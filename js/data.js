@@ -1,0 +1,381 @@
+// Expanded Vocabulary Data Bank with FontAwesome Icons and Subcategories
+const vocabularyBank = [
+    // Animals
+    {id: 'animal_01', word: 'Cat', spanish: 'Gato', type: 'noun', icon: 'fa-solid fa-cat', category: 'animals', subcategory: 'pets', level: 'beginner', definition: 'A small furry pet', example: 'The cat is sleeping.'},
+    {id: 'animal_02', word: 'Dog', spanish: 'Perro', type: 'noun', icon: 'fa-solid fa-dog', category: 'animals', subcategory: 'pets', level: 'beginner', definition: 'A friendly pet that barks', example: 'My dog is very friendly.'},
+    {id: 'animal_03', word: 'Fish', spanish: 'Pez', type: 'noun', icon: 'fa-solid fa-fish', category: 'animals', subcategory: 'pets', level: 'beginner', definition: 'An animal that lives in water', example: 'I can see a fish in the pond.'},
+    {id: 'animal_04', word: 'Bird', spanish: 'Pájaro', type: 'noun', icon: 'fa-solid fa-dove', category: 'animals', subcategory: 'wild', level: 'beginner', definition: 'An animal that can fly', example: 'The bird is singing.'},
+    {id: 'animal_05', word: 'Horse', spanish: 'Caballo', type: 'noun', icon: 'fa-solid fa-horse', category: 'animals', subcategory: 'farm', level: 'beginner', definition: 'A large animal you can ride', example: 'I ride a horse every week.'},
+    {id: 'animal_06', word: 'Cow', spanish: 'Vaca', type: 'noun', icon: 'fa-solid fa-cow', category: 'animals', subcategory: 'farm', level: 'beginner', definition: 'A farm animal that gives milk', example: 'The cow is eating grass.'},
+    {id: 'animal_07', word: 'Spider', spanish: 'Araña', type: 'noun', icon: 'fa-solid fa-spider', category: 'animals', subcategory: 'insects', level: 'beginner', definition: 'A small creature with eight legs', example: 'There is a spider on the wall.'},
+    {id: 'animal_08', word: 'Frog', spanish: 'Rana', type: 'noun', icon: 'fa-solid fa-frog', category: 'animals', subcategory: 'wild', level: 'beginner', definition: 'A small animal that jumps', example: 'The frog jumps into the water.'},
+    {id: 'animal_09', word: 'Bear', spanish: 'Oso', type: 'noun', icon: 'fa-solid fa-paw', category: 'animals', subcategory: 'wild', level: 'beginner', definition: 'A big strong animal', example: 'Bears sleep in winter.'},
+    {id: 'animal_10', word: 'Elephant', spanish: 'Elefante', type: 'noun', icon: 'fa-solid fa-hippo', category: 'animals', subcategory: 'wild', level: 'beginner', definition: 'A very large gray animal', example: 'The elephant has a long trunk.'},
+    {id: 'animal_11', word: 'Lion', spanish: 'León', type: 'noun', icon: 'fa-solid fa-paw', category: 'animals', subcategory: 'wild', level: 'intermediate', definition: 'The king of the jungle', example: 'The lion roars loudly.'},
+    {id: 'animal_12', word: 'Tiger', spanish: 'Tigre', type: 'noun', icon: 'fa-solid fa-paw', category: 'animals', subcategory: 'wild', level: 'intermediate', definition: 'A big cat with stripes', example: 'Tigers are very strong.'},
+    {id: 'animal_13', word: 'Monkey', spanish: 'Mono', type: 'noun', icon: 'fa-solid fa-paw', category: 'animals', subcategory: 'wild', level: 'beginner', definition: 'An animal that lives in trees', example: 'Monkeys love bananas.'},
+    {id: 'animal_14', word: 'Rabbit', spanish: 'Conejo', type: 'noun', icon: 'fa-solid fa-paw', category: 'animals', subcategory: 'pets', level: 'beginner', definition: 'A small animal with long ears', example: 'The rabbit is eating carrots.'},
+    {id: 'animal_15', word: 'Sheep', spanish: 'Oveja', type: 'noun', icon: 'fa-solid fa-paw', category: 'animals', subcategory: 'farm', level: 'beginner', definition: 'A farm animal with wool', example: 'Sheep give us wool.'},
+    {id: 'animal_16', word: 'Dolphin', spanish: 'Delfín', type: 'noun', icon: 'fa-solid fa-fish-fins', category: 'animals', subcategory: 'sea', level: 'intermediate', definition: 'A smart sea animal', example: 'Dolphins are very intelligent.'},
+    {id: 'animal_17', word: 'Penguin', spanish: 'Pingüino', type: 'noun', icon: 'fa-solid fa-fish-fins', category: 'animals', subcategory: 'wild', level: 'intermediate', definition: 'A bird that cannot fly', example: 'Penguins live in cold places.'},
+    {id: 'animal_18', word: 'Snake', spanish: 'Serpiente', type: 'noun', icon: 'fa-solid fa-worm', category: 'animals', subcategory: 'wild', level: 'beginner', definition: 'A long animal with no legs', example: 'Snakes can be dangerous.'},
+    {id: 'animal_19', word: 'Crocodile', spanish: 'Cocodrilo', type: 'noun', icon: 'fa-solid fa-hippo', category: 'animals', subcategory: 'wild', level: 'intermediate', definition: 'A big animal with sharp teeth', example: 'Crocodiles live in rivers.'},
+    {id: 'animal_20', word: 'Whale', spanish: 'Ballena', type: 'noun', icon: 'fa-solid fa-fish-fins', category: 'animals', subcategory: 'sea', level: 'intermediate', definition: 'The biggest animal in the sea', example: 'Whales are very big.'},
+    {id: 'animal_21', word: 'Shark', spanish: 'Tiburón', type: 'noun', icon: 'fa-solid fa-fish-fins', category: 'animals', subcategory: 'sea', level: 'intermediate', definition: 'A dangerous fish with sharp teeth', example: 'Sharks swim very fast.'},
+    {id: 'animal_22', word: 'Duck', spanish: 'Pato', type: 'noun', icon: 'fa-solid fa-dove', category: 'animals', subcategory: 'farm', level: 'beginner', definition: 'A bird that swims', example: 'Ducks live by the pond.'},
+    {id: 'animal_23', word: 'Chicken', spanish: 'Pollo', type: 'noun', icon: 'fa-solid fa-dove', category: 'animals', subcategory: 'farm', level: 'beginner', definition: 'A farm bird that lays eggs', example: 'The chicken is in the garden.'},
+    {id: 'animal_24', word: 'Bee', spanish: 'Abeja', type: 'noun', icon: 'fa-solid fa-bee', category: 'animals', subcategory: 'insects', level: 'beginner', definition: 'An insect that makes honey', example: 'Bees are flying around flowers.'},
+    {id: 'animal_25', word: 'Butterfly', spanish: 'Mariposa', type: 'noun', icon: 'fa-solid fa-butterfly', category: 'animals', subcategory: 'insects', level: 'beginner', definition: 'A colorful flying insect', example: 'The butterfly is beautiful.'},
+    
+    // Colors (No specific subcategory)
+    {id: 'color_01', word: 'Red', spanish: 'Rojo', type: 'adjective', icon: 'fa-solid fa-circle', category: 'colors', subcategory: 'general', level: 'beginner', definition: 'The color of blood', example: 'The apple is red.'},
+    {id: 'color_02', word: 'Blue', spanish: 'Azul', type: 'adjective', icon: 'fa-solid fa-circle', category: 'colors', subcategory: 'general', level: 'beginner', definition: 'The color of the sky', example: 'The sky is blue.'},
+    {id: 'color_03', word: 'Green', spanish: 'Verde', type: 'adjective', icon: 'fa-solid fa-circle', category: 'colors', subcategory: 'general', level: 'beginner', definition: 'The color of grass', example: 'The grass is green.'},
+    {id: 'color_04', word: 'Yellow', spanish: 'Amarillo', type: 'adjective', icon: 'fa-solid fa-circle', category: 'colors', subcategory: 'general', level: 'beginner', definition: 'The color of the sun', example: 'Bananas are yellow.'},
+    {id: 'color_05', word: 'Orange', spanish: 'Naranja', type: 'adjective', icon: 'fa-solid fa-circle', category: 'colors', subcategory: 'general', level: 'beginner', definition: 'A mix of red and yellow', example: 'Oranges are orange.'},
+    {id: 'color_06', word: 'Purple', spanish: 'Morado', type: 'adjective', icon: 'fa-solid fa-circle', category: 'colors', subcategory: 'general', level: 'beginner', definition: 'A mix of red and blue', example: 'Grapes can be purple.'},
+    {id: 'color_07', word: 'Pink', spanish: 'Rosa', type: 'adjective', icon: 'fa-solid fa-circle', category: 'colors', subcategory: 'general', level: 'beginner', definition: 'A light red color', example: 'Her dress is pink.'},
+    {id: 'color_08', word: 'Black', spanish: 'Negro', type: 'adjective', icon: 'fa-solid fa-circle', category: 'colors', subcategory: 'general', level: 'beginner', definition: 'The darkest color', example: 'My shoes are black.'},
+    {id: 'color_09', word: 'White', spanish: 'Blanco', type: 'adjective', icon: 'fa-solid fa-circle', category: 'colors', subcategory: 'general', level: 'beginner', definition: 'The lightest color', example: 'Snow is white.'},
+    {id: 'color_10', word: 'Brown', spanish: 'Marrón', type: 'adjective', icon: 'fa-solid fa-circle', category: 'colors', subcategory: 'general', level: 'beginner', definition: 'The color of chocolate', example: 'The bear is brown.'},
+    {id: 'color_11', word: 'Gray', spanish: 'Gris', type: 'adjective', icon: 'fa-solid fa-circle', category: 'colors', subcategory: 'general', level: 'beginner', definition: 'A mix of black and white', example: 'Elephants are gray.'},
+    
+    // Food & Drink
+    {id: 'food_01', word: 'Apple', spanish: 'Manzana', type: 'noun', icon: 'fa-solid fa-apple-whole', category: 'food', subcategory: 'fruits', level: 'beginner', definition: 'A round red or green fruit', example: 'I eat an apple every day.'},
+    {id: 'food_02', word: 'Banana', spanish: 'Plátano', type: 'noun', icon: 'fa-solid fa-banana', category: 'food', subcategory: 'fruits', level: 'beginner', definition: 'A long yellow fruit', example: 'Bananas are healthy.'},
+    {id: 'food_03', word: 'Pizza', spanish: 'Pizza', type: 'noun', icon: 'fa-solid fa-pizza-slice', category: 'food', subcategory: 'fast-food', level: 'beginner', definition: 'An Italian food with cheese', example: 'We eat pizza on Fridays.'},
+    {id: 'food_04', word: 'Burger', spanish: 'Hamburguesa', type: 'noun', icon: 'fa-solid fa-burger', category: 'food', subcategory: 'fast-food', level: 'beginner', definition: 'A sandwich with meat', example: 'I love hamburgers.'},
+    {id: 'food_05', word: 'Ice Cream', spanish: 'Helado', type: 'noun', icon: 'fa-solid fa-ice-cream', category: 'food', subcategory: 'desserts', level: 'beginner', definition: 'A cold sweet dessert', example: 'Ice cream is delicious.'},
+    {id: 'food_06', word: 'Cake', spanish: 'Pastel', type: 'noun', icon: 'fa-solid fa-cake-candles', category: 'food', subcategory: 'desserts', level: 'beginner', definition: 'A sweet baked dessert', example: 'Birthday cake is yummy.'},
+    {id: 'food_07', word: 'Bread', spanish: 'Pan', type: 'noun', icon: 'fa-solid fa-bread-slice', category: 'food', subcategory: 'staples', level: 'beginner', definition: 'Food made from flour', example: 'I eat bread for breakfast.'},
+    {id: 'food_08', word: 'Cheese', spanish: 'Queso', type: 'noun', icon: 'fa-solid fa-cheese', category: 'food', subcategory: 'staples', level: 'beginner', definition: 'A dairy product', example: 'I like cheese sandwiches.'},
+    {id: 'food_09', word: 'Egg', spanish: 'Huevo', type: 'noun', icon: 'fa-solid fa-egg', category: 'food', subcategory: 'staples', level: 'beginner', definition: 'Food from chickens', example: 'I eat eggs for breakfast.'},
+    {id: 'food_10', word: 'Carrot', spanish: 'Zanahoria', type: 'noun', icon: 'fa-solid fa-carrot', category: 'food', subcategory: 'vegetables', level: 'beginner', definition: 'An orange vegetable', example: 'Rabbits love carrots.'},
+    {id: 'food_11', word: 'Lemon', spanish: 'Limón', type: 'noun', icon: 'fa-solid fa-lemon', category: 'food', subcategory: 'fruits', level: 'beginner', definition: 'A sour yellow fruit', example: 'Lemons are very sour.'},
+    {id: 'food_12', word: 'Orange', spanish: 'Naranja', type: 'noun', icon: 'fa-solid fa-circle', category: 'food', subcategory: 'fruits', level: 'beginner', definition: 'A round orange fruit', example: 'Oranges have vitamin C.'},
+    {id: 'food_13', word: 'Strawberry', spanish: 'Fresa', type: 'noun', icon: 'fa-solid fa-strawberry', category: 'food', subcategory: 'fruits', level: 'beginner', definition: 'A small red berry', example: 'Strawberries are sweet.'},
+    {id: 'food_14', word: 'Watermelon', spanish: 'Sandía', type: 'noun', icon: 'fa-solid fa-melon', category: 'food', subcategory: 'fruits', level: 'beginner', definition: 'A big green fruit', example: 'Watermelon is refreshing.'},
+    {id: 'food_15', word: 'Grapes', spanish: 'Uvas', type: 'noun', icon: 'fa-solid fa-grapes', category: 'food', subcategory: 'fruits', level: 'beginner', definition: 'Small round fruits', example: 'Grapes grow on vines.'},
+    {id: 'food_16', word: 'Milk', spanish: 'Leche', type: 'noun', icon: 'fa-solid fa-wine-glass', category: 'food', subcategory: 'drinks', level: 'beginner', definition: 'A white drink from cows', example: 'I drink milk every morning.'},
+    {id: 'food_17', word: 'Water', spanish: 'Agua', type: 'noun', icon: 'fa-solid fa-droplet', category: 'food', subcategory: 'drinks', level: 'beginner', definition: 'Clear liquid we drink', example: 'Water is good for you.'},
+    {id: 'food_18', word: 'Juice', spanish: 'Zumo', type: 'noun', icon: 'fa-solid fa-wine-glass', category: 'food', subcategory: 'drinks', level: 'beginner', definition: 'A drink from fruit', example: 'Orange juice is tasty.'},
+    {id: 'food_19', word: 'Coffee', spanish: 'Café', type: 'noun', icon: 'fa-solid fa-mug-hot', category: 'food', subcategory: 'drinks', level: 'intermediate', definition: 'A hot brown drink', example: 'My dad drinks coffee.'},
+    {id: 'food_20', word: 'Tea', spanish: 'Té', type: 'noun', icon: 'fa-solid fa-mug-hot', category: 'food', subcategory: 'drinks', level: 'intermediate', definition: 'A hot drink from leaves', example: 'I like tea with milk.'},
+    {id: 'food_21', word: 'Sandwich', spanish: 'Sándwich', type: 'noun', icon: 'fa-solid fa-burger', category: 'food', subcategory: 'fast-food', level: 'beginner', definition: 'Two slices of bread with filling', example: 'I have a sandwich for lunch.'},
+    {id: 'food_22', word: 'Salad', spanish: 'Ensalada', type: 'noun', icon: 'fa-solid fa-bowl-food', category: 'food', subcategory: 'vegetables', level: 'beginner', definition: 'Mixed vegetables', example: 'Salad is very healthy.'},
+    {id: 'food_23', word: 'Rice', spanish: 'Arroz', type: 'noun', icon: 'fa-solid fa-bowl-rice', category: 'food', subcategory: 'staples', level: 'beginner', definition: 'Small white grains', example: 'We eat rice with chicken.'},
+    {id: 'food_24', word: 'Pasta', spanish: 'Pasta', type: 'noun', icon: 'fa-solid fa-bowl-food', category: 'food', subcategory: 'staples', level: 'intermediate', definition: 'Italian noodles', example: 'I love pasta with sauce.'},
+    {id: 'food_25', word: 'Soup', spanish: 'Sopa', type: 'noun', icon: 'fa-solid fa-bowl-food', category: 'food', subcategory: 'staples', level: 'intermediate', definition: 'A hot liquid food', example: 'Soup is good when sick.'},
+    
+    // Body Parts
+    {id: 'body_01', word: 'Head', spanish: 'Cabeza', type: 'noun', icon: 'fa-solid fa-head-side', category: 'body', subcategory: 'head', level: 'beginner', definition: 'The top part of your body', example: 'My head hurts.'},
+    {id: 'body_02', word: 'Eye', spanish: 'Ojo', type: 'noun', icon: 'fa-solid fa-eye', category: 'body', subcategory: 'head', level: 'beginner', definition: 'You see with your eyes', example: 'She has blue eyes.'},
+    {id: 'body_03', word: 'Ear', spanish: 'Oreja', type: 'noun', icon: 'fa-solid fa-ear-listen', category: 'body', subcategory: 'head', level: 'beginner', definition: 'You hear with your ears', example: 'My ears are cold.'},
+    {id: 'body_04', word: 'Nose', spanish: 'Nariz', type: 'noun', icon: 'fa-solid fa-head-side', category: 'body', subcategory: 'head', level: 'beginner', definition: 'You smell with your nose', example: 'Your nose is red.'},
+    {id: 'body_05', word: 'Mouth', spanish: 'Boca', type: 'noun', icon: 'fa-solid fa-mouth-open', category: 'body', subcategory: 'head', level: 'beginner', definition: 'You eat with your mouth', example: 'Open your mouth wide.'},
+    {id: 'body_06', word: 'Hand', spanish: 'Mano', type: 'noun', icon: 'fa-solid fa-hand', category: 'body', subcategory: 'limbs', level: 'beginner', definition: 'At the end of your arm', example: 'Wash your hands.'},
+    {id: 'body_07', word: 'Foot', spanish: 'Pie', type: 'noun', icon: 'fa-solid fa-socks', category: 'body', subcategory: 'limbs', level: 'beginner', definition: 'You walk with your feet', example: 'My feet are tired.'},
+    {id: 'body_08', word: 'Leg', spanish: 'Pierna', type: 'noun', icon: 'fa-solid fa-person-walking', category: 'body', subcategory: 'limbs', level: 'beginner', definition: 'You stand on your legs', example: 'His legs are long.'},
+    {id: 'body_09', word: 'Arm', spanish: 'Brazo', type: 'noun', icon: 'fa-solid fa-hands', category: 'body', subcategory: 'limbs', level: 'beginner', definition: 'Between shoulder and hand', example: 'My arm is strong.'},
+    {id: 'body_10', word: 'Hair', spanish: 'Pelo', type: 'noun', icon: 'fa-solid fa-head-side', category: 'body', subcategory: 'head', level: 'beginner', definition: 'Grows on your head', example: 'She has long hair.'},
+    {id: 'body_11', word: 'Tooth', spanish: 'Diente', type: 'noun', icon: 'fa-solid fa-tooth', category: 'body', subcategory: 'head', level: 'beginner', definition: 'White things in your mouth', example: 'Brush your teeth daily.'},
+    {id: 'body_12', word: 'Stomach', spanish: 'Estómago', type: 'noun', icon: 'fa-solid fa-person', category: 'body', subcategory: 'torso', level: 'intermediate', definition: 'Where food goes', example: 'My stomach hurts.'},
+    {id: 'body_13', word: 'Back', spanish: 'Espalda', type: 'noun', icon: 'fa-solid fa-person', category: 'body', subcategory: 'torso', level: 'intermediate', definition: 'Behind your body', example: 'My back is sore.'},
+    {id: 'body_14', word: 'Shoulder', spanish: 'Hombro', type: 'noun', icon: 'fa-solid fa-person', category: 'body', subcategory: 'torso', level: 'intermediate', definition: 'Between neck and arm', example: 'Put it on your shoulder.'},
+    
+    // Clothes
+    {id: 'clothes_01', word: 'Shirt', spanish: 'Camisa', type: 'noun', icon: 'fa-solid fa-shirt', category: 'clothes', subcategory: 'upper-body', level: 'beginner', definition: 'Clothing for upper body', example: 'He wears a blue shirt.'},
+    {id: 'clothes_02', word: 'Pants', spanish: 'Pantalones', type: 'noun', icon: 'fa-solid fa-person', category: 'clothes', subcategory: 'lower-body', level: 'beginner', definition: 'Clothing for legs', example: 'I need new pants.'},
+    {id: 'clothes_03', word: 'Dress', spanish: 'Vestido', type: 'noun', icon: 'fa-solid fa-person-dress', category: 'clothes', subcategory: 'upper-body', level: 'beginner', definition: 'One piece for girls', example: 'Her dress is pretty.'},
+    {id: 'clothes_04', word: 'Shoes', spanish: 'Zapatos', type: 'noun', icon: 'fa-solid fa-shoe-prints', category: 'clothes', subcategory: 'footwear', level: 'beginner', definition: 'You wear on feet', example: 'My shoes are comfortable.'},
+    {id: 'clothes_05', word: 'Socks', spanish: 'Calcetines', type: 'noun', icon: 'fa-solid fa-socks', category: 'clothes', subcategory: 'footwear', level: 'beginner', definition: 'Wear inside shoes', example: 'I have red socks.'},
+    {id: 'clothes_06', word: 'Hat', spanish: 'Sombrero', type: 'noun', icon: 'fa-solid fa-hat-cowboy', category: 'clothes', subcategory: 'accessories', level: 'beginner', definition: 'You wear on head', example: 'Wear a hat in the sun.'},
+    {id: 'clothes_07', word: 'Coat', spanish: 'Abrigo', type: 'noun', icon: 'fa-solid fa-person-coat', category: 'clothes', subcategory: 'upper-body', level: 'beginner', definition: 'Warm outer clothing', example: 'Get your coat, it\'s cold.'},
+    {id: 'clothes_08', word: 'Jacket', spanish: 'Chaqueta', type: 'noun', icon: 'fa-solid fa-vest', category: 'clothes', subcategory: 'upper-body', level: 'intermediate', definition: 'A short coat', example: 'I bought a new jacket.'},
+    {id: 'clothes_09', word: 'Sweater', spanish: 'Suéter', type: 'noun', icon: 'fa-solid fa-shirt', category: 'clothes', subcategory: 'upper-body', level: 'intermediate', definition: 'Warm knitted clothing', example: 'This sweater is cozy.'},
+    {id: 'clothes_10', word: 'Gloves', spanish: 'Guantes', type: 'noun', icon: 'fa-solid fa-mitten', category: 'clothes', subcategory: 'accessories', level: 'intermediate', definition: 'For your hands in winter', example: 'I need warm gloves.'},
+    
+    // Daily Routines
+    {id: 'routine_01', word: 'Wake Up', spanish: 'Despertarse', type: 'verb', icon: 'fa-solid fa-bed', category: 'daily-routines', subcategory: 'morning', level: 'beginner', definition: 'Stop sleeping', example: 'I wake up at 7 AM.'},
+    {id: 'routine_02', word: 'Brush Teeth', spanish: 'Cepillarse los dientes', type: 'verb', icon: 'fa-solid fa-tooth', category: 'daily-routines', subcategory: 'morning', level: 'beginner', definition: 'Clean your teeth', example: 'Brush your teeth twice daily.'},
+    {id: 'routine_03', word: 'Eat Breakfast', spanish: 'Desayunar', type: 'verb', icon: 'fa-solid fa-utensils', category: 'daily-routines', subcategory: 'morning', level: 'beginner', definition: 'Morning meal', example: 'I eat breakfast at 8.'},
+    {id: 'routine_04', word: 'Go to School', spanish: 'Ir a la escuela', type: 'verb', icon: 'fa-solid fa-school', category: 'daily-routines', subcategory: 'day', level: 'beginner', definition: 'Attend classes', example: 'I go to school by bus.'},
+    {id: 'routine_05', word: 'Do Homework', spanish: 'Hacer la tarea', type: 'verb', icon: 'fa-solid fa-book', category: 'daily-routines', subcategory: 'day', level: 'beginner', definition: 'Study at home', example: 'I do homework after school.'},
+    {id: 'routine_06', word: 'Have Lunch', spanish: 'Almorzar', type: 'verb', icon: 'fa-solid fa-utensils', category: 'daily-routines', subcategory: 'day', level: 'beginner', definition: 'Midday meal', example: 'We have lunch at noon.'},
+    {id: 'routine_07', word: 'Have Dinner', spanish: 'Cenar', type: 'verb', icon: 'fa-solid fa-utensils', category: 'daily-routines', subcategory: 'evening', level: 'beginner', definition: 'Evening meal', example: 'Dinner is at 6 PM.'},
+    {id: 'routine_08', word: 'Go to Bed', spanish: 'Acostarse', type: 'verb', icon: 'fa-solid fa-bed', category: 'daily-routines', subcategory: 'evening', level: 'beginner', definition: 'Go to sleep', example: 'I go to bed at 9.'},
+    {id: 'routine_09', word: 'Take a Shower', spanish: 'Ducharse', type: 'verb', icon: 'fa-solid fa-shower', category: 'daily-routines', subcategory: 'evening', level: 'beginner', definition: 'Wash your body', example: 'I take a shower daily.'},
+    {id: 'routine_10', word: 'Get Dressed', spanish: 'Vestirse', type: 'verb', icon: 'fa-solid fa-shirt', category: 'daily-routines', subcategory: 'morning', level: 'beginner', definition: 'Put on clothes', example: 'Get dressed quickly!'},
+    
+    // Sports & Activities
+    {id: 'sport_01', word: 'Football', spanish: 'Fútbol', type: 'noun', icon: 'fa-solid fa-futbol', category: 'sports', subcategory: 'ball-games', level: 'beginner', definition: 'A team ball sport', example: 'I play football on Saturdays.'},
+    {id: 'sport_02', word: 'Basketball', spanish: 'Baloncesto', type: 'noun', icon: 'fa-solid fa-basketball', category: 'sports', subcategory: 'ball-games', level: 'beginner', definition: 'Game with tall hoops', example: 'He loves basketball.'},
+    {id: 'sport_03', word: 'Tennis', spanish: 'Tenis', type: 'noun', icon: 'fa-solid fa-baseball', category: 'sports', subcategory: 'ball-games', level: 'beginner', definition: 'Sport with rackets', example: 'Tennis is fun to play.'},
+    {id: 'sport_04', word: 'Swimming', spanish: 'Natación', type: 'noun', icon: 'fa-solid fa-person-swimming', category: 'sports', subcategory: 'individual', level: 'beginner', definition: 'Moving through water', example: 'I love swimming in summer.'},
+    {id: 'sport_05', word: 'Running', spanish: 'Correr', type: 'noun', icon: 'fa-solid fa-person-running', category: 'sports', subcategory: 'individual', level: 'beginner', definition: 'Moving fast on foot', example: 'Running is good exercise.'},
+    {id: 'sport_06', word: 'Cycling', spanish: 'Ciclismo', type: 'noun', icon: 'fa-solid fa-bicycle', category: 'sports', subcategory: 'individual', level: 'beginner', definition: 'Riding a bicycle', example: 'I go cycling every weekend.'},
+    {id: 'sport_07', word: 'Dancing', spanish: 'Bailar', type: 'verb', icon: 'fa-solid fa-music', category: 'sports', subcategory: 'artistic', level: 'beginner', definition: 'Moving to music', example: 'She loves dancing.'},
+    {id: 'sport_08', word: 'Singing', spanish: 'Cantar', type: 'verb', icon: 'fa-solid fa-microphone', category: 'sports', subcategory: 'artistic', level: 'beginner', definition: 'Making music with voice', example: 'We sing in class.'},
+    {id: 'sport_09', word: 'Reading', spanish: 'Leer', type: 'verb', icon: 'fa-solid fa-book-open', category: 'sports', subcategory: 'artistic', level: 'beginner', definition: 'Looking at words in books', example: 'Reading is my hobby.'},
+    {id: 'sport_10', word: 'Drawing', spanish: 'Dibujar', type: 'verb', icon: 'fa-solid fa-pen', category: 'sports', subcategory: 'artistic', level: 'beginner', definition: 'Making pictures', example: 'I enjoy drawing animals.'},
+    
+    // Weather
+    {id: 'weather_01', word: 'Sunny', spanish: 'Soleado', type: 'adjective', icon: 'fa-solid fa-sun', category: 'weather', subcategory: 'conditions', level: 'beginner', definition: 'Bright with sun', example: 'It is sunny today.'},
+    {id: 'weather_02', word: 'Rainy', spanish: 'Lluvioso', type: 'adjective', icon: 'fa-solid fa-cloud-rain', category: 'weather', subcategory: 'conditions', level: 'beginner', definition: 'Water falling from sky', example: 'It is rainy outside.'},
+    {id: 'weather_03', word: 'Cloudy', spanish: 'Nublado', type: 'adjective', icon: 'fa-solid fa-cloud', category: 'weather', subcategory: 'conditions', level: 'beginner', definition: 'Lots of clouds', example: 'The sky is cloudy.'},
+    {id: 'weather_04', word: 'Windy', spanish: 'Ventoso', type: 'adjective', icon: 'fa-solid fa-wind', category: 'weather', subcategory: 'conditions', level: 'beginner', definition: 'Strong wind blowing', example: 'It is very windy.'},
+    {id: 'weather_05', word: 'Snowy', spanish: 'Nevado', type: 'adjective', icon: 'fa-solid fa-snowflake', category: 'weather', subcategory: 'conditions', level: 'beginner', definition: 'Snow falling', example: 'It is snowy in winter.'},
+    {id: 'weather_06', word: 'Hot', spanish: 'Caliente', type: 'adjective', icon: 'fa-solid fa-temperature-high', category: 'weather', subcategory: 'temperature', level: 'beginner', definition: 'Very warm', example: 'Summer is very hot.'},
+    {id: 'weather_07', word: 'Cold', spanish: 'Frío', type: 'adjective', icon: 'fa-solid fa-temperature-low', category: 'weather', subcategory: 'temperature', level: 'beginner', definition: 'Not warm', example: 'Winter is cold.'},
+    
+    // Places
+    {id: 'place_01', word: 'School', spanish: 'Escuela', type: 'noun', icon: 'fa-solid fa-school', category: 'places', subcategory: 'city', level: 'beginner', definition: 'Where you learn', example: 'I go to school every day.'},
+    {id: 'place_02', word: 'Home', spanish: 'Casa', type: 'noun', icon: 'fa-solid fa-house', category: 'places', subcategory: 'home', level: 'beginner', definition: 'Where you live', example: 'I am at home now.'},
+    {id: 'place_03', word: 'Park', spanish: 'Parque', type: 'noun', icon: 'fa-solid fa-tree', category: 'places', subcategory: 'nature', level: 'beginner', definition: 'Green space with trees', example: 'Let\'s go to the park.'},
+    {id: 'place_04', word: 'Library', spanish: 'Biblioteca', type: 'noun', icon: 'fa-solid fa-book', category: 'places', subcategory: 'city', level: 'intermediate', definition: 'Place with many books', example: 'I study at the library.'},
+    {id: 'place_05', word: 'Hospital', spanish: 'Hospital', type: 'noun', icon: 'fa-solid fa-hospital', category: 'places', subcategory: 'city', level: 'intermediate', definition: 'Where doctors work', example: 'She works at a hospital.'},
+    {id: 'place_06', word: 'Supermarket', spanish: 'Supermercado', type: 'noun', icon: 'fa-solid fa-cart-shopping', category: 'places', subcategory: 'city', level: 'beginner', definition: 'Big shop for food', example: 'We shop at the supermarket.'},
+    {id: 'place_07', word: 'Beach', spanish: 'Playa', type: 'noun', icon: 'fa-solid fa-umbrella-beach', category: 'places', subcategory: 'nature', level: 'beginner', definition: 'Sandy place by sea', example: 'We play at the beach.'},
+    {id: 'place_08', word: 'Restaurant', spanish: 'Restaurante', type: 'noun', icon: 'fa-solid fa-utensils', category: 'places', subcategory: 'city', level: 'intermediate', definition: 'Place to eat food', example: 'Let\'s eat at a restaurant.'},
+    
+    // Transport
+    {id: 'transport_01', word: 'Car', spanish: 'Coche', type: 'noun', icon: 'fa-solid fa-car', category: 'transport', subcategory: 'land', level: 'beginner', definition: 'Vehicle with four wheels', example: 'My dad drives a car.'},
+    {id: 'transport_02', word: 'Bus', spanish: 'Autobús', type: 'noun', icon: 'fa-solid fa-bus', category: 'transport', subcategory: 'land', level: 'beginner', definition: 'Big vehicle for many people', example: 'I take the bus to school.'},
+    {id: 'transport_03', word: 'Train', spanish: 'Tren', type: 'noun', icon: 'fa-solid fa-train', category: 'transport', subcategory: 'land', level: 'beginner', definition: 'Long vehicle on tracks', example: 'The train is fast.'},
+    {id: 'transport_04', word: 'Bicycle', spanish: 'Bicicleta', type: 'noun', icon: 'fa-solid fa-bicycle', category: 'transport', subcategory: 'land', level: 'beginner', definition: 'Two-wheeled vehicle', example: 'I ride my bicycle daily.'},
+    {id: 'transport_05', word: 'Plane', spanish: 'Avión', type: 'noun', icon: 'fa-solid fa-plane', category: 'transport', subcategory: 'air', level: 'beginner', definition: 'Flies in the sky', example: 'Planes fly very high.'},
+    {id: 'transport_06', word: 'Boat', spanish: 'Barco', type: 'noun', icon: 'fa-solid fa-ship', category: 'transport', subcategory: 'water', level: 'beginner', definition: 'Travels on water', example: 'We go fishing by boat.'},
+    {id: 'transport_07', word: 'Helicopter', spanish: 'Helicóptero', type: 'noun', icon: 'fa-solid fa-helicopter', category: 'transport', subcategory: 'air', level: 'intermediate', definition: 'Flying vehicle with blades', example: 'The helicopter is loud.'},
+    {id: 'transport_08', word: 'Truck', spanish: 'Camión', type: 'noun', icon: 'fa-solid fa-truck', category: 'transport', subcategory: 'land', level: 'beginner', definition: 'Big vehicle for cargo', example: 'Trucks carry heavy things.'},
+    
+    // Arts & Crafts
+    {id: 'art_01', word: 'Draw', spanish: 'Dibujar', type: 'verb', icon: 'fa-solid fa-pen-nib', category: 'arts', subcategory: 'verbs', level: 'beginner', definition: 'Make a picture with a pencil', example: 'Draw a circle.'},
+    {id: 'art_02', word: 'Paint', spanish: 'Pintar', type: 'verb', icon: 'fa-solid fa-paint-roller', category: 'arts', subcategory: 'verbs', level: 'beginner', definition: 'Make a picture with colors', example: 'Paint the sky blue.'},
+    {id: 'art_03', word: 'Cut', spanish: 'Cortar', type: 'verb', icon: 'fa-solid fa-scissors', category: 'arts', subcategory: 'verbs', level: 'beginner', definition: 'Use scissors to separate paper', example: 'Cut out the shape.'},
+    {id: 'art_04', word: 'Glue', spanish: 'Pegar', type: 'verb', icon: 'fa-solid fa-bottle-droplet', category: 'arts', subcategory: 'verbs', level: 'beginner', definition: 'Stick things together', example: 'Glue the paper to the card.'},
+    {id: 'art_05', word: 'Fold', spanish: 'Doblar', type: 'verb', icon: 'fa-solid fa-scroll', category: 'arts', subcategory: 'verbs', level: 'beginner', definition: 'Bend paper over itself', example: 'Fold the paper in half.'},
+    {id: 'art_06', word: 'Mix', spanish: 'Mezclar', type: 'verb', icon: 'fa-solid fa-palette', category: 'arts', subcategory: 'verbs', level: 'intermediate', definition: 'Combine colors together', example: 'Mix red and yellow to make orange.'},
+    {id: 'art_07', word: 'Brush', spanish: 'Pincel', type: 'noun', icon: 'fa-solid fa-paint-brush', category: 'arts', subcategory: 'tools', level: 'beginner', definition: 'Tool for painting', example: 'Wash your brushes after class.'},
+    {id: 'art_08', word: 'Scissors', spanish: 'Tijeras', type: 'noun', icon: 'fa-solid fa-scissors', category: 'arts', subcategory: 'tools', level: 'beginner', definition: 'Tool for cutting', example: 'Be careful with the scissors.'},
+    {id: 'art_09', word: 'Puppet', spanish: 'Marioneta', type: 'noun', icon: 'fa-solid fa-masks-theater', category: 'arts', subcategory: 'elements', level: 'intermediate', definition: 'A doll you move', example: 'Let\'s make a sock puppet.'},
+    {id: 'art_10', word: 'Mask', spanish: 'Máscara', type: 'noun', icon: 'fa-solid fa-mask', category: 'arts', subcategory: 'elements', level: 'intermediate', definition: 'Cover for your face', example: 'Wear a mask for the play.'},
+    {id: 'art_11', word: 'Dance', spanish: 'Bailar', type: 'verb', icon: 'fa-solid fa-music', category: 'arts', subcategory: 'verbs', level: 'beginner', definition: 'Move to music', example: 'Move your body to the rhythm.'},
+    {id: 'art_12', word: 'Act', spanish: 'Actuar', type: 'verb', icon: 'fa-solid fa-star', category: 'arts', subcategory: 'verbs', level: 'intermediate', definition: 'Play a character', example: 'Act like a happy person.'},
+
+    {id: 'art_ext_01', word: 'Acrylics', spanish: 'Vinilos', type: 'noun', icon: 'fa-solid fa-bottle-droplet', category: 'arts', subcategory: 'materials', level: 'intermediate', definition: 'Thick paint for art', example: 'Pour a little bit of vinyl paint on the palette.'},
+    {id: 'art_ext_02', word: 'Canvas', spanish: 'Lienzo', type: 'noun', icon: 'fa-solid fa-easel', category: 'arts', subcategory: 'materials', level: 'advanced', definition: 'Cloth used for painting', example: 'We usually paint on paper, not on canvas.'},
+    {id: 'art_ext_03', word: 'Charcoal', spanish: 'Carboncillo', type: 'noun', icon: 'fa-solid fa-pen', category: 'arts', subcategory: 'materials', level: 'advanced', definition: 'Black burnt wood for drawing', example: 'Use charcoal to make the dark shadows.'},
+    {id: 'art_ext_04', word: 'Colored pencils', spanish: 'Colores', type: 'noun', icon: 'fa-solid fa-pencil', category: 'arts', subcategory: 'tools', level: 'beginner', definition: 'Pencils with color cores', example: 'Sharpen your colored pencils, please.'},
+    {id: 'art_ext_05', word: 'Crayons', spanish: 'Crayolas', type: 'noun', icon: 'fa-solid fa-pencil', category: 'arts', subcategory: 'tools', level: 'beginner', definition: 'Wax sticks for coloring', example: 'Press hard with the crayons to make the color bright.'},
+    {id: 'art_ext_06', word: 'Eraser', spanish: 'Borrador', type: 'noun', icon: 'fa-solid fa-eraser', category: 'arts', subcategory: 'tools', level: 'beginner', definition: 'Removes pencil marks', example: 'Use your eraser to fix the mistake.'},
+    {id: 'art_ext_07', word: 'Grid', spanish: 'Cuadrícula', type: 'noun', icon: 'fa-solid fa-border-all', category: 'arts', subcategory: 'elements', level: 'intermediate', definition: 'Pattern of squares', example: 'Draw the image using the grid as a guide.'},
+    {id: 'art_ext_08', word: 'Markers', spanish: 'Marcadores', type: 'noun', icon: 'fa-solid fa-marker', category: 'arts', subcategory: 'tools', level: 'beginner', definition: 'Pens with felt tips', example: 'Outline your drawing with a black marker.'},
+    {id: 'art_ext_09', word: 'Palette', spanish: 'Paleta', type: 'noun', icon: 'fa-solid fa-palette', category: 'arts', subcategory: 'tools', level: 'intermediate', definition: 'Board for mixing paint', example: 'Mix the yellow and blue on your palette.'},
+    {id: 'art_ext_10', word: 'Paper', spanish: 'Papel', type: 'noun', icon: 'fa-solid fa-scroll', category: 'arts', subcategory: 'materials', level: 'beginner', definition: 'Material to write or draw on', example: 'Take one sheet of paper from the pile.'},
+    {id: 'art_ext_11', word: 'Pencil', spanish: 'Lápiz', type: 'noun', icon: 'fa-solid fa-pencil', category: 'arts', subcategory: 'tools', level: 'beginner', definition: 'Tool for writing or drawing', example: 'Sketch lightly with your pencil first.'},
+    {id: 'art_ext_12', word: 'Sharpener', spanish: 'Sacapuntas', type: 'noun', icon: 'fa-solid fa-pencil', category: 'arts', subcategory: 'tools', level: 'beginner', definition: 'Tool to sharpen pencils', example: 'Use the bin when you use your sharpener.'},
+    {id: 'art_ext_13', word: 'Sketchbook', spanish: 'Cuaderno de dibujo', type: 'noun', icon: 'fa-solid fa-book', category: 'arts', subcategory: 'elements', level: 'intermediate', definition: 'Book for drawing', example: 'Open your sketchbook to a new page.'},
+    {id: 'art_ext_14', word: 'Tempera', spanish: 'Témpera', type: 'noun', icon: 'fa-solid fa-brush', category: 'arts', subcategory: 'materials', level: 'beginner', definition: 'Type of paint', example: 'Be careful not to spill the tempera.'},
+    {id: 'art_ext_15', word: 'Watercolors', spanish: 'Acuarelas', type: 'noun', icon: 'fa-solid fa-palette', category: 'arts', subcategory: 'materials', level: 'intermediate', definition: 'Paint that uses water', example: 'You need water to activate the watercolors.'},
+    {id: 'art_ext_16', word: 'Bottle caps', spanish: 'Tapas', type: 'noun', icon: 'fa-solid fa-circle-dot', category: 'arts', subcategory: 'materials', level: 'beginner', definition: 'Lids for bottles', example: 'Glue the bottle caps to make the eyes.'},
+    {id: 'art_ext_17', word: 'Cardboard', spanish: 'Cartón', type: 'noun', icon: 'fa-solid fa-box-open', category: 'arts', subcategory: 'materials', level: 'intermediate', definition: 'Thick stiff paper', example: 'This cardboard is too thick to cut with scissors.'},
+    {id: 'art_ext_18', word: 'Cardstock', spanish: 'Cartulina', type: 'noun', icon: 'fa-solid fa-sticky-note', category: 'arts', subcategory: 'materials', level: 'intermediate', definition: 'Heavy paper', example: 'Cardstock is stronger than normal paper.'},
+    {id: 'art_ext_19', word: 'Clay', spanish: 'Arcilla', type: 'noun', icon: 'fa-solid fa-shapes', category: 'arts', subcategory: 'materials', level: 'intermediate', definition: 'Soft earth for molding', example: 'Roll the clay into a ball.'},
+    {id: 'art_ext_20', word: 'Fabric', spanish: 'Tela', type: 'noun', icon: 'fa-solid fa-rug', category: 'arts', subcategory: 'materials', level: 'intermediate', definition: 'Cloth material', example: 'Cut a piece of fabric for the puppet\'s dress.'},
+    {id: 'art_ext_21', word: 'Glitter', spanish: 'Escarcha', type: 'noun', icon: 'fa-solid fa-star', category: 'arts', subcategory: 'materials', level: 'beginner', definition: 'Sparkly tiny pieces', example: 'Sprinkle some glitter on the wet glue.'},
+    {id: 'art_ext_22', word: 'Liquid Glue', spanish: 'Colbón', type: 'noun', icon: 'fa-solid fa-bottle-water', category: 'arts', subcategory: 'materials', level: 'beginner', definition: 'Glue in liquid form', example: 'You only need a drop of liquid glue.'},
+    {id: 'art_ext_23', word: 'Glue Stick', spanish: 'Pegante en barra', type: 'noun', icon: 'fa-solid fa-scroll', category: 'arts', subcategory: 'materials', level: 'beginner', definition: 'Solid glue in a tube', example: 'Use the glue stick for the paper shapes.'},
+    {id: 'art_ext_24', word: 'Magazine', spanish: 'Revista', type: 'noun', icon: 'fa-solid fa-newspaper', category: 'arts', subcategory: 'materials', level: 'intermediate', definition: 'Booklet with articles', example: 'Cut pictures from the old magazine for the collage.'},
+    {id: 'art_ext_25', word: 'Newspaper', spanish: 'Periódico', type: 'noun', icon: 'fa-solid fa-newspaper', category: 'arts', subcategory: 'materials', level: 'beginner', definition: 'Daily news paper', example: 'Cover the desk with newspaper to keep it clean.'},
+    {id: 'art_ext_26', word: 'Plastic bottle', spanish: 'Botella plástica', type: 'noun', icon: 'fa-solid fa-bottle-water', category: 'arts', subcategory: 'materials', level: 'beginner', definition: 'Container made of plastic', example: 'We will recycle this plastic bottle to make a flower.'},
+    {id: 'art_ext_27', word: 'Popsicle stick', spanish: 'Palito de paleta', type: 'noun', icon: 'fa-solid fa-grip-lines-vertical', category: 'arts', subcategory: 'materials', level: 'beginner', definition: 'Wooden stick from ice cream', example: 'Glue the character onto the popsicle stick.'},
+    {id: 'art_ext_28', word: 'Recyclables', spanish: 'Material reciclable', type: 'noun', icon: 'fa-solid fa-recycle', category: 'arts', subcategory: 'materials', level: 'intermediate', definition: 'Items to reuse', example: 'Bring clean recyclables from home tomorrow.'},
+    {id: 'art_ext_29', word: 'Tape', spanish: 'Cinta adhesiva', type: 'noun', icon: 'fa-solid fa-tape', category: 'arts', subcategory: 'materials', level: 'beginner', definition: 'Sticky strip', example: 'Use tape to stick the back of the mask.'},
+    {id: 'art_ext_30', word: 'Wool', spanish: 'Lana', type: 'noun', icon: 'fa-solid fa-socks', category: 'arts', subcategory: 'materials', level: 'beginner', definition: 'Thick thread for knitting', example: 'Use wool to make the hair for the puppet.'},
+    {id: 'art_ext_31', word: 'Costume', spanish: 'Disfraz', type: 'noun', icon: 'fa-solid fa-shirt', category: 'arts', subcategory: 'elements', level: 'intermediate', definition: 'Clothes for a character', example: 'Put on your costume for the play.'},
+    {id: 'art_ext_32', word: 'Curtain', spanish: 'Telón', type: 'noun', icon: 'fa-solid fa-person-booth', category: 'arts', subcategory: 'elements', level: 'intermediate', definition: 'Cloth covering stage', example: 'Wait behind the curtain until I say "action."'},
+    {id: 'art_ext_33', word: 'Flashlight', spanish: 'Linterna', type: 'noun', icon: 'fa-solid fa-lightbulb', category: 'arts', subcategory: 'tools', level: 'beginner', definition: 'Portable electric light', example: 'Shine the flashlight on the white sheet.'},
+    {id: 'art_ext_34', word: 'Mirror', spanish: 'Espejo', type: 'noun', icon: 'fa-solid fa-expand', category: 'arts', subcategory: 'tools', level: 'beginner', definition: 'Glass that reflects', example: 'Look in the mirror to check your expression.'},
+    {id: 'art_ext_35', word: 'Props', spanish: 'Utilería', type: 'noun', icon: 'fa-solid fa-box', category: 'arts', subcategory: 'elements', level: 'advanced', definition: 'Objects used in a play', example: 'Put the props back in the box after the scene.'},
+    {id: 'art_ext_36', word: 'Script', spanish: 'Guion', type: 'noun', icon: 'fa-solid fa-file-lines', category: 'arts', subcategory: 'elements', level: 'advanced', definition: 'Written text of a play', example: 'Read your lines from the script.'},
+    {id: 'art_ext_37', word: 'Shadow', spanish: 'Sombra', type: 'noun', icon: 'fa-solid fa-cloud', category: 'arts', subcategory: 'elements', level: 'beginner', definition: 'Dark shape from light', example: 'Make a bird shadow with your hands.'},
+    {id: 'art_ext_38', word: 'Stage', spanish: 'Escenario', type: 'noun', icon: 'fa-solid fa-person-chalkboard', category: 'arts', subcategory: 'elements', level: 'intermediate', definition: 'Place where actors perform', example: 'Place your puppets in the center of the stage.'},
+    {id: 'art_ext_39', word: 'Apron', spanish: 'Delantal', type: 'noun', icon: 'fa-solid fa-shirt', category: 'arts', subcategory: 'elements', level: 'beginner', definition: 'Protective clothing', example: 'Put on your apron to protect your uniform.'},
+    {id: 'art_ext_40', word: 'Bin', spanish: 'Caneca', type: 'noun', icon: 'fa-solid fa-trash', category: 'arts', subcategory: 'elements', level: 'beginner', definition: 'Container for trash', example: 'Throw the scraps in the recycling bin.'},
+    {id: 'art_ext_41', word: 'Board', spanish: 'Tablero', type: 'noun', icon: 'fa-solid fa-chalkboard', category: 'arts', subcategory: 'elements', level: 'beginner', definition: 'Surface for writing', example: 'Look at the example on the board.'},
+    {id: 'art_ext_42', word: 'Desk', spanish: 'Pupitre', type: 'noun', icon: 'fa-solid fa-chair', category: 'arts', subcategory: 'elements', level: 'beginner', definition: 'Table for students', example: 'Clear your desk completely.'},
+    {id: 'art_ext_43', word: 'Folder', spanish: 'Carpeta', type: 'noun', icon: 'fa-solid fa-folder', category: 'arts', subcategory: 'elements', level: 'beginner', definition: 'Holder for papers', example: 'Put your finished drawing in your folder.'},
+    {id: 'art_ext_44', word: 'Rag', spanish: 'Trapo', type: 'noun', icon: 'fa-solid fa-rug', category: 'arts', subcategory: 'elements', level: 'beginner', definition: 'Old cloth for cleaning', example: 'Use the rag to dry your table.'},
+    {id: 'art_ext_45', word: 'Sink', spanish: 'Lavamanos', type: 'noun', icon: 'fa-solid fa-faucet', category: 'arts', subcategory: 'elements', level: 'beginner', definition: 'Basin with water tap', example: 'Wash your hands at the sink.'},
+    {id: 'art_ext_46', word: 'Table', spanish: 'Mesa', type: 'noun', icon: 'fa-solid fa-table', category: 'arts', subcategory: 'elements', level: 'beginner', definition: 'Furniture with flat top', example: 'Sit nicely at your table.'}
+];
+
+// Grammar Bank
+const grammarBank = [
+    {
+        id: 'grammar_01',
+        rule: 'Present Simple',
+        category: 'tenses',
+        level: 'beginner',
+        explanation: 'We use the Present Simple to talk about habits, routines, and general facts. For most verbs, add -s or -es for he/she/it.',
+        examples: [
+            'I eat breakfast every day.',
+            'She works at a school.',
+            'They play soccer on Saturdays.',
+            'He doesn\'t like coffee.',
+            'Do you speak English?'
+        ],
+        commonMistakes: [
+            'Incorrect: He go to school. → Correct: He goes to school.',
+            'Incorrect: She don\'t like pizza. → Correct: She doesn\'t like pizza.',
+            'Incorrect: Do he play tennis? → Correct: Does he play tennis?'
+        ],
+        exercises: [
+            {type: 'fill-blank', sentence: 'She ___ (go) to work every day.', answer: 'goes'},
+            {type: 'fill-blank', sentence: 'They ___ (play) soccer on weekends.', answer: 'play'},
+            {type: 'error-correction', sentence: 'He don\'t like vegetables.', answer: 'He doesn\'t like vegetables.'}
+        ]
+    },
+    {
+        id: 'grammar_02',
+        rule: 'Articles: A, An, The',
+        category: 'articles',
+        level: 'beginner',
+        explanation: 'Use "a" before consonant sounds, "an" before vowel sounds. Use "the" for specific things.',
+        examples: [
+            'I have a cat. (any cat)',
+            'She is an engineer. (vowel sound)',
+            'The sun is bright. (specific sun)',
+            'I saw a dog. The dog was big. (first mention, then specific)'
+        ],
+        commonMistakes: [
+            'Incorrect: I have a apple. → Correct: I have an apple.',
+            'Incorrect: She is teacher. → Correct: She is a teacher.',
+            'Incorrect: I went to a school. → Correct: I went to school. (no article for general places)'
+        ],
+        exercises: [
+            {type: 'fill-blank', sentence: 'I have ___ umbrella.', answer: 'an'},
+            {type: 'fill-blank', sentence: 'She is ___ doctor.', answer: 'a'},
+            {type: 'fill-blank', sentence: '___ moon is beautiful tonight.', answer: 'The'}
+        ]
+    },
+    {
+        id: 'grammar_03',
+        rule: 'Present Continuous',
+        category: 'tenses',
+        level: 'intermediate',
+        explanation: 'Use Present Continuous for actions happening now. Form: am/is/are + verb-ing',
+        examples: [
+            'I am studying English now.',
+            'She is watching TV.',
+            'They are playing in the park.',
+            'He is not sleeping.',
+            'Are you listening to me?'
+        ],
+        commonMistakes: [
+            'Incorrect: I am go to school. → Correct: I am going to school.',
+            'Incorrect: She working now. → Correct: She is working now.',
+            'Incorrect: They are play soccer. → Correct: They are playing soccer.'
+        ],
+        exercises: [
+            {type: 'fill-blank', sentence: 'She ___ (read) a book right now.', answer: 'is reading'},
+            {type: 'fill-blank', sentence: 'We ___ (watch) a movie.', answer: 'are watching'}
+        ]
+    },
+    {
+        id: 'grammar_04',
+        rule: 'Prepositions of Time',
+        category: 'prepositions',
+        level: 'intermediate',
+        explanation: 'Use IN for months/years, ON for days/dates, AT for specific times.',
+        examples: [
+            'I was born in 2010. (year)',
+            'My birthday is in May. (month)',
+            'The party is on Saturday. (day)',
+            'Class starts at 9 AM. (time)',
+            'We go on holiday in summer.'
+        ],
+        commonMistakes: [
+            'Incorrect: I wake up on 7 AM. → Correct: I wake up at 7 AM.',
+            'Incorrect: My birthday is at May. → Correct: My birthday is in May.',
+            'Incorrect: See you in Monday. → Correct: See you on Monday.'
+        ],
+        exercises: [
+            {type: 'fill-blank', sentence: 'I have class ___ 3 PM.', answer: 'at'},
+            {type: 'fill-blank', sentence: 'Her birthday is ___ July.', answer: 'in'},
+            {type: 'fill-blank', sentence: 'We meet ___ Fridays.', answer: 'on'}
+        ]
+    },
+    {
+        id: 'grammar_05',
+        rule: 'Modal Verbs: Can/Could',
+        category: 'modals',
+        level: 'intermediate',
+        explanation: 'Use CAN for ability and permission. Use COULD for past ability or polite requests.',
+        examples: [
+            'I can swim very well. (ability)',
+            'Can I use your phone? (permission)',
+            'She could speak French when she was young. (past ability)',
+            'Could you help me, please? (polite request)'
+        ],
+        commonMistakes: [
+            'Incorrect: I can to swim. → Correct: I can swim.',
+            'Incorrect: He cans play guitar. → Correct: He can play guitar.',
+            'Incorrect: She could swam last year. → Correct: She could swim last year.'
+        ],
+        exercises: [
+            {type: 'fill-blank', sentence: 'I ___ speak three languages.', answer: 'can'},
+            {type: 'fill-blank', sentence: '___ you open the window?', answer: 'Could'}
+        ]
+    },
+    {
+        id: 'grammar_06',
+        rule: 'Imperatives (Commands)',
+        category: 'modals',
+        level: 'beginner',
+        explanation: 'Use the verb alone to give an order or instruction. Use "Don\'t" for negative orders.',
+        examples: [
+            'Sit down.',
+            'Open your book.',
+            'Listen to me.',
+            'Don\'t run in class.',
+            'Be careful.'
+        ],
+        commonMistakes: [
+            'Incorrect: You sit down. → Correct: Sit down.',
+            'Incorrect: Not run. → Correct: Don\'t run.',
+            'Incorrect: To open the door. → Correct: Open the door.'
+        ],
+        exercises: [
+            {type: 'fill-blank', sentence: '___ (open) the window, please.', answer: 'Open'},
+            {type: 'fill-blank', sentence: '___ (not/talk) loudly.', answer: 'Don\'t talk'},
+            {type: 'error-correction', sentence: 'You eat your lunch.', answer: 'Eat your lunch.'}
+        ]
+    },
+    {
+        id: 'grammar_07',
+        rule: 'Suggestions with "Let\'s"',
+        category: 'modals',
+        level: 'beginner',
+        explanation: 'Use "Let\'s" (Let us) + verb to make a suggestion for everyone to do together.',
+        examples: [
+            'Let\'s go to the park.',
+            'Let\'s play a game.',
+            'Let\'s paint a picture.',
+            'Let\'s stop now.'
+        ],
+        commonMistakes: [
+            'Incorrect: Let\'s to go. → Correct: Let\'s go.',
+            'Incorrect: Let\'s going. → Correct: Let\'s go.',
+            'Incorrect: Lets play. (missing apostrophe) → Correct: Let\'s play.'
+        ],
+        exercises: [
+            {type: 'fill-blank', sentence: 'It\'s sunny. ___ go outside.', answer: 'Let\'s'},
+            {type: 'error-correction', sentence: 'Let\'s playing soccer.', answer: 'Let\'s play soccer.'}
+        ]
+    }
+];
+
+// Make data available globally
+window.vocabularyBank = vocabularyBank;
+window.grammarBank = grammarBank;
