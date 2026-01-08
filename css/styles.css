@@ -1377,6 +1377,110 @@ input, select, button, textarea {
     color: #555;
 }
 
+/* ===== SENTENCE UNJUMBLE EXERCISE ===== */
+.unjumble-exercise {
+    background: white;
+    padding: 25px;
+    border-radius: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    border-left: 5px solid var(--medium-slate-blue);
+    animation: slideIn 0.4s ease-out;
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateX(-20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+.unjumble-instruction {
+    font-size: 1.1rem;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.unjumble-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    min-height: 80px;
+    padding: 20px;
+    background: #f0f4ff;
+    border: 2px dashed #cbd5e0;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.unjumble-container.drag-over {
+    background: #e0e8ff;
+    border-color: var(--medium-slate-blue);
+    border-style: solid;
+}
+
+.unjumble-word {
+    background: white;
+    padding: 12px 24px;
+    border-radius: 12px;
+    border: 2px solid var(--indigo-velvet);
+    color: var(--indigo-velvet);
+    font-weight: 700;
+    font-size: 1.2rem;
+    cursor: grab;
+    user-select: none;
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    position: relative;
+    z-index: 1;
+}
+
+.unjumble-word:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 10px 15px rgba(61, 52, 139, 0.15);
+    border-color: var(--medium-slate-blue);
+}
+
+.unjumble-word:active {
+    cursor: grabbing;
+    transform: scale(0.95);
+}
+
+.unjumble-word.dragging {
+    opacity: 0.5;
+    transform: scale(0.8);
+}
+
+.unjumble-word.correct-pos {
+    background: #d4edda;
+    border-color: #28a745;
+    color: #155724;
+}
+
+.unjumble-word.incorrect-pos {
+    background: #f8d7da;
+    border-color: #dc3545;
+    color: #721c24;
+}
+
+.unjumble-feedback {
+    text-align: center;
+    font-weight: 800;
+    font-size: 1.2rem;
+    min-height: 1.5em;
+    margin-bottom: 15px;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.animate-bounce {
+    animation: bounce 0.5s ease infinite;
+}
+
 /* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
     .main-header h1 {

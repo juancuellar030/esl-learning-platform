@@ -411,19 +411,65 @@ const GrammarModule = {
             <div style="background: #f8f9fa; padding: 30px; border-radius: 15px; margin-top: 20px;">
                 <h3 style="color: #667eea; margin-bottom: 30px;">Practice Exercises</h3>
                 
-                <div style="margin-bottom: 40px;">
-                    <h4 style="color: #764ba2; margin-bottom: 20px;">Fill in the Blanks</h4>
-                    ${grammar.exercises.filter(ex => ex.type === 'fill-blank').map((ex, idx) => `
-                        <div style="background: white; padding: 20px; border-radius: 10px; margin-bottom: 15px;">
-                            <p style="font-size: 1.2rem; margin-bottom: 10px;">
-                                ${ex.sentence}
-                            </p>
-                            <input type="text" data-answer="${ex.answer}" 
-                                   style="width: 100%; padding: 10px; font-size: 1.1rem; border: 2px solid #ddd; border-radius: 8px;"
-                                   placeholder="Your answer...">
-                            <div class="result" style="margin-top: 10px; font-weight: bold;"></div>
-                        </div>
-                    `).join('')}
+                <div id="exercises-list">
+                    ${grammar.exercises.map((ex, idx) => {
+                        if (ex.type === 'fill-blank') {
+                            return `
+                                <div class="exercise-item" style="background: white; padding: 20px; border-radius: 10px; margin-bottom: 15px;">
+                                    <h4 style="margin-bottom: 10px; color: var(--indigo-velvet);">Fill in the Blank</h4>
+                                    <p style="font-size: 1.2rem; margin-bottom: 10px;">
+                                        ${ex.sentence}
+                                    </p>
+                                    <input type="text" data-answer="${ex.answer}" 
+                                           style="width: 100%; padding: 10px; font-size: 1.1rem; border: 2px solid #ddd; border-radius: 8px;"
+                                           placeholder="Your answer...">
+                                    <div class="result" style="margin-top: 10px; font-weight: bold;"></div>
+                                </div>
+                            `;
+                        } else if (ex.type === 'sentence-unjumble') {
+                            const shuffled = [...ex.words].sort(() => Math.random() - 0.5);
+                            return `
+                                <div class="unjumble-exercise" data-answer="${ex.sentence}">
+                                    <h4 style="margin-bottom: 10px; color: var(--indigo-velvet);">Unjumble the Sentence</h4>
+                                    <p class="unjumble-instruction">Drag the words or click them in order:</p>
+                                    <div class="unjumble-feedback"></div>
+                                    <div class="unjumble-container target-area" id="target-${idx}"
+                                         ondragover="GrammarModule.handleDragOver(event)"
+                                         ondragleave="this.classList.remove('drag-over')"
+                                         ondrop="this.classList.remove('drag-over')">
+                                        <!-- Selected words will go here -->
+                                    </div>
+                                    <div class="unjumble-container source-area" id="source-${idx}"
+                                         ondragover="GrammarModule.handleDragOver(event)"
+                                         ondragleave="this.classList.remove('drag-over')"
+                                         ondrop="this.classList.remove('drag-over')">
+                                        ${shuffled.map(word => `
+                                            <div class="unjumble-word" 
+                                                 draggable="true" 
+                                                 ondragstart="GrammarModule.handleDragStart(event)" 
+                                                 ondragend="GrammarModule.handleDragEnd(event)"
+                                                 onclick="GrammarModule.handleUnjumbleClick(this, ${idx})">${word}</div>
+                                        `).join('')}
+                                    </div>
+                                    <div class="result" style="margin-top: 10px; font-weight: bold;"></div>
+                                </div>
+                            `;
+                        } else if (ex.type === 'error-correction') {
+                             return `
+                                <div class="exercise-item" style="background: white; padding: 20px; border-radius: 10px; margin-bottom: 15px;">
+                                    <h4 style="margin-bottom: 10px; color: var(--indigo-velvet);">Correct the Error</h4>
+                                    <p style="font-size: 1.2rem; margin-bottom: 10px; color: #dc3545; font-style: italic;">
+                                        ${ex.sentence}
+                                    </p>
+                                    <input type="text" data-answer="${ex.answer}" 
+                                           style="width: 100%; padding: 10px; font-size: 1.1rem; border: 2px solid #ddd; border-radius: 8px;"
+                                           placeholder="Write the correct sentence...">
+                                    <div class="result" style="margin-top: 10px; font-weight: bold;"></div>
+                                </div>
+                            `;
+                        }
+                        return '';
+                    }).join('')}
                 </div>
                 
                 <button class="btn-primary" id="check-grammar-answers" style="width: 100%; padding: 15px; font-size: 1.2rem;">
@@ -440,15 +486,70 @@ const GrammarModule = {
         
         display.scrollIntoView({behavior: 'smooth'});
     },
+
+    handleUnjumbleClick(wordEl, idx) {
+        const source = document.getElementById(`source-${idx}`);
+        const target = document.getElementById(`target-${idx}`);
+        
+        if (wordEl.parentElement === source) {
+            target.appendChild(wordEl);
+        } else {
+            source.appendChild(wordEl);
+        }
+    },
+
+    handleDragStart(e) {
+        e.target.classList.add('dragging');
+        e.dataTransfer.setData('text/plain', ''); // Required for Firefox
+        e.dataTransfer.effectAllowed = 'move';
+    },
+
+    handleDragEnd(e) {
+        e.target.classList.remove('dragging');
+        document.querySelectorAll('.unjumble-container').forEach(c => c.classList.remove('drag-over'));
+    },
+
+    handleDragOver(e) {
+        e.preventDefault();
+        const container = e.currentTarget;
+        container.classList.add('drag-over');
+        
+        const dragging = document.querySelector('.dragging');
+        if (!dragging) return;
+
+        const afterElement = this.getDragAfterElement(container, e.clientX);
+        if (afterElement == null) {
+            container.appendChild(dragging);
+        } else {
+            container.insertBefore(dragging, afterElement);
+        }
+    },
+
+    getDragAfterElement(container, x) {
+        const draggableElements = [...container.querySelectorAll('.unjumble-word:not(.dragging)')];
+
+        return draggableElements.reduce((closest, child) => {
+            const box = child.getBoundingClientRect();
+            const offset = x - box.left - box.width / 2;
+            if (offset < 0 && offset > closest.offset) {
+                return { offset: offset, element: child };
+            } else {
+                return closest;
+            }
+        }, { offset: Number.NEGATIVE_INFINITY }).element;
+    },
     
     checkAnswers() {
-        const inputs = document.querySelectorAll('#grammar-exercise-display input[data-answer]');
+        const display = document.getElementById('grammar-exercise-display');
         let correct = 0;
-        let total = inputs.length;
-        
+        let total = 0;
+
+        // Check Fill-in and Error Correction
+        const inputs = display.querySelectorAll('input[data-answer]');
         inputs.forEach(input => {
-            const answer = input.value.trim().toLowerCase();
-            const correctAnswer = input.dataset.answer.toLowerCase();
+            total++;
+            const answer = input.value.trim().toLowerCase().replace(/[.,!?;]$/, '');
+            const correctAnswer = input.dataset.answer.toLowerCase().replace(/[.,!?;]$/, '');
             const result = input.nextElementSibling;
             
             if (answer === correctAnswer) {
@@ -462,9 +563,36 @@ const GrammarModule = {
                 input.style.borderColor = '#dc3545';
             }
         });
+
+        // Check Unjumble Exercises
+        const unjumbles = display.querySelectorAll('.unjumble-exercise');
+        unjumbles.forEach(ex => {
+            total++;
+            const targetArea = ex.querySelector('.target-area');
+            const result = ex.querySelector('.result');
+            const userSentence = Array.from(targetArea.children).map(el => el.textContent).join(' ');
+            const correctAnswer = ex.dataset.answer;
+            
+            // Clean both for comparison (remove trailing punctuation for better match)
+            const cleanUser = userSentence.toLowerCase().replace(/[.,!?;]$/, '');
+            const cleanCorrect = correctAnswer.toLowerCase().replace(/[.,!?;]$/, '');
+
+            if (cleanUser === cleanCorrect) {
+                result.innerHTML = '✅ Correct Sentence!';
+                result.style.color = '#28a745';
+                targetArea.style.borderColor = '#28a745';
+                targetArea.querySelectorAll('.unjumble-word').forEach(w => w.classList.add('correct-pos'));
+                correct++;
+            } else {
+                result.innerHTML = `❌ Incorrect. Expected: "${correctAnswer}"`;
+                result.style.color = '#dc3545';
+                targetArea.style.borderColor = '#dc3545';
+                targetArea.querySelectorAll('.unjumble-word').forEach(w => w.classList.add('incorrect-pos'));
+            }
+        });
         
         const score = document.getElementById('grammar-score');
-        const percentage = Math.round((correct / total) * 100);
+        const percentage = total > 0 ? Math.round((correct / total) * 100) : 0;
         score.innerHTML = `Score: ${correct}/${total} (${percentage}%)`;
     },
     

@@ -207,7 +207,43 @@ const vocabularyBank = [
     {id: 'art_ext_43', word: 'Folder', spanish: 'Carpeta', type: 'noun', icon: 'fa-solid fa-folder', category: 'arts', subcategory: 'elements', level: 'beginner', definition: 'Holder for papers', example: 'Put your finished drawing in your folder.'},
     {id: 'art_ext_44', word: 'Rag', spanish: 'Trapo', type: 'noun', icon: 'fa-solid fa-rug', category: 'arts', subcategory: 'elements', level: 'beginner', definition: 'Old cloth for cleaning', example: 'Use the rag to dry your table.'},
     {id: 'art_ext_45', word: 'Sink', spanish: 'Lavamanos', type: 'noun', icon: 'fa-solid fa-faucet', category: 'arts', subcategory: 'elements', level: 'beginner', definition: 'Basin with water tap', example: 'Wash your hands at the sink.'},
-    {id: 'art_ext_46', word: 'Table', spanish: 'Mesa', type: 'noun', icon: 'fa-solid fa-table', category: 'arts', subcategory: 'elements', level: 'beginner', definition: 'Furniture with flat top', example: 'Sit nicely at your table.'}
+    {id: 'art_ext_46', word: 'Table', spanish: 'Mesa', type: 'noun', icon: 'fa-solid fa-table', category: 'arts', subcategory: 'elements', level: 'beginner', definition: 'Furniture with flat top', example: 'Sit nicely at your table.'},
+
+    // Question Words
+    {id: 'quest_01', word: 'Who', spanish: 'Quién', type: 'pronoun', icon: 'fa-solid fa-question', category: 'grammar-words', subcategory: 'questions', level: 'beginner', definition: 'Used to ask about a person', example: 'Who is she?'},
+    {id: 'quest_02', word: 'What', spanish: 'Qué', type: 'pronoun', icon: 'fa-solid fa-question', category: 'grammar-words', subcategory: 'questions', level: 'beginner', definition: 'Used to ask about a thing', example: 'What is this?'},
+    {id: 'quest_03', word: 'Where', spanish: 'Dónde', type: 'adverb', icon: 'fa-solid fa-location-dot', category: 'grammar-words', subcategory: 'questions', level: 'beginner', definition: 'Used to ask about a place', example: 'Where is the park?'},
+    {id: 'quest_04', word: 'When', spanish: 'Cuándo', type: 'adverb', icon: 'fa-solid fa-clock', category: 'grammar-words', subcategory: 'questions', level: 'beginner', definition: 'Used to ask about time', example: 'When is the party?'},
+    {id: 'quest_05', word: 'Why', spanish: 'Por qué', type: 'adverb', icon: 'fa-solid fa-question', category: 'grammar-words', subcategory: 'questions', level: 'beginner', definition: 'Used to ask for a reason', example: 'Why are you sad?'},
+    {id: 'quest_06', word: 'Which', spanish: 'Cuál', type: 'pronoun', icon: 'fa-solid fa-question', category: 'grammar-words', subcategory: 'questions', level: 'beginner', definition: 'Used to ask about a choice', example: 'Which one do you want?'},
+    {id: 'quest_07', word: 'How', spanish: 'Cómo', type: 'adverb', icon: 'fa-solid fa-question', category: 'grammar-words', subcategory: 'questions', level: 'beginner', definition: 'Used to ask about manner', example: 'How do you do that?'},
+    {id: 'quest_08', word: 'What time', spanish: 'A qué hora', type: 'phrase', icon: 'fa-solid fa-clock', category: 'grammar-words', subcategory: 'questions', level: 'beginner', definition: 'Used to ask specific time', example: 'What time is it?'},
+    {id: 'quest_09', word: 'Because', spanish: 'Porque', type: 'conjunction', icon: 'fa-solid fa-comment-dots', category: 'grammar-words', subcategory: 'connectors', level: 'beginner', definition: 'Used to give a reason', example: 'Because I am hungry.'},
+
+    // Months of the Year
+    {id: 'month_01', word: 'January', spanish: 'Enero', type: 'noun', icon: 'fa-solid fa-calendar-days', category: 'time', subcategory: 'months', level: 'beginner', definition: 'The first month of the year', example: 'It is cold in January.'},
+    {id: 'month_02', word: 'February', spanish: 'Febrero', type: 'noun', icon: 'fa-solid fa-calendar-days', category: 'time', subcategory: 'months', level: 'beginner', definition: 'The second month of the year', example: 'February is the shortest month.'},
+    {id: 'month_03', word: 'March', spanish: 'Marzo', type: 'noun', icon: 'fa-solid fa-calendar-days', category: 'time', subcategory: 'months', level: 'beginner', definition: 'The third month of the year', example: 'Spring starts in March.'},
+    {id: 'month_04', word: 'April', spanish: 'Abril', type: 'noun', icon: 'fa-solid fa-calendar-days', category: 'time', subcategory: 'months', level: 'beginner', definition: 'The fourth month of the year', example: 'April showers bring May flowers.'},
+    {id: 'month_05', word: 'May', spanish: 'Mayo', type: 'noun', icon: 'fa-solid fa-calendar-days', category: 'time', subcategory: 'months', level: 'beginner', definition: 'The fifth month of the year', example: 'The weather is lovely in May.'},
+    {id: 'month_06', word: 'June', spanish: 'Junio', type: 'noun', icon: 'fa-solid fa-calendar-days', category: 'time', subcategory: 'months', level: 'beginner', definition: 'The sixth month of the year', example: 'School ends in June.'},
+    {id: 'month_07', word: 'July', spanish: 'Julio', type: 'noun', icon: 'fa-solid fa-calendar-days', category: 'time', subcategory: 'months', level: 'beginner', definition: 'The seventh month of the year', example: 'It is very hot in July.'},
+    {id: 'month_08', word: 'August', spanish: 'Agosto', type: 'noun', icon: 'fa-solid fa-calendar-days', category: 'time', subcategory: 'months', level: 'beginner', definition: 'The eighth month of the year', example: 'We go on holiday in August.'},
+    {id: 'month_09', word: 'September', spanish: 'Septiembre', type: 'noun', icon: 'fa-solid fa-calendar-days', category: 'time', subcategory: 'months', level: 'beginner', definition: 'The ninth month of the year', example: 'School starts in September.'},
+    {id: 'month_10', word: 'October', spanish: 'Octubre', type: 'noun', icon: 'fa-solid fa-calendar-days', category: 'time', subcategory: 'months', level: 'beginner', definition: 'The tenth month of the year', example: 'Leaves fall in October.'},
+    {id: 'month_11', word: 'November', spanish: 'Noviembre', type: 'noun', icon: 'fa-solid fa-calendar-days', category: 'time', subcategory: 'months', level: 'beginner', definition: 'The eleventh month of the year', example: 'November is before December.'},
+    {id: 'month_12', word: 'December', spanish: 'Diciembre', type: 'noun', icon: 'fa-solid fa-calendar-days', category: 'time', subcategory: 'months', level: 'beginner', definition: 'The twelfth month of the year', example: 'December is the last month.'},
+
+    // Transport & Journeys (Additional)
+    {id: 'transport_09', word: 'Taxi', spanish: 'Taxi', type: 'noun', icon: 'fa-solid fa-taxi', category: 'transport', subcategory: 'land', level: 'beginner', definition: 'A car you pay to take you somewhere', example: 'Let\'s call a taxi.'},
+    {id: 'transport_10', word: 'Ambulance', spanish: 'Ambulancia', type: 'noun', icon: 'fa-solid fa-ambulance', category: 'transport', subcategory: 'emergency', level: 'intermediate', definition: 'Vehicle for sick people', example: 'The ambulance goes to the hospital.'},
+    {id: 'transport_11', word: 'Motorway', spanish: 'Autopista', type: 'noun', icon: 'fa-solid fa-road', category: 'transport', subcategory: 'infrastructure', level: 'intermediate', definition: 'A big road for fast cars', example: 'Follow the motorway to the city.'},
+    {id: 'transport_12', word: 'Railway Station', spanish: 'Estación de tren', type: 'noun', icon: 'fa-solid fa-train-tram', category: 'transport', subcategory: 'infrastructure', level: 'beginner', definition: 'Place to catch a train', example: 'Meet me at the railway station.'},
+    {id: 'transport_13', word: 'Platform', spanish: 'Andén', type: 'noun', icon: 'fa-solid fa-lines-leaning', category: 'transport', subcategory: 'infrastructure', level: 'intermediate', definition: 'Where you wait for the train', example: 'The train is on platform 3.'},
+    {id: 'transport_14', word: 'Traffic', spanish: 'Tráfico', type: 'noun', icon: 'fa-solid fa-cars', category: 'transport', subcategory: 'infrastructure', level: 'intermediate', definition: 'Many cars on the road', example: 'The traffic is very slow today.'},
+    {id: 'transport_15', word: 'Airport', spanish: 'Aeropuerto', type: 'noun', icon: 'fa-solid fa-plane-arrival', category: 'transport', subcategory: 'infrastructure', level: 'beginner', definition: 'Place to catch a plane', example: 'We are going to the airport.'},
+    {id: 'transport_16', word: 'Passenger', spanish: 'Pasajero', type: 'noun', icon: 'fa-solid fa-person-rolling-suitcase', category: 'transport', subcategory: 'people', level: 'intermediate', definition: 'A person who is traveling', example: 'All passengers are on the plane.'},
+    {id: 'transport_17', word: 'Sea', spanish: 'Mar', type: 'noun', icon: 'fa-solid fa-water', category: 'transport', subcategory: 'nature', level: 'beginner', definition: 'Big body of salt water', example: 'Ships sail on the sea.'}
 ];
 
 // Make data available globally

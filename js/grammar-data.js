@@ -184,6 +184,97 @@ const grammarBank = [
             {type: 'fill-blank', sentence: 'Look at those clouds! It ___ rain.', answer: 'may'},
             {type: 'fill-blank', sentence: 'I ___ join you later, but I am busy.', answer: 'might'}
         ]
+    },
+    {
+        id: 'grammar_09',
+        rule: 'Question Words (Wh- Questions)',
+        category: 'questions',
+        level: 'beginner',
+        explanation: 'We use specific question words to get different types of information: Who (Person), What (Thing/Action), Where (Place), When (Time), Why (Reason), Which (Choice), How (Manner), What time (Specific Time).',
+        examples: [
+            'Who is your teacher? (Person)',
+            'What is that? (Thing)',
+            'Where do you live? (Place)',
+            'When is your birthday? (Time)',
+            'Why are you running? (Reason)',
+            'Which color do you prefer? (Choice)',
+            'How do you go to school? (Manner)',
+            'What time is it? (Specific Time)'
+        ],
+        commonMistakes: [
+            'Incorrect: When is your house? (Meaning Where) \u2192 Correct: Where is your house?',
+            'Incorrect: Why you cry? \u2192 Correct: Why are you crying?'
+        ],
+        exercises: [
+            {type: 'fill-blank', sentence: '___ is your name?', answer: 'What'},
+            {type: 'fill-blank', sentence: '___ do you live?', answer: 'Where'},
+            {type: 'fill-blank', sentence: '___ is that girl?', answer: 'Who'}
+        ]
+    },
+    {
+        id: 'grammar_10',
+        rule: 'Cause and Effect: Why and Because',
+        category: 'questions',
+        level: 'beginner',
+        explanation: 'Questions starting with "Why" ask for a reason. We answer these questions with "Because".',
+        examples: [
+            'Question: Why are you running?',
+            'Answer: Because school starts in ten minutes.',
+            'Question: Why are you happy?',
+            'Answer: Because it is my birthday.'
+        ],
+        commonMistakes: [
+            'Incorrect: Why are you late? Traffic. \u2192 Correct: Because of traffic.',
+            'Incorrect: Why do you eat? Yes, I do. \u2192 Correct: Because I am hungry.'
+        ],
+        exercises: [
+            {type: 'fill-blank', sentence: '___ are you sad?', answer: 'Why'},
+            {type: 'fill-blank', sentence: 'Why are you smiling? ___ I am happy.', answer: 'Because'}
+        ]
+    },
+    {
+        id: 'grammar_11',
+        rule: 'Months and Time',
+        category: 'prepositions',
+        level: 'beginner',
+        explanation: 'The year has twelve months. We use "in" for months (in January). We use "before" and "after" to talk about the order of months.',
+        examples: [
+            'January is the first month.',
+            'February comes after January.',
+            'April is before May.',
+            'My birthday is in August.'
+        ],
+        commonMistakes: [
+            'Incorrect: On January. \u2192 Correct: In January.',
+            'Incorrect: March is after April. \u2192 Correct: March is before April.'
+        ],
+        exercises: [
+            {type: 'sentence-unjumble', sentence: 'January is the first month', words: ['January', 'is', 'the', 'first', 'month']},
+            {type: 'sentence-unjumble', sentence: 'February comes after January', words: ['February', 'comes', 'after', 'January']},
+            {type: 'fill-blank', sentence: 'December is ___ (after/before) November.', answer: 'after'}
+        ]
+    },
+    {
+        id: 'grammar_12',
+        rule: 'Transport and Journeys',
+        category: 'prepositions',
+        level: 'intermediate',
+        explanation: 'We use "by" for modes of transport (by car, by train). We use "on" for public transport platforms and "at" for stations.',
+        examples: [
+            'I go to school by bicycle.',
+            'The train is at the railway station.',
+            'Wait for the train on the platform.',
+            'There is a lot of traffic on the motorway.'
+        ],
+        commonMistakes: [
+            'Incorrect: I go in car. \u2192 Correct: I go by car.',
+            'Incorrect: Wait in the platform. \u2192 Correct: Wait on the platform.'
+        ],
+        exercises: [
+            {type: 'sentence-unjumble', sentence: 'I go to school by car', words: ['I', 'go', 'to', 'school', 'by', 'car']},
+            {type: 'sentence-unjumble', sentence: 'The train is at the station', words: ['The', 'train', 'is', 'at', 'the', 'station']},
+            {type: 'fill-blank', sentence: 'We are going ___ a journey.', answer: 'on'}
+        ]
     }
 ];
 

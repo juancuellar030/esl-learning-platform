@@ -16,7 +16,9 @@ const VocabModule = {
         'weather': { label: 'Weather', icon: 'fa-solid fa-cloud-sun' },
         'places': { label: 'Places', icon: 'fa-solid fa-map-location-dot' },
         'transport': { label: 'Transport', icon: 'fa-solid fa-car' },
-        'arts': { label: 'Arts & Crafts', icon: 'fa-solid fa-palette' }
+        'arts': { label: 'Arts & Crafts', icon: 'fa-solid fa-palette' },
+        'grammar-words': { label: 'Grammar & Questions', icon: 'fa-solid fa-question' },
+        'time': { label: 'Calendar & Time', icon: 'fa-solid fa-calendar-days' }
     },
 
     init() {
