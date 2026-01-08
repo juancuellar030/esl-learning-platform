@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>May - Might Grammar Chart</title>
+    <style>
+        :root {
+            --main-green: #62c785;
+            --light-blue: #ccebf8;
+            --light-green-bg: #dcebc5;
+            --text-color: #000;
+            --header-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+            margin: 0;
+        }
+
+        .card {
+            background-color: white;
+            border: 3px solid var(--main-green);
+            border-radius: 15px;
+            width: 100%;
+            max-width: 900px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Header Section */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+        }
+
+        .badge {
+            background-color: var(--main-green);
+            color: white;
+            padding: 15px 10px;
+            border-radius: 50%;
+            text-align: center;
+            font-weight: bold;
+            font-size: 14px;
+            line-height: 1.2;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+        }
+
+        h1 {
+            font-size: 48px;
+            margin: 0;
+            text-shadow: var(--header-shadow);
+            color: black;
+            font-weight: 800;
+        }
+
+        .logo {
+            background-color: #222;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            text-align: right;
+            border-bottom: 2px solid #999;
+        }
+        .logo-top {
+            font-family: 'Brush Script MT', cursive;
+            color: var(--main-green);
+            font-size: 24px;
+        }
+        .logo-bottom {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #ccc;
+        }
+
+        /* Main Layout */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1.4fr 1fr;
+            gap: 20px;
+            padding: 0 20px 20px 20px;
+        }
+
+        /* Left Column Styles */
+        .uses-title {
+            font-size: 22px;
+            margin-bottom: 15px;
+        }
+
+        .category-box {
+            background-color: var(--light-blue);
+            padding: 5px 15px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 20px;
+            border: 1px solid #b0dceb;
+            margin-top: 15px;
+            display: inline-block;
+            width: 100%;
+            box-sizing: border-box;
+            box-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .example-text {
+            font-size: 18px;
+            margin: 8px 0 0 10px;
+            line-height: 1.4;
+        }
+
+        /* Right Column Styles */
+        .comparison-box {
+            background-color: var(--light-green-bg);
+            border-radius: 15px;
+            padding: 15px;
+            border: 1px solid #c9deb0;
+            height: fit-content;
+        }
+
+        .comp-header {
+            text-align: center;
+            font-weight: bold;
+            font-size: 22px;
+            margin-bottom: 10px;
+        }
+
+        .comp-text {
+            font-size: 18px;
+            line-height: 1.4;
+            margin-bottom: 15px;
+        }
+
+        .probability {
+            margin: 10px 0;
+            font-size: 18px;
+        }
+
+        /* Footer */
+        .footer-bar {
+            background-color: var(--main-green);
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 20px;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .footer-bar span {
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+            h1 {
+                font-size: 32px;
+            }
+            header {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .footer-bar {
+                flex-direction: column;
+                text-align: center;
+                gap: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <header>
+            <div class="badge">
+                Modal<br>Verbs
+            </div>
+            <h1>May - Might</h1>
+            <div class="logo">
+                <div class="logo-top">Woodward</div>
+                <div class="logo-bottom">ENGLISH</div>
+            </div>
+        </header>
+
+        <div class="content-grid">
+            <!-- Left Column -->
+            <section class="left-col">
+                <div class="uses-title">Uses of <b>May</b> and <b>Might</b>:</div>
+
+                <div class="category-box">Possibility</div>
+                <p class="example-text">- It <b>might</b> rain later so take an umbrella.</p>
+
+                <div class="category-box">Give permission</div>
+                <p class="example-text">- You <b>may</b> have another cookie if you like.</p>
+
+                <div class="category-box">Ask for permission</div>
+                <p class="example-text">- <b>May</b> I borrow your pen please?</p>
+
+                <div class="category-box">Express wishes</div>
+                <p class="example-text">- <b>May</b> the New Year bring you happiness.</p>
+
+                <div class="category-box">Speculate about past actions</div>
+                <p class="example-text">- She is late. She <b>may</b> have missed her plane.</p>
+            </section>
+
+            <!-- Right Column -->
+            <section class="right-col">
+                <div class="comparison-box">
+                    <div class="comp-header">May or Might?</div>
+                    <p class="comp-text">
+                        <b>May</b> and <b>Might</b> can normally be interchanged without a significant difference in meaning. However, <b>Might</b> often implies a smaller chance of something happening (when expressing possibility).
+                    </p>
+                    <div class="probability">
+                        - It may rain. &nbsp;&nbsp;&nbsp;(70% chance)<br>
+                        - It might rain. (40% chance)
+                    </div>
+                    <p class="comp-text">
+                        When expressing wishes or giving permission, only <b>May</b> is used.
+                    </p>
+                </div>
+            </section>
+        </div>
+
+        <div class="footer-bar">
+            <span>www.grammar.cl</span>
+            <span>www.woodwardenglish.com</span>
+            <span>www.vocabulary.cl</span>
+        </div>
+    </div>
+
+</body>
+</html>

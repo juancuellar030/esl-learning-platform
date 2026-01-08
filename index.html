@@ -28,9 +28,9 @@
             <button class="nav-btn" data-section="grammar">
                 <i class="fa-solid fa-spell-check"></i> Grammar Bank
             </button>
-            <button class="nav-btn" data-section="virtualboard">
+            <a href="board.html" target="_blank" class="nav-external-btn">
                 <i class="fa-solid fa-chalkboard"></i> Virtual Board
-            </button>
+            </a>
             <button class="nav-btn" data-section="dictionary">
                 <i class="fa-solid fa-language"></i> Dictionary
             </button>
@@ -60,12 +60,11 @@
                         <p>Teach grammar rules with interactive exercises</p>
 
                     </div>
-                    <div class="dashboard-card" data-goto="virtualboard">
+                    <a href="board.html" target="_blank" class="dashboard-card" style="text-decoration: none; color: inherit; display: block;">
                         <div class="card-icon"><i class="fa-solid fa-chalkboard"></i></div>
                         <h3>Virtual Board</h3>
                         <p>Live teaching with interactive drawing board</p>
-
-                    </div>
+                    </a>
                     <div class="dashboard-card" data-goto="dictionary">
                         <div class="card-icon"><i class="fa-solid fa-language"></i></div>
                         <h3>Dictionary</h3>
@@ -390,10 +389,11 @@
         </div>
     </footer>
 
-    <script src="js/data.js"></script>
+    <script src="js/vocabulary-data.js"></script>
+    <script src="js/grammar-data.js"></script>
     <script src="js/vocabulary.js"></script>
     <script src="js/grammar.js"></script>
-    <script src="js/virtualboard.js"></script>
+
     <script src="js/dictionary.js"></script>
     <script src="js/app.js"></script>
 </body>

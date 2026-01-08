@@ -1,0 +1,209 @@
+/* Override Excalidraw Variables to match Platform Aesthetic */
+:root {
+    /* Platform Colors */
+    --indigo-velvet: #3d348b;
+    --medium-slate-blue: #7678ed;
+    --amber-flame: #f7b801;
+    --tiger-orange: #f18701;
+    --cayenne-red: #f35b04;
+
+    /* Override Excalidraw Primary Colors */
+    --color-primary: var(--indigo-velvet);
+    --color-primary-darker: #2a246a;
+    --color-primary-darkest: #1a1645;
+    --color-primary-light: #e0dfff; 
+}
+
+/* Hide Unwanted Elements */
+
+/* Social Links */
+a[href*="twitter.com"],
+a[href*="x.com"],
+a[href*="discord.gg"],
+a[href*="github.com"],
+a[href*="youtube.com"] {
+    display: none !important;
+}
+
+/* Specific Excalidraw+ Promotions and Buttons */
+.plus-banner,
+.encrypted-icon, 
+.collab-button, 
+.layer-ui__wrapper__top-right .excalidraw-button { 
+    display: none !important;
+}
+
+/* Hide the Library Sidebar Button */
+.sidebar-trigger {
+    display: none !important;
+}
+
+/* Hide "Make comments with Excalidraw+" promo in sidebar */
+.app-sidebar-promo-container {
+    display: none !important;
+}
+
+/* Hide "Sign up" or "Login" if present in menu */
+.dropdown-menu-item-base[href*="plus.excalidraw.com"],
+.dropdown-menu-item-base[href*="app.excalidraw.com"] {
+    display: none !important;
+}
+
+/* Customize Font */
+body, 
+button, 
+input, 
+textarea, 
+.excalidraw {
+    font-family: 'Reddit Sans', 'Google Sans Flex', sans-serif !important;
+}
+
+/* --- REPLACE ICONS WITH FONTAWESOME --- */
+
+/* Base style for all tool icons to hide original SVG */
+.excalidraw .ToolIcon__icon svg {
+    display: none !important;
+}
+
+/* Base style for FontAwesome replacement */
+.excalidraw .ToolIcon__icon::after {
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    font-size: 1.2rem;
+    color: var(--icon-fill-color);
+    display: inline-block;
+}
+
+.excalidraw .ToolIcon_type_radio:checked + .ToolIcon__icon::after {
+    color: var(--color-primary);
+}
+
+/* Selection (V) */
+[data-testid="toolbar-selection"] .ToolIcon__icon::after {
+    content: "\f245"; /* fa-arrow-pointer */
+}
+
+/* Rectangle (R) */
+[data-testid="toolbar-rectangle"] .ToolIcon__icon::after {
+    content: "\f0c8"; /* fa-square */
+    font-weight: 400; /* Regular style */
+}
+
+/* Diamond (D) */
+[data-testid="toolbar-diamond"] .ToolIcon__icon::after {
+    content: "\f0c8"; /* fa-square */
+    font-weight: 400;
+    transform: rotate(45deg) scale(0.8);
+}
+
+/* Ellipse (O) */
+[data-testid="toolbar-ellipse"] .ToolIcon__icon::after {
+    content: "\f111"; /* fa-circle */
+    font-weight: 400;
+}
+
+/* Arrow (A) */
+[data-testid="toolbar-arrow"] .ToolIcon__icon::after {
+    content: "\f178"; /* fa-arrow-right-long */
+}
+
+/* Line (L) */
+[data-testid="toolbar-line"] .ToolIcon__icon::after {
+    content: "\f068"; /* fa-minus */
+}
+
+/* Draw (P) */
+[data-testid="toolbar-freedraw"] .ToolIcon__icon::after {
+    content: "\f303"; /* fa-pencil */
+}
+
+/* Text (T) */
+[data-testid="toolbar-text"] .ToolIcon__icon::after {
+    content: "\f031"; /* fa-font */
+}
+
+/* Image (I) */
+[data-testid="toolbar-image"] .ToolIcon__icon::after {
+    content: "\f03e"; /* fa-image */
+    font-weight: 400;
+}
+
+/* Eraser (E) */
+[data-testid="toolbar-eraser"] .ToolIcon__icon::after {
+    content: "\f12d"; /* fa-eraser */
+}
+
+/* Hand (H) */
+[data-testid="toolbar-hand"] .ToolIcon__icon::after {
+    content: "\f256"; /* fa-hand-paper */
+}
+
+/* Laser (K) */
+[data-testid="toolbar-laser"] .ToolIcon__icon::after {
+    content: "\e2ca"; /* fa-wand-magic-sparkles */
+}
+
+/* Lock */
+[data-testid="toolbar-lock"] .ToolIcon__icon svg {
+    display: none !important;
+}
+[data-testid="toolbar-lock"] .ToolIcon__icon::after {
+    content: "\f023"; /* fa-lock */
+    font-family: "Font Awesome 6 Free"; 
+    font-weight: 900;
+}
+
+/* Frame (F) */
+[data-testid="toolbar-frame"] .ToolIcon__icon::after {
+    content: "\f5cb"; /* fa-vector-square */
+}
+
+/* Embeddable */
+[data-testid="toolbar-embeddable"] .ToolIcon__icon::after {
+    content: "\f0c1"; /* fa-link */
+}
+
+/* Magic Frame */
+[data-testid="toolbar-magicframe"] .ToolIcon__icon::after {
+    content: "\f0d0"; /* fa-wand-magic */
+}
+
+/* Extra Tools Dropdown Trigger */
+.App-toolbar__extra-tools-trigger svg {
+    display: none !important;
+}
+.App-toolbar__extra-tools-trigger::after {
+    content: "\f0c9"; /* fa-bars (or similar for menu) */
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    font-size: 1rem;
+    color: var(--icon-fill-color);
+}
+
+/* Zoom Icons */
+.zoom-in-button svg { display: none !important; }
+.zoom-in-button .ToolIcon__icon::after {
+    content: "\f00e"; /* fa-magnifying-glass-plus */
+}
+
+.zoom-out-button svg { display: none !important; }
+.zoom-out-button .ToolIcon__icon::after {
+    content: "\f010"; /* fa-magnifying-glass-minus */
+}
+
+.reset-zoom-button {
+    font-weight: bold;
+}
+
+/* Undo/Redo */
+[data-testid="button-undo"] .ToolIcon__icon::after {
+    content: "\f0e2"; /* fa-rotate-left */
+}
+[data-testid="button-redo"] .ToolIcon__icon::after {
+    content: "\f01e"; /* fa-rotate-right */
+}
+
+/* Background Color Picker Icon */
+[data-testid="canvas-background-picker"] .ToolIcon__icon::after {
+    content: "\f576"; /* fa-fill-drip */
+}
