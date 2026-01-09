@@ -256,7 +256,78 @@ const VocabModule = {
             return;
         }
 
+        if (type === 'unjumble') {
+            const phrases = words.filter(w => w.word.trim().includes(' '));
+            if (phrases.length === 0) {
+                display.innerHTML = `
+                    <div class="exercise-setup-panel">
+                        <h3><i class="fa-solid fa-arrows-rotate" style="color: var(--medium-slate-blue); margin-right: 10px;"></i> Unjumble Mode</h3>
+                        <p style="color: #dc3545; font-weight: bold; margin-top: 20px;">No phrases selected!</p>
+                        <p>This mode only works with multi-word expressions (e.g., "Clean up").</p>
+                        <p>Please select some phrases from "Classroom Language" or other categories.</p>
+                    </div>
+                `;
+                return;
+            }
+            display.innerHTML = `
+                <div class="exercise-setup-panel">
+                    <h3><i class="fa-solid fa-arrows-rotate" style="color: var(--medium-slate-blue); margin-right: 10px;"></i> Unjumble Mode</h3>
+                    <p>Ready to practice with ${phrases.length} phrases?</p>
+                    <p style="font-size: 0.9rem; color: #666; margin-bottom: 20px;">(Single words like "Paint" have been filtered out)</p>
+                    <button class="btn-primary" style="font-size: 1.2rem; padding: 15px 30px;" 
+                            onclick="VocabModule.launchPractice('unjumble')">
+                        Start Unjumble <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                    </button>
+                </div>
+            `;
+            return;
+        }
+
+        if (type === 'crossword') {
+                display.innerHTML = `
+                    <div class="exercise-setup-panel">
+                        <h3><i class="fa-solid fa-table-cells" style="color: var(--medium-slate-blue); margin-right: 10px;"></i> Crossword Mode:</h3>
+                        <div class="setup-options">
+                            <button class="btn-secondary" onclick="VocabModule.launchPractice('crossword', 'easy')">
+                                <i class="fa-regular fa-image"></i> Image Clues
+                            </button>
+                            <button class="btn-secondary" onclick="VocabModule.launchPractice('crossword', 'text')">
+                                <i class="fa-solid fa-language"></i> Spanish Clues
+                            </button>
+                            <button class="btn-secondary" onclick="VocabModule.launchPractice('crossword', 'audio')">
+                                <i class="fa-solid fa-volume-high"></i> Audio Clues
+                            </button>
+                        </div>
+                    </div>
+                `;
+                return;
+        }
+
         // For other modes, simple launch button
+        let title = '';
+        let icon = '';
+        switch(type) {
+            case 'spelling':
+                title = 'Spelling Practice';
+                icon = 'fa-pen-to-square';
+                break;
+            case 'sentences':
+                title = 'Fill-in Sentences';
+                icon = 'fa-align-left';
+                break;
+        }
+
+        display.innerHTML = `
+            <div style="text-align: center; padding: 40px;">
+                <h3><i class="fa-solid ${icon}"></i> ${title}</h3>
+                <p>Ready to practice with ${words.length} words?</p>
+                <button class="btn-primary" style="margin-top: 20px; font-size: 1.2rem; padding: 15px 30px;" 
+                        onclick="VocabModule.launchPractice('${type}')">
+                    Start ${title} <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                </button>
+                <p style="margin-top: 15px; font-size: 0.9rem; color: #666;">Opens in a new immersive window</p>
+            </div>
+        `;
     },
 
     launchPractice(mode, face) {

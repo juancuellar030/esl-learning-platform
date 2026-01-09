@@ -17,6 +17,12 @@ const PracticeModule = {
 
         // Load words
         this.words = window.vocabularyBank.filter(w => ids.includes(w.id));
+
+        // Filter for multi-word phrases if in unjumble mode
+        if (this.config.mode === 'unjumble') {
+            this.words = this.words.filter(w => w.word.trim().includes(' '));
+        }
+
         this.difficultWords = []; // Reset difficult words on init
         
         if (this.words.length === 0) {
@@ -77,6 +83,9 @@ const PracticeModule = {
                 break;
             case 'unjumble':
                 this.renderUnjumble(area);
+                break;
+            case 'crossword':
+                this.renderCrossword(area);
                 break;
             default:
                 area.innerHTML = `<p>Mode ${this.config.mode} not implemented yet.</p>`;
@@ -814,6 +823,327 @@ const PracticeModule = {
                 w.style.backgroundColor = '#f8d7da';
                 w.style.borderColor = '#dc3545';
             });
+        }
+    },
+
+    // --- CROSSWORD LOGIC ---
+    crosswordData: {
+        grid: [],
+        size: 15,
+        placedWords: [],
+        clues: { across: [], down: [] }
+    },
+
+    renderCrossword(container) {
+        this.generateCrossword();
+        
+        container.innerHTML = `
+            <div class="crossword-container">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <h2 style="color: var(--indigo-velvet);">Crossword Challenge</h2>
+                    <p style="color: #666;">Fill in the words based on the clues!</p>
+                </div>
+
+                <div class="crossword-layout">
+                    <div class="crossword-grid-wrapper">
+                        <div class="crossword-grid" style="grid-template-columns: repeat(${this.crosswordData.size}, 1fr)">
+                            ${this.renderCWGrid()}
+                        </div>
+                    </div>
+                    
+                    <div class="crossword-clues">
+                        <div class="clue-group">
+                            <h3><i class="fa-solid fa-arrows-left-right"></i> Across</h3>
+                            <div id="clues-across">
+                                ${this.renderCWClueList('across')}
+                            </div>
+                        </div>
+                        <div class="clue-group" style="margin-top: 30px;">
+                            <h3><i class="fa-solid fa-arrows-up-down"></i> Down</h3>
+                            <div id="clues-down">
+                                ${this.renderCWClueList('down')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="text-align: center; margin-top: 20px;">
+                    <button class="btn-primary" onclick="PracticeModule.checkCrossword()">Check Crossword</button>
+                    <button class="btn-secondary" onclick="window.location.reload()">Restart</button>
+                </div>
+            </div>
+        `;
+
+        this.setupCWEvents();
+    },
+
+    generateCrossword() {
+        const size = 15;
+        this.crosswordData.size = size;
+        this.crosswordData.grid = Array(size).fill().map(() => Array(size).fill({ char: null, isSpace: false, number: null }));
+        this.crosswordData.placedWords = [];
+        this.crosswordData.clues = { across: [], down: [] };
+
+        // Sort words by length descending
+        const sortedWords = [...this.words].sort((a, b) => b.word.length - a.word.length);
+        
+        // Place first word in middle
+        const firstWord = sortedWords[0];
+        const startR = Math.floor(size / 2);
+        const startC = Math.floor((size - firstWord.word.length) / 2);
+        this.placeCWWord(firstWord, startR, startC, 'across', 1);
+
+        // Try to place other words
+        let wordCounter = 2;
+        for (let i = 1; i < sortedWords.length; i++) {
+            const wordObj = sortedWords[i];
+            const cleanWord = wordObj.word.toUpperCase();
+            let placedSuccessfully = false;
+
+            // Try to intersect with already placed words
+            for (const placed of this.crosswordData.placedWords) {
+                for (let idx = 0; idx < cleanWord.length; idx++) {
+                    const char = cleanWord[idx];
+                    if (char === ' ') continue;
+
+                    for (let j = 0; j < placed.word.length; j++) {
+                        if (char === placed.word[j]) {
+                            // Possible intersection
+                            const newDir = placed.dir === 'across' ? 'down' : 'across';
+                            const newR = newDir === 'down' ? placed.r - idx : placed.r + j;
+                            const newC = newDir === 'down' ? placed.c + j : placed.c - idx;
+
+                            if (this.canPlaceCWWord(cleanWord, newR, newC, newDir)) {
+                                this.placeCWWord(wordObj, newR, newC, newDir, wordCounter++);
+                                placedSuccessfully = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (placedSuccessfully) break;
+                }
+                if (placedSuccessfully) break;
+            }
+        }
+    },
+
+    canPlaceCWWord(word, r, c, dir) {
+        const size = this.crosswordData.size;
+        if (r < 0 || c < 0 || r >= size || c >= size) return false;
+
+        if (dir === 'across') {
+            if (c + word.length > size) return false;
+            for (let i = -1; i <= word.length; i++) {
+                for (let j = -1; j <= 1; j++) {
+                    const rr = r + j;
+                    const cc = c + i;
+                    if (rr < 0 || rr >= size || cc < 0 || cc >= size) continue;
+                    
+                    const cell = this.crosswordData.grid[rr][cc];
+                    if (j === 0 && i >= 0 && i < word.length) {
+                        if (cell.char && cell.char !== word[i]) return false;
+                    } else {
+                        if (cell.char) return false;
+                    }
+                }
+            }
+        } else {
+            if (r + word.length > size) return false;
+            for (let i = -1; i <= word.length; i++) {
+                for (let j = -1; j <= 1; j++) {
+                    const rr = r + i;
+                    const cc = c + j;
+                    if (rr < 0 || rr >= size || cc < 0 || cc >= size) continue;
+
+                    const cell = this.crosswordData.grid[rr][cc];
+                    if (j === 0 && i >= 0 && i < word.length) {
+                        if (cell.char && cell.char !== word[i]) return false;
+                    } else {
+                        if (cell.char) return false;
+                    }
+                }
+            }
+        }
+        return true;
+    },
+
+    placeCWWord(wordObj, r, c, dir, number) {
+        const word = wordObj.word.toUpperCase();
+        for (let i = 0; i < word.length; i++) {
+            const rr = dir === 'across' ? r : r + i;
+            const cc = dir === 'across' ? c + i : c;
+            
+            const cell = { ...this.crosswordData.grid[rr][cc] };
+            cell.char = word[i];
+            if (word[i] === ' ') cell.isSpace = true;
+            if (i === 0) cell.number = number;
+            
+            this.crosswordData.grid[rr][cc] = cell;
+        }
+
+        this.crosswordData.placedWords.push({
+            word: word,
+            r: r,
+            c: c,
+            dir: dir,
+            number: number,
+            obj: wordObj
+        });
+
+        this.crosswordData.clues[dir].push({
+            number: number,
+            word: word,
+            obj: wordObj
+        });
+    },
+
+    renderCWGrid() {
+        let html = '';
+        for (let r = 0; r < this.crosswordData.size; r++) {
+            for (let c = 0; c < this.crosswordData.size; c++) {
+                const cell = this.crosswordData.grid[r][c];
+                if (cell.char) {
+                    const isSpace = cell.char === ' ';
+                    html += `
+                        <div class="cw-cell active ${isSpace ? 'space' : ''}" data-r="${r}" data-c="${c}">
+                            ${cell.number ? `<span class="cw-number">${cell.number}</span>` : ''}
+                            ${!isSpace ? `<input type="text" class="cw-input" maxlength="1" data-r="${r}" data-c="${c}" data-answer="${cell.char}">` : ''}
+                        </div>
+                    `;
+                } else {
+                    html += `<div class="cw-cell"></div>`;
+                }
+            }
+        }
+        return html;
+    },
+
+    renderCWClueList(dir) {
+        const clues = this.crosswordData.clues[dir].sort((a, b) => a.number - b.number);
+        if (clues.length === 0) return '<p style="color: #999; padding: 10px;">None</p>';
+
+        return clues.map(clue => {
+            let content = '';
+            switch(this.config.face) {
+                case 'easy':
+                    const imgPath = `assets/images/vocabulary/${clue.obj.word.toLowerCase()}.png`;
+                    content = `<img src="${imgPath}" class="clue-visual" onerror="this.src='assets/images/thumbnails/flashcards.svg'">`;
+                    break;
+                case 'text':
+                    content = `<span>${clue.obj.spanish}</span>`;
+                    break;
+                case 'audio':
+                    content = `<button class="clue-audio-btn" onclick="PracticeModule.playSound('${clue.obj.word}')"><i class="fa-solid fa-volume-high"></i></button>`;
+                    break;
+                default:
+                    content = `<span>${clue.obj.word}</span>`;
+            }
+
+            return `
+                <div class="clue-item" data-number="${clue.number}" data-dir="${dir}">
+                    <strong>${clue.number}.</strong>
+                    ${content}
+                </div>
+            `;
+        }).join('');
+    },
+
+    setupCWEvents() {
+        const inputs = document.querySelectorAll('.cw-input');
+        
+        inputs.forEach(input => {
+            input.addEventListener('input', (e) => {
+                if (e.target.value) {
+                    this.moveCWFocus(e.target, 1);
+                }
+            });
+
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && !e.target.value) {
+                    this.moveCWFocus(e.target, -1);
+                } else if (e.key === 'ArrowRight') {
+                    this.moveCWFocus(e.target, 1, 'across');
+                } else if (e.key === 'ArrowLeft') {
+                    this.moveCWFocus(e.target, -1, 'across');
+                } else if (e.key === 'ArrowDown') {
+                    this.moveCWFocus(e.target, 1, 'down');
+                } else if (e.key === 'ArrowUp') {
+                    this.moveCWFocus(e.target, -1, 'down');
+                }
+            });
+
+            input.addEventListener('focus', () => {
+                document.querySelectorAll('.clue-item').forEach(el => el.classList.remove('active'));
+                const r = parseInt(input.dataset.r);
+                const c = parseInt(input.dataset.c);
+                
+                const words = this.crosswordData.placedWords.filter(pw => {
+                    if (pw.dir === 'across') {
+                        return pw.r === r && c >= pw.c && c < pw.c + pw.word.length;
+                    } else {
+                        return pw.c === c && r >= pw.r && r < pw.r + pw.word.length;
+                    }
+                });
+
+                words.forEach(w => {
+                    const clueEl = document.querySelector(`.clue-item[data-number="${w.number}"][data-dir="${w.dir}"]`);
+                    if (clueEl) clueEl.classList.add('active');
+                });
+            });
+        });
+    },
+
+    moveCWFocus(current, delta, forceDir = null) {
+        const r = parseInt(current.dataset.r);
+        const c = parseInt(current.dataset.c);
+        
+        let dir = forceDir;
+        if (!dir) {
+            const across = this.crosswordData.placedWords.some(pw => pw.dir === 'across' && pw.r === r && c >= pw.c && c < pw.c + pw.word.length);
+            dir = across ? 'across' : 'down';
+        }
+
+        let nextR = r;
+        let nextC = c;
+        
+        if (dir === 'across') nextC += delta;
+        else nextR += delta;
+
+        const cell = this.crosswordData.grid[nextR] ? this.crosswordData.grid[nextR][nextC] : null;
+        if (cell && cell.isSpace) {
+            if (dir === 'across') nextC += delta;
+            else nextR += delta;
+        }
+
+        const nextInput = document.querySelector(`.cw-input[data-r="${nextR}"][data-c="${nextC}"]`);
+        if (nextInput) nextInput.focus();
+    },
+
+    checkCrossword() {
+        const inputs = document.querySelectorAll('.cw-input');
+        let allCorrect = true;
+
+        inputs.forEach(input => {
+            const val = input.value.toUpperCase();
+            const ans = input.dataset.answer;
+
+            if (val === ans) {
+                input.parentElement.classList.add('correct');
+                input.classList.remove('wrong');
+            } else if (val !== '') {
+                input.value = '';
+                input.classList.add('wrong');
+                allCorrect = false;
+            } else {
+                allCorrect = false;
+            }
+        });
+
+        if (allCorrect) {
+            setTimeout(() => {
+                alert('🎉 Amazing! You completed the crossword!');
+                this.showSummary();
+            }, 500);
         }
     },
 
