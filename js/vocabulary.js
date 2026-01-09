@@ -26,6 +26,7 @@ const VocabModule = {
         // Show categories by default initially
         this.renderCategories();
         this.setupEventListeners();
+        this.updateExerciseCards('all');
     },
     
     renderCategories() {
@@ -131,6 +132,20 @@ const VocabModule = {
 
         // Add Color Wheel button if category is colors
         this.updateSpecialButtons(category);
+
+        // Show/hide Quiz exercise card based on category
+        this.updateExerciseCards(category);
+    },
+
+    updateExerciseCards(category) {
+        const quizCard = document.querySelector('.exercise-card[data-type="quiz"]');
+        if (quizCard) {
+            if (category === 'classroom-language') {
+                quizCard.style.display = 'flex';
+            } else {
+                quizCard.style.display = 'none';
+            }
+        }
     },
 
     updateSpecialButtons(category) {
@@ -301,6 +316,21 @@ const VocabModule = {
                     </div>
                 `;
                 return;
+        }
+
+        if (type === 'quiz') {
+            display.innerHTML = `
+                <div class="exercise-setup-panel">
+                    <h3><i class="fa-solid fa-circle-question" style="color: var(--medium-slate-blue); margin-right: 10px;"></i> Expressions Quiz</h3>
+                    <p>Test your knowledge of classroom expressions!</p>
+                    <p style="font-size: 0.9rem; color: #666; margin-bottom: 20px;">Choose the best word to complete each sentence.</p>
+                    <button class="btn-primary" style="font-size: 1.2rem; padding: 15px 30px;" 
+                            onclick="VocabModule.launchPractice('quiz')">
+                        Start Quiz <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                    </button>
+                </div>
+            `;
+            return;
         }
 
         // For other modes, simple launch button

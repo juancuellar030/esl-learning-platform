@@ -18,6 +18,11 @@ const PracticeModule = {
         // Load words
         this.words = window.vocabularyBank.filter(w => ids.includes(w.id));
 
+        // Special handling for quiz mode
+        if (this.config.mode === 'quiz') {
+            this.words = window.classroomLanguageQuiz;
+        }
+
         // Filter for multi-word phrases if in unjumble mode
         if (this.config.mode === 'unjumble') {
             this.words = this.words.filter(w => w.word.trim().includes(' '));
@@ -86,6 +91,9 @@ const PracticeModule = {
                 break;
             case 'crossword':
                 this.renderCrossword(area);
+                break;
+            case 'quiz':
+                this.renderQuiz(area);
                 break;
             default:
                 area.innerHTML = `<p>Mode ${this.config.mode} not implemented yet.</p>`;
@@ -1120,31 +1128,126 @@ const PracticeModule = {
     },
 
     checkCrossword() {
-        const inputs = document.querySelectorAll('.cw-input');
-        let allCorrect = true;
+        // ... (existing code)
+    },
 
-        inputs.forEach(input => {
-            const val = input.value.toUpperCase();
-            const ans = input.dataset.answer;
-
-            if (val === ans) {
-                input.parentElement.classList.add('correct');
-                input.classList.remove('wrong');
-            } else if (val !== '') {
-                input.value = '';
-                input.classList.add('wrong');
-                allCorrect = false;
-            } else {
-                allCorrect = false;
-            }
-        });
-
-        if (allCorrect) {
-            setTimeout(() => {
-                alert('🎉 Amazing! You completed the crossword!');
-                this.showSummary();
-            }, 500);
+    // --- QUIZ LOGIC ---
+    renderQuiz(container) {
+        const question = this.words[this.currentIndex];
+        const sentenceParts = question.sentence.split('____');
+        const progress = ((this.currentIndex + 1) / this.words.length) * 100;
+        
+        // Shuffle options if not already shuffled for this question
+        if (!question._shuffledOptions) {
+            question._shuffledOptions = [...question.options].sort(() => Math.random() - 0.5);
         }
+
+        container.innerHTML = `
+            <div class="quiz-container">
+                <div class="quiz-progress-container">
+                    <div class="quiz-progress-text">
+                        <span>Question ${this.currentIndex + 1} of ${this.words.length}</span>
+                        <span>${Math.round(progress)}% Complete</span>
+                    </div>
+                    <div class="quiz-progress-bar-bg">
+                        <div class="quiz-progress-bar-fill" style="width: ${progress}%"></div>
+                    </div>
+                </div>
+
+                <div class="quiz-question-container">
+                    <div class="quiz-sentence">
+                        ${sentenceParts[0]}<span class="blank" id="quiz-blank">____</span>${sentenceParts[1] || ''}
+                    </div>
+                </div>
+
+                <div id="quiz-hint-area" style="margin-bottom: 20px;">
+                    <button class="quiz-hint-btn" id="quiz-hint-btn" onclick="PracticeModule.toggleQuizHint()">
+                        <i class="fa-solid fa-lightbulb"></i> Need a hint?
+                    </button>
+                    <div id="quiz-hint-text" class="quiz-hint-text" style="display: none;">
+                        <strong>Hint:</strong> ${question.hint}
+                    </div>
+                </div>
+
+                <div class="quiz-options">
+                    ${question._shuffledOptions.map((option, index) => `
+                        <div class="quiz-option" 
+                             style="animation-delay: ${0.1 + (index * 0.1)}s"
+                             onclick="PracticeModule.checkQuizAnswer(this, '${option}')">
+                            ${option}
+                        </div>
+                    `).join('')}
+                </div>
+
+                <div id="quiz-feedback" style="min-height: 50px;"></div>
+            </div>
+        `;
+    },
+
+    checkQuizAnswer(optionEl, selectedOption) {
+        if (document.querySelector('.quiz-option.correct')) return;
+
+        const question = this.words[this.currentIndex];
+        const feedback = document.getElementById('quiz-feedback');
+        const blank = document.getElementById('quiz-blank');
+
+        if (selectedOption === question.answer) {
+            // Correct Answer
+            optionEl.classList.add('correct');
+            blank.textContent = question.answer;
+            blank.style.color = '#2ECC71';
+            blank.style.borderBottomStyle = 'solid';
+            
+            // Disable other options
+            document.querySelectorAll('.quiz-option').forEach(opt => {
+                if (opt !== optionEl) opt.style.opacity = '0.5';
+                opt.style.pointerEvents = 'none';
+            });
+
+            feedback.innerHTML = `
+                <div style="color: #2ECC71; font-weight: 800; font-size: 1.5rem; animation: bounce 0.5s ease;">
+                    <i class="fa-solid fa-circle-check"></i> Amazing! That's correct!
+                </div>
+            `;
+            
+            this.playSound(question.answer);
+
+            setTimeout(() => {
+                // Remove shuffled state for next session
+                delete question._shuffledOptions;
+                
+                if (this.currentIndex < this.words.length - 1) {
+                    this.currentIndex++;
+                    this.render();
+                } else {
+                    this.showSummary();
+                }
+            }, 1800);
+        } else {
+            // Wrong Answer
+            optionEl.classList.add('wrong');
+            feedback.innerHTML = `
+                <div style="color: #E74C3C; font-weight: 700; font-size: 1.2rem; animation: shake 0.5s ease;">
+                    <i class="fa-solid fa-circle-xmark"></i> Not quite, try another one!
+                </div>
+            `;
+            
+            setTimeout(() => {
+                optionEl.classList.remove('wrong');
+                feedback.innerHTML = '';
+            }, 1200);
+        }
+    },
+
+    toggleQuizHint() {
+        const hintText = document.getElementById('quiz-hint-text');
+        const hintBtn = document.getElementById('quiz-hint-btn');
+        const isHidden = hintText.style.display === 'none';
+        
+        hintText.style.display = isHidden ? 'block' : 'none';
+        hintBtn.innerHTML = isHidden ? 
+            '<i class="fa-solid fa-eye-slash"></i> Hide hint' : 
+            '<i class="fa-solid fa-lightbulb"></i> Need a hint?';
     },
 
     // --- SHARED ---
