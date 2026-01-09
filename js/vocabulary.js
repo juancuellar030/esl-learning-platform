@@ -17,6 +17,7 @@ const VocabModule = {
         'places': { label: 'Places', icon: 'fa-solid fa-map-location-dot' },
         'transport': { label: 'Transport', icon: 'fa-solid fa-car' },
         'arts': { label: 'Arts & Crafts', icon: 'fa-solid fa-palette' },
+        'classroom-language': { label: 'Classroom Language', icon: 'fa-solid fa-chalkboard-user' },
         'grammar-words': { label: 'Grammar & Questions', icon: 'fa-solid fa-question' },
         'time': { label: 'Calendar & Time', icon: 'fa-solid fa-calendar-days' }
     },
@@ -127,6 +128,34 @@ const VocabModule = {
         }
 
         this.renderWords(category, level, search, 'all');
+
+        // Add Color Wheel button if category is colors
+        this.updateSpecialButtons(category);
+    },
+
+    updateSpecialButtons(category) {
+        const container = document.getElementById('special-actions-container') || this.createSpecialActionsContainer();
+        container.innerHTML = '';
+        
+        if (category === 'colors') {
+            const btn = document.createElement('button');
+            btn.className = 'btn-primary';
+            btn.style.backgroundColor = '#f39c12';
+            btn.innerHTML = '<i class="fa-solid fa-circle-dot"></i> Interactive RYB Color Wheel';
+            btn.onclick = () => window.open('color-wheel.html', '_blank');
+            container.appendChild(btn);
+        }
+    },
+
+    createSpecialActionsContainer() {
+        const container = document.createElement('div');
+        container.id = 'special-actions-container';
+        container.style.margin = '20px 0';
+        container.style.display = 'flex';
+        container.style.justifyContent = 'center';
+        const grid = document.getElementById('word-grid');
+        grid.parentNode.insertBefore(container, grid);
+        return container;
     },
 
     toggleWordSelection(card) {
@@ -210,35 +239,24 @@ const VocabModule = {
             return;
         }
 
-        // For other modes, simple launch button
-        let title = '';
-        let icon = '';
-        switch(type) {
-            case 'matching':
-                title = 'Matching Game';
-                icon = 'fa-puzzle-piece';
-                break;
-            case 'spelling':
-                title = 'Spelling Practice';
-                icon = 'fa-pen-to-square';
-                break;
-            case 'sentences':
-                title = 'Fill-in Sentences';
-                icon = 'fa-align-left';
-                break;
+        if (type === 'matching') {
+            display.innerHTML = `
+                <div class="exercise-setup-panel">
+                    <h3><i class="fa-solid fa-puzzle-piece" style="color: var(--medium-slate-blue); margin-right: 10px;"></i> Matching Game Mode:</h3>
+                    <div class="setup-options">
+                        <button class="btn-secondary" onclick="VocabModule.launchPractice('matching', 'image_word')">
+                            <i class="fa-regular fa-image"></i> Image vs Word
+                        </button>
+                        <button class="btn-secondary" onclick="VocabModule.launchPractice('matching', 'en_es')">
+                            <i class="fa-solid fa-language"></i> English vs Spanish
+                        </button>
+                    </div>
+                </div>
+            `;
+            return;
         }
 
-        display.innerHTML = `
-            <div style="text-align: center; padding: 40px;">
-                <h3><i class="fa-solid ${icon}"></i> ${title}</h3>
-                <p>Ready to practice with ${words.length} words?</p>
-                <button class="btn-primary" style="margin-top: 20px; font-size: 1.2rem; padding: 15px 30px;" 
-                        onclick="VocabModule.launchPractice('${type}')">
-                    Start ${title} <i class="fa-solid fa-arrow-up-right-from-square"></i>
-                </button>
-                <p style="margin-top: 15px; font-size: 0.9rem; color: #666;">Opens in a new immersive window</p>
-            </div>
-        `;
+        // For other modes, simple launch button
     },
 
     launchPractice(mode, face) {

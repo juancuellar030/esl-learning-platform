@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive RYB Color Wheel</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Reddit+Sans:wght@300;400;500;600;700;800&family=Google+Sans+Flex:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --indigo-velvet: #3d348b;
+            --medium-slate-blue: #7678ed;
+            --amber-flame: #f7b801;
+            --tiger-orange: #f18701;
+            --cayenne-red: #f35b04;
+            --primary-bg: #f8f9fa;
+        }
+
+        body {
+            font-family: 'Reddit Sans', 'Google Sans Flex', sans-serif;
+            background-color: var(--medium-slate-blue);
+            color: #333;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+            padding: 20px;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 50px;
+            padding: 60px 40px 40px;
+            background: white;
+            border-radius: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            position: relative;
+            max-width: 900px;
+            width: 100%;
+        }
+
+        h1 {
+            position: absolute;
+            top: 25px;
+            width: 100%;
+            text-align: center;
+            color: var(--indigo-velvet);
+            margin: 0;
+            font-size: 2.2rem;
+            font-weight: 800;
+        }
+
+        .wheel-container {
+            position: relative;
+            width: 420px;
+            height: 420px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #color-wheel {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.15));
+        }
+
+        .segment {
+            cursor: pointer;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.3s, opacity 0.3s;
+            stroke: white;
+            stroke-width: 1.5;
+        }
+
+        .segment:hover {
+            transform: scale(1.08);
+            filter: brightness(1.1) saturate(1.2);
+            z-index: 10;
+        }
+
+        .segment.dimmed {
+            opacity: 0.15;
+            filter: grayscale(0.8) blur(1px);
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 240px;
+        }
+
+        .control-btn {
+            padding: 18px 25px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border: 3px solid var(--indigo-velvet);
+            background: white;
+            color: var(--indigo-velvet);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-align: center;
+            box-shadow: 0 4px 0 var(--indigo-velvet);
+        }
+
+        .control-btn:hover {
+            background: var(--indigo-velvet);
+            color: white;
+            transform: translateY(-4px);
+            box-shadow: 0 8px 0 #2a2463;
+        }
+
+        .control-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 0 0 var(--indigo-velvet);
+        }
+
+        .indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 160px;
+            height: 160px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-shadow: inset 0 0 25px rgba(0,0,0,0.08), 0 5px 15px rgba(0,0,0,0.1);
+            z-index: 5;
+            text-align: center;
+            padding: 15px;
+            pointer-events: none;
+            border: 4px solid #f0f4ff;
+        }
+
+        #color-name {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--indigo-velvet);
+            text-transform: capitalize;
+            line-height: 1.2;
+        }
+
+        #color-type {
+            font-size: 0.9rem;
+            color: var(--medium-slate-blue);
+            margin-top: 8px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .animation-spin {
+            animation: spin 30s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .back-link {
+            position: absolute;
+            top: -50px;
+            left: 0;
+            color: white;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .back-link:hover {
+            transform: translateX(-5px);
+            opacity: 0.8;
+        }
+
+        @media (max-width: 850px) {
+            .container {
+                flex-direction: column;
+                padding-top: 80px;
+                gap: 30px;
+            }
+            .wheel-container {
+                width: 320px;
+                height: 320px;
+            }
+            .controls {
+                width: 100%;
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .control-btn {
+                padding: 12px 20px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div style="position: relative; width: 100%; max-width: 900px;">
+        <a href="#" class="back-link" onclick="window.close(); return false;"><i class="fa-solid fa-circle-arrow-left"></i> Back to Vocabulary</a>
+        
+        <div class="container">
+            <h1>Interactive RYB Color Wheel</h1>
+            
+            <div class="wheel-container">
+                <svg id="color-wheel" viewBox="0 0 100 100">
+                    <!-- Segments will be generated by JS -->
+                </svg>
+                <div class="indicator">
+                    <div id="color-name">Hover a color</div>
+                    <div id="color-type"></div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="control-btn" data-type="primary">Primary Colors</button>
+                <button class="control-btn" data-type="secondary">Secondary Colors</button>
+                <button class="control-btn" data-type="tertiary">Tertiary Colors</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const colors = [
+            { name: 'Red', type: 'primary', color: '#E02121' },
+            { name: 'Vermilion', type: 'tertiary', color: '#F46036' },
+            { name: 'Orange', type: 'secondary', color: '#FF8C00' },
+            { name: 'Amber', type: 'tertiary', color: '#FFC000' },
+            { name: 'Yellow', type: 'primary', color: '#FFFB00' },
+            { name: 'Chartreuse', type: 'tertiary', color: '#9ACD32' },
+            { name: 'Green', type: 'secondary', color: '#008000' },
+            { name: 'Teal', type: 'tertiary', color: '#008080' },
+            { name: 'Blue', type: 'primary', color: '#0000FF' },
+            { name: 'Violet', type: 'tertiary', color: '#8A2BE2' },
+            { name: 'Purple', type: 'secondary', color: '#4B0082' },
+            { name: 'Magenta', type: 'tertiary', color: '#C71585' }
+        ];
+
+        const svg = document.getElementById('color-wheel');
+        const nameDisplay = document.getElementById('color-name');
+        const typeDisplay = document.getElementById('color-type');
+
+        function createWheel() {
+            const numSegments = colors.length;
+            const angleStep = 360 / numSegments;
+            const centerX = 50;
+            const centerY = 50;
+            const outerRadius = 45;
+            const innerRadius = 20;
+
+            colors.forEach((c, i) => {
+                const startAngle = i * angleStep;
+                const endAngle = (i + 1) * angleStep;
+                
+                const pathData = describeArc(centerX, centerY, innerRadius, outerRadius, startAngle, endAngle);
+                
+                const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                path.setAttribute("d", pathData);
+                path.setAttribute("fill", c.color);
+                path.setAttribute("class", "segment");
+                path.setAttribute("data-name", c.name);
+                path.setAttribute("data-type", c.type);
+                
+                path.addEventListener('mouseenter', () => {
+                    nameDisplay.textContent = c.name;
+                    typeDisplay.textContent = c.type.charAt(0).toUpperCase() + c.type.slice(1);
+                });
+
+                path.addEventListener('mouseleave', () => {
+                    nameDisplay.textContent = "Hover a color";
+                    typeDisplay.textContent = "";
+                });
+
+                svg.appendChild(path);
+            });
+        }
+
+        function polarToCartesian(centerX, centerY, radius, angleInDegrees) {
+            const angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;
+            return {
+                x: centerX + (radius * Math.cos(angleInRadians)),
+                y: centerY + (radius * Math.sin(angleInRadians))
+            };
+        }
+
+        function describeArc(x, y, innerRadius, outerRadius, startAngle, endAngle) {
+            const start = polarToCartesian(x, y, outerRadius, endAngle);
+            const end = polarToCartesian(x, y, outerRadius, startAngle);
+            const startInner = polarToCartesian(x, y, innerRadius, endAngle);
+            const endInner = polarToCartesian(x, y, innerRadius, startAngle);
+
+            const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
+
+            const d = [
+                "M", start.x, start.y,
+                "A", outerRadius, outerRadius, 0, largeArcFlag, 0, end.x, end.y,
+                "L", endInner.x, endInner.y,
+                "A", innerRadius, innerRadius, 0, largeArcFlag, 1, startInner.x, startInner.y,
+                "Z"
+            ].join(" ");
+
+            return d;
+        }
+
+        createWheel();
+
+        // Control buttons
+        document.querySelectorAll('.control-btn').forEach(btn => {
+            btn.addEventListener('mouseenter', () => {
+                const type = btn.dataset.type;
+                document.querySelectorAll('.segment').forEach(seg => {
+                    if (seg.dataset.type !== type) {
+                        seg.classList.add('dimmed');
+                    } else {
+                        seg.classList.remove('dimmed');
+                    }
+                });
+            });
+
+            btn.addEventListener('mouseleave', () => {
+                document.querySelectorAll('.segment').forEach(seg => {
+                    seg.classList.remove('dimmed');
+                });
+            });
+        });
+
+        // Add slow rotation animation
+        svg.classList.add('animation-spin');
+        
+        // Pause animation on hover
+        svg.addEventListener('mouseenter', () => {
+            svg.style.animationPlayState = 'paused';
+        });
+        svg.addEventListener('mouseleave', () => {
+            svg.style.animationPlayState = 'running';
+        });
+    </script>
+</body>
+</html>

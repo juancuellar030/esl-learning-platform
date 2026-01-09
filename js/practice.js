@@ -75,6 +75,9 @@ const PracticeModule = {
             case 'wordsearch':
                 this.renderWordsearch(area);
                 break;
+            case 'unjumble':
+                this.renderUnjumble(area);
+                break;
             default:
                 area.innerHTML = `<p>Mode ${this.config.mode} not implemented yet.</p>`;
         }
@@ -90,12 +93,19 @@ const PracticeModule = {
         const wordHtml = `<div class="card-content-word">${word.word}</div>`;
         const imgPath = `assets/images/vocabulary/${word.word.toLowerCase()}.png`;
         
-        const imageHtml = `
+        let visualHtml = `
             <img src="${imgPath}" class="card-content-image" 
                  onerror="this.style.display='none'; this.nextElementSibling.style.display='block'" 
                  alt="${word.word}">
-            <div style="display:none" class="card-content-icon"><i class="${word.icon}"></i></div>
         `;
+
+        if (word.category === 'colors') {
+            visualHtml = `
+                <div class="card-content-color-circle" style="background-color: ${this.getColorHex(word.word)}"></div>
+            `;
+        } else {
+            visualHtml += `<div style="display:none" class="card-content-icon"><i class="${word.icon}"></i></div>`;
+        }
         
         const soundBtnSmall = `<button class="sound-btn-small" onclick="event.stopPropagation(); PracticeModule.playSound('${word.word}')"><i class="fa-solid fa-volume-high"></i></button>`;
         const soundBtnLarge = `<button class="sound-btn-large" onclick="event.stopPropagation(); PracticeModule.playSound('${word.word}')"><i class="fa-solid fa-volume-high"></i></button>`;
@@ -103,15 +113,15 @@ const PracticeModule = {
         switch(this.config.face) {
             case 'word_first':
                 frontContent = wordHtml;
-                backContent = imageHtml + soundBtnSmall;
+                backContent = visualHtml + soundBtnSmall;
                 break;
             case 'image_first':
-                frontContent = imageHtml;
+                frontContent = visualHtml;
                 backContent = wordHtml + soundBtnSmall;
                 break;
             case 'sound_first':
                 frontContent = soundBtnLarge;
-                backContent = imageHtml + wordHtml;
+                backContent = visualHtml + wordHtml;
                 break;
         }
 
@@ -171,26 +181,39 @@ const PracticeModule = {
     // --- MATCHING GAME LOGIC ---
     renderMatching(container) {
         this.matches = 0;
-        // Limit to 6 pairs for better layout (or use all if small)
+        // Limit to 8 pairs for better layout
         const gameWords = this.words.slice(0, 8); 
-        
-        // Create left column (Images) and right column (Words)
-        // We will shuffle both independently to create the challenge
         
         const leftItems = [...gameWords].sort(() => Math.random() - 0.5);
         const rightItems = [...gameWords].sort(() => Math.random() - 0.5);
 
+        const isEnEs = this.config.face === 'en_es';
+        const title = isEnEs ? 'Match English to Spanish' : 'Match the Image to the Word';
+
         container.innerHTML = `
             <div style="display: flex; flex-direction: column; align-items: center; width: 100%;">
-                <h2 style="margin-bottom: 20px;">Match the Image to the Word</h2>
+                <h2 style="margin-bottom: 20px;">${title}</h2>
                 <div class="matching-game">
-                    <div class="matching-column" id="col-images">
+                    <div class="matching-column" id="col-left">
                         ${leftItems.map(w => {
-                            const imgPath = `assets/images/vocabulary/${w.word.toLowerCase()}.png`;
+                            let content = '';
+                            if (isEnEs) {
+                                content = `<span class="match-card-word">${w.word}</span>`;
+                            } else {
+                                const imgPath = `assets/images/vocabulary/${w.word.toLowerCase()}.png`;
+                                let visual = `
+                                    <img src="${imgPath}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+                                    <div style="display:none; font-size: 2rem; color: var(--hot-pink);"><i class="${w.icon}"></i></div>
+                                `;
+                                if (w.category === 'colors') {
+                                    visual = `<div class="match-card-color-circle" style="background-color: ${this.getColorHex(w.word)}"></div>`;
+                                }
+                                content = visual;
+                            }
+                            
                             return `
-                            <div class="match-card" data-id="${w.id}" data-type="image" onclick="PracticeModule.handleMatchClick(this)">
-                                <img src="${imgPath}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
-                                <div style="display:none; font-size: 2rem; color: var(--hot-pink);"><i class="${w.icon}"></i></div>
+                            <div class="match-card" data-id="${w.id}" data-type="left" onclick="PracticeModule.handleMatchClick(this)">
+                                ${content}
                                 <button class="sound-btn-small" style="width: 30px; height: 30px; font-size: 0.8rem; margin-left: 10px;" 
                                         onclick="event.stopPropagation(); PracticeModule.playSound('${w.word}')">
                                     <i class="fa-solid fa-volume-high"></i>
@@ -198,10 +221,10 @@ const PracticeModule = {
                             </div>`;
                         }).join('')}
                     </div>
-                    <div class="matching-column" id="col-words">
+                    <div class="matching-column" id="col-right">
                         ${rightItems.map(w => `
-                            <div class="match-card" data-id="${w.id}" data-type="word" onclick="PracticeModule.handleMatchClick(this)">
-                                <span class="match-card-word">${w.word}</span>
+                            <div class="match-card" data-id="${w.id}" data-type="right" onclick="PracticeModule.handleMatchClick(this)">
+                                <span class="match-card-word">${isEnEs ? w.spanish : w.word}</span>
                             </div>
                         `).join('')}
                     </div>
@@ -220,27 +243,26 @@ const PracticeModule = {
         card.classList.add('selected');
 
         // Check for match
-        const selectedImage = document.querySelector('.match-card[data-type="image"].selected');
-        const selectedWord = document.querySelector('.match-card[data-type="word"].selected');
+        const selectedLeft = document.querySelector('.match-card[data-type="left"].selected');
+        const selectedRight = document.querySelector('.match-card[data-type="right"].selected');
 
-        if (selectedImage && selectedWord) {
-            if (selectedImage.dataset.id === selectedWord.dataset.id) {
+        if (selectedLeft && selectedRight) {
+            if (selectedLeft.dataset.id === selectedRight.dataset.id) {
                 // Match!
-                selectedImage.classList.remove('selected');
-                selectedWord.classList.remove('selected');
-                selectedImage.classList.add('correct');
-                selectedWord.classList.add('correct');
+                selectedLeft.classList.remove('selected');
+                selectedRight.classList.remove('selected');
+                selectedLeft.classList.add('correct');
+                selectedRight.classList.add('correct');
                 
-                // Play success sound/effect?
                 this.matches++;
-                if (this.matches === document.querySelectorAll('.match-card[data-type="image"]').length) {
+                if (this.matches === document.querySelectorAll('.match-card[data-type="left"]').length) {
                     setTimeout(() => alert('🎉 All matched! Great job!'), 500);
                 }
             } else {
                 // No match
                 setTimeout(() => {
-                    selectedImage.classList.remove('selected');
-                    selectedWord.classList.remove('selected');
+                    selectedLeft.classList.remove('selected');
+                    selectedRight.classList.remove('selected');
                 }, 500);
             }
         }
@@ -250,12 +272,20 @@ const PracticeModule = {
     renderSpelling(container) {
         const word = this.words[this.currentIndex];
         const imgPath = `assets/images/vocabulary/${word.word.toLowerCase()}.png`;
+        
+        let visual = `
+            <img src="${imgPath}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+            <div style="display:none; font-size: 6rem; color: var(--hot-pink);"><i class="${word.icon}"></i></div>
+        `;
+
+        if (word.category === 'colors') {
+            visual = `<div class="card-content-color-circle" style="background-color: ${this.getColorHex(word.word)}"></div>`;
+        }
 
         container.innerHTML = `
             <div class="spelling-container">
                 <div class="spelling-image-container">
-                    <img src="${imgPath}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
-                    <div style="display:none; font-size: 6rem; color: var(--hot-pink);"><i class="${word.icon}"></i></div>
+                    ${visual}
                 </div>
                 
                 <button class="sound-btn-large" style="margin: 0 auto 20px auto;" onclick="PracticeModule.playSound('${word.word}')">
@@ -317,7 +347,13 @@ const PracticeModule = {
     },
 
     renderWordsearch(container) {
-        this.wordsearchData.size = this.words.length > 8 ? 15 : 12;
+        // Calculate required grid size based on the longest word
+        const longestWordLen = Math.max(...this.words.map(w => w.word.replace(/\s/g, '').length));
+        
+        // Base size on number of words, but ensure it fits the longest word
+        let baseSize = this.words.length > 8 ? 15 : 12;
+        this.wordsearchData.size = Math.max(baseSize, longestWordLen + 2);
+        
         this.wordsearchData.foundWords = [];
         this.wordsearchData.placedWords = [];
         this.wordsearchData.isPendingMatch = false;
@@ -433,10 +469,16 @@ const PracticeModule = {
             switch(this.config.submode) {
                 case 'easy':
                     const imgPath = `assets/images/vocabulary/${word.word.toLowerCase()}.png`;
+                    let visual = `
+                        <img src="${imgPath}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+                        <div style="display:none" class="clue-icon"><i class="${word.icon}"></i></div>
+                    `;
+                    if (word.category === 'colors') {
+                        visual = `<div class="clue-color-circle" style="background-color: ${this.getColorHex(word.word)}"></div>`;
+                    }
                     content = `
                         <div class="clue-image-container">
-                            <img src="${imgPath}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
-                            <div style="display:none" class="clue-icon"><i class="${word.icon}"></i></div>
+                            ${visual}
                         </div>
                     `;
                     break;
@@ -470,14 +512,6 @@ const PracticeModule = {
         const startSelection = (cell) => {
             if (!cell) return;
             
-            if (this.wordsearchData.isPendingMatch) {
-                this.updateWSStatus("Match the word with its clue first!", "error");
-                const cluesBox = document.querySelector('.wordsearch-clues');
-                cluesBox.classList.add('highlight-clues');
-                setTimeout(() => cluesBox.classList.remove('highlight-clues'), 500);
-                return;
-            }
-
             this.wordsearchData.isSelecting = true;
             this.wordsearchData.selectedCells = [cell];
             cell.classList.add('selecting');
@@ -540,9 +574,8 @@ const PracticeModule = {
                 
                 const clueEl = document.getElementById(`clue-${match.id}`);
                 clueEl.dataset.gridFound = "true";
-                this.wordsearchData.isPendingMatch = true;
                 
-                this.updateWSStatus("Great! Now click the matching clue.", "match");
+                this.updateWSStatus(`Found: ${match.word}!`, "success");
                 this.checkWSCompletion();
             } else {
                 document.querySelectorAll('.ws-cell.selecting').forEach(c => c.classList.remove('selecting'));
@@ -558,8 +591,7 @@ const PracticeModule = {
                 if (clueEl.dataset.gridFound === "true") {
                     // Match successful!
                     clueEl.classList.add('matched');
-                    this.wordsearchData.isPendingMatch = false;
-                    this.updateWSStatus("Correct! Find another word.", "success");
+                    this.updateWSStatus("Correct!", "success");
                     PracticeModule.playSound(window.vocabularyBank.find(w => w.id === clueEl.dataset.id).word);
                     this.checkWSCompletion();
                 } else {
@@ -636,6 +668,155 @@ const PracticeModule = {
         });
     },
 
+    // --- UNJUMBLE LOGIC ---
+    renderUnjumble(container) {
+        const wordObj = this.words[this.currentIndex];
+        // Split the word/phrase into individual words
+        const words = wordObj.word.split(' ');
+        
+        if (words.length <= 1) {
+            // If it's just one word, unjumbling words doesn't make sense.
+            // We could unjumble letters, but the user asked for words.
+            // Let's just treat it as a special case or show it anyway.
+        }
+
+        const shuffled = [...words].sort(() => Math.random() - 0.5);
+        const imgPath = `assets/images/vocabulary/${wordObj.word.toLowerCase()}.png`;
+
+        let visual = `
+            <img src="${imgPath}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'" style="max-height: 150px; margin-bottom: 10px;">
+            <div style="display:none; font-size: 3rem; color: var(--hot-pink);"><i class="${wordObj.icon}"></i></div>
+        `;
+
+        if (wordObj.category === 'colors') {
+            visual = `<div class="clue-color-circle" style="width: 100px; height: 100px; margin: 0 auto 10px auto; background-color: ${this.getColorHex(wordObj.word)}"></div>`;
+        }
+
+        container.innerHTML = `
+            <div class="unjumble-exercise" style="width: 100%; max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    ${visual}
+                    <h3 style="color: var(--indigo-velvet);">Unjumble the Phrase</h3>
+                    <p style="color: #666;">Drag the words or click them in order:</p>
+                </div>
+                
+                <div id="unjumble-feedback" class="unjumble-feedback" style="text-align: center; margin-bottom: 15px;"></div>
+                
+                <div class="unjumble-container target-area" id="unjumble-target"
+                     style="min-height: 80px; padding: 20px; background: #f0f4ff; border: 2px dashed #cbd5e0; border-radius: 12px; margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center;"
+                     ondragover="PracticeModule.handleDragOver(event)"
+                     ondragleave="event.currentTarget.classList.remove('drag-over')"
+                     ondrop="event.currentTarget.classList.remove('drag-over')">
+                </div>
+                
+                <div class="unjumble-container source-area" id="unjumble-source"
+                     style="min-height: 80px; padding: 20px; background: #fff; border: 2px solid #eee; border-radius: 12px; margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center;"
+                     ondragover="PracticeModule.handleDragOver(event)"
+                     ondragleave="event.currentTarget.classList.remove('drag-over')"
+                     ondrop="event.currentTarget.classList.remove('drag-over')">
+                    ${shuffled.map(w => `
+                        <div class="unjumble-word" 
+                             draggable="true" 
+                             style="background: white; padding: 10px 20px; border-radius: 10px; border: 2px solid var(--indigo-velvet); color: var(--indigo-velvet); font-weight: 700; cursor: grab; user-select: none;"
+                             ondragstart="PracticeModule.handleDragStart(event)" 
+                             ondragend="PracticeModule.handleDragEnd(event)"
+                             onclick="PracticeModule.handleUnjumbleClick(this)">${w}</div>
+                    `).join('')}
+                </div>
+
+                <div style="text-align: center; display: flex; gap: 10px; justify-content: center;">
+                    <button class="btn-primary" onclick="PracticeModule.checkUnjumble()">Check</button>
+                    <button class="btn-secondary" onclick="PracticeModule.next()">Skip</button>
+                </div>
+                
+                <p style="margin-top: 20px; text-align: center; color: #888;">Phrase ${this.currentIndex + 1} of ${this.words.length}</p>
+            </div>
+        `;
+    },
+
+    handleUnjumbleClick(wordEl) {
+        const source = document.getElementById('unjumble-source');
+        const target = document.getElementById('unjumble-target');
+        
+        if (wordEl.parentElement === source) {
+            target.appendChild(wordEl);
+        } else {
+            source.appendChild(wordEl);
+        }
+    },
+
+    handleDragStart(e) {
+        e.target.classList.add('dragging');
+        e.dataTransfer.setData('text/plain', '');
+        e.dataTransfer.effectAllowed = 'move';
+    },
+
+    handleDragEnd(e) {
+        e.target.classList.remove('dragging');
+        document.querySelectorAll('.unjumble-container').forEach(c => c.classList.remove('drag-over'));
+    },
+
+    handleDragOver(e) {
+        e.preventDefault();
+        const container = e.currentTarget;
+        container.classList.add('drag-over');
+        
+        const dragging = document.querySelector('.dragging');
+        if (!dragging) return;
+
+        const afterElement = this.getDragAfterElement(container, e.clientX);
+        if (afterElement == null) {
+            container.appendChild(dragging);
+        } else {
+            container.insertBefore(dragging, afterElement);
+        }
+    },
+
+    getDragAfterElement(container, x) {
+        const draggableElements = [...container.querySelectorAll('.unjumble-word:not(.dragging)')];
+
+        return draggableElements.reduce((closest, child) => {
+            const box = child.getBoundingClientRect();
+            const offset = x - box.left - box.width / 2;
+            if (offset < 0 && offset > closest.offset) {
+                return { offset: offset, element: child };
+            } else {
+                return closest;
+            }
+        }, { offset: Number.NEGATIVE_INFINITY }).element;
+    },
+
+    checkUnjumble() {
+        const wordObj = this.words[this.currentIndex];
+        const targetArea = document.getElementById('unjumble-target');
+        const feedback = document.getElementById('unjumble-feedback');
+        
+        const userSentence = Array.from(targetArea.children).map(el => el.textContent).join(' ');
+        const correctAnswer = wordObj.word;
+        
+        const cleanUser = userSentence.toLowerCase().replace(/[.,!?;]$/, '');
+        const cleanCorrect = correctAnswer.toLowerCase().replace(/[.,!?;]$/, '');
+
+        if (cleanUser === cleanCorrect) {
+            feedback.innerHTML = '✅ Correct!';
+            feedback.style.color = '#28a745';
+            targetArea.style.borderColor = '#28a745';
+            targetArea.querySelectorAll('.unjumble-word').forEach(w => {
+                w.style.backgroundColor = '#d4edda';
+                w.style.borderColor = '#28a745';
+            });
+            setTimeout(() => this.next(), 1000);
+        } else {
+            feedback.innerHTML = '❌ Try again!';
+            feedback.style.color = '#dc3545';
+            targetArea.style.borderColor = '#dc3545';
+            targetArea.querySelectorAll('.unjumble-word').forEach(w => {
+                w.style.backgroundColor = '#f8d7da';
+                w.style.borderColor = '#dc3545';
+            });
+        }
+    },
+
     // --- SHARED ---
     next() {
         if (this.currentIndex < this.words.length - 1) {
@@ -701,6 +882,29 @@ const PracticeModule = {
             speech.rate = 0.8;
             window.speechSynthesis.speak(speech);
         });
+    },
+
+    getColorHex(colorName) {
+        const colors = {
+            'red': '#E02121',
+            'blue': '#0000FF',
+            'green': '#008000',
+            'yellow': '#FFFB00',
+            'orange': '#FF8C00',
+            'purple': '#4B0082',
+            'pink': '#FFC0CB',
+            'black': '#000000',
+            'white': '#FFFFFF',
+            'brown': '#8B4513',
+            'gray': '#808080',
+            'vermilion': '#F46036',
+            'amber': '#FFC000',
+            'chartreuse': '#9ACD32',
+            'teal': '#008080',
+            'violet': '#8A2BE2',
+            'magenta': '#C71585'
+        };
+        return colors[colorName.toLowerCase()] || '#CCCCCC';
     }
 };
 

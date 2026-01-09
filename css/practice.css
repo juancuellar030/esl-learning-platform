@@ -176,6 +176,70 @@
     margin: 20px 0;
 }
 
+.card-content-color-circle {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    margin: 20px 0;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    border: 5px solid white;
+    transition: transform 0.3s ease;
+}
+
+.card-content-color-circle:hover {
+    transform: scale(1.05);
+}
+
+.match-card-color-circle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    border: 3px solid white;
+}
+
+.clue-color-circle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    margin-bottom: 5px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    border: 3px solid white;
+}
+
+/* Unjumble Styles */
+.unjumble-container {
+    transition: all 0.2s ease;
+}
+
+.unjumble-container.drag-over {
+    background-color: #e0e8ff !important;
+    border-color: var(--medium-slate-blue) !important;
+    border-style: solid !important;
+}
+
+.unjumble-word {
+    transition: transform 0.2s, background-color 0.2s, border-color 0.2s;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.unjumble-word:hover {
+    transform: translateY(-2px);
+    border-color: var(--medium-slate-blue) !important;
+    background-color: #f8f9fa !important;
+}
+
+.unjumble-word.dragging {
+    opacity: 0.5;
+    transform: scale(0.95);
+}
+
+.unjumble-feedback {
+    font-size: 1.2rem;
+    font-weight: bold;
+    min-height: 1.5em;
+}
+
 .sound-btn-large {
     width: 120px;
     height: 120px;
@@ -408,12 +472,6 @@
     justify-content: center;
 }
 
-.ws-status-msg.match {
-    background-color: var(--amber-flame);
-    color: white;
-    animation: pulsate 1s infinite;
-}
-
 .ws-status-msg.success {
     background-color: #2ECC71;
     color: white;
@@ -580,19 +638,6 @@
     background-color: #d4edda;
     transform: scale(0.95);
     opacity: 0.8;
-}
-
-.ws-clue[data-grid-found="true"]:not(.matched) {
-    animation: clue-pulse 1.5s infinite;
-    border-color: var(--amber-flame);
-    border-width: 3px;
-    background-color: #fff9db;
-}
-
-@keyframes clue-pulse {
-    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(247, 184, 1, 0.4); }
-    70% { transform: scale(1.02); box-shadow: 0 0 0 10px rgba(247, 184, 1, 0); }
-    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(247, 184, 1, 0); }
 }
 
 @keyframes bounce {
