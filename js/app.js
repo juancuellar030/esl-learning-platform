@@ -7,6 +7,7 @@ const App = {
         this.setupDashboardCards();
         this.setupLibraryTabs();
         this.loadSavedLessons();
+        this.restoreActiveState();
     },
     
     setupNavigation() {
@@ -16,6 +17,9 @@ const App = {
         navButtons.forEach(btn => {
             btn.addEventListener('click', () => {
                 const targetSection = btn.dataset.section;
+                
+                // Save to localStorage
+                localStorage.setItem('activeSection', targetSection);
                 
                 // Update active nav button
                 navButtons.forEach(b => b.classList.remove('active'));
@@ -60,6 +64,9 @@ const App = {
             btn.addEventListener('click', () => {
                 const targetTab = btn.dataset.tab;
                 
+                // Save to localStorage
+                localStorage.setItem('activeLibraryTab', targetTab);
+                
                 // Update active tab button
                 tabButtons.forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
@@ -73,6 +80,40 @@ const App = {
                 });
             });
         });
+    },
+
+    restoreActiveState() {
+        // Temporarily disable smooth scroll for initial state restoration
+        const originalScrollTo = window.scrollTo;
+        window.scrollTo = function() {
+            const args = Array.from(arguments);
+            if (args.length === 1 && typeof args[0] === 'object') {
+                originalScrollTo.call(window, args[0].left || 0, args[0].top || 0);
+            } else {
+                originalScrollTo.apply(window, args);
+            }
+        };
+
+        // Restore last active section
+        const savedSection = localStorage.getItem('activeSection');
+        if (savedSection && savedSection !== 'dashboard') {
+            const targetBtn = document.querySelector(`[data-section="${savedSection}"]`);
+            if (targetBtn) {
+                targetBtn.click();
+            }
+        }
+
+        // Restore last active library tab
+        const savedLibraryTab = localStorage.getItem('activeLibraryTab');
+        if (savedLibraryTab) {
+            const targetTabBtn = document.querySelector(`[data-tab="${savedLibraryTab}"]`);
+            if (targetTabBtn) {
+                targetTabBtn.click();
+            }
+        }
+
+        // Restore original scrollTo
+        window.scrollTo = originalScrollTo;
     },
     
     loadSavedLessons() {
