@@ -238,17 +238,11 @@ const VocabModule = {
             display.innerHTML = `
                 <div class="exercise-setup-panel">
                     <h3><img src="assets/images/thumbnails/wordsearch.svg" style="height: 40px; vertical-align: middle; margin-right: 10px;"> Wordsearch Mode:</h3>
-                    <div class="setup-options">
-                        <button class="btn-secondary" onclick="VocabModule.launchPractice('wordsearch', 'easy')">
-                            <i class="fa-regular fa-image"></i> Easy (Images)
-                        </button>
-                        <button class="btn-secondary" onclick="VocabModule.launchPractice('wordsearch', 'text')">
-                            <i class="fa-solid fa-quote-left"></i> Text Clues
-                        </button>
-                        <button class="btn-secondary" onclick="VocabModule.launchPractice('wordsearch', 'audio')">
-                            <i class="fa-solid fa-volume-high"></i> Audio Clues
-                        </button>
-                    </div>
+                    <p>Ready to challenge yourself with a hidden word puzzle?</p>
+                    <button class="btn-primary" style="font-size: 1.2rem; padding: 15px 30px;" 
+                            onclick="VocabModule.launchPractice('wordsearch')">
+                        Start Wordsearch <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                    </button>
                 </div>
             `;
             return;

@@ -1,31 +1,599 @@
 .practice-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-    height: 100vh;
+    width: 100vw;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 .practice-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
-    padding-bottom: 10px;
+    padding: 15px 40px;
+    background: white;
     border-bottom: 2px solid var(--medium-slate-blue);
+    z-index: 10;
+    flex-shrink: 0;
+}
+
+.practice-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+#fullscreen-btn {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background-color: var(--indigo-velvet);
+    color: white;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    z-index: 1000;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#fullscreen-btn:hover {
+    transform: scale(1.1) rotate(15deg);
+    background-color: var(--medium-slate-blue);
+}
+
+.settings-area {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    background: var(--medium-slate-blue);
+    min-height: 0;
+}
+
+.ws-settings-panel {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 40px;
+    border-radius: 30px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+    width: 100%;
+    max-width: 650px;
+    backdrop-filter: blur(10px);
+}
+
+.ws-settings-panel h2 {
+    color: var(--indigo-velvet);
+    margin-bottom: 35px;
+    text-align: center;
+    font-size: 2rem;
+    font-weight: 800;
+}
+
+.settings-group {
+    margin-bottom: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.settings-group > label {
+    font-weight: 800;
+    color: var(--indigo-velvet);
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.radio-group, .checkbox-group {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.radio-group label, .checkbox-group label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    color: #444;
+}
+
+.timer-inputs {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: 10px;
+    background: #f0f4ff;
+    padding: 5px 15px;
+    border-radius: 20px;
+}
+
+.timer-inputs input {
+    width: 50px;
+    padding: 8px;
+    border: 2px solid var(--medium-slate-blue);
+    border-radius: 10px;
+    text-align: center;
+    font-weight: 700;
+}
+
+.range-group {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background: #f0f4ff;
+    padding: 15px 25px;
+    border-radius: 20px;
+}
+
+/* Stylized Range Slider */
+input[type=range] {
+    -webkit-appearance: none;
+    width: 100%;
+    background: transparent;
+}
+
+input[type=range]:focus {
+    outline: none;
+}
+
+input[type=range]::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 12px;
+    cursor: pointer;
+    background: #cbd5e0;
+    border-radius: 6px;
+}
+
+input[type=range]::-webkit-slider-thumb {
+    height: 28px;
+    width: 28px;
+    border-radius: 50%;
+    background: var(--medium-slate-blue);
+    cursor: pointer;
+    -webkit-appearance: none;
+    margin-top: -8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    border: 3px solid white;
+}
+
+#lives-display {
+    font-weight: 800;
+    color: var(--medium-slate-blue);
+    min-width: 80px;
+    font-size: 1.2rem;
+    text-align: center;
+}
+
+.size-buttons {
+    display: flex;
+    gap: 12px;
+}
+
+.btn-size {
+    flex: 1;
+    padding: 15px 10px;
+    border: 3px solid #eee;
+    background: white;
+    border-radius: 15px;
+    cursor: pointer;
+    font-weight: 800;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    color: var(--indigo-velvet);
+}
+
+.btn-size:hover {
+    border-color: var(--medium-slate-blue);
+    transform: translateY(-3px);
+}
+
+.btn-size.active {
+    background: var(--medium-slate-blue);
+    color: white;
+    border-color: var(--medium-slate-blue);
+    box-shadow: 0 10px 20px rgba(121, 107, 255, 0.3);
+}
+
+.settings-actions {
+    margin-top: 40px;
+    text-align: center;
+}
+
+/* Wordsearch V2 Layout */
+/* Wordsearch V2 Layout */
+.wordsearch-layout-v2 {
+    display: grid;
+    grid-template-columns: minmax(150px, 1fr) 2fr minmax(150px, 1fr);
+    gap: 20px;
+    width: 100%;
+    min-height: calc(100vh - 100px);
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.ws-side-column {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+}
+
+.clues-grid-v2 {
+    display: grid;
+    gap: 15px;
+    max-height: 90%;
+}
+
+.ws-clue-v2 {
+    background: rgba(255, 255, 255, 0.9);
+    border: 3px solid white;
+    border-radius: 20px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    aspect-ratio: 1 / 1;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+    cursor: pointer;
+}
+
+.ws-clue-v2:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+}
+
+.ws-clue-v2.highlight-pending {
+    border-color: #f39c12;
+    animation: pulse-orange 1.5s infinite;
+}
+
+@keyframes pulse-orange {
+    0% { box-shadow: 0 0 0 0 rgba(243, 156, 18, 0.4); }
+    70% { box-shadow: 0 0 0 15px rgba(243, 156, 18, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(243, 156, 18, 0); }
+}
+
+.ws-clue-v2.matched {
+    background-color: #d4edda;
+    border-color: #2ECC71;
+    transform: scale(0.95);
+    opacity: 0.8;
+}
+
+.clue-image-container-v2 {
+    width: 100%;
+    height: 80%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.clue-image-container-v2 img {
+    max-width: 90%;
+    max-height: 90%;
+    object-fit: contain;
+}
+
+.clue-audio-v2 {
+    margin-top: 5px;
+}
+
+.clue-text-v2 {
+    font-weight: 800;
+    font-size: 1.1rem;
+    color: var(--indigo-velvet);
+}
+
+.wordsearch-main-v2 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 25px;
+    height: 100%;
+}
+
+.ws-header-info {
+    display: flex;
+    gap: 40px;
+    align-items: center;
+    width: 100%;
+    justify-content: center;
+}
+
+.ws-info-item {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.ws-info-item.shake {
+    animation: shake 0.5s ease;
+    color: #ff4d4d;
+}
+
+.ws-status-v2 {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--indigo-velvet);
+    background: rgba(255, 255, 255, 0.9);
+    padding: 10px 30px;
+    border-radius: 30px;
+    min-width: 250px;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.ws-status-v2.success {
+    background: #2ECC71;
+    color: white;
+}
+
+.ws-status-v2.error {
+    background: #E74C3C;
+    color: white;
+}
+
+.wordsearch-grid-v2 {
+    display: grid;
+    gap: 5px;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 20px;
+    border-radius: 25px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    user-select: none;
+    max-height: 85vh;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    aspect-ratio: 1 / 1;
+}
+
+.wordsearch-grid-v2 .ws-cell {
+    width: auto;
+    height: auto;
+    aspect-ratio: 1 / 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: clamp(0.6rem, 3vmin, 1.6rem);
+    font-weight: 900;
+    color: var(--indigo-velvet);
+    background: #f0f4ff;
+    border-radius: 6px;
+    transition: all 0.2s;
+    cursor: pointer;
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.wordsearch-grid-v2 .ws-cell.selecting {
+    background-color: var(--medium-slate-blue);
+    color: white;
+    transform: scale(0.95);
+}
+
+.wordsearch-grid-v2 .ws-cell.found {
+    background-color: #2ECC71;
+    color: white;
 }
 
 #game-area {
     flex: 1;
     display: flex;
     justify-content: center;
-    align-items: flex-start; /* Changed from center to prevent top clipping */
-    padding: 40px 20px;
+    align-items: center; 
+    padding: 0;
     position: relative;
     width: 100%;
-    overflow-y: auto;
-    overflow-x: hidden;
+    min-height: 0;
+}
+
+.practice-container {
+    background: var(--medium-slate-blue);
+}
+
+.practice-header {
+    background: white;
+    margin-bottom: 0;
+    padding: 15px 40px;
+}
+
+#practice-title {
+    color: var(--indigo-velvet);
+}
+
+@media (max-width: 1200px) {
+    .wordsearch-layout-v2 {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto auto;
+        gap: 15px;
+        padding: 10px;
+        height: auto;
+        min-height: auto;
+        overflow-y: visible;
+    }
+    .ws-side-column {
+        flex-direction: row;
+        width: 100%;
+        height: auto;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    .clues-grid-v2 {
+        grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)) !important;
+        grid-template-rows: none !important;
+        width: 100%;
+        max-height: none;
+        gap: 10px;
+    }
+    .ws-clue-v2 {
+        border-radius: 12px;
+        padding: 5px;
+    }
+    .wordsearch-grid-v2 {
+        max-height: 70vh;
+        width: 90vw;
+        max-width: 450px;
+        margin: 0 auto;
+        padding: 10px;
+    }
+    .ws-status-v2 {
+        min-width: 180px;
+        padding: 8px 20px;
+        font-size: 1.1rem;
+    }
+}
+
+@media (max-height: 600px) and (orientation: landscape) {
+    .wordsearch-layout-v2 {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto auto;
+        padding: 5px 10px;
+        gap: 5px;
+        height: auto;
+        overflow-y: auto;
+    }
+    .wordsearch-grid-v2 {
+        max-height: 45vh;
+        width: auto;
+        max-width: 300px;
+    }
+    .ws-side-column {
+        flex-direction: row;
+        width: 100%;
+        height: auto;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    .clues-grid-v2 {
+        grid-template-columns: repeat(auto-fit, minmax(40px, 1fr)) !important;
+        gap: 5px;
+    }
+    .ws-clue-v2 {
+        padding: 2px;
+        max-width: 45px;
+        border-radius: 8px;
+    }
+    .clue-image-container-v2 {
+        height: 100%;
+    }
+    .clue-image-container-v2 img {
+        max-width: 80%;
+        max-height: 80%;
+    }
+    .ws-header-info {
+        gap: 5px;
+    }
+    .ws-status-v2 {
+        padding: 2px 10px;
+        min-width: 100px;
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 600px) {
+    .ws-settings-panel {
+        padding: 20px;
+        border-radius: 20px;
+        margin: 10px;
+    }
+    .ws-settings-panel h2 {
+        font-size: 1.5rem;
+        margin-bottom: 20px;
+    }
+    .settings-group {
+        margin-bottom: 20px;
+    }
+    .practice-header {
+        padding: 10px 20px;
+    }
+}
+
+@media (max-height: 500px) {
+    .practice-header {
+        padding: 5px 20px;
+    }
+    .practice-header h1 {
+        font-size: 1.2rem;
+    }
+    .wordsearch-grid-v2 {
+        max-height: 60vh;
+    }
+    .ws-info-item {
+        font-size: 1.2rem;
+    }
+}
+
+body.dark-mode .ws-cell {
+    background: #333;
+    color: #eee;
+    border-color: #444;
+}
+
+body.dark-mode .wordsearch-grid,
+body.dark-mode .wordsearch-grid-v2,
+body.dark-mode .crossword-grid-wrapper,
+body.dark-mode .crossword-clues,
+body.dark-mode .wordsearch-clues,
+body.dark-mode .spelling-container,
+body.dark-mode .sentence-container,
+body.dark-mode .quiz-container,
+body.dark-mode .summary-container {
+    background: #1e1e1e !important;
+    color: #f5f5f5 !important;
+}
+
+body.dark-mode .ws-clue,
+body.dark-mode .ws-clue-v2,
+body.dark-mode .match-card,
+body.dark-mode .clue-item,
+body.dark-mode .flashcard-face {
+    background: #2d2d2d !important;
+    border-color: #444 !important;
+    color: #f5f5f5 !important;
+}
+
+body.dark-mode .ws-status-v2,
+body.dark-mode .ws-status-msg {
+    background: #333;
+    color: #ddd;
+}
+
+body.dark-mode .clue-text-v2,
+body.dark-mode .match-card-word,
+body.dark-mode .card-content-word {
+    color: var(--amber-flame) !important;
+}
+
+body.dark-mode .spelling-image-container {
+    background: #2d2d2d;
+}
+
+body.dark-mode .cw-cell.active {
+    background-color: #2d2d2d;
+}
+
+body.dark-mode .cw-input {
+    color: var(--amber-flame);
+}
+
+body.dark-mode .practice-nav {
+    background: rgba(30, 30, 30, 0.9);
 }
 
 /* Learning Controls (Check/Cross) */
@@ -74,6 +642,41 @@
     background-color: #c0392b;
 }
 
+body.dark-mode .ws-settings-panel {
+    background: rgba(30, 30, 30, 0.95);
+    color: #f5f5f5;
+    border: 1px solid #444;
+}
+
+body.dark-mode .ws-settings-panel h2 {
+    color: var(--amber-flame);
+}
+
+body.dark-mode .settings-group > label {
+    color: var(--amber-flame);
+}
+
+body.dark-mode .radio-group label, 
+body.dark-mode .checkbox-group label {
+    color: #ddd;
+}
+
+body.dark-mode .timer-inputs,
+body.dark-mode .range-group {
+    background: #333;
+}
+
+body.dark-mode .btn-size {
+    background: #2d2d2d;
+    border-color: #444;
+    color: #ddd;
+}
+
+body.dark-mode .btn-size.active {
+    background: var(--medium-slate-blue);
+    color: white;
+}
+
 /* Flashcard Styles - WIDER */
 .flashcard-scene {
     width: 600px;
@@ -82,29 +685,6 @@
     cursor: pointer;
     margin: 20px 0; /* Add margin to prevent flickers hitting edges */
     position: relative; /* Context for absolute positioning of controls if needed */
-}
-#fullscreen-btn {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    background-color: var(--indigo-velvet);
-    color: white;
-    border: none;
-    font-size: 1.5rem;
-    cursor: pointer;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-    z-index: 1000;
-    transition: transform 0.2s;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-#fullscreen-btn:hover {
-    transform: scale(1.1);
 }
 
 /* Flashcard Styles - WIDER */
@@ -1060,16 +1640,4 @@
 .clue-icon {
     font-size: 2.5rem;
     color: var(--hot-pink);
-}
-
-@media (max-width: 900px) {
-    .wordsearch-container {
-        flex-direction: column;
-    }
-    
-    .ws-cell {
-        width: 30px;
-        height: 30px;
-        font-size: 1rem;
-    }
 }

@@ -12,11 +12,17 @@
     <div class="practice-container">
         <header class="practice-header">
             <h1 id="practice-title">Practice</h1>
+            <div id="game-info" class="game-info"></div>
             <div class="practice-controls">
+                <button id="fullscreen-btn" class="btn-secondary" title="Toggle Full Screen"><i class="fa-solid fa-expand"></i></button>
                 <button id="close-btn" class="btn-secondary" onclick="window.close()">Close</button>
             </div>
         </header>
         
+        <div id="settings-area" class="settings-area" style="display: none;">
+            <!-- Game settings will be loaded here -->
+        </div>
+
         <main id="game-area">
             <!-- Game content will be loaded here -->
         </main>
@@ -25,6 +31,8 @@
     <script src="js/vocabulary-data.js"></script>
     <script src="js/grammar-data.js"></script>
     <script src="js/quiz-data.js"></script>
+    <script src="js/themes.js"></script>
+    <script src="js/darkmode.js"></script>
     <script src="js/practice.js"></script>
 </body>
 </html>

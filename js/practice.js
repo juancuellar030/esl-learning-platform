@@ -1,63 +1,217 @@
 const PracticeModule = {
     words: [],
-    difficultWords: [], // To track words user struggled with
+    difficultWords: [], 
     currentIndex: 0,
     config: {
-        mode: 'flashcards', // flashcards, matching, spelling, sentences
-        face: 'word_first' // for flashcards
+        mode: 'flashcards',
+        face: 'word_first',
+        submode: null,
+        settings: {
+            timer: 'none',
+            timerValue: 300, 
+            lives: 0, 
+            allowDiagonal: true,
+            allowReverse: false,
+            gridSize: 'M',
+            clueTypes: ['image'],
+            mustClickClue: false
+        }
     },
     matches: 0,
+    gameState: {
+        timerInterval: null,
+        timeLeft: 0,
+        livesLeft: 0,
+        isGameOver: false,
+        pendingClueMatch: null // Stores word id that was found but needs clue click
+    },
 
     init() {
         const params = new URLSearchParams(window.location.search);
         const ids = params.get('ids')?.split(',') || [];
         this.config.mode = params.get('mode') || 'flashcards';
         this.config.face = params.get('face') || 'word_first';
-        this.config.submode = params.get('face'); // Reuse 'face' param for wordsearch submodes
+        this.config.submode = params.get('face'); 
 
         // Load words
         this.words = window.vocabularyBank.filter(w => ids.includes(w.id));
+        
+        // Limit words to 16 for wordsearch
+        if (this.config.mode === 'wordsearch' && this.words.length > 16) {
+            this.words = this.words.slice(0, 16);
+        }
 
-        // Special handling for quiz mode
         if (this.config.mode === 'quiz') {
             this.words = window.classroomLanguageQuiz;
         }
 
-        // Filter for multi-word phrases if in unjumble mode
         if (this.config.mode === 'unjumble') {
             this.words = this.words.filter(w => w.word.trim().includes(' '));
         }
 
-        this.difficultWords = []; // Reset difficult words on init
+        this.difficultWords = []; 
         
         if (this.words.length === 0) {
             document.getElementById('game-area').innerHTML = '<p>No words selected.</p>';
             return;
         }
 
-        this.render();
+        if (this.config.mode === 'wordsearch') {
+            this.showWordsearchSettings();
+        } else {
+            this.render();
+        }
         this.setupFullScreen();
     },
 
-    setupFullScreen() {
-        if (document.getElementById('fullscreen-btn')) return;
-        
-        const btn = document.createElement('button');
-        btn.id = 'fullscreen-btn';
-        btn.innerHTML = '<i class="fa-solid fa-expand"></i>';
-        btn.title = 'Toggle Full Screen';
-        btn.onclick = () => this.toggleFullScreen();
-        document.body.appendChild(btn);
+    showWordsearchSettings() {
+        const settingsArea = document.getElementById('settings-area');
+        const gameArea = document.getElementById('game-area');
+        settingsArea.style.display = 'block';
+        gameArea.style.display = 'none';
+
+        settingsArea.innerHTML = `
+            <div class="ws-settings-panel">
+                <h2>Wordsearch Options</h2>
+                
+                <div class="settings-group">
+                    <label>TIMER</label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="timer" value="none" checked> None</label>
+                        <label><input type="radio" name="timer" value="up"> Count up</label>
+                        <label><input type="radio" name="timer" value="down"> Count down</label>
+                        <div class="timer-inputs">
+                            <input type="number" id="timer-m" value="5" min="0" max="59"> m
+                            <input type="number" id="timer-s" value="0" min="0" max="59"> s
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-group">
+                    <label>LIVES</label>
+                    <div class="range-group">
+                        <input type="range" id="lives-range" min="0" max="10" value="0">
+                        <span id="lives-display">Infinite</span>
+                    </div>
+                </div>
+
+                <div class="settings-group">
+                    <label>DIFFICULTY</label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" id="allow-diagonal" checked> Allow diagonal words</label>
+                        <label><input type="checkbox" id="allow-reverse"> Allow reverse words</label>
+                    </div>
+                </div>
+
+                <div class="settings-group">
+                    <label>GRID SIZE</label>
+                    <div class="size-buttons">
+                        <button type="button" class="btn-size" data-size="XS">XS</button>
+                        <button type="button" class="btn-size" data-size="S">S</button>
+                        <button type="button" class="btn-size active" data-size="M">M</button>
+                        <button type="button" class="btn-size" data-size="LG">LG</button>
+                        <button type="button" class="btn-size" data-size="XL">XL</button>
+                    </div>
+                </div>
+
+                <div class="settings-group">
+                    <label>CLUE TYPES</label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" class="clue-type-cb" value="image" checked> Image Clues</label>
+                        <label><input type="checkbox" class="clue-type-cb" value="audio"> Audio Clues</label>
+                        <label><input type="checkbox" class="clue-type-cb" value="text"> Text Clues</label>
+                    </div>
+                </div>
+
+                <div class="settings-group">
+                    <label>GAMEPLAY</label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" id="must-click-clue"> Must click clue card after finding word</label>
+                    </div>
+                </div>
+
+                <div class="settings-actions">
+                    <button class="btn-primary start-game-btn" onclick="PracticeModule.startWordsearch()">Start Game</button>
+                </div>
+            </div>
+        `;
+
+        // Add event listeners for settings
+        document.getElementById('lives-range').addEventListener('input', (e) => {
+            const val = e.target.value;
+            document.getElementById('lives-display').textContent = val == 0 ? 'Infinite' : val;
+        });
+
+        document.querySelectorAll('.btn-size').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.btn-size').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                this.config.settings.gridSize = btn.dataset.size;
+            });
+        });
     },
 
-    toggleFullScreen() {
-        if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen();
-            document.getElementById('fullscreen-btn').innerHTML = '<i class="fa-solid fa-compress"></i>';
+    startWordsearch() {
+        // Collect settings
+        const timerType = document.querySelector('input[name="timer"]:checked').value;
+        const minutes = parseInt(document.getElementById('timer-m').value) || 0;
+        const seconds = parseInt(document.getElementById('timer-s').value) || 0;
+        const lives = parseInt(document.getElementById('lives-range').value);
+        const diagonal = document.getElementById('allow-diagonal').checked;
+        const reverse = document.getElementById('allow-reverse').checked;
+        const mustClickClue = document.getElementById('must-click-clue').checked;
+        
+        const clueTypes = [];
+        document.querySelectorAll('.clue-type-cb:checked').forEach(cb => clueTypes.push(cb.value));
+
+        if (clueTypes.length === 0) {
+            alert('Please select at least one clue type!');
+            return;
+        }
+
+        this.config.settings = {
+            timer: timerType,
+            timerValue: (minutes * 60) + seconds,
+            lives: lives,
+            allowDiagonal: diagonal,
+            allowReverse: reverse,
+            gridSize: this.config.settings.gridSize,
+            clueTypes: clueTypes,
+            mustClickClue: mustClickClue
+        };
+
+        this.gameState.timeLeft = this.config.settings.timerValue;
+        this.gameState.livesLeft = this.config.settings.lives;
+        this.gameState.isGameOver = false;
+        this.gameState.pendingClueMatch = null;
+
+        // Try to enable full screen
+        this.toggleFullScreen(true);
+
+        document.getElementById('settings-area').style.display = 'none';
+        document.getElementById('game-area').style.display = 'flex';
+        
+        this.render();
+    },
+
+    setupFullScreen() {
+        const btn = document.getElementById('fullscreen-btn');
+        if (btn) {
+            btn.onclick = () => this.toggleFullScreen();
+        }
+    },
+
+    toggleFullScreen(force = null) {
+        const btn = document.getElementById('fullscreen-btn');
+        if (force === true || (force === null && !document.fullscreenElement)) {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => console.log(err));
+                if (btn) btn.innerHTML = '<i class="fa-solid fa-compress"></i>';
+            }
         } else {
             if (document.exitFullscreen) {
-                document.exitFullscreen();
-                document.getElementById('fullscreen-btn').innerHTML = '<i class="fa-solid fa-expand"></i>';
+                document.exitFullscreen().catch(err => console.log(err));
+                if (btn) btn.innerHTML = '<i class="fa-solid fa-expand"></i>';
             }
         }
     },
@@ -364,44 +518,114 @@ const PracticeModule = {
     },
 
     renderWordsearch(container) {
-        // Calculate required grid size based on the longest word
-        const longestWordLen = Math.max(...this.words.map(w => w.word.replace(/\s/g, '').length));
+        // Clear any existing timer
+        if (this.gameState.timerInterval) clearInterval(this.gameState.timerInterval);
+
+        // Determine grid size based on settings
+        const sizeMap = { 'XS': 10, 'S': 12, 'M': 15, 'LG': 18, 'XL': 20 };
+        let baseSize = sizeMap[this.config.settings.gridSize] || 15;
         
-        // Base size on number of words, but ensure it fits the longest word
-        let baseSize = this.words.length > 8 ? 15 : 12;
-        this.wordsearchData.size = Math.max(baseSize, longestWordLen + 2);
+        // Ensure it fits the longest word
+        const longestWordLen = Math.max(...this.words.map(w => w.word.replace(/\s/g, '').length));
+        this.wordsearchData.size = Math.max(baseSize, longestWordLen);
         
         this.wordsearchData.foundWords = [];
         this.wordsearchData.placedWords = [];
         this.wordsearchData.isPendingMatch = false;
         this.generateWordsearchGrid();
 
+        // Split words for side columns (max 16 words total)
+        const leftWords = this.wordsearchData.placedWords.slice(0, Math.ceil(this.wordsearchData.placedWords.length / 2));
+        const rightWords = this.wordsearchData.placedWords.slice(Math.ceil(this.wordsearchData.placedWords.length / 2));
+
         container.innerHTML = `
-            <div class="wordsearch-container">
-                <div class="wordsearch-main">
-                    <div id="ws-status-msg" class="ws-status-msg">Find a word in the grid!</div>
-                    <div class="wordsearch-grid" id="ws-grid" 
+            <div class="wordsearch-layout-v2">
+                <div class="ws-side-column ws-left-clues">
+                    <div class="clues-grid-v2" style="grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(4, 1fr);">
+                        ${this.renderWSCluesV2(leftWords)}
+                    </div>
+                </div>
+
+                <div class="wordsearch-main-v2">
+                    <div class="ws-header-info">
+                        ${this.config.settings.timer !== 'none' ? `<div id="ws-timer" class="ws-info-item"><i class="fa-solid fa-clock"></i> <span>${this.formatTime(this.gameState.timeLeft)}</span></div>` : ''}
+                        ${this.config.settings.lives > 0 ? `<div id="ws-lives" class="ws-info-item"><i class="fa-solid fa-heart"></i> <span>${this.gameState.livesLeft}</span></div>` : ''}
+                        <div id="ws-status-v2" class="ws-status-v2">Find the words!</div>
+                    </div>
+                    <div class="wordsearch-grid-v2" id="ws-grid" 
                          style="grid-template-columns: repeat(${this.wordsearchData.size}, 1fr)">
                         ${this.renderWSGrid()}
                     </div>
                 </div>
-                <div class="wordsearch-clues">
-                    <h3>Words to find:</h3>
-                    <div class="clues-grid" id="ws-clues">
-                        ${this.renderWSClues()}
+
+                <div class="ws-side-column ws-right-clues">
+                    <div class="clues-grid-v2" style="grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(4, 1fr);">
+                        ${this.renderWSCluesV2(rightWords)}
                     </div>
                 </div>
             </div>
         `;
 
         this.setupWSEvents();
+        this.startTimer();
+    },
+
+    formatTime(seconds) {
+        const m = Math.floor(seconds / 60);
+        const s = seconds % 60;
+        return `${m}:${s < 10 ? '0' : ''}${s}`;
+    },
+
+    startTimer() {
+        if (this.config.settings.timer === 'none') return;
+
+        this.gameState.timerInterval = setInterval(() => {
+            if (this.config.settings.timer === 'down') {
+                this.gameState.timeLeft--;
+                if (this.gameState.timeLeft <= 0) {
+                    this.gameOver(false, 'Time is up!');
+                }
+            } else {
+                this.gameState.timeLeft++;
+            }
+            
+            const timerEl = document.getElementById('ws-timer');
+            if (timerEl) timerEl.querySelector('span').textContent = this.formatTime(this.gameState.timeLeft);
+        }, 1000);
+    },
+
+    loseLife() {
+        if (this.config.settings.lives <= 0) return;
+        
+        this.gameState.livesLeft--;
+        const livesEl = document.getElementById('ws-lives');
+        if (livesEl) {
+            livesEl.querySelector('span').textContent = this.gameState.livesLeft;
+            livesEl.classList.add('shake');
+            setTimeout(() => livesEl.classList.remove('shake'), 500);
+        }
+        
+        if (this.gameState.livesLeft <= 0) {
+            this.gameOver(false, 'No more lives left!');
+        }
+    },
+
+    gameOver(success, message) {
+        this.gameState.isGameOver = true;
+        if (this.gameState.timerInterval) clearInterval(this.gameState.timerInterval);
+        
+        if (!success) {
+            alert(message || 'Game Over!');
+            this.showSummary();
+        } else {
+            this.showSummary();
+        }
     },
 
     generateWordsearchGrid() {
         const size = this.wordsearchData.size;
         this.wordsearchData.grid = Array(size).fill().map(() => Array(size).fill(''));
         
-        // Sort words by length descending for better placement
         const sortedWords = [...this.words].sort((a, b) => b.word.length - a.word.length);
         
         sortedWords.forEach(wordObj => {
@@ -415,7 +639,6 @@ const PracticeModule = {
             }
         });
 
-        // Fill empty cells with random letters
         for (let r = 0; r < size; r++) {
             for (let c = 0; c < size; c++) {
                 if (this.wordsearchData.grid[r][c] === '') {
@@ -427,15 +650,21 @@ const PracticeModule = {
 
     placeWordInGrid(word) {
         const size = this.wordsearchData.size;
-        const directions = [
-            [0, 1], [1, 0], [1, 1], [-1, 1], [0, -1], [-1, 0], [-1, -1], [1, -1]
-        ];
+        let directions = [[0, 1], [1, 0]]; // Horizontal and Vertical always
         
-        // Randomly shuffle directions
+        if (this.config.settings.allowDiagonal) {
+            directions.push([1, 1], [-1, 1]);
+        }
+        
+        if (this.config.settings.allowReverse) {
+            const revDirs = directions.map(d => [-d[0], -d[1]]);
+            directions = directions.concat(revDirs);
+        }
+        
         directions.sort(() => Math.random() - 0.5);
 
         for (let attempt = 0; attempt < 100; attempt++) {
-            const direction = directions[attempt % directions.length];
+            const direction = directions[Math.floor(Math.random() * directions.length)];
             const dr = direction[0];
             const dc = direction[1];
             
@@ -478,64 +707,71 @@ const PracticeModule = {
         return html;
     },
 
-    renderWSClues() {
-        return this.wordsearchData.placedWords.map(placed => {
+    renderWSCluesV2(placedWordsList) {
+        return placedWordsList.map(placed => {
             const word = placed.original;
             let content = '';
+            const clueTypes = this.config.settings.clueTypes;
             
-            switch(this.config.submode) {
-                case 'easy':
-                    const imgPath = `assets/images/vocabulary/${word.word.toLowerCase()}.png`;
-                    let visual = `
-                        <img src="${imgPath}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
-                        <div style="display:none" class="clue-icon"><i class="${word.icon}"></i></div>
-                    `;
-                    if (word.category === 'colors') {
-                        visual = `<div class="clue-color-circle" style="background-color: ${this.getColorHex(word.word)}"></div>`;
-                    }
-                    content = `
-                        <div class="clue-image-container">
-                            ${visual}
-                        </div>
-                    `;
-                    break;
-                case 'text':
-                    content = `<div class="clue-text">${word.definition}</div>`;
-                    break;
-                case 'audio':
-                    content = `
-                        <button class="sound-btn-large" onclick="event.stopPropagation(); PracticeModule.playSound('${word.word}')">
-                            <i class="fa-solid fa-volume-high"></i>
-                        </button>
-                    `;
-                    break;
-                default:
-                    content = `<div class="clue-word">${word.word}</div>`;
+            if (clueTypes.includes('image')) {
+                const imgPath = `assets/images/vocabulary/${word.word.toLowerCase()}.png`;
+                let visual = `
+                    <img src="${imgPath}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+                    <div style="display:none" class="clue-icon"><i class="${word.icon}"></i></div>
+                `;
+                if (word.category === 'colors') {
+                    visual = `<div class="clue-color-circle" style="background-color: ${this.getColorHex(word.word)}"></div>`;
+                }
+                content += `<div class="clue-image-container-v2">${visual}</div>`;
             }
 
-            return `<div class="ws-clue" id="clue-${word.id}" data-id="${word.id}">${content}</div>`;
+            if (clueTypes.includes('audio')) {
+                content += `
+                    <button class="sound-btn-small clue-audio-v2" onclick="event.stopPropagation(); PracticeModule.playSound('${word.word}')">
+                        <i class="fa-solid fa-volume-high"></i>
+                    </button>
+                `;
+            }
+
+            if (clueTypes.includes('text')) {
+                content += `<div class="clue-text-v2">${word.word}</div>`;
+            }
+
+            return `<div class="ws-clue-v2" id="clue-${word.id}" data-id="${word.id}">${content}</div>`;
         }).join('');
     },
 
     setupWSEvents() {
         const grid = document.getElementById('ws-grid');
-        const cells = document.querySelectorAll('.ws-cell');
-
+        
         const getCell = (e) => {
-            const el = document.elementFromPoint(e.clientX, e.clientY);
+            let clientX, clientY;
+            if (e.touches) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+            const el = document.elementFromPoint(clientX, clientY);
             return el && el.classList.contains('ws-cell') ? el : null;
         };
 
         const startSelection = (cell) => {
-            if (!cell) return;
+            if (!cell || this.gameState.isGameOver) return;
             
+            if (this.config.settings.mustClickClue && this.gameState.pendingClueMatch) {
+                this.updateWSStatusV2("Click the correct clue card first!", "error");
+                return;
+            }
+
             this.wordsearchData.isSelecting = true;
             this.wordsearchData.selectedCells = [cell];
             cell.classList.add('selecting');
         };
 
         const updateSelection = (cell) => {
-            if (!this.wordsearchData.isSelecting || !cell) return;
+            if (!this.wordsearchData.isSelecting || !cell || this.gameState.isGameOver) return;
             if (this.wordsearchData.selectedCells.includes(cell)) return;
 
             const lastCell = this.wordsearchData.selectedCells[0];
@@ -544,13 +780,10 @@ const PracticeModule = {
             const r2 = parseInt(cell.dataset.r);
             const c2 = parseInt(cell.dataset.c);
 
-            // Calculate direction
             const dr = r2 - r1;
             const dc = c2 - c1;
             
-            // Only allow straight lines (horizontal, vertical, diagonal)
             if (dr === 0 || dc === 0 || Math.abs(dr) === Math.abs(dc)) {
-                // Clear previous selection visually
                 document.querySelectorAll('.ws-cell.selecting').forEach(c => c.classList.remove('selecting'));
                 
                 const steps = Math.max(Math.abs(dr), Math.abs(dc));
@@ -571,7 +804,7 @@ const PracticeModule = {
         };
 
         const endSelection = () => {
-            if (!this.wordsearchData.isSelecting) return;
+            if (!this.wordsearchData.isSelecting || this.gameState.isGameOver) return;
             this.wordsearchData.isSelecting = false;
             
             const selectedWord = this.wordsearchData.selectedCells.map(c => c.textContent).join('');
@@ -582,43 +815,30 @@ const PracticeModule = {
             );
 
             if (match) {
-                // Success! Word found in grid
                 this.wordsearchData.foundWords.push(match.id);
                 this.wordsearchData.selectedCells.forEach(c => {
                     c.classList.remove('selecting');
                     c.classList.add('found');
                 });
                 
-                const clueEl = document.getElementById(`clue-${match.id}`);
-                clueEl.dataset.gridFound = "true";
-                
-                this.updateWSStatus(`Found: ${match.word}!`, "success");
-                this.checkWSCompletion();
+                if (this.config.settings.mustClickClue) {
+                    this.gameState.pendingClueMatch = match.id;
+                    this.updateWSStatusV2(`Found: ${match.word}! Now click the clue.`, "success");
+                    document.getElementById(`clue-${match.id}`).classList.add('highlight-pending');
+                } else {
+                    const clueEl = document.getElementById(`clue-${match.id}`);
+                    if (clueEl) clueEl.classList.add('matched');
+                    this.updateWSStatusV2(`Found: ${match.word}!`, "success");
+                    this.checkWSCompletion();
+                }
             } else {
                 document.querySelectorAll('.ws-cell.selecting').forEach(c => c.classList.remove('selecting'));
+                if (this.config.settings.lives > 0) {
+                    this.loseLife();
+                }
             }
             this.wordsearchData.selectedCells = [];
         };
-
-        // Clue clicking for matching
-        document.querySelectorAll('.ws-clue').forEach(clueEl => {
-            clueEl.addEventListener('click', () => {
-                if (clueEl.classList.contains('matched')) return;
-
-                if (clueEl.dataset.gridFound === "true") {
-                    // Match successful!
-                    clueEl.classList.add('matched');
-                    this.updateWSStatus("Correct!", "success");
-                    PracticeModule.playSound(window.vocabularyBank.find(w => w.id === clueEl.dataset.id).word);
-                    this.checkWSCompletion();
-                } else {
-                    // Not found in grid yet or wrong match
-                    this.updateWSStatus("Find this word in the grid first!", "error");
-                    clueEl.classList.add('highlight-clues');
-                    setTimeout(() => clueEl.classList.remove('highlight-clues'), 500);
-                }
-            });
-        });
 
         grid.addEventListener('mousedown', (e) => {
             const cell = getCell(e);
@@ -634,41 +854,63 @@ const PracticeModule = {
 
         window.addEventListener('mouseup', endSelection);
 
-        // Touch support
         grid.addEventListener('touchstart', (e) => {
             e.preventDefault();
-            const touch = e.touches[0];
-            const cell = getCell(touch);
+            const cell = getCell(e);
             if (cell) startSelection(cell);
         });
 
         grid.addEventListener('touchmove', (e) => {
             e.preventDefault();
-            const touch = e.touches[0];
-            const cell = getCell(touch);
+            const cell = getCell(e);
             updateSelection(cell);
         });
 
         grid.addEventListener('touchend', endSelection);
+
+        // Clue clicking
+        document.querySelectorAll('.ws-clue-v2').forEach(clueEl => {
+            clueEl.addEventListener('click', () => {
+                if (this.gameState.isGameOver || clueEl.classList.contains('matched')) return;
+
+                if (this.config.settings.mustClickClue) {
+                    if (!this.gameState.pendingClueMatch) {
+                        this.updateWSStatusV2("Find a word in the grid first!", "error");
+                        return;
+                    }
+
+                    if (clueEl.dataset.id === this.gameState.pendingClueMatch) {
+                        clueEl.classList.remove('highlight-pending');
+                        clueEl.classList.add('matched');
+                        this.gameState.pendingClueMatch = null;
+                        this.updateWSStatusV2("Correct!", "success");
+                        this.playSound(window.vocabularyBank.find(w => w.id === clueEl.dataset.id).word);
+                        this.checkWSCompletion();
+                    } else {
+                        this.updateWSStatusV2("Wrong clue!", "error");
+                        this.loseLife();
+                    }
+                }
+            });
+        });
     },
 
-    updateWSStatus(msg, type) {
-        const el = document.getElementById('ws-status-msg');
+    updateWSStatusV2(msg, type) {
+        const el = document.getElementById('ws-status-v2');
         if (!el) return;
         el.textContent = msg;
-        el.className = 'ws-status-msg ' + type;
+        el.className = 'ws-status-v2 ' + type;
+        setTimeout(() => {
+            if (!this.gameState.isGameOver) el.className = 'ws-status-v2';
+        }, 2000);
     },
 
     checkWSCompletion() {
         const totalWords = this.wordsearchData.placedWords.length;
         const foundWords = this.wordsearchData.foundWords.length;
-        const matchedClues = document.querySelectorAll('.ws-clue.matched').length;
         
-        if (foundWords === totalWords && matchedClues === totalWords) {
-            setTimeout(() => this.showSummary(), 500);
-        } else if (foundWords === totalWords) {
-            // Hint to match the remaining clues
-            // Subtle indication if needed
+        if (foundWords === totalWords) {
+            setTimeout(() => this.gameOver(true), 500);
         }
     },
 

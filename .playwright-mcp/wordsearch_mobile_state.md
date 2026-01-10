@@ -1,0 +1,267 @@
+### Page state
+- Page URL: http://localhost:8080/practice.html?mode=wordsearch&ids=animal_01,animal_02,animal_03,animal_04,animal_05,animal_06,animal_07,animal_08
+- Page Title: ESL Practice Mode
+- Page Snapshot:
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - heading "Practice" [level=1] [ref=e4]
+      - button "Close" [ref=e6] [cursor=pointer]
+    - main [ref=e60]:
+      - generic [ref=e61]:
+        - generic [ref=e63]:
+          - generic [ref=e65] [cursor=pointer]:
+            - img [ref=e66]
+            - text: 
+          - generic [ref=e68] [cursor=pointer]:
+            - img [ref=e69]
+            - text: 
+          - generic [ref=e73] [cursor=pointer]: 
+          - generic [ref=e75] [cursor=pointer]:
+            - img [ref=e76]
+            - text: 
+        - generic [ref=e77]:
+          - generic [ref=e79]: Find the words!
+          - generic [ref=e80]:
+            - generic [ref=e81] [cursor=pointer]: M
+            - generic [ref=e82] [cursor=pointer]: W
+            - generic [ref=e83] [cursor=pointer]: R
+            - generic [ref=e84] [cursor=pointer]: U
+            - generic [ref=e85] [cursor=pointer]: A
+            - generic [ref=e86] [cursor=pointer]: "N"
+            - generic [ref=e87] [cursor=pointer]: T
+            - generic [ref=e88] [cursor=pointer]: B
+            - generic [ref=e89] [cursor=pointer]: S
+            - generic [ref=e90] [cursor=pointer]: Z
+            - generic [ref=e91] [cursor=pointer]: X
+            - generic [ref=e92] [cursor=pointer]: E
+            - generic [ref=e93] [cursor=pointer]: "Y"
+            - generic [ref=e94] [cursor=pointer]: W
+            - generic [ref=e95] [cursor=pointer]: L
+            - generic [ref=e96] [cursor=pointer]: C
+            - generic [ref=e97] [cursor=pointer]: U
+            - generic [ref=e98] [cursor=pointer]: G
+            - generic [ref=e99] [cursor=pointer]: E
+            - generic [ref=e100] [cursor=pointer]: B
+            - generic [ref=e101] [cursor=pointer]: L
+            - generic [ref=e102] [cursor=pointer]: R
+            - generic [ref=e103] [cursor=pointer]: B
+            - generic [ref=e104] [cursor=pointer]: B
+            - generic [ref=e105] [cursor=pointer]: Q
+            - generic [ref=e106] [cursor=pointer]: B
+            - generic [ref=e107] [cursor=pointer]: W
+            - generic [ref=e108] [cursor=pointer]: "N"
+            - generic [ref=e109] [cursor=pointer]: T
+            - generic [ref=e110] [cursor=pointer]: F
+            - generic [ref=e111] [cursor=pointer]: A
+            - generic [ref=e112] [cursor=pointer]: H
+            - generic [ref=e113] [cursor=pointer]: I
+            - generic [ref=e114] [cursor=pointer]: G
+            - generic [ref=e115] [cursor=pointer]: "N"
+            - generic [ref=e116] [cursor=pointer]: T
+            - generic [ref=e117] [cursor=pointer]: T
+            - generic [ref=e118] [cursor=pointer]: M
+            - generic [ref=e119] [cursor=pointer]: G
+            - generic [ref=e120] [cursor=pointer]: T
+            - generic [ref=e121] [cursor=pointer]: X
+            - generic [ref=e122] [cursor=pointer]: O
+            - generic [ref=e123] [cursor=pointer]: O
+            - generic [ref=e124] [cursor=pointer]: "Y"
+            - generic [ref=e125] [cursor=pointer]: B
+            - generic [ref=e126] [cursor=pointer]: "Y"
+            - generic [ref=e127] [cursor=pointer]: X
+            - generic [ref=e128] [cursor=pointer]: K
+            - generic [ref=e129] [cursor=pointer]: A
+            - generic [ref=e130] [cursor=pointer]: E
+            - generic [ref=e131] [cursor=pointer]: T
+            - generic [ref=e132] [cursor=pointer]: D
+            - generic [ref=e133] [cursor=pointer]: D
+            - generic [ref=e134] [cursor=pointer]: A
+            - generic [ref=e135] [cursor=pointer]: M
+            - generic [ref=e136] [cursor=pointer]: G
+            - generic [ref=e137] [cursor=pointer]: W
+            - generic [ref=e138] [cursor=pointer]: Q
+            - generic [ref=e139] [cursor=pointer]: D
+            - generic [ref=e140] [cursor=pointer]: O
+            - generic [ref=e141] [cursor=pointer]: I
+            - generic [ref=e142] [cursor=pointer]: V
+            - generic [ref=e143] [cursor=pointer]: G
+            - generic [ref=e144] [cursor=pointer]: B
+            - generic [ref=e145] [cursor=pointer]: I
+            - generic [ref=e146] [cursor=pointer]: R
+            - generic [ref=e147] [cursor=pointer]: D
+            - generic [ref=e148] [cursor=pointer]: U
+            - generic [ref=e149] [cursor=pointer]: X
+            - generic [ref=e150] [cursor=pointer]: A
+            - generic [ref=e151] [cursor=pointer]: S
+            - generic [ref=e152] [cursor=pointer]: "Y"
+            - generic [ref=e153] [cursor=pointer]: T
+            - generic [ref=e154] [cursor=pointer]: G
+            - generic [ref=e155] [cursor=pointer]: P
+            - generic [ref=e156] [cursor=pointer]: S
+            - generic [ref=e157] [cursor=pointer]: R
+            - generic [ref=e158] [cursor=pointer]: L
+            - generic [ref=e159] [cursor=pointer]: R
+            - generic [ref=e160] [cursor=pointer]: "Y"
+            - generic [ref=e161] [cursor=pointer]: "N"
+            - generic [ref=e162] [cursor=pointer]: P
+            - generic [ref=e163] [cursor=pointer]: Q
+            - generic [ref=e164] [cursor=pointer]: C
+            - generic [ref=e165] [cursor=pointer]: "N"
+            - generic [ref=e166] [cursor=pointer]: E
+            - generic [ref=e167] [cursor=pointer]: O
+            - generic [ref=e168] [cursor=pointer]: B
+            - generic [ref=e169] [cursor=pointer]: C
+            - generic [ref=e170] [cursor=pointer]: Z
+            - generic [ref=e171] [cursor=pointer]: D
+            - generic [ref=e172] [cursor=pointer]: L
+            - generic [ref=e173] [cursor=pointer]: G
+            - generic [ref=e174] [cursor=pointer]: C
+            - generic [ref=e175] [cursor=pointer]: W
+            - generic [ref=e176] [cursor=pointer]: S
+            - generic [ref=e177] [cursor=pointer]: P
+            - generic [ref=e178] [cursor=pointer]: I
+            - generic [ref=e179] [cursor=pointer]: D
+            - generic [ref=e180] [cursor=pointer]: E
+            - generic [ref=e181] [cursor=pointer]: R
+            - generic [ref=e182] [cursor=pointer]: S
+            - generic [ref=e183] [cursor=pointer]: P
+            - generic [ref=e184] [cursor=pointer]: B
+            - generic [ref=e185] [cursor=pointer]: S
+            - generic [ref=e186] [cursor=pointer]: M
+            - generic [ref=e187] [cursor=pointer]: U
+            - generic [ref=e188] [cursor=pointer]: U
+            - generic [ref=e189] [cursor=pointer]: P
+            - generic [ref=e190] [cursor=pointer]: P
+            - generic [ref=e191] [cursor=pointer]: E
+            - generic [ref=e192] [cursor=pointer]: I
+            - generic [ref=e193] [cursor=pointer]: P
+            - generic [ref=e194] [cursor=pointer]: I
+            - generic [ref=e195] [cursor=pointer]: M
+            - generic [ref=e196] [cursor=pointer]: V
+            - generic [ref=e197] [cursor=pointer]: D
+            - generic [ref=e198] [cursor=pointer]: G
+            - generic [ref=e199] [cursor=pointer]: K
+            - generic [ref=e200] [cursor=pointer]: "Y"
+            - generic [ref=e201] [cursor=pointer]: L
+            - generic [ref=e202] [cursor=pointer]: H
+            - generic [ref=e203] [cursor=pointer]: X
+            - generic [ref=e204] [cursor=pointer]: M
+            - generic [ref=e205] [cursor=pointer]: I
+            - generic [ref=e206] [cursor=pointer]: Z
+            - generic [ref=e207] [cursor=pointer]: C
+            - generic [ref=e208] [cursor=pointer]: U
+            - generic [ref=e209] [cursor=pointer]: C
+            - generic [ref=e210] [cursor=pointer]: A
+            - generic [ref=e211] [cursor=pointer]: T
+            - generic [ref=e212] [cursor=pointer]: J
+            - generic [ref=e213] [cursor=pointer]: T
+            - generic [ref=e214] [cursor=pointer]: Z
+            - generic [ref=e215] [cursor=pointer]: H
+            - generic [ref=e216] [cursor=pointer]: L
+            - generic [ref=e217] [cursor=pointer]: C
+            - generic [ref=e218] [cursor=pointer]: Q
+            - generic [ref=e219] [cursor=pointer]: A
+            - generic [ref=e220] [cursor=pointer]: T
+            - generic [ref=e221] [cursor=pointer]: "Y"
+            - generic [ref=e222] [cursor=pointer]: G
+            - generic [ref=e223] [cursor=pointer]: M
+            - generic [ref=e224] [cursor=pointer]: "N"
+            - generic [ref=e225] [cursor=pointer]: O
+            - generic [ref=e226] [cursor=pointer]: "Y"
+            - generic [ref=e227] [cursor=pointer]: P
+            - generic [ref=e228] [cursor=pointer]: D
+            - generic [ref=e229] [cursor=pointer]: B
+            - generic [ref=e230] [cursor=pointer]: E
+            - generic [ref=e231] [cursor=pointer]: C
+            - generic [ref=e232] [cursor=pointer]: O
+            - generic [ref=e233] [cursor=pointer]: W
+            - generic [ref=e234] [cursor=pointer]: W
+            - generic [ref=e235] [cursor=pointer]: "N"
+            - generic [ref=e236] [cursor=pointer]: T
+            - generic [ref=e237] [cursor=pointer]: D
+            - generic [ref=e238] [cursor=pointer]: L
+            - generic [ref=e239] [cursor=pointer]: C
+            - generic [ref=e240] [cursor=pointer]: H
+            - generic [ref=e241] [cursor=pointer]: D
+            - generic [ref=e242] [cursor=pointer]: T
+            - generic [ref=e243] [cursor=pointer]: P
+            - generic [ref=e244] [cursor=pointer]: O
+            - generic [ref=e245] [cursor=pointer]: A
+            - generic [ref=e246] [cursor=pointer]: P
+            - generic [ref=e247] [cursor=pointer]: H
+            - generic [ref=e248] [cursor=pointer]: H
+            - generic [ref=e249] [cursor=pointer]: H
+            - generic [ref=e250] [cursor=pointer]: E
+            - generic [ref=e251] [cursor=pointer]: W
+            - generic [ref=e252] [cursor=pointer]: R
+            - generic [ref=e253] [cursor=pointer]: G
+            - generic [ref=e254] [cursor=pointer]: F
+            - generic [ref=e255] [cursor=pointer]: B
+            - generic [ref=e256] [cursor=pointer]: A
+            - generic [ref=e257] [cursor=pointer]: Q
+            - generic [ref=e258] [cursor=pointer]: W
+            - generic [ref=e259] [cursor=pointer]: G
+            - generic [ref=e260] [cursor=pointer]: G
+            - generic [ref=e261] [cursor=pointer]: P
+            - generic [ref=e262] [cursor=pointer]: V
+            - generic [ref=e263] [cursor=pointer]: S
+            - generic [ref=e264] [cursor=pointer]: T
+            - generic [ref=e265] [cursor=pointer]: T
+            - generic [ref=e266] [cursor=pointer]: T
+            - generic [ref=e267] [cursor=pointer]: S
+            - generic [ref=e268] [cursor=pointer]: "Y"
+            - generic [ref=e269] [cursor=pointer]: B
+            - generic [ref=e270] [cursor=pointer]: R
+            - generic [ref=e271] [cursor=pointer]: D
+            - generic [ref=e272] [cursor=pointer]: B
+            - generic [ref=e273] [cursor=pointer]: A
+            - generic [ref=e274] [cursor=pointer]: T
+            - generic [ref=e275] [cursor=pointer]: J
+            - generic [ref=e276] [cursor=pointer]: S
+            - generic [ref=e277] [cursor=pointer]: I
+            - generic [ref=e278] [cursor=pointer]: B
+            - generic [ref=e279] [cursor=pointer]: W
+            - generic [ref=e280] [cursor=pointer]: B
+            - generic [ref=e281] [cursor=pointer]: D
+            - generic [ref=e282] [cursor=pointer]: E
+            - generic [ref=e283] [cursor=pointer]: P
+            - generic [ref=e284] [cursor=pointer]: A
+            - generic [ref=e285] [cursor=pointer]: C
+            - generic [ref=e286] [cursor=pointer]: O
+            - generic [ref=e287] [cursor=pointer]: Z
+            - generic [ref=e288] [cursor=pointer]: M
+            - generic [ref=e289] [cursor=pointer]: S
+            - generic [ref=e290] [cursor=pointer]: V
+            - generic [ref=e291] [cursor=pointer]: F
+            - generic [ref=e292] [cursor=pointer]: H
+            - generic [ref=e293] [cursor=pointer]: O
+            - generic [ref=e294] [cursor=pointer]: R
+            - generic [ref=e295] [cursor=pointer]: S
+            - generic [ref=e296] [cursor=pointer]: E
+            - generic [ref=e297] [cursor=pointer]: D
+            - generic [ref=e298] [cursor=pointer]: Z
+            - generic [ref=e299] [cursor=pointer]: X
+            - generic [ref=e300] [cursor=pointer]: W
+            - generic [ref=e301] [cursor=pointer]: W
+            - generic [ref=e302] [cursor=pointer]: G
+            - generic [ref=e303] [cursor=pointer]: "N"
+            - generic [ref=e304] [cursor=pointer]: G
+            - generic [ref=e305] [cursor=pointer]: V
+        - generic [ref=e307]:
+          - generic [ref=e309] [cursor=pointer]:
+            - img [ref=e310]
+            - text: 
+          - generic [ref=e312] [cursor=pointer]:
+            - img [ref=e313]
+            - text: 
+          - generic [ref=e315] [cursor=pointer]:
+            - img [ref=e316]
+            - text: 
+          - generic [ref=e318] [cursor=pointer]:
+            - img [ref=e319]
+            - text: 
+  - button "" [ref=e320] [cursor=pointer]:
+    - generic [ref=e321]: 
+```

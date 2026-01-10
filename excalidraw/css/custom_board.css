@@ -14,6 +14,39 @@
     --color-primary-light: #e0dfff; 
 }
 
+/* ===== THEMES ===== */
+body.theme-nature {
+    --indigo-velvet: #2d6a4f;
+    --medium-slate-blue: #52b788;
+    --amber-flame: #95d5b2;
+    --tiger-orange: #74c69d;
+    --cayenne-red: #1b4332;
+}
+
+body.theme-sunset {
+    --indigo-velvet: #6d597a;
+    --medium-slate-blue: #b56576;
+    --amber-flame: #eaac8b;
+    --tiger-orange: #e56b6f;
+    --cayenne-red: #355070;
+}
+
+body.theme-ocean {
+    --indigo-velvet: #003049;
+    --medium-slate-blue: #0077b6;
+    --amber-flame: #90e0ef;
+    --tiger-orange: #48cae4;
+    --cayenne-red: #03045e;
+}
+
+body.theme-amber {
+    --indigo-velvet: #582f0e;
+    --medium-slate-blue: #f9c74f;
+    --amber-flame: #ffef96;
+    --tiger-orange: #f3722c;
+    --cayenne-red: #a4161a;
+}
+
 /* Hide Unwanted Elements */
 
 /* Social Links */

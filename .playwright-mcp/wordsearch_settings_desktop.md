@@ -1,0 +1,72 @@
+### Page state
+- Page URL: http://localhost:8080/practice.html?mode=wordsearch&ids=animal_01,animal_02,animal_03,animal_04,animal_05,animal_06,animal_07,animal_08
+- Page Title: ESL Practice Mode
+- Page Snapshot:
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - heading "Practice" [level=1] [ref=e4]
+      - button "Close" [ref=e6] [cursor=pointer]
+    - generic [ref=e8]:
+      - heading "Wordsearch Options" [level=2] [ref=e9]
+      - generic [ref=e10]:
+        - generic [ref=e11]: TIMER
+        - generic [ref=e12]:
+          - generic [ref=e13] [cursor=pointer]:
+            - radio "None" [checked] [ref=e14]
+            - text: None
+          - generic [ref=e15] [cursor=pointer]:
+            - radio "Count up" [ref=e16]
+            - text: Count up
+          - generic [ref=e17] [cursor=pointer]:
+            - radio "Count down" [ref=e18]
+            - text: Count down
+          - generic [ref=e19]:
+            - spinbutton [ref=e20]: "5"
+            - text: m
+            - spinbutton [ref=e21]: "0"
+            - text: s
+      - generic [ref=e22]:
+        - generic [ref=e23]: LIVES
+        - generic [ref=e24]:
+          - slider [ref=e25]: "0"
+          - generic [ref=e26]: Infinite
+      - generic [ref=e27]:
+        - generic [ref=e28]: DIFFICULTY
+        - generic [ref=e29]:
+          - generic [ref=e30] [cursor=pointer]:
+            - checkbox "Allow diagonal words" [checked] [ref=e31]
+            - text: Allow diagonal words
+          - generic [ref=e32] [cursor=pointer]:
+            - checkbox "Allow reverse words" [ref=e33]
+            - text: Allow reverse words
+      - generic [ref=e34]:
+        - generic [ref=e35]: GRID SIZE
+        - generic [ref=e36]:
+          - button "XS" [ref=e37] [cursor=pointer]
+          - button "S" [ref=e38] [cursor=pointer]
+          - button "M" [ref=e39] [cursor=pointer]
+          - button "LG" [ref=e40] [cursor=pointer]
+          - button "XL" [ref=e41] [cursor=pointer]
+      - generic [ref=e42]:
+        - generic [ref=e43]: CLUE TYPES
+        - generic [ref=e44]:
+          - generic [ref=e45] [cursor=pointer]:
+            - checkbox "Image Clues" [checked] [ref=e46]
+            - text: Image Clues
+          - generic [ref=e47] [cursor=pointer]:
+            - checkbox "Audio Clues" [ref=e48]
+            - text: Audio Clues
+          - generic [ref=e49] [cursor=pointer]:
+            - checkbox "Text Clues" [ref=e50]
+            - text: Text Clues
+      - generic [ref=e51]:
+        - generic [ref=e52]: GAMEPLAY
+        - generic [ref=e54] [cursor=pointer]:
+          - checkbox "Must click clue card after finding word" [ref=e55]
+          - text: Must click clue card after finding word
+      - button "Start Game" [ref=e57] [cursor=pointer]
+  - button "" [ref=e58] [cursor=pointer]:
+    - generic [ref=e59]: 
+```
