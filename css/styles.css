@@ -389,6 +389,21 @@ input, select, button, textarea {
     color: #721c24;
 }
 
+body.dark-mode .word-level.beginner {
+    background: #1b4332;
+    color: #95d5b2;
+}
+
+body.dark-mode .word-level.intermediate {
+    background: #582f0e;
+    color: #f9c74f;
+}
+
+body.dark-mode .word-level.advanced {
+    background: #641212;
+    color: #ff8787;
+}
+
 /* ===== EXERCISE CONTAINER ===== */
 .exercise-container {
     margin-top: 40px;
@@ -1212,7 +1227,8 @@ body.dark-mode .category-label,
 body.dark-mode .word-text,
 body.dark-mode .exercise-card span,
 body.dark-mode .quiz-sentence,
-body.dark-mode .word-title h3 {
+body.dark-mode .word-title h3,
+body.dark-mode .category-icon {
     color: var(--amber-flame) !important;
 }
 
@@ -1233,6 +1249,24 @@ body.dark-mode textarea {
 
 body.dark-mode .theme-menu {
     background-color: #1e1e1e !important;
+}
+
+body.dark-mode .dictionary-body .translation .value {
+    color: var(--amber-flame) !important;
+}
+
+body.dark-mode .dictionary-body .label {
+    color: #aaa !important;
+}
+
+body.dark-mode .word-type {
+    background: #333 !important;
+    color: #eee !important;
+}
+
+body.dark-mode .word-category {
+    background: #582f0e !important;
+    color: #f9c74f !important;
 }
 
 /* Dark Mode Toggle */
