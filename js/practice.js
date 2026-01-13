@@ -1309,6 +1309,9 @@ const PracticeModule = {
             <div class="unjumble-exercise" style="width: 100%; max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
                 <div style="text-align: center; margin-bottom: 20px;">
                     ${visual}
+                    <button class="sound-btn-large" style="margin: 0 auto 10px auto;" onclick="PracticeModule.playSound('${wordObj.word.replace(/'/g, "\\'")}')">
+                        <i class="fa-solid fa-volume-high"></i>
+                    </button>
                     <h3 style="color: var(--indigo-velvet);">Unjumble the Phrase</h3>
                     <p style="color: #666;">Drag the words or click them in order:</p>
                 </div>

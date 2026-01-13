@@ -286,7 +286,19 @@ const vocabularyBank = [
     {id: 'class_30', word: 'One moment, please', spanish: 'Un momento, por favor', type: 'phrase', icon: 'fa-solid fa-hourglass-half', category: 'classroom-language', subcategory: 'management', level: 'beginner', definition: 'Asking for a short wait', example: 'One moment, please, the video is loading.'},
     {id: 'id_class_31', word: 'Pass the scissors, please', spanish: 'Pasa las tijeras, por favor', type: 'phrase', icon: 'fa-solid fa-scissors', category: 'classroom-language', subcategory: 'instructional', level: 'beginner', definition: 'Asking to give an item', example: 'Pass the scissors, please, I need them.'},
     {id: 'id_class_32', word: 'Share the glue', spanish: 'Comparte el pegante', type: 'phrase', icon: 'fa-solid fa-handshake', category: 'classroom-language', subcategory: 'instructional', level: 'beginner', definition: 'Asking to use an item together', example: 'Share the glue with your partner.'},
-    {id: 'id_class_33', word: 'Dry your table', spanish: 'Seca tu mesa', type: 'phrase', icon: 'fa-solid fa-rug', category: 'classroom-language', subcategory: 'routines', level: 'beginner', definition: 'Command to wipe the table', example: 'Use the rag to dry your table.'}
+    {id: 'id_class_33', word: 'Dry your table', spanish: 'Seca tu mesa', type: 'phrase', icon: 'fa-solid fa-rug', category: 'classroom-language', subcategory: 'routines', level: 'beginner', definition: 'Command to wipe the table', example: 'Use the rag to dry your table.'},
+
+    // Directions
+    {id: 'dir_01', word: 'Up', spanish: 'Arriba', type: 'preposition', icon: 'fa-solid fa-arrow-up', category: 'directions', subcategory: 'position', level: 'beginner', definition: 'Towards a higher place', example: 'Look up at the ceiling.'},
+    {id: 'dir_02', word: 'Down', spanish: 'Abajo', type: 'preposition', icon: 'fa-solid fa-arrow-down', category: 'directions', subcategory: 'position', level: 'beginner', definition: 'Towards a lower place', example: 'Look down at your shoes.'},
+    {id: 'dir_03', word: 'Left', spanish: 'Izquierda', type: 'noun', icon: 'fa-solid fa-arrow-left', category: 'directions', subcategory: 'position', level: 'beginner', definition: 'The side where your heart is', example: 'The door is on the left.'},
+    {id: 'dir_04', word: 'Right', spanish: 'Derecha', type: 'noun', icon: 'fa-solid fa-arrow-right', category: 'directions', subcategory: 'position', level: 'beginner', definition: 'Opposite of left', example: 'The window is on the right.'},
+    {id: 'dir_05', word: 'Inside', spanish: 'Adentro', type: 'preposition', icon: 'fa-solid fa-box-open', category: 'directions', subcategory: 'location', level: 'beginner', definition: 'In the inner part', example: 'Go inside the classroom.'},
+    {id: 'dir_06', word: 'Outside', spanish: 'Afuera', type: 'preposition', icon: 'fa-solid fa-door-open', category: 'directions', subcategory: 'location', level: 'beginner', definition: 'Out of the building', example: 'Wait outside the door.'},
+    {id: 'dir_07', word: 'Front', spanish: 'Frente', type: 'noun', icon: 'fa-solid fa-turn-up', category: 'directions', subcategory: 'location', level: 'beginner', definition: 'The most forward part', example: 'Come to the front of the class.'},
+    {id: 'dir_08', word: 'Back', spanish: 'Atrás', type: 'noun', icon: 'fa-solid fa-turn-down', category: 'directions', subcategory: 'location', level: 'beginner', definition: 'The rear part', example: 'Sit at the back of the room.'},
+    {id: 'dir_09', word: 'Next to', spanish: 'Al lado de', type: 'preposition', icon: 'fa-solid fa-arrows-left-right-to-line', category: 'directions', subcategory: 'position', level: 'beginner', definition: 'Beside someone or something', example: 'Sit next to your friend.'},
+    {id: 'dir_10', word: 'Between', spanish: 'Entre', type: 'preposition', icon: 'fa-solid fa-arrows-left-right', category: 'directions', subcategory: 'position', level: 'beginner', definition: 'In the middle of two things', example: 'You are between Tom and Sarah.'}
 ];
 
 // Make data available globally
