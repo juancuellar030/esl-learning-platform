@@ -1,5 +1,6 @@
 const PracticeModule = {
     words: [],
+    baseWords: [],
     difficultWords: [], 
     currentIndex: 0,
     config: {
@@ -28,43 +29,352 @@ const PracticeModule = {
 
     init() {
         const params = new URLSearchParams(window.location.search);
-        const ids = params.get('ids')?.split(',') || [];
-        this.config.mode = params.get('mode') || 'flashcards';
+        let idsParam = params.get('ids');
+        
+        // Try getting IDs from localStorage if not in URL
+        if (!idsParam) {
+            const storedIds = localStorage.getItem('selectedVocabIds');
+            if (storedIds) {
+                try {
+                    idsParam = JSON.parse(storedIds).join(',');
+                } catch(e) { console.error('Error parsing stored IDs', e); }
+            }
+        }
+
+        const ids = idsParam ? idsParam.split(',') : [];
+        this.config.mode = params.get('mode'); // Allow null
         this.config.face = params.get('face') || 'word_first';
         this.config.submode = params.get('face'); 
 
-        // Load words
-        this.words = window.vocabularyBank.filter(w => ids.includes(w.id));
-        
-        // Limit words to 16 for wordsearch
-        if (this.config.mode === 'wordsearch' && this.words.length > 16) {
-            this.words = this.words.slice(0, 16);
-        }
-
-        if (this.config.mode === 'quiz') {
-            this.words = window.classroomLanguageQuiz;
-        }
-
-        if (this.config.mode === 'unjumble') {
-            this.words = this.words.filter(w => w.word.trim().includes(' '));
-        }
-
+        // Load base words
+        this.baseWords = window.vocabularyBank.filter(w => ids.includes(w.id));
+        this.words = [...this.baseWords];
         this.difficultWords = []; 
+
+        if (this.config.mode) {
+            this.handleModeSetup(this.config.mode);
+        } else {
+            this.showModeSelection();
+        }
         
+        this.setupFullScreen();
+        this.updateWordCountButton();
+        this.setupSettingsButton();
+    },
+
+    setupSettingsButton() {
+        const btn = document.getElementById('change-options-btn');
+        if (btn) {
+            btn.onclick = () => this.backToSettings();
+        }
+    },
+
+    backToSettings() {
+        if (this.gameState.timerInterval) clearInterval(this.gameState.timerInterval);
+        this.handleModeSetup(this.config.mode);
+    },
+
+    updateWordCountButton() {
+        const btn = document.getElementById('word-count-floating-btn');
+        const text = document.getElementById('word-count-text');
+        const list = document.getElementById('selected-words-list');
+        
+        if (!btn || !text || !list) return;
+
+        const count = this.baseWords.length;
+        text.textContent = `${count} Word${count !== 1 ? 's' : ''} Selected`;
+        
+        list.innerHTML = this.baseWords.map(w => `<li>${w.word}</li>`).join('');
+    },
+
+    toggleWordCountVisibility(visible) {
+        const btn = document.getElementById('word-count-floating-btn');
+        if (btn) {
+            if (visible) btn.classList.add('visible');
+            else btn.classList.remove('visible');
+        }
+    },
+
+    showModeSelection() {
+        document.getElementById('mode-selection-area').style.display = 'block';
+        document.getElementById('settings-area').style.display = 'none';
+        document.getElementById('game-area').style.display = 'none';
+        document.getElementById('game-info').innerHTML = '';
+        
+        const settingsBtn = document.getElementById('change-options-btn');
+        if (settingsBtn) settingsBtn.style.display = 'none';
+        
+        this.toggleWordCountVisibility(true);
+
+        // Add click handlers
+        document.querySelectorAll('.exercise-card').forEach(card => {
+            card.onclick = () => {
+                const mode = card.dataset.type;
+                this.config.mode = mode;
+                this.handleModeSetup(mode);
+            };
+        });
+    },
+
+    handleModeSetup(mode) {
+        // Reset words from base
+        this.words = [...this.baseWords];
+
+        // Specific filtering
+        if (mode === 'quiz') {
+            this.words = window.classroomLanguageQuiz;
+        } else if (mode === 'wordsearch') {
+             if (this.words.length > 16) this.words = this.words.slice(0, 16);
+        } else if (mode === 'unjumble') {
+             this.words = this.words.filter(w => w.word.trim().includes(' '));
+        }
+
         if (this.words.length === 0) {
-            document.getElementById('game-area').innerHTML = '<p>No words selected.</p>';
+            this.showToast('No suitable words selected for this mode! Please try another mode or select different words.', 'warning');
+            if (!this.config.mode) this.showModeSelection(); // Go back if we were in selection
             return;
         }
 
-        if (this.config.mode === 'wordsearch') {
+        document.getElementById('mode-selection-area').style.display = 'none';
+        
+        const settingsBtn = document.getElementById('change-options-btn');
+        
+        if (mode === 'wordsearch') {
+            if (settingsBtn) settingsBtn.style.display = 'none';
             this.showWordsearchSettings();
+        } else if (mode === 'flashcards') {
+            if (settingsBtn) settingsBtn.style.display = 'none';
+            this.showFlashcardsSettings();
         } else {
+            if (settingsBtn) settingsBtn.style.display = 'flex';
+            document.getElementById('game-area').style.display = 'flex'; // Ensure visible
             this.render();
         }
-        this.setupFullScreen();
+    },
+
+    showFlashcardsSettings() {
+        this.toggleWordCountVisibility(true);
+        const settingsArea = document.getElementById('settings-area');
+        const gameArea = document.getElementById('game-area');
+        settingsArea.style.display = 'block';
+        gameArea.style.display = 'none';
+
+        settingsArea.innerHTML = `
+            <div class="ws-settings-panel">
+                <h2>Flashcards Options</h2>
+                
+                <div class="flashcard-preview-container">
+                    <div class="flashcard-preview">
+                        <div class="flashcard-preview-inner">
+                            <div class="flashcard-preview-face flashcard-preview-face-front"></div>
+                            <div class="flashcard-preview-face flashcard-preview-face-back"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-group">
+                    <label>STUDY MODE</label>
+                    <div class="horizontal-options">
+                        <label>
+                            <input type="radio" name="fc-mode" value="word_first" checked> 
+                            <div class="option-btn">
+                                <i class="fa-solid fa-font option-icon"></i>
+                                <span>Word First</span>
+                            </div>
+                        </label>
+                        <label>
+                            <input type="radio" name="fc-mode" value="image_first"> 
+                            <div class="option-btn">
+                                <i class="fa-regular fa-image option-icon"></i>
+                                <span>Image First</span>
+                            </div>
+                        </label>
+                        <label>
+                            <input type="radio" name="fc-mode" value="listening"> 
+                            <div class="option-btn">
+                                <i class="fa-solid fa-volume-high option-icon"></i>
+                                <span>Listening</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="settings-group">
+                    <label>TIMER</label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="timer" value="none" checked> None</label>
+                        <label><input type="radio" name="timer" value="up"> Count up</label>
+                        <label><input type="radio" name="timer" value="down"> Count down</label>
+                        <div class="timer-inputs">
+                            <input type="number" id="timer-m" value="5" min="0" max="59"> m
+                            <input type="number" id="timer-s" value="0" min="0" max="59"> s
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-group">
+                    <label>RANDOM</label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" id="fc-shuffle" checked> Shuffle item order</label>
+                    </div>
+                </div>
+
+                <div class="settings-group">
+                    <label>REPEAT CARDS</label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="fc-repeat" value="until_correct" checked> Repeat cards until all correct</label>
+                        <label><input type="radio" name="fc-repeat" value="once"> Each card only once</label>
+                    </div>
+                </div>
+
+                <div class="settings-group">
+                    <label>MARKING</label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="fc-marking" value="none"> None</label>
+                        <label><input type="radio" name="fc-marking" value="tick_cross" checked> Tick/Cross</label>
+                    </div>
+                    <div class="checkbox-group" style="margin-top: 10px;">
+                        <label><input type="checkbox" id="fc-auto-proceed" checked> Automatically proceed after marking</label>
+                    </div>
+                </div>
+
+                <div class="settings-group">
+                    <label>END OF GAME</label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" id="fc-show-answers"> Show answers</label>
+                    </div>
+                </div>
+
+                <div class="settings-actions">
+                    <button class="btn-primary start-game-btn" onclick="PracticeModule.startFlashcards()">Start Practice</button>
+                </div>
+            </div>
+        `;
+
+        // Initialize preview
+        this.updateFlashcardPreview('word_first');
+
+        // Add Hover Listeners
+        const radios = document.querySelectorAll('input[name="fc-mode"]');
+        radios.forEach(radio => {
+            // Update on hover of the label (parent)
+            radio.parentElement.addEventListener('mouseenter', () => {
+                this.updateFlashcardPreview(radio.value);
+            });
+            
+            // Also update on change
+            radio.addEventListener('change', () => {
+                this.updateFlashcardPreview(radio.value);
+            });
+        });
+    },
+
+    startFlashcards() {
+        const mode = document.querySelector('input[name="fc-mode"]:checked').value;
+        const timerType = document.querySelector('input[name="timer"]:checked').value;
+        const minutes = parseInt(document.getElementById('timer-m').value) || 0;
+        const seconds = parseInt(document.getElementById('timer-s').value) || 0;
+        const shuffle = document.getElementById('fc-shuffle').checked;
+        const repeatMode = document.querySelector('input[name="fc-repeat"]:checked').value;
+        const markingMode = document.querySelector('input[name="fc-marking"]:checked').value;
+        const autoProceed = document.getElementById('fc-auto-proceed').checked;
+        const showAnswers = document.getElementById('fc-show-answers').checked;
+
+        this.config.face = mode;
+        this.config.settings = {
+            ...this.config.settings,
+            timer: timerType,
+            timerValue: (minutes * 60) + seconds,
+            shuffle: shuffle,
+            repeatMode: repeatMode,
+            markingMode: markingMode,
+            autoProceed: autoProceed,
+            showAnswers: showAnswers
+        };
+
+        if (shuffle) {
+            this.words.sort(() => Math.random() - 0.5);
+        }
+
+        // Reset game state for flashcards
+        this.gameState.timeLeft = this.config.settings.timerValue;
+        this.gameState.isGameOver = false;
+        
+        document.getElementById('settings-area').style.display = 'none';
+        document.getElementById('game-area').style.display = 'flex';
+        
+        this.startTimer(); // Start timer if configured
+        this.render();
+    },
+
+    updateFlashcardPreview(mode) {
+        const previewInner = document.querySelector('.flashcard-preview-inner');
+        const frontFace = document.querySelector('.flashcard-preview-face-front');
+        const backFace = document.querySelector('.flashcard-preview-face-back');
+        
+        if (!previewInner || !frontFace || !backFace) return;
+
+        let frontContent = '';
+        let backContent = '';
+
+        if (mode === 'word_first') {
+            frontContent = `<div class="preview-side-label">Front</div><i class="fa-solid fa-font preview-icon"></i><div class="preview-label">Word</div>`;
+            backContent = `
+                <div class="preview-side-label">Back</div>
+                <div style="display:flex; gap:10px;">
+                    <div style="text-align:center"><i class="fa-regular fa-image preview-icon"></i><div class="preview-label">Image</div></div>
+                    <div style="text-align:center"><i class="fa-solid fa-volume-high preview-icon"></i><div class="preview-label">Sound</div></div>
+                </div>
+            `;
+        } else if (mode === 'image_first') {
+            frontContent = `<div class="preview-side-label">Front</div><i class="fa-regular fa-image preview-icon"></i><div class="preview-label">Image</div>`;
+            backContent = `
+                <div class="preview-side-label">Back</div>
+                <div style="display:flex; gap:10px;">
+                    <div style="text-align:center"><i class="fa-solid fa-font preview-icon"></i><div class="preview-label">Word</div></div>
+                    <div style="text-align:center"><i class="fa-solid fa-volume-high preview-icon"></i><div class="preview-label">Sound</div></div>
+                </div>
+            `;
+        } else if (mode === 'listening') {
+            frontContent = `<div class="preview-side-label">Front</div><i class="fa-solid fa-volume-high preview-icon"></i><div class="preview-label">Sound</div>`;
+            backContent = `<div class="preview-side-label">Back</div><i class="fa-solid fa-font preview-icon"></i><div class="preview-label">Word</div>`;
+        }
+
+        // Apply content but prevent flicker if same
+        if (frontFace.innerHTML !== frontContent) frontFace.innerHTML = frontContent;
+        if (backFace.innerHTML !== backContent) backFace.innerHTML = backContent;
+
+        // Trigger Flip Animation
+        previewInner.classList.remove('flipped');
+        
+        // Small delay to ensure reset before flipping (simulating user interaction)
+        // If this is called on hover, we might want to flip to back then front?
+        // User said: "flips to reveal what type of content will be in the back and it flips again to show what type of content will be at the front."
+        
+        // Clear any existing animation timeouts
+        if (this._previewTimeout) clearTimeout(this._previewTimeout);
+        if (this._previewTimeout2) clearTimeout(this._previewTimeout2);
+
+        // Sequence: Start Front -> Flip to Back (show back content) -> Flip to Front (show front content)?
+        // Or: Start Front (Front Content) -> Flip to Back (Back Content) -> Flip to Front (Front Content).
+        
+        // Let's try:
+        // 1. Set content.
+        // 2. Wait a bit.
+        // 3. Add 'flipped' class (Show Back).
+        // 4. Wait.
+        // 5. Remove 'flipped' class (Show Front).
+        
+        this._previewTimeout = setTimeout(() => {
+            previewInner.classList.add('flipped');
+            this._previewTimeout2 = setTimeout(() => {
+                previewInner.classList.remove('flipped');
+            }, 1200); // Stay on back for 1.2s
+        }, 100);
     },
 
     showWordsearchSettings() {
+        this.toggleWordCountVisibility(true);
         const settingsArea = document.getElementById('settings-area');
         const gameArea = document.getElementById('game-area');
         settingsArea.style.display = 'block';
@@ -165,7 +475,7 @@ const PracticeModule = {
         document.querySelectorAll('.clue-type-cb:checked').forEach(cb => clueTypes.push(cb.value));
 
         if (clueTypes.length === 0) {
-            alert('Please select at least one clue type!');
+            this.showToast('Please select at least one clue type!', 'warning');
             return;
         }
 
@@ -217,6 +527,9 @@ const PracticeModule = {
     },
 
     render() {
+        this.toggleWordCountVisibility(false);
+        const settingsBtn = document.getElementById('change-options-btn');
+        if (settingsBtn) settingsBtn.style.display = 'flex';
         const area = document.getElementById('game-area');
         area.innerHTML = ''; // Clear previous content
         
@@ -294,6 +607,10 @@ const PracticeModule = {
                 frontContent = soundBtnLarge;
                 backContent = visualHtml + wordHtml;
                 break;
+            case 'listening':
+                frontContent = soundBtnLarge;
+                backContent = wordHtml;
+                break;
         }
 
         container.innerHTML = `
@@ -307,6 +624,7 @@ const PracticeModule = {
                     </div>
                 </div>
                 
+                ${this.config.settings.markingMode !== 'none' ? `
                 <div class="learning-controls" onclick="event.stopPropagation()">
                     <button class="learning-btn btn-known" title="I know this!" onclick="PracticeModule.markWord(true)">
                         <i class="fa-solid fa-check"></i>
@@ -315,13 +633,22 @@ const PracticeModule = {
                         <i class="fa-solid fa-xmark"></i>
                     </button>
                 </div>
+                ` : ''}
             </div>
             
             <div class="practice-nav">
                 <button class="nav-btn" id="prev-btn" onclick="PracticeModule.prev()" ${this.currentIndex === 0 ? 'disabled' : ''}>← Previous</button>
                 <span style="font-weight: bold; font-size: 1.2rem;">${this.currentIndex + 1} / ${this.words.length}</span>
-                <button class="nav-btn" id="next-btn" onclick="PracticeModule.next()" ${this.currentIndex === this.words.length - 1 ? 'disabled' : ''}>Next →</button>
+                <button class="nav-btn" id="next-btn" onclick="PracticeModule.next()" 
+                    ${this.currentIndex === this.words.length - 1 && this.config.settings.markingMode !== 'none' ? 'disabled' : ''}>
+                    ${this.currentIndex === this.words.length - 1 && this.config.settings.markingMode === 'none' ? 'Finish' : 'Next →'}
+                </button>
             </div>
+            
+            ${this.config.settings.timer && this.config.settings.timer !== 'none' ? `
+            <div id="fc-timer" style="position: absolute; top: 20px; right: 20px; font-size: 1.5rem; font-weight: bold; color: white;">
+                <i class="fa-solid fa-clock"></i> <span>${this.formatTime(this.gameState.timeLeft)}</span>
+            </div>` : ''}
         `;
     },
 
@@ -338,8 +665,14 @@ const PracticeModule = {
             this.difficultWords = this.difficultWords.filter(w => w.id !== currentWord.id);
         }
 
-        // Move to next card
-        this.next();
+        // Auto proceed if enabled
+        if (this.config.settings.autoProceed !== false) {
+            this.next();
+        } else {
+            // Provide feedback or just flip card?
+            // For now, assume user will manually click Next or it's handled by UI
+            this.showToast(isKnown ? 'Marked as Known' : 'Marked for Review', isKnown ? 'success' : 'warning');
+        }
     },
 
     startReviewSession() {
@@ -427,7 +760,7 @@ const PracticeModule = {
                 
                 this.matches++;
                 if (this.matches === document.querySelectorAll('.match-card[data-type="left"]').length) {
-                    setTimeout(() => alert('🎉 All matched! Great job!'), 500);
+                    setTimeout(() => this.showToast('🎉 All matched! Great job!', 'success'), 500);
                 }
             } else {
                 // No match
@@ -437,6 +770,32 @@ const PracticeModule = {
                 }, 500);
             }
         }
+    },
+
+    showToast(message, type = 'info') {
+        // Remove existing toast
+        const existingToast = document.querySelector('.toast-notification');
+        if (existingToast) existingToast.remove();
+
+        const toast = document.createElement('div');
+        toast.className = `toast-notification ${type}`;
+        
+        let icon = 'fa-circle-info';
+        if (type === 'success') icon = 'fa-circle-check';
+        if (type === 'error') icon = 'fa-circle-xmark';
+        if (type === 'warning') icon = 'fa-triangle-exclamation';
+
+        toast.innerHTML = `<i class="fa-solid ${icon}"></i> <span>${message}</span>`;
+        document.body.appendChild(toast);
+
+        // Trigger animation
+        setTimeout(() => toast.classList.add('show'), 10);
+
+        // Auto remove
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 400);
+        }, 3000);
     },
 
     // --- SPELLING GAME LOGIC ---
@@ -589,7 +948,7 @@ const PracticeModule = {
                 this.gameState.timeLeft++;
             }
             
-            const timerEl = document.getElementById('ws-timer');
+            const timerEl = document.getElementById('ws-timer') || document.getElementById('fc-timer');
             if (timerEl) timerEl.querySelector('span').textContent = this.formatTime(this.gameState.timeLeft);
         }, 1000);
     },
@@ -614,12 +973,7 @@ const PracticeModule = {
         this.gameState.isGameOver = true;
         if (this.gameState.timerInterval) clearInterval(this.gameState.timerInterval);
         
-        if (!success) {
-            alert(message || 'Game Over!');
-            this.showSummary();
-        } else {
-            this.showSummary();
-        }
+        this.showSummary(success, message);
     },
 
     generateWordsearchGrid() {
@@ -1510,7 +1864,25 @@ const PracticeModule = {
         }
     },
 
-    showSummary() {
+    redo() {
+        // Reset Game State
+        this.gameState.isGameOver = false;
+        this.gameState.pendingClueMatch = null;
+        
+        if (this.config.mode === 'wordsearch') {
+             this.gameState.timeLeft = this.config.settings.timerValue;
+             this.gameState.livesLeft = this.config.settings.lives;
+        } else {
+            this.currentIndex = 0;
+            this.matches = 0;
+        }
+        
+        this.render();
+    },
+
+    showSummary(success = true, message = '') {
+        const settingsBtn = document.getElementById('change-options-btn');
+        if (settingsBtn) settingsBtn.style.display = 'none';
         let content = '';
         
         if (this.difficultWords.length > 0 && this.config.mode === 'flashcards') {
@@ -1527,17 +1899,42 @@ const PracticeModule = {
                     </div>
                     <div class="summary-actions">
                         <button class="btn-secondary" onclick="window.close()">Close</button>
-                        <button class="btn-secondary" onclick="window.location.reload()">Restart All</button>
+                        <button class="btn-secondary" onclick="PracticeModule.showModeSelection()">Choose Game Mode</button>
                     </div>
                 </div>
             `;
         } else {
+            let title = '🎉 Excellent!';
+            let subtext = 'You have completed all words in this set.';
+            let icon = 'fa-trophy';
+            let extraButtons = '';
+            
+            if (!success) {
+                title = 'Game Over';
+                subtext = message || 'Better luck next time!';
+                icon = 'fa-face-sad-tear';
+                
+                if (message && message.includes('Time')) {
+                    title = "Time's Up!";
+                    icon = 'fa-hourglass-end';
+                } else if (message && message.includes('lives')) {
+                    title = "Out of Lives!";
+                    icon = 'fa-heart-crack';
+                }
+                
+                extraButtons = `<button class="btn-primary" onclick="PracticeModule.redo()">Try Again</button>`;
+            } else {
+                // Success case - also allow replaying?
+                extraButtons = `<button class="btn-primary" onclick="PracticeModule.redo()">Play Again</button>`;
+            }
+
             content = `
                 <div class="summary-container">
-                    <h1>🎉 Excellent!</h1>
-                    <p>You have completed all words in this set.</p>
+                    <h1><i class="fa-solid ${icon}"></i> ${title}</h1>
+                    <p>${subtext}</p>
                     <div class="summary-actions">
-                        <button class="btn-primary" onclick="window.location.reload()">Restart</button>
+                        ${extraButtons}
+                        <button class="btn-secondary" onclick="PracticeModule.showModeSelection()">Choose Game Mode</button>
                         <button class="btn-secondary" onclick="window.close()">Close</button>
                     </div>
                 </div>
@@ -1548,14 +1945,18 @@ const PracticeModule = {
     },
 
     playSound(wordText) {
-        const audioPath = `assets/audio/vocabulary/${wordText.toLowerCase()}.mp3`;
+        const cleanText = wordText.toLowerCase().replace(/\?/g, '');
+        const audioPath = `assets/audio/vocabulary/${cleanText}.mp3`;
         const audio = new Audio(audioPath);
         
-        audio.play().catch(() => {
-            console.log('Audio file not found, using synthesis');
-            const speech = new SpeechSynthesisUtterance(wordText);
-            speech.rate = 0.8;
-            window.speechSynthesis.speak(speech);
+        audio.play().catch((e) => {
+            console.log('Audio file not found or playback failed, using synthesis for:', wordText, e);
+            if ('speechSynthesis' in window) {
+                const speech = new SpeechSynthesisUtterance(wordText);
+                speech.lang = 'en-US';
+                speech.rate = 0.8;
+                window.speechSynthesis.speak(speech);
+            }
         });
     },
 

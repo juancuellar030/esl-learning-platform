@@ -65,7 +65,7 @@ const GrammarModule = {
                 <p>${grammar.explanation.substring(0, 100)}...</p>
                 <div class="grammar-meta">
                     <span>${grammar.category}</span>
-                    <span>${grammar.level}</span>
+                    <span class="level-tag ${grammar.level}">${grammar.level}</span>
                 </div>
             </div>
         `).join('');

@@ -26,7 +26,6 @@ const VocabModule = {
         // Show categories by default initially
         this.renderCategories();
         this.setupEventListeners();
-        this.updateExerciseCards('all');
     },
     
     renderCategories() {
@@ -132,20 +131,6 @@ const VocabModule = {
 
         // Add Color Wheel button if category is colors
         this.updateSpecialButtons(category);
-
-        // Show/hide Quiz exercise card based on category
-        this.updateExerciseCards(category);
-    },
-
-    updateExerciseCards(category) {
-        const quizCard = document.querySelector('.exercise-card[data-type="quiz"]');
-        if (quizCard) {
-            if (category === 'classroom-language') {
-                quizCard.style.display = 'flex';
-            } else {
-                quizCard.style.display = 'none';
-            }
-        }
     },
 
     updateSpecialButtons(category) {
@@ -188,183 +173,30 @@ const VocabModule = {
         this.updateGenerateButton();
     },
     
-    playAudio(wordId) {
-        const word = window.vocabularyBank.find(w => w.id === wordId);
-        // Simulate audio playback
-        const speech = new SpeechSynthesisUtterance(word.word);
-        speech.rate = 0.8;
-        window.speechSynthesis.speak(speech);
-    },
-    
     generateExercise() {
         if (this.selectedWords.length === 0) {
             alert('Please select at least one word!');
             return;
         }
-        document.getElementById('vocab-exercise-container').style.display = 'block';
-        document.getElementById('vocab-exercise-container').scrollIntoView({behavior: 'smooth'});
-    },
-    
-    showExercise(type) {
-        this.currentExerciseType = type;
-        const display = document.getElementById('exercise-display');
         
-        // Get selected word objects
-        const words = window.vocabularyBank.filter(w => 
-            this.selectedWords.includes(w.id)
-        );
+        // Save selected word IDs to localStorage
+        localStorage.setItem('selectedVocabIds', JSON.stringify(this.selectedWords));
+        localStorage.removeItem('practiceMode'); // Clear previous mode to trigger mode selection in practice.html
         
-        if (type === 'flashcards') {
-            display.innerHTML = `
-                <div class="exercise-setup-panel">
-                    <h3><img src="assets/images/thumbnails/flashcards.svg" style="height: 40px; vertical-align: middle; margin-right: 10px;"> Flashcard Mode:</h3>
-                    <div class="setup-options">
-                        <button class="btn-secondary" onclick="VocabModule.launchPractice('flashcards', 'word_first')">
-                            <i class="fa-solid fa-font"></i> Word First
-                        </button>
-                        <button class="btn-secondary" onclick="VocabModule.launchPractice('flashcards', 'image_first')">
-                            <i class="fa-regular fa-image"></i> Image First
-                        </button>
-                        <button class="btn-secondary" onclick="VocabModule.launchPractice('flashcards', 'sound_first')">
-                            <i class="fa-solid fa-volume-high"></i> Sound First
-                        </button>
-                    </div>
-                </div>
-            `;
-            return;
-        }
-
-        if (type === 'wordsearch') {
-            display.innerHTML = `
-                <div class="exercise-setup-panel">
-                    <h3><img src="assets/images/thumbnails/wordsearch.svg" style="height: 40px; vertical-align: middle; margin-right: 10px;"> Wordsearch Mode:</h3>
-                    <p>Ready to challenge yourself with a hidden word puzzle?</p>
-                    <button class="btn-primary" style="font-size: 1.2rem; padding: 15px 30px;" 
-                            onclick="VocabModule.launchPractice('wordsearch')">
-                        Start Wordsearch <i class="fa-solid fa-arrow-up-right-from-square"></i>
-                    </button>
-                </div>
-            `;
-            return;
-        }
-
-        if (type === 'matching') {
-            display.innerHTML = `
-                <div class="exercise-setup-panel">
-                    <h3><i class="fa-solid fa-puzzle-piece" style="color: var(--medium-slate-blue); margin-right: 10px;"></i> Matching Game Mode:</h3>
-                    <div class="setup-options">
-                        <button class="btn-secondary" onclick="VocabModule.launchPractice('matching', 'image_word')">
-                            <i class="fa-regular fa-image"></i> Image vs Word
-                        </button>
-                        <button class="btn-secondary" onclick="VocabModule.launchPractice('matching', 'en_es')">
-                            <i class="fa-solid fa-language"></i> English vs Spanish
-                        </button>
-                    </div>
-                </div>
-            `;
-            return;
-        }
-
-        if (type === 'unjumble') {
-            const phrases = words.filter(w => w.word.trim().includes(' '));
-            if (phrases.length === 0) {
-                display.innerHTML = `
-                    <div class="exercise-setup-panel">
-                        <h3><i class="fa-solid fa-arrows-rotate" style="color: var(--medium-slate-blue); margin-right: 10px;"></i> Unjumble Mode</h3>
-                        <p style="color: #dc3545; font-weight: bold; margin-top: 20px;">No phrases selected!</p>
-                        <p>This mode only works with multi-word expressions (e.g., "Clean up").</p>
-                        <p>Please select some phrases from "Classroom Language" or other categories.</p>
-                    </div>
-                `;
-                return;
-            }
-            display.innerHTML = `
-                <div class="exercise-setup-panel">
-                    <h3><i class="fa-solid fa-arrows-rotate" style="color: var(--medium-slate-blue); margin-right: 10px;"></i> Unjumble Mode</h3>
-                    <p>Ready to practice with ${phrases.length} phrases?</p>
-                    <p style="font-size: 0.9rem; color: #666; margin-bottom: 20px;">(Single words like "Paint" have been filtered out)</p>
-                    <button class="btn-primary" style="font-size: 1.2rem; padding: 15px 30px;" 
-                            onclick="VocabModule.launchPractice('unjumble')">
-                        Start Unjumble <i class="fa-solid fa-arrow-up-right-from-square"></i>
-                    </button>
-                </div>
-            `;
-            return;
-        }
-
-        if (type === 'crossword') {
-                display.innerHTML = `
-                    <div class="exercise-setup-panel">
-                        <h3><i class="fa-solid fa-table-cells" style="color: var(--medium-slate-blue); margin-right: 10px;"></i> Crossword Mode:</h3>
-                        <div class="setup-options">
-                            <button class="btn-secondary" onclick="VocabModule.launchPractice('crossword', 'easy')">
-                                <i class="fa-regular fa-image"></i> Image Clues
-                            </button>
-                            <button class="btn-secondary" onclick="VocabModule.launchPractice('crossword', 'text')">
-                                <i class="fa-solid fa-language"></i> Spanish Clues
-                            </button>
-                            <button class="btn-secondary" onclick="VocabModule.launchPractice('crossword', 'audio')">
-                                <i class="fa-solid fa-volume-high"></i> Audio Clues
-                            </button>
-                        </div>
-                    </div>
-                `;
-                return;
-        }
-
-        if (type === 'quiz') {
-            display.innerHTML = `
-                <div class="exercise-setup-panel">
-                    <h3><i class="fa-solid fa-circle-question" style="color: var(--medium-slate-blue); margin-right: 10px;"></i> Expressions Quiz</h3>
-                    <p>Test your knowledge of classroom expressions!</p>
-                    <p style="font-size: 0.9rem; color: #666; margin-bottom: 20px;">Choose the best word to complete each sentence.</p>
-                    <button class="btn-primary" style="font-size: 1.2rem; padding: 15px 30px;" 
-                            onclick="VocabModule.launchPractice('quiz')">
-                        Start Quiz <i class="fa-solid fa-arrow-up-right-from-square"></i>
-                    </button>
-                </div>
-            `;
-            return;
-        }
-
-        // For other modes, simple launch button
-        let title = '';
-        let icon = '';
-        switch(type) {
-            case 'spelling':
-                title = 'Spelling Practice';
-                icon = 'fa-pen-to-square';
-                break;
-            case 'sentences':
-                title = 'Fill-in Sentences';
-                icon = 'fa-align-left';
-                break;
-        }
-
-        display.innerHTML = `
-            <div style="text-align: center; padding: 40px;">
-                <h3><i class="fa-solid ${icon}"></i> ${title}</h3>
-                <p>Ready to practice with ${words.length} words?</p>
-                <button class="btn-primary" style="margin-top: 20px; font-size: 1.2rem; padding: 15px 30px;" 
-                        onclick="VocabModule.launchPractice('${type}')">
-                    Start ${title} <i class="fa-solid fa-arrow-up-right-from-square"></i>
-                </button>
-                <p style="margin-top: 15px; font-size: 0.9rem; color: #666;">Opens in a new immersive window</p>
-            </div>
-        `;
-    },
-
-    launchPractice(mode, face) {
-        const ids = this.selectedWords.join(',');
-        let url = `practice.html?ids=${ids}&mode=${mode}`;
-        if (face) {
-            url += `&face=${face}`;
-        }
-        window.open(url, '_blank');
+        // Open practice.html in a new tab
+        window.open('practice.html', '_blank');
     },
     
-    // ... (Old inline render methods removed as we use the separate practice window now) ...
-    
+    updateGenerateButton() {
+        const btn = document.getElementById('generate-vocab-exercise');
+        if (this.selectedWords.length > 0) {
+            btn.classList.add('visible');
+            btn.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles"></i> Generate Exercise (${this.selectedWords.length})`;
+        } else {
+            btn.classList.remove('visible');
+        }
+    },
+
     setupEventListeners() {
         // Search input
         document.getElementById('vocab-search').addEventListener('input', (e) => {
@@ -424,28 +256,7 @@ const VocabModule = {
         document.getElementById('generate-vocab-exercise').addEventListener('click', () => {
             this.generateExercise();
         });
-        
-        // Exercise type cards
-        document.querySelectorAll('.exercise-card').forEach(card => {
-            card.addEventListener('click', () => {
-                document.querySelectorAll('.exercise-card').forEach(c => c.classList.remove('active'));
-                card.classList.add('active');
-                this.showExercise(card.dataset.type);
-            });
-        });
-    },
-    
-    updateGenerateButton() {
-        const btn = document.getElementById('generate-vocab-exercise');
-        if (this.selectedWords.length > 0) {
-            btn.style.display = 'inline-block';
-            btn.classList.add('pulsate');
-            btn.textContent = `Generate Exercise (${this.selectedWords.length})`;
-        } else {
-            btn.style.display = 'none';
-            btn.classList.remove('pulsate');
-        }
-    },
+    }
 };
 
 // Initialize when DOM is ready

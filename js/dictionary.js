@@ -67,13 +67,21 @@ const DictionaryModule = {
     },
 
     playAudio(text) {
-        if ('speechSynthesis' in window) {
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'en-US';
-            window.speechSynthesis.speak(utterance);
-        } else {
-            alert('Text-to-speech is not supported in this browser.');
-        }
+        const cleanText = text.toLowerCase().replace(/\?/g, '');
+        const audioPath = `assets/audio/vocabulary/${cleanText}.mp3`;
+        const audio = new Audio(audioPath);
+        
+        audio.play().catch((e) => {
+            console.log('Audio file not found or playback failed, using synthesis for:', text, e);
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'en-US';
+                utterance.rate = 0.8;
+                window.speechSynthesis.speak(utterance);
+            } else {
+                console.warn('Text-to-speech is not supported in this browser.');
+            }
+        });
     }
 };
 

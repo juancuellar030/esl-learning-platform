@@ -320,6 +320,37 @@ input, select, button, textarea {
 }
 
 /* ===== WORD GRID ===== */
+/* Floating Generate Button */
+#generate-vocab-exercise {
+    position: fixed;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%) translateY(150px);
+    z-index: 2000;
+    font-size: 1.3rem;
+    padding: 15px 40px;
+    border-radius: 50px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+    border: 3px solid white;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    opacity: 0;
+    pointer-events: none;
+}
+
+#generate-vocab-exercise.visible {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+}
+
+#generate-vocab-exercise:hover {
+    transform: translateX(-50%) translateY(-5px) scale(1.05);
+    background: var(--tiger-orange);
+}
+
 .word-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -548,11 +579,46 @@ body.dark-mode .word-level.advanced {
 
 .grammar-meta span {
     padding: 5px 12px;
-    background: var(--amber-flame);
-    color: white;
+    background: #e0e0e0;
+    color: #333;
     border-radius: 12px;
     font-size: 0.85rem;
-    font-weight: 600;
+    font-weight: 700;
+}
+
+.grammar-meta span.level-tag.beginner {
+    background: #d4edda;
+    color: #155724;
+}
+
+.grammar-meta span.level-tag.intermediate {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.grammar-meta span.level-tag.advanced {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+body.dark-mode .grammar-meta span {
+    background: #333 !important;
+    color: #eee !important;
+}
+
+body.dark-mode .grammar-meta span.level-tag.beginner {
+    background: #1b4332 !important;
+    color: #95d5b2 !important;
+}
+
+body.dark-mode .grammar-meta span.level-tag.intermediate {
+    background: #582f0e !important;
+    color: #f9c74f !important;
+}
+
+body.dark-mode .grammar-meta span.level-tag.advanced {
+    background: #641212 !important;
+    color: #ff8787 !important;
 }
 
 /* ===== GRAMMAR LESSON ===== */
@@ -1762,4 +1828,55 @@ body.dark-mode .dark-mode-toggle {
     .matching-game {
         grid-template-columns: 1fr;
     }
+}
+
+/* ===== TOAST NOTIFICATIONS ===== */
+.toast-notification {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-100px);
+    background: white;
+    color: #333;
+    padding: 15px 30px;
+    border-radius: 50px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    z-index: 9999;
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    font-weight: 600;
+    font-size: 1.1rem;
+    border: 3px solid var(--indigo-velvet);
+    min-width: 300px;
+    justify-content: center;
+}
+
+.toast-notification.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+}
+
+.toast-notification.success {
+    border-color: #2ECC71;
+    color: #155724;
+    background: #d4edda;
+}
+
+.toast-notification.error {
+    border-color: #E74C3C;
+    color: #721c24;
+    background: #f8d7da;
+}
+
+.toast-notification.warning {
+    border-color: #f39c12;
+    color: #856404;
+    background: #fff3cd;
+}
+
+.toast-notification i {
+    font-size: 1.4rem;
 }
