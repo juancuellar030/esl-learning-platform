@@ -1,0 +1,327 @@
+/* Geometric Shapes CSS Styles */
+
+.shape-preview-container {
+    width: 200px;
+    height: 200px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 10px auto;
+    perspective: 800px;
+    transition: transform 0.3s ease;
+}
+
+.shape-preview-container.large {
+    transform: scale(1.6);
+    margin: 40px auto;
+}
+
+.css-shape {
+    position: relative;
+    box-sizing: border-box;
+    transition: all 0.3s ease;
+}
+
+.css-shape:hover {
+    transform: scale(1.1);
+}
+
+/* --- 2D Shapes --- */
+
+/* Circle */
+.shape-circle {
+    width: 150px;
+    height: 150px;
+    background-color: var(--amber-flame);
+    border-radius: 50%;
+    border: 4px solid var(--indigo-velvet);
+}
+
+/* Square */
+.shape-square {
+    width: 150px;
+    height: 150px;
+    background-color: var(--medium-slate-blue);
+    border: 4px solid var(--indigo-velvet);
+}
+
+/* Triangle */
+.shape-triangle {
+    width: 0;
+    height: 0;
+    border-left: 80px solid transparent;
+    border-right: 80px solid transparent;
+    border-bottom: 140px solid var(--tiger-orange);
+    position: relative;
+}
+.shape-triangle::after {
+    content: '';
+    position: absolute;
+    top: 6px; /* Offset for border effect */
+    left: -70px;
+    width: 0;
+    height: 0;
+    border-left: 70px solid transparent;
+    border-right: 70px solid transparent;
+    border-bottom: 125px solid var(--tiger-orange);
+    z-index: -1;
+}
+/* Adding a faux border wrapper might be cleaner but let's stick to simple shape or drop shadow */
+.shape-triangle {
+    filter: drop-shadow(0 0 2px var(--indigo-velvet));
+}
+
+/* Rectangle */
+.shape-rectangle {
+    width: 180px;
+    height: 100px;
+    background-color: var(--cayenne-red);
+    border: 4px solid var(--indigo-velvet);
+}
+
+/* Oval */
+.shape-oval {
+    width: 160px;
+    height: 100px;
+    background-color: var(--medium-slate-blue);
+    border-radius: 50%;
+    border: 4px solid var(--indigo-velvet);
+}
+
+/* Star */
+.shape-star {
+    width: 150px;
+    height: 150px;
+    background-color: var(--amber-flame);
+    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+    /* Border is hard with clip-path, use drop-shadow */
+    filter: drop-shadow(0 0 4px var(--indigo-velvet));
+}
+
+/* Diamond */
+.shape-diamond {
+    width: 110px;
+    height: 110px;
+    background-color: var(--tiger-orange);
+    transform: rotate(45deg);
+    border: 4px solid var(--indigo-velvet);
+    margin: 20px;
+}
+
+/* Hexagon */
+.shape-hexagon {
+    width: 160px;
+    height: 140px;
+    background-color: var(--medium-slate-blue);
+    clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+    filter: drop-shadow(0 0 4px var(--indigo-velvet));
+}
+
+/* Pentagon */
+.shape-pentagon {
+    width: 150px;
+    height: 140px;
+    background-color: var(--cayenne-red);
+    clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
+    filter: drop-shadow(0 0 4px var(--indigo-velvet));
+}
+
+
+/* --- 3D Shapes --- */
+
+/* Sphere */
+.shape-sphere {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #fff, var(--medium-slate-blue), var(--indigo-velvet));
+    box-shadow: 10px 10px 20px rgba(0,0,0,0.3);
+}
+
+/* Cube */
+.shape-cube {
+    width: 100px;
+    height: 100px;
+    position: relative;
+    transform-style: preserve-3d;
+    transform: rotateX(-20deg) rotateY(45deg);
+}
+
+.cube-face {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    border: 2px solid var(--indigo-velvet);
+    opacity: 0.9;
+    background: var(--amber-flame);
+}
+
+.cube-front  { transform: translateZ(50px); background: var(--amber-flame); }
+.cube-back   { transform: rotateY(180deg) translateZ(50px); background: #e67e22; }
+.cube-right  { transform: rotateY(90deg) translateZ(50px); background: #f39c12; }
+.cube-left   { transform: rotateY(-90deg) translateZ(50px); background: #d35400; }
+.cube-top    { transform: rotateX(90deg) translateZ(50px); background: #f1c40f; }
+.cube-bottom { transform: rotateX(-90deg) translateZ(50px); background: #c0392b; }
+
+
+/* Pyramid */
+.shape-pyramid {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    transform-style: preserve-3d;
+    transform: rotateX(-20deg) rotateY(45deg);
+}
+
+.pyramid-side {
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-left: 50px solid transparent;
+    border-right: 50px solid transparent;
+    border-bottom: 100px solid var(--cayenne-red);
+    transform-origin: 50% 100%;
+}
+
+.pyramid-front { transform: translateZ(50px) rotateX(30deg); border-bottom-color: var(--cayenne-red); }
+.pyramid-back  { transform: translateZ(-50px) rotateX(-30deg); border-bottom-color: #a4161a; }
+.pyramid-left  { transform: translateX(-50px) rotateY(-90deg) rotateX(30deg); border-bottom-color: #d35400; }
+.pyramid-right { transform: translateX(50px) rotateY(90deg) rotateX(30deg); border-bottom-color: #e67e22; }
+.pyramid-bottom {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    background: #7f2a1b;
+    transform: rotateX(90deg) translateZ(-50px);
+    border: 1px solid rgba(0,0,0,0.2);
+}
+
+/* Cylinder */
+.shape-cylinder {
+    position: relative;
+    width: 100px;
+    height: 150px;
+    transform-style: preserve-3d;
+    transform: rotateX(-10deg) rotateY(20deg);
+}
+
+.cylinder-top {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100px;
+    height: 40px;
+    background: #52b788;
+    border-radius: 50%;
+    transform: rotateX(90deg) translateY(-20px);
+    border: 1px solid #1b4332;
+    z-index: 10;
+}
+
+.cylinder-bottom {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100px;
+    height: 40px;
+    background: #1b4332;
+    border-radius: 50%;
+    transform: rotateX(90deg) translateY(-20px);
+    border: 1px solid #000;
+}
+
+.cylinder-side {
+    position: absolute;
+    top: 20px;
+    left: 0;
+    width: 100px;
+    height: 110px;
+    background: linear-gradient(to right, #1b4332, #52b788, #1b4332);
+    transform: translateZ(-20px); /* Rough approximation */
+    /* Proper cylinder requires many strips or webgl, using simple div approximation */
+    border-radius: 10px; /* soften edges */
+}
+/* Better CSS cylinder using ::before/::after on a single element */
+.shape-cylinder-simple {
+    width: 100px;
+    height: 140px;
+    background: linear-gradient(to right, #2d6a4f, #74c69d, #2d6a4f);
+    position: relative;
+    border-radius: 10px / 5px; /* Vertical radius */
+    margin-top: 20px;
+}
+.shape-cylinder-simple::before {
+    content: '';
+    position: absolute;
+    top: -15px;
+    left: 0;
+    width: 100%;
+    height: 30px;
+    background: #95d5b2;
+    border-radius: 50%;
+    border: 1px solid #2d6a4f;
+}
+.shape-cylinder-simple::after {
+    content: '';
+    position: absolute;
+    bottom: -15px;
+    left: 0;
+    width: 100%;
+    height: 30px;
+    background: #2d6a4f;
+    border-radius: 50%;
+    z-index: -1;
+}
+
+/* Cone */
+.shape-cone {
+    width: 0;
+    height: 0;
+    border-left: 75px solid transparent;
+    border-right: 75px solid transparent;
+    border-bottom: 150px solid var(--medium-slate-blue);
+    border-radius: 50%;
+    position: relative;
+    transform: rotateX(10deg);
+}
+.shape-cone::after {
+    content: '';
+    position: absolute;
+    bottom: -150px; /* Offset by border-bottom height */
+    left: -75px;
+    width: 150px;
+    height: 40px;
+    background: #3d348b;
+    border-radius: 50%;
+    transform: translateY(20px); /* Move down slightly */
+    z-index: -1;
+}
+/* Improved Cone using conic-gradient or simple triangle with rounded bottom */
+.shape-cone-simple {
+    width: 120px;
+    height: 140px;
+    position: relative;
+    background: linear-gradient(to right, #5f27cd, #a29bfe);
+    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+    /* This is just a triangle. Let's stick to the border trick */
+}
+
+/* Let's use the border trick with a pseudo-element for the base */
+.shape-cone-final {
+    width: 0;
+    height: 0;
+    border-left: 60px solid transparent;
+    border-right: 60px solid transparent;
+    border-bottom: 140px solid var(--medium-slate-blue);
+    position: relative;
+}
+.shape-cone-final::after {
+    content: '';
+    position: absolute;
+    width: 120px;
+    height: 40px;
+    background: var(--indigo-velvet);
+    border-radius: 50%;
+    top: 120px; /* Position at bottom */
+    left: -60px;
+}

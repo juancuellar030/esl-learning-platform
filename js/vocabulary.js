@@ -20,7 +20,8 @@ const VocabModule = {
         'directions': { label: 'Directions', icon: 'fa-solid fa-diamond-turn-right' },
         'classroom-language': { label: 'Classroom Language', icon: 'fa-solid fa-chalkboard-user' },
         'grammar-words': { label: 'Grammar & Questions', icon: 'fa-solid fa-question' },
-        'time': { label: 'Calendar & Time', icon: 'fa-solid fa-calendar-days' }
+        'time': { label: 'Calendar & Time', icon: 'fa-solid fa-calendar-days' },
+        'shapes': { label: 'Geometric Shapes', icon: 'fa-solid fa-shapes' }
     },
 
     init() {

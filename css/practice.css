@@ -1,3 +1,5 @@
+@import url('shapes.css');
+
 .practice-container {
     width: 100vw;
     margin: 0;
@@ -2044,4 +2046,6 @@ body.dark-mode .exercise-card svg [id^="dark-light-fill"],
 body.dark-mode .exercise-card svg [id^="dark-light-fill"] * {
     fill: #1e1e1e;
 }
+
+
 
