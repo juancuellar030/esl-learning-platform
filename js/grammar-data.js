@@ -275,6 +275,28 @@ const grammarBank = [
             {type: 'sentence-unjumble', sentence: 'The train is at the station', words: ['The', 'train', 'is', 'at', 'the', 'station']},
             {type: 'fill-blank', sentence: 'We are going ___ a journey.', answer: 'on'}
         ]
+    },
+    {
+        id: 'grammar_13',
+        rule: 'Indefinite Pronouns',
+        category: 'pronouns',
+        level: 'beginner',
+        explanation: 'Indefinite pronouns are used to talk about people, places, or things without saying exactly who, where, or what they are. Common prefixes include every-, some-, any-, and no-.',
+        examples: [
+            'Everyone is here.',
+            'I want something to eat.',
+            'Is there anyone in the room?',
+            'I have nothing to say.'
+        ],
+        commonMistakes: [
+            'Incorrect: I don\'t have nothing. \u2192 Correct: I have nothing. (or I don\'t have anything)',
+            'Incorrect: Someone are calling. \u2192 Correct: Someone is calling. (Indefinite pronouns are singular)'
+        ],
+        exercises: [
+            {type: 'fill-blank', sentence: 'I am hungry. I want ___ to eat.', answer: 'something'},
+            {type: 'fill-blank', sentence: '___ is knocking at the door.', answer: 'Someone'},
+            {type: 'fill-blank', sentence: 'Is there ___ in the garden?', answer: 'anyone'}
+        ]
     }
 ];
 

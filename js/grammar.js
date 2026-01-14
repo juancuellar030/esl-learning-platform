@@ -157,6 +157,109 @@ const GrammarModule = {
                     </div>
                 </div>
             `;
+        } else if (grammar.rule === 'Indefinite Pronouns') {
+            contentHtml = `
+                <div class="grammar-infographic-card">
+                    <header class="grammar-infographic-header">
+                        <div class="grammar-badge">
+                            <i class="fa-solid fa-users" style="font-size: 24px; margin-bottom: 5px;"></i><br>
+                            Pronouns
+                        </div>
+                        <h1 class="grammar-infographic-title" style="font-size: 2.8rem;">Indefinite Pronouns</h1>
+                    </header>
+
+                    <div class="grammar-content-grid">
+                        <!-- Left Column -->
+                        <section class="left-col">
+                            <div class="grammar-uses-title">How to Use Them</div>
+                            <p class="grammar-intro-text" style="margin-bottom: 20px; font-style: italic;">
+                                We use indefinite pronouns to talk about a place, person or thing without saying which one.
+                            </p>
+
+                            <div class="grammar-example-item">
+                                <div class="grammar-category-tag">Every- (All)</div>
+                                <p class="grammar-example-text">Luca ate <b>everything</b> on his plate.</p>
+                            </div>
+
+                            <div class="grammar-example-item">
+                                <div class="grammar-category-tag">Some- (One)</div>
+                                <p class="grammar-example-text">We should eat <b>something</b> before we go out.</p>
+                            </div>
+
+                            <div class="grammar-example-item">
+                                <div class="grammar-category-tag">Any- (? / -)</div>
+                                <p class="grammar-example-text">Are you hungry? Would you like <b>anything</b> to eat?</p>
+                            </div>
+
+                            <div class="grammar-example-item">
+                                <div class="grammar-category-tag">No- (None)</div>
+                                <p class="grammar-example-text">There's <b>nothing</b> to eat at home.</p>
+                            </div>
+                        </section>
+
+                        <!-- Right Column -->
+                        <section class="right-col">
+                            <div class="grammar-comparison-box">
+                                <div class="grammar-comp-header"><i class="fa-solid fa-table"></i> Quick Reference</div>
+                                <p class="grammar-comp-text" style="margin-bottom: 15px;">
+                                    Combine <b>prefixes</b> with <b>suffixes</b>:
+                                </p>
+                                <p style="font-size: 0.9rem; margin-bottom: 15px; opacity: 0.9; font-style: italic;">
+                                    -where (places), -thing (things), -one (people)
+                                </p>
+                                
+                                <div class="grammar-table-wrapper" style="overflow-x: auto;">
+                                    <table class="grammar-reference-table" style="width: 100%; border-collapse: collapse; color: white; text-align: center;">
+                                        <thead>
+                                            <tr style="border-bottom: 2px solid rgba(255,255,255,0.2);">
+                                                <th style="padding: 10px;"></th>
+                                                <th style="padding: 10px; color: var(--amber-flame);">all</th>
+                                                <th style="padding: 10px; color: #81c784;">+</th>
+                                                <th style="padding: 10px; color: #64b5f6;">- / ?</th>
+                                                <th style="padding: 10px; color: #e57373;">-</th>
+                                            </tr>
+                                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                                                <th style="padding: 10px;"></th>
+                                                <th style="padding: 10px; font-weight: 400;">every</th>
+                                                <th style="padding: 10px; font-weight: 400;">some</th>
+                                                <th style="padding: 10px; font-weight: 400;">any</th>
+                                                <th style="padding: 10px; font-weight: 400;">no</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                                                <td style="padding: 10px; font-weight: 700; color: var(--amber-flame);">where</td>
+                                                <td style="padding: 10px;">everywhere</td>
+                                                <td style="padding: 10px;">somewhere</td>
+                                                <td style="padding: 10px;">anywhere</td>
+                                                <td style="padding: 10px;">nowhere</td>
+                                            </tr>
+                                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                                                <td style="padding: 10px; font-weight: 700; color: var(--amber-flame);">thing</td>
+                                                <td style="padding: 10px;">everything</td>
+                                                <td style="padding: 10px;">something</td>
+                                                <td style="padding: 10px;">anything</td>
+                                                <td style="padding: 10px;">nothing</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 10px; font-weight: 700; color: var(--amber-flame);">one</td>
+                                                <td style="padding: 10px;">everyone</td>
+                                                <td style="padding: 10px;">someone</td>
+                                                <td style="padding: 10px;">anyone</td>
+                                                <td style="padding: 10px;">no-one</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                
+                                <div style="margin-top: 20px; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 10px; font-style: italic; font-size: 0.95em; text-align: center; border-left: 4px solid var(--amber-flame);">
+                                    "Everyone should come to the circus!"
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            `;
         } else {
             contentHtml = `
                 <div style="background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
