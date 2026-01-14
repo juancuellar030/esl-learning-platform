@@ -1772,7 +1772,7 @@ const PracticeModule = {
                         ${sentenceParts[0]}<span class="blank" id="quiz-blank">____</span>${sentenceParts[1] || ''}
                     </div>
                     ${question.audio ? `
-                    <button class="sound-btn-large" style="margin-top: 20px;" onclick="PracticeModule.playQuizAudio('${question.audio}')">
+                    <button class="sound-btn-large" style="margin-top: 20px;" onclick="PracticeModule.playQuizAudio('${question.audio.replace(/'/g, "\\'")}')">
                         <i class="fa-solid fa-volume-high"></i>
                     </button>` : ''}
                 </div>
