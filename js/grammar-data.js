@@ -297,6 +297,28 @@ const grammarBank = [
             {type: 'fill-blank', sentence: '___ is knocking at the door.', answer: 'Someone'},
             {type: 'fill-blank', sentence: 'Is there ___ in the garden?', answer: 'anyone'}
         ]
+    },
+    {
+        id: 'grammar_14',
+        rule: 'Telling the Time',
+        category: 'time',
+        level: 'beginner',
+        explanation: 'In English, we use "past" for the first 30 minutes and "to" for the last 30 minutes. We use "o\'clock" for exact hours.',
+        examples: [
+            'It\'s five past two. (2:05)',
+            'It\'s quarter past two. (2:15)',
+            'It\'s half past two. (2:30)',
+            'It\'s twenty to three. (2:40)'
+        ],
+        commonMistakes: [
+            'Incorrect: It\'s two and half. \u2192 Correct: It\'s half past two.',
+            'Incorrect: It\'s fifteen past two. \u2192 Correct: It\'s quarter past two.'
+        ],
+        exercises: [
+            {type: 'fill-blank', sentence: '2:30 is ___ past two.', answer: 'half'},
+            {type: 'fill-blank', sentence: '2:45 is ___ to three.', answer: 'quarter'},
+            {type: 'fill-blank', sentence: '2:00 is two ___.', answer: 'o\'clock'}
+        ]
     }
 ];
 

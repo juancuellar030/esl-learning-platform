@@ -106,4 +106,56 @@ const classroomLanguageQuiz = [
     }
 ];
 
+const timeQuizData = [
+    {
+        id: 'tq_01',
+        sentence: "What time is it? It's ____.",
+        options: ["half past eleven", "one o'clock", "seven o'clock", "half past five"],
+        answer: "half past eleven",
+        audio: "assets/audio/grammar/half past eleven.mp3",
+        hint: "11:30"
+    },
+    {
+        id: 'tq_02',
+        sentence: "The clock shows ____.",
+        options: ["half past five", "half past six", "one o'clock", "half past nine"],
+        answer: "half past five",
+        audio: "assets/audio/grammar/half past five.mp3",
+        hint: "5:30"
+    },
+    {
+        id: 'tq_03',
+        sentence: "It is exactly ____.",
+        options: ["half past nine", "seven o'clock", "half past six", "one o'clock"],
+        answer: "half past nine",
+        audio: "assets/audio/grammar/half past nine.mp3",
+        hint: "9:30"
+    },
+    {
+        id: 'tq_04',
+        sentence: "Look! It's ____.",
+        options: ["half past six", "half past eleven", "seven o'clock", "one o'clock"],
+        answer: "half past six",
+        audio: "assets/audio/grammar/half past six.mp3",
+        hint: "6:30"
+    },
+    {
+        id: 'tq_05',
+        sentence: "It's ____ right now.",
+        options: ["one o'clock", "seven o'clock", "half past five", "half past nine"],
+        answer: "one o'clock",
+        audio: "assets/audio/grammar/one o'clock.mp3",
+        hint: "1:00"
+    },
+    {
+        id: 'tq_06',
+        sentence: "The meeting starts at ____.",
+        options: ["seven o'clock", "one o'clock", "half past eleven", "half past six"],
+        answer: "seven o'clock",
+        audio: "assets/audio/grammar/seven o'clock.mp3",
+        hint: "7:00"
+    }
+];
+
 window.classroomLanguageQuiz = classroomLanguageQuiz;
+window.timeQuizData = timeQuizData;

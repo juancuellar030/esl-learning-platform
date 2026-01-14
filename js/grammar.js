@@ -260,6 +260,82 @@ const GrammarModule = {
                     </div>
                 </div>
             `;
+        } else if (grammar.rule === 'Telling the Time') {
+            contentHtml = `
+                <div class="grammar-infographic-card">
+                    <header class="grammar-infographic-header">
+                        <div class="grammar-badge">
+                            <i class="fa-solid fa-clock" style="font-size: 24px; margin-bottom: 5px;"></i><br>
+                            Time
+                        </div>
+                        <h1 class="grammar-infographic-title">Telling the Time</h1>
+                    </header>
+
+                    <div class="grammar-content-grid">
+                        <!-- Left Column: The Clock -->
+                        <section class="left-col" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                            <div class="grammar-uses-title">The Clock Face</div>
+                            
+                            <div class="time-clock-container" style="position: relative; width: 280px; height: 280px; border: 10px solid var(--indigo-velvet); border-radius: 50%; background: white; margin: 20px 0; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                                <!-- To / Past Sides -->
+                                <div style="position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: rgba(0,0,0,0.1);"></div>
+                                <div style="position: absolute; left: 70%; top: 20%; color: var(--medium-slate-blue); font-weight: 800; font-size: 1.2rem;">PAST</div>
+                                <div style="position: absolute; left: 15%; top: 20%; color: #e57373; font-weight: 800; font-size: 1.2rem;">TO</div>
+
+                                <!-- Clock Markers -->
+                                <div style="position: absolute; left: 50%; top: 5px; transform: translateX(-50%); font-weight: 700;">o'clock</div>
+                                <div style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); font-weight: 700;">quarter past</div>
+                                <div style="position: absolute; left: 50%; bottom: 5px; transform: translateX(-50%); font-weight: 700;">half past</div>
+                                <div style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); font-weight: 700;">quarter to</div>
+
+                                <!-- Hands (Static Example) -->
+                                <div style="position: absolute; left: 50%; top: 50%; width: 4px; height: 80px; background: var(--indigo-velvet); transform-origin: bottom center; transform: translate(-50%, -100%) rotate(0deg); border-radius: 4px;"></div>
+                                <div style="position: absolute; left: 50%; top: 50%; width: 6px; height: 60px; background: var(--medium-slate-blue); transform-origin: bottom center; transform: translate(-50%, -100%) rotate(90deg); border-radius: 4px;"></div>
+                                <div style="position: absolute; left: 50%; top: 50%; width: 12px; height: 12px; background: var(--amber-flame); border-radius: 50%; transform: translate(-50%, -50%); border: 2px solid white;"></div>
+                            </div>
+
+                            <div style="width: 100%; text-align: left; background: #f0f4ff; padding: 15px; border-radius: 12px; border-left: 5px solid var(--medium-slate-blue);">
+                                <p style="margin: 0; font-weight: 700; color: var(--indigo-velvet);">Rule:</p>
+                                <ul style="margin: 5px 0 0 20px; padding: 0; font-size: 0.95rem;">
+                                    <li><b>Past</b>: Minutes 1 to 30</li>
+                                    <li><b>To</b>: Minutes 31 to 59</li>
+                                    <li><b>At + Time</b>: For specific events</li>
+                                </ul>
+                            </div>
+                        </section>
+
+                        <!-- Right Column: List -->
+                        <section class="right-col">
+                            <div class="grammar-comparison-box" style="background: white; border: 2px solid var(--indigo-velvet); color: #333;">
+                                <div class="grammar-comp-header" style="color: var(--indigo-velvet);"><i class="fa-solid fa-list-ol"></i> Examples (2:00 - 2:55)</div>
+                                
+                                <div class="time-examples-list" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.9rem;">
+                                    <div style="padding: 5px; border-bottom: 1px solid #eee;">2:00 - <b>o'clock</b></div>
+                                    <div style="padding: 5px; border-bottom: 1px solid #eee;">2:30 - <b>half past</b></div>
+                                    <div style="padding: 5px; border-bottom: 1px solid #eee;">2:05 - <b>five past</b></div>
+                                    <div style="padding: 5px; border-bottom: 1px solid #eee;">2:35 - <b>twenty-five to</b></div>
+                                    <div style="padding: 5px; border-bottom: 1px solid #eee;">2:10 - <b>ten past</b></div>
+                                    <div style="padding: 5px; border-bottom: 1px solid #eee;">2:40 - <b>twenty to</b></div>
+                                    <div style="padding: 5px; border-bottom: 1px solid #eee;">2:15 - <b>quarter past</b></div>
+                                    <div style="padding: 5px; border-bottom: 1px solid #eee;">2:45 - <b>quarter to</b></div>
+                                    <div style="padding: 5px; border-bottom: 1px solid #eee;">2:20 - <b>twenty past</b></div>
+                                    <div style="padding: 5px; border-bottom: 1px solid #eee;">2:50 - <b>ten to</b></div>
+                                    <div style="padding: 5px; border-bottom: 1px solid #eee;">2:25 - <b>twenty-five past</b></div>
+                                    <div style="padding: 5px; border-bottom: 1px solid #eee;">2:55 - <b>five to</b></div>
+                                </div>
+
+                                <div style="margin-top: 20px; padding: 15px; background: var(--indigo-velvet); color: white; border-radius: 12px; text-align: center;">
+                                    <h4 style="margin: 0 0 10px 0; color: var(--amber-flame);"><i class="fa-solid fa-gamepad"></i> Interactive Practice</h4>
+                                    <p style="font-size: 0.9rem; margin-bottom: 15px;">Test your knowledge with the Listening Time Quiz!</p>
+                                    <button class="btn-primary" onclick="window.open('practice.html?mode=time-quiz', '_blank')" style="background: var(--amber-flame); color: var(--indigo-velvet); border: none; font-weight: 800; width: 100%;">
+                                        <i class="fa-solid fa-play"></i> PLAY TIME QUIZ
+                                    </button>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            `;
         } else {
             contentHtml = `
                 <div style="background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">

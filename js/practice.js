@@ -123,6 +123,9 @@ const PracticeModule = {
         // Specific filtering
         if (mode === 'quiz') {
             this.words = window.classroomLanguageQuiz;
+        } else if (mode === 'time-quiz') {
+            this.words = window.timeQuizData;
+            this.config.mode = 'quiz'; // Re-use quiz rendering logic
         } else if (mode === 'wordsearch') {
              if (this.words.length > 16) this.words = this.words.slice(0, 16);
         } else if (mode === 'unjumble') {
@@ -587,6 +590,8 @@ const PracticeModule = {
             visualHtml = `
                 <div class="card-content-color-circle" style="background-color: ${this.getColorHex(word.word)}"></div>
             `;
+        } else if (word.category === 'shapes') {
+            visualHtml = this.getShapeHtml(word.word, true);
         } else {
             visualHtml += `<div style="display:none" class="card-content-icon"><i class="${word.icon}"></i></div>`;
         }
@@ -711,6 +716,9 @@ const PracticeModule = {
                                 `;
                                 if (w.category === 'colors') {
                                     visual = `<div class="match-card-color-circle" style="background-color: ${this.getColorHex(w.word)}"></div>`;
+                                } else if (w.category === 'shapes') {
+                                    // Scale down shapes for matching cards
+                                    visual = `<div style="transform: scale(0.4); margin: -40px;">${this.getShapeHtml(w.word)}</div>`;
                                 }
                                 content = visual;
                             }
@@ -810,6 +818,8 @@ const PracticeModule = {
 
         if (word.category === 'colors') {
             visual = `<div class="card-content-color-circle" style="background-color: ${this.getColorHex(word.word)}"></div>`;
+        } else if (word.category === 'shapes') {
+            visual = this.getShapeHtml(word.word, true);
         }
 
         container.innerHTML = `
@@ -1075,6 +1085,8 @@ const PracticeModule = {
                 `;
                 if (word.category === 'colors') {
                     visual = `<div class="clue-color-circle" style="background-color: ${this.getColorHex(word.word)}"></div>`;
+                } else if (word.category === 'shapes') {
+                     visual = `<div style="transform: scale(0.3); margin: -50px;">${this.getShapeHtml(word.word)}</div>`;
                 }
                 content += `<div class="clue-image-container-v2">${visual}</div>`;
             }
@@ -1303,6 +1315,8 @@ const PracticeModule = {
 
         if (wordObj.category === 'colors') {
             visual = `<div class="clue-color-circle" style="width: 100px; height: 100px; margin: 0 auto 10px auto; background-color: ${this.getColorHex(wordObj.word)}"></div>`;
+        } else if (wordObj.category === 'shapes') {
+             visual = `<div style="transform: scale(0.8); margin-bottom: 20px;">${this.getShapeHtml(wordObj.word)}</div>`;
         }
 
         container.innerHTML = `
@@ -1757,6 +1771,10 @@ const PracticeModule = {
                     <div class="quiz-sentence">
                         ${sentenceParts[0]}<span class="blank" id="quiz-blank">____</span>${sentenceParts[1] || ''}
                     </div>
+                    ${question.audio ? `
+                    <button class="sound-btn-large" style="margin-top: 20px;" onclick="PracticeModule.playQuizAudio('${question.audio}')">
+                        <i class="fa-solid fa-volume-high"></i>
+                    </button>` : ''}
                 </div>
 
                 <div id="quiz-hint-area" style="margin-bottom: 20px;">
@@ -1809,7 +1827,11 @@ const PracticeModule = {
                 </div>
             `;
             
-            this.playSound(question.answer);
+            if (question.audio) {
+                this.playQuizAudio(question.audio);
+            } else {
+                this.playSound(question.answer);
+            }
 
             setTimeout(() => {
                 // Remove shuffled state for next session
@@ -1961,6 +1983,54 @@ const PracticeModule = {
                 window.speechSynthesis.speak(speech);
             }
         });
+    },
+
+    playQuizAudio(audioPath) {
+        const audio = new Audio(audioPath);
+        audio.play().catch(e => console.error('Error playing quiz audio:', e));
+    },
+
+    getShapeHtml(word, isLarge = false) {
+        const shapeClassMap = {
+            'circle': 'shape-circle',
+            'square': 'shape-square',
+            'triangle': 'shape-triangle',
+            'rectangle': 'shape-rectangle',
+            'oval': 'shape-oval',
+            'star': 'shape-star',
+            'diamond': 'shape-diamond',
+            'hexagon': 'shape-hexagon',
+            'pentagon': 'shape-pentagon',
+            'sphere': 'shape-sphere',
+            'cube': 'shape-cube',
+            'pyramid': 'shape-pyramid',
+            'cylinder': 'shape-cylinder-simple',
+            'cone': 'shape-cone-final'
+        };
+        const shapeClass = shapeClassMap[word.toLowerCase()] || 'shape-circle';
+        
+        // Some shapes need specific inner HTML for 3D effects
+        let innerHtml = '';
+        if (shapeClass === 'shape-cube') {
+            innerHtml = `
+                <div class="cube-face cube-front"></div>
+                <div class="cube-face cube-back"></div>
+                <div class="cube-face cube-right"></div>
+                <div class="cube-face cube-left"></div>
+                <div class="cube-face cube-top"></div>
+                <div class="cube-face cube-bottom"></div>
+            `;
+        } else if (shapeClass === 'shape-pyramid') {
+             innerHtml = `
+                <div class="pyramid-side pyramid-front"></div>
+                <div class="pyramid-side pyramid-back"></div>
+                <div class="pyramid-side pyramid-left"></div>
+                <div class="pyramid-side pyramid-right"></div>
+                <div class="pyramid-bottom"></div>
+            `;
+        }
+        
+        return `<div class="shape-preview-container ${isLarge ? 'large' : ''}"><div class="css-shape ${shapeClass}">${innerHtml}</div></div>`;
     },
 
     getColorHex(colorName) {
