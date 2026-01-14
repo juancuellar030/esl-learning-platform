@@ -110,50 +110,50 @@ const timeQuizData = [
     {
         id: 'tq_01',
         sentence: "What time is it? It's ____.",
-        options: ["half past eleven", "one o'clock", "seven o'clock", "half past five"],
-        answer: "half past eleven",
+        options: ["11:30", "1:00", "7:00", "5:30"],
+        answer: "11:30",
         audio: "assets/audio/grammar/half past eleven.mp3",
-        hint: "11:30"
+        hint: "half past eleven"
     },
     {
         id: 'tq_02',
         sentence: "The clock shows ____.",
-        options: ["half past five", "half past six", "one o'clock", "half past nine"],
-        answer: "half past five",
+        options: ["5:30", "6:30", "1:00", "9:30"],
+        answer: "5:30",
         audio: "assets/audio/grammar/half past five.mp3",
-        hint: "5:30"
+        hint: "half past five"
     },
     {
         id: 'tq_03',
         sentence: "It is exactly ____.",
-        options: ["half past nine", "seven o'clock", "half past six", "one o'clock"],
-        answer: "half past nine",
+        options: ["9:30", "7:00", "6:30", "1:00"],
+        answer: "9:30",
         audio: "assets/audio/grammar/half past nine.mp3",
-        hint: "9:30"
+        hint: "half past nine"
     },
     {
         id: 'tq_04',
         sentence: "Look! It's ____.",
-        options: ["half past six", "half past eleven", "seven o'clock", "one o'clock"],
-        answer: "half past six",
+        options: ["6:30", "11:30", "7:00", "1:00"],
+        answer: "6:30",
         audio: "assets/audio/grammar/half past six.mp3",
-        hint: "6:30"
+        hint: "half past six"
     },
     {
         id: 'tq_05',
         sentence: "It's ____ right now.",
-        options: ["one o'clock", "seven o'clock", "half past five", "half past nine"],
-        answer: "one o'clock",
+        options: ["1:00", "7:00", "5:30", "9:30"],
+        answer: "1:00",
         audio: "assets/audio/grammar/one o'clock.mp3",
-        hint: "1:00"
+        hint: "one o'clock"
     },
     {
         id: 'tq_06',
         sentence: "The meeting starts at ____.",
-        options: ["seven o'clock", "one o'clock", "half past eleven", "half past six"],
-        answer: "seven o'clock",
+        options: ["7:00", "1:00", "11:30", "6:30"],
+        answer: "7:00",
         audio: "assets/audio/grammar/seven o'clock.mp3",
-        hint: "7:00"
+        hint: "seven o'clock"
     }
 ];
 
