@@ -1335,6 +1335,67 @@ body.dark-mode .word-category {
     color: #f9c74f !important;
 }
 
+/* Grammar Infographic Dark Mode Overrides */
+body.dark-mode .grammar-infographic-card {
+    background-color: #1a1a1a !important;
+    border-color: var(--medium-slate-blue) !important;
+}
+
+body.dark-mode .grammar-content-grid {
+    background-color: #222 !important;
+}
+
+body.dark-mode .grammar-example-item {
+    background-color: #2d2d2d !important;
+    border-left-color: var(--amber-flame) !important;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+body.dark-mode .grammar-example-text {
+    color: #fff !important;
+}
+
+body.dark-mode .grammar-uses-title {
+    color: var(--amber-flame) !important;
+    border-bottom-color: var(--medium-slate-blue) !important;
+}
+
+body.dark-mode .grammar-category-tag {
+    color: var(--medium-slate-blue) !important;
+}
+
+body.dark-mode .grammar-comparison-box {
+    background-color: #2d2d2d !important;
+    border: 1px solid #444 !important;
+}
+
+body.dark-mode .grammar-comp-text {
+    color: #eee !important;
+}
+
+body.dark-mode .grammar-reference-table {
+    color: #eee !important;
+}
+
+body.dark-mode .grammar-reference-table tr {
+    border-bottom-color: rgba(255,255,255,0.1) !important;
+}
+
+/* Telling the Time Clock Dark Mode */
+body.dark-mode .time-clock-container {
+    background: #333 !important;
+    border-color: var(--medium-slate-blue) !important;
+}
+
+body.dark-mode .time-clock-container div {
+    color: #fff !important;
+}
+
+body.dark-mode .time-examples-list div {
+    border-bottom-color: #444 !important;
+    color: #fff !important;
+}
+
 /* Dark Mode Toggle */
 .dark-mode-toggle {
     position: fixed;

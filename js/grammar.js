@@ -324,10 +324,10 @@ const GrammarModule = {
                                     <div style="padding: 5px; border-bottom: 1px solid #eee;">2:55 - <b>five to</b></div>
                                 </div>
 
-                                <div style="margin-top: 20px; padding: 15px; background: var(--indigo-velvet); color: white; border-radius: 12px; text-align: center;">
+                                <div style="margin-top: 20px; padding: 15px; background: var(--indigo-velvet); color: white; border-radius: 12px; text-align: center; pointer-events: auto;">
                                     <h4 style="margin: 0 0 10px 0; color: var(--amber-flame);"><i class="fa-solid fa-gamepad"></i> Interactive Practice</h4>
                                     <p style="font-size: 0.9rem; margin-bottom: 15px;">Test your knowledge with the Listening Time Quiz!</p>
-                                    <button class="btn-primary" onclick="window.open('practice.html?mode=time-quiz', '_blank')" style="background: var(--amber-flame); color: var(--indigo-velvet); border: none; font-weight: 800; width: 100%;">
+                                    <button class="btn-primary" onclick="window.open('practice.html?mode=time-quiz', '_blank')" style="background: var(--amber-flame); color: var(--indigo-velvet); border: none; font-weight: 800; width: 100%; cursor: pointer;">
                                         <i class="fa-solid fa-play"></i> PLAY TIME QUIZ
                                     </button>
                                 </div>
@@ -404,7 +404,7 @@ const GrammarModule = {
                 </div>
 
                 <div class="grammar-content-wrapper" id="grammar-content-wrapper" style="position: relative; transition: border-color 0.3s; border: 2px solid transparent; border-radius: 12px; margin-top: 10px;">
-                    <div id="grammar-html-content" style="pointer-events: none;">
+                    <div id="grammar-html-content">
                         ${contentHtml}
                     </div>
                     <!-- Note: Pointer events on HTML content disabled when annotating so strokes don't select text -->
