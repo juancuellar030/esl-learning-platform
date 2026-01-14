@@ -298,7 +298,45 @@ const vocabularyBank = [
     {id: 'dir_07', word: 'Front', spanish: 'Frente', type: 'noun', icon: 'fa-solid fa-turn-up', category: 'directions', subcategory: 'location', level: 'beginner', definition: 'The most forward part', example: 'Come to the front of the class.'},
     {id: 'dir_08', word: 'Back', spanish: 'Atrás', type: 'noun', icon: 'fa-solid fa-turn-down', category: 'directions', subcategory: 'location', level: 'beginner', definition: 'The rear part', example: 'Sit at the back of the room.'},
     {id: 'dir_09', word: 'Next to', spanish: 'Al lado de', type: 'preposition', icon: 'fa-solid fa-arrows-left-right-to-line', category: 'directions', subcategory: 'position', level: 'beginner', definition: 'Beside someone or something', example: 'Sit next to your friend.'},
-    {id: 'dir_10', word: 'Between', spanish: 'Entre', type: 'preposition', icon: 'fa-solid fa-arrows-left-right', category: 'directions', subcategory: 'position', level: 'beginner', definition: 'In the middle of two things', example: 'You are between Tom and Sarah.'}
+    {id: 'dir_10', word: 'Between', spanish: 'Entre', type: 'preposition', icon: 'fa-solid fa-arrows-left-right', category: 'directions', subcategory: 'position', level: 'beginner', definition: 'In the middle of two things', example: 'You are between Tom and Sarah.'},
+
+    // Geometric Shapes
+    {id: 'shape_01', word: 'Circle', spanish: 'Círculo', type: 'noun', icon: 'fa-solid fa-circle', category: 'shapes', subcategory: '2d', level: 'beginner', definition: 'A round shape with no corners', example: 'The sun is a circle.'},
+    {id: 'shape_02', word: 'Square', spanish: 'Cuadrado', type: 'noun', icon: 'fa-solid fa-square', category: 'shapes', subcategory: '2d', level: 'beginner', definition: 'A shape with four equal sides', example: 'The box is a square.'},
+    {id: 'shape_03', word: 'Triangle', spanish: 'Triángulo', type: 'noun', icon: 'fa-solid fa-play', category: 'shapes', subcategory: '2d', level: 'beginner', definition: 'A shape with three sides', example: 'A slice of pizza is a triangle.'},
+    {id: 'shape_04', word: 'Rectangle', spanish: 'Rectángulo', type: 'noun', icon: 'fa-solid fa-vector-square', category: 'shapes', subcategory: '2d', level: 'beginner', definition: 'A shape with four sides, two long and two short', example: 'The door is a rectangle.'},
+    {id: 'shape_05', word: 'Oval', spanish: 'Óvalo', type: 'noun', icon: 'fa-solid fa-egg', category: 'shapes', subcategory: '2d', level: 'beginner', definition: 'A shape like a stretched circle', example: 'An egg is an oval.'},
+    {id: 'shape_06', word: 'Star', spanish: 'Estrella', type: 'noun', icon: 'fa-solid fa-star', category: 'shapes', subcategory: '2d', level: 'beginner', definition: 'A shape with five or more points', example: 'Look at the star in the sky.'},
+    {id: 'shape_07', word: 'Diamond', spanish: 'Diamante', type: 'noun', icon: 'fa-solid fa-diamond', category: 'shapes', subcategory: '2d', level: 'beginner', definition: 'A shape with four sides standing on a point', example: 'The kite is a diamond.'},
+    {id: 'shape_08', word: 'Hexagon', spanish: 'Hexágono', type: 'noun', icon: 'fa-solid fa-cube', category: 'shapes', subcategory: '2d', level: 'intermediate', definition: 'A shape with six sides', example: 'A honeycomb has hexagons.'},
+    {id: 'shape_09', word: 'Pentagon', spanish: 'Pentágono', type: 'noun', icon: 'fa-solid fa-draw-polygon', category: 'shapes', subcategory: '2d', level: 'intermediate', definition: 'A shape with five sides', example: 'The building is a pentagon.'},
+    
+    // 3D Shapes
+    {id: 'shape_10', word: 'Sphere', spanish: 'Esfera', type: 'noun', icon: 'fa-solid fa-earth-americas', category: 'shapes', subcategory: '3d', level: 'intermediate', definition: 'A round solid shape like a ball', example: 'The earth is a sphere.'},
+    {id: 'shape_11', word: 'Cube', spanish: 'Cubo', type: 'noun', icon: 'fa-solid fa-cube', category: 'shapes', subcategory: '3d', level: 'intermediate', definition: 'A solid shape with six square faces', example: 'Roll the dice, it is a cube.'},
+    {id: 'shape_12', word: 'Pyramid', spanish: 'Pirámide', type: 'noun', icon: 'fa-solid fa-landmark', category: 'shapes', subcategory: '3d', level: 'intermediate', definition: 'A solid shape with triangular sides', example: 'The pyramids in Egypt are huge.'},
+    {id: 'shape_13', word: 'Cylinder', spanish: 'Cilindro', type: 'noun', icon: 'fa-solid fa-database', category: 'shapes', subcategory: '3d', level: 'intermediate', definition: 'A solid shape with circular ends', example: 'A soda can is a cylinder.'},
+    {id: 'shape_14', word: 'Cone', spanish: 'Cono', type: 'noun', icon: 'fa-solid fa-ice-cream', category: 'shapes', subcategory: '3d', level: 'intermediate', definition: 'A solid shape with a circular base and a point', example: 'I like ice cream in a cone.'},
+
+    // Indefinite Pronouns
+    {id: 'pronoun_01', word: 'Everyone', spanish: 'Todos / Todo el mundo', type: 'pronoun', icon: 'fa-solid fa-users', category: 'grammar-words', subcategory: 'indefinite-pronouns', level: 'beginner', definition: 'All people', example: 'Everyone is happy today.'},
+    {id: 'pronoun_02', word: 'Someone', spanish: 'Alguien', type: 'pronoun', icon: 'fa-solid fa-user', category: 'grammar-words', subcategory: 'indefinite-pronouns', level: 'beginner', definition: 'An unspecified person', example: 'Someone is at the door.'},
+    {id: 'pronoun_03', word: 'Anyone', spanish: 'Cualquiera / Alguien', type: 'pronoun', icon: 'fa-solid fa-user-question', category: 'grammar-words', subcategory: 'indefinite-pronouns', level: 'beginner', definition: 'Any person at all', example: 'Is there anyone here?'},
+    {id: 'pronoun_04', word: 'No-one', spanish: 'Nadie', type: 'pronoun', icon: 'fa-solid fa-user-slash', category: 'grammar-words', subcategory: 'indefinite-pronouns', level: 'beginner', definition: 'Not a single person', example: 'No-one likes to be lonely.'},
+    {id: 'pronoun_05', word: 'Everything', spanish: 'Todo', type: 'pronoun', icon: 'fa-solid fa-boxes-stacked', category: 'grammar-words', subcategory: 'indefinite-pronouns', level: 'beginner', definition: 'All things', example: 'Everything is in its place.'},
+    {id: 'pronoun_06', word: 'Something', spanish: 'Algo', type: 'pronoun', icon: 'fa-solid fa-box', category: 'grammar-words', subcategory: 'indefinite-pronouns', level: 'beginner', definition: 'An unspecified thing', example: 'I have something for you.'},
+    {id: 'pronoun_07', word: 'Anything', spanish: 'Cualquier cosa / Algo', type: 'pronoun', icon: 'fa-solid fa-box-open', category: 'grammar-words', subcategory: 'indefinite-pronouns', level: 'beginner', definition: 'Any thing at all', example: 'Do you need anything?'},
+    {id: 'pronoun_08', word: 'Nothing', spanish: 'Nada', type: 'pronoun', icon: 'fa-solid fa-ban', category: 'grammar-words', subcategory: 'indefinite-pronouns', level: 'beginner', definition: 'Not a single thing', example: 'There is nothing in the box.'},
+    {id: 'pronoun_09', word: 'Everywhere', spanish: 'En todas partes', type: 'adverb', icon: 'fa-solid fa-earth-americas', category: 'grammar-words', subcategory: 'indefinite-pronouns', level: 'beginner', definition: 'In all places', example: 'There is dust everywhere.'},
+    {id: 'pronoun_10', word: 'Somewhere', spanish: 'En algún lugar', type: 'adverb', icon: 'fa-solid fa-location-dot', category: 'grammar-words', subcategory: 'indefinite-pronouns', level: 'beginner', definition: 'In an unspecified place', example: 'The keys are somewhere here.'},
+    {id: 'pronoun_11', word: 'Anywhere', spanish: 'En cualquier parte', type: 'adverb', icon: 'fa-solid fa-map-location-dot', category: 'grammar-words', subcategory: 'indefinite-pronouns', level: 'beginner', definition: 'In any place at all', example: 'You can sit anywhere.'},
+    {id: 'pronoun_12', word: 'Nowhere', spanish: 'En ninguna parte', type: 'adverb', icon: 'fa-solid fa-location-crosshairs', category: 'grammar-words', subcategory: 'indefinite-pronouns', level: 'beginner', definition: 'In no place', example: 'There is nowhere to go.'},
+
+    // Time Expressions
+    {id: 'time_exp_01', word: "o'clock", spanish: 'en punto', type: 'adverb', icon: 'fa-solid fa-clock', category: 'time', subcategory: 'expressions', level: 'beginner', definition: 'Used to specify an exact hour', example: "It's three o'clock."},
+    {id: 'time_exp_02', word: 'half past', spanish: 'y media', type: 'phrase', icon: 'fa-solid fa-clock', category: 'time', subcategory: 'expressions', level: 'beginner', definition: 'Thirty minutes after the hour', example: "It's half past four."},
+    {id: 'time_exp_03', word: 'quarter past', spanish: 'y cuarto', type: 'phrase', icon: 'fa-solid fa-clock', category: 'time', subcategory: 'expressions', level: 'beginner', definition: 'Fifteen minutes after the hour', example: "It's quarter past six."},
+    {id: 'time_exp_04', word: 'quarter to', spanish: 'menos cuarto', type: 'phrase', icon: 'fa-solid fa-clock', category: 'time', subcategory: 'expressions', level: 'beginner', definition: 'Fifteen minutes before the next hour', example: "It's quarter to eight."}
 ];
 
 // Make data available globally

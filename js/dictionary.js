@@ -44,7 +44,7 @@ const DictionaryModule = {
                             ${word.type ? `<span class="word-type ${word.type}">${word.type}</span>` : ''}
                         </div>
                     </div>
-                    <button class="audio-btn" onclick="DictionaryModule.playAudio('${word.word}')" title="Listen">
+                    <button class="audio-btn" onclick="DictionaryModule.playAudio('${word.word.replace(/'/g, "\\'")}')" title="Listen">
                         <i class="fa-solid fa-volume-high"></i>
                     </button>
                 </div>
