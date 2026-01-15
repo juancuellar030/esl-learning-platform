@@ -153,6 +153,14 @@ const GrammarModule = {
                                     *Only <b>May</b> is used for formal permission or wishes.
                                 </p>
                             </div>
+
+                            <div style="margin-top: 20px; padding: 15px; background: var(--indigo-velvet); color: white; border-radius: 12px; text-align: center;">
+                                <h4 style="margin: 0 0 10px 0; color: var(--amber-flame);"><i class="fa-solid fa-gamepad"></i> Interactive Practice</h4>
+                                <p style="font-size: 0.9rem; margin-bottom: 15px;">Unjumble the sentences to practice May and Might!</p>
+                                <button class="btn-primary" onclick="window.open('practice.html?mode=may-might-unjumble', '_blank')" style="background: var(--amber-flame); color: var(--indigo-velvet); border: none; font-weight: 800; width: 100%; cursor: pointer;">
+                                    <i class="fa-solid fa-play"></i> PLAY UNJUMBLE GAME
+                                </button>
+                            </div>
                         </section>
                     </div>
                 </div>

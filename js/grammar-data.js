@@ -182,7 +182,10 @@ const grammarBank = [
         ],
         exercises: [
             {type: 'fill-blank', sentence: 'Look at those clouds! It ___ rain.', answer: 'may'},
-            {type: 'fill-blank', sentence: 'I ___ join you later, but I am busy.', answer: 'might'}
+            {type: 'fill-blank', sentence: 'I ___ join you later, but I am busy.', answer: 'might'},
+            {type: 'sentence-unjumble', sentence: 'It might rain today', words: ['It', 'might', 'rain', 'today']},
+            {type: 'sentence-unjumble', sentence: 'May I go to the bathroom', words: ['May', 'I', 'go', 'to', 'the', 'bathroom']},
+            {type: 'sentence-unjumble', sentence: 'You may eat your lunch now', words: ['You', 'may', 'eat', 'your', 'lunch', 'now']}
         ]
     },
     {

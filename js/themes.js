@@ -56,6 +56,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // Sync across tabs
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'platform-theme') {
+            applyTheme(e.newValue);
+        }
+    });
+
     function applyTheme(theme) {
         // Remove all theme classes
         document.body.classList.remove('theme-nature', 'theme-sunset', 'theme-ocean', 'theme-amber');

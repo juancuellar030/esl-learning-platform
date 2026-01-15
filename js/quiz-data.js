@@ -159,3 +159,50 @@ const timeQuizData = [
 
 window.classroomLanguageQuiz = classroomLanguageQuiz;
 window.timeQuizData = timeQuizData;
+
+const mayMightUnjumbleData = [
+    {
+        id: 'mm_01',
+        word: "It might rain today.",
+        category: 'grammar',
+        icon: 'fa-solid fa-cloud-rain'
+    },
+    {
+        id: 'mm_02',
+        word: "May I go to the bathroom?",
+        category: 'grammar',
+        icon: 'fa-solid fa-restroom'
+    },
+    {
+        id: 'mm_03',
+        word: "You may eat your lunch now.",
+        category: 'grammar',
+        icon: 'fa-solid fa-utensils'
+    },
+    {
+        id: 'mm_04',
+        word: "We might go to the park.",
+        category: 'grammar',
+        icon: 'fa-solid fa-tree'
+    },
+    {
+        id: 'mm_05',
+        word: "He may be late for school.",
+        category: 'grammar',
+        icon: 'fa-solid fa-school'
+    },
+    {
+        id: 'mm_06',
+        word: "It might be cold outside.",
+        category: 'grammar',
+        icon: 'fa-solid fa-snowflake'
+    },
+    {
+        id: 'mm_07',
+        word: "May I have a cookie?",
+        category: 'grammar',
+        icon: 'fa-solid fa-cookie'
+    }
+];
+
+window.mayMightUnjumbleData = mayMightUnjumbleData;

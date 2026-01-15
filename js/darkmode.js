@@ -26,15 +26,26 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    function enableDarkMode() {
+    // Sync across tabs
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'dark-mode') {
+            if (e.newValue === 'enabled') {
+                enableDarkMode(true);
+            } else {
+                disableDarkMode(true);
+            }
+        }
+    });
+
+    function enableDarkMode(skipSave = false) {
         document.body.classList.add('dark-mode');
         icon.classList.replace('fa-moon', 'fa-sun');
-        localStorage.setItem('dark-mode', 'enabled');
+        if (!skipSave) localStorage.setItem('dark-mode', 'enabled');
     }
 
-    function disableDarkMode() {
+    function disableDarkMode(skipSave = false) {
         document.body.classList.remove('dark-mode');
         icon.classList.replace('fa-sun', 'fa-moon');
-        localStorage.setItem('dark-mode', 'disabled');
+        if (!skipSave) localStorage.setItem('dark-mode', 'disabled');
     }
 });

@@ -126,6 +126,9 @@ const PracticeModule = {
         } else if (mode === 'time-quiz') {
             this.words = window.timeQuizData;
             this.config.mode = 'quiz'; // Re-use quiz rendering logic
+        } else if (mode === 'may-might-unjumble') {
+            this.words = window.mayMightUnjumbleData;
+            this.config.mode = 'unjumble'; 
         } else if (mode === 'wordsearch') {
              if (this.words.length > 16) this.words = this.words.slice(0, 16);
         } else if (mode === 'unjumble') {
@@ -148,6 +151,14 @@ const PracticeModule = {
         } else if (mode === 'flashcards') {
             if (settingsBtn) settingsBtn.style.display = 'none';
             this.showFlashcardsSettings();
+        } else if (mode === 'matching') {
+            if (this.words.length < 4) {
+                this.showToast('Please select at least 4 words for Matching mode.', 'warning');
+                if (!this.config.mode) this.showModeSelection(); // Go back if we were in selection
+                return;
+            }
+            if (settingsBtn) settingsBtn.style.display = 'none';
+            this.showMatchingSettings();
         } else {
             if (settingsBtn) settingsBtn.style.display = 'flex';
             document.getElementById('game-area').style.display = 'flex'; // Ensure visible
@@ -175,80 +186,87 @@ const PracticeModule = {
                     </div>
                 </div>
 
-                <div class="settings-group">
-                    <label>STUDY MODE</label>
-                    <div class="horizontal-options">
-                        <label>
-                            <input type="radio" name="fc-mode" value="word_first" checked> 
-                            <div class="option-btn">
-                                <i class="fa-solid fa-font option-icon"></i>
-                                <span>Word First</span>
+                <div class="settings-columns">
+                    <div class="settings-column">
+                        <div class="settings-group">
+                            <label>STUDY MODE</label>
+                            <div class="horizontal-options">
+                                <label>
+                                    <input type="radio" name="fc-mode" value="word_first" checked> 
+                                    <div class="option-btn">
+                                        <i class="fa-solid fa-font option-icon"></i>
+                                        <span>Word First</span>
+                                    </div>
+                                </label>
+                                <label>
+                                    <input type="radio" name="fc-mode" value="image_first"> 
+                                    <div class="option-btn">
+                                        <i class="fa-regular fa-image option-icon"></i>
+                                        <span>Image First</span>
+                                    </div>
+                                </label>
+                                <label>
+                                    <input type="radio" name="fc-mode" value="listening"> 
+                                    <div class="option-btn">
+                                        <i class="fa-solid fa-volume-high option-icon"></i>
+                                        <span>Listening</span>
+                                    </div>
+                                </label>
                             </div>
-                        </label>
-                        <label>
-                            <input type="radio" name="fc-mode" value="image_first"> 
-                            <div class="option-btn">
-                                <i class="fa-regular fa-image option-icon"></i>
-                                <span>Image First</span>
-                            </div>
-                        </label>
-                        <label>
-                            <input type="radio" name="fc-mode" value="listening"> 
-                            <div class="option-btn">
-                                <i class="fa-solid fa-volume-high option-icon"></i>
-                                <span>Listening</span>
-                            </div>
-                        </label>
-                    </div>
-                </div>
+                        </div>
 
-                <div class="settings-group">
-                    <label>TIMER</label>
-                    <div class="radio-group">
-                        <label><input type="radio" name="timer" value="none" checked> None</label>
-                        <label><input type="radio" name="timer" value="up"> Count up</label>
-                        <label><input type="radio" name="timer" value="down"> Count down</label>
-                        <div class="timer-inputs">
-                            <input type="number" id="timer-m" value="5" min="0" max="59"> m
-                            <input type="number" id="timer-s" value="0" min="0" max="59"> s
+                        <div class="settings-group">
+                            <label>TIMER</label>
+                            <div class="radio-group">
+                                <label><input type="radio" name="timer" value="none" checked> None</label>
+                                <label><input type="radio" name="timer" value="up"> Count up</label>
+                                <label><input type="radio" name="timer" value="down"> Count down</label>
+                                <div class="timer-inputs">
+                                    <input type="number" id="timer-m" value="5" min="0" max="59"> m
+                                    <input type="number" id="timer-s" value="0" min="0" max="59"> s
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="settings-group">
+                            <label>RANDOM</label>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" id="fc-shuffle" checked> Shuffle item order</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-column">
+                        <div class="settings-group">
+                            <label>REPEAT CARDS</label>
+                            <div class="radio-group">
+                                <label><input type="radio" name="fc-repeat" value="until_correct" checked> Repeat cards until all correct</label>
+                                <label><input type="radio" name="fc-repeat" value="once"> Each card only once</label>
+                            </div>
+                        </div>
+
+                        <div class="settings-group">
+                            <label>MARKING</label>
+                            <div class="radio-group">
+                                <label><input type="radio" name="fc-marking" value="none"> None</label>
+                                <label><input type="radio" name="fc-marking" value="tick_cross" checked> Tick/Cross</label>
+                            </div>
+                            <div class="checkbox-group" style="margin-top: 10px;">
+                                <label><input type="checkbox" id="fc-auto-proceed" checked> Automatically proceed after marking</label>
+                            </div>
+                        </div>
+
+                        <div class="settings-group">
+                            <label>END OF GAME</label>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" id="fc-show-answers"> Show answers</label>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="settings-group">
-                    <label>RANDOM</label>
-                    <div class="checkbox-group">
-                        <label><input type="checkbox" id="fc-shuffle" checked> Shuffle item order</label>
-                    </div>
-                </div>
-
-                <div class="settings-group">
-                    <label>REPEAT CARDS</label>
-                    <div class="radio-group">
-                        <label><input type="radio" name="fc-repeat" value="until_correct" checked> Repeat cards until all correct</label>
-                        <label><input type="radio" name="fc-repeat" value="once"> Each card only once</label>
-                    </div>
-                </div>
-
-                <div class="settings-group">
-                    <label>MARKING</label>
-                    <div class="radio-group">
-                        <label><input type="radio" name="fc-marking" value="none"> None</label>
-                        <label><input type="radio" name="fc-marking" value="tick_cross" checked> Tick/Cross</label>
-                    </div>
-                    <div class="checkbox-group" style="margin-top: 10px;">
-                        <label><input type="checkbox" id="fc-auto-proceed" checked> Automatically proceed after marking</label>
-                    </div>
-                </div>
-
-                <div class="settings-group">
-                    <label>END OF GAME</label>
-                    <div class="checkbox-group">
-                        <label><input type="checkbox" id="fc-show-answers"> Show answers</label>
-                    </div>
-                </div>
-
                 <div class="settings-actions">
+                    <button class="btn-secondary" onclick="PracticeModule.showModeSelection()"><i class="fa-solid fa-arrow-left"></i> Back to Game Modes</button>
                     <button class="btn-primary start-game-btn" onclick="PracticeModule.startFlashcards()">Start Practice</button>
                 </div>
             </div>
@@ -376,6 +394,95 @@ const PracticeModule = {
         }, 100);
     },
 
+        showMatchingSettings() {
+            this.toggleWordCountVisibility(true);
+            const settingsArea = document.getElementById('settings-area');
+            const gameArea = document.getElementById('game-area');
+            settingsArea.style.display = 'block';
+            gameArea.style.display = 'none';
+    
+            settingsArea.innerHTML = `
+                <div class="ws-settings-panel">
+                    <h2>Memory Match Options</h2>
+    
+                    <div class="settings-columns">
+                        <div class="settings-column">
+                            <div class="settings-group">
+                                <label>MATCHING MODE</label>
+                                <div class="radio-group" style="flex-direction: column; gap: 10px;">
+                                    <label><input type="radio" name="match-mode" value="image_word" checked> Image <i class="fa-solid fa-arrows-left-right" style="font-size: 0.8em;"></i> Word</label>
+                                    <label><input type="radio" name="match-mode" value="image_image"> Image <i class="fa-solid fa-arrows-left-right" style="font-size: 0.8em;"></i> Image</label>
+                                    <label><input type="radio" name="match-mode" value="word_word"> Word <i class="fa-solid fa-arrows-left-right" style="font-size: 0.8em;"></i> Word</label>
+                                    <label><input type="radio" name="match-mode" value="audio_word"> Audio <i class="fa-solid fa-arrows-left-right" style="font-size: 0.8em;"></i> Word</label>
+                                    <label><input type="radio" name="match-mode" value="audio_image"> Audio <i class="fa-solid fa-arrows-left-right" style="font-size: 0.8em;"></i> Image</label>
+                                    <label><input type="radio" name="match-mode" value="audio_audio"> Audio <i class="fa-solid fa-arrows-left-right" style="font-size: 0.8em;"></i> Audio</label>
+                                </div>
+                            </div>
+                        </div>
+    
+                        <div class="settings-column">
+                             <div class="settings-group">
+                                <label>TIMER</label>
+                                <div class="radio-group">
+                                    <label><input type="radio" name="timer" value="none" checked> None</label>
+                                    <label><input type="radio" name="timer" value="up"> Count up</label>      
+                                    <label><input type="radio" name="timer" value="down"> Count down</label>  
+                                    <div class="timer-inputs">
+                                        <input type="number" id="timer-m" value="3" min="0" max="59"> m       
+                                        <input type="number" id="timer-s" value="0" min="0" max="59"> s       
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="settings-group">
+                                <label>INFO</label>
+                                <p style="color: #666; line-height: 1.5;">
+                                    <i class="fa-solid fa-circle-info" style="color: var(--medium-slate-blue);"></i> 
+                                    The game will use up to <strong>10 pairs</strong> from your selected words.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+    
+                    <div class="settings-actions">
+                        <button class="btn-secondary" onclick="PracticeModule.showModeSelection()"><i class="fa-solid fa-arrow-left"></i> Back to Game Modes</button>
+                        <button class="btn-primary start-game-btn" onclick="PracticeModule.startMatching()">Start Game</button>
+                    </div>
+                </div>
+            `;
+        },
+    
+        startMatching() {
+            const matchMode = document.querySelector('input[name="match-mode"]:checked').value;
+            const timerType = document.querySelector('input[name="timer"]:checked').value;
+            const minutes = parseInt(document.getElementById('timer-m').value) || 0;
+            const seconds = parseInt(document.getElementById('timer-s').value) || 0;
+            
+            // Auto-determine pairs: min(selected words, 10)
+            const numPairs = Math.min(this.words.length, 10);
+    
+            this.config.settings = {
+                ...this.config.settings,
+                matchMode: matchMode,
+                timer: timerType,
+                timerValue: (minutes * 60) + seconds,
+                numPairs: numPairs
+            };
+    
+            this.gameState.timeLeft = this.config.settings.timerValue;
+            this.gameState.isGameOver = false;
+    
+            document.getElementById('settings-area').style.display = 'none';
+            document.getElementById('game-area').style.display = 'flex';
+    
+            // Prepare words subset
+            // Shuffle all words first, then take the first N
+            const shuffledAll = [...this.words].sort(() => Math.random() - 0.5);
+            this.words = shuffledAll.slice(0, numPairs);
+    
+            this.startTimer();
+            this.render();
+        },
     showWordsearchSettings() {
         this.toggleWordCountVisibility(true);
         const settingsArea = document.getElementById('settings-area');
@@ -387,63 +494,70 @@ const PracticeModule = {
             <div class="ws-settings-panel">
                 <h2>Wordsearch Options</h2>
                 
-                <div class="settings-group">
-                    <label>TIMER</label>
-                    <div class="radio-group">
-                        <label><input type="radio" name="timer" value="none" checked> None</label>
-                        <label><input type="radio" name="timer" value="up"> Count up</label>
-                        <label><input type="radio" name="timer" value="down"> Count down</label>
-                        <div class="timer-inputs">
-                            <input type="number" id="timer-m" value="5" min="0" max="59"> m
-                            <input type="number" id="timer-s" value="0" min="0" max="59"> s
+                <div class="settings-columns">
+                    <div class="settings-column">
+                        <div class="settings-group">
+                            <label>TIMER</label>
+                            <div class="radio-group">
+                                <label><input type="radio" name="timer" value="none" checked> None</label>
+                                <label><input type="radio" name="timer" value="up"> Count up</label>
+                                <label><input type="radio" name="timer" value="down"> Count down</label>
+                                <div class="timer-inputs">
+                                    <input type="number" id="timer-m" value="5" min="0" max="59"> m
+                                    <input type="number" id="timer-s" value="0" min="0" max="59"> s
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="settings-group">
+                            <label>LIVES</label>
+                            <div class="range-group">
+                                <input type="range" id="lives-range" min="0" max="10" value="0">
+                                <span id="lives-display">Infinite</span>
+                            </div>
+                        </div>
+
+                        <div class="settings-group">
+                            <label>DIFFICULTY</label>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" id="allow-diagonal" checked> Allow diagonal words</label>
+                                <label><input type="checkbox" id="allow-reverse"> Allow reverse words</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-column">
+                        <div class="settings-group">
+                            <label>GRID SIZE</label>
+                            <div class="size-buttons">
+                                <button type="button" class="btn-size" data-size="XS">XS</button>
+                                <button type="button" class="btn-size" data-size="S">S</button>
+                                <button type="button" class="btn-size active" data-size="M">M</button>
+                                <button type="button" class="btn-size" data-size="LG">LG</button>
+                                <button type="button" class="btn-size" data-size="XL">XL</button>
+                            </div>
+                        </div>
+
+                        <div class="settings-group">
+                            <label>CLUE TYPES</label>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" class="clue-type-cb" value="image" checked> Image Clues</label>
+                                <label><input type="checkbox" class="clue-type-cb" value="audio"> Audio Clues</label>
+                                <label><input type="checkbox" class="clue-type-cb" value="text"> Text Clues</label>
+                            </div>
+                        </div>
+
+                        <div class="settings-group">
+                            <label>GAMEPLAY</label>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" id="must-click-clue"> Must click clue card after finding word</label>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="settings-group">
-                    <label>LIVES</label>
-                    <div class="range-group">
-                        <input type="range" id="lives-range" min="0" max="10" value="0">
-                        <span id="lives-display">Infinite</span>
-                    </div>
-                </div>
-
-                <div class="settings-group">
-                    <label>DIFFICULTY</label>
-                    <div class="checkbox-group">
-                        <label><input type="checkbox" id="allow-diagonal" checked> Allow diagonal words</label>
-                        <label><input type="checkbox" id="allow-reverse"> Allow reverse words</label>
-                    </div>
-                </div>
-
-                <div class="settings-group">
-                    <label>GRID SIZE</label>
-                    <div class="size-buttons">
-                        <button type="button" class="btn-size" data-size="XS">XS</button>
-                        <button type="button" class="btn-size" data-size="S">S</button>
-                        <button type="button" class="btn-size active" data-size="M">M</button>
-                        <button type="button" class="btn-size" data-size="LG">LG</button>
-                        <button type="button" class="btn-size" data-size="XL">XL</button>
-                    </div>
-                </div>
-
-                <div class="settings-group">
-                    <label>CLUE TYPES</label>
-                    <div class="checkbox-group">
-                        <label><input type="checkbox" class="clue-type-cb" value="image" checked> Image Clues</label>
-                        <label><input type="checkbox" class="clue-type-cb" value="audio"> Audio Clues</label>
-                        <label><input type="checkbox" class="clue-type-cb" value="text"> Text Clues</label>
-                    </div>
-                </div>
-
-                <div class="settings-group">
-                    <label>GAMEPLAY</label>
-                    <div class="checkbox-group">
-                        <label><input type="checkbox" id="must-click-clue"> Must click clue card after finding word</label>
-                    </div>
-                </div>
-
                 <div class="settings-actions">
+                    <button class="btn-secondary" onclick="PracticeModule.showModeSelection()"><i class="fa-solid fa-arrow-left"></i> Back to Game Modes</button>
                     <button class="btn-primary start-game-btn" onclick="PracticeModule.startWordsearch()">Start Game</button>
                 </div>
             </div>
@@ -688,98 +802,303 @@ const PracticeModule = {
     },
 
     // --- MATCHING GAME LOGIC ---
+    memoryData: {
+        cards: [],
+        flippedCards: [],
+        isLocking: false
+    },
+
     renderMatching(container) {
         this.matches = 0;
-        // Limit to 8 pairs for better layout
-        const gameWords = this.words.slice(0, 8); 
+        this.memoryData.flippedCards = [];
+        this.memoryData.isLocking = false;
         
-        const leftItems = [...gameWords].sort(() => Math.random() - 0.5);
-        const rightItems = [...gameWords].sort(() => Math.random() - 0.5);
+        // Generate Cards
+        this.memoryData.cards = [];
+        const mode = this.config.settings.matchMode || 'image_word'; // Default
+        
+        this.words.forEach(word => {
+            // Card 1
+            let content1 = { type: 'word', val: word.word, wordObj: word };
+            // Card 2
+            let content2 = { type: 'image', val: word.word, wordObj: word }; // Default image
 
-        const isEnEs = this.config.face === 'en_es';
-        const title = isEnEs ? 'Match English to Spanish' : 'Match the Image to the Word';
+            if (mode === 'image_image') {
+                content1 = { type: 'image', val: word.word, wordObj: word };
+            } else if (mode === 'word_word') {
+                content2 = { type: 'word', val: word.word, wordObj: word };
+            } else if (mode === 'audio_word') {
+                content1 = { type: 'audio', val: word.word, wordObj: word };
+                content2 = { type: 'word', val: word.word, wordObj: word };
+            } else if (mode === 'audio_image') {
+                content1 = { type: 'audio', val: word.word, wordObj: word };
+                content2 = { type: 'image', val: word.word, wordObj: word };
+            } else if (mode === 'audio_audio') {
+                content1 = { type: 'audio', val: word.word, wordObj: word };
+                content2 = { type: 'audio', val: word.word, wordObj: word };
+            }
 
+            this.memoryData.cards.push({
+                id: Math.random().toString(36).substr(2, 9),
+                wordId: word.id,
+                content: content1,
+                isFlipped: false,
+                isMatched: false
+            });
+            this.memoryData.cards.push({
+                id: Math.random().toString(36).substr(2, 9),
+                wordId: word.id,
+                content: content2,
+                isFlipped: false,
+                isMatched: false
+            });
+        });
+
+        this.shuffleMemoryCards(false); // Shuffle data
+
+        // HTML
         container.innerHTML = `
-            <div style="display: flex; flex-direction: column; align-items: center; width: 100%;">
-                <h2 style="margin-bottom: 20px;">${title}</h2>
-                <div class="matching-game">
-                    <div class="matching-column" id="col-left">
-                        ${leftItems.map(w => {
-                            let content = '';
-                            if (isEnEs) {
-                                content = `<span class="match-card-word">${w.word}</span>`;
-                            } else {
-                                const imgPath = `assets/images/vocabulary/${w.word.toLowerCase()}.png`;
-                                let visual = `
-                                    <img src="${imgPath}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
-                                    <div style="display:none; font-size: 2rem; color: var(--hot-pink);"><i class="${w.icon}"></i></div>
-                                `;
-                                if (w.category === 'colors') {
-                                    visual = `<div class="match-card-color-circle" style="background-color: ${this.getColorHex(w.word)}"></div>`;
-                                } else if (w.category === 'shapes') {
-                                    // Scale down shapes for matching cards
-                                    visual = `<div style="transform: scale(0.4); margin: -40px;">${this.getShapeHtml(w.word)}</div>`;
-                                }
-                                content = visual;
-                            }
-                            
-                            return `
-                            <div class="match-card" data-id="${w.id}" data-type="left" onclick="PracticeModule.handleMatchClick(this)">
-                                ${content}
-                                <button class="sound-btn-small" style="width: 30px; height: 30px; font-size: 0.8rem; margin-left: 10px;" 
-                                        onclick="event.stopPropagation(); PracticeModule.playSound('${w.word}')">
-                                    <i class="fa-solid fa-volume-high"></i>
-                                </button>
-                            </div>`;
-                        }).join('')}
-                    </div>
-                    <div class="matching-column" id="col-right">
-                        ${rightItems.map(w => `
-                            <div class="match-card" data-id="${w.id}" data-type="right" onclick="PracticeModule.handleMatchClick(this)">
-                                <span class="match-card-word">${isEnEs ? w.spanish : w.word}</span>
-                            </div>
-                        `).join('')}
-                    </div>
+            <div class="memory-game-container">
+                 <div class="ws-header-info" style="margin-bottom: 20px;">
+                    ${this.config.settings.timer !== 'none' ? `<div id="fc-timer" class="ws-info-item"><i class="fa-solid fa-clock"></i> <span>${this.formatTime(this.gameState.timeLeft)}</span></div>` : ''}
+                    <div id="memory-status" class="ws-status-v2">Find the pairs!</div>
+                </div>
+
+                <div class="memory-controls">
+                    <button class="memory-shuffle-btn" onclick="PracticeModule.shuffleMemoryCards(true)">
+                        <i class="fa-solid fa-shuffle"></i> Shuffle Cards
+                    </button>
+                    <button class="btn-secondary" onclick="PracticeModule.startMatching()" title="Restart">
+                        <i class="fa-solid fa-rotate-right"></i>
+                    </button>
+                </div>
+
+                <div class="memory-grid" id="memory-grid">
+                    ${this.renderMemoryGridItems()}
                 </div>
             </div>
         `;
     },
 
-    handleMatchClick(card) {
-        if (card.classList.contains('correct') || card.classList.contains('selected')) return;
+    renderMemoryGridItems() {
+        return this.memoryData.cards.map((card, index) => {
+            let contentHtml = '';
+            const type = card.content.type;
+            const word = card.content.wordObj;
 
-        // Deselect others in same column
-        const type = card.dataset.type;
-        document.querySelectorAll(`.match-card[data-type="${type}"]`).forEach(c => c.classList.remove('selected'));
-        
-        card.classList.add('selected');
-
-        // Check for match
-        const selectedLeft = document.querySelector('.match-card[data-type="left"].selected');
-        const selectedRight = document.querySelector('.match-card[data-type="right"].selected');
-
-        if (selectedLeft && selectedRight) {
-            if (selectedLeft.dataset.id === selectedRight.dataset.id) {
-                // Match!
-                selectedLeft.classList.remove('selected');
-                selectedRight.classList.remove('selected');
-                selectedLeft.classList.add('correct');
-                selectedRight.classList.add('correct');
+            if (type === 'word') {
+                contentHtml = `<div class="memory-content-word">${card.content.val}</div>`;
+            } else if (type === 'image') {
+                const imgPath = `assets/images/vocabulary/${word.word.toLowerCase()}.png`;
+                let visual = `<img src="${imgPath}" class="memory-content-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+                              <div style="display:none; font-size: 2rem; color: var(--hot-pink);"><i class="${word.icon}"></i></div>`;
                 
-                this.matches++;
-                if (this.matches === document.querySelectorAll('.match-card[data-type="left"]').length) {
-                    setTimeout(() => this.showToast('🎉 All matched! Great job!', 'success'), 500);
+                if (word.category === 'colors') {
+                    visual = `<div class="match-card-color-circle" style="background-color: ${this.getColorHex(word.word)}"></div>`;
+                } else if (word.category === 'shapes') {
+                    visual = `<div style="transform: scale(0.5);">${this.getShapeHtml(word.word)}</div>`;
                 }
-            } else {
-                // No match
-                setTimeout(() => {
-                    selectedLeft.classList.remove('selected');
-                    selectedRight.classList.remove('selected');
-                }, 500);
+                contentHtml = visual;
+            } else if (type === 'audio') {
+                 contentHtml = `<i class="fa-solid fa-volume-high" style="font-size: 2.5rem; color: var(--indigo-velvet);"></i>`;
             }
-        }
+
+            // If matched, keep flipped.
+            const flippedClass = (card.isFlipped || card.isMatched) ? 'flipped' : '';
+            const matchedClass = card.isMatched ? 'matched' : '';
+
+            // Number for the back
+            const cardNumber = index + 1;
+
+            return `
+                <div class="memory-card-container ${flippedClass} ${matchedClass}" data-id="${card.id}" onclick="PracticeModule.handleMemoryCardClick('${card.id}')">
+                    <div class="memory-card-inner">
+                        <div class="memory-face memory-front">
+                            <span class="memory-number">${cardNumber}</span>
+                        </div>
+                        <div class="memory-face memory-back">
+                            ${contentHtml}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
     },
 
+        shuffleMemoryCards(reRender = true) {
+            if (!reRender) {
+                this.memoryData.cards.sort(() => Math.random() - 0.5);
+                return;
+            }
+    
+            const grid = document.getElementById('memory-grid');
+            if (!grid) return;
+    
+            // 1. First: Record positions
+            const cards = Array.from(grid.children);
+            const positions = new Map();
+            
+            cards.forEach(card => {
+                // Find the ID. It's in the onclick handler string, but easier if we add data-id to the container.
+                // Let's rely on index for now, but index changes. 
+                // We need to map DOM elements to their future locations.
+                // Since we are re-rendering innerHTML, the DOM nodes will be destroyed. 
+                // FLIP with innerHTML replacement is tricky.
+                // Better approach: 
+                // 1. Get current card IDs and their rects.
+                // 2. Shuffle data.
+                // 3. Render new HTML.
+                // 4. Get new card rects by ID (assuming we added data-id).
+                // 5. Animate from old rect to new rect.
+            });
+    
+            // Let's grab IDs from the current DOM or just rely on the data-id I added in renderMemoryGridItems 
+            // Wait, I didn't add data-id to the container in renderMemoryGridItems, only to the onclick.
+            // I need to update renderMemoryGridItems first to include data-id on the container.
+            
+            // Actually, let's update renderMemoryGridItems first in this same Edit or assume I'll do it.
+            // I'll update renderMemoryGridItems to add data-id="${card.id}" to .memory-card-container
+            
+            // Let's implement the logic assuming data-id is there.
+            const firstPositions = {};
+            grid.querySelectorAll('.memory-card-container').forEach(el => {
+                const id = el.dataset.id;
+                firstPositions[id] = el.getBoundingClientRect();
+            });
+    
+            // 2. Last: Shuffle and Render
+            this.memoryData.cards.sort(() => Math.random() - 0.5);
+            grid.innerHTML = this.renderMemoryGridItems();
+    
+            // 3. Invert: Calculate deltas and apply transform
+            grid.querySelectorAll('.memory-card-container').forEach(el => {
+                const id = el.dataset.id;
+                const first = firstPositions[id];
+                
+                if (first) {
+                    const last = el.getBoundingClientRect();
+                    const deltaX = first.left - last.left;
+                    const deltaY = first.top - last.top;
+    
+                    // Apply transform to put it back where it was
+                    el.style.transition = 'none';
+                    el.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+                    
+                    // Force layout
+                    el.getBoundingClientRect();
+    
+                    // 4. Play: Remove transform to animate to new spot
+                    requestAnimationFrame(() => {
+                        el.style.transition = 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+                        el.style.transform = '';
+                    });
+                }
+            });
+        },
+        handleMemoryCardClick(cardId) {
+            if (this.memoryData.isLocking) return;
+    
+            const card = this.memoryData.cards.find(c => c.id === cardId);
+            if (!card || card.isFlipped || card.isMatched) return;
+    
+            // Flip it
+            card.isFlipped = true;
+            this.memoryData.flippedCards.push(card);
+    
+            // Update DOM directly for smooth animation
+            const cardEl = document.querySelector(`.memory-card-container[data-id="${cardId}"]`);
+            if (cardEl) cardEl.classList.add('flipped');
+    
+            // Play audio if it's an audio card
+            if (card.content.type === 'audio') {
+                this.playSound(card.content.val);
+            }
+    
+            if (this.memoryData.flippedCards.length === 2) {
+                this.memoryData.isLocking = true;
+                this.checkMemoryMatch();
+            }
+        },
+    
+        updateMemoryGridUI() {
+             const grid = document.getElementById('memory-grid');
+             if (grid) grid.innerHTML = this.renderMemoryGridItems();
+        },
+    
+        checkMemoryMatch() {
+            const [card1, card2] = this.memoryData.flippedCards;
+    
+            if (card1.wordId === card2.wordId) {
+                // Match!
+                setTimeout(() => {
+                    card1.isMatched = true;
+                    card2.isMatched = true;
+                    card1.isFlipped = false; // logic handled by matched class
+                    card2.isFlipped = false;
+                    this.memoryData.flippedCards = [];
+                    this.memoryData.isLocking = false;
+                    this.matches++;
+                    
+                    // Update DOM directly
+                    const el1 = document.querySelector(`.memory-card-container[data-id="${card1.id}"]`);
+                    const el2 = document.querySelector(`.memory-card-container[data-id="${card2.id}"]`);
+                    
+                    if (el1) {
+                        el1.classList.add('matched');
+                        el1.classList.remove('flipped'); // Matched state handles rotation
+                    }
+                    if (el2) {
+                        el2.classList.add('matched');
+                        el2.classList.remove('flipped');
+                    }
+    
+                    // Audio feedback (play the word if not already audio)
+                    if (card1.content.type !== 'audio' && card2.content.type !== 'audio') {
+                        this.playSound(card1.content.val);
+                    }
+    
+                     const status = document.getElementById('memory-status');
+                     if (status) {
+                         status.textContent = "Great Match!";
+                         status.className = 'ws-status-v2 success';
+                         setTimeout(() => {
+                             if(status) status.className = 'ws-status-v2';
+                         }, 1000);
+                     }
+    
+                    if (this.matches === this.words.length) {
+                        setTimeout(() => this.showSummary(true), 1000);
+                    }
+                }, 800);
+            } else {
+                // No Match
+                setTimeout(() => {
+                    card1.isFlipped = false;
+                    card2.isFlipped = false;
+                    this.memoryData.flippedCards = [];
+                    this.memoryData.isLocking = false;
+                    
+                    // Update DOM directly
+                    const el1 = document.querySelector(`.memory-card-container[data-id="${card1.id}"]`);
+                    const el2 = document.querySelector(`.memory-card-container[data-id="${card2.id}"]`);
+                    
+                    if (el1) el1.classList.remove('flipped');
+                    if (el2) el2.classList.remove('flipped');
+    
+                    const status = document.getElementById('memory-status');
+                     if (status) {
+                         status.textContent = "Try again!";
+                         status.className = 'ws-status-v2 error';
+                         setTimeout(() => {
+                             if(status) {
+                                 status.className = 'ws-status-v2';
+                                 status.textContent = "Find the pairs!";
+                             }
+                         }, 1000);
+                     }
+                }, 1200);
+            }
+        },
     showToast(message, type = 'info') {
         // Remove existing toast
         const existingToast = document.querySelector('.toast-notification');
