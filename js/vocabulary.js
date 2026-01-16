@@ -24,7 +24,9 @@ const VocabModule = {
         'discourse-markers': { label: 'Discourse Markers', icon: 'fa-solid fa-comment-dots' },
         'grammar-words': { label: 'Grammar & Questions', icon: 'fa-solid fa-question' },
         'time': { label: 'Calendar & Time', icon: 'fa-solid fa-calendar-days' },
-        'shapes': { label: 'Geometric Shapes', icon: 'fa-solid fa-shapes' }
+        'shapes': { label: 'Geometric Shapes', icon: 'fa-solid fa-shapes' },
+        'numbers': { label: 'Numbers', icon: 'fa-solid fa-hashtag' },
+        'feedback': { label: 'Feedback & Praise', icon: 'fa-solid fa-thumbs-up' }
     },
 
     init() {
