@@ -48,6 +48,12 @@ const vocabularyBank = [
     {id: 'color_16', word: 'Violet', spanish: 'Violeta', type: 'adjective', icon: 'fa-solid fa-circle', category: 'colors', subcategory: 'tertiary', level: 'intermediate', definition: 'A mix of blue and purple', example: 'Violets are blue-purple flowers.'},
     {id: 'color_17', word: 'Magenta', spanish: 'Magenta', type: 'adjective', icon: 'fa-solid fa-circle', category: 'colors', subcategory: 'tertiary', level: 'intermediate', definition: 'A mix of red and purple', example: 'Her hair is dyed magenta.'},
     
+    // Color Properties
+    {id: 'color_18', word: 'Warm', spanish: 'Cálido', type: 'adjective', icon: 'fa-solid fa-fire', category: 'colors', subcategory: 'properties', level: 'intermediate', definition: 'Colors like red, orange, and yellow', example: 'Red and orange are warm colors.'},
+    {id: 'color_19', word: 'Cold', spanish: 'Frío', type: 'adjective', icon: 'fa-solid fa-snowflake', category: 'colors', subcategory: 'properties', level: 'intermediate', definition: 'Colors like blue and green', example: 'Blue is a cold color.'},
+    {id: 'color_20', word: 'Dark', spanish: 'Oscuro', type: 'adjective', icon: 'fa-solid fa-moon', category: 'colors', subcategory: 'properties', level: 'beginner', definition: 'A color that is close to black', example: 'I have a dark blue jacket.'},
+    {id: 'color_21', word: 'Light', spanish: 'Claro', type: 'adjective', icon: 'fa-solid fa-sun', category: 'colors', subcategory: 'properties', level: 'beginner', definition: 'A color that is close to white', example: 'She likes light pink dresses.'},
+    
     // Food & Drink
     {id: 'food_01', word: 'Apple', spanish: 'Manzana', type: 'noun', icon: 'fa-solid fa-apple-whole', category: 'food', subcategory: 'fruits', level: 'beginner', definition: 'A round red or green fruit', example: 'I eat an apple every day.'},
     {id: 'food_02', word: 'Banana', spanish: 'Plátano', type: 'noun', icon: 'fa-solid fa-banana', category: 'food', subcategory: 'fruits', level: 'beginner', definition: 'A long yellow fruit', example: 'Bananas are healthy.'},
@@ -299,6 +305,21 @@ const vocabularyBank = [
     {id: 'dir_08', word: 'Back', spanish: 'Atrás', type: 'noun', icon: 'fa-solid fa-turn-down', category: 'directions', subcategory: 'location', level: 'beginner', definition: 'The rear part', example: 'Sit at the back of the room.'},
     {id: 'dir_09', word: 'Next to', spanish: 'Al lado de', type: 'preposition', icon: 'fa-solid fa-arrows-left-right-to-line', category: 'directions', subcategory: 'position', level: 'beginner', definition: 'Beside someone or something', example: 'Sit next to your friend.'},
     {id: 'dir_10', word: 'Between', spanish: 'Entre', type: 'preposition', icon: 'fa-solid fa-arrows-left-right', category: 'directions', subcategory: 'position', level: 'beginner', definition: 'In the middle of two things', example: 'You are between Tom and Sarah.'},
+    {id: 'dir_11', word: 'Forward', spanish: 'Adelante', type: 'adverb', icon: 'fa-solid fa-arrow-up', category: 'directions', subcategory: 'movement', level: 'beginner', definition: 'Towards the front', example: 'Take one step forward.'},
+    {id: 'dir_12', word: 'Backward', spanish: 'Atrás', type: 'adverb', icon: 'fa-solid fa-arrow-down', category: 'directions', subcategory: 'movement', level: 'beginner', definition: 'Towards the back', example: 'Step backward carefully.'},
+    {id: 'dir_13', word: 'Straight', spanish: 'Derecho / Recto', type: 'adverb', icon: 'fa-solid fa-arrow-up-long', category: 'directions', subcategory: 'movement', level: 'beginner', definition: 'In a line without curves', example: 'Walk straight to the door.'},
+
+    // Movement Verbs
+    {id: 'move_01', word: 'Walk', spanish: 'Caminar', type: 'verb', icon: 'fa-solid fa-person-walking', category: 'movement', subcategory: 'actions', level: 'beginner', definition: 'To move on foot at a regular pace', example: 'We walk to the park.'},
+    {id: 'move_02', word: 'Run', spanish: 'Correr', type: 'verb', icon: 'fa-solid fa-person-running', category: 'movement', subcategory: 'actions', level: 'beginner', definition: 'To move fast on foot', example: 'The dog runs in the garden.'},
+    {id: 'move_03', word: 'Jump', spanish: 'Saltar', type: 'verb', icon: 'fa-solid fa-child-reaching', category: 'movement', subcategory: 'actions', level: 'beginner', definition: 'To push yourself off the ground', example: 'The frog jumps high.'},
+    {id: 'move_04', word: 'Hop', spanish: 'Saltar (en un pie) / Brincar', type: 'verb', icon: 'fa-solid fa-child', category: 'movement', subcategory: 'actions', level: 'beginner', definition: 'A small jump, often on one foot', example: 'Rabbits hop through the grass.'},
+    {id: 'move_05', word: 'Skip', spanish: 'Salticar', type: 'verb', icon: 'fa-solid fa-person-walking-arrow-right', category: 'movement', subcategory: 'actions', level: 'beginner', definition: 'To move forward with light jumps', example: 'The children skip to school.'},
+    {id: 'move_06', word: 'Climb', spanish: 'Escalar / Trepar', type: 'verb', icon: 'fa-solid fa-mountain', category: 'movement', subcategory: 'actions', level: 'intermediate', definition: 'To go up using hands and feet', example: 'Cats can climb trees.'},
+    {id: 'move_07', word: 'Slide', spanish: 'Deslizarse', type: 'verb', icon: 'fa-solid fa-person-rays', category: 'movement', subcategory: 'actions', level: 'beginner', definition: 'To move smoothly over a surface', example: 'I love to slide on the playground.'},
+    {id: 'move_08', word: 'Turn', spanish: 'Girar / Dar la vuelta', type: 'verb', icon: 'fa-solid fa-rotate-left', category: 'movement', subcategory: 'actions', level: 'beginner', definition: 'To move in a circular direction', example: 'Turn around and look at me.'},
+    {id: 'move_09', word: 'Crawl', spanish: 'Gatear', type: 'verb', icon: 'fa-solid fa-person-praying', category: 'movement', subcategory: 'actions', level: 'beginner', definition: 'To move on hands and knees', example: 'The baby is starting to crawl.'},
+    {id: 'move_10', word: 'Stretch', spanish: 'Estirarse', type: 'verb', icon: 'fa-solid fa-person-walking-with-cane', category: 'movement', subcategory: 'actions', level: 'beginner', definition: 'To reach out your arms or legs', example: 'Stretch your arms up high.'},
 
     // Geometric Shapes
     {id: 'shape_01', word: 'Circle', spanish: 'Círculo', type: 'noun', icon: 'fa-solid fa-circle', category: 'shapes', subcategory: '2d', level: 'beginner', definition: 'A round shape with no corners', example: 'The sun is a circle.'},

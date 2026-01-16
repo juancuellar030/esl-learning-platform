@@ -50,6 +50,28 @@
     background-color: var(--medium-slate-blue);
 }
 
+.exercise-types-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 25px;
+    margin-bottom: 30px;
+}
+
+.exercise-card {
+    padding: 25px;
+    min-height: 200px;
+}
+
+.exercise-card svg {
+    max-width: 160px;
+}
+
+.card-icon-placeholder {
+    font-size: 5rem;
+    color: var(--medium-slate-blue);
+    margin: 20px 0;
+}
+
 .mode-selection-area {
     padding: 40px;
     max-width: 1200px;
@@ -2027,7 +2049,7 @@ body.dark-mode #change-options-btn:hover {
 .exercise-card svg {
     width: 100%;
     height: auto;
-    max-width: 120px;
+    max-width: 160px;
     transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 

@@ -18,6 +18,7 @@ const VocabModule = {
         'transport': { label: 'Transport', icon: 'fa-solid fa-car' },
         'arts': { label: 'Arts & Crafts', icon: 'fa-solid fa-palette' },
         'directions': { label: 'Directions', icon: 'fa-solid fa-diamond-turn-right' },
+        'movement': { label: 'Movement', icon: 'fa-solid fa-person-running' },
         'classroom-language': { label: 'Classroom Language', icon: 'fa-solid fa-chalkboard-user' },
         'connectors': { label: 'Connectors', icon: 'fa-solid fa-link' },
         'discourse-markers': { label: 'Discourse Markers', icon: 'fa-solid fa-comment-dots' },
