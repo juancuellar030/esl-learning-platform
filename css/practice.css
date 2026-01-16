@@ -2036,46 +2036,6 @@ body.dark-mode #change-options-btn:hover {
     transform: rotate(5deg) scale(1.1);
 }
 
-/* Dynamic Coloring based on IDs */
-
-/* Theme Fill */
-.exercise-card svg [id^="theme-fill"],
-.exercise-card svg [id^="theme-fill"] * {
-    fill: var(--medium-slate-blue) !important;
-    transition: fill 0.3s ease;
-}
-
-/* Secondary Theme Fill */
-.exercise-card svg [id^="secondary-theme-fill"],
-.exercise-card svg [id^="secondary-theme-fill"] * {
-    fill: var(--amber-flame) !important;
-    transition: fill 0.3s ease;
-}
-
-/* Dark/Light Background Fill */
-.exercise-card svg [id^="dark-light-fill"],
-.exercise-card svg [id^="dark-light-fill"] * {
-    fill: #ffffff !important;
-    transition: fill 0.3s ease;
-}
-
-/* Dark Mode Overrides */
-body.dark-mode .exercise-card svg [id^="theme-fill"],
-body.dark-mode .exercise-card svg [id^="theme-fill"] *
-{
-    /* Use dynamic theme color lightened for dark mode contrast */
-    fill: var(--medium-slate-blue) !important;
-    fill: color-mix(in srgb, var(--medium-slate-blue), white 25%) !important;
-}
-
-body.dark-mode .exercise-card svg [id^="dark-light-fill"],
-body.dark-mode .exercise-card svg [id^="dark-light-fill"] * {
-    fill: #1e1e1e !important;
-}
-
-
-
-
 /* Memory Match Game Styles */
 .memory-game-container {
     display: flex;

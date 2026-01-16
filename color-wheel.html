@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interactive RYB Color Wheel</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Reddit+Sans:wght@300;400;500;600;700;800&family=Google+Sans+Flex:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Reddit+Sans:wght@300;400;500;600;700;800&family=Google+Sans+Flex:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&family=Open+Sans:wght@300;400;600;700&family=Nunito:wght@300;400;600;700;800&family=Architects+Daughter&display=swap" rel="stylesheet">
     <style>
         :root {
             --indigo-velvet: #3d348b;
@@ -28,12 +28,19 @@
             min-height: 100vh;
             overflow: hidden;
             padding: 20px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Apply font to all form elements */
+        input, select, button, textarea {
+            font-family: 'Reddit Sans', 'Google Sans Flex', sans-serif;
         }
 
         .container {
             display: flex;
             flex-direction: row;
             align-items: center;
+            justify-content: center;
             gap: 50px;
             padding: 60px 40px 40px;
             background: white;
@@ -42,6 +49,7 @@
             position: relative;
             max-width: 900px;
             width: 100%;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
         }
 
         h1 {
@@ -78,7 +86,7 @@
         }
 
         .segment:hover {
-            transform: scale(1.08);
+            transform: scale(1.02);
             filter: brightness(1.1) saturate(1.2);
             z-index: 10;
         }
@@ -140,6 +148,7 @@
             padding: 15px;
             pointer-events: none;
             border: 4px solid #f0f4ff;
+            transition: all 0.3s ease;
         }
 
         #color-name {
@@ -242,6 +251,74 @@
             --cayenne-red: #a4161a;
         }
 
+        /* Dark Mode */
+        body.dark-mode {
+            color: #f5f5f5;
+        }
+
+        body.dark-mode .container {
+            background-color: #1e1e1e;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+
+        body.dark-mode h1 {
+            color: var(--amber-flame);
+        }
+
+        body.dark-mode .indicator {
+            background: #2d2d2d;
+            border-color: #444;
+            box-shadow: inset 0 0 25px rgba(0,0,0,0.2), 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        body.dark-mode #color-name {
+            color: var(--amber-flame);
+        }
+
+        body.dark-mode .control-btn {
+            background: #333;
+            color: #f5f5f5;
+            border-color: #555;
+            box-shadow: 0 4px 0 #000;
+        }
+
+        body.dark-mode .control-btn:hover {
+            background: var(--indigo-velvet);
+            color: white;
+            border-color: var(--indigo-velvet);
+            box-shadow: 0 8px 0 #000;
+        }
+
+        /* Dark Mode Toggle */
+        .dark-mode-toggle {
+            position: fixed;
+            bottom: 100px;
+            right: 30px;
+            z-index: 1000;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #333;
+            color: #f1c40f;
+            border: 3px solid white;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            cursor: pointer;
+            font-size: 1.5rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .dark-mode-toggle:hover {
+            transform: scale(1.1) rotate(-15deg);
+        }
+
+        body.dark-mode .dark-mode-toggle {
+            background: #f1c40f;
+            color: #333;
+        }
+
         /* Theme Toggle Button */
         .theme-switcher-container {
             position: fixed;
@@ -335,17 +412,17 @@
     <script>
         const colors = [
             { name: 'Red', type: 'primary', color: '#E02121' },
-            { name: 'Vermilion', type: 'tertiary', color: '#F46036' },
+            { name: 'Red-Orange', type: 'tertiary', color: '#F46036' },
             { name: 'Orange', type: 'secondary', color: '#FF8C00' },
-            { name: 'Amber', type: 'tertiary', color: '#FFC000' },
+            { name: 'Yellow-Orange', type: 'tertiary', color: '#FFC000' },
             { name: 'Yellow', type: 'primary', color: '#FFFB00' },
-            { name: 'Chartreuse', type: 'tertiary', color: '#9ACD32' },
+            { name: 'Yellow-Green', type: 'tertiary', color: '#9ACD32' },
             { name: 'Green', type: 'secondary', color: '#008000' },
-            { name: 'Teal', type: 'tertiary', color: '#008080' },
+            { name: 'Blue-Green', type: 'tertiary', color: '#008080' },
             { name: 'Blue', type: 'primary', color: '#0000FF' },
-            { name: 'Violet', type: 'tertiary', color: '#8A2BE2' },
+            { name: 'Blue-Violet', type: 'tertiary', color: '#8A2BE2' },
             { name: 'Purple', type: 'secondary', color: '#4B0082' },
-            { name: 'Magenta', type: 'tertiary', color: '#C71585' }
+            { name: 'Red-Violet', type: 'tertiary', color: '#C71585' }
         ];
 
         const svg = document.getElementById('color-wheel');

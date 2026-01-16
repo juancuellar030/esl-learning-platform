@@ -336,7 +336,33 @@ const vocabularyBank = [
     {id: 'time_exp_01', word: "o'clock", spanish: 'en punto', type: 'adverb', icon: 'fa-solid fa-clock', category: 'time', subcategory: 'expressions', level: 'beginner', definition: 'Used to specify an exact hour', example: "It's three o'clock."},
     {id: 'time_exp_02', word: 'half past', spanish: 'y media', type: 'phrase', icon: 'fa-solid fa-clock', category: 'time', subcategory: 'expressions', level: 'beginner', definition: 'Thirty minutes after the hour', example: "It's half past four."},
     {id: 'time_exp_03', word: 'quarter past', spanish: 'y cuarto', type: 'phrase', icon: 'fa-solid fa-clock', category: 'time', subcategory: 'expressions', level: 'beginner', definition: 'Fifteen minutes after the hour', example: "It's quarter past six."},
-    {id: 'time_exp_04', word: 'quarter to', spanish: 'menos cuarto', type: 'phrase', icon: 'fa-solid fa-clock', category: 'time', subcategory: 'expressions', level: 'beginner', definition: 'Fifteen minutes before the next hour', example: "It's quarter to eight."}
+    {id: 'time_exp_04', word: 'quarter to', spanish: 'menos cuarto', type: 'phrase', icon: 'fa-solid fa-clock', category: 'time', subcategory: 'expressions', level: 'beginner', definition: 'Fifteen minutes before the next hour', example: "It's quarter to eight."},
+
+    // Connectors (Sequencers)
+    {id: 'conn_01', word: 'First', spanish: 'Primero', type: 'adverb', category: 'connectors', subcategory: 'sequencers', level: 'beginner', definition: 'Before anything else', example: 'First, draw a big circle.'},
+    {id: 'conn_02', word: 'Second', spanish: 'Segundo', type: 'adverb', category: 'connectors', subcategory: 'sequencers', level: 'beginner', definition: 'After the first thing', example: 'Second, cut out the circle.'},
+    {id: 'conn_03', word: 'Next', spanish: 'Siguiente / Luego', type: 'adverb', category: 'connectors', subcategory: 'sequencers', level: 'beginner', definition: 'Immediately after', example: 'Next, take your glue stick.'},
+    {id: 'conn_04', word: 'Then', spanish: 'Entonces / Después', type: 'adverb', category: 'connectors', subcategory: 'sequencers', level: 'beginner', definition: 'After that time', example: 'Then, stick the eyes onto the face.'},
+    {id: 'conn_05', word: 'After that', spanish: 'Después de eso', type: 'phrase', category: 'connectors', subcategory: 'sequencers', level: 'beginner', definition: 'Following an event', example: 'After that, wait for the glue to dry.'},
+    {id: 'conn_06', word: 'Finally', spanish: 'Finalmente', type: 'adverb', category: 'connectors', subcategory: 'sequencers', level: 'beginner', definition: 'At the end', example: 'Finally, write your name on the back.'},
+    {id: 'conn_07', word: 'Lastly', spanish: 'Por último', type: 'adverb', category: 'connectors', subcategory: 'sequencers', level: 'beginner', definition: 'The last point', example: 'Lastly, show me your work.'},
+    {id: 'conn_08', word: 'Now', spanish: 'Ahora', type: 'adverb', category: 'connectors', subcategory: 'sequencers', level: 'beginner', definition: 'At this moment', example: 'Now, show me your work.'},
+
+    // Discourse Markers
+    {id: 'disc_01', word: 'OK', spanish: 'Bueno / Listo', type: 'interjection', category: 'discourse-markers', subcategory: 'general', level: 'beginner', definition: 'Used to express agreement', example: 'OK, let\'s start the class.'},
+    {id: 'disc_02', word: 'Alright', spanish: 'Bien', type: 'interjection', category: 'discourse-markers', subcategory: 'general', level: 'beginner', definition: 'Satisfactory or acceptable', example: 'Alright, eyes on me.'},
+    {id: 'disc_03', word: 'So...', spanish: 'Entonces... / Así que...', type: 'conjunction', category: 'discourse-markers', subcategory: 'general', level: 'beginner', definition: 'Used to introduce a conclusion', example: 'The paint is wet, so be careful.'},
+    {id: 'disc_04', word: 'But', spanish: 'Pero', type: 'conjunction', category: 'discourse-markers', subcategory: 'general', level: 'beginner', definition: 'Used to introduce a contrast', example: 'Use the scissors, but don\'t run.'},
+    {id: 'disc_05', word: 'And', spanish: 'Y', type: 'conjunction', category: 'discourse-markers', subcategory: 'general', level: 'beginner', definition: 'Used to connect words', example: 'Take a pencil and an eraser.'},
+    {id: 'disc_06', word: 'Also', spanish: 'También', type: 'adverb', category: 'discourse-markers', subcategory: 'general', level: 'beginner', definition: 'In addition', example: 'Also, remember to wash your brushes.'},
+    {id: 'disc_07', word: 'For example', spanish: 'Por ejemplo', type: 'phrase', category: 'discourse-markers', subcategory: 'general', level: 'beginner', definition: 'Used to introduce an illustration', example: 'Draw a fruit, for example, an apple.'},
+    {id: 'disc_08', word: 'Ready?', spanish: '¿Listos?', type: 'phrase', category: 'discourse-markers', subcategory: 'questions', level: 'beginner', definition: 'Prepared for an activity', example: 'Ready? Let\'s go!'},
+    {id: 'disc_09', word: 'Remember', spanish: 'Recuerden', type: 'verb', category: 'discourse-markers', subcategory: 'general', level: 'beginner', definition: 'Keep in mind', example: 'Remember, do not use too much glue.'},
+    {id: 'disc_10', word: 'Look', spanish: 'Miren', type: 'verb', category: 'discourse-markers', subcategory: 'general', level: 'beginner', definition: 'Direct your eyes', example: 'Look, this is my puppet.'},
+    {id: 'disc_11', word: 'Like this', spanish: 'Así / Como esto', type: 'phrase', category: 'discourse-markers', subcategory: 'general', level: 'beginner', definition: 'In this way', example: 'Move your hands like this.'},
+    {id: 'disc_12', word: 'Wait', spanish: 'Esperen', type: 'verb', category: 'discourse-markers', subcategory: 'general', level: 'beginner', definition: 'Stay where you are', example: 'Wait a minute, please.'},
+    {id: 'disc_13', word: 'Excuse me', spanish: 'Permiso / Disculpe', type: 'phrase', category: 'discourse-markers', subcategory: 'general', level: 'beginner', definition: 'Polite apology', example: 'Excuse me, please sit down.'},
+    {id: 'disc_14', word: 'Very important', spanish: 'Muy importante', type: 'phrase', category: 'discourse-markers', subcategory: 'general', level: 'beginner', definition: 'Of great significance', example: 'Very important: put your name on the paper.'}
 ];
 
 // Make data available globally

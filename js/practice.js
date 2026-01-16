@@ -707,7 +707,7 @@ const PracticeModule = {
         } else if (word.category === 'shapes') {
             visualHtml = this.getShapeHtml(word.word, true);
         } else {
-            visualHtml += `<div style="display:none" class="card-content-icon"><i class="${word.icon}"></i></div>`;
+            if (word.icon) visualHtml += `<div style="display:none" class="card-content-icon"><i class="${word.icon}"></i></div>`;
         }
         
         const soundBtnSmall = `<button class="sound-btn-small" onclick="event.stopPropagation(); PracticeModule.playSound('${word.word}')"><i class="fa-solid fa-volume-high"></i></button>`;
@@ -891,7 +891,7 @@ const PracticeModule = {
             } else if (type === 'image') {
                 const imgPath = `assets/images/vocabulary/${word.word.toLowerCase()}.png`;
                 let visual = `<img src="${imgPath}" class="memory-content-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
-                              <div style="display:none; font-size: 2rem; color: var(--hot-pink);"><i class="${word.icon}"></i></div>`;
+                              ${word.icon ? `<div style="display:none; font-size: 2rem; color: var(--hot-pink);"><i class="${word.icon}"></i></div>` : ''}`;
                 
                 if (word.category === 'colors') {
                     visual = `<div class="match-card-color-circle" style="background-color: ${this.getColorHex(word.word)}"></div>`;
@@ -1132,7 +1132,7 @@ const PracticeModule = {
         
         let visual = `
             <img src="${imgPath}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
-            <div style="display:none; font-size: 6rem; color: var(--hot-pink);"><i class="${word.icon}"></i></div>
+            ${word.icon ? `<div style="display:none; font-size: 6rem; color: var(--hot-pink);"><i class="${word.icon}"></i></div>` : ''}
         `;
 
         if (word.category === 'colors') {
@@ -1400,7 +1400,7 @@ const PracticeModule = {
                 const imgPath = `assets/images/vocabulary/${word.word.toLowerCase()}.png`;
                 let visual = `
                     <img src="${imgPath}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
-                    <div style="display:none" class="clue-icon"><i class="${word.icon}"></i></div>
+                    ${word.icon ? `<div style="display:none" class="clue-icon"><i class="${word.icon}"></i></div>` : ''}
                 `;
                 if (word.category === 'colors') {
                     visual = `<div class="clue-color-circle" style="background-color: ${this.getColorHex(word.word)}"></div>`;

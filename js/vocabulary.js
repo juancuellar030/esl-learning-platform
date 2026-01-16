@@ -19,6 +19,8 @@ const VocabModule = {
         'arts': { label: 'Arts & Crafts', icon: 'fa-solid fa-palette' },
         'directions': { label: 'Directions', icon: 'fa-solid fa-diamond-turn-right' },
         'classroom-language': { label: 'Classroom Language', icon: 'fa-solid fa-chalkboard-user' },
+        'connectors': { label: 'Connectors', icon: 'fa-solid fa-link' },
+        'discourse-markers': { label: 'Discourse Markers', icon: 'fa-solid fa-comment-dots' },
         'grammar-words': { label: 'Grammar & Questions', icon: 'fa-solid fa-question' },
         'time': { label: 'Calendar & Time', icon: 'fa-solid fa-calendar-days' },
         'shapes': { label: 'Geometric Shapes', icon: 'fa-solid fa-shapes' }
