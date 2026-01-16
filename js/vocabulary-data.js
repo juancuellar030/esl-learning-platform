@@ -308,6 +308,18 @@ const vocabularyBank = [
     {id: 'dir_11', word: 'Forward', spanish: 'Adelante', type: 'adverb', icon: 'fa-solid fa-arrow-up', category: 'directions', subcategory: 'movement', level: 'beginner', definition: 'Towards the front', example: 'Take one step forward.'},
     {id: 'dir_12', word: 'Backward', spanish: 'Atrás', type: 'adverb', icon: 'fa-solid fa-arrow-down', category: 'directions', subcategory: 'movement', level: 'beginner', definition: 'Towards the back', example: 'Step backward carefully.'},
     {id: 'dir_13', word: 'Straight', spanish: 'Derecho / Recto', type: 'adverb', icon: 'fa-solid fa-arrow-up-long', category: 'directions', subcategory: 'movement', level: 'beginner', definition: 'In a line without curves', example: 'Walk straight to the door.'},
+    
+    // Prepositions of Place (Directions)
+    {id: 'dir_14', word: 'On', spanish: 'Sobre / En', type: 'preposition', icon: 'fa-solid fa-cube', category: 'directions', subcategory: 'prepositions', level: 'beginner', definition: 'Touching the surface of something', example: 'The book is on the table.'},
+    {id: 'dir_15', word: 'In', spanish: 'En / Dentro de', type: 'preposition', icon: 'fa-solid fa-box-open', category: 'directions', subcategory: 'prepositions', level: 'beginner', definition: 'Inside something', example: 'The pencils are in the box.'},
+    {id: 'dir_16', word: 'Under', spanish: 'Debajo de', type: 'preposition', icon: 'fa-solid fa-arrow-down', category: 'directions', subcategory: 'prepositions', level: 'beginner', definition: 'Below something', example: 'The cat is under the chair.'},
+    {id: 'dir_17', word: 'Behind', spanish: 'Detrás de', type: 'preposition', icon: 'fa-solid fa-arrow-left', category: 'directions', subcategory: 'prepositions', level: 'beginner', definition: 'At the back of something', example: 'The garden is behind the house.'},
+    {id: 'dir_18', word: 'In front of', spanish: 'En frente de', type: 'preposition', icon: 'fa-solid fa-arrow-right', category: 'directions', subcategory: 'prepositions', level: 'beginner', definition: 'Further forward than something', example: 'The teacher stands in front of the class.'},
+    {id: 'dir_19', word: 'Next to', spanish: 'Al lado de', type: 'preposition', icon: 'fa-solid fa-arrows-left-right', category: 'directions', subcategory: 'prepositions', level: 'beginner', definition: 'Beside something', example: 'Sit next to your friend.'},
+    {id: 'dir_20', word: 'Between', spanish: 'Entre', type: 'preposition', icon: 'fa-solid fa-left-right', category: 'directions', subcategory: 'prepositions', level: 'beginner', definition: 'In the middle of two things', example: 'The park is between the school and the library.'},
+    {id: 'dir_21', word: 'Above', spanish: 'Encima de', type: 'preposition', icon: 'fa-solid fa-arrow-up-from-bracket', category: 'directions', subcategory: 'prepositions', level: 'intermediate', definition: 'Higher than something, but not touching', example: 'The clock is above the whiteboard.'},
+    {id: 'dir_22', word: 'Below', spanish: 'Debajo de', type: 'preposition', icon: 'fa-solid fa-arrow-down-to-bracket', category: 'directions', subcategory: 'prepositions', level: 'intermediate', definition: 'Lower than something', example: 'Read the text below the picture.'},
+
 
     // Movement Verbs
     {id: 'move_01', word: 'Walk', spanish: 'Caminar', type: 'verb', icon: 'fa-solid fa-person-walking', category: 'movement', subcategory: 'actions', level: 'beginner', definition: 'To move on foot at a regular pace', example: 'We walk to the park.'},
