@@ -3,7 +3,7 @@ const VocabModule = {
     selectedWords: [],
     currentExerciseType: null,
     currentFlashcardIndex: 0,
-    
+
     // Category mapping with icons
     categories: {
         'animals': { label: 'Animals', icon: 'fa-solid fa-paw' },
@@ -20,6 +20,7 @@ const VocabModule = {
         'directions': { label: 'Directions', icon: 'fa-solid fa-diamond-turn-right' },
         'movement': { label: 'Movement', icon: 'fa-solid fa-person-running' },
         'classroom-language': { label: 'Classroom Language', icon: 'fa-solid fa-chalkboard-user' },
+        'classroom-questions': { label: 'Classroom Questions', icon: 'fa-solid fa-circle-question' },
         'connectors': { label: 'Connectors', icon: 'fa-solid fa-link' },
         'discourse-markers': { label: 'Discourse Markers', icon: 'fa-solid fa-comment-dots' },
         'grammar-words': { label: 'Grammar & Questions', icon: 'fa-solid fa-question' },
@@ -34,11 +35,11 @@ const VocabModule = {
         this.renderCategories();
         this.setupEventListeners();
     },
-    
+
     renderCategories() {
         const grid = document.getElementById('word-grid');
         grid.innerHTML = '';
-        
+
         // Hide subcategory dropdown when showing all categories
         document.getElementById('subcategory-group').style.display = 'none';
 
@@ -60,14 +61,14 @@ const VocabModule = {
 
     renderWords(category = 'all', level = 'all', searchTerm = '', subcategory = 'all') {
         const grid = document.getElementById('word-grid');
-        
+
         if (category === 'all' && !searchTerm) {
             this.renderCategories();
             return;
         }
 
         let words = window.vocabularyBank;
-        
+
         if (category !== 'all') {
             words = words.filter(w => w.category === category);
         }
@@ -78,16 +79,16 @@ const VocabModule = {
             words = words.filter(w => w.subcategory === subcategory);
         }
         if (searchTerm) {
-            words = words.filter(w => 
+            words = words.filter(w =>
                 w.word.toLowerCase().includes(searchTerm.toLowerCase())
             );
         }
-        
+
         if (words.length === 0) {
             grid.innerHTML = '<p style="text-align: center; padding: 40px; color: #999; grid-column: 1/-1;">No words found matching your filters.</p>';
             return;
         }
-        
+
         grid.innerHTML = words.map(word => `
             <div class="word-card ${this.selectedWords.includes(word.id) ? 'selected' : ''}" data-id="${word.id}">
                 <div class="word-text">${word.word}</div>
@@ -95,7 +96,7 @@ const VocabModule = {
                 <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">${word.subcategory ? word.subcategory.replace('-', ' ') : ''}</div>
             </div>
         `).join('');
-        
+
         // Add click handlers
         document.querySelectorAll('.word-card').forEach(card => {
             card.addEventListener('click', () => {
@@ -103,7 +104,7 @@ const VocabModule = {
             });
         });
     },
-    
+
     handleCategoryChange(category) {
         const subcategorySelect = document.getElementById('vocab-subcategory');
         const subcategoryGroup = document.getElementById('subcategory-group');
@@ -112,13 +113,13 @@ const VocabModule = {
 
         // Reset subcategory select
         subcategorySelect.innerHTML = '<option value="all">All Subcategories</option>';
-        
+
         if (category !== 'all') {
             // Find unique subcategories for this category
             const subcats = [...new Set(window.vocabularyBank
                 .filter(w => w.category === category && w.subcategory)
                 .map(w => w.subcategory))].sort();
-            
+
             if (subcats.length > 0) {
                 subcats.forEach(sub => {
                     const option = document.createElement('option');
@@ -143,7 +144,7 @@ const VocabModule = {
     updateSpecialButtons(category) {
         const container = document.getElementById('special-actions-container') || this.createSpecialActionsContainer();
         container.innerHTML = '';
-        
+
         if (category === 'colors') {
             const btn = document.createElement('button');
             btn.className = 'btn-primary';
@@ -168,7 +169,7 @@ const VocabModule = {
     toggleWordSelection(card) {
         const wordId = card.dataset.id;
         card.classList.toggle('selected');
-        
+
         if (card.classList.contains('selected')) {
             if (!this.selectedWords.includes(wordId)) {
                 this.selectedWords.push(wordId);
@@ -176,24 +177,24 @@ const VocabModule = {
         } else {
             this.selectedWords = this.selectedWords.filter(id => id !== wordId);
         }
-        
+
         this.updateGenerateButton();
     },
-    
+
     generateExercise() {
         if (this.selectedWords.length === 0) {
             alert('Please select at least one word!');
             return;
         }
-        
+
         // Save selected word IDs to localStorage
         localStorage.setItem('selectedVocabIds', JSON.stringify(this.selectedWords));
         localStorage.removeItem('practiceMode'); // Clear previous mode to trigger mode selection in practice.html
-        
+
         // Open practice.html in a new tab
         window.open('practice.html', '_blank');
     },
-    
+
     updateGenerateButton() {
         const btn = document.getElementById('generate-vocab-exercise');
         if (this.selectedWords.length > 0) {
@@ -212,7 +213,7 @@ const VocabModule = {
             const subcategory = document.getElementById('vocab-subcategory').value;
             this.renderWords(category, level, e.target.value, subcategory);
         });
-        
+
         // Category change
         document.getElementById('vocab-category').addEventListener('change', (e) => {
             this.handleCategoryChange(e.target.value);
@@ -225,7 +226,7 @@ const VocabModule = {
             const search = document.getElementById('vocab-search').value;
             this.renderWords(category, level, search, e.target.value);
         });
-        
+
         // Level change
         document.getElementById('vocab-level').addEventListener('change', (e) => {
             const category = document.getElementById('vocab-category').value;
@@ -233,7 +234,7 @@ const VocabModule = {
             const search = document.getElementById('vocab-search').value;
             this.renderWords(category, e.target.value, search, subcategory);
         });
-        
+
         // Select All Filtered button
         document.getElementById('select-all-vocab').addEventListener('click', () => {
             const visibleCards = document.querySelectorAll('.word-card');
@@ -248,7 +249,7 @@ const VocabModule = {
             });
             this.updateGenerateButton();
         });
-        
+
         // Deselect All button
         document.getElementById('deselect-all-vocab').addEventListener('click', () => {
             document.querySelectorAll('.word-card').forEach(card => {
@@ -258,7 +259,7 @@ const VocabModule = {
             this.selectedWords = [];
             this.updateGenerateButton();
         });
-        
+
         // Generate exercise button
         document.getElementById('generate-vocab-exercise').addEventListener('click', () => {
             this.generateExercise();

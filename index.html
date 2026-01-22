@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/styles.css">
 </head>
+
 <body>
     <!-- Header -->
     <header class="main-header">
@@ -43,7 +45,7 @@
     <!-- Main Content Container -->
     <main class="main-content">
         <div class="container">
-            
+
             <!-- DASHBOARD SECTION -->
             <section id="dashboard" class="content-section active">
                 <h2>Welcome to Your Teaching Dashboard</h2>
@@ -60,7 +62,8 @@
                         <p>Teach grammar rules with interactive exercises</p>
 
                     </div>
-                    <a href="board.html" target="_blank" class="dashboard-card" style="text-decoration: none; color: inherit; display: block;">
+                    <a href="board.html" target="_blank" class="dashboard-card"
+                        style="text-decoration: none; color: inherit; display: block;">
                         <div class="card-icon"><i class="fa-solid fa-chalkboard"></i></div>
                         <h3>Virtual Board</h3>
                         <p>Live teaching with interactive drawing board</p>
@@ -83,13 +86,14 @@
             <!-- DICTIONARY SECTION -->
             <section id="dictionary" class="content-section">
                 <h2>Dictionary & Translator</h2>
-                
+
                 <div class="dictionary-container">
                     <div class="dictionary-search-box">
                         <i class="fa-solid fa-magnifying-glass search-icon"></i>
-                        <input type="text" id="dictionary-search" placeholder="Type a word in English or Spanish..." autocomplete="off">
+                        <input type="text" id="dictionary-search" placeholder="Type a word in English or Spanish..."
+                            autocomplete="off">
                     </div>
-                    
+
                     <div id="dictionary-results" class="dictionary-results">
                         <p class="empty-state">Type a word above to search the dictionary.</p>
                     </div>
@@ -99,11 +103,12 @@
             <!-- VOCABULARY SECTION -->
             <section id="vocabulary" class="content-section">
                 <h2>Vocabulary Bank</h2>
-                
+
                 <div class="filters-bar">
                     <div class="filter-group">
                         <label>Search:</label>
-                        <input type="text" id="vocab-search" placeholder="Type to search..." style="padding: 8px 15px; border: 2px solid var(--medium-slate-blue); border-radius: 10px; font-size: 1rem; min-width: 200px;">
+                        <input type="text" id="vocab-search" placeholder="Type to search..."
+                            style="padding: 8px 15px; border: 2px solid var(--medium-slate-blue); border-radius: 10px; font-size: 1rem; min-width: 200px;">
                     </div>
                     <div class="filter-group">
                         <label>Category:</label>
@@ -123,8 +128,14 @@
                             <option value="directions">Directions</option>
                             <option value="movement">Movement</option>
                             <option value="classroom-language">Classroom Language</option>
+                            <option value="classroom-questions">Classroom Questions</option>
                             <option value="connectors">Connectors</option>
                             <option value="discourse-markers">Discourse Markers</option>
+                            <option value="grammar-words">Grammar & Questions</option>
+                            <option value="time">Calendar & Time</option>
+                            <option value="shapes">Geometric Shapes</option>
+                            <option value="numbers">Numbers</option>
+                            <option value="feedback">Feedback & Praise</option>
                         </select>
                     </div>
                     <div class="filter-group" id="subcategory-group" style="display: none;">
@@ -145,7 +156,7 @@
                     <button class="btn-secondary" id="select-all-vocab">Select All Filtered</button>
                     <button class="btn-secondary" id="deselect-all-vocab">Deselect All</button>
                 </div>
-                
+
                 <div class="word-grid" id="word-grid"></div>
 
                 <button id="generate-vocab-exercise">
@@ -156,7 +167,7 @@
             <!-- GRAMMAR SECTION -->
             <section id="grammar" class="content-section">
                 <h2>Grammar Bank</h2>
-                
+
                 <div class="filters-bar">
                     <div class="filter-group">
                         <label>Category:</label>
@@ -198,15 +209,21 @@
             <!-- VIRTUAL BOARD SECTION -->
             <section id="virtualboard" class="content-section">
                 <h2>Virtual Board</h2>
-                
+
                 <div class="board-toolbar">
                     <div class="toolbar-group">
-                        <button class="tool-btn" data-tool="select" title="Select (V)"><i class="fa-solid fa-arrow-pointer"></i></button>
-                        <button class="tool-btn" data-tool="hand" title="Pan (H)"><i class="fa-solid fa-hand"></i></button>
-                        <button class="tool-btn active" data-tool="pen" title="Pen (P)"><i class="fa-solid fa-pen"></i></button>
-                        <button class="tool-btn" data-tool="eraser" title="Eraser (E)"><i class="fa-solid fa-eraser"></i></button>
-                        <button class="tool-btn" data-tool="text" title="Text (T)"><i class="fa-solid fa-font"></i></button>
-                        <button class="tool-btn" data-tool="image" title="Image (I)"><i class="fa-regular fa-image"></i></button>
+                        <button class="tool-btn" data-tool="select" title="Select (V)"><i
+                                class="fa-solid fa-arrow-pointer"></i></button>
+                        <button class="tool-btn" data-tool="hand" title="Pan (H)"><i
+                                class="fa-solid fa-hand"></i></button>
+                        <button class="tool-btn active" data-tool="pen" title="Pen (P)"><i
+                                class="fa-solid fa-pen"></i></button>
+                        <button class="tool-btn" data-tool="eraser" title="Eraser (E)"><i
+                                class="fa-solid fa-eraser"></i></button>
+                        <button class="tool-btn" data-tool="text" title="Text (T)"><i
+                                class="fa-solid fa-font"></i></button>
+                        <button class="tool-btn" data-tool="image" title="Image (I)"><i
+                                class="fa-regular fa-image"></i></button>
                     </div>
 
                     <div class="toolbar-group" id="pen-settings">
@@ -229,7 +246,8 @@
                         <select id="toolbar-font-family" title="Font Family">
                             <option value="Reddit Sans">Reddit Sans</option>
                             <option value="Google Sans Flex">Google Sans Flex</option>
-                            <option value="Architects Daughter" style="font-family: 'Architects Daughter';">Architects Daughter</option>
+                            <option value="Architects Daughter" style="font-family: 'Architects Daughter';">Architects
+                                Daughter</option>
                             <option value="Inter">Inter</option>
                             <option value="Roboto">Roboto</option>
                             <option value="Open Sans">Open Sans</option>
@@ -241,29 +259,45 @@
                     <div class="toolbar-group">
                         <div class="color-palette">
                             <button class="color-btn active" data-color="#000000" style="background: #000000;"></button>
-                            <button class="color-btn" data-color="#ff007f" style="background: #ff007f;" title="Hot Pink"></button>
-                            <button class="color-btn" data-color="#3d348b" style="background: #3d348b;" title="Indigo Velvet"></button>
-                            <button class="color-btn" data-color="#7678ed" style="background: #7678ed;" title="Medium Slate Blue"></button>
-                            <button class="color-btn" data-color="#f7b801" style="background: #f7b801;" title="Amber Flame"></button>
-                            <button class="color-btn" data-color="#f18701" style="background: #f18701;" title="Tiger Orange"></button>
-                            <button class="color-btn" data-color="#f35b04" style="background: #f35b04;" title="Cayenne Red"></button>
-                            <button class="color-btn" data-color="#2ECC71" style="background: #2ECC71;" title="Green"></button>
-                            <button class="color-btn" data-color="#E74C3C" style="background: #E74C3C;" title="Red"></button>
-                            <button class="color-btn" data-color="#95A5A6" style="background: #95A5A6;" title="Gray"></button>
-                            <button class="color-btn" data-color="#FFFFFF" style="background: #FFFFFF; border: 2px solid #ddd;" title="White"></button>
+                            <button class="color-btn" data-color="#ff007f" style="background: #ff007f;"
+                                title="Hot Pink"></button>
+                            <button class="color-btn" data-color="#3d348b" style="background: #3d348b;"
+                                title="Indigo Velvet"></button>
+                            <button class="color-btn" data-color="#7678ed" style="background: #7678ed;"
+                                title="Medium Slate Blue"></button>
+                            <button class="color-btn" data-color="#f7b801" style="background: #f7b801;"
+                                title="Amber Flame"></button>
+                            <button class="color-btn" data-color="#f18701" style="background: #f18701;"
+                                title="Tiger Orange"></button>
+                            <button class="color-btn" data-color="#f35b04" style="background: #f35b04;"
+                                title="Cayenne Red"></button>
+                            <button class="color-btn" data-color="#2ECC71" style="background: #2ECC71;"
+                                title="Green"></button>
+                            <button class="color-btn" data-color="#E74C3C" style="background: #E74C3C;"
+                                title="Red"></button>
+                            <button class="color-btn" data-color="#95A5A6" style="background: #95A5A6;"
+                                title="Gray"></button>
+                            <button class="color-btn" data-color="#FFFFFF"
+                                style="background: #FFFFFF; border: 2px solid #ddd;" title="White"></button>
                         </div>
                     </div>
 
                     <div class="toolbar-group">
-                        <button class="tool-btn" id="zoom-in" title="Zoom In"><i class="fa-solid fa-magnifying-glass-plus"></i></button>
-                        <span id="zoom-level" style="color: white; font-weight: bold; min-width: 45px; text-align: center;">100%</span>
-                        <button class="tool-btn" id="zoom-out" title="Zoom Out"><i class="fa-solid fa-magnifying-glass-minus"></i></button>
+                        <button class="tool-btn" id="zoom-in" title="Zoom In"><i
+                                class="fa-solid fa-magnifying-glass-plus"></i></button>
+                        <span id="zoom-level"
+                            style="color: white; font-weight: bold; min-width: 45px; text-align: center;">100%</span>
+                        <button class="tool-btn" id="zoom-out" title="Zoom Out"><i
+                                class="fa-solid fa-magnifying-glass-minus"></i></button>
                     </div>
 
                     <div class="toolbar-group">
-                        <button class="tool-btn" id="undo-btn" title="Undo (Ctrl+Z)"><i class="fa-solid fa-rotate-left"></i></button>
-                        <button class="tool-btn" id="redo-btn" title="Redo (Ctrl+Y)"><i class="fa-solid fa-rotate-right"></i></button>
-                        <button class="tool-btn" id="clear-btn" title="Clear All"><i class="fa-solid fa-trash"></i></button>
+                        <button class="tool-btn" id="undo-btn" title="Undo (Ctrl+Z)"><i
+                                class="fa-solid fa-rotate-left"></i></button>
+                        <button class="tool-btn" id="redo-btn" title="Redo (Ctrl+Y)"><i
+                                class="fa-solid fa-rotate-right"></i></button>
+                        <button class="tool-btn" id="clear-btn" title="Clear All"><i
+                                class="fa-solid fa-trash"></i></button>
                     </div>
 
                     <div class="toolbar-group">
@@ -279,9 +313,12 @@
                     </div>
 
                     <div class="toolbar-group">
-                        <button class="btn-secondary" id="save-board-btn"><i class="fa-solid fa-floppy-disk"></i> Save</button>
-                        <button class="btn-secondary" id="load-board-btn"><i class="fa-solid fa-folder-open"></i> Load</button>
-                        <button class="btn-secondary" id="export-board-btn"><i class="fa-solid fa-file-export"></i> Export PNG</button>
+                        <button class="btn-secondary" id="save-board-btn"><i class="fa-solid fa-floppy-disk"></i>
+                            Save</button>
+                        <button class="btn-secondary" id="load-board-btn"><i class="fa-solid fa-folder-open"></i>
+                            Load</button>
+                        <button class="btn-secondary" id="export-board-btn"><i class="fa-solid fa-file-export"></i>
+                            Export PNG</button>
                     </div>
                 </div>
 
@@ -303,7 +340,8 @@
                     <select id="text-font-family">
                         <option value="Reddit Sans">Reddit Sans</option>
                         <option value="Google Sans Flex">Google Sans Flex</option>
-                        <option value="Architects Daughter" style="font-family: 'Architects Daughter';">Architects Daughter</option>
+                        <option value="Architects Daughter" style="font-family: 'Architects Daughter';">Architects
+                            Daughter</option>
                         <option value="Inter">Inter</option>
                         <option value="Roboto">Roboto</option>
                         <option value="Open Sans">Open Sans</option>
@@ -330,7 +368,7 @@
             <!-- LIBRARY SECTION -->
             <section id="library" class="content-section">
                 <h2>My Lessons Library</h2>
-                
+
                 <div class="library-tabs">
                     <button class="lib-tab-btn active" data-tab="vocab-lessons">Vocabulary Lessons</button>
                     <button class="lib-tab-btn" data-tab="grammar-lessons">Grammar Lessons</button>
@@ -376,4 +414,5 @@
     <script src="js/darkmode.js"></script>
     <script src="js/app.js"></script>
 </body>
+
 </html>

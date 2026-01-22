@@ -160,6 +160,81 @@ const timeQuizData = [
 window.classroomLanguageQuiz = classroomLanguageQuiz;
 window.timeQuizData = timeQuizData;
 
+const classroomQuestionsQuiz = [
+    {
+        id: 'cqq_01',
+        sentence: "____ color is this?",
+        options: ["What", "Who", "Where", "When"],
+        answer: "What",
+        hint: "Asking about a thing."
+    },
+    {
+        id: 'cqq_02',
+        sentence: "____ pencil is this?",
+        options: ["Whose", "Who", "What", "Which"],
+        answer: "Whose",
+        hint: "Asking about ownership."
+    },
+    {
+        id: 'cqq_03',
+        sentence: "____ me about your drawing.",
+        options: ["Tell", "Say", "Speak", "Talk"],
+        answer: "Tell",
+        hint: "Give me information."
+    },
+    {
+        id: 'cqq_04',
+        sentence: "____ one is your favorite?",
+        options: ["Which", "What", "Who", "Where"],
+        answer: "Which",
+        hint: "Choosing from options."
+    },
+    {
+        id: 'cqq_05',
+        sentence: "____ you ready?",
+        options: ["Are", "Is", "Do", "Can"],
+        answer: "Are",
+        hint: "To be ready."
+    },
+    {
+        id: 'cqq_06',
+        sentence: "____ it dry or wet?",
+        options: ["Is", "Are", "Do", "Does"],
+        answer: "Is",
+        hint: "Singular subject."
+    },
+    {
+        id: 'cqq_07',
+        sentence: "____ you see the screen?",
+        options: ["Can", "Do", "Are", "Is"],
+        answer: "Can",
+        hint: "Ability to see."
+    },
+    {
+        id: 'cqq_08',
+        sentence: "____ you need help?",
+        options: ["Do", "Can", "Are", "Is"],
+        answer: "Do",
+        hint: "Simple present question."
+    },
+    {
+        id: 'cqq_09',
+        sentence: "____ happens if I mix red and blue?",
+        options: ["What", "Who", "Where", "When"],
+        answer: "What",
+        hint: "Asking about a result."
+    },
+    {
+        id: 'cqq_10',
+        sentence: "____ turn is it?",
+        options: ["Whose", "Who", "Which", "What"],
+        answer: "Whose",
+        hint: "Possession."
+    }
+];
+
+window.classroomQuestionsQuiz = classroomQuestionsQuiz;
+
 const mayMightUnjumbleData = [
     {
         id: 'mm_01',

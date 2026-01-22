@@ -1,7 +1,7 @@
 const PracticeModule = {
     words: [],
     baseWords: [],
-    difficultWords: [], 
+    difficultWords: [],
     currentIndex: 0,
     config: {
         mode: 'flashcards',
@@ -9,8 +9,8 @@ const PracticeModule = {
         submode: null,
         settings: {
             timer: 'none',
-            timerValue: 300, 
-            lives: 0, 
+            timerValue: 300,
+            lives: 0,
             allowDiagonal: true,
             allowReverse: false,
             gridSize: 'M',
@@ -30,33 +30,33 @@ const PracticeModule = {
     init() {
         const params = new URLSearchParams(window.location.search);
         let idsParam = params.get('ids');
-        
+
         // Try getting IDs from localStorage if not in URL
         if (!idsParam) {
             const storedIds = localStorage.getItem('selectedVocabIds');
             if (storedIds) {
                 try {
                     idsParam = JSON.parse(storedIds).join(',');
-                } catch(e) { console.error('Error parsing stored IDs', e); }
+                } catch (e) { console.error('Error parsing stored IDs', e); }
             }
         }
 
         const ids = idsParam ? idsParam.split(',') : [];
         this.config.mode = params.get('mode'); // Allow null
         this.config.face = params.get('face') || 'word_first';
-        this.config.submode = params.get('face'); 
+        this.config.submode = params.get('face');
 
         // Load base words
         this.baseWords = window.vocabularyBank.filter(w => ids.includes(w.id));
         this.words = [...this.baseWords];
-        this.difficultWords = []; 
+        this.difficultWords = [];
 
         if (this.config.mode) {
             this.handleModeSetup(this.config.mode);
         } else {
             this.showModeSelection();
         }
-        
+
         this.setupFullScreen();
         this.updateWordCountButton();
         this.setupSettingsButton();
@@ -78,12 +78,12 @@ const PracticeModule = {
         const btn = document.getElementById('word-count-floating-btn');
         const text = document.getElementById('word-count-text');
         const list = document.getElementById('selected-words-list');
-        
+
         if (!btn || !text || !list) return;
 
         const count = this.baseWords.length;
         text.textContent = `${count} Word${count !== 1 ? 's' : ''} Selected`;
-        
+
         list.innerHTML = this.baseWords.map(w => `<li>${w.word}</li>`).join('');
     },
 
@@ -100,10 +100,10 @@ const PracticeModule = {
         document.getElementById('settings-area').style.display = 'none';
         document.getElementById('game-area').style.display = 'none';
         document.getElementById('game-info').innerHTML = '';
-        
+
         const settingsBtn = document.getElementById('change-options-btn');
         if (settingsBtn) settingsBtn.style.display = 'none';
-        
+
         this.toggleWordCountVisibility(true);
 
         // Add click handlers
@@ -122,17 +122,29 @@ const PracticeModule = {
 
         // Specific filtering
         if (mode === 'quiz') {
-            this.words = window.classroomLanguageQuiz;
+            const hasClassLang = this.baseWords.some(w => w.category === 'classroom-language');
+            const hasClassQuest = this.baseWords.some(w => w.category === 'classroom-questions');
+
+            if (hasClassQuest && !hasClassLang) {
+                this.words = window.classroomQuestionsQuiz;
+            } else if (hasClassLang && hasClassQuest) {
+                this.words = [...window.classroomLanguageQuiz, ...window.classroomQuestionsQuiz];
+            } else {
+                this.words = window.classroomLanguageQuiz;
+            }
         } else if (mode === 'time-quiz') {
             this.words = window.timeQuizData;
             this.config.mode = 'quiz'; // Re-use quiz rendering logic
         } else if (mode === 'may-might-unjumble') {
             this.words = window.mayMightUnjumbleData;
-            this.config.mode = 'unjumble'; 
+            this.config.mode = 'unjumble';
         } else if (mode === 'wordsearch') {
-             if (this.words.length > 16) this.words = this.words.slice(0, 16);
+            if (this.words.length > 16) this.words = this.words.slice(0, 16);
+        } else if (mode === 'crossword') {
+            this.words = this.words.filter(w => w.word.length <= 30);
+            if (this.words.length > 10) this.words = this.words.slice(0, 10);
         } else if (mode === 'unjumble') {
-             this.words = this.words.filter(w => w.word.trim().includes(' '));
+            this.words = this.words.filter(w => w.word.trim().includes(' '));
         }
 
         if (this.words.length === 0) {
@@ -142,12 +154,16 @@ const PracticeModule = {
         }
 
         document.getElementById('mode-selection-area').style.display = 'none';
-        
+
         const settingsBtn = document.getElementById('change-options-btn');
-        
+
         if (mode === 'wordsearch') {
             if (settingsBtn) settingsBtn.style.display = 'none';
             this.showWordsearchSettings();
+        } else if (mode === 'crossword') {
+            if (settingsBtn) settingsBtn.style.display = 'none';
+            document.getElementById('game-area').style.display = 'flex';
+            this.render();
         } else if (mode === 'flashcards') {
             if (settingsBtn) settingsBtn.style.display = 'none';
             this.showFlashcardsSettings();
@@ -282,7 +298,7 @@ const PracticeModule = {
             radio.parentElement.addEventListener('mouseenter', () => {
                 this.updateFlashcardPreview(radio.value);
             });
-            
+
             // Also update on change
             radio.addEventListener('change', () => {
                 this.updateFlashcardPreview(radio.value);
@@ -320,10 +336,10 @@ const PracticeModule = {
         // Reset game state for flashcards
         this.gameState.timeLeft = this.config.settings.timerValue;
         this.gameState.isGameOver = false;
-        
+
         document.getElementById('settings-area').style.display = 'none';
         document.getElementById('game-area').style.display = 'flex';
-        
+
         this.startTimer(); // Start timer if configured
         this.render();
     },
@@ -332,7 +348,7 @@ const PracticeModule = {
         const previewInner = document.querySelector('.flashcard-preview-inner');
         const frontFace = document.querySelector('.flashcard-preview-face-front');
         const backFace = document.querySelector('.flashcard-preview-face-back');
-        
+
         if (!previewInner || !frontFace || !backFace) return;
 
         let frontContent = '';
@@ -367,25 +383,25 @@ const PracticeModule = {
 
         // Trigger Flip Animation
         previewInner.classList.remove('flipped');
-        
+
         // Small delay to ensure reset before flipping (simulating user interaction)
         // If this is called on hover, we might want to flip to back then front?
         // User said: "flips to reveal what type of content will be in the back and it flips again to show what type of content will be at the front."
-        
+
         // Clear any existing animation timeouts
         if (this._previewTimeout) clearTimeout(this._previewTimeout);
         if (this._previewTimeout2) clearTimeout(this._previewTimeout2);
 
         // Sequence: Start Front -> Flip to Back (show back content) -> Flip to Front (show front content)?
         // Or: Start Front (Front Content) -> Flip to Back (Back Content) -> Flip to Front (Front Content).
-        
+
         // Let's try:
         // 1. Set content.
         // 2. Wait a bit.
         // 3. Add 'flipped' class (Show Back).
         // 4. Wait.
         // 5. Remove 'flipped' class (Show Front).
-        
+
         this._previewTimeout = setTimeout(() => {
             previewInner.classList.add('flipped');
             this._previewTimeout2 = setTimeout(() => {
@@ -394,14 +410,14 @@ const PracticeModule = {
         }, 100);
     },
 
-        showMatchingSettings() {
-            this.toggleWordCountVisibility(true);
-            const settingsArea = document.getElementById('settings-area');
-            const gameArea = document.getElementById('game-area');
-            settingsArea.style.display = 'block';
-            gameArea.style.display = 'none';
-    
-            settingsArea.innerHTML = `
+    showMatchingSettings() {
+        this.toggleWordCountVisibility(true);
+        const settingsArea = document.getElementById('settings-area');
+        const gameArea = document.getElementById('game-area');
+        settingsArea.style.display = 'block';
+        gameArea.style.display = 'none';
+
+        settingsArea.innerHTML = `
                 <div class="ws-settings-panel">
                     <h2>Memory Match Options</h2>
     
@@ -450,39 +466,39 @@ const PracticeModule = {
                     </div>
                 </div>
             `;
-        },
-    
-        startMatching() {
-            const matchMode = document.querySelector('input[name="match-mode"]:checked').value;
-            const timerType = document.querySelector('input[name="timer"]:checked').value;
-            const minutes = parseInt(document.getElementById('timer-m').value) || 0;
-            const seconds = parseInt(document.getElementById('timer-s').value) || 0;
-            
-            // Auto-determine pairs: min(selected words, 10)
-            const numPairs = Math.min(this.words.length, 10);
-    
-            this.config.settings = {
-                ...this.config.settings,
-                matchMode: matchMode,
-                timer: timerType,
-                timerValue: (minutes * 60) + seconds,
-                numPairs: numPairs
-            };
-    
-            this.gameState.timeLeft = this.config.settings.timerValue;
-            this.gameState.isGameOver = false;
-    
-            document.getElementById('settings-area').style.display = 'none';
-            document.getElementById('game-area').style.display = 'flex';
-    
-            // Prepare words subset
-            // Shuffle all words first, then take the first N
-            const shuffledAll = [...this.words].sort(() => Math.random() - 0.5);
-            this.words = shuffledAll.slice(0, numPairs);
-    
-            this.startTimer();
-            this.render();
-        },
+    },
+
+    startMatching() {
+        const matchMode = document.querySelector('input[name="match-mode"]:checked').value;
+        const timerType = document.querySelector('input[name="timer"]:checked').value;
+        const minutes = parseInt(document.getElementById('timer-m').value) || 0;
+        const seconds = parseInt(document.getElementById('timer-s').value) || 0;
+
+        // Auto-determine pairs: min(selected words, 10)
+        const numPairs = Math.min(this.words.length, 10);
+
+        this.config.settings = {
+            ...this.config.settings,
+            matchMode: matchMode,
+            timer: timerType,
+            timerValue: (minutes * 60) + seconds,
+            numPairs: numPairs
+        };
+
+        this.gameState.timeLeft = this.config.settings.timerValue;
+        this.gameState.isGameOver = false;
+
+        document.getElementById('settings-area').style.display = 'none';
+        document.getElementById('game-area').style.display = 'flex';
+
+        // Prepare words subset
+        // Shuffle all words first, then take the first N
+        const shuffledAll = [...this.words].sort(() => Math.random() - 0.5);
+        this.words = shuffledAll.slice(0, numPairs);
+
+        this.startTimer();
+        this.render();
+    },
     showWordsearchSettings() {
         this.toggleWordCountVisibility(true);
         const settingsArea = document.getElementById('settings-area');
@@ -587,7 +603,7 @@ const PracticeModule = {
         const diagonal = document.getElementById('allow-diagonal').checked;
         const reverse = document.getElementById('allow-reverse').checked;
         const mustClickClue = document.getElementById('must-click-clue').checked;
-        
+
         const clueTypes = [];
         document.querySelectorAll('.clue-type-cb:checked').forEach(cb => clueTypes.push(cb.value));
 
@@ -617,7 +633,7 @@ const PracticeModule = {
 
         document.getElementById('settings-area').style.display = 'none';
         document.getElementById('game-area').style.display = 'flex';
-        
+
         this.render();
     },
 
@@ -649,12 +665,12 @@ const PracticeModule = {
         if (settingsBtn) settingsBtn.style.display = 'flex';
         const area = document.getElementById('game-area');
         area.innerHTML = ''; // Clear previous content
-        
+
         // Remove old nav if exists
         const oldNav = document.querySelector('.practice-nav');
         if (oldNav) oldNav.remove();
 
-        switch(this.config.mode) {
+        switch (this.config.mode) {
             case 'flashcards':
                 this.renderFlashcard(area);
                 break;
@@ -687,13 +703,13 @@ const PracticeModule = {
     // --- FLASHCARDS LOGIC ---
     renderFlashcard(container) {
         const word = this.words[this.currentIndex];
-        
+
         let frontContent = '';
         let backContent = '';
 
         const wordHtml = `<div class="card-content-word">${word.word}</div>`;
         const imgPath = `assets/images/vocabulary/${word.word.toLowerCase()}.png`;
-        
+
         let visualHtml = `
             <img src="${imgPath}" class="card-content-image" 
                  onerror="this.style.display='none'; this.nextElementSibling.style.display='block'" 
@@ -709,11 +725,11 @@ const PracticeModule = {
         } else {
             if (word.icon) visualHtml += `<div style="display:none" class="card-content-icon"><i class="${word.icon}"></i></div>`;
         }
-        
+
         const soundBtnSmall = `<button class="sound-btn-small" onclick="event.stopPropagation(); PracticeModule.playSound('${word.word}')"><i class="fa-solid fa-volume-high"></i></button>`;
         const soundBtnLarge = `<button class="sound-btn-large" onclick="event.stopPropagation(); PracticeModule.playSound('${word.word}')"><i class="fa-solid fa-volume-high"></i></button>`;
 
-        switch(this.config.face) {
+        switch (this.config.face) {
             case 'word_first':
                 frontContent = wordHtml;
                 backContent = visualHtml + soundBtnSmall;
@@ -773,7 +789,7 @@ const PracticeModule = {
 
     markWord(isKnown) {
         const currentWord = this.words[this.currentIndex];
-        
+
         if (!isKnown) {
             // Add to difficult words if not already there
             if (!this.difficultWords.find(w => w.id === currentWord.id)) {
@@ -812,11 +828,11 @@ const PracticeModule = {
         this.matches = 0;
         this.memoryData.flippedCards = [];
         this.memoryData.isLocking = false;
-        
+
         // Generate Cards
         this.memoryData.cards = [];
         const mode = this.config.settings.matchMode || 'image_word'; // Default
-        
+
         this.words.forEach(word => {
             // Card 1
             let content1 = { type: 'word', val: word.word, wordObj: word };
@@ -892,7 +908,7 @@ const PracticeModule = {
                 const imgPath = `assets/images/vocabulary/${word.word.toLowerCase()}.png`;
                 let visual = `<img src="${imgPath}" class="memory-content-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
                               ${word.icon ? `<div style="display:none; font-size: 2rem; color: var(--hot-pink);"><i class="${word.icon}"></i></div>` : ''}`;
-                
+
                 if (word.category === 'colors') {
                     visual = `<div class="match-card-color-circle" style="background-color: ${this.getColorHex(word.word)}"></div>`;
                 } else if (word.category === 'shapes') {
@@ -900,7 +916,7 @@ const PracticeModule = {
                 }
                 contentHtml = visual;
             } else if (type === 'audio') {
-                 contentHtml = `<i class="fa-solid fa-volume-high" style="font-size: 2.5rem; color: var(--indigo-velvet);"></i>`;
+                contentHtml = `<i class="fa-solid fa-volume-high" style="font-size: 2.5rem; color: var(--indigo-velvet);"></i>`;
             }
 
             // If matched, keep flipped.
@@ -925,180 +941,180 @@ const PracticeModule = {
         }).join('');
     },
 
-        shuffleMemoryCards(reRender = true) {
-            if (!reRender) {
-                this.memoryData.cards.sort(() => Math.random() - 0.5);
-                return;
-            }
-    
-            const grid = document.getElementById('memory-grid');
-            if (!grid) return;
-    
-            // 1. First: Record positions
-            const cards = Array.from(grid.children);
-            const positions = new Map();
-            
-            cards.forEach(card => {
-                // Find the ID. It's in the onclick handler string, but easier if we add data-id to the container.
-                // Let's rely on index for now, but index changes. 
-                // We need to map DOM elements to their future locations.
-                // Since we are re-rendering innerHTML, the DOM nodes will be destroyed. 
-                // FLIP with innerHTML replacement is tricky.
-                // Better approach: 
-                // 1. Get current card IDs and their rects.
-                // 2. Shuffle data.
-                // 3. Render new HTML.
-                // 4. Get new card rects by ID (assuming we added data-id).
-                // 5. Animate from old rect to new rect.
-            });
-    
-            // Let's grab IDs from the current DOM or just rely on the data-id I added in renderMemoryGridItems 
-            // Wait, I didn't add data-id to the container in renderMemoryGridItems, only to the onclick.
-            // I need to update renderMemoryGridItems first to include data-id on the container.
-            
-            // Actually, let's update renderMemoryGridItems first in this same Edit or assume I'll do it.
-            // I'll update renderMemoryGridItems to add data-id="${card.id}" to .memory-card-container
-            
-            // Let's implement the logic assuming data-id is there.
-            const firstPositions = {};
-            grid.querySelectorAll('.memory-card-container').forEach(el => {
-                const id = el.dataset.id;
-                firstPositions[id] = el.getBoundingClientRect();
-            });
-    
-            // 2. Last: Shuffle and Render
+    shuffleMemoryCards(reRender = true) {
+        if (!reRender) {
             this.memoryData.cards.sort(() => Math.random() - 0.5);
-            grid.innerHTML = this.renderMemoryGridItems();
-    
-            // 3. Invert: Calculate deltas and apply transform
-            grid.querySelectorAll('.memory-card-container').forEach(el => {
-                const id = el.dataset.id;
-                const first = firstPositions[id];
-                
-                if (first) {
-                    const last = el.getBoundingClientRect();
-                    const deltaX = first.left - last.left;
-                    const deltaY = first.top - last.top;
-    
-                    // Apply transform to put it back where it was
-                    el.style.transition = 'none';
-                    el.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
-                    
-                    // Force layout
-                    el.getBoundingClientRect();
-    
-                    // 4. Play: Remove transform to animate to new spot
-                    requestAnimationFrame(() => {
-                        el.style.transition = 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
-                        el.style.transform = '';
-                    });
+            return;
+        }
+
+        const grid = document.getElementById('memory-grid');
+        if (!grid) return;
+
+        // 1. First: Record positions
+        const cards = Array.from(grid.children);
+        const positions = new Map();
+
+        cards.forEach(card => {
+            // Find the ID. It's in the onclick handler string, but easier if we add data-id to the container.
+            // Let's rely on index for now, but index changes. 
+            // We need to map DOM elements to their future locations.
+            // Since we are re-rendering innerHTML, the DOM nodes will be destroyed. 
+            // FLIP with innerHTML replacement is tricky.
+            // Better approach: 
+            // 1. Get current card IDs and their rects.
+            // 2. Shuffle data.
+            // 3. Render new HTML.
+            // 4. Get new card rects by ID (assuming we added data-id).
+            // 5. Animate from old rect to new rect.
+        });
+
+        // Let's grab IDs from the current DOM or just rely on the data-id I added in renderMemoryGridItems 
+        // Wait, I didn't add data-id to the container in renderMemoryGridItems, only to the onclick.
+        // I need to update renderMemoryGridItems first to include data-id on the container.
+
+        // Actually, let's update renderMemoryGridItems first in this same Edit or assume I'll do it.
+        // I'll update renderMemoryGridItems to add data-id="${card.id}" to .memory-card-container
+
+        // Let's implement the logic assuming data-id is there.
+        const firstPositions = {};
+        grid.querySelectorAll('.memory-card-container').forEach(el => {
+            const id = el.dataset.id;
+            firstPositions[id] = el.getBoundingClientRect();
+        });
+
+        // 2. Last: Shuffle and Render
+        this.memoryData.cards.sort(() => Math.random() - 0.5);
+        grid.innerHTML = this.renderMemoryGridItems();
+
+        // 3. Invert: Calculate deltas and apply transform
+        grid.querySelectorAll('.memory-card-container').forEach(el => {
+            const id = el.dataset.id;
+            const first = firstPositions[id];
+
+            if (first) {
+                const last = el.getBoundingClientRect();
+                const deltaX = first.left - last.left;
+                const deltaY = first.top - last.top;
+
+                // Apply transform to put it back where it was
+                el.style.transition = 'none';
+                el.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+
+                // Force layout
+                el.getBoundingClientRect();
+
+                // 4. Play: Remove transform to animate to new spot
+                requestAnimationFrame(() => {
+                    el.style.transition = 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+                    el.style.transform = '';
+                });
+            }
+        });
+    },
+    handleMemoryCardClick(cardId) {
+        if (this.memoryData.isLocking) return;
+
+        const card = this.memoryData.cards.find(c => c.id === cardId);
+        if (!card || card.isFlipped || card.isMatched) return;
+
+        // Flip it
+        card.isFlipped = true;
+        this.memoryData.flippedCards.push(card);
+
+        // Update DOM directly for smooth animation
+        const cardEl = document.querySelector(`.memory-card-container[data-id="${cardId}"]`);
+        if (cardEl) cardEl.classList.add('flipped');
+
+        // Play audio if it's an audio card
+        if (card.content.type === 'audio') {
+            this.playSound(card.content.val);
+        }
+
+        if (this.memoryData.flippedCards.length === 2) {
+            this.memoryData.isLocking = true;
+            this.checkMemoryMatch();
+        }
+    },
+
+    updateMemoryGridUI() {
+        const grid = document.getElementById('memory-grid');
+        if (grid) grid.innerHTML = this.renderMemoryGridItems();
+    },
+
+    checkMemoryMatch() {
+        const [card1, card2] = this.memoryData.flippedCards;
+
+        if (card1.wordId === card2.wordId) {
+            // Match!
+            setTimeout(() => {
+                card1.isMatched = true;
+                card2.isMatched = true;
+                card1.isFlipped = false; // logic handled by matched class
+                card2.isFlipped = false;
+                this.memoryData.flippedCards = [];
+                this.memoryData.isLocking = false;
+                this.matches++;
+
+                // Update DOM directly
+                const el1 = document.querySelector(`.memory-card-container[data-id="${card1.id}"]`);
+                const el2 = document.querySelector(`.memory-card-container[data-id="${card2.id}"]`);
+
+                if (el1) {
+                    el1.classList.add('matched');
+                    el1.classList.remove('flipped'); // Matched state handles rotation
                 }
-            });
-        },
-        handleMemoryCardClick(cardId) {
-            if (this.memoryData.isLocking) return;
-    
-            const card = this.memoryData.cards.find(c => c.id === cardId);
-            if (!card || card.isFlipped || card.isMatched) return;
-    
-            // Flip it
-            card.isFlipped = true;
-            this.memoryData.flippedCards.push(card);
-    
-            // Update DOM directly for smooth animation
-            const cardEl = document.querySelector(`.memory-card-container[data-id="${cardId}"]`);
-            if (cardEl) cardEl.classList.add('flipped');
-    
-            // Play audio if it's an audio card
-            if (card.content.type === 'audio') {
-                this.playSound(card.content.val);
-            }
-    
-            if (this.memoryData.flippedCards.length === 2) {
-                this.memoryData.isLocking = true;
-                this.checkMemoryMatch();
-            }
-        },
-    
-        updateMemoryGridUI() {
-             const grid = document.getElementById('memory-grid');
-             if (grid) grid.innerHTML = this.renderMemoryGridItems();
-        },
-    
-        checkMemoryMatch() {
-            const [card1, card2] = this.memoryData.flippedCards;
-    
-            if (card1.wordId === card2.wordId) {
-                // Match!
-                setTimeout(() => {
-                    card1.isMatched = true;
-                    card2.isMatched = true;
-                    card1.isFlipped = false; // logic handled by matched class
-                    card2.isFlipped = false;
-                    this.memoryData.flippedCards = [];
-                    this.memoryData.isLocking = false;
-                    this.matches++;
-                    
-                    // Update DOM directly
-                    const el1 = document.querySelector(`.memory-card-container[data-id="${card1.id}"]`);
-                    const el2 = document.querySelector(`.memory-card-container[data-id="${card2.id}"]`);
-                    
-                    if (el1) {
-                        el1.classList.add('matched');
-                        el1.classList.remove('flipped'); // Matched state handles rotation
-                    }
-                    if (el2) {
-                        el2.classList.add('matched');
-                        el2.classList.remove('flipped');
-                    }
-    
-                    // Audio feedback (play the word if not already audio)
-                    if (card1.content.type !== 'audio' && card2.content.type !== 'audio') {
-                        this.playSound(card1.content.val);
-                    }
-    
-                     const status = document.getElementById('memory-status');
-                     if (status) {
-                         status.textContent = "Great Match!";
-                         status.className = 'ws-status-v2 success';
-                         setTimeout(() => {
-                             if(status) status.className = 'ws-status-v2';
-                         }, 1000);
-                     }
-    
-                    if (this.matches === this.words.length) {
-                        setTimeout(() => this.showSummary(true), 1000);
-                    }
-                }, 800);
-            } else {
-                // No Match
-                setTimeout(() => {
-                    card1.isFlipped = false;
-                    card2.isFlipped = false;
-                    this.memoryData.flippedCards = [];
-                    this.memoryData.isLocking = false;
-                    
-                    // Update DOM directly
-                    const el1 = document.querySelector(`.memory-card-container[data-id="${card1.id}"]`);
-                    const el2 = document.querySelector(`.memory-card-container[data-id="${card2.id}"]`);
-                    
-                    if (el1) el1.classList.remove('flipped');
-                    if (el2) el2.classList.remove('flipped');
-    
-                    const status = document.getElementById('memory-status');
-                     if (status) {
-                         status.textContent = "Try again!";
-                         status.className = 'ws-status-v2 error';
-                         setTimeout(() => {
-                             if(status) {
-                                 status.className = 'ws-status-v2';
-                                 status.textContent = "Find the pairs!";
-                             }
-                         }, 1000);
-                     }
-                }, 1200);
-            }
-        },
+                if (el2) {
+                    el2.classList.add('matched');
+                    el2.classList.remove('flipped');
+                }
+
+                // Audio feedback (play the word if not already audio)
+                if (card1.content.type !== 'audio' && card2.content.type !== 'audio') {
+                    this.playSound(card1.content.val);
+                }
+
+                const status = document.getElementById('memory-status');
+                if (status) {
+                    status.textContent = "Great Match!";
+                    status.className = 'ws-status-v2 success';
+                    setTimeout(() => {
+                        if (status) status.className = 'ws-status-v2';
+                    }, 1000);
+                }
+
+                if (this.matches === this.words.length) {
+                    setTimeout(() => this.showSummary(true), 1000);
+                }
+            }, 800);
+        } else {
+            // No Match
+            setTimeout(() => {
+                card1.isFlipped = false;
+                card2.isFlipped = false;
+                this.memoryData.flippedCards = [];
+                this.memoryData.isLocking = false;
+
+                // Update DOM directly
+                const el1 = document.querySelector(`.memory-card-container[data-id="${card1.id}"]`);
+                const el2 = document.querySelector(`.memory-card-container[data-id="${card2.id}"]`);
+
+                if (el1) el1.classList.remove('flipped');
+                if (el2) el2.classList.remove('flipped');
+
+                const status = document.getElementById('memory-status');
+                if (status) {
+                    status.textContent = "Try again!";
+                    status.className = 'ws-status-v2 error';
+                    setTimeout(() => {
+                        if (status) {
+                            status.className = 'ws-status-v2';
+                            status.textContent = "Find the pairs!";
+                        }
+                    }, 1000);
+                }
+            }, 1200);
+        }
+    },
     showToast(message, type = 'info') {
         // Remove existing toast
         const existingToast = document.querySelector('.toast-notification');
@@ -1106,7 +1122,7 @@ const PracticeModule = {
 
         const toast = document.createElement('div');
         toast.className = `toast-notification ${type}`;
-        
+
         let icon = 'fa-circle-info';
         if (type === 'success') icon = 'fa-circle-check';
         if (type === 'error') icon = 'fa-circle-xmark';
@@ -1129,7 +1145,7 @@ const PracticeModule = {
     renderSpelling(container) {
         const word = this.words[this.currentIndex];
         const imgPath = `assets/images/vocabulary/${word.word.toLowerCase()}.png`;
-        
+
         let visual = `
             <img src="${imgPath}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
             ${word.icon ? `<div style="display:none; font-size: 6rem; color: var(--hot-pink);"><i class="${word.icon}"></i></div>` : ''}
@@ -1176,7 +1192,7 @@ const PracticeModule = {
         const input = document.getElementById('spelling-input');
         const feedback = document.getElementById('spelling-feedback');
         const word = this.words[this.currentIndex];
-        
+
         if (input.value.trim().toLowerCase() === word.word.toLowerCase()) {
             feedback.innerHTML = '✅ Correct!';
             feedback.style.color = '#28a745';
@@ -1212,11 +1228,11 @@ const PracticeModule = {
         // Determine grid size based on settings
         const sizeMap = { 'XS': 10, 'S': 12, 'M': 15, 'LG': 18, 'XL': 20 };
         let baseSize = sizeMap[this.config.settings.gridSize] || 15;
-        
+
         // Ensure it fits the longest word
         const longestWordLen = Math.max(...this.words.map(w => w.word.replace(/\s/g, '').length));
         this.wordsearchData.size = Math.max(baseSize, longestWordLen);
-        
+
         this.wordsearchData.foundWords = [];
         this.wordsearchData.placedWords = [];
         this.wordsearchData.isPendingMatch = false;
@@ -1276,7 +1292,7 @@ const PracticeModule = {
             } else {
                 this.gameState.timeLeft++;
             }
-            
+
             const timerEl = document.getElementById('ws-timer') || document.getElementById('fc-timer');
             if (timerEl) timerEl.querySelector('span').textContent = this.formatTime(this.gameState.timeLeft);
         }, 1000);
@@ -1284,7 +1300,7 @@ const PracticeModule = {
 
     loseLife() {
         if (this.config.settings.lives <= 0) return;
-        
+
         this.gameState.livesLeft--;
         const livesEl = document.getElementById('ws-lives');
         if (livesEl) {
@@ -1292,7 +1308,7 @@ const PracticeModule = {
             livesEl.classList.add('shake');
             setTimeout(() => livesEl.classList.remove('shake'), 500);
         }
-        
+
         if (this.gameState.livesLeft <= 0) {
             this.gameOver(false, 'No more lives left!');
         }
@@ -1301,16 +1317,16 @@ const PracticeModule = {
     gameOver(success, message) {
         this.gameState.isGameOver = true;
         if (this.gameState.timerInterval) clearInterval(this.gameState.timerInterval);
-        
+
         this.showSummary(success, message);
     },
 
     generateWordsearchGrid() {
         const size = this.wordsearchData.size;
         this.wordsearchData.grid = Array(size).fill().map(() => Array(size).fill(''));
-        
+
         const sortedWords = [...this.words].sort((a, b) => b.word.length - a.word.length);
-        
+
         sortedWords.forEach(wordObj => {
             const placed = this.placeWordInGrid(wordObj.word.toUpperCase().replace(/\s/g, ''));
             if (placed) {
@@ -1334,26 +1350,26 @@ const PracticeModule = {
     placeWordInGrid(word) {
         const size = this.wordsearchData.size;
         let directions = [[0, 1], [1, 0]]; // Horizontal and Vertical always
-        
+
         if (this.config.settings.allowDiagonal) {
             directions.push([1, 1], [-1, 1]);
         }
-        
+
         if (this.config.settings.allowReverse) {
             const revDirs = directions.map(d => [-d[0], -d[1]]);
             directions = directions.concat(revDirs);
         }
-        
+
         directions.sort(() => Math.random() - 0.5);
 
         for (let attempt = 0; attempt < 100; attempt++) {
             const direction = directions[Math.floor(Math.random() * directions.length)];
             const dr = direction[0];
             const dc = direction[1];
-            
+
             const startR = Math.floor(Math.random() * size);
             const startC = Math.floor(Math.random() * size);
-            
+
             if (this.canPlaceWord(word, startR, startC, dr, dc)) {
                 for (let i = 0; i < word.length; i++) {
                     this.wordsearchData.grid[startR + i * dr][startC + i * dc] = word[i];
@@ -1395,7 +1411,7 @@ const PracticeModule = {
             const word = placed.original;
             let content = '';
             const clueTypes = this.config.settings.clueTypes;
-            
+
             if (clueTypes.includes('image')) {
                 const imgPath = `assets/images/vocabulary/${word.word.toLowerCase()}.png`;
                 let visual = `
@@ -1405,7 +1421,7 @@ const PracticeModule = {
                 if (word.category === 'colors') {
                     visual = `<div class="clue-color-circle" style="background-color: ${this.getColorHex(word.word)}"></div>`;
                 } else if (word.category === 'shapes') {
-                     visual = `<div style="transform: scale(0.3); margin: -50px;">${this.getShapeHtml(word.word)}</div>`;
+                    visual = `<div style="transform: scale(0.3); margin: -50px;">${this.getShapeHtml(word.word)}</div>`;
                 }
                 content += `<div class="clue-image-container-v2">${visual}</div>`;
             }
@@ -1428,7 +1444,7 @@ const PracticeModule = {
 
     setupWSEvents() {
         const grid = document.getElementById('ws-grid');
-        
+
         const getCell = (e) => {
             let clientX, clientY;
             if (e.touches) {
@@ -1444,7 +1460,7 @@ const PracticeModule = {
 
         const startSelection = (cell) => {
             if (!cell || this.gameState.isGameOver) return;
-            
+
             if (this.config.settings.mustClickClue && this.gameState.pendingClueMatch) {
                 this.updateWSStatusV2("Click the correct clue card first!", "error");
                 return;
@@ -1467,14 +1483,14 @@ const PracticeModule = {
 
             const dr = r2 - r1;
             const dc = c2 - c1;
-            
+
             if (dr === 0 || dc === 0 || Math.abs(dr) === Math.abs(dc)) {
                 document.querySelectorAll('.ws-cell.selecting').forEach(c => c.classList.remove('selecting'));
-                
+
                 const steps = Math.max(Math.abs(dr), Math.abs(dc));
                 const stepR = dr === 0 ? 0 : dr / steps;
                 const stepC = dc === 0 ? 0 : dc / steps;
-                
+
                 this.wordsearchData.selectedCells = [];
                 for (let i = 0; i <= steps; i++) {
                     const r = r1 + i * stepR;
@@ -1491,11 +1507,11 @@ const PracticeModule = {
         const endSelection = () => {
             if (!this.wordsearchData.isSelecting || this.gameState.isGameOver) return;
             this.wordsearchData.isSelecting = false;
-            
+
             const selectedWord = this.wordsearchData.selectedCells.map(c => c.textContent).join('');
             const reversedWord = selectedWord.split('').reverse().join('');
-            
-            const match = this.wordsearchData.placedWords.find(p => 
+
+            const match = this.wordsearchData.placedWords.find(p =>
                 (p.word === selectedWord || p.word === reversedWord) && !this.wordsearchData.foundWords.includes(p.id)
             );
 
@@ -1505,7 +1521,7 @@ const PracticeModule = {
                     c.classList.remove('selecting');
                     c.classList.add('found');
                 });
-                
+
                 if (this.config.settings.mustClickClue) {
                     this.gameState.pendingClueMatch = match.id;
                     this.updateWSStatusV2(`Found: ${match.word}! Now click the clue.`, "success");
@@ -1593,7 +1609,7 @@ const PracticeModule = {
     checkWSCompletion() {
         const totalWords = this.wordsearchData.placedWords.length;
         const foundWords = this.wordsearchData.foundWords.length;
-        
+
         if (foundWords === totalWords) {
             setTimeout(() => this.gameOver(true), 500);
         }
@@ -1617,7 +1633,7 @@ const PracticeModule = {
         const wordObj = this.words[this.currentIndex];
         // Split the word/phrase into individual words
         const words = wordObj.word.split(' ');
-        
+
         if (words.length <= 1) {
             // If it's just one word, unjumbling words doesn't make sense.
             // We could unjumble letters, but the user asked for words.
@@ -1635,7 +1651,7 @@ const PracticeModule = {
         if (wordObj.category === 'colors') {
             visual = `<div class="clue-color-circle" style="width: 100px; height: 100px; margin: 0 auto 10px auto; background-color: ${this.getColorHex(wordObj.word)}"></div>`;
         } else if (wordObj.category === 'shapes') {
-             visual = `<div style="transform: scale(0.8); margin-bottom: 20px;">${this.getShapeHtml(wordObj.word)}</div>`;
+            visual = `<div style="transform: scale(0.8); margin-bottom: 20px;">${this.getShapeHtml(wordObj.word)}</div>`;
         }
 
         container.innerHTML = `
@@ -1686,7 +1702,7 @@ const PracticeModule = {
     handleUnjumbleClick(wordEl) {
         const source = document.getElementById('unjumble-source');
         const target = document.getElementById('unjumble-target');
-        
+
         if (wordEl.parentElement === source) {
             target.appendChild(wordEl);
         } else {
@@ -1709,7 +1725,7 @@ const PracticeModule = {
         e.preventDefault();
         const container = e.currentTarget;
         container.classList.add('drag-over');
-        
+
         const dragging = document.querySelector('.dragging');
         if (!dragging) return;
 
@@ -1739,10 +1755,10 @@ const PracticeModule = {
         const wordObj = this.words[this.currentIndex];
         const targetArea = document.getElementById('unjumble-target');
         const feedback = document.getElementById('unjumble-feedback');
-        
+
         const userSentence = Array.from(targetArea.children).map(el => el.textContent).join(' ');
         const correctAnswer = wordObj.word;
-        
+
         const cleanUser = userSentence.toLowerCase().replace(/[.,!?;]$/, '');
         const cleanCorrect = correctAnswer.toLowerCase().replace(/[.,!?;]$/, '');
 
@@ -1776,7 +1792,7 @@ const PracticeModule = {
 
     renderCrossword(container) {
         this.generateCrossword();
-        
+
         container.innerHTML = `
             <div class="crossword-container">
                 <div style="text-align: center; margin-bottom: 20px;">
@@ -1786,7 +1802,7 @@ const PracticeModule = {
 
                 <div class="crossword-layout">
                     <div class="crossword-grid-wrapper">
-                        <div class="crossword-grid" style="grid-template-columns: repeat(${this.crosswordData.size}, 1fr)">
+                        <div class="crossword-grid" style="grid-template-columns: repeat(${this.crosswordData.cols}, 1fr)">
                             ${this.renderCWGrid()}
                         </div>
                     </div>
@@ -1818,53 +1834,247 @@ const PracticeModule = {
     },
 
     generateCrossword() {
-        const size = 15;
-        this.crosswordData.size = size;
-        this.crosswordData.grid = Array(size).fill().map(() => Array(size).fill({ char: null, isSpace: false, number: null }));
-        this.crosswordData.placedWords = [];
-        this.crosswordData.clues = { across: [], down: [] };
+        const size = 40;
+        const attempts = 50; // Increased from 20 to 50 for better layouts
+        let bestGrid = null;
+        let bestScore = -Infinity;
 
-        // Sort words by length descending
+        // Sort words by length descending (longer words first for better structure)
         const sortedWords = [...this.words].sort((a, b) => b.word.length - a.word.length);
-        
-        // Place first word in middle
-        const firstWord = sortedWords[0];
-        const startR = Math.floor(size / 2);
-        const startC = Math.floor((size - firstWord.word.length) / 2);
-        this.placeCWWord(firstWord, startR, startC, 'across', 1);
 
-        // Try to place other words
-        let wordCounter = 2;
-        for (let i = 1; i < sortedWords.length; i++) {
-            const wordObj = sortedWords[i];
-            const cleanWord = wordObj.word.toUpperCase();
-            let placedSuccessfully = false;
+        for (let attempt = 0; attempt < attempts; attempt++) {
+            const currentGrid = Array(size).fill().map(() => Array(size).fill({ char: null, isSpace: false, number: null }));
+            const currentPlacedWords = [];
+            const currentClues = { across: [], down: [] };
+            let wordCounter = 1;
 
-            // Try to intersect with already placed words
-            for (const placed of this.crosswordData.placedWords) {
-                for (let idx = 0; idx < cleanWord.length; idx++) {
-                    const char = cleanWord[idx];
-                    if (char === ' ') continue;
+            // Helper to place word in current iteration
+            const placeWordInCurrent = (wordObj, r, c, dir, num) => {
+                const word = wordObj.word.toUpperCase();
+                for (let i = 0; i < word.length; i++) {
+                    const rr = dir === 'across' ? r : r + i;
+                    const cc = dir === 'across' ? c + i : c;
 
-                    for (let j = 0; j < placed.word.length; j++) {
-                        if (char === placed.word[j]) {
-                            // Possible intersection
-                            const newDir = placed.dir === 'across' ? 'down' : 'across';
-                            const newR = newDir === 'down' ? placed.r - idx : placed.r + j;
-                            const newC = newDir === 'down' ? placed.c + j : placed.c - idx;
+                    const cell = { ...currentGrid[rr][cc] };
+                    cell.char = word[i];
+                    if (word[i] === ' ') cell.isSpace = true;
+                    if (i === 0) cell.number = num;
+                    currentGrid[rr][cc] = cell;
+                }
 
-                            if (this.canPlaceCWWord(cleanWord, newR, newC, newDir)) {
-                                this.placeCWWord(wordObj, newR, newC, newDir, wordCounter++);
-                                placedSuccessfully = true;
-                                break;
+                currentPlacedWords.push({
+                    word: word,
+                    r: r,
+                    c: c,
+                    dir: dir,
+                    number: num,
+                    obj: wordObj
+                });
+
+                currentClues[dir].push({
+                    number: num,
+                    word: word,
+                    obj: wordObj
+                });
+            };
+
+            // Helper for checking placement in current grid
+            const canPlaceInCurrent = (word, r, c, dir) => {
+                if (r < 0 || c < 0 || r >= size || c >= size) return false;
+                if (dir === 'across') {
+                    if (c + word.length > size) return false;
+                    for (let i = -1; i <= word.length; i++) {
+                        for (let j = -1; j <= 1; j++) {
+                            const rr = r + j;
+                            const cc = c + i;
+                            if (rr < 0 || rr >= size || cc < 0 || cc >= size) continue;
+                            const cell = currentGrid[rr][cc];
+                            if (j === 0 && i >= 0 && i < word.length) {
+                                if (cell.char && cell.char !== word[i]) return false;
+                            } else {
+                                if (cell.char) return false;
                             }
                         }
                     }
-                    if (placedSuccessfully) break;
+                } else {
+                    if (r + word.length > size) return false;
+                    for (let i = -1; i <= word.length; i++) {
+                        for (let j = -1; j <= 1; j++) {
+                            const rr = r + i;
+                            const cc = c + j;
+                            if (rr < 0 || rr >= size || cc < 0 || cc >= size) continue;
+                            const cell = currentGrid[rr][cc];
+                            if (j === 0 && i >= 0 && i < word.length) {
+                                if (cell.char && cell.char !== word[i]) return false;
+                            } else {
+                                if (cell.char) return false;
+                            }
+                        }
+                    }
                 }
-                if (placedSuccessfully) break;
+                return true;
+            };
+
+            // Helper to count intersections for a potential placement
+            const countIntersections = (word, r, c, dir) => {
+                let count = 0;
+                for (let i = 0; i < word.length; i++) {
+                    const rr = dir === 'across' ? r : r + i;
+                    const cc = dir === 'across' ? c + i : c;
+                    if (currentGrid[rr][cc].char === word[i]) {
+                        count++;
+                    }
+                }
+                return count;
+            };
+
+            // Place first word in the center
+            if (sortedWords.length > 0) {
+                const firstWord = sortedWords[0];
+                const startR = Math.floor(size / 2);
+                const startC = Math.floor((size - firstWord.word.length) / 2);
+                placeWordInCurrent(firstWord, startR, startC, 'across', wordCounter++);
+            }
+
+            // Place remaining words with improved intersection logic
+            const remainingWords = sortedWords.slice(1).sort(() => Math.random() - 0.5);
+
+            for (const wordObj of remainingWords) {
+                const cleanWord = wordObj.word.toUpperCase();
+                let placed = false;
+                let bestPlacement = null;
+                let maxIntersections = 0;
+
+                // Try to find ALL possible intersections and pick the best one
+                for (const placedWord of currentPlacedWords) {
+                    for (let idx = 0; idx < cleanWord.length; idx++) {
+                        const char = cleanWord[idx];
+                        if (char === ' ') continue;
+
+                        for (let j = 0; j < placedWord.word.length; j++) {
+                            if (char === placedWord.word[j]) {
+                                const newDir = placedWord.dir === 'across' ? 'down' : 'across';
+                                const newR = newDir === 'down' ? placedWord.r - idx : placedWord.r + j;
+                                const newC = newDir === 'down' ? placedWord.c + j : placedWord.c - idx;
+
+                                if (canPlaceInCurrent(cleanWord, newR, newC, newDir)) {
+                                    const intersections = countIntersections(cleanWord, newR, newC, newDir);
+                                    // Only consider placements with at least 1 intersection
+                                    if (intersections >= 1 && intersections > maxIntersections) {
+                                        maxIntersections = intersections;
+                                        bestPlacement = { r: newR, c: newC, dir: newDir };
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Place word at best intersection point (only if it has at least 1 intersection)
+                if (bestPlacement && maxIntersections >= 1) {
+                    placeWordInCurrent(wordObj, bestPlacement.r, bestPlacement.c, bestPlacement.dir, wordCounter++);
+                    placed = true;
+                }
+
+                // REMOVED: Island placement fallback - we want connected crosswords only
+                // If a word can't connect, it simply won't be placed in this attempt
+            }
+
+            // Calculate grid score with improved metrics
+            let intersectionCount = 0;
+            let connectedWords = 0;
+            let isolatedWords = 0;
+
+            // Count intersections and connectivity
+            for (const word of currentPlacedWords) {
+                let hasIntersection = false;
+                for (let i = 0; i < word.word.length; i++) {
+                    const r = word.dir === 'across' ? word.r : word.r + i;
+                    const c = word.dir === 'across' ? word.c + i : word.c;
+
+                    // Check if this cell is shared with another word
+                    const otherWord = currentPlacedWords.find(pw => {
+                        if (pw === word) return false;
+                        for (let j = 0; j < pw.word.length; j++) {
+                            const pr = pw.dir === 'across' ? pw.r : pw.r + j;
+                            const pc = pw.dir === 'across' ? pw.c + j : pw.c;
+                            if (pr === r && pc === c) return true;
+                        }
+                        return false;
+                    });
+
+                    if (otherWord) {
+                        hasIntersection = true;
+                        intersectionCount++;
+                    }
+                }
+
+                if (hasIntersection) {
+                    connectedWords++;
+                } else {
+                    isolatedWords++;
+                }
+            }
+
+            // Score calculation: heavily favor intersections and penalize isolated words
+            const score = (intersectionCount * 100) + (connectedWords * 50) - (isolatedWords * 200);
+
+            if (score > bestScore) {
+                bestScore = score;
+                bestGrid = { grid: currentGrid, placedWords: currentPlacedWords, clues: currentClues };
             }
         }
+
+        // Apply best grid
+        this.crosswordData.grid = bestGrid.grid;
+        this.crosswordData.placedWords = bestGrid.placedWords;
+        this.crosswordData.clues = bestGrid.clues;
+
+        // Crop Grid to remove empty space
+        let minR = size, maxR = 0, minC = size, maxC = 0;
+        let hasContent = false;
+
+        for (let r = 0; r < size; r++) {
+            for (let c = 0; c < size; c++) {
+                if (this.crosswordData.grid[r][c].char) {
+                    if (r < minR) minR = r;
+                    if (r > maxR) maxR = r;
+                    if (c < minC) minC = c;
+                    if (c > maxC) maxC = c;
+                    hasContent = true;
+                }
+            }
+        }
+
+        if (!hasContent) {
+            minR = 0; maxR = 9; minC = 0; maxC = 9;
+        } else {
+            // Add padding
+            minR = Math.max(0, minR - 1);
+            maxR = Math.min(size - 1, maxR + 1);
+            minC = Math.max(0, minC - 1);
+            maxC = Math.min(size - 1, maxC + 1);
+        }
+
+        const rows = maxR - minR + 1;
+        const cols = maxC - minC + 1;
+        const newGrid = Array(rows).fill().map(() => Array(cols).fill({ char: null, isSpace: false, number: null }));
+
+        for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+                newGrid[r][c] = this.crosswordData.grid[minR + r][minC + c];
+            }
+        }
+
+        this.crosswordData.grid = newGrid;
+        this.crosswordData.rows = rows;
+        this.crosswordData.cols = cols;
+
+        // Shift coordinates of placed words to match the cropped grid
+        this.crosswordData.placedWords.forEach(pw => {
+            pw.r -= minR;
+            pw.c -= minC;
+        });
     },
 
     canPlaceCWWord(word, r, c, dir) {
@@ -1878,7 +2088,7 @@ const PracticeModule = {
                     const rr = r + j;
                     const cc = c + i;
                     if (rr < 0 || rr >= size || cc < 0 || cc >= size) continue;
-                    
+
                     const cell = this.crosswordData.grid[rr][cc];
                     if (j === 0 && i >= 0 && i < word.length) {
                         if (cell.char && cell.char !== word[i]) return false;
@@ -1912,12 +2122,12 @@ const PracticeModule = {
         for (let i = 0; i < word.length; i++) {
             const rr = dir === 'across' ? r : r + i;
             const cc = dir === 'across' ? c + i : c;
-            
+
             const cell = { ...this.crosswordData.grid[rr][cc] };
             cell.char = word[i];
             if (word[i] === ' ') cell.isSpace = true;
             if (i === 0) cell.number = number;
-            
+
             this.crosswordData.grid[rr][cc] = cell;
         }
 
@@ -1939,8 +2149,8 @@ const PracticeModule = {
 
     renderCWGrid() {
         let html = '';
-        for (let r = 0; r < this.crosswordData.size; r++) {
-            for (let c = 0; c < this.crosswordData.size; c++) {
+        for (let r = 0; r < this.crosswordData.rows; r++) {
+            for (let c = 0; c < this.crosswordData.cols; c++) {
                 const cell = this.crosswordData.grid[r][c];
                 if (cell.char) {
                     const isSpace = cell.char === ' ';
@@ -1964,7 +2174,7 @@ const PracticeModule = {
 
         return clues.map(clue => {
             let content = '';
-            switch(this.config.face) {
+            switch (this.config.face) {
                 case 'easy':
                     const imgPath = `assets/images/vocabulary/${clue.obj.word.toLowerCase()}.png`;
                     content = `<img src="${imgPath}" class="clue-visual" onerror="this.src='assets/images/thumbnails/flashcards.svg'">`;
@@ -1990,8 +2200,33 @@ const PracticeModule = {
 
     setupCWEvents() {
         const inputs = document.querySelectorAll('.cw-input');
-        
+
         inputs.forEach(input => {
+            // Click to toggle direction
+            input.addEventListener('click', (e) => {
+                const r = parseInt(input.dataset.r);
+                const c = parseInt(input.dataset.c);
+
+                // Check if this cell is an intersection
+                const hasAcross = this.crosswordData.placedWords.some(pw => pw.dir === 'across' && pw.r === r && c >= pw.c && c < pw.c + pw.word.length);
+                const hasDown = this.crosswordData.placedWords.some(pw => pw.dir === 'down' && pw.c === c && r >= pw.r && r < pw.r + pw.word.length);
+
+                if (hasAcross && hasDown) {
+                    // Toggle
+                    if (this.crosswordData.activeDir === 'across') {
+                        this.crosswordData.activeDir = 'down';
+                    } else {
+                        this.crosswordData.activeDir = 'across';
+                    }
+                } else if (hasAcross) {
+                    this.crosswordData.activeDir = 'across';
+                } else if (hasDown) {
+                    this.crosswordData.activeDir = 'down';
+                }
+
+                this.highlightActiveWord(input);
+            });
+
             input.addEventListener('input', (e) => {
                 if (e.target.value) {
                     this.moveCWFocus(e.target, 1);
@@ -1999,64 +2234,108 @@ const PracticeModule = {
             });
 
             input.addEventListener('keydown', (e) => {
-                if (e.key === 'Backspace' && !e.target.value) {
-                    this.moveCWFocus(e.target, -1);
+                if (e.key === 'Backspace') {
+                    if (!e.target.value) {
+                        this.moveCWFocus(e.target, -1);
+                    }
                 } else if (e.key === 'ArrowRight') {
+                    this.crosswordData.activeDir = 'across';
                     this.moveCWFocus(e.target, 1, 'across');
                 } else if (e.key === 'ArrowLeft') {
+                    this.crosswordData.activeDir = 'across';
                     this.moveCWFocus(e.target, -1, 'across');
                 } else if (e.key === 'ArrowDown') {
+                    this.crosswordData.activeDir = 'down';
                     this.moveCWFocus(e.target, 1, 'down');
                 } else if (e.key === 'ArrowUp') {
+                    this.crosswordData.activeDir = 'down';
                     this.moveCWFocus(e.target, -1, 'down');
                 }
             });
 
-            input.addEventListener('focus', () => {
-                document.querySelectorAll('.clue-item').forEach(el => el.classList.remove('active'));
+            input.addEventListener('focus', (e) => {
+                e.target.select();
+
+                // Determine initial direction if not set or invalid
                 const r = parseInt(input.dataset.r);
                 const c = parseInt(input.dataset.c);
-                
-                const words = this.crosswordData.placedWords.filter(pw => {
-                    if (pw.dir === 'across') {
-                        return pw.r === r && c >= pw.c && c < pw.c + pw.word.length;
-                    } else {
-                        return pw.c === c && r >= pw.r && r < pw.r + pw.word.length;
-                    }
-                });
+                const hasAcross = this.crosswordData.placedWords.some(pw => pw.dir === 'across' && pw.r === r && c >= pw.c && c < pw.c + pw.word.length);
+                const hasDown = this.crosswordData.placedWords.some(pw => pw.dir === 'down' && pw.c === c && r >= pw.r && r < pw.r + pw.word.length);
 
-                words.forEach(w => {
-                    const clueEl = document.querySelector(`.clue-item[data-number="${w.number}"][data-dir="${w.dir}"]`);
-                    if (clueEl) clueEl.classList.add('active');
-                });
+                if (!this.crosswordData.activeDir) {
+                    this.crosswordData.activeDir = hasAcross ? 'across' : 'down';
+                } else {
+                    // If current dir is invalid for this cell, switch
+                    if (this.crosswordData.activeDir === 'across' && !hasAcross) this.crosswordData.activeDir = 'down';
+                    if (this.crosswordData.activeDir === 'down' && !hasDown) this.crosswordData.activeDir = 'across';
+                }
+
+                this.highlightActiveWord(input);
             });
         });
+    },
+
+    highlightActiveWord(currentInput) {
+        // Clear active word highlights
+        document.querySelectorAll('.clue-item').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.cw-cell').forEach(el => el.classList.remove('word-active'));
+
+        const r = parseInt(currentInput.dataset.r);
+        const c = parseInt(currentInput.dataset.c);
+        const dir = this.crosswordData.activeDir || 'across';
+
+        const word = this.crosswordData.placedWords.find(pw => {
+            if (dir === 'across') {
+                return pw.dir === 'across' && pw.r === r && c >= pw.c && c < pw.c + pw.word.length;
+            } else {
+                return pw.dir === 'down' && pw.c === c && r >= pw.r && r < pw.r + pw.word.length;
+            }
+        });
+
+        if (word) {
+            // Highlight Clue
+            const clueEl = document.querySelector(`.clue-item[data-number="${word.number}"][data-dir="${word.dir}"]`);
+            if (clueEl) {
+                clueEl.classList.add('active');
+                clueEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+
+            // Highlight Grid Cells
+            for (let i = 0; i < word.word.length; i++) {
+                const tr = word.dir === 'across' ? word.r : word.r + i;
+                const tc = word.dir === 'across' ? word.c + i : word.c;
+                const cellEl = document.querySelector(`.cw-cell[data-r="${tr}"][data-c="${tc}"]`);
+                if (cellEl) cellEl.classList.add('word-active');
+            }
+        }
     },
 
     moveCWFocus(current, delta, forceDir = null) {
         const r = parseInt(current.dataset.r);
         const c = parseInt(current.dataset.c);
-        
-        let dir = forceDir;
-        if (!dir) {
-            const across = this.crosswordData.placedWords.some(pw => pw.dir === 'across' && pw.r === r && c >= pw.c && c < pw.c + pw.word.length);
-            dir = across ? 'across' : 'down';
-        }
+        const dir = forceDir || this.crosswordData.activeDir || 'across';
 
         let nextR = r;
         let nextC = c;
-        
+
         if (dir === 'across') nextC += delta;
         else nextR += delta;
 
-        const cell = this.crosswordData.grid[nextR] ? this.crosswordData.grid[nextR][nextC] : null;
-        if (cell && cell.isSpace) {
+        // Check bounds
+        if (nextR < 0 || nextR >= this.crosswordData.rows || nextC < 0 || nextC >= this.crosswordData.cols) return;
+
+        const cell = this.crosswordData.grid[nextR][nextC];
+
+        // If it's a space (phrase), skip it
+        if (cell && cell.char && cell.isSpace) {
             if (dir === 'across') nextC += delta;
             else nextR += delta;
         }
 
         const nextInput = document.querySelector(`.cw-input[data-r="${nextR}"][data-c="${nextC}"]`);
-        if (nextInput) nextInput.focus();
+        if (nextInput) {
+            nextInput.focus();
+        }
     },
 
     checkCrossword() {
@@ -2068,7 +2347,7 @@ const PracticeModule = {
         const question = this.words[this.currentIndex];
         const sentenceParts = question.sentence.split('____');
         const progress = ((this.currentIndex + 1) / this.words.length) * 100;
-        
+
         // Shuffle options if not already shuffled for this question
         if (!question._shuffledOptions) {
             question._shuffledOptions = [...question.options].sort(() => Math.random() - 0.5);
@@ -2133,7 +2412,7 @@ const PracticeModule = {
             blank.textContent = question.answer;
             blank.style.color = '#2ECC71';
             blank.style.borderBottomStyle = 'solid';
-            
+
             // Disable other options
             document.querySelectorAll('.quiz-option').forEach(opt => {
                 if (opt !== optionEl) opt.style.opacity = '0.5';
@@ -2145,7 +2424,7 @@ const PracticeModule = {
                     <i class="fa-solid fa-circle-check"></i> Amazing! That's correct!
                 </div>
             `;
-            
+
             if (question.audio) {
                 this.playQuizAudio(question.audio);
             } else {
@@ -2155,7 +2434,7 @@ const PracticeModule = {
             setTimeout(() => {
                 // Remove shuffled state for next session
                 delete question._shuffledOptions;
-                
+
                 if (this.currentIndex < this.words.length - 1) {
                     this.currentIndex++;
                     this.render();
@@ -2171,7 +2450,7 @@ const PracticeModule = {
                     <i class="fa-solid fa-circle-xmark"></i> Not quite, try another one!
                 </div>
             `;
-            
+
             setTimeout(() => {
                 optionEl.classList.remove('wrong');
                 feedback.innerHTML = '';
@@ -2183,10 +2462,10 @@ const PracticeModule = {
         const hintText = document.getElementById('quiz-hint-text');
         const hintBtn = document.getElementById('quiz-hint-btn');
         const isHidden = hintText.style.display === 'none';
-        
+
         hintText.style.display = isHidden ? 'block' : 'none';
-        hintBtn.innerHTML = isHidden ? 
-            '<i class="fa-solid fa-eye-slash"></i> Hide hint' : 
+        hintBtn.innerHTML = isHidden ?
+            '<i class="fa-solid fa-eye-slash"></i> Hide hint' :
             '<i class="fa-solid fa-lightbulb"></i> Need a hint?';
     },
 
@@ -2212,15 +2491,15 @@ const PracticeModule = {
         // Reset Game State
         this.gameState.isGameOver = false;
         this.gameState.pendingClueMatch = null;
-        
+
         if (this.config.mode === 'wordsearch') {
-             this.gameState.timeLeft = this.config.settings.timerValue;
-             this.gameState.livesLeft = this.config.settings.lives;
+            this.gameState.timeLeft = this.config.settings.timerValue;
+            this.gameState.livesLeft = this.config.settings.lives;
         } else {
             this.currentIndex = 0;
             this.matches = 0;
         }
-        
+
         this.render();
     },
 
@@ -2228,7 +2507,7 @@ const PracticeModule = {
         const settingsBtn = document.getElementById('change-options-btn');
         if (settingsBtn) settingsBtn.style.display = 'none';
         let content = '';
-        
+
         if (this.difficultWords.length > 0 && this.config.mode === 'flashcards') {
             content = `
                 <div class="summary-container">
@@ -2252,12 +2531,12 @@ const PracticeModule = {
             let subtext = 'You have completed all words in this set.';
             let icon = 'fa-trophy';
             let extraButtons = '';
-            
+
             if (!success) {
                 title = 'Game Over';
                 subtext = message || 'Better luck next time!';
                 icon = 'fa-face-sad-tear';
-                
+
                 if (message && message.includes('Time')) {
                     title = "Time's Up!";
                     icon = 'fa-hourglass-end';
@@ -2265,7 +2544,7 @@ const PracticeModule = {
                     title = "Out of Lives!";
                     icon = 'fa-heart-crack';
                 }
-                
+
                 extraButtons = `<button class="btn-primary" onclick="PracticeModule.redo()">Try Again</button>`;
             } else {
                 // Success case - also allow replaying?
@@ -2284,7 +2563,7 @@ const PracticeModule = {
                 </div>
             `;
         }
-        
+
         document.getElementById('game-area').innerHTML = content;
     },
 
@@ -2292,7 +2571,7 @@ const PracticeModule = {
         const cleanText = wordText.toLowerCase().replace(/\?/g, '');
         const audioPath = `assets/audio/vocabulary/${cleanText}.mp3`;
         const audio = new Audio(audioPath);
-        
+
         audio.play().catch((e) => {
             console.log('Audio file not found or playback failed, using synthesis for:', wordText, e);
             if ('speechSynthesis' in window) {
@@ -2327,7 +2606,7 @@ const PracticeModule = {
             'cone': 'shape-cone-final'
         };
         const shapeClass = shapeClassMap[word.toLowerCase()] || 'shape-circle';
-        
+
         // Some shapes need specific inner HTML for 3D effects
         let innerHtml = '';
         if (shapeClass === 'shape-cube') {
@@ -2340,7 +2619,7 @@ const PracticeModule = {
                 <div class="cube-face cube-bottom"></div>
             `;
         } else if (shapeClass === 'shape-pyramid') {
-             innerHtml = `
+            innerHtml = `
                 <div class="pyramid-side pyramid-front"></div>
                 <div class="pyramid-side pyramid-back"></div>
                 <div class="pyramid-side pyramid-left"></div>
@@ -2348,7 +2627,7 @@ const PracticeModule = {
                 <div class="pyramid-bottom"></div>
             `;
         }
-        
+
         return `<div class="shape-preview-container ${isLarge ? 'large' : ''}"><div class="css-shape ${shapeClass}">${innerHtml}</div></div>`;
     },
 
