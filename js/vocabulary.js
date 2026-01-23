@@ -24,6 +24,7 @@ const VocabModule = {
         'connectors': { label: 'Connectors', icon: 'fa-solid fa-link' },
         'discourse-markers': { label: 'Discourse Markers', icon: 'fa-solid fa-comment-dots' },
         'grammar-words': { label: 'Grammar & Questions', icon: 'fa-solid fa-question' },
+        'indefinite-pronouns': { label: 'Indefinite Pronouns', icon: 'fa-solid fa-users-viewfinder' },
         'time': { label: 'Calendar & Time', icon: 'fa-solid fa-calendar-days' },
         'shapes': { label: 'Geometric Shapes', icon: 'fa-solid fa-shapes' },
         'numbers': { label: 'Numbers', icon: 'fa-solid fa-hashtag' },
@@ -34,6 +35,15 @@ const VocabModule = {
         // Show categories by default initially
         this.renderCategories();
         this.setupEventListeners();
+    },
+
+    normalizeString(str) {
+        if (!str) return '';
+        return str.toString()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .toLowerCase()
+            .trim();
     },
 
     renderCategories() {
@@ -79,13 +89,40 @@ const VocabModule = {
             words = words.filter(w => w.subcategory === subcategory);
         }
         if (searchTerm) {
-            words = words.filter(w =>
-                w.word.toLowerCase().includes(searchTerm.toLowerCase())
-            );
+            const searchTokens = this.normalizeString(searchTerm).split(/\s+/).filter(t => t);
+
+            words = words.filter(w => {
+                const searchableText = this.normalizeString([
+                    w.word,
+                    w.spanish,
+                    w.definition || '',
+                    w.subcategory || '',
+                    w.category || ''
+                ].join(' '));
+
+                return searchTokens.every(token => searchableText.includes(token));
+            });
         }
 
         if (words.length === 0) {
-            grid.innerHTML = '<p style="text-align: center; padding: 40px; color: #999; grid-column: 1/-1;">No words found matching your filters.</p>';
+            let message = 'No words found matching your filters.';
+
+            // Check if results exist outside the current category filter
+            if (category !== 'all' && searchTerm) {
+                const searchTokens = this.normalizeString(searchTerm).split(/\s+/).filter(t => t);
+                const globalResults = window.vocabularyBank.filter(w => {
+                    const searchableText = this.normalizeString([
+                        w.word, w.spanish, w.definition || '', w.subcategory || '', w.category || ''
+                    ].join(' '));
+                    return searchTokens.every(token => searchableText.includes(token));
+                });
+
+                if (globalResults.length > 0) {
+                    message = `No words found in this category, but ${globalResults.length} result(s) found elsewhere. <a href="#" onclick="document.getElementById('vocab-category').value='all'; VocabModule.handleCategoryChange('all'); return false;" style="color: var(--medium-slate-blue); font-weight: bold;">Show all results</a>`;
+                }
+            }
+
+            grid.innerHTML = `<p style="text-align: center; padding: 40px; color: #999; grid-column: 1/-1;">${message}</p>`;
             return;
         }
 
