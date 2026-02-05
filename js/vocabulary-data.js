@@ -483,7 +483,19 @@ const vocabularyBank = [
     { id: 'feed_13', word: 'Don\'t give up', spanish: 'No te rindas', type: 'phrase', icon: 'fa-solid fa-heart', category: 'feedback', subcategory: 'encouragement', level: 'intermediate', definition: 'Keep trying even if it is hard', example: 'It is difficult, but don\'t give up.' },
     { id: 'feed_14', word: 'Nice try', spanish: 'Buen intento', type: 'phrase', icon: 'fa-solid fa-hand-holding-heart', category: 'feedback', subcategory: 'encouragement', level: 'beginner', definition: 'Good effort even if wrong', example: 'Nice try, but the answer is B.' },
     { id: 'feed_15', word: 'Improvements needed', spanish: 'Necesita mejorar', type: 'phrase', icon: 'fa-solid fa-screwdriver-wrench', category: 'feedback', subcategory: 'suggestion', level: 'intermediate', definition: 'Work is not yet finished or perfect', example: 'Good start, but some improvements are needed.' },
-    { id: 'feed_16', word: 'I love it!', spanish: '¡Me encanta!', type: 'phrase', icon: 'fa-solid fa-heart', category: 'feedback', subcategory: 'praise', level: 'beginner', definition: 'Expression of great liking', example: 'Your artwork is beautiful, I love it!' }
+    { id: 'feed_16', word: 'I love it!', spanish: '¡Me encanta!', type: 'phrase', icon: 'fa-solid fa-heart', category: 'feedback', subcategory: 'praise', level: 'beginner', definition: 'Expression of great liking', example: 'Your artwork is beautiful, I love it!' },
+
+    // Verbs in Simple Past
+    { id: 'verb_past_01', word: 'Played', spanish: 'Jugó', type: 'verb', icon: 'fa-solid fa-gamepad', category: 'verbs-past', subcategory: 'regular', level: 'beginner', definition: 'Did play in the past', example: 'He played football yesterday.' },
+    { id: 'verb_past_02', word: 'Walked', spanish: 'Caminó', type: 'verb', icon: 'fa-solid fa-person-walking', category: 'verbs-past', subcategory: 'regular', level: 'beginner', definition: 'Did walk in the past', example: 'She walked to school.' },
+    { id: 'verb_past_03', word: 'Cooked', spanish: 'Cocinó', type: 'verb', icon: 'fa-solid fa-utensils', category: 'verbs-past', subcategory: 'regular', level: 'beginner', definition: 'Did cook in the past', example: 'Dad cooked dinner last night.' },
+    { id: 'verb_past_04', word: 'Watched', spanish: 'Miró', type: 'verb', icon: 'fa-solid fa-tv', category: 'verbs-past', subcategory: 'regular', level: 'beginner', definition: 'Did watch in the past', example: 'We watched a movie.' },
+    { id: 'verb_past_05', word: 'Cleaned', spanish: 'Limpió', type: 'verb', icon: 'fa-solid fa-broom', category: 'verbs-past', subcategory: 'regular', level: 'beginner', definition: 'Did clean in the past', example: 'I cleaned my room.' },
+    { id: 'verb_past_06', word: 'Went', spanish: 'Fue', type: 'verb', icon: 'fa-solid fa-person-walking-arrow-right', category: 'verbs-past', subcategory: 'irregular', level: 'beginner', definition: 'Past form of go', example: 'They went to the park.' },
+    { id: 'verb_past_07', word: 'Ate', spanish: 'Comió', type: 'verb', icon: 'fa-solid fa-utensils', category: 'verbs-past', subcategory: 'irregular', level: 'beginner', definition: 'Past form of eat', example: 'She ate an apple.' },
+    { id: 'verb_past_08', word: 'Drank', spanish: 'Bebió', type: 'verb', icon: 'fa-solid fa-glass-water', category: 'verbs-past', subcategory: 'irregular', level: 'beginner', definition: 'Past form of drink', example: 'He drank some water.' },
+    { id: 'verb_past_09', word: 'Saw', spanish: 'Vio', type: 'verb', icon: 'fa-solid fa-eye', category: 'verbs-past', subcategory: 'irregular', level: 'beginner', definition: 'Past form of see', example: 'I saw a bird.' },
+    { id: 'verb_past_10', word: 'Made', spanish: 'Hizo', type: 'verb', icon: 'fa-solid fa-hammer', category: 'verbs-past', subcategory: 'irregular', level: 'beginner', definition: 'Past form of make', example: 'Mom made a cake.' }
 ];
 
 // Make data available globally

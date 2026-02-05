@@ -28,6 +28,7 @@ const VocabModule = {
         'time': { label: 'Calendar & Time', icon: 'fa-solid fa-calendar-days' },
         'shapes': { label: 'Geometric Shapes', icon: 'fa-solid fa-shapes' },
         'numbers': { label: 'Numbers', icon: 'fa-solid fa-hashtag' },
+        'verbs-past': { label: 'Verbs in Simple Past', icon: 'fa-solid fa-clock-rotate-left' },
         'feedback': { label: 'Feedback & Praise', icon: 'fa-solid fa-thumbs-up' }
     },
 

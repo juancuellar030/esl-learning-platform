@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clock & Timer - ESL Learning Platform</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/clock-timer.css">
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="main-header">
+        <div class="container">
+            <h1><i class="fa-solid fa-graduation-cap"></i> ESL Learning Platform</h1>
+            <p class="tagline">Clock & Timer Tool</p>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="main-nav">
+        <div class="container">
+            <a href="tools.html" class="nav-btn">
+                <i class="fa-solid fa-arrow-left"></i> Back to Tools
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Real-Time Clock Section -->
+            <section class="content-section active clock-section">
+                <h2><i class="fa-solid fa-clock"></i> Current Time</h2>
+                <div class="clock-display" id="clock-display">
+                    <div class="time-display" id="time-display">00:00:00</div>
+                    <div class="date-display" id="date-display">Loading...</div>
+                </div>
+            </section>
+
+            <!-- Timer Section -->
+            <section class="content-section active timer-section">
+                <h2><i class="fa-solid fa-hourglass-half"></i> Classroom Timer</h2>
+
+                <!-- Timer Setup -->
+                <div class="timer-setup" id="timer-setup">
+                    <div class="time-inputs">
+                        <div class="time-input-group">
+                            <label for="hours-input">Hours</label>
+                            <input type="number" id="hours-input" min="0" max="23" value="0">
+                        </div>
+                        <div class="time-input-group">
+                            <label for="minutes-input">Minutes</label>
+                            <input type="number" id="minutes-input" min="0" max="59" value="5">
+                        </div>
+                        <div class="time-input-group">
+                            <label for="seconds-input">Seconds</label>
+                            <input type="number" id="seconds-input" min="0" max="59" value="0">
+                        </div>
+                    </div>
+                    <button class="btn-primary btn-large" id="start-timer-btn">
+                        <i class="fa-solid fa-play"></i> Start Timer
+                    </button>
+                </div>
+
+                <!-- Timer Display -->
+                <div class="timer-display-container" id="timer-display-container" style="display: none;">
+                    <div class="timer-display" id="timer-display">00:00:00</div>
+                    <div class="timer-progress-bar">
+                        <div class="timer-progress-fill" id="timer-progress-fill"></div>
+                    </div>
+                    <div class="timer-controls">
+                        <button class="btn-secondary btn-icon" id="pause-timer-btn" title="Pause">
+                            <i class="fa-solid fa-pause"></i>
+                        </button>
+                        <button class="btn-secondary btn-icon" id="resume-timer-btn" style="display: none;"
+                            title="Resume">
+                            <i class="fa-solid fa-play"></i>
+                        </button>
+                        <button class="btn-secondary btn-icon" id="restart-timer-btn" title="Restart">
+                            <i class="fa-solid fa-rotate-right"></i>
+                        </button>
+                        <button class="btn-secondary btn-icon" id="reset-timer-btn" title="Reset">
+                            <i class="fa-solid fa-stop"></i>
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="main-footer">
+        <div class="container">
+            <p>ESL Learning Platform © 2025 | Made for Teachers, by Teachers</p>
+        </div>
+    </footer>
+
+    <script src="js/clock-timer.js"></script>
+</body>
+
+</html>

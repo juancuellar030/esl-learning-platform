@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weekly Lesson Planner - ESL Learning Platform</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/planner.css">
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="main-header">
+        <div class="container">
+            <h1><i class="fa-solid fa-graduation-cap"></i> ESL Learning Platform</h1>
+            <p class="tagline">Weekly Lesson Planner</p>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="main-nav">
+        <div class="container">
+            <a href="tools.html" class="nav-btn">
+                <i class="fa-solid fa-arrow-left"></i> Back to Tools
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <section class="content-section active">
+                <h2><i class="fa-solid fa-calendar-week"></i> Weekly Lesson Planner</h2>
+
+                <!-- Planner Controls -->
+                <div class="planner-controls">
+                    <div class="control-group">
+                        <label for="week-picker">
+                            <i class="fa-solid fa-calendar"></i> Week Of:
+                        </label>
+                        <input type="date" id="week-picker" />
+                    </div>
+
+                    <div class="control-actions">
+                        <button class="btn-secondary" id="clear-table-btn">
+                            <i class="fa-solid fa-trash"></i> Empty Table
+                        </button>
+                        <button class="btn-primary" id="export-json-btn">
+                            <i class="fa-solid fa-download"></i> Save Full Week
+                        </button>
+                        <label class="btn-secondary upload-btn">
+                            <i class="fa-solid fa-upload"></i> Upload Planning
+                            <input type="file" id="import-json-input" accept=".json" style="display: none;">
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Weekly Schedule Table -->
+                <div class="planner-wrapper">
+                    <!-- Monday-Thursday Table -->
+                    <div class="schedule-table-container">
+                        <h3>Monday - Thursday Schedule</h3>
+                        <table class="schedule-table" id="weekday-table">
+                            <thead>
+                                <tr>
+                                    <th>Period</th>
+                                    <th>Time</th>
+                                    <th>Monday</th>
+                                    <th>Tuesday</th>
+                                    <th>Wednesday</th>
+                                    <th>Thursday</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Period 1 -->
+                                <tr>
+                                    <td>1</td>
+                                    <td>7:00-7:50</td>
+                                    <td class="class-cell ap-cell" data-class-id="monday-1">
+                                        <div class="class-box bg-dir">DIR.GRUPO<br>(FORMACIONES/CATE<br>MOCIONAL</div>
+                                    </td>
+                                    <td class="empty-cell"></td>
+                                    <td class="class-cell" data-class-id="wednesday-1">
+                                        <div class="class-box bg-4c">TECNOLOGY<br>4C</div>
+                                    </td>
+                                    <td class="class-cell" data-class-id="thursday-1">
+                                        <div class="class-box bg-5c">SCIENCE<br>5C</div>
+                                    </td>
+                                </tr>
+                                <!-- Period 2 -->
+                                <tr>
+                                    <td>2</td>
+                                    <td>7:50-8:40</td>
+                                    <td class="empty-cell"></td>
+                                    <td class="empty-cell"></td>
+                                    <td class="class-cell" data-class-id="wednesday-2">
+                                        <div class="class-box bg-4c">TECNOLOGY<br>4C</div>
+                                    </td>
+                                    <td class="empty-cell"></td>
+                                </tr>
+                                <!-- Break -->
+                                <tr class="break-row">
+                                    <td>DES</td>
+                                    <td>8:40-9:05</td>
+                                    <td colspan="4" class="break-cell">BREAK</td>
+                                </tr>
+                                <!-- Period 3 -->
+                                <tr>
+                                    <td>3</td>
+                                    <td>9:10-10:00</td>
+                                    <td class="class-cell" data-class-id="monday-3">
+                                        <div class="class-box bg-3b">TECNOLOGY<br>3B</div>
+                                    </td>
+                                    <td class="class-cell" data-class-id="tuesday-3">
+                                        <div class="class-box bg-3c">TECNOLOGY<br>3C</div>
+                                    </td>
+                                    <td class="class-cell" data-class-id="wednesday-3">
+                                        <div class="class-box bg-4a">TECNOLOGY<br>4A</div>
+                                    </td>
+                                    <td class="class-cell" data-class-id="thursday-3">
+                                        <div class="class-box bg-4b">TECNOLOGY<br>4B</div>
+                                    </td>
+                                </tr>
+                                <!-- Period 4 -->
+                                <tr>
+                                    <td>4</td>
+                                    <td>10:00-10:50</td>
+                                    <td class="class-cell" data-class-id="monday-4">
+                                        <div class="class-box bg-3b">TECNOLOGY<br>3B</div>
+                                    </td>
+                                    <td class="class-cell" data-class-id="tuesday-4">
+                                        <div class="class-box bg-3c">TECNOLOGY<br>3C</div>
+                                    </td>
+                                    <td class="class-cell" data-class-id="wednesday-4">
+                                        <div class="class-box bg-4a">TECNOLOGY<br>4A</div>
+                                    </td>
+                                    <td class="class-cell" data-class-id="thursday-4">
+                                        <div class="class-box bg-4b">TECNOLOGY<br>4B</div>
+                                    </td>
+                                </tr>
+                                <!-- Period 5 -->
+                                <tr>
+                                    <td>5</td>
+                                    <td>10:50-11:40</td>
+                                    <td class="class-cell" data-class-id="monday-5">
+                                        <div class="class-box bg-5c">SCIENCE<br>5C</div>
+                                    </td>
+                                    <td class="class-cell" data-class-id="tuesday-5">
+                                        <div class="class-box bg-3a">TECNOLOGY<br>3A</div>
+                                    </td>
+                                    <td class="class-cell ap-cell" data-class-id="wednesday-5">
+                                        <div class="class-box bg-lideres">REUNIÓN<br>LIDERES DE 4°</div>
+                                    </td>
+                                    <td class="class-cell" data-class-id="thursday-5">
+                                        <div class="class-box bg-4c">SCIENCE<br>4C</div>
+                                    </td>
+                                </tr>
+                                <!-- Lunch -->
+                                <tr class="break-row">
+                                    <td>ALM</td>
+                                    <td>11:40-12:25</td>
+                                    <td colspan="4" class="break-cell">LUNCH</td>
+                                </tr>
+                                <!-- Period 6 -->
+                                <tr>
+                                    <td>6</td>
+                                    <td>12:30-1:15</td>
+                                    <td class="class-cell" data-class-id="monday-6">
+                                        <div class="class-box bg-4c">SCIENCE<br>4C</div>
+                                    </td>
+                                    <td class="class-cell" data-class-id="tuesday-6">
+                                        <div class="class-box bg-3a">TECNOLOGY<br>3A</div>
+                                    </td>
+                                    <td class="class-cell" data-class-id="wednesday-6">
+                                        <div class="class-box bg-4c">SCIENCE<br>4C</div>
+                                    </td>
+                                    <td class="class-cell" data-class-id="thursday-6">
+                                        <div class="class-box bg-4c">SCIENCE<br>4C</div>
+                                    </td>
+                                </tr>
+                                <!-- Period 7 -->
+                                <tr>
+                                    <td>7</td>
+                                    <td>1:15-2:00</td>
+                                    <td class="class-cell" data-class-id="monday-7">
+                                        <div class="class-box bg-5b">TECNOLOGY<br>5B</div>
+                                    </td>
+                                    <td class="class-cell" data-class-id="tuesday-7">
+                                        <div class="class-box bg-5c">TECNOLOGY<br>5C</div>
+                                    </td>
+                                    <td class="class-cell ap-cell" data-class-id="wednesday-7">
+                                        <div class="class-box">A.P</div>
+                                    </td>
+                                    <td class="class-cell" data-class-id="thursday-7">
+                                        <div class="class-box bg-5a">TECNOLOGY<br>5A</div>
+                                    </td>
+                                </tr>
+                                <!-- Period 8 -->
+                                <tr>
+                                    <td>8</td>
+                                    <td>2:00-2:45</td>
+                                    <td class="class-cell" data-class-id="monday-8">
+                                        <div class="class-box bg-5b">TECNOLOGY<br>5B</div>
+                                    </td>
+                                    <td class="class-cell" data-class-id="tuesday-8">
+                                        <div class="class-box bg-5c">TECNOLOGY<br>5C</div>
+                                    </td>
+                                    <td class="empty-cell"></td>
+                                    <td class="class-cell" data-class-id="thursday-8">
+                                        <div class="class-box bg-5a">TECNOLOGY<br>5A</div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Friday Table -->
+                    <div class="schedule-table-container friday-table">
+                        <h3>Friday Schedule</h3>
+                        <table class="schedule-table" id="friday-table">
+                            <thead>
+                                <tr>
+                                    <th>Period</th>
+                                    <th>Time</th>
+                                    <th>Friday</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>1</td>
+                                    <td>7:00-7:45</td>
+                                    <td class="empty-cell"></td>
+                                </tr>
+                                <tr>
+                                    <td>2</td>
+                                    <td>7:45-8:30</td>
+                                    <td class="class-cell" data-class-id="friday-2">
+                                        <div class="class-box bg-5c">SCIENCE<br>5C</div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>3</td>
+                                    <td>8:30-9:15</td>
+                                    <td class="class-cell" data-class-id="friday-3">
+                                        <div class="class-box bg-5c">SCIENCE<br>5C</div>
+                                    </td>
+                                </tr>
+                                <tr class="break-row">
+                                    <td>DES</td>
+                                    <td>9:15-9:30</td>
+                                    <td class="break-cell">BREAK</td>
+                                </tr>
+                                <tr>
+                                    <td>4</td>
+                                    <td>9:30-10:20</td>
+                                    <td class="empty-cell"></td>
+                                </tr>
+                                <tr>
+                                    <td>5</td>
+                                    <td>10:20-11:05</td>
+                                    <td class="class-cell" data-class-id="friday-5">
+                                        <div class="class-box bg-5d">TECNOLOGY<br>5D</div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>6</td>
+                                    <td>11:05-11:50</td>
+                                    <td class="class-cell" data-class-id="friday-6">
+                                        <div class="class-box bg-5d">TECNOLOGY<br>5D</div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Activity Modal -->
+    <div id="activity-modal" class="modal-backdrop" style="display: none;">
+        <div class="modal-card activity-modal">
+            <div class="modal-header">
+                <h3 id="modal-class-name">Class Name</h3>
+                <p id="modal-class-time">Time</p>
+            </div>
+            <div class="modal-body">
+                <label>Activities for this session:</label>
+                <div id="activities-list" class="activities-list">
+                    <!-- Dynamic activity inputs will be added here -->
+                </div>
+                <button class="btn-secondary add-activity-btn" id="add-activity-btn">
+                    <i class="fa-solid fa-plus"></i> Add Activity
+                </button>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="activity-cancel">Cancel</button>
+                <button class="btn-primary" id="activity-save">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="main-footer">
+        <div class="container">
+            <p>ESL Learning Platform © 2025 | Made for Teachers, by Teachers</p>
+        </div>
+    </footer>
+
+    <script src="js/planner.js"></script>
+</body>
+
+</html>
