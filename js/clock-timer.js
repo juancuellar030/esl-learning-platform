@@ -25,10 +25,40 @@
     let isPaused = false;
     let isFinished = false;
 
+    // Stopwatch state
+    let stopwatchInterval = null;
+    let stopwatchStartTime = 0;
+    let stopwatchElapsed = 0;
+    let stopwatchRunning = false;
+    let laps = [];
+
     // Initialize
     function init() {
         startClock();
         attachEventListeners();
+        initTabSwitching();
+    }
+
+    // Tab Switching
+    function initTabSwitching() {
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const targetTab = btn.dataset.tab;
+
+                // Update active tab button
+                tabBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                // Update active tab content
+                tabContents.forEach(content => {
+                    content.classList.remove('active');
+                });
+                document.getElementById(`${targetTab}-tab`).classList.add('active');
+            });
+        });
     }
 
     // Real-time clock
@@ -252,11 +282,125 @@
         timerDisplayContainer.classList.remove('finished', 'warning-10', 'warning-25', 'warning-50');
     }
 
+    // Stopwatch Functions
+    function startStopwatch() {
+        if (!stopwatchRunning) {
+            stopwatchStartTime = Date.now() - stopwatchElapsed;
+            stopwatchRunning = true;
+            stopwatchInterval = setInterval(updateStopwatch, 10); // Update every 10ms for milliseconds
+
+            document.getElementById('stopwatch-display').classList.add('running');
+            document.getElementById('start-stopwatch-btn').style.display = 'none';
+            document.getElementById('stop-stopwatch-btn').style.display = 'flex';
+            document.getElementById('lap-stopwatch-btn').style.display = 'flex';
+        }
+    }
+
+    function stopStopwatch() {
+        if (stopwatchRunning) {
+            stopwatchRunning = false;
+            clearInterval(stopwatchInterval);
+            stopwatchElapsed = Date.now() - stopwatchStartTime;
+
+            document.getElementById('stopwatch-display').classList.remove('running');
+            document.getElementById('start-stopwatch-btn').style.display = 'flex';
+            document.getElementById('stop-stopwatch-btn').style.display = 'none';
+            document.getElementById('lap-stopwatch-btn').style.display = 'none';
+        }
+    }
+
+    function resetStopwatch() {
+        stopStopwatch();
+        stopwatchElapsed = 0;
+        laps = [];
+        updateStopwatchDisplay(0);
+        document.getElementById('laps-container').style.display = 'none';
+        document.getElementById('laps-list').innerHTML = '';
+    }
+
+    function recordLap() {
+        if (stopwatchRunning) {
+            const lapTime = Date.now() - stopwatchStartTime;
+            laps.push(lapTime);
+            updateLapsList();
+            document.getElementById('laps-container').style.display = 'block';
+        }
+    }
+
+    function updateStopwatch() {
+        const elapsed = Date.now() - stopwatchStartTime;
+        updateStopwatchDisplay(elapsed);
+    }
+
+    function updateStopwatchDisplay(ms) {
+        const hours = Math.floor(ms / 3600000);
+        const minutes = Math.floor((ms % 3600000) / 60000);
+        const seconds = Math.floor((ms % 60000) / 1000);
+        const milliseconds = Math.floor((ms % 1000));
+
+        const display = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${String(milliseconds).padStart(3, '0')}`;
+        document.getElementById('stopwatch-display').textContent = display;
+    }
+
+    function updateLapsList() {
+        const lapsList = document.getElementById('laps-list');
+        lapsList.innerHTML = '';
+
+        // Calculate lap times (difference between consecutive laps)
+        const lapTimes = laps.map((lap, index) => {
+            if (index === 0) return lap;
+            return lap - laps[index - 1];
+        });
+
+        // Find fastest and slowest laps
+        const fastest = Math.min(...lapTimes);
+        const slowest = Math.max(...lapTimes);
+
+        laps.forEach((lap, index) => {
+            const lapTime = lapTimes[index];
+            const lapItem = document.createElement('div');
+            lapItem.className = 'lap-item';
+
+            // Highlight fastest and slowest (only if there are more than 2 laps)
+            if (laps.length > 2) {
+                if (lapTime === fastest) lapItem.classList.add('fastest');
+                if (lapTime === slowest) lapItem.classList.add('slowest');
+            }
+
+            const hours = Math.floor(lapTime / 3600000);
+            const minutes = Math.floor((lapTime % 3600000) / 60000);
+            const seconds = Math.floor((lapTime % 60000) / 1000);
+            const milliseconds = Math.floor((lapTime % 1000));
+
+            lapItem.innerHTML = `
+                <span class="lap-number">Lap ${index + 1}</span>
+                <span class="lap-time">${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${String(milliseconds).padStart(3, '0')}</span>
+            `;
+
+            lapsList.appendChild(lapItem);
+        });
+    }
+
+    // Event Listeners
+    function attachEventListeners() {
+        // Timer events
+        startTimerBtn.addEventListener('click', startTimer);
+        pauseTimerBtn.addEventListener('click', pauseTimer);
+        resumeTimerBtn.addEventListener('click', resumeTimer);
+        restartTimerBtn.addEventListener('click', restartTimer);
+        resetTimerBtn.addEventListener('click', resetTimer);
+
+        // Stopwatch events
+        document.getElementById('start-stopwatch-btn').addEventListener('click', startStopwatch);
+        document.getElementById('stop-stopwatch-btn').addEventListener('click', stopStopwatch);
+        document.getElementById('reset-stopwatch-btn').addEventListener('click', resetStopwatch);
+        document.getElementById('lap-stopwatch-btn').addEventListener('click', recordLap);
+    }
+
     // Initialize on page load
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', init);
     } else {
         init();
     }
-
 })();

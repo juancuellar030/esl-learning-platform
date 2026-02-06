@@ -12,13 +12,13 @@
         /* Page-specific overrides */
         body {
             font-family: 'Reddit Sans', 'Google Sans Flex', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, var(--indigo-velvet) 0%, var(--medium-slate-blue) 100%);
+            background: var(--medium-slate-blue);
             min-height: 100vh;
             padding: 20px;
         }
 
         .tracker-container {
-            max-width: 1400px;
+            max-width: 1800px;
             margin: 0 auto;
             background: white;
             border-radius: 16px;
@@ -365,51 +365,117 @@
             color: #2c3e50;
         }
 
-        .error-message {
-            background: #ffebee;
-            color: #c62828;
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 4px;
-            border-left: 4px solid #c62828;
-            font-family: monospace;
-            font-size: 12px;
+        /* Slide-in Notifications */
+        .notification-container {
+            position: fixed;
+            top: 20px;
+            right: -400px;
+            width: 350px;
+            z-index: 9999;
+            transition: right 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         }
 
-        .success-message {
-            background: #e8f5e9;
+        .notification-container.show {
+            right: 20px;
+        }
+
+        .notification {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            border-left: 5px solid;
+            animation: slideIn 0.4s ease;
+        }
+
+        .notification.success {
+            border-left-color: #2e7d32;
+        }
+
+        .notification.error {
+            border-left-color: #c62828;
+        }
+
+        .notification.info {
+            border-left-color: #1976d2;
+        }
+
+        .notification-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .notification-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .notification.success .notification-title {
             color: #2e7d32;
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 4px;
-            border-left: 4px solid #2e7d32;
+        }
+
+        .notification.error .notification-title {
+            color: #c62828;
+        }
+
+        .notification.info .notification-title {
+            color: #1976d2;
+        }
+
+        .notification-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #999;
+            transition: color 0.3s;
+        }
+
+        .notification-close:hover {
+            color: #333;
+        }
+
+        .notification-message {
+            color: #555;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
         }
     </style>
 </head>
 
 <body>
-    <!-- ESL Platform Header -->
-    <header class="main-header">
-        <div class="container">
-            <h1><i class="fa-solid fa-graduation-cap"></i> ESL Learning Platform</h1>
-            <p class="tagline">Student Behavior Tracker</p>
-        </div>
-    </header>
-
-    <!-- Navigation -->
-    <nav class="main-nav">
-        <div class="container">
-            <a href="tools.html" class="nav-btn">
-                <i class="fa-solid fa-arrow-left"></i> Back to Tools
-            </a>
-        </div>
-    </nav>
-
     <!-- Behavior Tracker Container -->
     <div class="tracker-container">
         <div class="tracker-header">
             <h1>📚 Student Behavior Tracker</h1>
             <div class="controls">
+                <a href="tools.html" class="btn btn-secondary"
+                    style="text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-arrow-left"></i> Back to Tools
+                </a>
+                <a href="https://docs.google.com/spreadsheets/d/1XmQEduG0GSrCW_xZ3oArgDB-HbR6zVx8FW3UKwMrSpA/edit?usp=sharing"
+                    target="_blank" class="btn btn-primary"
+                    style="text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-table"></i> Open Google Sheet
+                </a>
                 <button class="btn btn-circle" id="markCircle">● Circle Mode</button>
                 <button class="btn btn-finish" id="finishWeek">🏁 Finish Week</button>
                 <button class="btn btn-clear" id="clearAll">🔥 Clear All</button>
@@ -466,6 +532,9 @@
         </div>
     </div>
 
+    <!-- Slide-in Notification Container -->
+    <div class="notification-container" id="notificationContainer"></div>
+
     <!-- ESL Platform Footer -->
     <footer class="main-footer">
         <div class="container">
@@ -474,7 +543,7 @@
     </footer>
 
     <script>
-        const SHEETS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwWRwrfiWnMvJBD6uxUwUY8iso18veUIIFfcP3zpuZzjB8f7ai3I4Q9T3pubGphPOYgJw/exec';
+        const SHEETS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzZ-T71mGOFcew27xNGJkyTqHkJPqYEEVdgO6X8uXwiSQRsqINje-YGZAq2_lmAm4B6sg/exec';
 
         const students = [
             'ALEJANDRA H.', 'ALEJANDRO C.', 'ANAMARIA C.', 'ANTONELLA P.', 'BRIANA C.',
@@ -498,16 +567,57 @@
             debugDiv.innerHTML = `<strong>${timestamp}:</strong> ${message}${data ? ' - Check console' : ''}`;
         }
 
+        // Slide-in Notification System
+        function showNotification(message, type = 'info', title = null) {
+            const container = document.getElementById('notificationContainer');
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+
+            // Determine icon and default title based on type
+            let icon = '📢';
+            let defaultTitle = 'Notification';
+            if (type === 'success') {
+                icon = '✅';
+                defaultTitle = 'Success';
+            } else if (type === 'error') {
+                icon = '❌';
+                defaultTitle = 'Error';
+            } else if (type === 'info') {
+                icon = 'ℹ️';
+                defaultTitle = 'Info';
+            }
+
+            notification.innerHTML = `
+                <div class="notification-header">
+                    <div class="notification-title">${icon} ${title || defaultTitle}</div>
+                    <button class="notification-close" onclick="this.parentElement.parentElement.remove()">×</button>
+                </div>
+                <div class="notification-message">${message}</div>
+            `;
+
+            container.appendChild(notification);
+            container.classList.add('show');
+
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                setTimeout(() => {
+                    notification.remove();
+                    if (container.children.length === 0) {
+                        container.classList.remove('show');
+                    }
+                }, 300);
+            }, 5000);
+        }
+
         function showError(message, error = null) {
             console.error('[ERROR]', message, error);
-            const debugDiv = document.getElementById('debugInfo');
-            debugDiv.innerHTML = `<div class="error-message"><strong>Error:</strong> ${message}${error ? '<br>Details: ' + error.message : ''}</div>`;
+            const fullMessage = error ? `${message}<br><small>Details: ${error.message}</small>` : message;
+            showNotification(fullMessage, 'error', 'Error');
         }
 
         function showSuccess(message) {
-            const debugDiv = document.getElementById('debugInfo');
-            debugDiv.innerHTML = `<div class="success-message"><strong>Success:</strong> ${message}</div>`;
-            setTimeout(() => { debugDiv.innerHTML = ''; }, 5000);
+            showNotification(message, 'success', 'Success');
         }
 
         function initializeBehaviorData() {
