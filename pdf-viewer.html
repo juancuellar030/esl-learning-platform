@@ -56,6 +56,13 @@
                     </button>
                 </div>
 
+                <!-- Page Thumbnails -->
+                <div class="control-group">
+                    <button class="header-btn" id="thumbnailGridBtn" title="Page Thumbnails">
+                        <i class="fa-solid fa-grip"></i>
+                    </button>
+                </div>
+
                 <!-- Undo/Redo Controls -->
                 <div class="control-group">
                     <button class="header-btn" id="undoBtn" title="Undo (Ctrl+Z)">
@@ -147,6 +154,17 @@
                     <i class="fa-solid fa-trash"></i>
                 </button>
             </div>
+        </div>
+
+        <!-- Thumbnail Grid Overlay -->
+        <div class="thumbnail-overlay hidden" id="thumbnailOverlay">
+            <div class="thumbnail-overlay-header">
+                <span class="thumbnail-overlay-title">All Pages</span>
+                <button class="thumbnail-close-btn" id="thumbnailCloseBtn">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+            <div class="thumbnail-grid" id="thumbnailGrid"></div>
         </div>
 
         <!-- Color Palette Popup -->

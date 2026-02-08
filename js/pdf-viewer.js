@@ -197,6 +197,10 @@ class PDFViewer {
 
 
 
+        // Thumbnail grid
+        document.getElementById('thumbnailGridBtn').addEventListener('click', () => this.toggleThumbnailGrid());
+        document.getElementById('thumbnailCloseBtn').addEventListener('click', () => this.closeThumbnailGrid());
+
         // Actions
         document.getElementById('undoBtn').addEventListener('click', () => this.undo());
         document.getElementById('redoBtn').addEventListener('click', () => this.redo());
@@ -1179,6 +1183,80 @@ class PDFViewer {
             texts: this.textAnnotations
         };
         localStorage.setItem(`annotations_${bookId}`, JSON.stringify(data));
+    }
+
+    // --- Thumbnail Grid ---
+    toggleThumbnailGrid() {
+        const overlay = document.getElementById('thumbnailOverlay');
+        if (overlay.classList.contains('hidden')) {
+            this.openThumbnailGrid();
+        } else {
+            this.closeThumbnailGrid();
+        }
+    }
+
+    async openThumbnailGrid() {
+        const overlay = document.getElementById('thumbnailOverlay');
+        const grid = document.getElementById('thumbnailGrid');
+        overlay.classList.remove('hidden');
+
+        // Only re-render thumbnails if page count changed or grid is empty
+        if (grid.children.length === this.totalPages) {
+            this.highlightCurrentThumbnail();
+            return;
+        }
+
+        grid.innerHTML = '';
+
+        // Render all page thumbnails at a small scale
+        const thumbScale = 0.3;
+
+        for (let i = 1; i <= this.totalPages; i++) {
+            const item = document.createElement('div');
+            item.className = 'thumbnail-item';
+            if (i === this.currentPage) item.classList.add('current');
+            item.dataset.page = i;
+
+            const canvas = document.createElement('canvas');
+            const label = document.createElement('span');
+            label.className = 'thumbnail-label';
+            label.textContent = i;
+
+            item.appendChild(canvas);
+            item.appendChild(label);
+            grid.appendChild(item);
+
+            item.addEventListener('click', () => {
+                this.closeThumbnailGrid();
+                this.goToPage(i);
+            });
+
+            // Render thumbnail asynchronously (don't await each one — fire in parallel)
+            this.renderThumbnail(i, canvas, thumbScale);
+        }
+    }
+
+    async renderThumbnail(pageNum, canvas, thumbScale) {
+        try {
+            const page = await this.pdf.getPage(pageNum);
+            const viewport = page.getViewport({ scale: thumbScale });
+            canvas.width = viewport.width;
+            canvas.height = viewport.height;
+            const ctx = canvas.getContext('2d');
+            await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+        } catch (e) {
+            // Silently skip failed thumbnails
+        }
+    }
+
+    highlightCurrentThumbnail() {
+        document.querySelectorAll('.thumbnail-item').forEach(item => {
+            item.classList.toggle('current', Number(item.dataset.page) === this.currentPage);
+        });
+    }
+
+    closeThumbnailGrid() {
+        document.getElementById('thumbnailOverlay').classList.add('hidden');
     }
 }
 
