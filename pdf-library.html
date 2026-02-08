@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Book Library - ESL Learning Platform</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/pdf-library.css">
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="main-header">
+        <div class="container">
+            <h1><i class="fa-solid fa-graduation-cap"></i> ESL Learning Platform</h1>
+            <p class="tagline">PDF Book Library</p>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="main-nav">
+        <div class="container">
+            <a href="tools.html" class="nav-btn" style="text-decoration: none;">
+                <i class="fa-solid fa-arrow-left"></i> Back to Tools
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Library Header -->
+            <div class="library-header">
+                <h2><i class="fa-solid fa-book"></i> My Book Library</h2>
+                <p>Upload and manage your teaching materials</p>
+            </div>
+
+            <!-- Upload Section -->
+            <div class="upload-section">
+                <div class="upload-area" id="uploadArea">
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                    <h3>Upload PDF Books</h3>
+                    <p>Drag and drop PDF files here or click to browse</p>
+                    <p style="font-size: 0.85rem; color: #999;">Supported format: PDF</p>
+                </div>
+                <input type="file" id="pdfFileInput" accept=".pdf" multiple>
+            </div>
+
+            <!-- Search Section -->
+            <div class="search-section">
+                <div class="search-bar">
+                    <i class="fa-solid fa-search" style="color: #666;"></i>
+                    <input type="text" id="searchInput" placeholder="Search books by title...">
+                    <span id="bookCount" style="color: #666; font-size: 0.9rem;">0 books</span>
+                </div>
+            </div>
+
+            <!-- Books Grid -->
+            <div id="booksGrid" class="books-grid">
+                <!-- Books will be dynamically inserted here -->
+            </div>
+
+            <!-- Empty State -->
+            <div id="emptyState" class="empty-state" style="display: none;">
+                <i class="fa-solid fa-book-open"></i>
+                <h3>No books in your library yet</h3>
+                <p>Upload your first PDF book to get started</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="main-footer">
+        <div class="container">
+            <p>ESL Learning Platform © 2025 | Made for Teachers, by Teachers</p>
+        </div>
+    </footer>
+
+    <!-- PDF.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        // Set PDF.js worker
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    </script>
+    <script src="js/pdf-library.js"></script>
+</body>
+
+</html>

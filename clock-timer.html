@@ -22,7 +22,7 @@
     <!-- Navigation -->
     <nav class="main-nav">
         <div class="container">
-            <a href="tools.html" class="nav-btn">
+            <a href="tools.html" class="nav-btn" style="text-decoration: none;">
                 <i class="fa-solid fa-arrow-left"></i> Back to Tools
             </a>
         </div>
@@ -31,107 +31,109 @@
     <!-- Main Content -->
     <main class="main-content">
         <div class="container">
-            <!-- Tab Navigation -->
-            <div class="tab-navigation">
-                <button class="tab-btn active" data-tab="clock">
-                    <i class="fa-solid fa-clock"></i> Clock
-                </button>
-                <button class="tab-btn" data-tab="timer">
-                    <i class="fa-solid fa-hourglass-half"></i> Timer
-                </button>
-                <button class="tab-btn" data-tab="stopwatch">
-                    <i class="fa-solid fa-stopwatch"></i> Stopwatch
-                </button>
-            </div>
-
-            <!-- Clock Tab -->
-            <section class="tab-content active" id="clock-tab">
-                <h2><i class="fa-solid fa-clock"></i> Current Time</h2>
-                <div class="clock-display" id="clock-display">
-                    <div class="time-display" id="time-display">00:00:00</div>
-                    <div class="date-display" id="date-display">Loading...</div>
-                </div>
-            </section>
-
-            <!-- Timer Tab -->
-            <section class="tab-content" id="timer-tab">
-                <h2><i class="fa-solid fa-hourglass-half"></i> Classroom Timer</h2>
-
-                <!-- Timer Setup -->
-                <div class="timer-setup" id="timer-setup">
-                    <div class="time-inputs">
-                        <div class="time-input-group">
-                            <label for="hours-input">Hours</label>
-                            <input type="number" id="hours-input" min="0" max="23" value="0">
-                        </div>
-                        <div class="time-input-group">
-                            <label for="minutes-input">Minutes</label>
-                            <input type="number" id="minutes-input" min="0" max="59" value="5">
-                        </div>
-                        <div class="time-input-group">
-                            <label for="seconds-input">Seconds</label>
-                            <input type="number" id="seconds-input" min="0" max="59" value="0">
-                        </div>
-                    </div>
-                    <button class="btn-primary btn-large" id="start-timer-btn">
-                        <i class="fa-solid fa-play"></i> Start Timer
+            <div class="tool-card">
+                <!-- Tab Navigation -->
+                <div class="tab-navigation">
+                    <button class="tab-btn active" data-tab="clock">
+                        <i class="fa-solid fa-clock"></i> Clock
+                    </button>
+                    <button class="tab-btn" data-tab="timer">
+                        <i class="fa-solid fa-hourglass-half"></i> Timer
+                    </button>
+                    <button class="tab-btn" data-tab="stopwatch">
+                        <i class="fa-solid fa-stopwatch"></i> Stopwatch
                     </button>
                 </div>
 
-                <!-- Timer Display -->
-                <div class="timer-display-container" id="timer-display-container" style="display: none;">
-                    <div class="timer-display" id="timer-display">00:00:00</div>
-                    <div class="timer-progress-bar">
-                        <div class="timer-progress-fill" id="timer-progress-fill"></div>
+                <!-- Clock Tab -->
+                <section class="tab-content active" id="clock-tab">
+                    <h2><i class="fa-solid fa-clock"></i> Current Time</h2>
+                    <div class="clock-display" id="clock-display">
+                        <div class="time-display" id="time-display">00:00:00</div>
+                        <div class="date-display" id="date-display">Loading...</div>
                     </div>
-                    <div class="timer-controls">
-                        <button class="btn-secondary btn-icon" id="pause-timer-btn" title="Pause">
-                            <i class="fa-solid fa-pause"></i>
-                        </button>
-                        <button class="btn-secondary btn-icon" id="resume-timer-btn" style="display: none;"
-                            title="Resume">
-                            <i class="fa-solid fa-play"></i>
-                        </button>
-                        <button class="btn-secondary btn-icon" id="restart-timer-btn" title="Restart">
-                            <i class="fa-solid fa-rotate-right"></i>
-                        </button>
-                        <button class="btn-secondary btn-icon" id="reset-timer-btn" title="Reset">
-                            <i class="fa-solid fa-stop"></i>
-                        </button>
-                    </div>
-                </div>
-            </section>
+                </section>
 
-            <!-- Stopwatch Tab -->
-            <section class="tab-content" id="stopwatch-tab">
-                <h2><i class="fa-solid fa-stopwatch"></i> Stopwatch</h2>
+                <!-- Timer Tab -->
+                <section class="tab-content" id="timer-tab">
+                    <h2><i class="fa-solid fa-hourglass-half"></i> Classroom Timer</h2>
 
-                <div class="stopwatch-container">
-                    <div class="stopwatch-display" id="stopwatch-display">00:00:00.000</div>
-
-                    <div class="stopwatch-controls">
-                        <button class="btn-primary btn-icon-large" id="start-stopwatch-btn" title="Start">
-                            <i class="fa-solid fa-play"></i>
-                        </button>
-                        <button class="btn-primary btn-icon-large" id="stop-stopwatch-btn" style="display: none;"
-                            title="Stop">
-                            <i class="fa-solid fa-pause"></i>
-                        </button>
-                        <button class="btn-secondary btn-icon-large" id="lap-stopwatch-btn" style="display: none;"
-                            title="Lap">
-                            <i class="fa-solid fa-flag"></i>
-                        </button>
-                        <button class="btn-secondary btn-icon-large" id="reset-stopwatch-btn" title="Reset">
-                            <i class="fa-solid fa-rotate-right"></i>
+                    <!-- Timer Setup -->
+                    <div class="timer-setup" id="timer-setup">
+                        <div class="time-inputs">
+                            <div class="time-input-group">
+                                <label for="hours-input">Hours</label>
+                                <input type="number" id="hours-input" min="0" max="23" value="0">
+                            </div>
+                            <div class="time-input-group">
+                                <label for="minutes-input">Minutes</label>
+                                <input type="number" id="minutes-input" min="0" max="59" value="5">
+                            </div>
+                            <div class="time-input-group">
+                                <label for="seconds-input">Seconds</label>
+                                <input type="number" id="seconds-input" min="0" max="59" value="0">
+                            </div>
+                        </div>
+                        <button class="btn-primary btn-large" id="start-timer-btn">
+                            <i class="fa-solid fa-play"></i> Start Timer
                         </button>
                     </div>
 
-                    <div class="laps-container" id="laps-container" style="display: none;">
-                        <h3><i class="fa-solid fa-list"></i> Lap Times</h3>
-                        <div class="laps-list" id="laps-list"></div>
+                    <!-- Timer Display -->
+                    <div class="timer-display-container" id="timer-display-container" style="display: none;">
+                        <div class="timer-display" id="timer-display">00:00:00</div>
+                        <div class="timer-progress-bar">
+                            <div class="timer-progress-fill" id="timer-progress-fill"></div>
+                        </div>
+                        <div class="timer-controls">
+                            <button class="btn-secondary btn-icon" id="pause-timer-btn" title="Pause">
+                                <i class="fa-solid fa-pause"></i>
+                            </button>
+                            <button class="btn-secondary btn-icon" id="resume-timer-btn" style="display: none;"
+                                title="Resume">
+                                <i class="fa-solid fa-play"></i>
+                            </button>
+                            <button class="btn-secondary btn-icon" id="restart-timer-btn" title="Restart">
+                                <i class="fa-solid fa-rotate-right"></i>
+                            </button>
+                            <button class="btn-secondary btn-icon" id="reset-timer-btn" title="Reset">
+                                <i class="fa-solid fa-stop"></i>
+                            </button>
+                        </div>
                     </div>
-                </div>
-            </section>
+                </section>
+
+                <!-- Stopwatch Tab -->
+                <section class="tab-content" id="stopwatch-tab">
+                    <h2><i class="fa-solid fa-stopwatch"></i> Stopwatch</h2>
+
+                    <div class="stopwatch-container">
+                        <div class="stopwatch-display" id="stopwatch-display">00:00:00.000</div>
+
+                        <div class="stopwatch-controls">
+                            <button class="btn-primary btn-icon-large" id="start-stopwatch-btn" title="Start">
+                                <i class="fa-solid fa-play"></i>
+                            </button>
+                            <button class="btn-primary btn-icon-large" id="stop-stopwatch-btn" style="display: none;"
+                                title="Stop">
+                                <i class="fa-solid fa-pause"></i>
+                            </button>
+                            <button class="btn-secondary btn-icon-large" id="lap-stopwatch-btn" style="display: none;"
+                                title="Lap">
+                                <i class="fa-solid fa-flag"></i>
+                            </button>
+                            <button class="btn-secondary btn-icon-large" id="reset-stopwatch-btn" title="Reset">
+                                <i class="fa-solid fa-rotate-right"></i>
+                            </button>
+                        </div>
+
+                        <div class="laps-container" id="laps-container" style="display: none;">
+                            <h3><i class="fa-solid fa-list"></i> Lap Times</h3>
+                            <div class="laps-list" id="laps-list"></div>
+                        </div>
+                    </div>
+                </section>
+            </div>
         </div>
     </main>
 

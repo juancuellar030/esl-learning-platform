@@ -1,12 +1,27 @@
 /* ===== CLOCK & TIMER STYLES ===== */
 
+/* Navigation Override for Clock Timer Page */
+.main-nav {
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+/* Tool Card Container */
+.tool-card {
+    background: white;
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+}
+
 /* Tab Navigation */
 .tab-navigation {
     display: flex;
     gap: 10px;
     margin-bottom: 30px;
     border-bottom: 3px solid #e0e0e0;
-    padding-bottom: 0;
+    padding-bottom: 0px;
 }
 
 .tab-btn {
@@ -48,10 +63,6 @@
 .tab-content {
     display: none;
     animation: fadeIn 0.3s ease;
-    background: white;
-    padding: 30px;
-    border-radius: 15px;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
 }
 
 .tab-content.active {
@@ -85,6 +96,7 @@
     box-shadow: 0 10px 40px rgba(61, 52, 139, 0.3);
     margin: 30px auto;
     max-width: 600px;
+    text-align: center;
 }
 
 .time-display {
@@ -122,6 +134,12 @@
     gap: 20px;
     justify-content: center;
     margin-bottom: 30px;
+}
+
+.timer-setup {
+    text-align: center;
+    max-width: 600px;
+    margin: 0 auto 40px;
 }
 
 .time-input-group {
@@ -313,20 +331,20 @@
 .stopwatch-display {
     font-size: 6rem;
     font-weight: 900;
-    color: var(--indigo-velvet);
+    color: white;
     font-family: 'Google Sans Flex', 'Reddit Sans', monospace;
     letter-spacing: 0.05em;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
     margin-bottom: 40px;
     padding: 40px;
-    background: white;
+    background: var(--indigo-velvet);
     border-radius: 20px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 10px 40px rgba(61, 52, 139, 0.3);
 }
 
 .stopwatch-display.running {
-    background: rgba(118, 120, 237, 0.05);
     border: 3px solid var(--medium-slate-blue);
+    box-shadow: 0 0 20px rgba(118, 120, 237, 0.4);
 }
 
 .stopwatch-controls {

@@ -134,7 +134,7 @@ function setupSheetHeaders(sheet) {
   
   // Format header row
   sheet.getRange(1, 1, 1, headers.length)
-    .setBackground('#4285f4')
+    .setBackground('#333333ff')
     .setFontColor('white')
     .setFontWeight('bold')
     .setHorizontalAlignment('center');

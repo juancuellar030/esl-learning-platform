@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Viewer - ESL Learning Platform</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/pdf-library.css">
+</head>
+
+<body>
+    <div class="viewer-container">
+        <!-- Header with integrated controls -->
+        <div class="viewer-header">
+            <div class="viewer-title">
+                <i class="fa-solid fa-book-open"></i>
+                <span id="bookTitle">Loading...</span>
+            </div>
+
+            <!-- Center Controls -->
+            <div class="viewer-center-controls">
+                <!-- Page Navigation -->
+                <div class="control-group">
+                    <button class="header-btn" id="prevPageBtn" title="Previous Page (←)">
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+                    <input type="number" class="page-input" id="pageInput" min="1" value="1">
+                    <span class="page-info">/ <span id="totalPages">0</span></span>
+                    <button class="header-btn" id="nextPageBtn" title="Next Page (→)">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                </div>
+
+                <!-- Zoom Controls -->
+                <div class="control-group">
+                    <button class="header-btn" id="zoomOutBtn" title="Zoom Out">
+                        <i class="fa-solid fa-search-minus"></i>
+                    </button>
+                    <button class="header-btn" id="zoomResetBtn" title="Reset Zoom">
+                        <span id="zoomLevel">100%</span>
+                    </button>
+                    <button class="header-btn" id="zoomInBtn" title="Zoom In">
+                        <i class="fa-solid fa-search-plus"></i>
+                    </button>
+                </div>
+
+                <!-- Fit Controls -->
+                <div class="control-group">
+                    <button class="header-btn" id="fitWidthBtn" title="Fit to Width">
+                        <i class="fa-solid fa-arrows-left-right"></i>
+                    </button>
+                    <button class="header-btn" id="fitPageBtn" title="Fit to Page">
+                        <i class="fa-solid fa-expand"></i>
+                    </button>
+                </div>
+
+                <!-- Undo/Redo Controls -->
+                <div class="control-group">
+                    <button class="header-btn" id="undoBtn" title="Undo (Ctrl+Z)">
+                        <i class="fa-solid fa-undo"></i>
+                    </button>
+                    <button class="header-btn" id="redoBtn" title="Redo (Ctrl+Y)">
+                        <i class="fa-solid fa-redo"></i>
+                    </button>
+                </div>
+            </div>
+
+            <button class="viewer-close" onclick="window.location.href='pdf-library.html'">
+                <i class="fa-solid fa-times"></i> Close
+            </button>
+        </div>
+
+        <!-- Canvas Area -->
+        <div class="viewer-canvas-area">
+            <div class="canvas-wrapper" id="canvasWrapper">
+                <canvas id="pdfCanvas"></canvas>
+                <canvas id="annotationCanvas"></canvas>
+                <div id="textLayer"></div>
+            </div>
+            <div class="loading-overlay" id="loadingOverlay">
+                <i class="fa-solid fa-spinner loading-spinner"></i>
+            </div>
+        </div>
+
+        <!-- Floating Toggle Button -->
+        <button class="toolbar-toggle-btn" id="toolbarToggleBtn" title="Toggle Drawing Tools">
+            <i class="fa-solid fa-pencil"></i>
+        </button>
+
+        <!-- Vertical Left Toolbar -->
+        <div class="floating-toolbar hidden" id="floatingToolbar">
+            <!-- Close Button -->
+            <button class="tool-btn toolbar-close-btn" id="toolbarCloseBtn" title="Close Toolbar">
+                <i class="fa-solid fa-times"></i>
+            </button>
+
+            <div class="toolbar-divider"></div>
+
+            <!-- Tool Selection -->
+            <div class="tool-group">
+                <button class="tool-btn" id="selectToolBtn" title="Hand Tool (Pan)">
+                    <i class="fa-solid fa-hand"></i>
+                </button>
+                <button class="tool-btn" id="markerToolBtn" title="Marker">
+                    <i class="fa-solid fa-pen"></i>
+                </button>
+                <button class="tool-btn" id="highlighterToolBtn" title="Highlighter">
+                    <i class="fa-solid fa-highlighter"></i>
+                </button>
+                <button class="tool-btn" id="textToolBtn" title="Text Tool">
+                    <i class="fa-solid fa-font"></i>
+                </button>
+                <button class="tool-btn" id="eraserToolBtn" title="Eraser">
+                    <i class="fa-solid fa-eraser"></i>
+                </button>
+            </div>
+
+            <div class="toolbar-divider"></div>
+
+            <!-- Color Palette -->
+            <div class="tool-group">
+                <button class="tool-btn color-preview-btn" id="colorPreviewBtn" title="Choose Color">
+                    <div class="color-preview-circle" id="colorPreview"></div>
+                </button>
+            </div>
+
+            <div class="toolbar-divider"></div>
+
+            <!-- Stroke Width -->
+            <div class="tool-group stroke-width-group">
+                <label
+                    style="color: white; font-size: 0.75rem; writing-mode: vertical-rl; transform: rotate(180deg);">Width</label>
+                <input type="range" class="stroke-width-slider" id="strokeWidthSlider" min="1" max="20" value="3"
+                    orient="vertical">
+                <div class="stroke-preview">
+                    <div class="stroke-preview-line" id="strokePreview" style="width: 3px; height: 30px;"></div>
+                </div>
+            </div>
+
+            <div class="toolbar-divider"></div>
+
+            <!-- Actions -->
+            <div class="tool-group">
+                <button class="tool-btn" id="clearPageBtn" title="Clear Page Annotations">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Color Palette Popup -->
+        <div class="color-palette-popup hidden" id="colorPalettePopup">
+            <div class="color-palette-grid">
+                <button class="palette-color-btn" data-color="#000000" style="background: #000000;"
+                    title="Black"></button>
+                <button class="palette-color-btn" data-color="#ef4444" style="background: #ef4444;"
+                    title="Red"></button>
+                <button class="palette-color-btn" data-color="#3b82f6" style="background: #3b82f6;"
+                    title="Blue"></button>
+                <button class="palette-color-btn" data-color="#10b981" style="background: #10b981;"
+                    title="Green"></button>
+                <button class="palette-color-btn" data-color="#ffd6e7" style="background: #ffd6e7;"
+                    title="Pastel Pink"></button>
+                <button class="palette-color-btn" data-color="#c7f0db" style="background: #c7f0db;"
+                    title="Pastel Mint"></button>
+                <button class="palette-color-btn" data-color="#fff4cc" style="background: #fff4cc;"
+                    title="Pastel Yellow"></button>
+                <button class="palette-color-btn" data-color="#e0d4f7" style="background: #e0d4f7;"
+                    title="Pastel Lavender"></button>
+                <button class="palette-color-btn" data-color="#ffd4b2" style="background: #ffd4b2;"
+                    title="Pastel Peach"></button>
+                <button class="palette-color-btn" data-color="#d4f1f4" style="background: #d4f1f4;"
+                    title="Pastel Cyan"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PDF.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <!-- Perfect Freehand for smooth strokes (local copy) -->
+    <script src="js/perfect-freehand.js"></script>
+    <script>
+        // Set PDF.js worker
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+        // Debug perfect-freehand structure
+        console.log('perfectFreehand object:', perfectFreehand);
+        console.log('perfectFreehand.getStroke:', perfectFreehand.getStroke);
+        console.log('perfectFreehand.default:', perfectFreehand.default);
+
+        // Create global alias for easier access
+        window.getStroke = perfectFreehand.getStroke || perfectFreehand.default;
+        console.log('Global getStroke function:', window.getStroke);
+    </script>
+    <script src="js/pdf-viewer.js"></script>
+</body>
+
+</html>

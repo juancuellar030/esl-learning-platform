@@ -369,6 +369,8 @@ const vocabularyBank = [
     { id: 'move_08', word: 'Turn', spanish: 'Girar / Dar la vuelta', type: 'verb', icon: 'fa-solid fa-rotate-left', category: 'movement', subcategory: 'actions', level: 'beginner', definition: 'To move in a circular direction', example: 'Turn around and look at me.' },
     { id: 'move_09', word: 'Crawl', spanish: 'Gatear', type: 'verb', icon: 'fa-solid fa-person-praying', category: 'movement', subcategory: 'actions', level: 'beginner', definition: 'To move on hands and knees', example: 'The baby is starting to crawl.' },
     { id: 'move_10', word: 'Stretch', spanish: 'Estirarse', type: 'verb', icon: 'fa-solid fa-person-walking-with-cane', category: 'movement', subcategory: 'actions', level: 'beginner', definition: 'To reach out your arms or legs', example: 'Stretch your arms up high.' },
+    { id: 'move_11', word: 'Shout', spanish: 'Gritar', type: 'verb', icon: 'fa-solid fa-bullhorn', category: 'movement', subcategory: 'actions', level: 'beginner', definition: 'To speak very loudly', example: 'Don\'t shout in the classroom.' },
+    { id: 'move_12', word: 'Laugh', spanish: 'Reír', type: 'verb', icon: 'fa-solid fa-face-laugh', category: 'movement', subcategory: 'actions', level: 'beginner', definition: 'To make a sound because something is funny', example: 'We laugh at the funny joke.' },
 
     // Geometric Shapes
     { id: 'shape_01', word: 'Circle', spanish: 'Círculo', type: 'noun', icon: 'fa-solid fa-circle', category: 'shapes', subcategory: '2d', level: 'beginner', definition: 'A round shape with no corners', example: 'The sun is a circle.' },
@@ -495,7 +497,54 @@ const vocabularyBank = [
     { id: 'verb_past_07', word: 'Ate', spanish: 'Comió', type: 'verb', icon: 'fa-solid fa-utensils', category: 'verbs-past', subcategory: 'irregular', level: 'beginner', definition: 'Past form of eat', example: 'She ate an apple.' },
     { id: 'verb_past_08', word: 'Drank', spanish: 'Bebió', type: 'verb', icon: 'fa-solid fa-glass-water', category: 'verbs-past', subcategory: 'irregular', level: 'beginner', definition: 'Past form of drink', example: 'He drank some water.' },
     { id: 'verb_past_09', word: 'Saw', spanish: 'Vio', type: 'verb', icon: 'fa-solid fa-eye', category: 'verbs-past', subcategory: 'irregular', level: 'beginner', definition: 'Past form of see', example: 'I saw a bird.' },
-    { id: 'verb_past_10', word: 'Made', spanish: 'Hizo', type: 'verb', icon: 'fa-solid fa-hammer', category: 'verbs-past', subcategory: 'irregular', level: 'beginner', definition: 'Past form of make', example: 'Mom made a cake.' }
+    { id: 'verb_past_10', word: 'Made', spanish: 'Hizo', type: 'verb', icon: 'fa-solid fa-hammer', category: 'verbs-past', subcategory: 'irregular', level: 'beginner', definition: 'Past form of make', example: 'Mom made a cake.' },
+
+    // Modal Verbs
+    { id: 'modal_01', word: 'Can', spanish: 'Poder', type: 'modal verb', icon: 'fa-solid fa-thumbs-up', category: 'modal-verbs', subcategory: 'ability', level: 'beginner', definition: 'Used to express ability or permission', example: 'I can swim.' },
+    { id: 'modal_02', word: 'Could', spanish: 'Podría', type: 'modal verb', icon: 'fa-solid fa-clock-rotate-left', category: 'modal-verbs', subcategory: 'ability', level: 'intermediate', definition: 'Past ability or polite request', example: 'Could you help me?' },
+    { id: 'modal_03', word: 'May', spanish: 'Podría / Puede que', type: 'modal verb', icon: 'fa-solid fa-hand-holding', category: 'modal-verbs', subcategory: 'possibility', level: 'intermediate', definition: 'Used to express possibility or formal permission', example: 'May I come in?' },
+    { id: 'modal_04', word: 'Might', spanish: 'Podría / Quizás', type: 'modal verb', icon: 'fa-solid fa-cloud-question', category: 'modal-verbs', subcategory: 'possibility', level: 'intermediate', definition: 'Used to express slight possibility', example: 'It might rain later.' },
+    { id: 'modal_05', word: 'Must', spanish: 'Deber', type: 'modal verb', icon: 'fa-solid fa-circle-exclamation', category: 'modal-verbs', subcategory: 'obligation', level: 'intermediate', definition: 'Used to express strong obligation', example: 'You must wear a seatbelt.' },
+    { id: 'modal_06', word: 'Should', spanish: 'Debería', type: 'modal verb', icon: 'fa-solid fa-scale-balanced', category: 'modal-verbs', subcategory: 'advice', level: 'beginner', definition: 'Used to give advice', example: 'You should see a doctor.' },
+    { id: 'modal_07', word: 'Will', spanish: 'Irá a (Futuro)', type: 'modal verb', icon: 'fa-solid fa-arrow-right-long', category: 'modal-verbs', subcategory: 'future', level: 'beginner', definition: 'Used to express future intention', example: 'I will call you tomorrow.' },
+    { id: 'modal_08', word: 'Would', spanish: 'Haría (Condicional)', type: 'modal verb', icon: 'fa-solid fa-mug-hot', category: 'modal-verbs', subcategory: 'conditional', level: 'intermediate', definition: 'Used to make polite offers or conditionals', example: 'Would you like some tea?' },
+    { id: 'modal_09', word: 'Shall', spanish: 'Deberé / Shall', type: 'modal verb', icon: 'fa-solid fa-scroll', category: 'modal-verbs', subcategory: 'suggestion', level: 'advanced', definition: 'Used for suggestions or future (formal)', example: 'Shall we dance?' },
+    { id: 'modal_10', word: 'Ought to', spanish: 'Debería', type: 'modal verb', icon: 'fa-solid fa-gavel', category: 'modal-verbs', subcategory: 'advice', level: 'advanced', definition: 'Used to express moral obligation', example: 'You ought to apologize.' },
+
+    // Personal Pronouns
+    // Subject Pronouns
+    { id: 'pp_sub_01', word: 'I', spanish: 'Yo', type: 'pronoun', icon: 'fa-solid fa-user', category: 'personal-pronouns', subcategory: 'subject', level: 'beginner', definition: 'Used by a speaker to refer to himself or herself', example: 'I am a student.' },
+    { id: 'pp_sub_02', word: 'You', spanish: 'Tú / Usted', type: 'pronoun', icon: 'fa-regular fa-user', category: 'personal-pronouns', subcategory: 'subject', level: 'beginner', definition: 'Used to refer to the person being addressed', example: 'You are my friend.' },
+    { id: 'pp_sub_03', word: 'He', spanish: 'Él', type: 'pronoun', icon: 'fa-solid fa-person', category: 'personal-pronouns', subcategory: 'subject', level: 'beginner', definition: 'Used to refer to a man or boy', example: 'He is playing football.' },
+    { id: 'pp_sub_04', word: 'She', spanish: 'Ella', type: 'pronoun', icon: 'fa-solid fa-person-dress', category: 'personal-pronouns', subcategory: 'subject', level: 'beginner', definition: 'Used to refer to a woman or girl', example: 'She is reading a book.' },
+    { id: 'pp_sub_05', word: 'It', spanish: 'Eso / Ello', type: 'pronoun', icon: 'fa-solid fa-box', category: 'personal-pronouns', subcategory: 'subject', level: 'beginner', definition: 'Used to refer to a thing or animal', example: 'It is a cat.' },
+    { id: 'pp_sub_06', word: 'We', spanish: 'Nosotros', type: 'pronoun', icon: 'fa-solid fa-users', category: 'personal-pronouns', subcategory: 'subject', level: 'beginner', definition: 'Used to refer to the speaker and others', example: 'We are going to the park.' },
+    { id: 'pp_sub_07', word: 'They', spanish: 'Ellos / Ellas', type: 'pronoun', icon: 'fa-solid fa-users-line', category: 'personal-pronouns', subcategory: 'subject', level: 'beginner', definition: 'Used to refer to other people or things', example: 'They are sleeping.' },
+
+    // Object Pronouns
+    { id: 'pp_obj_01', word: 'Me', spanish: 'Mí / Me', type: 'pronoun', icon: 'fa-solid fa-hand-point-left', category: 'personal-pronouns', subcategory: 'object', level: 'beginner', definition: 'Object form of I', example: 'Can you help me?' },
+    { id: 'pp_obj_02', word: 'Him', spanish: 'Él / Lo', type: 'pronoun', icon: 'fa-solid fa-hand-point-right', category: 'personal-pronouns', subcategory: 'object', level: 'beginner', definition: 'Object form of He', example: 'I saw him yesterday.' },
+    { id: 'pp_obj_03', word: 'Her', spanish: 'Ella / La', type: 'pronoun', icon: 'fa-solid fa-hand-point-right', category: 'personal-pronouns', subcategory: 'object', level: 'beginner', definition: 'Object form of She', example: 'Give the book to her.' },
+    { id: 'pp_obj_04', word: 'Us', spanish: 'Nosotros / Nos', type: 'pronoun', icon: 'fa-solid fa-people-arrows', category: 'personal-pronouns', subcategory: 'object', level: 'beginner', definition: 'Object form of We', example: 'Come with us.' },
+    { id: 'pp_obj_05', word: 'Them', spanish: 'Ellos / Los / Las', type: 'pronoun', icon: 'fa-solid fa-people-group', category: 'personal-pronouns', subcategory: 'object', level: 'beginner', definition: 'Object form of They', example: 'I will call them later.' },
+
+    // Possessive Adjectives
+    { id: 'pp_poss_01', word: 'My', spanish: 'Mi', type: 'adjective', icon: 'fa-solid fa-key', category: 'personal-pronouns', subcategory: 'possessive', level: 'beginner', definition: 'Belonging to me', example: 'This is my bag.' },
+    { id: 'pp_poss_02', word: 'Your', spanish: 'Tu', type: 'adjective', icon: 'fa-solid fa-key', category: 'personal-pronouns', subcategory: 'possessive', level: 'beginner', definition: 'Belonging to you', example: 'Is this your pen?' },
+    { id: 'pp_poss_03', word: 'His', spanish: 'Su (de él)', type: 'adjective', icon: 'fa-solid fa-key', category: 'personal-pronouns', subcategory: 'possessive', level: 'beginner', definition: 'Belonging to a male', example: 'His car is blue.' },
+    { id: 'pp_poss_04', word: 'Her', spanish: 'Su (de ella)', type: 'adjective', icon: 'fa-solid fa-key', category: 'personal-pronouns', subcategory: 'possessive', level: 'beginner', definition: 'Belonging to a female', example: 'Her hair is long.' },
+    { id: 'pp_poss_05', word: 'Its', spanish: 'Su (de cosa/animal)', type: 'adjective', icon: 'fa-solid fa-key', category: 'personal-pronouns', subcategory: 'possessive', level: 'beginner', definition: 'Belonging to a thing or animal', example: 'The dog wagged its tail.' },
+    { id: 'pp_poss_06', word: 'Our', spanish: 'Nuestro', type: 'adjective', icon: 'fa-solid fa-key', category: 'personal-pronouns', subcategory: 'possessive', level: 'beginner', definition: 'Belonging to us', example: 'Our house is near here.' },
+    { id: 'pp_poss_07', word: 'Their', spanish: 'Su (de ellos)', type: 'adjective', icon: 'fa-solid fa-key', category: 'personal-pronouns', subcategory: 'possessive', level: 'beginner', definition: 'Belonging to them', example: 'Their children are happy.' },
+
+    // Reflexive Pronouns
+    { id: 'pp_ref_01', word: 'Myself', spanish: 'Yo mismo / Me', type: 'pronoun', icon: 'fa-solid fa-mirror', category: 'personal-pronouns', subcategory: 'reflexive', level: 'intermediate', definition: 'Reflexive form of I', example: 'I hurt myself.' },
+    { id: 'pp_ref_02', word: 'Yourself', spanish: 'Tú mismo / Te', type: 'pronoun', icon: 'fa-solid fa-mirror', category: 'personal-pronouns', subcategory: 'reflexive', level: 'intermediate', definition: 'Reflexive form of You', example: 'Be careful, don\'t cut yourself.' },
+    { id: 'pp_ref_03', word: 'Himself', spanish: 'Él mismo / Se', type: 'pronoun', icon: 'fa-solid fa-mirror', category: 'personal-pronouns', subcategory: 'reflexive', level: 'intermediate', definition: 'Reflexive form of He', example: 'He taught himself to play.' },
+    { id: 'pp_ref_04', word: 'Herself', spanish: 'Ella misma / Se', type: 'pronoun', icon: 'fa-solid fa-mirror', category: 'personal-pronouns', subcategory: 'reflexive', level: 'intermediate', definition: 'Reflexive form of She', example: 'She looked at herself in the mirror.' },
+    { id: 'pp_ref_05', word: 'Itself', spanish: 'Sí mismo / Se', type: 'pronoun', icon: 'fa-solid fa-mirror', category: 'personal-pronouns', subcategory: 'reflexive', level: 'intermediate', definition: 'Reflexive form of It', example: 'The problem resolved itself.' },
+    { id: 'pp_ref_06', word: 'Ourselves', spanish: 'Nosotros mismos / Nos', type: 'pronoun', icon: 'fa-solid fa-mirror', category: 'personal-pronouns', subcategory: 'reflexive', level: 'intermediate', definition: 'Reflexive form of We', example: 'We enjoyed ourselves at the party.' },
+    { id: 'pp_ref_07', word: 'Themselves', spanish: 'Ellos mismos / Se', type: 'pronoun', icon: 'fa-solid fa-mirror', category: 'personal-pronouns', subcategory: 'reflexive', level: 'intermediate', definition: 'Reflexive form of They', example: 'They bought themselves a new car.' }
 ];
 
 // Make data available globally

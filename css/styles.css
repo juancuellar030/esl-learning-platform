@@ -4,6 +4,7 @@
 :root {
     --indigo-velvet: #3d348b;
     --medium-slate-blue: #7678ed;
+    --dark-slate-blue: #483d8b;
     --amber-flame: #f7b801;
     --tiger-orange: #f18701;
     --cayenne-red: #f35b04;
@@ -2039,7 +2040,7 @@ body.dark-mode .dark-mode-toggle {
 .tools-fab {
     position: fixed;
     bottom: 40px;
-    right: 40px;
+    left: 40px;
     background: var(--indigo-velvet);
     color: white;
     border: none;
@@ -2057,7 +2058,6 @@ body.dark-mode .dark-mode-toggle {
 }
 
 .tools-fab:hover {
-    background: var(--medium-slate-blue);
     transform: translateY(-5px) scale(1.05);
     box-shadow: 0 12px 35px rgba(61, 52, 139, 0.6);
 }

@@ -22,7 +22,7 @@
     <!-- Navigation -->
     <nav class="main-nav">
         <div class="container">
-            <a href="tools.html" class="nav-btn">
+            <a href="tools.html" class="nav-btn" style="text-decoration: none;">
                 <i class="fa-solid fa-arrow-left"></i> Back to Tools
             </a>
         </div>
@@ -36,11 +36,19 @@
 
                 <!-- Planner Controls -->
                 <div class="planner-controls">
-                    <div class="control-group">
-                        <label for="week-picker">
-                            <i class="fa-solid fa-calendar"></i> Week Of:
+                    <div class="date-range-control">
+                        <label>
+                            <i class="fa-solid fa-calendar-days"></i> Period:
                         </label>
-                        <input type="date" id="week-picker" />
+                        <div class="date-inputs">
+                            <div class="date-input-wrapper">
+                                <input type="date" id="week-start" title="Start Date">
+                            </div>
+                            <span class="range-separator">to</span>
+                            <div class="date-input-wrapper">
+                                <input type="date" id="week-end" title="End Date">
+                            </div>
+                        </div>
                     </div>
 
                     <div class="control-actions">
@@ -67,10 +75,30 @@
                                 <tr>
                                     <th>Period</th>
                                     <th>Time</th>
-                                    <th>Monday</th>
-                                    <th>Tuesday</th>
-                                    <th>Wednesday</th>
-                                    <th>Thursday</th>
+                                    <th>Monday
+                                        <button class="day-toggle-header active" data-day="monday"
+                                            title="Toggle Monday">
+                                            <i class="fa-solid fa-eye"></i>
+                                        </button>
+                                    </th>
+                                    <th>Tuesday
+                                        <button class="day-toggle-header active" data-day="tuesday"
+                                            title="Toggle Tuesday">
+                                            <i class="fa-solid fa-eye"></i>
+                                        </button>
+                                    </th>
+                                    <th>Wednesday
+                                        <button class="day-toggle-header active" data-day="wednesday"
+                                            title="Toggle Wednesday">
+                                            <i class="fa-solid fa-eye"></i>
+                                        </button>
+                                    </th>
+                                    <th>Thursday
+                                        <button class="day-toggle-header active" data-day="thursday"
+                                            title="Toggle Thursday">
+                                            <i class="fa-solid fa-eye"></i>
+                                        </button>
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -224,7 +252,12 @@
                                 <tr>
                                     <th>Period</th>
                                     <th>Time</th>
-                                    <th>Friday</th>
+                                    <th>Friday
+                                        <button class="day-toggle-header active" data-day="friday"
+                                            title="Toggle Friday">
+                                            <i class="fa-solid fa-eye"></i>
+                                        </button>
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody>

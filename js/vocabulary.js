@@ -25,10 +25,12 @@ const VocabModule = {
         'discourse-markers': { label: 'Discourse Markers', icon: 'fa-solid fa-comment-dots' },
         'grammar-words': { label: 'Grammar & Questions', icon: 'fa-solid fa-question' },
         'indefinite-pronouns': { label: 'Indefinite Pronouns', icon: 'fa-solid fa-users-viewfinder' },
+        'personal-pronouns': { label: 'Personal Pronouns', icon: 'fa-solid fa-users' },
         'time': { label: 'Calendar & Time', icon: 'fa-solid fa-calendar-days' },
         'shapes': { label: 'Geometric Shapes', icon: 'fa-solid fa-shapes' },
         'numbers': { label: 'Numbers', icon: 'fa-solid fa-hashtag' },
         'verbs-past': { label: 'Verbs in Simple Past', icon: 'fa-solid fa-clock-rotate-left' },
+        'modal-verbs': { label: 'Modal Verbs', icon: 'fa-solid fa-bolt' },
         'feedback': { label: 'Feedback & Praise', icon: 'fa-solid fa-thumbs-up' }
     },
 

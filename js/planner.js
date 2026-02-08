@@ -4,17 +4,24 @@
 
     // State
     let plannerData = {
-        weekOf: '',
+        weekStart: '',
+        weekEnd: '',
+        disabledDays: [], // ['monday', 'tuesday', etc.]
         classes: {}
     };
 
-    let currentEditingClassId = null;
-
     // DOM Elements
-    const weekPicker = document.getElementById('week-picker');
+    const weekStartInput = document.getElementById('week-start');
+    const weekEndInput = document.getElementById('week-end');
+    const dayToggles = document.querySelectorAll('.day-toggle-header'); // Updated selector
+    const weekdayTable = document.getElementById('weekday-table');
+    const fridayTable = document.getElementById('friday-table');
+
     const clearTableBtn = document.getElementById('clear-table-btn');
     const exportJsonBtn = document.getElementById('export-json-btn');
     const importJsonInput = document.getElementById('import-json-input');
+
+    // Modal elements
     const activityModal = document.getElementById('activity-modal');
     const modalClassName = document.getElementById('modal-class-name');
     const modalClassTime = document.getElementById('modal-class-time');
@@ -23,15 +30,17 @@
     const activityCancel = document.getElementById('activity-cancel');
     const activitySave = document.getElementById('activity-save');
 
+    let currentEditingClassId = null;
+
     // Initialize
     function init() {
         setDefaultWeek();
         loadFromLocalStorage();
         attachEventListeners();
-        updateVisualFeedback();
+        updateDayVisibility();
     }
 
-    // Set default week to current Monday
+    // Set default week to current Monday - Friday
     function setDefaultWeek() {
         const today = new Date();
         const dayOfWeek = today.getDay();
@@ -41,20 +50,56 @@
         const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
         monday.setDate(today.getDate() - daysToMonday);
 
-        const mondayStr = monday.toISOString().split('T')[0];
-        weekPicker.value = mondayStr;
+        // Calculate Friday
+        const friday = new Date(monday);
+        friday.setDate(monday.getDate() + 4);
 
-        if (!plannerData.weekOf) {
-            plannerData.weekOf = mondayStr;
+        const mondayStr = monday.toISOString().split('T')[0];
+        const fridayStr = friday.toISOString().split('T')[0];
+
+        weekStartInput.value = mondayStr;
+        weekEndInput.value = fridayStr;
+
+        if (!plannerData.weekStart) {
+            plannerData.weekStart = mondayStr;
+            plannerData.weekEnd = fridayStr;
         }
     }
 
     // Attach event listeners
     function attachEventListeners() {
-        // Week picker
-        weekPicker.addEventListener('change', (e) => {
-            plannerData.weekOf = e.target.value;
+        // Date Inputs
+        weekStartInput.addEventListener('change', (e) => {
+            plannerData.weekStart = e.target.value;
+            // Optional: Auto-update end date logic if needed
             saveToLocalStorage();
+        });
+
+        weekEndInput.addEventListener('change', (e) => {
+            plannerData.weekEnd = e.target.value;
+            saveToLocalStorage();
+        });
+
+        // Day Toggles
+        dayToggles.forEach(toggle => {
+            toggle.addEventListener('click', () => {
+                const day = toggle.dataset.day;
+
+                if (plannerData.disabledDays.includes(day)) {
+                    // Enable day
+                    plannerData.disabledDays = plannerData.disabledDays.filter(d => d !== day);
+                    toggle.classList.remove('inactive');
+                    toggle.classList.add('active');
+                } else {
+                    // Disable day
+                    plannerData.disabledDays.push(day);
+                    toggle.classList.remove('active');
+                    toggle.classList.add('inactive');
+                }
+
+                updateDayVisibility();
+                saveToLocalStorage();
+            });
         });
 
         // Clear table
@@ -197,6 +242,53 @@
         });
     }
 
+    // Update visibility of disabled days
+    function updateDayVisibility() {
+        const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'];
+        const disabledDays = plannerData.disabledDays || [];
+
+        // Update Toggles UI
+        days.forEach(day => {
+            const toggle = document.querySelector(`.day-toggle[data-day="${day}"]`);
+            if (toggle) {
+                if (disabledDays.includes(day)) {
+                    toggle.classList.remove('active');
+                    toggle.classList.add('inactive');
+                } else {
+                    toggle.classList.add('active');
+                    toggle.classList.remove('inactive');
+                }
+            }
+        });
+
+        // Update Table Columns
+        const setColumnDisabled = (table, colIndex, disable) => {
+            if (!table) return;
+            // Header
+            const th = table.querySelector(`thead th:nth-child(${colIndex})`);
+            if (th) th.classList.toggle('day-disabled', disable);
+
+            // Rows
+            const rows = table.querySelectorAll('tbody tr');
+            rows.forEach(row => {
+                const cell = row.querySelector(`td:nth-child(${colIndex})`);
+                // Check if cell exists and is NOT a colspan break cell
+                if (cell && !cell.hasAttribute('colspan')) {
+                    cell.classList.toggle('day-disabled', disable);
+                }
+            });
+        };
+
+        // Mon-Thu
+        setColumnDisabled(weekdayTable, 3, disabledDays.includes('monday'));
+        setColumnDisabled(weekdayTable, 4, disabledDays.includes('tuesday'));
+        setColumnDisabled(weekdayTable, 5, disabledDays.includes('wednesday'));
+        setColumnDisabled(weekdayTable, 6, disabledDays.includes('thursday'));
+
+        // Fri
+        setColumnDisabled(fridayTable, 3, disabledDays.includes('friday'));
+    }
+
     // Clear table
     function clearTable() {
         const confirmed = confirm('Are you sure you want to clear all planning data? This action cannot be undone.');
@@ -213,7 +305,7 @@
 
     // Export to JSON
     function exportToJSON() {
-        if (Object.keys(plannerData.classes).length === 0) {
+        if (Object.keys(plannerData.classes).length === 0 && !plannerData.weekStart) {
             showToast('No planning data to export', 'warning');
             return;
         }
@@ -224,7 +316,7 @@
 
         const a = document.createElement('a');
         a.href = url;
-        a.download = `lesson-plan-${plannerData.weekOf || 'backup'}.json`;
+        a.download = `lesson-plan-${plannerData.weekStart || 'backup'}.json`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -254,13 +346,22 @@
 
                 plannerData = importedData;
 
-                // Update week picker if date is provided
-                if (importedData.weekOf) {
-                    weekPicker.value = importedData.weekOf;
+                // Handle legacy data (weekOf -> weekStart)
+                if (importedData.weekOf && !importedData.weekStart) {
+                    plannerData.weekStart = importedData.weekOf;
+                    // Calculate default end date
+                    const start = new Date(importedData.weekOf);
+                    start.setDate(start.getDate() + 4);
+                    plannerData.weekEnd = start.toISOString().split('T')[0];
                 }
+
+                // Update date inputs
+                if (plannerData.weekStart) weekStartInput.value = plannerData.weekStart;
+                if (plannerData.weekEnd) weekEndInput.value = plannerData.weekEnd;
 
                 saveToLocalStorage();
                 updateVisualFeedback();
+                updateDayVisibility();
                 showToast('Planning data imported successfully', 'success');
             } catch (error) {
                 showToast('Error importing file: Invalid format', 'error');
@@ -292,10 +393,20 @@
                 const parsed = JSON.parse(saved);
                 plannerData = parsed;
 
-                // Update week picker
-                if (plannerData.weekOf) {
-                    weekPicker.value = plannerData.weekOf;
+                // Migration: weekOf -> weekStart
+                if (plannerData.weekOf && !plannerData.weekStart) {
+                    plannerData.weekStart = plannerData.weekOf;
+                    const start = new Date(plannerData.weekOf);
+                    start.setDate(start.getDate() + 4);
+                    plannerData.weekEnd = start.toISOString().split('T')[0];
                 }
+
+                // Update inputs
+                if (plannerData.weekStart) weekStartInput.value = plannerData.weekStart;
+                if (plannerData.weekEnd) weekEndInput.value = plannerData.weekEnd;
+
+                // Initialize disabled days if missing
+                if (!plannerData.disabledDays) plannerData.disabledDays = [];
             }
         } catch (error) {
             console.error('Error loading from localStorage:', error);

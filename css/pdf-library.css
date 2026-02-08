@@ -1,0 +1,724 @@
+/* PDF Library & Viewer Styles */
+
+/* ===== Library Page ===== */
+.library-header {
+    background: linear-gradient(135deg, var(--medium-slate-blue), var(--dark-slate-blue));
+    padding: 2rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.library-header h2 {
+    color: white;
+    margin: 0 0 0.5rem 0;
+    font-size: 2rem;
+}
+
+.library-header p {
+    color: rgba(255, 255, 255, 0.9);
+    margin: 0;
+}
+
+/* Upload Section */
+.upload-section {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.upload-area {
+    border: 3px dashed var(--medium-slate-blue);
+    border-radius: 12px;
+    padding: 3rem;
+    text-align: center;
+    background: rgba(99, 102, 241, 0.05);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.upload-area:hover,
+.upload-area.drag-over {
+    border-color: var(--dark-slate-blue);
+    background: rgba(99, 102, 241, 0.1);
+    transform: scale(1.02);
+}
+
+.upload-area i {
+    font-size: 3rem;
+    color: var(--medium-slate-blue);
+    margin-bottom: 1rem;
+}
+
+.upload-area h3 {
+    color: var(--dark-slate-blue);
+    margin: 0.5rem 0;
+}
+
+.upload-area p {
+    color: #666;
+    margin: 0.5rem 0;
+}
+
+#pdfFileInput {
+    display: none;
+}
+
+/* Search Bar */
+.search-section {
+    margin-bottom: 2rem;
+}
+
+.search-bar {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    background: white;
+    padding: 1rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.search-bar input {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+.search-bar input:focus {
+    outline: none;
+    border-color: var(--medium-slate-blue);
+}
+
+/* Books Grid */
+.books-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.book-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+}
+
+.book-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.book-thumbnail {
+    width: 100%;
+    height: 300px;
+    background: linear-gradient(135deg, #f5f5f5, #e0e0e0);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.book-thumbnail canvas {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.book-thumbnail i {
+    font-size: 4rem;
+    color: #ccc;
+}
+
+.book-info {
+    padding: 1.5rem;
+}
+
+.book-info h3 {
+    margin: 0 0 0.5rem 0;
+    color: var(--dark-slate-blue);
+    font-size: 1.1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.book-meta {
+    display: flex;
+    justify-content: space-between;
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.book-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.book-actions button {
+    flex: 1;
+    padding: 0.6rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.btn-open {
+    background: var(--medium-slate-blue);
+    color: white;
+}
+
+.btn-open:hover {
+    background: var(--dark-slate-blue);
+    transform: scale(1.05);
+}
+
+.btn-delete {
+    background: #ef4444;
+    color: white;
+}
+
+.btn-delete:hover {
+    background: #dc2626;
+    transform: scale(1.05);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #666;
+}
+
+.empty-state i {
+    font-size: 5rem;
+    color: #ddd;
+    margin-bottom: 1rem;
+}
+
+/* ===== PDF Viewer Page ===== */
+.viewer-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background: #2a2a2a;
+}
+
+.viewer-header {
+    background: #1a1a1a;
+    color: white;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    gap: 2rem;
+    position: relative;
+    z-index: 50;
+}
+
+.viewer-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 150px;
+}
+
+.viewer-center-controls {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.control-group {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.header-btn {
+    background: #3a3a3a;
+    color: white;
+    border: none;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 36px;
+    justify-content: center;
+}
+
+.header-btn:hover {
+    background: #4a4a4a;
+    transform: scale(1.05);
+}
+
+.header-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.viewer-close {
+    background: #ef4444;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    white-space: nowrap;
+}
+
+.viewer-close:hover {
+    background: #dc2626;
+}
+
+.page-input {
+    width: 60px;
+    padding: 0.5rem;
+    border: 2px solid #3a3a3a;
+    border-radius: 6px;
+    background: #2a2a2a;
+    color: white;
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+.page-input:focus {
+    outline: none;
+    border-color: var(--medium-slate-blue);
+}
+
+.page-info {
+    color: #aaa;
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+/* Toolbar Toggle Button */
+.toolbar-toggle-btn {
+    position: fixed;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--medium-slate-blue);
+    color: white;
+    border: none;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    z-index: 90;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+.toolbar-toggle-btn:hover {
+    background: var(--dark-slate-blue);
+    transform: translateY(-50%) scale(1.1);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+    opacity: 1;
+}
+
+/* Floating Toolbar - Vertical Left Side */
+.floating-toolbar {
+    position: fixed;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%) translateX(0);
+    background: rgba(26, 26, 26, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 1rem 0.75rem;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: center;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    z-index: 100;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.floating-toolbar.hidden {
+    transform: translateY(-50%) translateX(-120%);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.toolbar-close-btn {
+    background: #ef4444 !important;
+}
+
+.toolbar-close-btn:hover {
+    background: #dc2626 !important;
+}
+
+.toolbar-divider {
+    width: 40px;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.tool-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.tool-btn {
+    background: #3a3a3a;
+    color: white;
+    border: none;
+    padding: 0.6rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+    min-width: 40px;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tool-btn:hover {
+    background: #4a4a4a;
+    transform: scale(1.1);
+}
+
+.tool-btn.active {
+    background: var(--medium-slate-blue);
+    box-shadow: 0 0 12px rgba(99, 102, 241, 0.6);
+}
+
+/* Color Preview Button */
+.color-preview-btn {
+    position: relative;
+}
+
+.color-preview-circle {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #000000;
+    border: 3px solid white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Color Palette Popup */
+.color-palette-popup {
+    position: fixed;
+    left: 5.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(26, 26, 26, 0.98);
+    backdrop-filter: blur(10px);
+    padding: 1rem;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 110;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.color-palette-popup.hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-50%) translateX(-10px);
+}
+
+.color-palette-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+}
+
+.palette-color-btn {
+    width: 40px;
+    height: 40px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0;
+}
+
+.palette-color-btn:hover {
+    transform: scale(1.15);
+    border-color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.stroke-width-group {
+    padding: 0.5rem 0;
+}
+
+.stroke-width-slider {
+    writing-mode: bt-lr;
+    appearance: slider-vertical;
+    -webkit-appearance: slider-vertical;
+    width: 8px;
+    height: 80px;
+    accent-color: var(--medium-slate-blue);
+    cursor: pointer;
+}
+
+.stroke-preview {
+    width: 32px;
+    height: 50px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.stroke-preview-line {
+    background: white;
+    border-radius: 10px;
+}
+
+/* Canvas Area */
+.viewer-canvas-area {
+    flex: 1;
+    display: flex;
+    /* Remove centering to allow scrolling when zoomed */
+    /* align-items: center; */
+    /* justify-content: center; */
+    overflow: auto;
+    padding: 2rem;
+    margin-top: 0.1rem;
+    position: relative;
+}
+
+.canvas-wrapper {
+    position: relative;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    background: white;
+    margin: auto;
+    /* Centers content when smaller than container */
+}
+
+#pdfCanvas {
+    display: block;
+    background: white;
+}
+
+#annotationCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    cursor: crosshair;
+    z-index: 10;
+    /* Ensure annotations appear above PDF */
+    pointer-events: auto;
+}
+
+/* Loading State */
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.loading-spinner {
+    color: white;
+    font-size: 2rem;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .books-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+
+    .viewer-toolbar,
+    .drawing-tools {
+        padding: 0.75rem 1rem;
+        gap: 1rem;
+    }
+
+    .toolbar-group,
+    .tool-group {
+        gap: 0.25rem;
+    }
+
+    .viewer-canvas-area {
+        padding: 1rem;
+    }
+}
+
+/* Text Layer */
+#textLayer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 20;
+    overflow: hidden;
+}
+
+.text-annotation-box {
+    position: absolute;
+    pointer-events: auto;
+    cursor: move;
+    border: 1px solid transparent;
+    padding: 2px;
+    min-width: 40px;
+    min-height: 1.2em;
+    outline: none;
+    background: transparent;
+    transform-origin: top left;
+    box-sizing: border-box;
+}
+
+.text-annotation-editable {
+    width: 100%;
+    min-height: 1.2em;
+    outline: none;
+    cursor: text;
+    white-space: pre-wrap;
+    word-break: break-word;
+    writing-mode: horizontal-tb;
+    line-height: 1.3;
+    background: transparent;
+}
+
+.text-annotation-editable:empty:before {
+    content: attr(placeholder);
+    color: rgba(68, 68, 68, 0.4);
+}
+
+.text-annotation-box:hover {
+    border-color: rgba(99, 102, 241, 0.3);
+}
+
+.text-annotation-box.active {
+    border: 1px dashed var(--medium-slate-blue);
+    background: rgba(255, 255, 255, 0.5);
+    z-index: 30;
+}
+
+.text-annotation-box .resize-handle {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: var(--medium-slate-blue);
+    border: 1px solid white;
+    border-radius: 50%;
+    z-index: 40;
+    display: none;
+}
+
+.text-annotation-box.active .resize-handle {
+    display: block;
+}
+
+.resize-handle.se {
+    bottom: -5px;
+    right: -5px;
+    cursor: se-resize;
+}
+
+/* Hide other handles for now as requested user flow focuses on corner dragging */
+.resize-handle.nw,
+.resize-handle.ne,
+.resize-handle.sw {
+    display: none;
+}
+
+/* Text Alignment Mini-Toolbar */
+.text-align-toolbar {
+    position: absolute;
+    display: flex;
+    gap: 2px;
+    background: rgba(30, 30, 30, 0.95);
+    backdrop-filter: blur(8px);
+    border-radius: 6px;
+    padding: 3px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    z-index: 100;
+    pointer-events: auto;
+    transition: opacity 0.15s ease;
+}
+
+.text-align-toolbar.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.text-align-btn {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    width: 30px;
+    height: 28px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    transition: all 0.15s ease;
+    padding: 0;
+}
+
+.text-align-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: white;
+}
+
+.text-align-btn.active {
+    background: var(--medium-slate-blue, #6366f1);
+    color: white;
+}
