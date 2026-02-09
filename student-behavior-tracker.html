@@ -477,7 +477,8 @@
                     <i class="fa-solid fa-table"></i> Open Google Sheet
                 </a>
                 <button class="btn btn-circle" id="markCircle"><i class="fa-solid fa-circle"></i> Circle Mode</button>
-                <button class="btn btn-finish" id="finishWeek"><i class="fa-solid fa-flag-checkered"></i> Finish Week</button>
+                <button class="btn btn-finish" id="finishWeek"><i class="fa-solid fa-flag-checkered"></i> Finish
+                    Week</button>
                 <button class="btn btn-clear" id="clearAll"><i class="fa-solid fa-broom"></i> Clear All</button>
                 <button class="btn btn-save" id="saveData"><i class="fa-solid fa-floppy-disk"></i> Save Data</button>
                 <button class="btn btn-load" id="loadData"><i class="fa-solid fa-folder-open"></i> Load Data</button>
@@ -485,8 +486,10 @@
                     <select id="weekSelector" class="week-selector">
                         <option value="current">Current Week</option>
                     </select>
-                    <button class="btn btn-sync" id="syncToSheets"><i class="fa-solid fa-cloud-arrow-up"></i> Sync to Sheets</button>
-                    <button class="btn btn-sync" id="loadFromSheets"><i class="fa-solid fa-cloud-arrow-down"></i> Load from Sheets</button>
+                    <button class="btn btn-sync" id="syncToSheets"><i class="fa-solid fa-cloud-arrow-up"></i> Sync to
+                        Sheets</button>
+                    <button class="btn btn-sync" id="loadFromSheets"><i class="fa-solid fa-cloud-arrow-down"></i> Load
+                        from Sheets</button>
                 </div>
                 <input type="file" id="fileInput" accept=".json" style="display: none;">
             </div>
@@ -496,19 +499,25 @@
             Week of <span id="currentWeek"></span>
             <div style="margin-top: 10px; font-size: 14px; color: #7f8c8d;">
                 <strong><i class="fa-solid fa-chart-bar"></i> Status Legend:</strong>
-                <span style="background: #d5f4e6; padding: 2px 8px; border-radius: 4px; margin: 0 5px;"><i class="fa-solid fa-circle" style="color: #27ae60; font-size: 10px;"></i> Clean (0
+                <span style="background: #d5f4e6; padding: 2px 8px; border-radius: 4px; margin: 0 5px;"><i
+                        class="fa-solid fa-circle" style="color: #27ae60; font-size: 10px;"></i> Clean (0
                     marks)</span>
-                <span style="background: #f7f1a8; padding: 2px 8px; border-radius: 4px; margin: 0 5px;"><i class="fa-solid fa-circle" style="color: #8bc34a; font-size: 10px;"></i> Warning (1
+                <span style="background: #f7f1a8; padding: 2px 8px; border-radius: 4px; margin: 0 5px;"><i
+                        class="fa-solid fa-circle" style="color: #8bc34a; font-size: 10px;"></i> Warning (1
                     mark)</span>
-                <span style="background: #ffeaa7; padding: 2px 8px; border-radius: 4px; margin: 0 5px;"><i class="fa-solid fa-circle" style="color: #f7b801; font-size: 10px;"></i> Alert (2
+                <span style="background: #ffeaa7; padding: 2px 8px; border-radius: 4px; margin: 0 5px;"><i
+                        class="fa-solid fa-circle" style="color: #f7b801; font-size: 10px;"></i> Alert (2
                     marks)</span>
-                <span style="background: #ffcccc; padding: 2px 8px; border-radius: 4px; margin: 0 5px;"><i class="fa-solid fa-circle" style="color: #f35b04; font-size: 10px;"></i> Danger (3+
+                <span style="background: #ffcccc; padding: 2px 8px; border-radius: 4px; margin: 0 5px;"><i
+                        class="fa-solid fa-circle" style="color: #f35b04; font-size: 10px;"></i> Danger (3+
                     marks)</span>
-                <span style="background: #a8e6cf; padding: 2px 8px; border-radius: 4px; margin: 0 5px;"><i class="fa-solid fa-circle-check" style="color: #00b894;"></i> Week
+                <span style="background: #a8e6cf; padding: 2px 8px; border-radius: 4px; margin: 0 5px;"><i
+                        class="fa-solid fa-circle-check" style="color: #00b894;"></i> Week
                     Completed</span>
             </div>
             <div style="margin-top: 8px; font-size: 12px; color: #95a5a6;">
-                <strong><i class="fa-solid fa-lightbulb"></i> Usage:</strong> Click cells to add/remove X marks | Use Circle Mode for O marks | Finish Week
+                <strong><i class="fa-solid fa-lightbulb"></i> Usage:</strong> Click cells to add/remove X marks | Use
+                Circle Mode for O marks | Finish Week
                 to lock clean records
             </div>
             <div id="debugInfo" style="margin-top: 10px; font-size: 12px; color: #666;"></div>
@@ -543,7 +552,7 @@
     </footer>
 
     <script>
-        const SHEETS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzZ-T71mGOFcew27xNGJkyTqHkJPqYEEVdgO6X8uXwiSQRsqINje-YGZAq2_lmAm4B6sg/exec';
+        const SHEETS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzJO-Bi9AI4bVfY_hy2f_8W9rW5n4X4rfirFc-XxH2LE1OGA-niLms5N7QVRT7kN4h2/exec';
 
         const students = [
             'ALEJANDRA H.', 'ALEJANDRO C.', 'ANAMARIA C.', 'ANTONELLA P.', 'BRIANA C.',
@@ -551,7 +560,7 @@
             'ERMES V.', 'EVA MARIA P.', 'JUAN J. RÍOS', 'JUAN J. SARRIAS', 'KESHIA C.',
             'LAURA S.', 'LAURA BERNAL', 'LORENZO R.', 'LUCIANO M.', 'MATIAS F.',
             'MIA H.', 'PABLO A.', 'PAULA V.', 'SAMANTHA C', 'SAMUEL G.',
-            'SANTIGO O.', 'SARA LUCÍA V.', 'THOMAS C.', 'VALERIA P.'
+            'SANTIAGO O.', 'SARA LUCÍA V.', 'THOMAS C.', 'VALERIA P.'
         ];
 
         let circleMode = false;
@@ -923,6 +932,15 @@
             document.querySelectorAll('.clickable-cell').forEach(cell => {
                 const student = cell.dataset.student;
                 const day = cell.dataset.day;
+
+                // Safety check: ensure student exists in behaviorData
+                if (!behaviorData[student]) {
+                    console.warn(`Student "${student}" not found in behaviorData. Skipping.`);
+                    cell.textContent = '';
+                    cell.className = 'clickable-cell';
+                    return;
+                }
+
                 const mark = behaviorData[student][day];
 
                 cell.textContent = '';
@@ -1048,7 +1066,18 @@
 
                 if (result.success) {
                     if (confirm(`Load data from Google Sheets for ${result.week}?\nFound ${result.studentsLoaded} students.\n\nThis will replace current marks.`)) {
-                        behaviorData = result.behaviorData;
+                        // Re-initialize behaviorData with current student names
+                        initializeBehaviorData();
+
+                        // Merge loaded data, matching student names
+                        const loadedData = result.behaviorData;
+                        students.forEach(currentStudent => {
+                            // Try to find matching student in loaded data
+                            if (loadedData[currentStudent]) {
+                                behaviorData[currentStudent] = loadedData[currentStudent];
+                            }
+                        });
+
                         weekCompleted = result.weekCompleted || false;
                         updateTableDisplay();
 

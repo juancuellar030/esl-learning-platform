@@ -1,0 +1,225 @@
+/* Science Lab Section Styles */
+
+#science {
+    padding: 2rem 0;
+}
+
+.science-container {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 2rem;
+    align-items: start;
+    margin-top: 1rem;
+}
+
+@media (max-width: 900px) {
+    .science-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Controls Panel */
+.science-controls {
+    background: var(--card-bg);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-color);
+}
+
+.control-group {
+    margin-bottom: 2rem;
+}
+
+.control-group h3 {
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    color: var(--text-color);
+    border-bottom: 2px solid var(--accent-light);
+    padding-bottom: 0.5rem;
+}
+
+.science-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    width: 100%;
+    padding: 0.8rem 1rem;
+    margin-bottom: 0.8rem;
+    border: none;
+    border-radius: 8px;
+    background: var(--bg-secondary);
+    color: var(--text-color);
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    text-align: left;
+}
+
+.science-btn:hover {
+    transform: translateX(5px);
+    background: var(--accent-light);
+    color: white;
+}
+
+.science-btn i {
+    width: 20px;
+    text-align: center;
+}
+
+/* Specific button colors */
+#btn-male {
+    border-left: 4px solid #3b82f6;
+}
+
+#btn-male:hover,
+#btn-male.active {
+    background: #3b82f6;
+    color: white;
+}
+
+#btn-female {
+    border-left: 4px solid #ec4899;
+}
+
+#btn-female:hover,
+#btn-female.active {
+    background: #ec4899;
+    color: white;
+}
+
+#btn-reset {
+    border-left: 4px solid var(--text-secondary);
+}
+
+#btn-help {
+    background: var(--accent-color);
+    color: white;
+    justify-content: center;
+    text-align: center;
+}
+
+/* Info Box */
+.part-info-box {
+    background: var(--bg-secondary);
+    padding: 1rem;
+    border-radius: 8px;
+    border-left: 4px solid var(--primary-color);
+    min-height: 120px;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+    pointer-events: none;
+}
+
+.part-info-box.visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.part-info-box h4 {
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+    font-size: 1.2rem;
+}
+
+.part-info-box p {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--text-color);
+}
+
+/* Diagram Container */
+.interactive-diagram-container {
+    background: white;
+    /* SVG needs white or specific bg usually, or transparent */
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    box-shadow: var(--shadow-lg);
+    position: relative;
+    /* transition: background 0.3s; */
+    min-height: 500px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Dark mode adjustment for SVG container */
+/* We might need a light bg for the flower diagram to look corect if it has transparency/multiply mix-blend-mode */
+/* The SVG has mix-blend-mode: multiply; so it EXPECTS a white background! */
+/* In dark mode, we might need to keep it white or adjust SVG filters. */
+/* User asked for compatibility. If SVG uses multiply, it must be on light bg. */
+.dark-mode .interactive-diagram-container {
+    background: #e2e8f0;
+    /* Slightly dim white/gray to not be blinding but keep multiply working */
+}
+
+/* SVG Interactions */
+#flower-svg-container svg {
+    max-height: 600px;
+    /* width: 100%; via JS */
+    cursor: pointer;
+    overflow: visible;
+    /* Allow transforms/shadows to spill */
+}
+
+/* SVG Group Styles */
+#flower-svg-container g {
+    transition: all 0.3s ease;
+    transform-origin: center center;
+}
+
+#flower-svg-container g:hover {
+    filter: brightness(1.2) drop-shadow(0 0 5px rgba(0, 0, 0, 0.3));
+    /* transform: scale(1.02); */
+    /* Can be jumpy on complex SVGs needed careful transform-origin */
+}
+
+#flower-svg-container g.hovered {
+    /* Stronger effect for logic-based hover */
+    opacity: 1;
+}
+
+#flower-svg-container g.dimmed {
+    opacity: 0.2;
+    filter: grayscale(1);
+}
+
+#flower-svg-container g.highlighted {
+    opacity: 1;
+    filter: drop-shadow(0 0 8px currentColor);
+}
+
+/* highlight male parts blue-ish glow */
+/* We can't easily change color of complex SVG paths without messing up the artwork.
+   So we use opacity to highlight. */
+
+/* Tooltip Label */
+.hover-label {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    pointer-events: none;
+    z-index: 10;
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

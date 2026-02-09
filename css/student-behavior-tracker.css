@@ -395,13 +395,10 @@ td {
 }
 
 /* ===== DARK MODE ===== */
-body.dark-mode {
-    background: #1a1a2e !important;
-}
-
 body.dark-mode .tracker-container {
     background: #1e1e1e;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 body.dark-mode .tracker-header {
@@ -412,6 +409,7 @@ body.dark-mode .week-info {
     background: #2d2d2d;
     color: #f5f5f5;
     border-bottom-color: #444;
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
 body.dark-mode .week-info div {
@@ -438,6 +436,7 @@ body.dark-mode table {
 
 body.dark-mode tbody tr {
     background: #1e1e1e;
+    transition: background-color 0.3s ease;
 }
 
 body.dark-mode tbody tr:nth-child(even) {
@@ -451,11 +450,13 @@ body.dark-mode tbody tr:hover {
 
 body.dark-mode td {
     border-bottom-color: #444;
+    transition: border-color 0.3s ease;
 }
 
 body.dark-mode .student-name-cell {
     color: #f5f5f5;
     background: rgba(255, 255, 255, 0.05);
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 body.dark-mode .clickable-cell:hover {

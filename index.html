@@ -7,6 +7,7 @@
     <title>ESL Learning Platform - Interactive Teaching Tool</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/science.css">
 </head>
 
 <body>
@@ -29,6 +30,9 @@
             </button>
             <button class="nav-btn" data-section="grammar">
                 <i class="fa-solid fa-spell-check"></i> Grammar Bank
+            </button>
+            <button class="nav-btn" data-section="science">
+                <i class="fa-solid fa-flask"></i> Science
             </button>
             <a href="board.html" target="_blank" class="nav-external-btn">
                 <i class="fa-solid fa-chalkboard"></i> Virtual Board
@@ -61,6 +65,11 @@
                         <h3>Grammar Lessons</h3>
                         <p>Teach grammar rules with interactive exercises</p>
 
+                    </div>
+                    <div class="dashboard-card" data-goto="science">
+                        <div class="card-icon"><i class="fa-solid fa-flask"></i></div>
+                        <h3>Science Lab</h3>
+                        <p>Interactive science models and diagrams</p>
                     </div>
                     <a href="board.html" target="_blank" class="dashboard-card"
                         style="text-decoration: none; color: inherit; display: block;">
@@ -207,6 +216,48 @@
                         <button class="btn-primary" id="generate-grammar-exercise">Generate Exercises</button>
                     </div>
                     <div id="grammar-exercise-display"></div>
+                </div>
+            </section>
+
+            <!-- SCIENCE SECTION -->
+            <section id="science" class="content-section">
+                <h2>Science Lab: Flower Parts</h2>
+
+                <div class="science-container">
+                    <div class="science-controls">
+                        <div class="control-group">
+                            <h3>Classification</h3>
+                            <button class="science-btn" id="btn-male" data-type="male">
+                                <i class="fa-solid fa-mars"></i> Stamen (Male)
+                            </button>
+                            <button class="science-btn" id="btn-female" data-type="female">
+                                <i class="fa-solid fa-venus"></i> Carpel (Female)
+                            </button>
+                            <button class="science-btn" id="btn-reset">
+                                <i class="fa-solid fa-rotate-left"></i> Reset
+                            </button>
+                        </div>
+
+                        <div class="control-group">
+                            <h3>Learn</h3>
+                            <button class="science-btn secondary" id="btn-help">
+                                <i class="fa-solid fa-circle-question"></i> Show Definitions
+                            </button>
+                        </div>
+
+                        <div id="part-info-box" class="part-info-box">
+                            <h4 id="info-title">Flower Parts</h4>
+                            <p id="info-desc">Hover over the flower parts to identify them. Click buttons to see
+                                classifications.</p>
+                        </div>
+                    </div>
+
+                    <div class="interactive-diagram-container">
+                        <div id="flower-svg-container">
+                            <!-- SVG will be injected here -->
+                        </div>
+                        <div id="hover-label" class="hover-label" style="display: none;">Label</div>
+                    </div>
                 </div>
             </section>
 
@@ -437,6 +488,7 @@
 
     <script src="js/dictionary.js"></script>
     <script src="js/themes.js"></script>
+    <script src="js/science.js"></script>
     <script src="js/darkmode.js"></script>
     <script src="js/app.js"></script>
     <script src="js/tools-access.js"></script>

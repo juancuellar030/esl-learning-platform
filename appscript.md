@@ -125,8 +125,10 @@ function setupSheetHeaders(sheet) {
   const headers = [
     'Student Name',
     'monday1', 'monday2', 'monday3', 'monday4', 'monday5',
+    'tuesday1', 'tuesday2', 'tuesday3', 'tuesday4', 'tuesday5',
     'wednesday1', 'wednesday2', 'wednesday3', 'wednesday4', 'wednesday5',
-    'thursday1', 'thursday2', 'thursday3', 'thursday4', 'thursday5', 'thursday6', 'thursday7'
+    'thursday1', 'thursday2', 'thursday3', 'thursday4', 'thursday5',
+    'friday1', 'friday2', 'friday3', 'friday4', 'friday5'
   ];
   
   // Set headers in first row
@@ -160,12 +162,12 @@ function applyConditionalFormatting(sheet) {
     sheet.clearConditionalFormatRules();
     
     // Get the data range (assuming max 100 students, adjust as needed)
-    const dataRange = sheet.getRange(2, 1, 100, 18); // Start from row 2, cover all columns
+    const dataRange = sheet.getRange(2, 1, 100, 26); // Start from row 2, cover all 26 columns (name + 25 periods)
     
     // Create conditional formatting rule for 3+ X marks
     const rule = SpreadsheetApp.newConditionalFormatRule()
       .setRanges([dataRange])
-      .whenFormulaSatisfied('=COUNTIF($B2:$S2,"X")>=3') // Count X marks from columns B to S
+      .whenFormulaSatisfied('=COUNTIF($B2:$Z2,"X")>=3') // Count X marks from columns B to Z
       .setBackground('#ffcccc') // Light red background
       .setBold(true)
       .build();
@@ -191,13 +193,15 @@ function saveBehaviorData(sheet, behaviorData, weekCompleted) {
     'ERMES V.', 'EVA MARIA P.', 'JUAN J. RÍOS', 'JUAN J. SARRIAS', 'KESHIA C.',
     'LAURA S.', 'LAURA BERNAL', 'LORENZO R.', 'LUCIANO M.', 'MATIAS F.',
     'MIA H.', 'PABLO A.', 'PAULA V.', 'SAMANTHA C', 'SAMUEL G.',
-    'SANTIGO O.', 'SARA LUCÍA V.', 'THOMAS C.', 'VALERIA P.'
+    'SANTIAGO O.', 'SARA LUCÍA V.', 'THOMAS C.', 'VALERIA P.'
   ];
   
   const periods = [
     'monday1', 'monday2', 'monday3', 'monday4', 'monday5',
+    'tuesday1', 'tuesday2', 'tuesday3', 'tuesday4', 'tuesday5',
     'wednesday1', 'wednesday2', 'wednesday3', 'wednesday4', 'wednesday5',
-    'thursday1', 'thursday2', 'thursday3', 'thursday4', 'thursday5', 'thursday6', 'thursday7'
+    'thursday1', 'thursday2', 'thursday3', 'thursday4', 'thursday5',
+    'friday1', 'friday2', 'friday3', 'friday4', 'friday5'
   ];
   
   // Prepare data array
@@ -222,7 +226,7 @@ function saveBehaviorData(sheet, behaviorData, weekCompleted) {
   
   // Add week completion status in a separate cell (optional)
   if (weekCompleted) {
-    sheet.getRange(1, 19).setValue('COMPLETED').setBackground('#90EE90');
+    sheet.getRange(1, 27).setValue('COMPLETED').setBackground('#90EE90');
   }
   
   console.log('Behavior data saved for', students.length, 'students');
@@ -253,8 +257,10 @@ function loadBehaviorData(sheet) {
     // Map each column to its corresponding period
     const periods = [
       'monday1', 'monday2', 'monday3', 'monday4', 'monday5',
+      'tuesday1', 'tuesday2', 'tuesday3', 'tuesday4', 'tuesday5',
       'wednesday1', 'wednesday2', 'wednesday3', 'wednesday4', 'wednesday5',
-      'thursday1', 'thursday2', 'thursday3', 'thursday4', 'thursday5', 'thursday6', 'thursday7'
+      'thursday1', 'thursday2', 'thursday3', 'thursday4', 'thursday5',
+      'friday1', 'friday2', 'friday3', 'friday4', 'friday5'
     ];
     
     periods.forEach((period, index) => {

@@ -1306,6 +1306,10 @@ body.theme-amber {
 }
 
 /* ===== DARK MODE ===== */
+body {
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
 body.dark-mode {
     color: #f5f5f5;
 }
@@ -1488,10 +1492,19 @@ body.dark-mode .time-examples-list div {
     justify-content: center;
     align-items: center;
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    will-change: transform;
+}
+
+.dark-mode-toggle i {
+    transition: transform 0.3s ease, opacity 0.2s ease;
 }
 
 .dark-mode-toggle:hover {
     transform: scale(1.1) rotate(-15deg);
+}
+
+.dark-mode-toggle:active {
+    transform: scale(0.95);
 }
 
 body.dark-mode .dark-mode-toggle {
