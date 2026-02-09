@@ -24,7 +24,7 @@ body.behavior-tracker-page {
 }
 
 .tracker-header {
-    background: linear-gradient(135deg, var(--indigo-velvet) 0%, #2c3e50 100%);
+    background: var(--indigo-velvet);
     color: white;
     padding: 30px;
     display: flex;
@@ -173,7 +173,7 @@ table {
 }
 
 thead {
-    background: linear-gradient(135deg, var(--medium-slate-blue) 0%, var(--indigo-velvet) 100%);
+    background: var(--indigo-velvet);
 }
 
 th {
@@ -198,7 +198,7 @@ th:after {
 }
 
 .student-name {
-    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%) !important;
+    background: #2c3e50 !important;
     text-align: left !important;
     min-width: 200px;
     font-size: 18px;
@@ -392,4 +392,179 @@ td {
     margin: 10px 0;
     border-radius: 4px;
     border-left: 4px solid #2e7d32;
+}
+
+/* ===== DARK MODE ===== */
+body.dark-mode {
+    background: #1a1a2e !important;
+}
+
+body.dark-mode .tracker-container {
+    background: #1e1e1e;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-mode .tracker-header {
+    background: var(--indigo-velvet);
+}
+
+body.dark-mode .week-info {
+    background: #2d2d2d;
+    color: #f5f5f5;
+    border-bottom-color: #444;
+}
+
+body.dark-mode .week-info div {
+    color: #aaa !important;
+}
+
+body.dark-mode .week-info strong {
+    color: #f5f5f5 !important;
+}
+
+body.dark-mode .week-info div span {
+    background: rgba(255, 255, 255, 0.08) !important;
+}
+
+body.dark-mode .week-selector {
+    background: #2d2d2d !important;
+    color: #f5f5f5 !important;
+    border-color: #555 !important;
+}
+
+body.dark-mode table {
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode tbody tr {
+    background: #1e1e1e;
+}
+
+body.dark-mode tbody tr:nth-child(even) {
+    background: #252525;
+}
+
+body.dark-mode tbody tr:hover {
+    background: #2a2a40 !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode td {
+    border-bottom-color: #444;
+}
+
+body.dark-mode .student-name-cell {
+    color: #f5f5f5;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+body.dark-mode .clickable-cell:hover {
+    background: #2a3a2a;
+}
+
+body.dark-mode .clickable-cell.has-mark {
+    background: #2d2d2d;
+}
+
+body.dark-mode .clickable-cell[data-day$="5"] {
+    border-right-color: #555;
+}
+
+body.dark-mode .mark-x {
+    text-shadow: none;
+}
+
+body.dark-mode .mark-circle {
+    text-shadow: none;
+}
+
+body.dark-mode tbody tr.status-clean {
+    background: #1b4332 !important;
+    border-left-color: #27ae60;
+}
+
+body.dark-mode tbody tr.status-clean:hover {
+    background: #1e5038 !important;
+}
+
+body.dark-mode tbody tr.status-warning {
+    background: #3d3510 !important;
+    border-left-color: #8bc34a;
+}
+
+body.dark-mode tbody tr.status-warning:hover {
+    background: #4a4015 !important;
+}
+
+body.dark-mode tbody tr.status-alert {
+    background: #4a3000 !important;
+    border-left-color: var(--amber-flame);
+}
+
+body.dark-mode tbody tr.status-alert:hover {
+    background: #573a05 !important;
+}
+
+body.dark-mode tbody tr.status-danger {
+    background: #4a1010 !important;
+    border-left-color: var(--cayenne-red);
+    box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
+}
+
+body.dark-mode tbody tr.status-danger:hover {
+    background: #5a1515 !important;
+}
+
+body.dark-mode tbody tr.week-completed {
+    background: #1a3a3a !important;
+    border-left-color: #00b894;
+    box-shadow: 0 2px 8px rgba(0, 184, 148, 0.2);
+}
+
+body.dark-mode tbody tr.week-completed:hover {
+    background: #204545 !important;
+}
+
+body.dark-mode tbody tr.week-completed.status-warning {
+    background: #3d3510 !important;
+    border-left-color: #8bc34a;
+}
+
+body.dark-mode tbody tr.week-completed.status-alert {
+    background: #4a3000 !important;
+    border-left-color: var(--amber-flame);
+}
+
+body.dark-mode tbody tr.week-completed.status-danger {
+    background: #4a1010 !important;
+    border-left-color: var(--cayenne-red);
+}
+
+body.dark-mode .notification {
+    background: #2d2d2d;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-mode .notification-message {
+    color: #bbb;
+}
+
+body.dark-mode .notification-close {
+    color: #888;
+}
+
+body.dark-mode .notification-close:hover {
+    color: #f5f5f5;
+}
+
+body.dark-mode .error-message {
+    background: #3a1010;
+    color: #ff8787;
+    border-left-color: #c62828;
+}
+
+body.dark-mode .success-message {
+    background: #1b3a1b;
+    color: #95d5b2;
+    border-left-color: #2e7d32;
 }

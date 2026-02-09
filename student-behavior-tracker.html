@@ -27,7 +27,7 @@
         }
 
         .tracker-header {
-            background: linear-gradient(135deg, var(--indigo-velvet) 0%, #2c3e50 100%);
+            background: var(--indigo-velvet);
             color: white;
             padding: 30px;
             display: flex;
@@ -176,7 +176,7 @@
         }
 
         thead {
-            background: linear-gradient(135deg, var(--medium-slate-blue) 0%, var(--indigo-velvet) 100%);
+            background: var(--indigo-velvet);
         }
 
         th {
@@ -201,7 +201,7 @@
         }
 
         .student-name {
-            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%) !important;
+            background: #2c3e50 !important;
             text-align: left !important;
             min-width: 200px;
             font-size: 18px;
@@ -465,7 +465,7 @@
     <!-- Behavior Tracker Container -->
     <div class="tracker-container">
         <div class="tracker-header">
-            <h1>📚 Student Behavior Tracker</h1>
+            <h1><i class="fa-solid fa-clipboard-list"></i> Student Behavior Tracker</h1>
             <div class="controls">
                 <a href="tools.html" class="btn btn-secondary"
                     style="text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
@@ -476,17 +476,17 @@
                     style="text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
                     <i class="fa-solid fa-table"></i> Open Google Sheet
                 </a>
-                <button class="btn btn-circle" id="markCircle">● Circle Mode</button>
-                <button class="btn btn-finish" id="finishWeek">🏁 Finish Week</button>
-                <button class="btn btn-clear" id="clearAll">🔥 Clear All</button>
-                <button class="btn btn-save" id="saveData">💾 Save Data</button>
-                <button class="btn btn-load" id="loadData">📂 Load Data</button>
+                <button class="btn btn-circle" id="markCircle"><i class="fa-solid fa-circle"></i> Circle Mode</button>
+                <button class="btn btn-finish" id="finishWeek"><i class="fa-solid fa-flag-checkered"></i> Finish Week</button>
+                <button class="btn btn-clear" id="clearAll"><i class="fa-solid fa-broom"></i> Clear All</button>
+                <button class="btn btn-save" id="saveData"><i class="fa-solid fa-floppy-disk"></i> Save Data</button>
+                <button class="btn btn-load" id="loadData"><i class="fa-solid fa-folder-open"></i> Load Data</button>
                 <div class="week-selector-group">
                     <select id="weekSelector" class="week-selector">
                         <option value="current">Current Week</option>
                     </select>
-                    <button class="btn btn-sync" id="syncToSheets">☁️ Sync to Sheets</button>
-                    <button class="btn btn-sync" id="loadFromSheets">📥 Load from Sheets</button>
+                    <button class="btn btn-sync" id="syncToSheets"><i class="fa-solid fa-cloud-arrow-up"></i> Sync to Sheets</button>
+                    <button class="btn btn-sync" id="loadFromSheets"><i class="fa-solid fa-cloud-arrow-down"></i> Load from Sheets</button>
                 </div>
                 <input type="file" id="fileInput" accept=".json" style="display: none;">
             </div>
@@ -495,20 +495,20 @@
         <div class="week-info" id="weekInfo">
             Week of <span id="currentWeek"></span>
             <div style="margin-top: 10px; font-size: 14px; color: #7f8c8d;">
-                <strong>📊 Status Legend:</strong>
-                <span style="background: #d5f4e6; padding: 2px 8px; border-radius: 4px; margin: 0 5px;">🟢 Clean (0
+                <strong><i class="fa-solid fa-chart-bar"></i> Status Legend:</strong>
+                <span style="background: #d5f4e6; padding: 2px 8px; border-radius: 4px; margin: 0 5px;"><i class="fa-solid fa-circle" style="color: #27ae60; font-size: 10px;"></i> Clean (0
                     marks)</span>
-                <span style="background: #f7f1a8; padding: 2px 8px; border-radius: 4px; margin: 0 5px;">🟡 Warning (1
+                <span style="background: #f7f1a8; padding: 2px 8px; border-radius: 4px; margin: 0 5px;"><i class="fa-solid fa-circle" style="color: #8bc34a; font-size: 10px;"></i> Warning (1
                     mark)</span>
-                <span style="background: #ffeaa7; padding: 2px 8px; border-radius: 4px; margin: 0 5px;">🟠 Alert (2
+                <span style="background: #ffeaa7; padding: 2px 8px; border-radius: 4px; margin: 0 5px;"><i class="fa-solid fa-circle" style="color: #f7b801; font-size: 10px;"></i> Alert (2
                     marks)</span>
-                <span style="background: #ffcccc; padding: 2px 8px; border-radius: 4px; margin: 0 5px;">🔴 Danger (3+
+                <span style="background: #ffcccc; padding: 2px 8px; border-radius: 4px; margin: 0 5px;"><i class="fa-solid fa-circle" style="color: #f35b04; font-size: 10px;"></i> Danger (3+
                     marks)</span>
-                <span style="background: #a8e6cf; padding: 2px 8px; border-radius: 4px; margin: 0 5px;">✅ Week
+                <span style="background: #a8e6cf; padding: 2px 8px; border-radius: 4px; margin: 0 5px;"><i class="fa-solid fa-circle-check" style="color: #00b894;"></i> Week
                     Completed</span>
             </div>
             <div style="margin-top: 8px; font-size: 12px; color: #95a5a6;">
-                <strong>💡 Usage:</strong> Click cells to add/remove X marks | Use Circle Mode for O marks | Finish Week
+                <strong><i class="fa-solid fa-lightbulb"></i> Usage:</strong> Click cells to add/remove X marks | Use Circle Mode for O marks | Finish Week
                 to lock clean records
             </div>
             <div id="debugInfo" style="margin-top: 10px; font-size: 12px; color: #666;"></div>
@@ -574,16 +574,16 @@
             notification.className = `notification ${type}`;
 
             // Determine icon and default title based on type
-            let icon = '📢';
+            let icon = '<i class="fa-solid fa-bullhorn"></i>';
             let defaultTitle = 'Notification';
             if (type === 'success') {
-                icon = '✅';
+                icon = '<i class="fa-solid fa-circle-check"></i>';
                 defaultTitle = 'Success';
             } else if (type === 'error') {
-                icon = '❌';
+                icon = '<i class="fa-solid fa-circle-xmark"></i>';
                 defaultTitle = 'Error';
             } else if (type === 'info') {
-                icon = 'ℹ️';
+                icon = '<i class="fa-solid fa-circle-info"></i>';
                 defaultTitle = 'Info';
             }
 
@@ -787,10 +787,10 @@
             const button = document.getElementById('markCircle');
             if (circleMode) {
                 button.classList.add('active');
-                button.textContent = '● Circle Mode (ON)';
+                button.innerHTML = '<i class="fa-solid fa-circle"></i> Circle Mode (ON)';
             } else {
                 button.classList.remove('active');
-                button.textContent = '● Circle Mode';
+                button.innerHTML = '<i class="fa-solid fa-circle"></i> Circle Mode';
             }
         }
 
@@ -800,7 +800,7 @@
                     weekCompleted = false;
                     document.querySelectorAll('tbody tr').forEach(row => row.classList.remove('week-completed'));
                     students.forEach(student => updateRowStatus(student));
-                    document.getElementById('finishWeek').textContent = '🏁 Finish Week';
+                    document.getElementById('finishWeek').innerHTML = '<i class="fa-solid fa-flag-checkered"></i> Finish Week';
                     document.getElementById('finishWeek').style.background = '';
                     showSuccess('Week status reset');
                 }
@@ -818,7 +818,7 @@
                     if (marks.length === 0) cleanStudents++;
                 });
                 const finishBtn = document.getElementById('finishWeek');
-                finishBtn.textContent = '✅ Week Completed';
+                finishBtn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Week Completed';
                 finishBtn.style.background = '#00b894';
                 showSuccess(`Week completed! ${cleanStudents} students had clean records.`);
             }
@@ -833,7 +833,7 @@
                     cell.className = 'clickable-cell';
                 });
                 document.querySelectorAll('tbody tr').forEach(row => row.className = '');
-                document.getElementById('finishWeek').textContent = '🏁 Finish Week';
+                document.getElementById('finishWeek').innerHTML = '<i class="fa-solid fa-flag-checkered"></i> Finish Week';
                 document.getElementById('finishWeek').style.background = '';
                 showSuccess('All marks cleared');
             }
@@ -858,11 +858,11 @@
                 document.body.removeChild(link);
 
                 const saveBtn = document.getElementById('saveData');
-                const originalText = saveBtn.textContent;
-                saveBtn.textContent = '✅ Saved!';
+                const originalHTML = saveBtn.innerHTML;
+                saveBtn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Saved!';
                 saveBtn.style.background = '#27ae60';
                 setTimeout(() => {
-                    saveBtn.textContent = originalText;
+                    saveBtn.innerHTML = originalHTML;
                     saveBtn.style.background = '';
                 }, 2000);
                 showSuccess('Data saved to file');
@@ -891,19 +891,19 @@
 
                             const finishBtn = document.getElementById('finishWeek');
                             if (weekCompleted) {
-                                finishBtn.textContent = '✅ Week Completed';
+                                finishBtn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Week Completed';
                                 finishBtn.style.background = '#00b894';
                             } else {
-                                finishBtn.textContent = '🏁 Finish Week';
+                                finishBtn.innerHTML = '<i class="fa-solid fa-flag-checkered"></i> Finish Week';
                                 finishBtn.style.background = '';
                             }
 
                             const loadBtn = document.getElementById('loadData');
-                            const originalText = loadBtn.textContent;
-                            loadBtn.textContent = '✅ Loaded!';
+                            const originalHTML = loadBtn.innerHTML;
+                            loadBtn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Loaded!';
                             loadBtn.style.background = '#3498db';
                             setTimeout(() => {
-                                loadBtn.textContent = originalText;
+                                loadBtn.innerHTML = originalHTML;
                                 loadBtn.style.background = '';
                             }, 2000);
                             showSuccess(`Data loaded from ${loadedData.week}`);
@@ -967,8 +967,8 @@
 
             try {
                 const syncBtn = document.getElementById('syncToSheets');
-                const originalText = syncBtn.textContent;
-                syncBtn.textContent = '⏳ Syncing...';
+                const originalHTML = syncBtn.innerHTML;
+                syncBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Syncing...';
                 syncBtn.disabled = true;
 
                 const dataToSync = {
@@ -994,12 +994,12 @@
 
                 if (result.success) {
                     hasUnsavedData = false;
-                    syncBtn.textContent = '✅ Synced!';
+                    syncBtn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Synced!';
                     syncBtn.style.background = '#27ae60';
                     showSuccess(`Data synced! ${result.studentsUpdated} students updated.`);
 
                     setTimeout(() => {
-                        syncBtn.textContent = originalText;
+                        syncBtn.innerHTML = originalHTML;
                         syncBtn.style.background = '';
                         syncBtn.disabled = false;
                     }, 3000);
@@ -1009,7 +1009,7 @@
             } catch (error) {
                 showError('Error syncing to Google Sheets', error);
                 const syncBtn = document.getElementById('syncToSheets');
-                syncBtn.textContent = '☁️ Sync to Sheets';
+                syncBtn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Sync to Sheets';
                 syncBtn.disabled = false;
             }
         }
@@ -1024,8 +1024,8 @@
 
             try {
                 const loadBtn = document.getElementById('loadFromSheets');
-                const originalText = loadBtn.textContent;
-                loadBtn.textContent = '⏳ Loading...';
+                const originalHTML = loadBtn.innerHTML;
+                loadBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Loading...';
                 loadBtn.disabled = true;
 
                 const dataToSend = {
@@ -1054,24 +1054,24 @@
 
                         const finishBtn = document.getElementById('finishWeek');
                         if (weekCompleted) {
-                            finishBtn.textContent = '✅ Week Completed';
+                            finishBtn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Week Completed';
                             finishBtn.style.background = '#00b894';
                         } else {
-                            finishBtn.textContent = '🏁 Finish Week';
+                            finishBtn.innerHTML = '<i class="fa-solid fa-flag-checkered"></i> Finish Week';
                             finishBtn.style.background = '';
                         }
 
-                        loadBtn.textContent = '✅ Loaded!';
+                        loadBtn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Loaded!';
                         loadBtn.style.background = '#3498db';
                         showSuccess(`Data loaded! ${result.studentsLoaded} students loaded.`);
 
                         setTimeout(() => {
-                            loadBtn.textContent = originalText;
+                            loadBtn.innerHTML = originalHTML;
                             loadBtn.style.background = '';
                             loadBtn.disabled = false;
                         }, 3000);
                     } else {
-                        loadBtn.textContent = originalText;
+                        loadBtn.innerHTML = originalHTML;
                         loadBtn.disabled = false;
                     }
                 } else {
@@ -1080,13 +1080,13 @@
                     } else {
                         throw new Error(result.error || 'Unknown load error');
                     }
-                    loadBtn.textContent = originalText;
+                    loadBtn.innerHTML = originalHTML;
                     loadBtn.disabled = false;
                 }
             } catch (error) {
                 showError('Error loading from Google Sheets', error);
                 const loadBtn = document.getElementById('loadFromSheets');
-                loadBtn.textContent = '📥 Load from Sheets';
+                loadBtn.innerHTML = '<i class="fa-solid fa-cloud-arrow-down"></i> Load from Sheets';
                 loadBtn.disabled = false;
             }
         }
@@ -1128,6 +1128,7 @@
             initialize();
         });
     </script>
+    <script src="js/darkmode.js"></script>
 </body>
 
 </html>
