@@ -1,4 +1,4 @@
-﻿const FlowerQuiz = {
+﻿window.FlowerQuiz = {
     title: "Flower Parts Quiz",
     description: "Test your knowledge of flower parts and their functions!",
 

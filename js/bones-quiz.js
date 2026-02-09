@@ -1,4 +1,4 @@
-const BonesQuiz = {
+window.BonesQuiz = {
     title: "Human Bones Quiz",
     description: "Identify the bones of the human body!",
 

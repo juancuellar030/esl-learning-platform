@@ -166,7 +166,9 @@ const ScienceModule = {
             if (modal) {
                 modal.style.display = 'flex';
                 if (window.FlowerQuiz) {
-                    FlowerQuiz.init();
+                    window.FlowerQuiz.init();
+                } else {
+                    console.error("FlowerQuiz not found");
                 }
             }
         });
@@ -176,7 +178,9 @@ const ScienceModule = {
             if (modal) {
                 modal.style.display = 'flex';
                 if (window.BonesQuiz) {
-                    BonesQuiz.init();
+                    window.BonesQuiz.init();
+                } else {
+                    console.error("BonesQuiz not found");
                 }
             }
         });
