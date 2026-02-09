@@ -221,84 +221,203 @@
 
             <!-- SCIENCE SECTION -->
             <section id="science" class="content-section">
-                <h2>Science Lab: Flower Parts</h2>
+                <section id="science" class="content-section">
+                    <h2>Science Lab</h2>
 
-                <div class="science-container">
-                    <div class="science-controls">
-                        <div class="control-group">
-                            <h3>Classification</h3>
-                            <button class="science-btn" id="btn-male" data-type="male">
-                                <i class="fa-solid fa-mars"></i> Stamen (Male)
-                            </button>
-                            <button class="science-btn" id="btn-female" data-type="female">
-                                <i class="fa-solid fa-venus"></i> Carpel (Female)
-                            </button>
-                            <button class="science-btn" id="btn-reset">
-                                <i class="fa-solid fa-rotate-left"></i> Reset
-                            </button>
+                    <div class="science-module">
+                        <h3>Flower Parts</h3>
+
+                        <div class="science-container">
+                            <div class="science-controls">
+                                <div class="control-group">
+                                    <h3>Classification</h3>
+                                    <button class="science-btn" id="btn-male" data-type="male">
+                                        <i class="fa-solid fa-mars"></i> Stamen (Male)
+                                    </button>
+                                    <button class="science-btn" id="btn-female" data-type="female">
+                                        <i class="fa-solid fa-venus"></i> Carpel (Female)
+                                    </button>
+                                    <button class="science-btn" id="btn-reset">
+                                        <i class="fa-solid fa-rotate-left"></i> Reset
+                                    </button>
+                                </div>
+
+                                <div class="control-group">
+                                    <h3>Learn</h3>
+                                    <button class="science-btn secondary" id="btn-help">
+                                        <i class="fa-solid fa-circle-question"></i> Show Definitions
+                                    </button>
+                                    <button class="science-btn primary" id="btn-quiz"
+                                        style="margin-top: 0.5rem; width: 100%; background-color: var(--medium-slate-blue); color: white;">
+                                        <i class="fa-solid fa-clipboard-question"></i> Take Quiz
+                                    </button>
+                                </div>
+
+                                <div id="part-info-box" class="part-info-box">
+                                    <h4 id="info-title">Flower Parts</h4>
+                                    <p id="info-desc">Hover over the flower parts to identify them. Click buttons to see
+                                        classifications.</p>
+                                </div>
+                            </div>
+
+                            <div class="interactive-diagram-container">
+                                <div id="flower-svg-container">
+                                    <!-- SVG will be injected here -->
+                                </div>
+                                <div id="hover-label" class="hover-label" style="display: none;">Label</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Module 2: Human Bones -->
+                    <div class="science-module">
+                        <h3>Human Bones</h3>
+                        <div class="quiz-start-card">
+                            <div class="quiz-card-content">
+                                <i class="fa-solid fa-skull-crossbones quiz-icon"></i>
+                                <p>Test your knowledge of human bones vocabulary with this interactive quiz.</p>
+                                <button id="btn-bones-quiz" class="science-btn primary"
+                                    style="background-color: var(--medium-slate-blue); color: white;">Start Bones
+                                    Quiz</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIRTUAL BOARD SECTION -->
+                <section id="virtualboard" class="content-section">
+                    <h2>Virtual Board</h2>
+
+                    <div class="board-toolbar">
+                        <div class="toolbar-group">
+                            <button class="tool-btn" data-tool="select" title="Select (V)"><i
+                                    class="fa-solid fa-arrow-pointer"></i></button>
+                            <button class="tool-btn" data-tool="hand" title="Pan (H)"><i
+                                    class="fa-solid fa-hand"></i></button>
+                            <button class="tool-btn active" data-tool="pen" title="Pen (P)"><i
+                                    class="fa-solid fa-pen"></i></button>
+                            <button class="tool-btn" data-tool="eraser" title="Eraser (E)"><i
+                                    class="fa-solid fa-eraser"></i></button>
+                            <button class="tool-btn" data-tool="text" title="Text (T)"><i
+                                    class="fa-solid fa-font"></i></button>
+                            <button class="tool-btn" data-tool="image" title="Image (I)"><i
+                                    class="fa-regular fa-image"></i></button>
                         </div>
 
-                        <div class="control-group">
-                            <h3>Learn</h3>
-                            <button class="science-btn secondary" id="btn-help">
-                                <i class="fa-solid fa-circle-question"></i> Show Definitions
-                            </button>
+                        <div class="toolbar-group" id="pen-settings">
+                            <label>Size:</label>
+                            <input type="range" id="pen-size" min="1" max="20" value="3">
+                            <span id="pen-size-display">3px</span>
                         </div>
 
-                        <div id="part-info-box" class="part-info-box">
-                            <h4 id="info-title">Flower Parts</h4>
-                            <p id="info-desc">Hover over the flower parts to identify them. Click buttons to see
-                                classifications.</p>
+                        <div class="toolbar-group" id="eraser-settings" style="display: none;">
+                            <label>Mode:</label>
+                            <select id="eraser-mode">
+                                <option value="pixel">Pixel Eraser</option>
+                                <option value="stroke">Stroke Eraser</option>
+                            </select>
+                            <input type="range" id="eraser-size" min="5" max="50" value="20">
+                            <span id="eraser-size-display">20px</span>
+                        </div>
+
+                        <div class="toolbar-group" id="text-settings" style="display: none;">
+                            <select id="toolbar-font-family" title="Font Family">
+                                <option value="Reddit Sans">Reddit Sans</option>
+                                <option value="Google Sans Flex">Google Sans Flex</option>
+                                <option value="Architects Daughter" style="font-family: 'Architects Daughter';">
+                                    Architects
+                                    Daughter</option>
+                                <option value="Inter">Inter</option>
+                                <option value="Roboto">Roboto</option>
+                                <option value="Open Sans">Open Sans</option>
+                                <option value="Nunito">Nunito</option>
+                                <option value="Comic Sans MS">Comic Sans</option>
+                            </select>
+                        </div>
+
+                        <div class="toolbar-group">
+                            <div class="color-palette">
+                                <button class="color-btn active" data-color="#000000"
+                                    style="background: #000000;"></button>
+                                <button class="color-btn" data-color="#ff007f" style="background: #ff007f;"
+                                    title="Hot Pink"></button>
+                                <button class="color-btn" data-color="#3d348b" style="background: #3d348b;"
+                                    title="Indigo Velvet"></button>
+                                <button class="color-btn" data-color="#7678ed" style="background: #7678ed;"
+                                    title="Medium Slate Blue"></button>
+                                <button class="color-btn" data-color="#f7b801" style="background: #f7b801;"
+                                    title="Amber Flame"></button>
+                                <button class="color-btn" data-color="#f18701" style="background: #f18701;"
+                                    title="Tiger Orange"></button>
+                                <button class="color-btn" data-color="#f35b04" style="background: #f35b04;"
+                                    title="Cayenne Red"></button>
+                                <button class="color-btn" data-color="#2ECC71" style="background: #2ECC71;"
+                                    title="Green"></button>
+                                <button class="color-btn" data-color="#E74C3C" style="background: #E74C3C;"
+                                    title="Red"></button>
+                                <button class="color-btn" data-color="#95A5A6" style="background: #95A5A6;"
+                                    title="Gray"></button>
+                                <button class="color-btn" data-color="#FFFFFF"
+                                    style="background: #FFFFFF; border: 2px solid #ddd;" title="White"></button>
+                            </div>
+                        </div>
+
+                        <div class="toolbar-group">
+                            <button class="tool-btn" id="zoom-in" title="Zoom In"><i
+                                    class="fa-solid fa-magnifying-glass-plus"></i></button>
+                            <span id="zoom-level"
+                                style="color: white; font-weight: bold; min-width: 45px; text-align: center;">100%</span>
+                            <button class="tool-btn" id="zoom-out" title="Zoom Out"><i
+                                    class="fa-solid fa-magnifying-glass-minus"></i></button>
+                        </div>
+
+                        <div class="toolbar-group">
+                            <button class="tool-btn" id="undo-btn" title="Undo (Ctrl+Z)"><i
+                                    class="fa-solid fa-rotate-left"></i></button>
+                            <button class="tool-btn" id="redo-btn" title="Redo (Ctrl+Y)"><i
+                                    class="fa-solid fa-rotate-right"></i></button>
+                            <button class="tool-btn" id="clear-btn" title="Clear All"><i
+                                    class="fa-solid fa-trash"></i></button>
+                        </div>
+
+                        <div class="toolbar-group">
+                            <label>Background:</label>
+                            <select id="board-background">
+                                <option value="white">White</option>
+                                <option value="lined">Lined Paper</option>
+                                <option value="grid">Grid</option>
+                                <option value="chalkboard">Chalkboard</option>
+                                <option value="nature">Nature Theme</option>
+                                <option value="space">Space Theme</option>
+                            </select>
+                        </div>
+
+                        <div class="toolbar-group">
+                            <button class="btn-secondary" id="save-board-btn"><i class="fa-solid fa-floppy-disk"></i>
+                                Save</button>
+                            <button class="btn-secondary" id="load-board-btn"><i class="fa-solid fa-folder-open"></i>
+                                Load</button>
+                            <button class="btn-secondary" id="export-board-btn"><i class="fa-solid fa-file-export"></i>
+                                Export PNG</button>
                         </div>
                     </div>
 
-                    <div class="interactive-diagram-container">
-                        <div id="flower-svg-container">
-                            <!-- SVG will be injected here -->
-                        </div>
-                        <div id="hover-label" class="hover-label" style="display: none;">Label</div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- VIRTUAL BOARD SECTION -->
-            <section id="virtualboard" class="content-section">
-                <h2>Virtual Board</h2>
-
-                <div class="board-toolbar">
-                    <div class="toolbar-group">
-                        <button class="tool-btn" data-tool="select" title="Select (V)"><i
-                                class="fa-solid fa-arrow-pointer"></i></button>
-                        <button class="tool-btn" data-tool="hand" title="Pan (H)"><i
-                                class="fa-solid fa-hand"></i></button>
-                        <button class="tool-btn active" data-tool="pen" title="Pen (P)"><i
-                                class="fa-solid fa-pen"></i></button>
-                        <button class="tool-btn" data-tool="eraser" title="Eraser (E)"><i
-                                class="fa-solid fa-eraser"></i></button>
-                        <button class="tool-btn" data-tool="text" title="Text (T)"><i
-                                class="fa-solid fa-font"></i></button>
-                        <button class="tool-btn" data-tool="image" title="Image (I)"><i
-                                class="fa-regular fa-image"></i></button>
+                    <div class="canvas-container">
+                        <canvas id="virtual-board" width="1200" height="700"></canvas>
+                        <div id="text-editor-overlay" style="display: none;"></div>
                     </div>
 
-                    <div class="toolbar-group" id="pen-settings">
-                        <label>Size:</label>
-                        <input type="range" id="pen-size" min="1" max="20" value="3">
-                        <span id="pen-size-display">3px</span>
+                    <div class="page-navigation">
+                        <button id="prev-page-btn">← Previous</button>
+                        <span id="page-indicator">Page 1 of 1</span>
+                        <button id="next-page-btn">Next →</button>
+                        <button id="add-page-btn">+ Add Page</button>
                     </div>
 
-                    <div class="toolbar-group" id="eraser-settings" style="display: none;">
-                        <label>Mode:</label>
-                        <select id="eraser-mode">
-                            <option value="pixel">Pixel Eraser</option>
-                            <option value="stroke">Stroke Eraser</option>
-                        </select>
-                        <input type="range" id="eraser-size" min="5" max="50" value="20">
-                        <span id="eraser-size-display">20px</span>
-                    </div>
-
-                    <div class="toolbar-group" id="text-settings" style="display: none;">
-                        <select id="toolbar-font-family" title="Font Family">
+                    <!-- Floating Text Editor Panel -->
+                    <div id="text-properties-panel" style="display: none;">
+                        <label>Font:</label>
+                        <select id="text-font-family">
                             <option value="Reddit Sans">Reddit Sans</option>
                             <option value="Google Sans Flex">Google Sans Flex</option>
                             <option value="Architects Daughter" style="font-family: 'Architects Daughter';">Architects
@@ -309,145 +428,51 @@
                             <option value="Nunito">Nunito</option>
                             <option value="Comic Sans MS">Comic Sans</option>
                         </select>
+                        <label>Size:</label>
+                        <input type="number" id="text-font-size" min="8" max="200" value="24">
+                        <label>Color:</label>
+                        <input type="color" id="text-color-picker" value="#000000">
+                        <button id="delete-text-btn" class="btn-secondary">Delete</button>
                     </div>
 
-                    <div class="toolbar-group">
-                        <div class="color-palette">
-                            <button class="color-btn active" data-color="#000000" style="background: #000000;"></button>
-                            <button class="color-btn" data-color="#ff007f" style="background: #ff007f;"
-                                title="Hot Pink"></button>
-                            <button class="color-btn" data-color="#3d348b" style="background: #3d348b;"
-                                title="Indigo Velvet"></button>
-                            <button class="color-btn" data-color="#7678ed" style="background: #7678ed;"
-                                title="Medium Slate Blue"></button>
-                            <button class="color-btn" data-color="#f7b801" style="background: #f7b801;"
-                                title="Amber Flame"></button>
-                            <button class="color-btn" data-color="#f18701" style="background: #f18701;"
-                                title="Tiger Orange"></button>
-                            <button class="color-btn" data-color="#f35b04" style="background: #f35b04;"
-                                title="Cayenne Red"></button>
-                            <button class="color-btn" data-color="#2ECC71" style="background: #2ECC71;"
-                                title="Green"></button>
-                            <button class="color-btn" data-color="#E74C3C" style="background: #E74C3C;"
-                                title="Red"></button>
-                            <button class="color-btn" data-color="#95A5A6" style="background: #95A5A6;"
-                                title="Gray"></button>
-                            <button class="color-btn" data-color="#FFFFFF"
-                                style="background: #FFFFFF; border: 2px solid #ddd;" title="White"></button>
+                    <!-- Image Properties Panel -->
+                    <div id="image-properties-panel" style="display: none;">
+                        <label>Width:</label>
+                        <input type="number" id="image-width" min="50" max="1200" step="10">
+                        <label>Height:</label>
+                        <input type="number" id="image-height" min="50" max="700" step="10">
+                        <button id="delete-image-btn" class="btn-secondary">Delete</button>
+                    </div>
+                </section>
+
+                <!-- LIBRARY SECTION -->
+                <section id="library" class="content-section">
+                    <h2>My Lessons Library</h2>
+
+                    <div class="library-tabs">
+                        <button class="lib-tab-btn active" data-tab="vocab-lessons">Vocabulary Lessons</button>
+                        <button class="lib-tab-btn" data-tab="grammar-lessons">Grammar Lessons</button>
+                        <button class="lib-tab-btn" data-tab="board-lessons">Board Presentations</button>
+                    </div>
+
+                    <div class="library-content">
+                        <div id="vocab-lessons" class="lib-tab-content active">
+                            <div id="saved-vocab-list" class="saved-lessons-grid">
+                                <p class="empty-state">No saved vocabulary lessons yet. Create one to get started!</p>
+                            </div>
+                        </div>
+                        <div id="grammar-lessons" class="lib-tab-content">
+                            <div id="saved-grammar-list" class="saved-lessons-grid">
+                                <p class="empty-state">No saved grammar lessons yet. Create one to get started!</p>
+                            </div>
+                        </div>
+                        <div id="board-lessons" class="lib-tab-content">
+                            <div id="saved-board-list" class="saved-lessons-grid">
+                                <p class="empty-state">No saved board presentations yet. Create one to get started!</p>
+                            </div>
                         </div>
                     </div>
-
-                    <div class="toolbar-group">
-                        <button class="tool-btn" id="zoom-in" title="Zoom In"><i
-                                class="fa-solid fa-magnifying-glass-plus"></i></button>
-                        <span id="zoom-level"
-                            style="color: white; font-weight: bold; min-width: 45px; text-align: center;">100%</span>
-                        <button class="tool-btn" id="zoom-out" title="Zoom Out"><i
-                                class="fa-solid fa-magnifying-glass-minus"></i></button>
-                    </div>
-
-                    <div class="toolbar-group">
-                        <button class="tool-btn" id="undo-btn" title="Undo (Ctrl+Z)"><i
-                                class="fa-solid fa-rotate-left"></i></button>
-                        <button class="tool-btn" id="redo-btn" title="Redo (Ctrl+Y)"><i
-                                class="fa-solid fa-rotate-right"></i></button>
-                        <button class="tool-btn" id="clear-btn" title="Clear All"><i
-                                class="fa-solid fa-trash"></i></button>
-                    </div>
-
-                    <div class="toolbar-group">
-                        <label>Background:</label>
-                        <select id="board-background">
-                            <option value="white">White</option>
-                            <option value="lined">Lined Paper</option>
-                            <option value="grid">Grid</option>
-                            <option value="chalkboard">Chalkboard</option>
-                            <option value="nature">Nature Theme</option>
-                            <option value="space">Space Theme</option>
-                        </select>
-                    </div>
-
-                    <div class="toolbar-group">
-                        <button class="btn-secondary" id="save-board-btn"><i class="fa-solid fa-floppy-disk"></i>
-                            Save</button>
-                        <button class="btn-secondary" id="load-board-btn"><i class="fa-solid fa-folder-open"></i>
-                            Load</button>
-                        <button class="btn-secondary" id="export-board-btn"><i class="fa-solid fa-file-export"></i>
-                            Export PNG</button>
-                    </div>
-                </div>
-
-                <div class="canvas-container">
-                    <canvas id="virtual-board" width="1200" height="700"></canvas>
-                    <div id="text-editor-overlay" style="display: none;"></div>
-                </div>
-
-                <div class="page-navigation">
-                    <button id="prev-page-btn">← Previous</button>
-                    <span id="page-indicator">Page 1 of 1</span>
-                    <button id="next-page-btn">Next →</button>
-                    <button id="add-page-btn">+ Add Page</button>
-                </div>
-
-                <!-- Floating Text Editor Panel -->
-                <div id="text-properties-panel" style="display: none;">
-                    <label>Font:</label>
-                    <select id="text-font-family">
-                        <option value="Reddit Sans">Reddit Sans</option>
-                        <option value="Google Sans Flex">Google Sans Flex</option>
-                        <option value="Architects Daughter" style="font-family: 'Architects Daughter';">Architects
-                            Daughter</option>
-                        <option value="Inter">Inter</option>
-                        <option value="Roboto">Roboto</option>
-                        <option value="Open Sans">Open Sans</option>
-                        <option value="Nunito">Nunito</option>
-                        <option value="Comic Sans MS">Comic Sans</option>
-                    </select>
-                    <label>Size:</label>
-                    <input type="number" id="text-font-size" min="8" max="200" value="24">
-                    <label>Color:</label>
-                    <input type="color" id="text-color-picker" value="#000000">
-                    <button id="delete-text-btn" class="btn-secondary">Delete</button>
-                </div>
-
-                <!-- Image Properties Panel -->
-                <div id="image-properties-panel" style="display: none;">
-                    <label>Width:</label>
-                    <input type="number" id="image-width" min="50" max="1200" step="10">
-                    <label>Height:</label>
-                    <input type="number" id="image-height" min="50" max="700" step="10">
-                    <button id="delete-image-btn" class="btn-secondary">Delete</button>
-                </div>
-            </section>
-
-            <!-- LIBRARY SECTION -->
-            <section id="library" class="content-section">
-                <h2>My Lessons Library</h2>
-
-                <div class="library-tabs">
-                    <button class="lib-tab-btn active" data-tab="vocab-lessons">Vocabulary Lessons</button>
-                    <button class="lib-tab-btn" data-tab="grammar-lessons">Grammar Lessons</button>
-                    <button class="lib-tab-btn" data-tab="board-lessons">Board Presentations</button>
-                </div>
-
-                <div class="library-content">
-                    <div id="vocab-lessons" class="lib-tab-content active">
-                        <div id="saved-vocab-list" class="saved-lessons-grid">
-                            <p class="empty-state">No saved vocabulary lessons yet. Create one to get started!</p>
-                        </div>
-                    </div>
-                    <div id="grammar-lessons" class="lib-tab-content">
-                        <div id="saved-grammar-list" class="saved-lessons-grid">
-                            <p class="empty-state">No saved grammar lessons yet. Create one to get started!</p>
-                        </div>
-                    </div>
-                    <div id="board-lessons" class="lib-tab-content">
-                        <div id="saved-board-list" class="saved-lessons-grid">
-                            <p class="empty-state">No saved board presentations yet. Create one to get started!</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
+                </section>
 
         </div>
     </main>
@@ -457,6 +482,20 @@
         <i class="fa-solid fa-screwdriver-wrench"></i>
         <span>Tools</span>
     </button>
+
+    <!-- Quiz Modal -->
+    <div id="quiz-modal" class="quiz-modal" style="display: none;">
+        <div class="quiz-content" id="quiz-container">
+            <!-- Content injected by JS -->
+        </div>
+    </div>
+
+    <!-- Quiz Modal -->
+    <div id="quiz-modal" class="quiz-modal" style="display: none;">
+        <div class="quiz-content" id="quiz-container">
+            <!-- Content injected by JS -->
+        </div>
+    </div>
 
     <!-- Password Modal -->
     <div id="password-modal" class="modal-backdrop" style="display: none;">
@@ -489,6 +528,8 @@
     <script src="js/dictionary.js"></script>
     <script src="js/themes.js"></script>
     <script src="js/science.js"></script>
+    <script src="js/flower-quiz.js"></script>
+    <script src="js/bones-quiz.js"></script>
     <script src="js/darkmode.js"></script>
     <script src="js/app.js"></script>
     <script src="js/tools-access.js"></script>

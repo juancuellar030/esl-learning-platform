@@ -6,20 +6,73 @@ const ScienceModule = {
     },
 
     definitions: {
-        'anther': { title: 'Anther', text: 'Produces pollen grains.' },
-        'filament': { title: 'Filament', text: 'Connects the anther to the flower.' },
-        'stigma': { title: 'Stigma', text: 'Receives the pollen grains.' },
-        'style': { title: 'Style', text: 'Connects the stigma to the ovary.' },
-        'ovary': { title: 'Ovary', text: 'Contains the ovules.' },
-        'ovule': { title: 'Ovule', text: 'Contains the egg cell.' },
-        'petal': { title: 'Petal', text: 'To attract pollinators.' },
-        'sepal': { title: 'Sepal', text: 'Protects flower bud.' }
+        'anther': {
+            title: 'Anther',
+            text: 'Produces pollen grains.',
+            detailed: 'Produces pollen grains which contain the male reproductive cell. Pollen grains are sticky to stick onto body of pollinators.'
+        },
+        'filament': {
+            title: 'Filament',
+            text: 'Connects the anther to the flower.',
+            detailed: 'Connects the anther to the flower.'
+        },
+        'stigma': {
+            title: 'Stigma',
+            text: 'Receives the pollen grains.',
+            detailed: 'Receives the pollen grains.'
+        },
+        'style': {
+            title: 'Style',
+            text: 'Connects the stigma to the ovary.',
+            detailed: 'Connects the stigma to the ovary.'
+        },
+        'ovary': {
+            title: 'Ovary',
+            text: 'Contains the ovules.',
+            detailed: 'Contains the ovules. Develops into a fruit after fertilisation.'
+        },
+        'ovule': {
+            title: 'Ovule',
+            text: 'Contains the egg cell.',
+            detailed: 'Contains the egg cell. Develops into a seed after fertilisation.'
+        },
+        'petal': {
+            title: 'Petal',
+            text: 'To attract pollinators.',
+            detailed: 'To attract pollinators. Usually brightly coloured.'
+        },
+        'sepal': {
+            title: 'Sepal',
+            text: 'Protects flower bud.',
+            detailed: 'Protects flower bud.'
+        }
     },
+
+    // Helper function to normalize flower part IDs (remove number suffixes)
+    normalizeId(id) {
+        if (!id) return '';
+        // Remove -2, -3, etc. suffixes to treat anther-2, anther-3 as 'anther'
+        return id.replace(/-\d+$/, '').toLowerCase();
+    },
+
+    mousePosition: { x: 0, y: 0 },
 
     init() {
         console.log('Initializing Science Module...');
         this.loadSVG();
         this.setupControls();
+        this.setupMouseTracking();
+    },
+
+    setupMouseTracking() {
+        const container = document.getElementById('flower-svg-container');
+        if (!container) return;
+
+        container.addEventListener('mousemove', (e) => {
+            const rect = container.getBoundingClientRect();
+            this.mousePosition.x = e.clientX - rect.left;
+            this.mousePosition.y = e.clientY - rect.top;
+        });
     },
 
     async loadSVG() {
@@ -48,9 +101,10 @@ const ScienceModule = {
         const svg = document.querySelector('#flower-svg-container svg');
         if (!svg) return;
 
-        // Make SVG responsive
-        svg.setAttribute('width', '100%');
-        svg.setAttribute('height', 'auto');
+        // Remove fixed width/height to allow CSS max-height to control size
+        svg.removeAttribute('width');
+        svg.removeAttribute('height');
+        svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
 
         // Add hover listeners to all relevant groups
         const allKeys = Object.keys(this.definitions);
@@ -73,9 +127,9 @@ const ScienceModule = {
         svg.addEventListener('mouseover', (e) => {
             const group = getParentGroup(e.target);
             if (group) {
-                this.handleHover(group.key);
-                // Highlight the specific group hovered
-                group.element.classList.add('hovered');
+                this.handleHover(group.key, group.element);
+                // Dim all other parts
+                this.dimOtherParts(group.element);
             }
         });
 
@@ -83,7 +137,8 @@ const ScienceModule = {
             const group = getParentGroup(e.target);
             if (group) {
                 this.hideHover();
-                group.element.classList.remove('hovered');
+                // Reset all parts to full opacity
+                this.resetDimming();
             }
         });
 
@@ -105,9 +160,29 @@ const ScienceModule = {
             const infoBox = document.getElementById('part-info-box');
             infoBox.classList.toggle('visible');
         });
+
+        document.getElementById('btn-quiz')?.addEventListener('click', () => {
+            const modal = document.getElementById('quiz-modal');
+            if (modal) {
+                modal.style.display = 'flex';
+                if (window.FlowerQuiz) {
+                    FlowerQuiz.init();
+                }
+            }
+        });
+
+        document.getElementById('btn-bones-quiz')?.addEventListener('click', () => {
+            const modal = document.getElementById('quiz-modal');
+            if (modal) {
+                modal.style.display = 'flex';
+                if (window.BonesQuiz) {
+                    BonesQuiz.init();
+                }
+            }
+        });
     },
 
-    handleHover(key) {
+    handleHover(key, element) {
         const label = document.getElementById('hover-label');
         if (!label) return;
 
@@ -115,19 +190,45 @@ const ScienceModule = {
         label.textContent = info ? info.title : key;
         label.style.display = 'block';
 
-        // Position label near mouse? Or just fixed?
-        // For now, fixed position relative to container is easier or following mouse
-        // CSS handles position, JS handles visibility
+        // Position label near the mouse cursor
+        const offset = 15;
+        label.style.left = (this.mousePosition.x + offset) + 'px';
+        label.style.top = (this.mousePosition.y + offset) + 'px';
+    },
+
+    dimOtherParts(hoveredElement) {
+        const svg = document.querySelector('#flower-svg-container svg');
+        if (!svg) return;
+
+        const groups = svg.querySelectorAll('g');
+        groups.forEach(g => {
+            // Only apply dimming to top-level flower part groups
+            // (groups that have an ID in definitions AND whose parent is NOT a flower part)
+            if (g !== hoveredElement && g.id && this.definitions[g.id]) {
+                const parent = g.parentElement;
+                const parentIsFlowerPart = parent && parent.id && this.definitions[parent.id];
+
+                // Only dim if this is a top-level flower part (parent is not a flower part)
+                if (!parentIsFlowerPart) {
+                    g.classList.add('dimmed-hover');
+                }
+            }
+        });
+    },
+
+    resetDimming() {
+        const svg = document.querySelector('#flower-svg-container svg');
+        if (!svg) return;
+
+        const groups = svg.querySelectorAll('g');
+        groups.forEach(g => {
+            g.classList.remove('dimmed-hover');
+        });
     },
 
     hideHover() {
         const label = document.getElementById('hover-label');
         if (label) label.style.display = 'none';
-
-        // Also remove 'hovered' class from all groups
-        /* const groups = document.querySelectorAll('#flower-svg-container g');
-        groups.forEach(g => g.classList.remove('hovered')); */
-        // Handled in mouseout event per element
     },
 
     showDefinition(key) {
@@ -138,10 +239,18 @@ const ScienceModule = {
         const descParams = document.getElementById('info-desc');
 
         if (titleParams) titleParams.textContent = info.title;
-        if (descParams) descParams.textContent = info.text;
+        if (descParams) descParams.textContent = info.detailed || info.text;
 
         // Show the info box if not visible
-        document.getElementById('part-info-box')?.classList.add('visible');
+        const infoBox = document.getElementById('part-info-box');
+        if (infoBox) {
+            infoBox.classList.add('visible');
+            // Add a highlight effect
+            infoBox.style.animation = 'none';
+            setTimeout(() => {
+                infoBox.style.animation = 'pulseInfo 0.5s ease-out';
+            }, 10);
+        }
     },
 
     highlightType(type) {
@@ -154,11 +263,26 @@ const ScienceModule = {
         const svg = document.querySelector('#flower-svg-container svg');
         if (!svg) return;
 
+        const allKeys = Object.keys(this.definitions);
+
         // Iterate over all groups and check IDs
         const groups = svg.querySelectorAll('g');
         groups.forEach(g => {
-            const id = g.id.toLowerCase();
-            const match = partsToHighlight.find(p => id.startsWith(p));
+            if (!g.id) return;
+
+            const normalizedId = this.normalizeId(g.id);
+
+            // Only apply effects to top-level flower part groups
+            if (!allKeys.includes(normalizedId)) return;
+
+            const parent = g.parentElement;
+            const parentNormalizedId = this.normalizeId(parent?.id);
+            const parentIsFlowerPart = allKeys.includes(parentNormalizedId);
+
+            // Only process if this is a top-level flower part
+            if (parentIsFlowerPart) return;
+
+            const match = partsToHighlight.includes(normalizedId);
             if (match) {
                 g.classList.add('highlighted');
             } else {
