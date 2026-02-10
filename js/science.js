@@ -310,7 +310,47 @@ const ScienceModule = {
         const descParams = document.getElementById('info-desc');
         if (titleParams) titleParams.textContent = 'Flower Parts';
         if (descParams) descParams.textContent = 'Hover over the flower parts to identify them. Click buttons to see classifications.';
+    },
+
+    startQuiz(type) {
+        const selectionArea = document.getElementById('science-quiz-selection');
+        const displayArea = document.getElementById('science-quiz-display-area');
+
+        if (selectionArea && displayArea) {
+            selectionArea.style.display = 'none';
+            displayArea.style.display = 'block';
+
+            let quizData = null;
+            if (type === 'flower') {
+                quizData = window.FlowerQuizData;
+            } else if (type === 'bones') {
+                quizData = window.BonesQuizData;
+            }
+
+            if (quizData && window.scienceQuizRenderer) {
+                window.scienceQuizRenderer.init(quizData);
+            } else {
+                console.error("Quiz data or renderer not found");
+                this.exitQuiz();
+            }
+        }
+    },
+
+    exitQuiz() {
+        const selectionArea = document.getElementById('science-quiz-selection');
+        const displayArea = document.getElementById('science-quiz-display-area');
+
+        if (selectionArea && displayArea) {
+            displayArea.style.display = 'none';
+            selectionArea.style.display = 'block';
+            displayArea.innerHTML = ''; // Clear quiz content
+        }
     }
+};
+
+// Expose exit handler globally for the renderer
+window.handleQuizExit = () => {
+    ScienceModule.exitQuiz();
 };
 
 // Initialize when DOM is ready
@@ -319,4 +359,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (document.getElementById('science')) {
         ScienceModule.init();
     }
+
+    // Check if we need to expose the module globally for onclick handlers in HTML
+    window.scienceModule = ScienceModule;
 });

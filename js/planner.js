@@ -30,6 +30,12 @@
     const activityCancel = document.getElementById('activity-cancel');
     const activitySave = document.getElementById('activity-save');
 
+    // Import controls
+    const importClassBtn = document.getElementById('import-class-btn');
+    const importOptionsContainer = document.getElementById('import-options-container');
+    const importClassSelect = document.getElementById('import-class-select');
+    const confirmImportBtn = document.getElementById('confirm-import-btn');
+
     let currentEditingClassId = null;
 
     // Initialize
@@ -143,6 +149,10 @@
                 closeActivityModal();
             }
         });
+
+        // Import inside modal
+        if (importClassBtn) importClassBtn.addEventListener('click', toggleImportOptions);
+        if (confirmImportBtn) confirmImportBtn.addEventListener('click', importActivitiesFromClass);
     }
 
     // Open activity modal
@@ -170,6 +180,109 @@
     function closeActivityModal() {
         activityModal.style.display = 'none';
         currentEditingClassId = null;
+        // Reset import UI
+        importOptionsContainer.style.display = 'none';
+        importClassSelect.innerHTML = '<option value="">Select a class...</option>';
+    }
+
+    // Toggle Import Options
+    function toggleImportOptions() {
+        if (importOptionsContainer.style.display === 'none') {
+            populateImportSelect();
+            importOptionsContainer.style.display = 'block';
+        } else {
+            importOptionsContainer.style.display = 'none';
+        }
+    }
+
+    // Populate Import Select
+    function populateImportSelect() {
+        importClassSelect.innerHTML = '<option value="">Select a class...</option>';
+
+        Object.entries(plannerData.classes).forEach(([classId, data]) => {
+            // Don't show current class and ensure it has activities
+            if (classId !== currentEditingClassId && data.activities && data.activities.length > 0) {
+                const option = document.createElement('option');
+                option.value = classId;
+                option.textContent = `${data.className} (${data.time}) - ${data.activities.length} activities`;
+                importClassSelect.appendChild(option);
+            }
+        });
+
+        if (importClassSelect.options.length <= 1) {
+            const option = document.createElement('option');
+            option.disabled = true;
+            option.textContent = 'No other classes with activities found';
+            importClassSelect.appendChild(option);
+        }
+    }
+
+    // Import Activities
+    function importActivitiesFromClass() {
+        const sourceClassId = importClassSelect.value;
+        if (!sourceClassId) {
+            showToast('Please select a class to import from', 'warning');
+            return;
+        }
+
+        const sourceActivities = plannerData.classes[sourceClassId]?.activities || [];
+
+        sourceActivities.forEach(activity => {
+            addActivityInput(activity);
+        });
+
+        showToast(`Imported ${sourceActivities.length} activities`, 'success');
+        importOptionsContainer.style.display = 'none';
+    }
+
+    // Toggle Import Options
+    function toggleImportOptions() {
+        if (importOptionsContainer.style.display === 'none') {
+            populateImportSelect();
+            importOptionsContainer.style.display = 'block';
+        } else {
+            importOptionsContainer.style.display = 'none';
+        }
+    }
+
+    // Populate Import Select
+    function populateImportSelect() {
+        importClassSelect.innerHTML = '<option value="">Select a class...</option>';
+
+        Object.entries(plannerData.classes).forEach(([classId, data]) => {
+            // Don't show current class and ensure it has activities
+            if (classId !== currentEditingClassId && data.activities && data.activities.length > 0) {
+                const option = document.createElement('option');
+                option.value = classId;
+                option.textContent = `${data.className} (${data.time}) - ${data.activities.length} activities`;
+                importClassSelect.appendChild(option);
+            }
+        });
+
+        if (importClassSelect.options.length <= 1) {
+            const option = document.createElement('option');
+            option.disabled = true;
+            option.textContent = 'No other classes with activities found';
+            importClassSelect.appendChild(option);
+        }
+    }
+
+    // Import Activities
+    function importActivitiesFromClass() {
+        const sourceClassId = importClassSelect.value;
+        if (!sourceClassId) {
+            showToast('Please select a class to import from', 'warning');
+            return;
+        }
+
+        const sourceActivities = plannerData.classes[sourceClassId]?.activities || [];
+
+        sourceActivities.forEach(activity => {
+            addActivityInput(activity);
+        });
+
+        showToast(`Imported ${sourceActivities.length} activities`, 'success');
+        importOptionsContainer.style.display = 'none';
     }
 
     // Add activity input field

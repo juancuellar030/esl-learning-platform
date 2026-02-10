@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/science.css">
+    <link rel="stylesheet" href="css/science-quiz.css">
+
 </head>
 
 <body>
@@ -32,7 +34,10 @@
                 <i class="fa-solid fa-spell-check"></i> Grammar Bank
             </button>
             <button class="nav-btn" data-section="science">
-                <i class="fa-solid fa-flask"></i> Science
+                <i class="fa-solid fa-flask"></i> Science Lab
+            </button>
+            <button class="nav-btn" data-section="science-quizzes">
+                <i class="fa-solid fa-clipboard-question"></i> Science Quizzes
             </button>
             <a href="board.html" target="_blank" class="nav-external-btn">
                 <i class="fa-solid fa-chalkboard"></i> Virtual Board
@@ -283,6 +288,32 @@
                 </div>
             </section>
 
+            <!-- SCIENCE QUIZZES SECTION -->
+            <section id="science-quizzes" class="content-section">
+                <h2>Science Quizzes</h2>
+
+                <div class="science-module" id="science-quiz-selection">
+                    <h3>Choose a Quiz</h3>
+                    <div class="dashboard-grid">
+                        <div class="dashboard-card" onclick="scienceModule.startQuiz('flower')">
+                            <div class="card-icon"><i class="fa-solid fa-seedling"></i></div>
+                            <h3>Flower Parts</h3>
+                            <p>Test your knowledge of plant anatomy and reproduction</p>
+                        </div>
+                        <div class="dashboard-card" onclick="scienceModule.startQuiz('bones')">
+                            <div class="card-icon"><i class="fa-solid fa-skull-crossbones"></i></div>
+                            <h3>Human Bones</h3>
+                            <p>Challenge yourself with the skeletal system vocabulary</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="science-quiz-display-area" style="display: none; margin-top: 30px;">
+                    <!-- Quiz Renderer will inject content here -->
+                </div>
+            </section>
+
+
             <!-- VIRTUAL BOARD SECTION -->
             <section id="virtualboard" class="content-section">
                 <h2>Virtual Board</h2>
@@ -520,7 +551,9 @@
     <script src="js/dictionary.js"></script>
     <script src="js/themes.js"></script>
     <script src="js/science.js"></script>
+    <script src="js/science-quiz-renderer.js"></script>
     <script src="js/flower-quiz.js"></script>
+
     <script src="js/bones-quiz.js"></script>
     <script src="js/darkmode.js"></script>
     <script src="js/app.js"></script>
