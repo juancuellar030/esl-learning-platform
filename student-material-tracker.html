@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Material Tracker - ESL Learning Platform</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        body {
+            font-family: 'Reddit Sans', 'Google Sans Flex', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--medium-slate-blue, #7b68ee);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .tracker-container {
+            max-width: 1800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .tracker-header {
+            background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%);
+            color: white;
+            padding: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Juicy Header Pattern */
+        .tracker-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 25%),
+                radial-gradient(circle at 80% 30%, rgba(255, 255, 255, 0.15) 0%, transparent 20%);
+            pointer-events: none;
+        }
+
+        .tracker-header h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 1;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            z-index: 1;
+            align-items: center;
+        }
+
+        /* Juicy Buttons */
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn-add {
+            background: #00b894;
+            color: white;
+        }
+
+        .btn-add:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 8px 15px rgba(0, 184, 148, 0.3);
+            background: #00cc99;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            backdrop-filter: blur(5px);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: #ff7675;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #d63031;
+            transform: translateY(-2px);
+        }
+
+        .new-item-input {
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: none;
+            outline: none;
+            font-weight: 600;
+            min-width: 250px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .new-item-input:focus {
+            box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.3);
+            transform: scale(1.02);
+        }
+
+        .table-container {
+            padding: 30px;
+            overflow-x: auto;
+            min-height: 400px;
+            background: #f8f9fa;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            border-radius: 16px;
+            overflow: hidden;
+            background: white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        thead {
+            background: #dfe6e9;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        th {
+            padding: 20px 15px;
+            text-align: center;
+            font-weight: 800;
+            color: #2d3436;
+            font-size: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #b2bec3;
+            transition: background 0.3s;
+        }
+
+        th.material-header {
+            min-width: 150px;
+            position: relative;
+        }
+
+        th.material-header:hover {
+            background: #d1d8dd;
+        }
+
+        /* Student Name Column Sticky */
+        .student-name-header,
+        .student-name-cell {
+            position: sticky;
+            left: 0;
+            z-index: 2;
+            background: white;
+            border-right: 2px solid #f1f2f6;
+        }
+
+        .student-name-header {
+            background: #dfe6e9;
+            z-index: 11;
+        }
+
+        .student-name-cell {
+            padding: 15px 20px;
+            font-weight: 700;
+            color: #2d3436;
+            text-align: left;
+            font-size: 16px;
+        }
+
+        /* Rows */
+        tbody tr {
+            transition: background 0.2s;
+        }
+
+        tbody tr:nth-child(even) .student-name-cell {
+            background: #fdfdfd;
+        }
+
+        tbody tr:hover .student-name-cell {
+            background: #f0f3f6;
+        }
+
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        /* Cells */
+        td {
+            border-bottom: 1px solid #f1f2f6;
+            padding: 0;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .cell-content {
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Status States */
+        .cell-content.empty {
+            background: transparent;
+        }
+
+        .cell-content.empty:hover {
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        .cell-content.brought {
+            background: #00b894;
+            /* Mint Green */
+            /* Juicy Glow */
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .cell-content.missing {
+            background: #ff7675;
+            /* Soft Red */
+        }
+
+        /* Icons */
+        .status-icon {
+            font-size: 24px;
+            color: white;
+            transform: scale(0);
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+        }
+
+        .cell-content.brought .status-icon {
+            transform: scale(1.2);
+        }
+
+        .cell-content.missing .status-icon {
+            transform: scale(1);
+        }
+
+        /* Delete Column Button */
+        .delete-col-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #ff7675;
+            color: white;
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.2s;
+        }
+
+        th.material-header:hover .delete-col-btn {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .delete-col-btn:hover {
+            background: #d63031;
+            transform: scale(1.1);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px;
+            color: #b2bec3;
+        }
+
+        .empty-state i {
+            font-size: 60px;
+            margin-bottom: 20px;
+            color: #dfe6e9;
+        }
+
+        /* Loading Animation */
+        @keyframes popIn {
+            0% {
+                transform: scale(0.9);
+                opacity: 0;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .tracker-container {
+            animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="tracker-container">
+        <!-- Header -->
+        <header class="tracker-header">
+            <h1><i class="fa-solid fa-box-open"></i> Student Material Tracker</h1>
+
+            <div class="controls">
+                <a href="tools.html" class="btn btn-secondary">
+                    <i class="fa-solid fa-arrow-left"></i> Back
+                </a>
+                <input type="text" id="newItemInput" class="new-item-input"
+                    placeholder="Enter item name (e.g. Lunch Money)...">
+                <button class="btn btn-add" id="addItemBtn">
+                    <i class="fa-solid fa-plus"></i> Add Column
+                </button>
+            </div>
+        </header>
+
+        <!-- Table Area -->
+        <div class="table-container">
+            <table id="materialTable">
+                <thead>
+                    <tr id="headerRow">
+                        <th class="student-name-header">Student Name</th>
+                        <!-- Dynamic columns will be added here -->
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- Dynamic rows will be added here -->
+                </tbody>
+            </table>
+
+            <div id="emptyState" class="empty-state" style="display: none;">
+                <i class="fa-solid fa-clipboard-list"></i>
+                <h3>No materials being tracked yet</h3>
+                <p>Add an item above to start tracking!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Container -->
+    <div id="notificationContainer" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
+
+    <script>
+        // Data Handling
+        const STORAGE_KEY = 'esl_material_tracker_data';
+        const students = [
+            'ALEJANDRA H.', 'ALEJANDRO C.', 'ANAMARIA C.', 'ANTONELLA P.', 'BRIANA C.',
+            'DANIEL P.', 'DANNA P.', 'EMILIANO Q.', 'EMILIANO T.', 'EMILIO R.',
+            'ERMES V.', 'EVA MARIA P.', 'JUAN J. RÍOS', 'JUAN J. SARRIAS', 'KESHIA C.',
+            'LAURA S.', 'LAURA BERNAL', 'LORENZO R.', 'LUCIANO M.', 'MATIAS F.',
+            'MIA H.', 'PABLO A.', 'PAULA V.', 'SAMANTHA C', 'SAMUEL G.',
+            'SANTIAGO O.', 'SARA LUCÍA V.', 'THOMAS C.', 'VALERIA P.'
+        ];
+
+        let appData = {
+            materials: [], // Array of material names
+            tracking: {}   // Object: { StudentName: { MaterialName: 'brought' | 'missing' | null } }
+        };
+
+        // Load Data
+        function loadData() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                appData = JSON.parse(saved);
+            } else {
+                // Initialize empty tracking for all students
+                students.forEach(s => appData.tracking[s] = {});
+            }
+            renderTable();
+        }
+
+        // Save Data
+        function saveData() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+        }
+
+        // Render Table
+        function renderTable() {
+            const headerRow = document.getElementById('headerRow');
+            const tableBody = document.getElementById('tableBody');
+            const emptyState = document.getElementById('emptyState');
+
+            // Clear current (keep first th)
+            headerRow.innerHTML = '<th class="student-name-header">Student Name</th>';
+            tableBody.innerHTML = '';
+
+            // Empty State Check
+            if (appData.materials.length === 0) {
+                // table.style.display = 'none';
+                // emptyState.style.display = 'block'; 
+                // We show table anyway but with no columns implies empty state visually if we want
+            }
+
+            // Render Headers
+            appData.materials.forEach((material, index) => {
+                const th = document.createElement('th');
+                th.className = 'material-header';
+                th.innerHTML = `
+                    ${material}
+                    <button class="delete-col-btn" onclick="deleteMaterial(${index})" title="Remove Column">
+                        <i class="fa-solid fa-times"></i>
+                    </button>
+                `;
+                headerRow.appendChild(th);
+            });
+
+            // Render Rows
+            students.forEach(student => {
+                const tr = document.createElement('tr');
+
+                // Name Cell
+                const nameTd = document.createElement('td');
+                nameTd.className = 'student-name-cell';
+                nameTd.textContent = student;
+                tr.appendChild(nameTd);
+
+                // Material Cells
+                appData.materials.forEach(material => {
+                    const status = getStudentStatus(student, material);
+                    const td = document.createElement('td');
+
+                    const contentDiv = document.createElement('div');
+                    contentDiv.className = `cell-content ${status || 'empty'}`;
+                    contentDiv.onclick = () => toggleStatus(student, material);
+
+                    let icon = '';
+                    if (status === 'brought') icon = '<i class="status-icon fa-solid fa-check"></i>';
+                    if (status === 'missing') icon = '<i class="status-icon fa-solid fa-xmark"></i>';
+
+                    contentDiv.innerHTML = icon;
+                    td.appendChild(contentDiv);
+                    tr.appendChild(td);
+                });
+
+                tableBody.appendChild(tr);
+            });
+        }
+
+        // Logic Helpers
+        function getStudentStatus(student, material) {
+            if (!appData.tracking[student]) appData.tracking[student] = {};
+            return appData.tracking[student][material];
+        }
+
+        function toggleStatus(student, material) {
+            const current = getStudentStatus(student, material);
+            let next = 'brought';
+            if (current === 'brought') next = 'missing';
+            else if (current === 'missing') next = null; // Back to empty
+
+            appData.tracking[student][material] = next;
+            saveData();
+            renderTable(); // Re-render to show animation state (or optimize to update DOM directly for better performance, but renderTable is fast enough for <30 rows)
+        }
+
+        // Add Material
+        document.getElementById('addItemBtn').addEventListener('click', () => {
+            const input = document.getElementById('newItemInput');
+            const name = input.value.trim();
+
+            if (!name) return;
+            if (appData.materials.includes(name)) {
+                alert('That item already exists!');
+                return;
+            }
+
+            appData.materials.push(name);
+            input.value = '';
+
+            // Initialize storage for new column
+            students.forEach(s => {
+                if (!appData.tracking[s]) appData.tracking[s] = {};
+                if (!appData.tracking[s][name]) appData.tracking[s][name] = null;
+            });
+
+            saveData();
+            renderTable();
+        });
+
+        // Allow Enter key to add
+        document.getElementById('newItemInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') document.getElementById('addItemBtn').click();
+        });
+
+        // Delete Material
+        window.deleteMaterial = function (index) {
+            if (confirm('Are you sure you want to remove this column? tracking data will be lost.')) {
+                const materialName = appData.materials[index];
+                appData.materials.splice(index, 1);
+
+                // Cleanup data
+                students.forEach(s => {
+                    if (appData.tracking[s]) delete appData.tracking[s][materialName];
+                });
+
+                saveData();
+                renderTable();
+            }
+        };
+
+        // Initialize
+        loadData();
+
+    </script>
+</body>
+
+</html>
