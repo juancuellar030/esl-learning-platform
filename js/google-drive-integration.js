@@ -6,8 +6,8 @@
 class GoogleDriveIntegration {
     constructor() {
         // These will need to be configured with your Google Cloud project
-        this.CLIENT_ID = 'YOUR_CLIENT_ID.apps.googleusercontent.com';
-        this.API_KEY = 'YOUR_API_KEY';
+        this.CLIENT_ID = '1041840472824-9ivoi73ufdhirq4afin9avlmtuhpdbn0.apps.googleusercontent.com';
+        this.API_KEY = 'AIzaSyBsQX4EOWF26YzPPqOVtiRX04dh6cSv7Bc';
         this.DISCOVERY_DOCS = ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'];
         this.SCOPES = 'https://www.googleapis.com/auth/drive.file';
 
