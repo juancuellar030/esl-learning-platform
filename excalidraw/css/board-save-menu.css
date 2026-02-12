@@ -1,0 +1,407 @@
+/* Board Save Menu Styles */
+
+/* Notification System */
+.board-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 16px 24px;
+    border-radius: 8px;
+    background: #2d2d2d;
+    color: white;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 14px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    z-index: 10000;
+    opacity: 0;
+    transform: translateX(100%);
+    transition: all 0.3s ease;
+}
+
+.board-notification.show {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.board-notification--success {
+    background: #667eea;
+}
+
+.board-notification--error {
+    background: #f5576c;
+}
+
+.board-notification--info {
+    background: #4facfe;
+}
+
+/* Floating Action Button */
+.board-fab {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: #667eea;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.5);
+    transition: all 0.3s ease;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.board-fab:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 30px rgba(102, 126, 234, 0.7);
+}
+
+.board-fab:active {
+    transform: scale(0.95);
+}
+
+/* Save Menu Modal */
+.board-menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+    z-index: 10000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.board-menu-overlay.active {
+    display: flex;
+    animation: fadeIn 0.3s ease;
+}
+
+.board-menu {
+    background: #1e1e1e;
+    border-radius: 12px;
+    padding: 30px;
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    animation: slideUp 0.3s ease;
+}
+
+.board-menu-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #333;
+}
+
+.board-menu-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: white;
+    margin: 0;
+}
+
+.board-menu-close {
+    background: none;
+    border: none;
+    color: #999;
+    font-size: 28px;
+    cursor: pointer;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.board-menu-close:hover {
+    background: #333;
+    color: white;
+}
+
+/* Menu Sections */
+.board-menu-section {
+    margin-bottom: 25px;
+}
+
+.board-menu-section-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #999;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.board-menu-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+}
+
+.board-btn {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: #2d2d2d;
+    color: white;
+}
+
+.board-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.board-btn:active {
+    transform: translateY(0);
+}
+
+.board-btn--primary {
+    background: #667eea;
+}
+
+.board-btn--primary:hover {
+    background: #5568d3;
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.5);
+}
+
+.board-btn--success {
+    background: #11998e;
+}
+
+.board-btn--success:hover {
+    background: #0e8073;
+}
+
+.board-btn--danger {
+    background: #f5576c;
+}
+
+.board-btn--danger:hover {
+    background: #d94759;
+}
+
+/* Google Drive Section */
+.drive-auth-section {
+    background: #2d2d2d;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.drive-user-info {
+    display: none;
+    color: white;
+    margin-bottom: 15px;
+    padding: 12px;
+    background: rgba(102, 126, 234, 0.1);
+    border-radius: 6px;
+    border-left: 3px solid #667eea;
+}
+
+.drive-user-info i {
+    margin-right: 8px;
+    color: #667eea;
+}
+
+.drive-controls {
+    display: none;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.drive-file-list {
+    margin-top: 20px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.drive-file-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    background: #1a1a1a;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    transition: all 0.2s;
+}
+
+.drive-file-item:hover {
+    background: #252525;
+    transform: translateX(4px);
+}
+
+.drive-file-info {
+    flex: 1;
+}
+
+.drive-file-name {
+    color: white;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+.drive-file-meta {
+    color: #999;
+    font-size: 12px;
+}
+
+.drive-file-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.drive-btn {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.drive-btn-load {
+    background: #667eea;
+    color: white;
+}
+
+.drive-btn-load:hover {
+    background: #5568d3;
+}
+
+.drive-btn-delete {
+    background: #f5576c;
+    color: white;
+}
+
+.drive-btn-delete:hover {
+    background: #d94759;
+}
+
+.drive-no-files {
+    text-align: center;
+    color: #666;
+    padding: 40px 20px;
+    font-style: italic;
+}
+
+/* Setup Instructions */
+.drive-setup-notice {
+    background: rgba(255, 152, 0, 0.1);
+    border: 1px solid rgba(255, 152, 0, 0.3);
+    border-radius: 6px;
+    padding: 15px;
+    margin-bottom: 20px;
+    color: #ffab40;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.drive-setup-notice strong {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.drive-setup-notice a {
+    color: #667eea;
+    text-decoration: none;
+}
+
+.drive-setup-notice a:hover {
+    text-decoration: underline;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Scrollbar Styling */
+.board-menu::-webkit-scrollbar,
+.drive-file-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.board-menu::-webkit-scrollbar-track,
+.drive-file-list::-webkit-scrollbar-track {
+    background: #1a1a1a;
+    border-radius: 4px;
+}
+
+.board-menu::-webkit-scrollbar-thumb,
+.drive-file-list::-webkit-scrollbar-thumb {
+    background: #667eea;
+    border-radius: 4px;
+}
+
+.board-menu::-webkit-scrollbar-thumb:hover,
+.drive-file-list::-webkit-scrollbar-thumb:hover {
+    background: #5568d3;
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+    .board-menu {
+        width: 95%;
+        padding: 20px;
+    }
+
+    .board-menu-buttons {
+        grid-template-columns: 1fr;
+    }
+
+    .board-fab {
+        bottom: 20px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+    }
+}
