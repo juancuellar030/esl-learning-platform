@@ -1,6 +1,7 @@
 /**
  * Google Drive Integration for Board Storage
- * Handles OAuth authentication and file operations with Google Drive
+ * Uses Google Identity Services (GIS) for authentication
+ * and Google Drive API v3 for file operations
  */
 
 class GoogleDriveIntegration {
@@ -13,13 +14,14 @@ class GoogleDriveIntegration {
 
         this.isSignedIn = false;
         this.gapiReady = false;
-        this.currentUser = null;
+        this.accessToken = null;
+        this.tokenClient = null;
         this.folderName = 'Excalidraw Boards';
         this.folderId = null;
     }
 
     /**
-     * Initialize Google Drive API
+     * Initialize Google Drive API with new GIS
      */
     async init() {
         try {
@@ -29,27 +31,39 @@ class GoogleDriveIntegration {
                 return false;
             }
 
-            // Load Google API client
-            await this.loadGoogleAPI();
+            // Wait for both libraries to load
+            await Promise.all([
+                this.waitForGAPI(),
+                this.waitForGIS()
+            ]);
 
-            // Initialize the API
+            // Initialize gapi client
+            await new Promise((resolve, reject) => {
+                gapi.load('client', { callback: resolve, onerror: reject });
+            });
+
             await gapi.client.init({
                 apiKey: this.API_KEY,
-                clientId: this.CLIENT_ID,
-                discoveryDocs: this.DISCOVERY_DOCS,
-                scope: this.SCOPES
+                discoveryDocs: this.DISCOVERY_DOCS
             });
 
-            // Listen for sign-in state changes
-            gapi.auth2.getAuthInstance().isSignedIn.listen((isSignedIn) => {
-                this.updateSignInStatus(isSignedIn);
+            // Initialize Google Identity Services token client
+            this.tokenClient = google.accounts.oauth2.initTokenClient({
+                client_id: this.CLIENT_ID,
+                scope: this.SCOPES,
+                callback: (tokenResponse) => {
+                    if (tokenResponse && tokenResponse.access_token) {
+                        this.accessToken = tokenResponse.access_token;
+                        this.isSignedIn = true;
+                        gapi.client.setToken({ access_token: this.accessToken });
+                        this.updateUI(true);
+                        console.log('Signed in successfully');
+                    }
+                }
             });
-
-            // Handle initial sign-in state
-            this.updateSignInStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
 
             this.gapiReady = true;
-            console.log('Google Drive API initialized');
+            console.log('Google Drive API initialized with GIS');
             return true;
         } catch (error) {
             console.error('Error initializing Google Drive:', error);
@@ -60,52 +74,39 @@ class GoogleDriveIntegration {
     }
 
     /**
-     * Load Google API client library
+     * Wait for gapi library to load
      */
-    loadGoogleAPI() {
-        return new Promise((resolve, reject) => {
-            // Check if gapi is already available
-            if (window.gapi && window.gapi.load) {
-                gapi.load('client:auth2', {
-                    callback: resolve,
-                    onerror: () => reject(new Error('Failed to load Google API client'))
-                });
-                return;
+    waitForGAPI() {
+        return new Promise((resolve) => {
+            if (typeof gapi !== 'undefined') {
+                resolve();
+            } else {
+                const checkGAPI = setInterval(() => {
+                    if (typeof gapi !== 'undefined') {
+                        clearInterval(checkGAPI);
+                        resolve();
+                    }
+                }, 100);
             }
-
-            // Wait for gapi to become available
-            let attempts = 0;
-            const maxAttempts = 50; // 5 seconds max
-            const checkInterval = setInterval(() => {
-                attempts++;
-                if (window.gapi && window.gapi.load) {
-                    clearInterval(checkInterval);
-                    gapi.load('client:auth2', {
-                        callback: resolve,
-                        onerror: () => reject(new Error('Failed to load Google API client'))
-                    });
-                } else if (attempts >= maxAttempts) {
-                    clearInterval(checkInterval);
-                    reject(new Error('Google API library not loaded. Make sure the script tag is included.'));
-                }
-            }, 100);
         });
     }
 
     /**
-     * Update sign-in status
+     * Wait for GIS library to load
      */
-    updateSignInStatus(isSignedIn) {
-        this.isSignedIn = isSignedIn;
-        if (isSignedIn) {
-            this.currentUser = gapi.auth2.getAuthInstance().currentUser.get();
-            const profile = this.currentUser.getBasicProfile();
-            console.log('Signed in as:', profile.getEmail());
-            this.updateUI(true, profile.getName(), profile.getEmail());
-        } else {
-            this.currentUser = null;
-            this.updateUI(false);
-        }
+    waitForGIS() {
+        return new Promise((resolve) => {
+            if (typeof google !== 'undefined' && google.accounts) {
+                resolve();
+            } else {
+                const checkGIS = setInterval(() => {
+                    if (typeof google !== 'undefined' && google.accounts) {
+                        clearInterval(checkGIS);
+                        resolve();
+                    }
+                }, 100);
+            }
+        });
     }
 
     /**
@@ -120,8 +121,8 @@ class GoogleDriveIntegration {
                 }
             }
 
-            await gapi.auth2.getAuthInstance().signIn();
-            this.showNotification('Signed in to Google Drive', 'success');
+            // Request access token
+            this.tokenClient.requestAccessToken({ prompt: '' });
         } catch (error) {
             console.error('Error signing in:', error);
             this.showNotification('Sign-in failed: ' + error.message, 'error');
@@ -133,8 +134,17 @@ class GoogleDriveIntegration {
      */
     async signOut() {
         try {
-            await gapi.auth2.getAuthInstance().signOut();
-            this.showNotification('Signed out from Google Drive', 'success');
+            if (this.accessToken) {
+                // Revoke the token
+                google.accounts.oauth2.revoke(this.accessToken, () => {
+                    console.log('Token revoked');
+                });
+                this.accessToken = null;
+                this.isSignedIn = false;
+                gapi.client.setToken(null);
+                this.updateUI(false);
+                this.showNotification('Signed out from Google Drive', 'success');
+            }
         } catch (error) {
             console.error('Error signing out:', error);
             this.showNotification('Sign-out failed: ' + error.message, 'error');
@@ -230,7 +240,7 @@ class GoogleDriveIntegration {
             const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
                 method: 'POST',
                 headers: new Headers({
-                    'Authorization': 'Bearer ' + gapi.auth.getToken().access_token
+                    'Authorization': 'Bearer ' + this.accessToken
                 }),
                 body: form
             });
@@ -377,7 +387,7 @@ class GoogleDriveIntegration {
     /**
      * Update UI based on sign-in status
      */
-    updateUI(isSignedIn, name = '', email = '') {
+    updateUI(isSignedIn) {
         const signInBtn = document.getElementById('drive-sign-in-btn');
         const signOutBtn = document.getElementById('drive-sign-out-btn');
         const userInfo = document.getElementById('drive-user-info');
@@ -389,7 +399,7 @@ class GoogleDriveIntegration {
 
         if (userInfo) {
             if (isSignedIn) {
-                userInfo.innerHTML = `<i class="fas fa-user-circle"></i> ${name} (${email})`;
+                userInfo.innerHTML = `<i class="fas fa-user-circle"></i> Signed in to Google Drive`;
                 userInfo.style.display = 'block';
             } else {
                 userInfo.style.display = 'none';
