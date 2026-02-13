@@ -38,18 +38,18 @@
 /* Floating Action Button */
 .board-fab {
     position: fixed;
-    bottom: 30px;
-    right: 30px;
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    background: #667eea;
-    border: none;
-    color: white;
-    font-size: 24px;
+    top: 20px;
+    right: 80px;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid #e0e0e0;
+    color: #666;
+    font-size: 16px;
     cursor: pointer;
-    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.5);
-    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
     z-index: 9999;
     display: flex;
     align-items: center;
@@ -57,12 +57,14 @@
 }
 
 .board-fab:hover {
-    transform: scale(1.1);
-    box-shadow: 0 6px 30px rgba(102, 126, 234, 0.7);
+    background: rgba(255, 255, 255, 1);
+    color: #667eea;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
 }
 
 .board-fab:active {
-    transform: scale(0.95);
+    transform: translateY(0);
 }
 
 /* Save Menu Modal */
