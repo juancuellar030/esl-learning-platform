@@ -53,7 +53,8 @@ class GoogleDriveIntegration {
             return true;
         } catch (error) {
             console.error('Error initializing Google Drive:', error);
-            this.showNotification('Failed to initialize Google Drive: ' + error.message, 'error');
+            console.error('Error details:', error.details || error.message || error);
+            this.showNotification('Failed to initialize Google Drive: ' + (error.message || JSON.stringify(error)), 'error');
             return false;
         }
     }
