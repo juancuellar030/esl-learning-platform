@@ -63,22 +63,31 @@ class GoogleDriveIntegration {
      */
     loadGoogleAPI() {
         return new Promise((resolve, reject) => {
-            // Check if already loaded
-            if (window.gapi) {
-                resolve();
+            // Check if gapi is already available
+            if (window.gapi && window.gapi.load) {
+                gapi.load('client:auth2', {
+                    callback: resolve,
+                    onerror: () => reject(new Error('Failed to load Google API client'))
+                });
                 return;
             }
 
-            // Load the Google API script
-            const script = document.createElement('script');
-            script.src = 'https://apis.google.com/js/api.js';
-            script.onload = () => {
-                gapi.load('client:auth2', () => {
-                    resolve();
-                });
-            };
-            script.onerror = () => reject(new Error('Failed to load Google API'));
-            document.body.appendChild(script);
+            // Wait for gapi to become available
+            let attempts = 0;
+            const maxAttempts = 50; // 5 seconds max
+            const checkInterval = setInterval(() => {
+                attempts++;
+                if (window.gapi && window.gapi.load) {
+                    clearInterval(checkInterval);
+                    gapi.load('client:auth2', {
+                        callback: resolve,
+                        onerror: () => reject(new Error('Failed to load Google API client'))
+                    });
+                } else if (attempts >= maxAttempts) {
+                    clearInterval(checkInterval);
+                    reject(new Error('Google API library not loaded. Make sure the script tag is included.'));
+                }
+            }, 100);
         });
     }
 
