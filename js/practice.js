@@ -30,31 +30,62 @@ const PracticeModule = {
     init() {
         const params = new URLSearchParams(window.location.search);
         let idsParam = params.get('ids');
+        const modeParam = params.get('mode');
 
-        // Try getting IDs from localStorage if not in URL
-        if (!idsParam) {
-            const storedIds = localStorage.getItem('selectedVocabIds');
-            if (storedIds) {
-                try {
-                    idsParam = JSON.parse(storedIds).join(',');
-                } catch (e) { console.error('Error parsing stored IDs', e); }
+        // Check if this is grammar practice mode
+        if (modeParam === 'grammar-practice') {
+            // Load grammar exercises from localStorage
+            const grammarDataStr = localStorage.getItem('grammarPracticeData');
+            if (grammarDataStr) {
+                const grammarData = JSON.parse(grammarDataStr);
+
+                // Convert grammar exercises to practice-compatible format
+                this.isGrammarMode = true;
+                this.grammarRule = grammarData.grammarRule;
+                this.baseWords = grammarData.exercises.map((ex, index) => ({
+                    id: `grammar_${grammarData.grammarId}_${index}`,
+                    word: ex.sentence, // Use sentence as "word"
+                    exerciseData: ex, // Store original exercise data
+                    type: ex.type
+                }));
+                this.words = [...this.baseWords];
+                this.difficultWords = [];
+
+                // Show mode selection for grammar practice
+                this.showModeSelection();
+            } else {
+                console.error('No grammar practice data found in localStorage');
+                document.body.innerHTML = '<div style="padding: 50px; text-align: center;"><h2>Error: No grammar data found</h2><p>Please generate exercises from the grammar page.</p</div>';
+                return;
             }
-        }
-
-        const ids = idsParam ? idsParam.split(',') : [];
-        this.config.mode = params.get('mode'); // Allow null
-        this.config.face = params.get('face') || 'word_first';
-        this.config.submode = params.get('face');
-
-        // Load base words
-        this.baseWords = window.vocabularyBank.filter(w => ids.includes(w.id));
-        this.words = [...this.baseWords];
-        this.difficultWords = [];
-
-        if (this.config.mode) {
-            this.handleModeSetup(this.config.mode);
         } else {
-            this.showModeSelection();
+            // Standard vocabulary practice mode
+            this.isGrammarMode = false;
+
+            // Try getting IDs from localStorage if not in URL
+            if (!idsParam) {
+                const storedIds = localStorage.getItem('selectedVocabIds');
+                if (storedIds) {
+                    try {
+                        idsParam = JSON.parse(storedIds).join(',');
+                    } catch (e) { console.error('Error parsing stored IDs', e); }
+                }
+            }
+
+            const ids = idsParam ? idsParam.split(',') : [];
+            this.config.face = params.get('face') || 'word_first';
+            this.config.submode = params.get('face');
+
+            // Load base words
+            this.baseWords = window.vocabularyBank.filter(w => ids.includes(w.id));
+            this.words = [...this.baseWords];
+            this.difficultWords = [];
+
+            if (modeParam) {
+                this.handleModeSetup(modeParam);
+            } else {
+                this.showModeSelection();
+            }
         }
 
         this.setupFullScreen();
@@ -106,8 +137,27 @@ const PracticeModule = {
 
         this.toggleWordCountVisibility(true);
 
+        // Update title if in grammar mode
+        if (this.isGrammarMode) {
+            const titleEl = document.getElementById('practice-title');
+            if (titleEl) titleEl.textContent = `${this.grammarRule} Practice`;
+        }
+
         // Add click handlers
         document.querySelectorAll('.exercise-card').forEach(card => {
+            const cardType = card.dataset.type;
+
+            // Filter cards for grammar mode (only show unjumble and quiz)
+            if (this.isGrammarMode) {
+                if (cardType === 'unjumble' || cardType === 'quiz') {
+                    card.style.display = 'flex'; // Show
+                } else {
+                    card.style.display = 'none'; // Hide
+                }
+            } else {
+                card.style.display = 'flex'; // Show all for vocabulary mode
+            }
+
             card.onclick = () => {
                 const mode = card.dataset.type;
                 this.config.mode = mode;
@@ -121,7 +171,14 @@ const PracticeModule = {
         this.words = [...this.baseWords];
 
         // Specific filtering
-        if (mode === 'quiz') {
+        if (this.isGrammarMode) {
+            // Filter grammar exercises by mode
+            if (mode === 'unjumble') {
+                this.words = this.baseWords.filter(w => w.type === 'sentence-unjumble');
+            } else if (mode === 'quiz') {
+                this.words = this.baseWords.filter(w => w.type === 'fill-blank');
+            }
+        } else if (mode === 'quiz') {
             const hasClassLang = this.baseWords.some(w => w.category === 'classroom-language');
             const hasClassQuest = this.baseWords.some(w => w.category === 'classroom-questions');
 
@@ -175,6 +232,14 @@ const PracticeModule = {
             }
             if (settingsBtn) settingsBtn.style.display = 'none';
             this.showMatchingSettings();
+        } else if (this.isGrammarMode && mode === 'unjumble') {
+            // Grammar unjumble mode
+            if (settingsBtn) settingsBtn.style.display = 'none';
+            this.showGrammarUnjumbleSettings();
+        } else if (this.isGrammarMode && mode === 'quiz') {
+            // Grammar quiz mode
+            if (settingsBtn) settingsBtn.style.display = 'none';
+            this.showGrammarQuizSettings();
         } else {
             if (settingsBtn) settingsBtn.style.display = 'flex';
             document.getElementById('game-area').style.display = 'flex'; // Ensure visible
@@ -499,6 +564,213 @@ const PracticeModule = {
         this.startTimer();
         this.render();
     },
+
+    // --- GRAMMAR UNJUMBLE SETTINGS ---
+    showGrammarUnjumbleSettings() {
+        this.toggleWordCountVisibility(true);
+        const settingsArea = document.getElementById('settings-area');
+        const gameArea = document.getElementById('game-area');
+        settingsArea.style.display = 'block';
+        gameArea.style.display = 'none';
+
+        const maxQuestions = this.words.length;
+
+        settingsArea.innerHTML = `
+            <div class="ws-settings-panel">
+                <h2>${this.grammarRule} - Unjumble</h2>
+                
+                <div class="settings-columns">
+                    <div class="settings-column">
+                        <div class="settings-group">
+                            <label>TIMER</label>
+                            <div class="radio-group">
+                                <label><input type="radio" name="timer" value="none" checked> None</label>
+                                <label><input type="radio" name="timer" value="up"> Count up</label>
+                                <label><input type="radio" name="timer" value="down"> Count down</label>
+                                <div class="timer-inputs">
+                                    <input type="number" id="timer-m" value="3" min="0" max="59"> m
+                                    <input type="number" id="timer-s" value="0" min="0" max="59"> s
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="settings-group">
+                            <label>NUMBER OF QUESTIONS</label>
+                            <div class="range-group">
+                                <input type="range" id="question-count-range" min="1" max="${maxQuestions}" value="${maxQuestions}">
+                                <span id="question-count-display">${maxQuestions} of ${maxQuestions}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-column">
+                        <div class="settings-group">
+                            <label>RANDOMIZE</label>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" id="shuffle-sentences" checked> Shuffle sentence order</label>
+                            </div>
+                        </div>
+                        
+                        <div class="settings-group">
+                            <label>INFO</label>
+                            <p style="color: #666; line-height: 1.5;">
+                                <i class="fa-solid fa-circle-info" style="color: var(--medium-slate-blue);"></i> 
+                                Arrange the scrambled words into the correct sentence order.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-actions">
+                    <button class="btn-secondary" onclick="PracticeModule.showModeSelection()"><i class="fa-solid fa-arrow-left"></i> Back to Game Modes</button>
+                    <button class="btn-primary start-game-btn" onclick="PracticeModule.startGrammarUnjumble()">Start Practice</button>
+                </div>
+            </div>
+        `;
+
+        // Add slider event listener
+        document.getElementById('question-count-range').addEventListener('input', (e) => {
+            const val = e.target.value;
+            document.getElementById('question-count-display').textContent = `${val} of ${maxQuestions}`;
+        });
+    },
+
+    startGrammarUnjumble() {
+        const timerType = document.querySelector('input[name="timer"]:checked').value;
+        const minutes = parseInt(document.getElementById('timer-m').value) || 0;
+        const seconds = parseInt(document.getElementById('timer-s').value) || 0;
+        const questionCount = parseInt(document.getElementById('question-count-range').value);
+        const shuffle = document.getElementById('shuffle-sentences').checked;
+
+        this.config.settings = {
+            ...this.config.settings,
+            timer: timerType,
+            timerValue: (minutes * 60) + seconds,
+            questionCount: questionCount,
+            shuffle: shuffle
+        };
+
+        // Apply question count limit
+        let questionSet = [...this.words];
+        if (shuffle) {
+            questionSet.sort(() => Math.random() - 0.5);
+        }
+        this.words = questionSet.slice(0, questionCount);
+
+        this.gameState.timeLeft = this.config.settings.timerValue;
+        this.gameState.isGameOver = false;
+        this.currentIndex = 0;
+
+        document.getElementById('settings-area').style.display = 'none';
+        document.getElementById('game-area').style.display = 'flex';
+
+        this.startTimer();
+        this.render();
+    },
+
+    // --- GRAMMAR QUIZ SETTINGS ---
+    showGrammarQuizSettings() {
+        this.toggleWordCountVisibility(true);
+        const settingsArea = document.getElementById('settings-area');
+        const gameArea = document.getElementById('game-area');
+        settingsArea.style.display = 'block';
+        gameArea.style.display = 'none';
+
+        const maxQuestions = this.words.length;
+
+        settingsArea.innerHTML = `
+            <div class="ws-settings-panel">
+                <h2>${this.grammarRule} - Quiz</h2>
+                
+                <div class="settings-columns">
+                    <div class="settings-column">
+                        <div class="settings-group">
+                            <label>TIMER</label>
+                            <div class="radio-group">
+                                <label><input type="radio" name="timer" value="none" checked> None</label>
+                                <label><input type="radio" name="timer" value="up"> Count up</label>
+                                <label><input type="radio" name="timer" value="down"> Count down</label>
+                                <div class="timer-inputs">
+                                    <input type="number" id="timer-m" value="5" min="0" max="59"> m
+                                    <input type="number" id="timer-s" value="0" min="0" max="59"> s
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="settings-group">
+                            <label>NUMBER OF QUESTIONS</label>
+                            <div class="range-group">
+                                <input type="range" id="question-count-range" min="1" max="${maxQuestions}" value="${maxQuestions}">
+                                <span id="question-count-display">${maxQuestions} of ${maxQuestions}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-column">
+                        <div class="settings-group">
+                            <label>RANDOMIZE</label>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" id="shuffle-questions" checked> Shuffle question order</label>
+                            </div>
+                        </div>
+                        
+                        <div class="settings-group">
+                            <label>INFO</label>
+                            <p style="color: #666; line-height: 1.5;">
+                                <i class="fa-solid fa-circle-info" style="color: var(--medium-slate-blue);"></i> 
+                                Choose the correct word to complete each sentence.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-actions">
+                    <button class="btn-secondary" onclick="PracticeModule.showModeSelection()"><i class="fa-solid fa-arrow-left"></i> Back to Game Modes</button>
+                    <button class="btn-primary start-game-btn" onclick="PracticeModule.startGrammarQuiz()">Start Practice</button>
+                </div>
+            </div>
+        `;
+
+        // Add slider event listener
+        document.getElementById('question-count-range').addEventListener('input', (e) => {
+            const val = e.target.value;
+            document.getElementById('question-count-display').textContent = `${val} of ${maxQuestions}`;
+        });
+    },
+
+    startGrammarQuiz() {
+        const timerType = document.querySelector('input[name="timer"]:checked').value;
+        const minutes = parseInt(document.getElementById('timer-m').value) || 0;
+        const seconds = parseInt(document.getElementById('timer-s').value) || 0;
+        const questionCount = parseInt(document.getElementById('question-count-range').value);
+        const shuffle = document.getElementById('shuffle-questions').checked;
+
+        this.config.settings = {
+            ...this.config.settings,
+            timer: timerType,
+            timerValue: (minutes * 60) + seconds,
+            questionCount: questionCount,
+            shuffle: shuffle
+        };
+
+        // Apply question count limit
+        let questionSet = [...this.words];
+        if (shuffle) {
+            questionSet.sort(() => Math.random() - 0.5);
+        }
+        this.words = questionSet.slice(0, questionCount);
+
+        this.gameState.timeLeft = this.config.settings.timerValue;
+        this.gameState.isGameOver = false;
+        this.currentIndex = 0;
+
+        document.getElementById('settings-area').style.display = 'none';
+        document.getElementById('game-area').style.display = 'flex';
+
+        this.startTimer();
+        this.render();
+    },
+
     showWordsearchSettings() {
         this.toggleWordCountVisibility(true);
         const settingsArea = document.getElementById('settings-area');
@@ -687,13 +959,21 @@ const PracticeModule = {
                 this.renderWordsearch(area);
                 break;
             case 'unjumble':
-                this.renderUnjumble(area);
+                if (this.isGrammarMode) {
+                    this.renderGrammarUnjumble(area);
+                } else {
+                    this.renderUnjumble(area);
+                }
                 break;
             case 'crossword':
                 this.renderCrossword(area);
                 break;
             case 'quiz':
-                this.renderQuiz(area);
+                if (this.isGrammarMode) {
+                    this.renderGrammarQuiz(area);
+                } else {
+                    this.renderQuiz(area);
+                }
                 break;
             default:
                 area.innerHTML = `<p>Mode ${this.config.mode} not implemented yet.</p>`;
@@ -2467,6 +2747,298 @@ const PracticeModule = {
         hintBtn.innerHTML = isHidden ?
             '<i class="fa-solid fa-eye-slash"></i> Hide hint' :
             '<i class="fa-solid fa-lightbulb"></i> Need a hint?';
+    },
+
+    // --- GRAMMAR UNJUMBLE RENDERING ---
+    renderGrammarUnjumble(container) {
+        const exercise = this.words[this.currentIndex];
+        const exerciseData = exercise.exerciseData;
+        const progress = ((this.currentIndex + 1) / this.words.length) * 100;
+
+        // Shuffle words if not already shuffled for this question
+        if (!exerciseData._shuffled) {
+            exerciseData._shuffled = [...exerciseData.words].sort(() => Math.random() - 0.5);
+        }
+
+        container.innerHTML = `
+            <div class="quiz-container">
+                <div class="quiz-progress-container">
+                    <div class="quiz-progress-text">
+                        <span>Question ${this.currentIndex + 1} of ${this.words.length}</span>
+                        <span>${Math.round(progress)}% Complete</span>
+                    </div>
+                    <div class="quiz-progress-bar-bg">
+                        <div class="quiz-progress-bar-fill" style="width: ${progress}%"></div>
+                    </div>
+                </div>
+
+                <div class="quiz-question-container">
+                    <h3 style="color: var(--indigo-velvet); margin-bottom: 20px;">Arrange the words to form a correct sentence</h3>
+                </div>
+
+                <div class="unjumble-grammar-container">
+                    <div class="unjumble-target-area" id="grammar-unjumble-target" 
+                         ondragover="PracticeModule.handleGrammarDragOver(event)"
+                         ondrop="PracticeModule.handleGrammarDrop(event)">
+                        <!-- Selected words will appear here -->
+                    </div>
+                    
+                    <div class="unjumble-source-area" id="grammar-unjumble-source"
+                         ondragover="PracticeModule.handleGrammarDragOver(event)"
+                         ondrop="PracticeModule.handleGrammarDrop(event)">
+                        ${exerciseData._shuffled.map((word, index) => `
+                            <div class="unjumble-word" draggable="true" data-word="${word}" data-index="${index}"
+                                 ondragstart="PracticeModule.handleGrammarDragStart(event)"
+                                 ondragend="PracticeModule.handleGrammarDragEnd(event)"
+                                 onclick="PracticeModule.handleGrammarWordClick(event)">
+                                ${word}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <div id="unjumble-feedback" style="min-height: 50px; text-align: center; margin-top: 20px;"></div>
+                
+                <div style="text-align: center; margin-top: 20px;">
+                    <button class="btn-primary" onclick="PracticeModule.checkGrammarUnjumble()">Check Answer</button>
+                    <button class="btn-secondary" onclick="PracticeModule.skipGrammarUnjumble()" style="margin-left: 10px;">Skip</button>
+                </div>
+            </div>
+        `;
+    },
+
+    handleGrammarDragStart(e) {
+        e.dataTransfer.setData('text/plain', e.target.dataset.word);
+        e.dataTransfer.effectAllowed = 'move';
+        e.target.classList.add('dragging');
+        // Delay opacity change so drag image is opaque
+        setTimeout(() => e.target.style.opacity = '0.5', 0);
+    },
+
+    handleGrammarDragEnd(e) {
+        e.target.classList.remove('dragging');
+        e.target.style.opacity = '1';
+        document.querySelectorAll('.unjumble-target-area, .unjumble-source-area').forEach(container => {
+            container.classList.remove('drag-over');
+        });
+    },
+
+    handleGrammarDragOver(e) {
+        e.preventDefault();
+        const container = e.target.closest('.unjumble-target-area, .unjumble-source-area');
+        if (container) {
+            container.classList.add('drag-over');
+
+            const afterElement = this.getDragAfterElement(container, e.clientX, e.clientY);
+            const draggable = document.querySelector('.dragging');
+
+            if (draggable) {
+                if (afterElement == null) {
+                    container.appendChild(draggable);
+                } else {
+                    container.insertBefore(draggable, afterElement);
+                }
+            }
+        }
+    },
+
+    handleGrammarDrop(e) {
+        e.preventDefault();
+        const container = e.target.closest('.unjumble-target-area, .unjumble-source-area');
+        if (container) {
+            container.classList.remove('drag-over');
+        }
+    },
+
+    getDragAfterElement(container, x, y) {
+        const draggableElements = [...container.querySelectorAll('.unjumble-word:not(.dragging)')];
+
+        return draggableElements.reduce((closest, child) => {
+            const box = child.getBoundingClientRect();
+            // Calculate distance to the center of the box
+            const boxCenterX = box.left + box.width / 2;
+            const boxCenterY = box.top + box.height / 2;
+            const distance = Math.hypot(x - boxCenterX, y - boxCenterY);
+
+            if (distance < closest.distance) {
+                return { distance: distance, element: child };
+            } else {
+                return closest;
+            }
+        }, { distance: Number.POSITIVE_INFINITY }).element;
+    },
+
+    handleGrammarWordClick(e) {
+        const wordEl = e.target;
+        const targetArea = document.getElementById('grammar-unjumble-target');
+        const sourceArea = document.getElementById('grammar-unjumble-source');
+
+        // Toggle between source and target
+        if (wordEl.parentElement.id === 'grammar-unjumble-source') {
+            targetArea.appendChild(wordEl);
+        } else {
+            sourceArea.appendChild(wordEl);
+        }
+    },
+
+    checkGrammarUnjumble() {
+        const exercise = this.words[this.currentIndex];
+        const exerciseData = exercise.exerciseData;
+        const targetArea = document.getElementById('grammar-unjumble-target');
+        const words = Array.from(targetArea.children).map(el => el.dataset.word);
+        const userAnswer = words.join(' ');
+        const correctAnswer = exerciseData.sentence;
+        const feedback = document.getElementById('unjumble-feedback');
+
+        if (userAnswer === correctAnswer) {
+            feedback.innerHTML = `
+                <div style="color: #2ECC71; font-weight: 800; font-size: 1.5rem; animation: bounce 0.5s ease;">
+                    <i class="fa-solid fa-circle-check"></i> Perfect! That's correct!
+                </div>
+            `;
+
+            setTimeout(() => {
+                // Reset shuffled state
+                delete exerciseData._shuffled;
+
+                if (this.currentIndex < this.words.length - 1) {
+                    this.currentIndex++;
+                    this.render();
+                } else {
+                    this.showSummary();
+                }
+            }, 1500);
+        } else {
+            feedback.innerHTML = `
+                <div style="color: #E74C3C; font-weight: 700; font-size: 1.2rem; animation: shake 0.5s ease;">
+                    <i class="fa-solid fa-circle-xmark"></i> Not quite! Try again.
+                </div>
+            `;
+
+            setTimeout(() => {
+                feedback.innerHTML = '';
+            }, 1500);
+        }
+    },
+
+    skipGrammarUnjumble() {
+        const exercise = this.words[this.currentIndex];
+        const exerciseData = exercise.exerciseData;
+        delete exerciseData._shuffled; // Reset for next time if revisited
+
+        if (this.currentIndex < this.words.length - 1) {
+            this.currentIndex++;
+            this.render();
+        } else {
+            this.showSummary();
+        }
+    },
+
+    // --- GRAMMAR QUIZ RENDERING ---
+    renderGrammarQuiz(container) {
+        const exercise = this.words[this.currentIndex];
+        const exerciseData = exercise.exerciseData;
+        const progress = ((this.currentIndex + 1) / this.words.length) * 100;
+
+        // Generate options: correct answer + distractors
+        let options = [exerciseData.answer];
+        if (exerciseData.distractors && exerciseData.distractors.length > 0) {
+            options = [...options, ...exerciseData.distractors];
+        } else {
+            // Fallback generic distractors if none provided
+            options = [exerciseData.answer, 'something', 'anything', 'nothing'];
+        }
+
+        // Shuffle options if not already shuffled
+        if (!exerciseData._shuffledOptions) {
+            exerciseData._shuffledOptions = [...new Set(options)].sort(() => Math.random() - 0.5);
+        }
+
+        container.innerHTML = `
+            <div class="quiz-container">
+                <div class="quiz-progress-container">
+                    <div class="quiz-progress-text">
+                        <span>Question ${this.currentIndex + 1} of ${this.words.length}</span>
+                        <span>${Math.round(progress)}% Complete</span>
+                    </div>
+                    <div class="quiz-progress-bar-bg">
+                        <div class="quiz-progress-bar-fill" style="width: ${progress}%"></div>
+                    </div>
+                </div>
+
+                <div class="quiz-question-container">
+                    <div class="quiz-sentence">
+                        ${exerciseData.sentence.replace('___', '<span class="blank" id="quiz-blank">____</span>')}
+                    </div>
+                </div>
+
+                <div class="quiz-options">
+                    ${exerciseData._shuffledOptions.map((option, index) => `
+                        <div class="quiz-option" 
+                             style="animation-delay: ${0.1 + (index * 0.1)}s"
+                             onclick="PracticeModule.checkGrammarQuizAnswer(this, '${option}')">
+                            ${option}
+                        </div>
+                    `).join('')}
+                </div>
+
+                <div id="quiz-feedback" style="min-height: 50px;"></div>
+            </div>
+        `;
+    },
+
+    checkGrammarQuizAnswer(optionEl, selectedOption) {
+        if (document.querySelector('.quiz-option.correct')) return;
+
+        const exercise = this.words[this.currentIndex];
+        const exerciseData = exercise.exerciseData;
+        const feedback = document.getElementById('quiz-feedback');
+        const blank = document.getElementById('quiz-blank');
+
+        if (selectedOption === exerciseData.answer) {
+            // Correct Answer
+            optionEl.classList.add('correct');
+            blank.textContent = exerciseData.answer;
+            blank.style.color = '#2ECC71';
+            blank.style.borderBottomStyle = 'solid';
+
+            // Disable other options
+            document.querySelectorAll('.quiz-option').forEach(opt => {
+                if (opt !== optionEl) opt.style.opacity = '0.5';
+                opt.style.pointerEvents = 'none';
+            });
+
+            feedback.innerHTML = `
+                <div style="color: #2ECC71; font-weight: 800; font-size: 1.5rem; animation: bounce 0.5s ease;">
+                    <i class="fa-solid fa-circle-check"></i> Excellent! That's correct!
+                </div>
+            `;
+
+            setTimeout(() => {
+                // Remove shuffled state for next session
+                delete exerciseData._shuffledOptions;
+
+                if (this.currentIndex < this.words.length - 1) {
+                    this.currentIndex++;
+                    this.render();
+                } else {
+                    this.showSummary();
+                }
+            }, 1800);
+        } else {
+            // Wrong Answer
+            optionEl.classList.add('wrong');
+            feedback.innerHTML = `
+                <div style="color: #E74C3C; font-weight: 700; font-size: 1.2rem; animation: shake 0.5s ease;">
+                    <i class="fa-solid fa-circle-xmark"></i> Not quite, try another one!
+                </div>
+            `;
+
+            setTimeout(() => {
+                optionEl.classList.remove('wrong');
+                feedback.innerHTML = '';
+            }, 1200);
+        }
     },
 
     // --- SHARED ---

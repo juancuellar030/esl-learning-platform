@@ -19,9 +19,9 @@ const grammarBank = [
             'Incorrect: Do he play tennis? \u2192 Correct: Does he play tennis?'
         ],
         exercises: [
-            {type: 'fill-blank', sentence: 'She ___ (go) to work every day.', answer: 'goes'},
-            {type: 'fill-blank', sentence: 'They ___ (play) soccer on weekends.', answer: 'play'},
-            {type: 'error-correction', sentence: 'He don\'t like vegetables.', answer: 'He doesn\'t like vegetables.'}
+            { type: 'fill-blank', sentence: 'She ___ (go) to work every day.', answer: 'goes' },
+            { type: 'fill-blank', sentence: 'They ___ (play) soccer on weekends.', answer: 'play' },
+            { type: 'error-correction', sentence: 'He don\'t like vegetables.', answer: 'He doesn\'t like vegetables.' }
         ]
     },
     {
@@ -42,9 +42,9 @@ const grammarBank = [
             'Incorrect: I went to a school. \u2192 Correct: I went to school. (no article for general places)'
         ],
         exercises: [
-            {type: 'fill-blank', sentence: 'I have ___ umbrella.', answer: 'an'},
-            {type: 'fill-blank', sentence: 'She is ___ doctor.', answer: 'a'},
-            {type: 'fill-blank', sentence: '___ moon is beautiful tonight.', answer: 'The'}
+            { type: 'fill-blank', sentence: 'I have ___ umbrella.', answer: 'an' },
+            { type: 'fill-blank', sentence: 'She is ___ doctor.', answer: 'a' },
+            { type: 'fill-blank', sentence: '___ moon is beautiful tonight.', answer: 'The' }
         ]
     },
     {
@@ -66,8 +66,8 @@ const grammarBank = [
             'Incorrect: They are play soccer. \u2192 Correct: They are playing soccer.'
         ],
         exercises: [
-            {type: 'fill-blank', sentence: 'She ___ (read) a book right now.', answer: 'is reading'},
-            {type: 'fill-blank', sentence: 'We ___ (watch) a movie.', answer: 'are watching'}
+            { type: 'fill-blank', sentence: 'She ___ (read) a book right now.', answer: 'is reading' },
+            { type: 'fill-blank', sentence: 'We ___ (watch) a movie.', answer: 'are watching' }
         ]
     },
     {
@@ -89,9 +89,9 @@ const grammarBank = [
             'Incorrect: See you in Monday. \u2192 Correct: See you on Monday.'
         ],
         exercises: [
-            {type: 'fill-blank', sentence: 'I have class ___ 3 PM.', answer: 'at'},
-            {type: 'fill-blank', sentence: 'Her birthday is ___ July.', answer: 'in'},
-            {type: 'fill-blank', sentence: 'We meet ___ Fridays.', answer: 'on'}
+            { type: 'fill-blank', sentence: 'I have class ___ 3 PM.', answer: 'at' },
+            { type: 'fill-blank', sentence: 'Her birthday is ___ July.', answer: 'in' },
+            { type: 'fill-blank', sentence: 'We meet ___ Fridays.', answer: 'on' }
         ]
     },
     {
@@ -112,8 +112,8 @@ const grammarBank = [
             'Incorrect: She could swam last year. \u2192 Correct: She could swim last year.'
         ],
         exercises: [
-            {type: 'fill-blank', sentence: 'I ___ speak three languages.', answer: 'can'},
-            {type: 'fill-blank', sentence: '___ you open the window?', answer: 'Could'}
+            { type: 'fill-blank', sentence: 'I ___ speak three languages.', answer: 'can' },
+            { type: 'fill-blank', sentence: '___ you open the window?', answer: 'Could' }
         ]
     },
     {
@@ -135,9 +135,9 @@ const grammarBank = [
             'Incorrect: To open the door. \u2192 Correct: Open the door.'
         ],
         exercises: [
-            {type: 'fill-blank', sentence: '___ (open) the window, please.', answer: 'Open'},
-            {type: 'fill-blank', sentence: '___ (not/talk) loudly.', answer: 'Don\'t talk'},
-            {type: 'error-correction', sentence: 'You eat your lunch.', answer: 'Eat your lunch.'}
+            { type: 'fill-blank', sentence: '___ (open) the window, please.', answer: 'Open' },
+            { type: 'fill-blank', sentence: '___ (not/talk) loudly.', answer: 'Don\'t talk' },
+            { type: 'error-correction', sentence: 'You eat your lunch.', answer: 'Eat your lunch.' }
         ]
     },
     {
@@ -158,8 +158,8 @@ const grammarBank = [
             'Incorrect: Lets play. (missing apostrophe) \u2192 Correct: Let\'s play.'
         ],
         exercises: [
-            {type: 'fill-blank', sentence: 'It\'s sunny. ___ go outside.', answer: 'Let\'s'},
-            {type: 'error-correction', sentence: 'Let\'s playing soccer.', answer: 'Let\'s play soccer.'}
+            { type: 'fill-blank', sentence: 'It\'s sunny. ___ go outside.', answer: 'Let\'s' },
+            { type: 'error-correction', sentence: 'Let\'s playing soccer.', answer: 'Let\'s play soccer.' }
         ]
     },
     {
@@ -181,11 +181,11 @@ const grammarBank = [
             'Incorrect: Might I go to the bathroom? (Too formal/archaic) \u2192 Correct: May I go to the bathroom?'
         ],
         exercises: [
-            {type: 'fill-blank', sentence: 'Look at those clouds! It ___ rain.', answer: 'may'},
-            {type: 'fill-blank', sentence: 'I ___ join you later, but I am busy.', answer: 'might'},
-            {type: 'sentence-unjumble', sentence: 'It might rain today', words: ['It', 'might', 'rain', 'today']},
-            {type: 'sentence-unjumble', sentence: 'May I go to the bathroom', words: ['May', 'I', 'go', 'to', 'the', 'bathroom']},
-            {type: 'sentence-unjumble', sentence: 'You may eat your lunch now', words: ['You', 'may', 'eat', 'your', 'lunch', 'now']}
+            { type: 'fill-blank', sentence: 'Look at those clouds! It ___ rain.', answer: 'may' },
+            { type: 'fill-blank', sentence: 'I ___ join you later, but I am busy.', answer: 'might' },
+            { type: 'sentence-unjumble', sentence: 'It might rain today', words: ['It', 'might', 'rain', 'today'] },
+            { type: 'sentence-unjumble', sentence: 'May I go to the bathroom', words: ['May', 'I', 'go', 'to', 'the', 'bathroom'] },
+            { type: 'sentence-unjumble', sentence: 'You may eat your lunch now', words: ['You', 'may', 'eat', 'your', 'lunch', 'now'] }
         ]
     },
     {
@@ -209,9 +209,9 @@ const grammarBank = [
             'Incorrect: Why you cry? \u2192 Correct: Why are you crying?'
         ],
         exercises: [
-            {type: 'fill-blank', sentence: '___ is your name?', answer: 'What'},
-            {type: 'fill-blank', sentence: '___ do you live?', answer: 'Where'},
-            {type: 'fill-blank', sentence: '___ is that girl?', answer: 'Who'}
+            { type: 'fill-blank', sentence: '___ is your name?', answer: 'What' },
+            { type: 'fill-blank', sentence: '___ do you live?', answer: 'Where' },
+            { type: 'fill-blank', sentence: '___ is that girl?', answer: 'Who' }
         ]
     },
     {
@@ -231,8 +231,8 @@ const grammarBank = [
             'Incorrect: Why do you eat? Yes, I do. \u2192 Correct: Because I am hungry.'
         ],
         exercises: [
-            {type: 'fill-blank', sentence: '___ are you sad?', answer: 'Why'},
-            {type: 'fill-blank', sentence: 'Why are you smiling? ___ I am happy.', answer: 'Because'}
+            { type: 'fill-blank', sentence: '___ are you sad?', answer: 'Why' },
+            { type: 'fill-blank', sentence: 'Why are you smiling? ___ I am happy.', answer: 'Because' }
         ]
     },
     {
@@ -252,9 +252,9 @@ const grammarBank = [
             'Incorrect: March is after April. \u2192 Correct: March is before April.'
         ],
         exercises: [
-            {type: 'sentence-unjumble', sentence: 'January is the first month', words: ['January', 'is', 'the', 'first', 'month']},
-            {type: 'sentence-unjumble', sentence: 'February comes after January', words: ['February', 'comes', 'after', 'January']},
-            {type: 'fill-blank', sentence: 'December is ___ (after/before) November.', answer: 'after'}
+            { type: 'sentence-unjumble', sentence: 'January is the first month', words: ['January', 'is', 'the', 'first', 'month'] },
+            { type: 'sentence-unjumble', sentence: 'February comes after January', words: ['February', 'comes', 'after', 'January'] },
+            { type: 'fill-blank', sentence: 'December is ___ (after/before) November.', answer: 'after' }
         ]
     },
     {
@@ -274,9 +274,9 @@ const grammarBank = [
             'Incorrect: Wait in the platform. \u2192 Correct: Wait on the platform.'
         ],
         exercises: [
-            {type: 'sentence-unjumble', sentence: 'I go to school by car', words: ['I', 'go', 'to', 'school', 'by', 'car']},
-            {type: 'sentence-unjumble', sentence: 'The train is at the station', words: ['The', 'train', 'is', 'at', 'the', 'station']},
-            {type: 'fill-blank', sentence: 'We are going ___ a journey.', answer: 'on'}
+            { type: 'sentence-unjumble', sentence: 'I go to school by car', words: ['I', 'go', 'to', 'school', 'by', 'car'] },
+            { type: 'sentence-unjumble', sentence: 'The train is at the station', words: ['The', 'train', 'is', 'at', 'the', 'station'] },
+            { type: 'fill-blank', sentence: 'We are going ___ a journey.', answer: 'on' }
         ]
     },
     {
@@ -296,9 +296,25 @@ const grammarBank = [
             'Incorrect: Someone are calling. \u2192 Correct: Someone is calling. (Indefinite pronouns are singular)'
         ],
         exercises: [
-            {type: 'fill-blank', sentence: 'I am hungry. I want ___ to eat.', answer: 'something'},
-            {type: 'fill-blank', sentence: '___ is knocking at the door.', answer: 'Someone'},
-            {type: 'fill-blank', sentence: 'Is there ___ in the garden?', answer: 'anyone'}
+            // Fill-blank exercises for quiz mode (Context-rich for 9-year-olds)
+            { type: 'fill-blank', sentence: 'I am very hungry! I want ___ to eat for lunch.', answer: 'something', distractors: ['anything', 'nothing', 'everything'] },
+            { type: 'fill-blank', sentence: 'The box is empty. There is ___ inside it.', answer: 'nothing', distractors: ['something', 'anything', 'everything'] },
+            { type: 'fill-blank', sentence: '___ is knocking at the door. Go see who it is!', answer: 'Someone', distractors: ['Anyone', 'Everyone', 'No one'] },
+            { type: 'fill-blank', sentence: 'I can\'t find my keys ___! I looked in my bag and on the table.', answer: 'anywhere', distractors: ['somewhere', 'nowhere', 'everywhere'] },
+            { type: 'fill-blank', sentence: '___ needs to do their homework before playing games.', answer: 'Everyone', distractors: ['Someone', 'Anyone', 'No one'] },
+            { type: 'fill-blank', sentence: 'Is there ___ home? I want to visit.', answer: 'anyone', distractors: ['someone', 'no one', 'everyone'] },
+            { type: 'fill-blank', sentence: 'I am bored. I have ___ to do today.', answer: 'nothing', distractors: ['something', 'anything', 'everything'] },
+            { type: 'fill-blank', sentence: 'Let\'s go ___ fun this weekend, like the park!', answer: 'somewhere', distractors: ['anywhere', 'nowhere', 'everywhere'] },
+
+            // Sentence Unjumble exercises (Clearer sentences)
+            { type: 'sentence-unjumble', sentence: 'Someone is knocking at the door.', words: ['Someone', 'is', 'knocking', 'at', 'the', 'door.'] },
+            { type: 'sentence-unjumble', sentence: 'I cannot find my book anywhere.', words: ['I', 'cannot', 'find', 'my', 'book', 'anywhere.'] },
+            { type: 'sentence-unjumble', sentence: 'Everyone needs to listen to the teacher.', words: ['Everyone', 'needs', 'to', 'listen', 'to', 'the', 'teacher.'] },
+            { type: 'sentence-unjumble', sentence: 'There is nothing in the fridge.', words: ['There', 'is', 'nothing', 'in', 'the', 'fridge.'] },
+            { type: 'sentence-unjumble', sentence: 'Does anyone have a red pen?', words: ['Does', 'anyone', 'have', 'a', 'red', 'pen?'] },
+            { type: 'sentence-unjumble', sentence: 'I want to go somewhere new.', words: ['I', 'want', 'to', 'go', 'somewhere', 'new.'] },
+            { type: 'sentence-unjumble', sentence: 'Everything is ready for the party.', words: ['Everything', 'is', 'ready', 'for', 'the', 'party.'] },
+            { type: 'sentence-unjumble', sentence: 'No one likes to be sick.', words: ['No', 'one', 'likes', 'to', 'be', 'sick.'] }
         ]
     },
     {
@@ -318,9 +334,9 @@ const grammarBank = [
             'Incorrect: It\'s fifteen past two. \u2192 Correct: It\'s quarter past two.'
         ],
         exercises: [
-            {type: 'fill-blank', sentence: '2:30 is ___ past two.', answer: 'half'},
-            {type: 'fill-blank', sentence: '2:45 is ___ to three.', answer: 'quarter'},
-            {type: 'fill-blank', sentence: '2:00 is two ___.', answer: 'o\'clock'}
+            { type: 'fill-blank', sentence: '2:30 is ___ past two.', answer: 'half' },
+            { type: 'fill-blank', sentence: '2:45 is ___ to three.', answer: 'quarter' },
+            { type: 'fill-blank', sentence: '2:00 is two ___.', answer: 'o\'clock' }
         ]
     }
 ];

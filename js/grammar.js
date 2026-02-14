@@ -2,7 +2,7 @@
 const GrammarModule = {
     currentGrammar: null,
     inkController: null,
-    
+
     // Constants for Brave-style Toolbar
     BRUSH_SIZES: {
         PEN: [
@@ -24,7 +24,7 @@ const GrammarModule = {
             { size: 32, icon: 'font', scale: 1.4 }
         ]
     },
-    
+
     // Softer Palette
     BRUSH_COLORS: [
         { color: '#2c3e50', label: 'Charcoal' },
@@ -47,18 +47,18 @@ const GrammarModule = {
         this.renderGrammarList();
         this.setupEventListeners();
     },
-    
+
     renderGrammarList(category = 'all', level = 'all') {
         const list = document.getElementById('grammar-list');
         let rules = window.grammarBank;
-        
+
         if (category !== 'all') {
             rules = rules.filter(g => g.category === category);
         }
         if (level !== 'all') {
             rules = rules.filter(g => g.level === level);
         }
-        
+
         list.innerHTML = rules.map(grammar => `
             <div class="grammar-card" data-id="${grammar.id}">
                 <h4>${grammar.rule}</h4>
@@ -69,7 +69,7 @@ const GrammarModule = {
                 </div>
             </div>
         `).join('');
-        
+
         // Add click handlers
         document.querySelectorAll('.grammar-card').forEach(card => {
             card.addEventListener('click', () => {
@@ -77,17 +77,17 @@ const GrammarModule = {
             });
         });
     },
-    
+
     showGrammarLesson(grammarId) {
         const grammar = window.grammarBank.find(g => g.id === grammarId);
-        if (!grammar) return; 
-        
+        if (!grammar) return;
+
         this.currentGrammar = grammar;
-        
+
         const container = document.getElementById('grammar-lesson-container');
-        
+
         let contentHtml = '';
-        
+
         if (grammar.rule === 'May vs. Might') {
             contentHtml = `
                 <div class="grammar-infographic-card">
@@ -443,7 +443,7 @@ const GrammarModule = {
         `;
 
         container.style.display = 'block';
-        container.scrollIntoView({behavior: 'smooth'});
+        container.scrollIntoView({ behavior: 'smooth' });
 
         // Re-attach event listeners
         document.getElementById('generate-grammar-exercise').addEventListener('click', () => {
@@ -453,7 +453,7 @@ const GrammarModule = {
         document.getElementById('toggle-annotation-btn').addEventListener('click', () => {
             this.toggleAnnotationMode();
         });
-        
+
         // Initialize Ink Controller
         this.inkController = new InkController('grammar-canvas', 'grammar-content-wrapper');
         this.initToolbar();
@@ -465,7 +465,7 @@ const GrammarModule = {
         const sizeDropdownContent = document.getElementById('size-dropdown-content');
         const colorDropdownBtn = document.getElementById('color-dropdown-btn');
         const colorDropdownContent = document.getElementById('color-dropdown-content');
-        
+
         // Tool Selection
         toolbar.querySelectorAll('[data-tool]').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -509,7 +509,7 @@ const GrammarModule = {
         const selector = document.getElementById('size-selector');
         const tool = this.inkController.currentTool;
         let sizes = [];
-        
+
         if (tool === 'pen' || tool === 'eraser') {
             sizes = this.BRUSH_SIZES.PEN;
         } else if (tool === 'highlighter') {
@@ -530,9 +530,9 @@ const GrammarModule = {
             btn.addEventListener('click', (e) => {
                 const size = parseInt(btn.dataset.size);
                 this.inkController.setLineWidth(size);
-                this.updateSizeSelector(); 
+                this.updateSizeSelector();
                 // Update button indicator
-                document.getElementById('current-size-indicator').style.transform = `scale(${btn.querySelector('div').style.width.replace('px','')/8})`;
+                document.getElementById('current-size-indicator').style.transform = `scale(${btn.querySelector('div').style.width.replace('px', '') / 8})`;
             });
         });
     },
@@ -563,7 +563,7 @@ const GrammarModule = {
                 document.getElementById('current-color-indicator').style.backgroundColor = btn.dataset.color;
             });
         });
-        
+
         document.getElementById('current-color-indicator').style.backgroundColor = this.inkController.color;
     },
 
@@ -572,7 +572,7 @@ const GrammarModule = {
         const toolbar = document.getElementById('annotation-toolbar');
         const btn = document.getElementById('toggle-annotation-btn');
         const contentDiv = document.getElementById('grammar-html-content');
-        
+
         if (isModeActive) {
             toolbar.style.display = 'flex';
             document.getElementById('grammar-content-wrapper').style.borderColor = 'var(--indigo-velvet)';
@@ -590,94 +590,27 @@ const GrammarModule = {
 
     generateExercises() {
         if (!this.currentGrammar) return;
-        
-        const display = document.getElementById('grammar-exercise-display');
+
         const grammar = this.currentGrammar;
-        
-        display.innerHTML = `
-            <div style="background: #f8f9fa; padding: 30px; border-radius: 15px; margin-top: 20px;">
-                <h3 style="color: #667eea; margin-bottom: 30px;">Practice Exercises</h3>
-                
-                <div id="exercises-list">
-                    ${grammar.exercises.map((ex, idx) => {
-                        if (ex.type === 'fill-blank') {
-                            return `
-                                <div class="exercise-item" style="background: white; padding: 20px; border-radius: 10px; margin-bottom: 15px;">
-                                    <h4 style="margin-bottom: 10px; color: var(--indigo-velvet);">Fill in the Blank</h4>
-                                    <p style="font-size: 1.2rem; margin-bottom: 10px;">
-                                        ${ex.sentence}
-                                    </p>
-                                    <input type="text" data-answer="${ex.answer}" 
-                                           style="width: 100%; padding: 10px; font-size: 1.1rem; border: 2px solid #ddd; border-radius: 8px;"
-                                           placeholder="Your answer...">
-                                    <div class="result" style="margin-top: 10px; font-weight: bold;"></div>
-                                </div>
-                            `;
-                        } else if (ex.type === 'sentence-unjumble') {
-                            const shuffled = [...ex.words].sort(() => Math.random() - 0.5);
-                            return `
-                                <div class="unjumble-exercise" data-answer="${ex.sentence}">
-                                    <h4 style="margin-bottom: 10px; color: var(--indigo-velvet);">Unjumble the Sentence</h4>
-                                    <p class="unjumble-instruction">Drag the words or click them in order:</p>
-                                    <div class="unjumble-feedback"></div>
-                                    <div class="unjumble-container target-area" id="target-${idx}"
-                                         ondragover="GrammarModule.handleDragOver(event)"
-                                         ondragleave="this.classList.remove('drag-over')"
-                                         ondrop="this.classList.remove('drag-over')">
-                                        <!-- Selected words will go here -->
-                                    </div>
-                                    <div class="unjumble-container source-area" id="source-${idx}"
-                                         ondragover="GrammarModule.handleDragOver(event)"
-                                         ondragleave="this.classList.remove('drag-over')"
-                                         ondrop="this.classList.remove('drag-over')">
-                                        ${shuffled.map(word => `
-                                            <div class="unjumble-word" 
-                                                 draggable="true" 
-                                                 ondragstart="GrammarModule.handleDragStart(event)" 
-                                                 ondragend="GrammarModule.handleDragEnd(event)"
-                                                 onclick="GrammarModule.handleUnjumbleClick(this, ${idx})">${word}</div>
-                                        `).join('')}
-                                    </div>
-                                    <div class="result" style="margin-top: 10px; font-weight: bold;"></div>
-                                </div>
-                            `;
-                        } else if (ex.type === 'error-correction') {
-                             return `
-                                <div class="exercise-item" style="background: white; padding: 20px; border-radius: 10px; margin-bottom: 15px;">
-                                    <h4 style="margin-bottom: 10px; color: var(--indigo-velvet);">Correct the Error</h4>
-                                    <p style="font-size: 1.2rem; margin-bottom: 10px; color: #dc3545; font-style: italic;">
-                                        ${ex.sentence}
-                                    </p>
-                                    <input type="text" data-answer="${ex.answer}" 
-                                           style="width: 100%; padding: 10px; font-size: 1.1rem; border: 2px solid #ddd; border-radius: 8px;"
-                                           placeholder="Write the correct sentence...">
-                                    <div class="result" style="margin-top: 10px; font-weight: bold;"></div>
-                                </div>
-                            `;
-                        }
-                        return '';
-                    }).join('')}
-                </div>
-                
-                <button class="btn-primary" id="check-grammar-answers" style="width: 100%; padding: 15px; font-size: 1.2rem;">
-                    Check All Answers
-                </button>
-                
-                <div id="grammar-score" style="text-align: center; margin-top: 20px; font-size: 1.3rem; font-weight: bold;"></div>
-            </div>
-        `;
-        
-        document.getElementById('check-grammar-answers').addEventListener('click', () => {
-            this.checkAnswers();
-        });
-        
-        display.scrollIntoView({behavior: 'smooth'});
+
+        // Store grammar exercises in localStorage
+        const grammarPracticeData = {
+            grammarId: grammar.id,
+            grammarRule: grammar.rule,
+            exercises: grammar.exercises
+        };
+
+        localStorage.setItem('grammarPracticeData', JSON.stringify(grammarPracticeData));
+
+        // Open practice.html in a new tab
+        const practiceUrl = `practice.html?mode=grammar-practice&grammarId=${grammar.id}`;
+        window.open(practiceUrl, '_blank');
     },
 
     handleUnjumbleClick(wordEl, idx) {
         const source = document.getElementById(`source-${idx}`);
         const target = document.getElementById(`target-${idx}`);
-        
+
         if (wordEl.parentElement === source) {
             target.appendChild(wordEl);
         } else {
@@ -700,7 +633,7 @@ const GrammarModule = {
         e.preventDefault();
         const container = e.currentTarget;
         container.classList.add('drag-over');
-        
+
         const dragging = document.querySelector('.dragging');
         if (!dragging) return;
 
@@ -725,7 +658,7 @@ const GrammarModule = {
             }
         }, { offset: Number.NEGATIVE_INFINITY }).element;
     },
-    
+
     checkAnswers() {
         const display = document.getElementById('grammar-exercise-display');
         let correct = 0;
@@ -738,7 +671,7 @@ const GrammarModule = {
             const answer = input.value.trim().toLowerCase().replace(/[.,!?;]$/, '');
             const correctAnswer = input.dataset.answer.toLowerCase().replace(/[.,!?;]$/, '');
             const result = input.nextElementSibling;
-            
+
             if (answer === correctAnswer) {
                 result.innerHTML = '✅ Correct!';
                 result.style.color = '#28a745';
@@ -759,7 +692,7 @@ const GrammarModule = {
             const result = ex.querySelector('.result');
             const userSentence = Array.from(targetArea.children).map(el => el.textContent).join(' ');
             const correctAnswer = ex.dataset.answer;
-            
+
             // Clean both for comparison (remove trailing punctuation for better match)
             const cleanUser = userSentence.toLowerCase().replace(/[.,!?;]$/, '');
             const cleanCorrect = correctAnswer.toLowerCase().replace(/[.,!?;]$/, '');
@@ -777,23 +710,23 @@ const GrammarModule = {
                 targetArea.querySelectorAll('.unjumble-word').forEach(w => w.classList.add('incorrect-pos'));
             }
         });
-        
+
         const score = document.getElementById('grammar-score');
         const percentage = total > 0 ? Math.round((correct / total) * 100) : 0;
         score.innerHTML = `Score: ${correct}/${total} (${percentage}%)`;
     },
-    
+
     setupEventListeners() {
         const catFilter = document.getElementById('grammar-category');
         const lvlFilter = document.getElementById('grammar-level');
-        
+
         if (catFilter) {
             catFilter.addEventListener('change', (e) => {
                 const level = document.getElementById('grammar-level').value;
                 this.renderGrammarList(e.target.value, level);
             });
         }
-        
+
         if (lvlFilter) {
             lvlFilter.addEventListener('change', (e) => {
                 const category = document.getElementById('grammar-category').value;
@@ -820,7 +753,7 @@ function getStroke(points, options = {}) {
 
     const totalPoints = points.length;
     const minPressure = 0.5;
-    
+
     // Process points to add simulated pressure if needed
     const pts = points.map((p, i) => {
         let pressure = p.pressure;
@@ -834,12 +767,12 @@ function getStroke(points, options = {}) {
 
     const leftPts = [];
     const rightPts = [];
-    
+
     let prev = pts[0];
-    
+
     for (let i = 0; i < totalPoints; i++) {
         let curr = pts[i];
-        
+
         // Width based on pressure
         let width = size * (1 - thinning * (1 - curr.pressure));
         width = Math.max(width, size * 0.2); // Min width check
@@ -864,22 +797,22 @@ function getStroke(points, options = {}) {
             // Direction vector
             const dx = curr.x - prev.x;
             const dy = curr.y - prev.y;
-            const dist = Math.sqrt(dx*dx + dy*dy);
-            
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
             if (dist === 0) continue;
-            
+
             // Normal
             const nx = -dy / dist;
             const ny = dx / dist;
-            
+
             const r = width / 2;
             leftPts.push({ x: curr.x + nx * r, y: curr.y + ny * r });
             rightPts.push({ x: curr.x - nx * r, y: curr.y - ny * r });
         }
-        
+
         prev = curr;
     }
-    
+
     return leftPts.concat(rightPts.reverse());
 }
 
@@ -906,24 +839,24 @@ class InkController {
         this.canvas = document.getElementById(canvasId);
         this.wrapper = document.getElementById(wrapperId);
         this.ctx = this.canvas.getContext('2d');
-        
+
         this.elements = []; // Array of { type, points, color, size, text, x, y, ... }
         this.currentStroke = null;
         this.selectedElement = null;
         this.draggingElement = null;
         this.dragOffset = { x: 0, y: 0 };
-        
+
         this.isActive = false;
         this.currentTool = 'pen';
         this.color = '#2c3e50';
         this.lineWidth = 4;
-        
+
         this.resizeObserver = new ResizeObserver(() => this.resizeCanvas());
         this.resizeObserver.observe(this.wrapper);
-        
+
         this.setupEvents();
     }
-    
+
     toggleActive() {
         this.isActive = !this.isActive;
         this.canvas.style.pointerEvents = this.isActive ? 'auto' : 'none';
@@ -931,26 +864,26 @@ class InkController {
         this.render();
         return this.isActive;
     }
-    
+
     setTool(tool) {
         this.currentTool = tool;
         this.selectedElement = null;
-        
+
         if (tool === 'pen') {
             this.lineWidth = 4;
             this.color = '#2c3e50';
         } else if (tool === 'highlighter') {
             this.lineWidth = 20;
-            this.color = '#fff9c4'; 
+            this.color = '#fff9c4';
         } else if (tool === 'eraser') {
             this.lineWidth = 30;
         } else if (tool === 'text') {
             // Text defaults
         }
-        
+
         this.render();
     }
-    
+
     setColor(color) {
         this.color = color;
         if (this.selectedElement && this.selectedElement.type === 'text') {
@@ -958,7 +891,7 @@ class InkController {
             this.render();
         }
     }
-    
+
     setLineWidth(width) {
         this.lineWidth = width;
         if (this.selectedElement && this.selectedElement.type === 'text') {
@@ -966,22 +899,22 @@ class InkController {
             this.render();
         }
     }
-    
+
     clear() {
         this.elements = [];
         this.render();
     }
-    
+
     resizeCanvas() {
         const rect = this.wrapper.getBoundingClientRect();
         this.canvas.width = rect.width;
         this.canvas.height = rect.height;
         this.render();
     }
-    
+
     render() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        
+
         // Draw all elements
         this.elements.forEach(el => {
             if (el.type === 'stroke') {
@@ -990,18 +923,18 @@ class InkController {
                 this.drawText(el);
             }
         });
-        
+
         // Draw current stroke being drawn
         if (this.currentStroke) {
             this.drawStroke(this.currentStroke);
         }
-        
+
         // Draw selection box
         if (this.selectedElement) {
             this.drawSelection(this.selectedElement);
         }
     }
-    
+
     drawStroke(stroke) {
         const outlinePoints = getStroke(stroke.points, {
             size: stroke.size,
@@ -1010,13 +943,13 @@ class InkController {
             streamline: 0.5,
             simulatePressure: true
         });
-        
+
         if (outlinePoints.length === 0) return;
 
         this.ctx.fillStyle = stroke.color;
         this.ctx.globalAlpha = stroke.tool === 'highlighter' ? 0.5 : 1.0;
         if (stroke.tool === 'highlighter') this.ctx.globalCompositeOperation = 'multiply';
-        
+
         this.ctx.beginPath();
         this.ctx.moveTo(outlinePoints[0].x, outlinePoints[0].y);
         for (let i = 1; i < outlinePoints.length; i++) {
@@ -1024,17 +957,17 @@ class InkController {
         }
         this.ctx.closePath();
         this.ctx.fill();
-        
+
         this.ctx.globalAlpha = 1.0;
         this.ctx.globalCompositeOperation = 'source-over';
     }
-    
+
     drawText(textEl) {
         this.ctx.font = `${textEl.size}px 'Reddit Sans', sans-serif`;
         this.ctx.fillStyle = textEl.color;
         this.ctx.fillText(textEl.text, textEl.x, textEl.y);
     }
-    
+
     drawSelection(el) {
         let bbox;
         if (el.type === 'text') {
@@ -1051,16 +984,16 @@ class InkController {
             let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
             el.points.forEach(p => { minX = Math.min(minX, p.x); minY = Math.min(minY, p.y); maxX = Math.max(maxX, p.x); maxY = Math.max(maxY, p.y); });
             const pad = el.size / 2 + 5;
-            bbox = { x: minX - pad, y: minY - pad, width: maxX - minX + pad*2, height: maxY - minY + pad*2 };
+            bbox = { x: minX - pad, y: minY - pad, width: maxX - minX + pad * 2, height: maxY - minY + pad * 2 };
         }
-        
+
         this.ctx.strokeStyle = '#3d348b';
         this.ctx.lineWidth = 1;
         this.ctx.setLineDash([5, 5]);
         this.ctx.strokeRect(bbox.x, bbox.y, bbox.width, bbox.height);
         this.ctx.setLineDash([]);
     }
-    
+
     getPointerPos(e) {
         const rect = this.canvas.getBoundingClientRect();
         return {
@@ -1069,7 +1002,7 @@ class InkController {
             pressure: e.pressure
         };
     }
-    
+
     hitTest(x, y) {
         // Reverse iterate to find top-most element
         for (let i = this.elements.length - 1; i >= 0; i--) {
@@ -1099,12 +1032,12 @@ class InkController {
         }
         return null;
     }
-    
+
     setupEvents() {
         const start = (e) => {
             if (!this.isActive) return;
             const pos = this.getPointerPos(e);
-            
+
             if (this.currentTool === 'text') {
                 // Check if clicking existing text to edit/move
                 const hit = this.hitTest(pos.x, pos.y);
@@ -1119,7 +1052,7 @@ class InkController {
                 this.createText(pos.x, pos.y);
                 return;
             }
-            
+
             if (this.currentTool === 'eraser') {
                 // Eraser logic
                 const hit = this.hitTest(pos.x, pos.y);
@@ -1131,7 +1064,7 @@ class InkController {
                 this.isDrawing = true; // Drag to erase
                 return;
             }
-            
+
             // Pen/Highlighter
             this.isDrawing = true;
             this.currentStroke = {
@@ -1143,18 +1076,18 @@ class InkController {
             };
             this.render();
         };
-        
+
         const move = (e) => {
             if (!this.isActive) return;
             const pos = this.getPointerPos(e);
-            
+
             if (this.draggingElement) {
                 this.draggingElement.x = pos.x - this.dragOffset.x;
                 this.draggingElement.y = pos.y - this.dragOffset.y;
                 this.render();
                 return;
             }
-            
+
             if (this.currentTool === 'eraser' && this.isDrawing) {
                 const hit = this.hitTest(pos.x, pos.y);
                 if (hit) {
@@ -1163,20 +1096,20 @@ class InkController {
                 }
                 return;
             }
-            
+
             if (this.isDrawing && this.currentStroke) {
                 this.currentStroke.points.push(pos);
                 this.render();
             }
         };
-        
+
         const end = () => {
             this.draggingElement = null;
             if (this.currentTool === 'eraser') {
                 this.isDrawing = false;
                 return;
             }
-            
+
             if (this.isDrawing && this.currentStroke) {
                 this.isDrawing = false;
                 this.elements.push(this.currentStroke);
@@ -1184,7 +1117,7 @@ class InkController {
                 this.render();
             }
         };
-        
+
         // Double click to edit text
         const dblClick = (e) => {
             if (!this.isActive) return;
@@ -1194,28 +1127,28 @@ class InkController {
                 this.editText(hit);
             }
         };
-        
+
         this.canvas.addEventListener('mousedown', start);
         this.canvas.addEventListener('mousemove', move);
         this.canvas.addEventListener('mouseup', end);
         this.canvas.addEventListener('dblclick', dblClick);
-        
+
         // Touch support
         this.canvas.addEventListener('touchstart', (e) => {
-            if(e.touches.length === 1) {
+            if (e.touches.length === 1) {
                 e.preventDefault();
                 start(e.touches[0]);
             }
-        }, {passive: false});
+        }, { passive: false });
         this.canvas.addEventListener('touchmove', (e) => {
-            if(e.touches.length === 1) {
+            if (e.touches.length === 1) {
                 e.preventDefault();
                 move(e.touches[0]);
             }
-        }, {passive: false});
+        }, { passive: false });
         this.canvas.addEventListener('touchend', end);
     }
-    
+
     createText(x, y) {
         const input = document.createElement('textarea');
         input.style.position = 'absolute';
@@ -1232,11 +1165,11 @@ class InkController {
         input.style.overflow = 'hidden';
         input.style.padding = '0';
         input.style.margin = '0';
-        
+
         this.wrapper.appendChild(input);
-        
+
         setTimeout(() => input.focus(), 0);
-        
+
         const finish = () => {
             const text = input.value;
             if (text.trim()) {
@@ -1244,7 +1177,7 @@ class InkController {
                     type: 'text',
                     text: text,
                     x: x,
-                    y: y, 
+                    y: y,
                     color: this.color,
                     size: this.lineWidth
                 });
@@ -1252,7 +1185,7 @@ class InkController {
             }
             input.remove();
         };
-        
+
         input.addEventListener('blur', finish);
         input.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
@@ -1261,12 +1194,12 @@ class InkController {
             }
         });
     }
-    
+
     editText(textEl) {
         // Remove element from canvas to avoid duplication
         this.elements = this.elements.filter(el => el !== textEl);
         this.render();
-        
+
         const input = document.createElement('textarea');
         input.value = textEl.text;
         input.style.position = 'absolute';
@@ -1279,10 +1212,10 @@ class InkController {
         input.style.outline = 'none';
         input.style.zIndex = '1000';
         input.style.minWidth = '50px';
-        
+
         this.wrapper.appendChild(input);
         input.focus();
-        
+
         const finish = () => {
             const text = input.value;
             if (text.trim()) {
@@ -1294,7 +1227,7 @@ class InkController {
             }
             input.remove();
         };
-        
+
         input.addEventListener('blur', finish);
         input.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
