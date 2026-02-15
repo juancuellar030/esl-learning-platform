@@ -11,7 +11,7 @@
     --color-primary: var(--indigo-velvet);
     --color-primary-darker: #2a246a;
     --color-primary-darkest: #1a1645;
-    --color-primary-light: #e0dfff; 
+    --color-primary-light: #e0dfff;
 }
 
 /* ===== THEMES ===== */
@@ -60,9 +60,9 @@ a[href*="youtube.com"] {
 
 /* Specific Excalidraw+ Promotions and Buttons */
 .plus-banner,
-.encrypted-icon, 
-.collab-button, 
-.layer-ui__wrapper__top-right .excalidraw-button { 
+.encrypted-icon,
+.collab-button,
+.layer-ui__wrapper__top-right .excalidraw-button {
     display: none !important;
 }
 
@@ -78,15 +78,34 @@ a[href*="youtube.com"] {
 
 /* Hide "Sign up" or "Login" if present in menu */
 .dropdown-menu-item-base[href*="plus.excalidraw.com"],
-.dropdown-menu-item-base[href*="app.excalidraw.com"] {
+/* Hide "Sign up" or "Login" if present in menu */
+.dropdown-menu-item-base[href*="plus.excalidraw.com"],
+.dropdown-menu-item-base[href*="app.excalidraw.com"],
+.dropdown-menu-item-base[href*="accounts.google.com"],
+a[href*="plus.excalidraw.com"],
+a[href*="excalidraw.com/signup"],
+a[href*="excalidraw.com/login"] {
     display: none !important;
 }
 
+/* Hide Live Collaboration explicitly */
+button[title="Live collaboration..."],
+.collab-button,
+[data-testid="collab-button"],
+.dropdown-menu-item-base[aria-label="Live collaboration..."] {
+    display: none !important;
+}
+
+/* Hide "Welcome to Excalidraw" screen actions if they contain sign up */
+.welcome-screen-menu-item {
+    /* valid selector check needed, but general catch-all for now */
+}
+
 /* Customize Font */
-body, 
-button, 
-input, 
-textarea, 
+body,
+button,
+input,
+textarea,
 .excalidraw {
     font-family: 'Reddit Sans', 'Google Sans Flex', sans-serif !important;
 }

@@ -9,7 +9,7 @@ http.createServer((req, res) => {
   let filePath = path.join(baseDir, req.url === '/' ? 'index.html' : req.url);
   // Remove query string
   filePath = filePath.split('?')[0];
-  
+
   const extname = path.extname(filePath);
   let contentType = 'text/html';
   switch (extname) {
@@ -31,26 +31,34 @@ http.createServer((req, res) => {
 
   fs.readFile(filePath, (error, content) => {
     if (error) {
-      if(error.code == 'ENOENT'){
+      if (error.code == 'ENOENT') {
+        // Check if this is a missing JS file in the excalidraw directory
+        if (filePath.includes('excalidraw') && extname === '.js') {
+          console.log(`Serving dummy module for missing file: ${filePath}`);
+          res.writeHead(200, { 'Content-Type': 'text/javascript' });
+          res.end('export default function() {}; export const Workbox = class { register() {} };', 'utf-8');
+          return;
+        }
+
         // try to see if it is a directory and has index.html
         if (fs.existsSync(filePath) && fs.lstatSync(filePath).isDirectory()) {
-             filePath = path.join(filePath, 'index.html');
-             fs.readFile(filePath, (err, data) => {
-                 if (err) {
-                    res.writeHead(404);
-                    res.end('404 File Not Found'); 
-                 } else {
-                    res.writeHead(200, { 'Content-Type': 'text/html' });
-                    res.end(data, 'utf-8');
-                 }
-             });
+          filePath = path.join(filePath, 'index.html');
+          fs.readFile(filePath, (err, data) => {
+            if (err) {
+              res.writeHead(404);
+              res.end('404 File Not Found');
+            } else {
+              res.writeHead(200, { 'Content-Type': 'text/html' });
+              res.end(data, 'utf-8');
+            }
+          });
         } else {
-            res.writeHead(404);
-            res.end('404 File Not Found');
+          res.writeHead(404);
+          res.end('404 File Not Found');
         }
       } else {
         res.writeHead(500);
-        res.end('Sorry, check with the site admin for error: '+error.code+' ..\n');
+        res.end('Sorry, check with the site admin for error: ' + error.code + ' ..\n');
       }
     } else {
       res.writeHead(200, { 'Content-Type': contentType });

@@ -56,7 +56,75 @@
 
 <body>
     <script src="js/themes.js"></script>
-    <script src="js/darkmode.js"></script><noscript>You need to enable JavaScript to run this app.</noscript>
+    <script src="js/darkmode.js"></script>
+    <script>
+        // DOM Observer to remove unwanted Excalidraw elements
+        // Throttled to prevent interfering with React's DOM management
+        (function () {
+            let removalQueue = new Set();
+            let isProcessing = false;
+
+            const selectorsToRemove = [
+                'button[title="Live collaboration..."]',
+                '.collab-button',
+                'a[href*="plus.excalidraw.com"]',
+                'a[href*="excalidraw.com/signup"]',
+                'a[href*="accounts.google.com"]'
+            ];
+
+            const textContentToRemove = [
+                "Sign up",
+                "Sign in",
+                "Live collaboration"
+            ];
+
+            function processRemovals() {
+                if (isProcessing || removalQueue.size === 0) return;
+                isProcessing = true;
+
+                try {
+                    // 1. Remove by selector
+                    selectorsToRemove.forEach(selector => {
+                        const elements = document.querySelectorAll(selector);
+                        elements.forEach(el => {
+                            if (el.parentNode) removalQueue.add(el);
+                        });
+                    });
+
+                    // 2. Check specific leaf elements only (avoid breaking React trees)
+                    const candidates = document.querySelectorAll('button, a[href]');
+                    candidates.forEach(el => {
+                        // Skip if element has complex children (likely managed by React)
+                        if (el.children.length > 1) return;
+
+                        const text = el.textContent?.trim() || "";
+                        if (textContentToRemove.some(rem => text === rem || text === rem + "...")) {
+                            if (el.parentNode) removalQueue.add(el);
+                        }
+                    });
+
+                    // Execute removals safely
+                    removalQueue.forEach(el => {
+                        try {
+                            if (el.parentNode) el.parentNode.removeChild(el);
+                        } catch (e) {
+                            // Element already removed, ignore
+                        }
+                    });
+                    removalQueue.clear();
+                } finally {
+                    isProcessing = false;
+                }
+            }
+
+            // Run cleanup on a throttled interval instead of every mutation
+            setInterval(processRemovals, 500);
+
+            // Also run on initial load
+            setTimeout(processRemovals, 1000);
+        })();
+    </script>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
     <header>
         <h1 class="visually-hidden">Excalidraw</h1>
     </header>
