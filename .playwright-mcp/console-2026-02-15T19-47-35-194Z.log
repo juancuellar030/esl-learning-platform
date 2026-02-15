@@ -1,0 +1,80 @@
+[     245ms] [WARNING] Simple Analytics: Add DOCTYPE html for accurate dimensions @ http://127.0.0.1:8080/excalidraw/js/latest.js:2
+[     245ms] [WARNING] Simple Analytics: Set hostname on 127.0.0.1:8080. See https://docs.simpleanalytics.com/overwrite-domain-name @ http://127.0.0.1:8080/excalidraw/js/latest.js:2
+[     496ms] TypeError: a.addEventListener is not a function
+    at d (http://127.0.0.1:8080/excalidraw/js/index_crn4xutn.js:49:35130)
+[     721ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[     722ms] [WARNING] Simple Analytics: Not sending request twice @ https://scripts.simpleanalyticscdn.com/latest.js:2
+[     821ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[     878ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8080/manifest.webmanifest:0
+[     878ms] [ERROR] Manifest fetch from http://127.0.0.1:8080/manifest.webmanifest failed, code 404 @ http://127.0.0.1:8080/board.html:0
+[     879ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8080/favicon-32x32.png:0
+[     881ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8080/favicon-16x16.png:0
+[     940ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    1015ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    1025ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    1149ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    1219ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    1220ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    1226ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    1350ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    1415ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    1427ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    1428ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    1428ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    1552ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    1617ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    1617ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    1632ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    1632ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    1633ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    1757ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    1816ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    1819ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    1819ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    1834ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    1834ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    1834ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    2019ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    2219ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    2419ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    2620ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    2820ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    3018ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    3220ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    3420ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    3620ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    3816ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    4019ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    4215ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    4420ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    4620ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    4820ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    5021ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    5217ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    5416ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    5616ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    5820ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    6021ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    6221ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    6421ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    6621ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    6816ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    7019ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    7215ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    7421ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    7616ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    7821ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    8016ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    8216ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    8421ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    8616ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    8817ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    9021ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    9222ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    9422ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    9615ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[    9816ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[   10019ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[   10218ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[   10415ms] [WARNING] Font family label not found, retrying... @ http://127.0.0.1:8080/js/board-font-selector.js:49
+[   10415ms] [ERROR] Failed to initialize custom font selector @ http://127.0.0.1:8080/js/board-font-selector.js:232

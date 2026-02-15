@@ -98,7 +98,23 @@ button[title="Live collaboration..."],
 
 /* Hide "Welcome to Excalidraw" screen actions if they contain sign up */
 .welcome-screen-menu-item {
-    /* valid selector check needed, but general catch-all for now */
+    display: none !important;
+}
+
+/* Hide default font family icon buttons - we'll replace with dropdown */
+/* Hide default font family icon buttons - we'll replace with dropdown */
+/* .Island fieldset:has(button[aria-label*="font"]) {
+    display: none !important;
+} */
+
+.buttonList button[aria-label*="Virgil"],
+.buttonList button[aria-label*="Helvetica"],
+.buttonList button[aria-label*="Cascadia"],
+button[data-testid*="font-family"],
+button[aria-label="Hand-drawn"],
+button[aria-label="Normal"],
+button[aria-label="Code"] {
+    display: none !important;
 }
 
 /* Customize Font */
@@ -108,6 +124,104 @@ input,
 textarea,
 .excalidraw {
     font-family: 'Reddit Sans', 'Google Sans Flex', sans-serif !important;
+}
+
+/* Custom Font Selector Dropdown Styles */
+.custom-font-selector {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--color-gray-30);
+}
+
+/* Hamburger menu variant */
+.custom-font-selector-menu {
+    padding: 0;
+    margin: 8px 0 12px 0;
+}
+
+.custom-font-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--color-gray-60);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.custom-font-dropdown,
+.custom-font-dropdown-menu {
+    position: relative;
+}
+
+.custom-font-button,
+.custom-font-button-menu {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    background: #f8f9fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    color: #1a1a1a;
+    transition: all 0.2s ease;
+}
+
+.custom-font-button:hover,
+.custom-font-button-menu:hover {
+    background: #eff1f3;
+    border-color: #d0d4d8;
+}
+
+.custom-font-button:active,
+.custom-font-button-menu:active {
+    transform: scale(0.98);
+}
+
+.custom-font-button svg,
+.custom-font-button-menu svg {
+    opacity: 0.6;
+    transition: transform 0.2s ease;
+}
+
+.custom-font-dropdown:has(.custom-font-menu[style*="display: block"]) .custom-font-button svg,
+.custom-font-dropdown-menu:has(.custom-font-menu[style*="display: block"]) .custom-font-button-menu svg {
+    transform: rotate(180deg);
+}
+
+.custom-font-menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #e1e4e8;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 10000;
+    overflow: hidden;
+}
+
+.custom-font-option {
+    width: 100%;
+    padding: 10px 12px;
+    border: none;
+    background: white;
+    text-align: left;
+    cursor: pointer;
+    font-size: 0.875rem;
+    color: #1a1a1a;
+    transition: background 0.15s ease;
+}
+
+.custom-font-option:hover {
+    background: #f0f6ff;
+}
+
+.custom-font-option:active {
+    background: #6965db;
+    color: white;
 }
 
 /* --- REPLACE ICONS WITH FONTAWESOME --- */

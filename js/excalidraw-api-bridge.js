@@ -102,13 +102,43 @@
                                 }
                             },
 
-                            exportToBlob: async (options) => {
+                            exportToBlob: async (options = {}) => {
                                 try {
+                                    // Try to use the built-in export if available
                                     if (excalidrawInstance.exportToBlob) {
                                         return await excalidrawInstance.exportToBlob(options);
                                     }
-                                    console.warn('exportToBlob not available');
-                                    return null;
+
+                                    // Fallback: Capture the canvas directly at full quality
+                                    console.log('Using canvas-based PNG export fallback');
+
+                                    // Find all canvas elements (Excalidraw uses multiple layers)
+                                    const canvases = Array.from(document.querySelectorAll('canvas'));
+                                    const excalidrawCanvas = canvases.find(c =>
+                                        c.width > 100 && c.height > 100 && c.style.position !== 'absolute'
+                                    ) || canvases[0];
+
+                                    if (!excalidrawCanvas) {
+                                        throw new Error('Canvas not found');
+                                    }
+
+                                    // Get the canvas context to ensure it's rendered
+                                    const ctx = excalidrawCanvas.getContext('2d');
+
+                                    // Export at maximum quality
+                                    return new Promise((resolve, reject) => {
+                                        try {
+                                            excalidrawCanvas.toBlob((blob) => {
+                                                if (blob) {
+                                                    resolve(blob);
+                                                } else {
+                                                    reject(new Error('Failed to create blob'));
+                                                }
+                                            }, options.mimeType || 'image/png', 1.0); // Maximum quality
+                                        } catch (err) {
+                                            reject(err);
+                                        }
+                                    });
                                 } catch (e) {
                                     console.error('Error exporting to blob:', e);
                                     return null;
@@ -117,10 +147,21 @@
 
                             exportToSvg: async () => {
                                 try {
+                                    // Try to use the built-in export if available
                                     if (excalidrawInstance.exportToSvg) {
                                         return await excalidrawInstance.exportToSvg();
                                     }
-                                    console.warn('exportToSvg not available');
+
+                                    // Fallback: Try to find SVG element in the Excalidraw container
+                                    console.log('Using SVG extraction fallback');
+                                    const svgElement = document.querySelector('.excalidraw svg, svg.excalidraw__svg');
+
+                                    if (svgElement) {
+                                        return svgElement.cloneNode(true);
+                                    }
+
+                                    // If no SVG, try to convert canvas to SVG (basic approach)
+                                    console.warn('SVG export not fully supported, returning null');
                                     return null;
                                 } catch (e) {
                                     console.error('Error exporting to SVG:', e);
