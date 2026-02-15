@@ -338,6 +338,88 @@
         .tracker-container {
             animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
+
+        /* Dark Mode Styles */
+        body.dark-mode {
+            background: #1a1a2e;
+        }
+
+        body.dark-mode .tracker-container {
+            background: #16213e;
+            border-color: rgba(255, 255, 255, 0.05);
+        }
+
+        body.dark-mode .tracker-header {
+            background: linear-gradient(135deg, #0f3460 0%, #16213e 100%);
+        }
+
+        body.dark-mode .new-item-input {
+            background: #1a1a2e;
+            color: #e0e0e0;
+        }
+
+        body.dark-mode .new-item-input:focus {
+            box-shadow: 0 0 0 4px rgba(123, 104, 238, 0.3);
+        }
+
+        body.dark-mode .table-container {
+            background: #0f3460;
+        }
+
+        body.dark-mode table {
+            background: #16213e;
+        }
+
+        body.dark-mode thead {
+            background: #0f3460;
+        }
+
+        body.dark-mode th {
+            color: #e0e0e0;
+            border-bottom-color: #1a1a2e;
+        }
+
+        body.dark-mode th.material-header:hover {
+            background: #1a1a2e;
+        }
+
+        body.dark-mode .student-name-header,
+        body.dark-mode .student-name-cell {
+            background: #16213e;
+            border-right-color: #0f3460;
+        }
+
+        body.dark-mode .student-name-cell {
+            color: #e0e0e0;
+        }
+
+        body.dark-mode tbody tr:nth-child(even) .student-name-cell {
+            background: #1a1a2e;
+        }
+
+        body.dark-mode tbody tr:hover {
+            background: #0f3460;
+        }
+
+        body.dark-mode tbody tr:hover .student-name-cell {
+            background: #0f3460;
+        }
+
+        body.dark-mode td {
+            border-bottom-color: #0f3460;
+        }
+
+        body.dark-mode .cell-content.empty:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        body.dark-mode .empty-state {
+            color: #6c7a89;
+        }
+
+        body.dark-mode .empty-state i {
+            color: #2c3e50;
+        }
     </style>
 </head>
 
@@ -547,6 +629,7 @@
         loadData();
 
     </script>
+    <script src="js/darkmode.js"></script>
 </body>
 
 </html>

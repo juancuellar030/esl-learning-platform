@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classroom Student Distribution - ESL Learning Platform</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/classroom-distribution.css">
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="main-header">
+        <div class="container">
+            <h1><i class="fa-solid fa-users-rectangle"></i> ESL Learning Platform</h1>
+            <p class="tagline">Classroom Layout Planner</p>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="main-nav">
+        <div class="container">
+            <a href="tools.html" class="nav-btn" style="text-decoration: none;">
+                <i class="fa-solid fa-arrow-left"></i> Back to Tools
+            </a>
+            <div class="nav-controls" style="margin-left: auto; display: flex; gap: 10px;">
+                <button id="toggle-names-btn" class="nav-btn">
+                    <i class="fa-solid fa-eye-slash"></i> Hide Names
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container distribution-container">
+
+            <!-- Toolbar -->
+            <div class="toolbar">
+                <button class="btn-primary" id="save-layout-btn">
+                    <i class="fa-solid fa-floppy-disk"></i> Save Layout
+                </button>
+                <button class="btn-secondary" id="load-layout-btn">
+                    <i class="fa-solid fa-folder-open"></i> Load Layout
+                </button>
+                <button class="btn-secondary" id="export-btn">
+                    <i class="fa-solid fa-file-export"></i> Export JSON
+                </button>
+                <label class="btn-secondary" style="cursor: pointer;">
+                    <i class="fa-solid fa-file-import"></i> Import JSON
+                    <input type="file" id="import-file" accept=".json" style="display: none;">
+                </label>
+                <button class="btn-secondary" id="add-student-btn"
+                    style="background-color: var(--tiger-orange); color: white;">
+                    <i class="fa-solid fa-user-plus"></i> Add Student
+                </button>
+                <button class="btn-secondary" id="random-relocation-btn"
+                    style="background-color: var(--medium-slate-blue); color: white;">
+                    <i class="fa-solid fa-shuffle"></i> Random Relocation
+                </button>
+                <button class="btn-secondary" id="reset-layout-btn"
+                    style="background-color: var(--cayenne-red); color: white;">
+                    <i class="fa-solid fa-rotate-right"></i> Reset
+                </button>
+            </div>
+
+            <!-- Classroom Grid -->
+            <div class="classroom-grid-wrapper">
+                <!-- Column Resizers Container (dynamic) -->
+                <div id="column-resizers"
+                    style="display: grid; grid-template-columns: repeat(7, 100px); gap: 10px; margin-bottom: 10px;">
+                    <!-- Resizers injected by JS -->
+                </div>
+
+                <div id="classroom-grid" class="classroom-grid">
+                    <!-- Grid cells injected by JS -->
+                </div>
+            </div>
+
+            <!-- Relocation Area -->
+            <div id="relocation-area" class="relocation-area">
+                <span class="relocation-title">Relocation Area / Waiting List</span>
+                <!-- Unassigned students go here -->
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="main-footer">
+        <div class="container">
+            <p>ESL Learning Platform © 2025 | Made for Teachers, by Teachers</p>
+        </div>
+    </footer>
+
+    <script src="js/classroom-distribution.js"></script>
+    <script src="js/darkmode.js"></script>
+</body>
+
+</html>
