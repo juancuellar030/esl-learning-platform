@@ -1,0 +1,16 @@
+[     218ms] [WARNING] Simple Analytics: Add DOCTYPE html for accurate dimensions @ http://localhost:8000/excalidraw/js/latest.js:2
+[     218ms] [WARNING] Simple Analytics: Set hostname on localhost:8000. See https://docs.simpleanalytics.com/overwrite-domain-name @ http://localhost:8000/excalidraw/js/latest.js:2
+[     382ms] TypeError: a.addEventListener is not a function
+    at d (http://localhost:8000/excalidraw/js/index_crn4xutn.js:49:35130)
+[     399ms] [WARNING] Simple Analytics: Not sending request twice @ https://scripts.simpleanalyticscdn.com/latest.js:2
+[    2554ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8000/favicon-32x32.png:0
+[    2557ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8000/favicon-16x16.png:0
+[    2866ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8000/manifest.webmanifest:0
+[    2866ms] [ERROR] Manifest fetch from http://localhost:8000/manifest.webmanifest failed, code 404 @ http://localhost:8000/board.html:0
+[   43979ms] [WARNING] Simple Analytics: Add DOCTYPE html for accurate dimensions @ http://localhost:8000/excalidraw/js/latest.js:2
+[   43980ms] [WARNING] Simple Analytics: Set hostname on localhost:8000. See https://docs.simpleanalytics.com/overwrite-domain-name @ http://localhost:8000/excalidraw/js/latest.js:2
+[   43980ms] [WARNING] Simple Analytics: Not sending request twice @ https://scripts.simpleanalyticscdn.com/latest.js:2
+[   43998ms] TypeError: a.addEventListener is not a function
+    at d (http://localhost:8000/excalidraw/js/index_crn4xutn.js:49:35130)
+[   57172ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8000/manifest.webmanifest:0
+[   57172ms] [ERROR] Manifest fetch from http://localhost:8000/manifest.webmanifest failed, code 404 @ http://localhost:8000/board.html:0

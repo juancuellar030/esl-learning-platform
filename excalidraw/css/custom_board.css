@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Pacifico&family=Playfair+Display:wght@400;700&family=Bebas+Neue&family=Poppins:wght@400;600&family=Chewy&family=Happy+Monkey&display=swap');
+
 /* Override Excalidraw Variables to match Platform Aesthetic */
 :root {
     /* Platform Colors */
@@ -113,17 +115,71 @@ button[title="Live collaboration..."],
 button[data-testid*="font-family"],
 button[aria-label="Hand-drawn"],
 button[aria-label="Normal"],
-button[aria-label="Code"] {
-    display: none !important;
+button[aria-label="Code"],
+button[aria-label="Excalifont"] {
+    opacity: 0 !important;
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    overflow: hidden !important;
+    pointer-events: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
 /* Customize Font */
 body,
 button,
 input,
-textarea,
+textarea:not(.excalidraw-textEditorContainer > textarea),
 .excalidraw {
     font-family: 'Reddit Sans', 'Google Sans Flex', sans-serif !important;
+}
+
+/* Ensure the text editor uses the selected font */
+/* Default override to ensure we don't get Reddit Sans */
+.excalidraw-textEditorContainer>textarea {
+    font-family: var(--ui-font) !important;
+}
+
+/* Specific Font Overrides via Body Class */
+body.excalidraw-font-1 .excalidraw-textEditorContainer>textarea {
+    font-family: 'Virgil', 'Segoe UI Emoji', sans-serif !important;
+}
+
+body.excalidraw-font-2 .excalidraw-textEditorContainer>textarea {
+    font-family: 'Helvetica', 'Segoe UI Emoji', sans-serif !important;
+}
+
+body.excalidraw-font-3 .excalidraw-textEditorContainer>textarea {
+    font-family: 'Cascadia', 'Segoe UI Emoji', monospace !important;
+}
+
+body.excalidraw-font-5 .excalidraw-textEditorContainer>textarea {
+    /* Fallback for the dynamic slot hijacker - will be redefined by JS */
+    /* Fallback for the dynamic slot hijacker - will be redefined by JS */
+    font-family: 'Excalifont', sans-serif !important;
+}
+
+/* Secondary IDs (6-16) also map to ID 5 in JS, so we point them here as fallback */
+body.excalidraw-font-6 .excalidraw-textEditorContainer>textarea,
+body.excalidraw-font-7 .excalidraw-textEditorContainer>textarea,
+body.excalidraw-font-8 .excalidraw-textEditorContainer>textarea,
+body.excalidraw-font-9 .excalidraw-textEditorContainer>textarea,
+body.excalidraw-font-10 .excalidraw-textEditorContainer>textarea,
+body.excalidraw-font-11 .excalidraw-textEditorContainer>textarea,
+body.excalidraw-font-12 .excalidraw-textEditorContainer>textarea,
+body.excalidraw-font-13 .excalidraw-textEditorContainer>textarea,
+body.excalidraw-font-14 .excalidraw-textEditorContainer>textarea,
+body.excalidraw-font-15 .excalidraw-textEditorContainer>textarea,
+body.excalidraw-font-16 .excalidraw-textEditorContainer>textarea {
+    font-family: 'Excalifont', sans-serif !important;
+}
+
+/* Ensure fonts render on canvas - critical for persistence */
+body.excalidraw-font-5 .excalidraw text,
+body.excalidraw-font-5 canvas {
+    font-family: 'Excalifont', sans-serif !important;
 }
 
 /* Custom Font Selector Dropdown Styles */
@@ -219,10 +275,60 @@ textarea,
     background: #f0f6ff;
 }
 
-.custom-font-option:active {
-    background: #6965db;
-    color: white;
+/* --- Top Left Font Selector --- */
+.custom-font-btn-top {
+    background-color: var(--color-gray-10);
+    border: 1px solid var(--color-gray-30);
+    border-radius: 8px;
+    /* Match Excalidraw rounded vibe */
+    padding: 8px 12px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 12px;
+    height: 40px;
+    /* Match standard button height */
+    font-family: 'Virgil', sans-serif;
+    font-size: 0.9rem;
+    color: var(--color-gray-80);
+    pointer-events: auto;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
+
+.custom-font-btn-top:hover {
+    background-color: var(--color-gray-20);
+    transform: translateY(-1px);
+}
+
+.custom-font-btn-top svg {
+    width: 16px;
+    height: 16px;
+    margin-left: 8px;
+    opacity: 0.6;
+}
+
+.custom-font-menu-top {
+    position: absolute;
+    top: 60px;
+    left: 70px;
+    /* Adjust based on button position */
+    background: white;
+    border: 1px solid #e1e4e8;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 10000;
+    width: 180px;
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.custom-font-menu-top.active {
+    display: flex;
+}
+
 
 /* --- REPLACE ICONS WITH FONTAWESOME --- */
 

@@ -1,0 +1,7 @@
+[     256ms] [WARNING] Simple Analytics: Add DOCTYPE html for accurate dimensions @ http://localhost:8000/excalidraw/js/latest.js:2
+[     256ms] [WARNING] Simple Analytics: Set hostname on localhost:8000. See https://docs.simpleanalytics.com/overwrite-domain-name @ http://localhost:8000/excalidraw/js/latest.js:2
+[     346ms] TypeError: a.addEventListener is not a function
+    at d (http://localhost:8000/excalidraw/js/index_crn4xutn.js:49:35130)
+[    9217ms] [WARNING] Simple Analytics: Not sending request twice @ https://scripts.simpleanalyticscdn.com/latest.js:2
+[    9527ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8000/manifest.webmanifest:0
+[    9528ms] [ERROR] Manifest fetch from http://localhost:8000/manifest.webmanifest failed, code 404 @ http://localhost:8000/board.html:0

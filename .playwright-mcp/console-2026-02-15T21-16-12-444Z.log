@@ -1,0 +1,42 @@
+[      75ms] [WARNING] Simple Analytics: Add DOCTYPE html for accurate dimensions @ http://127.0.0.1:8080/excalidraw/js/latest.js:2
+[      75ms] [WARNING] Simple Analytics: Set hostname on 127.0.0.1:8080. See https://docs.simpleanalytics.com/overwrite-domain-name @ http://127.0.0.1:8080/excalidraw/js/latest.js:2
+[      93ms] [WARNING] Simple Analytics: Not sending request twice @ https://scripts.simpleanalyticscdn.com/latest.js:2
+[     249ms] TypeError: a.addEventListener is not a function
+    at d (http://127.0.0.1:8080/excalidraw/js/index_crn4xutn.js:49:35130)
+[    8226ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8080/manifest.webmanifest:0
+[    8226ms] [ERROR] Manifest fetch from http://127.0.0.1:8080/manifest.webmanifest failed, code 404 @ http://127.0.0.1:8080/board.html:0
+[   61715ms] [WARNING] Simple Analytics: Add DOCTYPE html for accurate dimensions @ http://127.0.0.1:8080/excalidraw/js/latest.js:2
+[   61715ms] [WARNING] Simple Analytics: Set hostname on 127.0.0.1:8080. See https://docs.simpleanalytics.com/overwrite-domain-name @ http://127.0.0.1:8080/excalidraw/js/latest.js:2
+[   61724ms] [WARNING] Simple Analytics: Not sending request twice @ https://scripts.simpleanalyticscdn.com/latest.js:2
+[   61847ms] TypeError: a.addEventListener is not a function
+    at d (http://127.0.0.1:8080/excalidraw/js/index_crn4xutn.js:49:35130)
+[   63905ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8080/manifest.webmanifest:0
+[   63905ms] [ERROR] Manifest fetch from http://127.0.0.1:8080/manifest.webmanifest failed, code 404 @ http://127.0.0.1:8080/board.html:0
+[   72687ms] [WARNING] Simple Analytics: Add DOCTYPE html for accurate dimensions @ http://127.0.0.1:8080/excalidraw/js/latest.js:2
+[   72687ms] [WARNING] Simple Analytics: Set hostname on 127.0.0.1:8080. See https://docs.simpleanalytics.com/overwrite-domain-name @ http://127.0.0.1:8080/excalidraw/js/latest.js:2
+[   72698ms] [WARNING] Simple Analytics: Not sending request twice @ https://scripts.simpleanalyticscdn.com/latest.js:2
+[   72840ms] TypeError: a.addEventListener is not a function
+    at d (http://127.0.0.1:8080/excalidraw/js/index_crn4xutn.js:49:35130)
+[   73854ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8080/manifest.webmanifest:0
+[   73854ms] [ERROR] Manifest fetch from http://127.0.0.1:8080/manifest.webmanifest failed, code 404 @ http://127.0.0.1:8080/board.html:0
+[  149221ms] [WARNING] Simple Analytics: Add DOCTYPE html for accurate dimensions @ http://127.0.0.1:8080/excalidraw/js/latest.js:2
+[  149221ms] [WARNING] Simple Analytics: Set hostname on 127.0.0.1:8080. See https://docs.simpleanalytics.com/overwrite-domain-name @ http://127.0.0.1:8080/excalidraw/js/latest.js:2
+[  149231ms] [WARNING] Simple Analytics: Not sending request twice @ https://scripts.simpleanalyticscdn.com/latest.js:2
+[  149336ms] TypeError: a.addEventListener is not a function
+    at d (http://127.0.0.1:8080/excalidraw/js/index_crn4xutn.js:49:35130)
+[  165059ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8080/manifest.webmanifest:0
+[  165059ms] [ERROR] Manifest fetch from http://127.0.0.1:8080/manifest.webmanifest failed, code 404 @ http://127.0.0.1:8080/board.html:0
+[  167870ms] [WARNING] Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently @ http://127.0.0.1:8080/excalidraw/js/index_crn4xutn.js:149
+[  214960ms] [WARNING] Simple Analytics: Add DOCTYPE html for accurate dimensions @ http://127.0.0.1:8080/excalidraw/js/latest.js:2
+[  214960ms] [WARNING] Simple Analytics: Set hostname on 127.0.0.1:8080. See https://docs.simpleanalytics.com/overwrite-domain-name @ http://127.0.0.1:8080/excalidraw/js/latest.js:2
+[  215041ms] TypeError: a.addEventListener is not a function
+    at d (http://127.0.0.1:8080/excalidraw/js/index_crn4xutn.js:49:35130)
+[  215260ms] [WARNING] Simple Analytics: Not sending request twice @ https://scripts.simpleanalyticscdn.com/latest.js:2
+[  215264ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8080/manifest.webmanifest:0
+[  215264ms] [ERROR] Manifest fetch from http://127.0.0.1:8080/manifest.webmanifest failed, code 404 @ http://127.0.0.1:8080/board.html:0
+[  215264ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8080/favicon-32x32.png:0
+[  215266ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8080/favicon-16x16.png:0
+[  434069ms] [WARNING] Simple Analytics: Add DOCTYPE html for accurate dimensions @ http://127.0.0.1:8080/excalidraw/js/latest.js:2
+[  434069ms] [WARNING] Simple Analytics: Set hostname on 127.0.0.1:8080. See https://docs.simpleanalytics.com/overwrite-domain-name @ http://127.0.0.1:8080/excalidraw/js/latest.js:2
+[  434203ms] TypeError: a.addEventListener is not a function
+    at d (http://127.0.0.1:8080/excalidraw/js/index_crn4xutn.js:49:35130)
