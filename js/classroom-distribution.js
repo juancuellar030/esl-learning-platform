@@ -204,12 +204,175 @@ function createDeskElement(desk) {
         el.appendChild(controls);
     }
 
-    // Drag Events
+    // Drag Events (Desktop)
     el.addEventListener('dragstart', handleDragStart);
     el.addEventListener('dragend', handleDragEnd);
 
+    // Touch Events (Mobile)
+    el.addEventListener('touchstart', handleTouchStart, { passive: false });
+    el.addEventListener('touchmove', handleTouchMove, { passive: false });
+    el.addEventListener('touchend', handleTouchEnd);
+
     return el;
 }
+
+// Global variables for touch handling
+let touchDragItem = null;
+let touchStartX = 0;
+let touchStartY = 0;
+let initialTransform = '';
+let touchDragClone = null; // Visual feedback element if needed, or we move the original
+
+function handleTouchStart(e) {
+    if (e.touches.length > 1) return; // Ignore multi-touch
+    // e.preventDefault(); // Prevent scroll? No, only on move if dragging.
+
+    const deskEl = e.currentTarget;
+    const deskId = deskEl.id;
+
+    // Check if it's a desk
+    if (!deskId) return;
+
+    touchDragItem = deskEl;
+    draggedDeskId = deskId;
+    isDragging = true;
+
+    const touch = e.touches[0];
+    touchStartX = touch.clientX;
+    touchStartY = touch.clientY;
+
+    // Visual feedback
+    deskEl.classList.add('dragging');
+
+    // We need to use fixed positioning for the dragged item to follow the finger perfectly
+    // storing initial rect to calculate offsets
+    const rect = deskEl.getBoundingClientRect();
+
+    // Instead of moving the original, let's clone it for the drag visual?
+    // Or just move the original with fixed position?
+    // Moving original is easier for logic but harder for layout flow.
+    // Let's use position: fixed on the original for now.
+
+    deskEl.style.width = `${rect.width}px`;
+    deskEl.style.height = `${rect.height}px`;
+    deskEl.style.position = 'fixed';
+    deskEl.style.left = `${rect.left}px`;
+    deskEl.style.top = `${rect.top}px`;
+    deskEl.style.zIndex = '1000';
+    deskEl.style.pointerEvents = 'none'; // CRITICAL: Allows elementFromPoint to see what's under
+}
+
+function handleTouchMove(e) {
+    if (!isDragging || !touchDragItem) return;
+    e.preventDefault(); // Prevent scrolling while dragging
+
+    const touch = e.touches[0];
+    const dx = touch.clientX - touchStartX;
+    const dy = touch.clientY - touchStartY;
+
+    // Update position
+    // We set initial left/top in start, so we just update those or use transform?
+    // Since we set fixed left/top to current visual pos, we can just update left/top to match finger
+    // But better: Center the item on the finger?
+    // Or keep relative offset.
+
+    // Let's just move it to the finger position (centered)
+    // Actually, keep relative offset is better UX usually.
+    // But since we just set left/top to rect.left/top, we can add the delta
+
+    // Simpler: Just set left/top to touch coordinates minus half width/height (center it)
+    // touchDragItem.style.left = `${touch.clientX - touchDragItem.offsetWidth / 2}px`;
+    // touchDragItem.style.top = `${touch.clientY - touchDragItem.offsetHeight / 2}px`;
+
+    // Let's try to maintain offset:
+    // currentLeft = initialLeft + dx
+    // But we need to store initial styles. 
+    // Let's just update left/top directly using the delta from the LAST move? 
+    // No, from start.
+
+    // Let's use the touch coordinates directly.
+    touchDragItem.style.left = `${touch.clientX - (touchDragItem.offsetWidth / 2)}px`;
+    touchDragItem.style.top = `${touch.clientY - (touchDragItem.offsetHeight / 2)}px`;
+}
+
+function handleTouchEnd(e) {
+    if (!isDragging || !touchDragItem) return;
+
+    // Logic to find drop target
+    // We need the coordinates of the *changed* touch (finger lift)
+    const touch = e.changedTouches[0];
+    const x = touch.clientX;
+    const y = touch.clientY;
+
+    // Temporarily hide the dragged item to find what's underneath?
+    // We already set pointer-events: none in start, so it should be invisible to hit testing.
+
+    const targetElement = document.elementFromPoint(x, y);
+
+    // Reset styles
+    touchDragItem.style.position = '';
+    touchDragItem.style.left = '';
+    touchDragItem.style.top = '';
+    touchDragItem.style.width = '';
+    touchDragItem.style.height = '';
+    touchDragItem.style.zIndex = '';
+    touchDragItem.style.pointerEvents = '';
+    touchDragItem.classList.remove('dragging');
+
+    // Find if we dropped on a cell or relocation area
+    let dropZone = targetElement.closest('.grid-cell');
+    if (!dropZone) dropZone = targetElement.closest('#relocation-area');
+
+    if (dropZone) {
+        // Execute drop logic
+        if (dropZone.classList.contains('grid-cell')) {
+            handleDropGridLogic(dropZone);
+        } else if (dropZone.id === 'relocation-area') {
+            handleDropRelocationLogic();
+        }
+    } else {
+        // If dropped nowhere valid, return to original spot (re-render handles this automatically since we didn't change state)
+        renderDesks();
+    }
+
+    isDragging = false;
+    touchDragItem = null;
+    draggedDeskId = null;
+}
+
+// Extracted logic for reuse
+function handleDropGridLogic(cellElement) {
+    const targetCellIndex = parseInt(cellElement.dataset.index);
+    const draggedDesk = desks.find(d => d.id === draggedDeskId);
+
+    if (!draggedDesk) return;
+
+    const occupiedBy = gridState[targetCellIndex];
+
+    if (occupiedBy && occupiedBy !== draggedDeskId) {
+        const occupierDesk = desks.find(d => d.id === occupiedBy);
+        if (draggedDesk.position.type === 'grid') {
+            const oldIndex = draggedDesk.position.index;
+            occupierDesk.position = { type: 'grid', index: oldIndex };
+        } else {
+            occupierDesk.position = { type: 'relocation', index: 0 };
+        }
+    }
+
+    draggedDesk.position = { type: 'grid', index: targetCellIndex }; // CRITICAL: Updates global state
+    renderDesks();
+    saveLayout();
+}
+
+function handleDropRelocationLogic() {
+    const draggedDesk = desks.find(d => d.id === draggedDeskId);
+    if (draggedDesk) {
+        draggedDesk.position = { type: 'relocation', index: 0 }; // CRITICAL: Updates global state
+        renderDesks();
+        saveLayout();
+    }
+}
+
 
 function handleDragStart(e) {
     isDragging = true;
@@ -319,12 +482,7 @@ function handleDropRelocation(e) {
 
     if (!draggedDeskId) return;
 
-    const draggedDesk = desks.find(d => d.id === draggedDeskId);
-    if (draggedDesk) {
-        draggedDesk.position = { type: 'relocation', index: 0 };
-        renderDesks();
-        saveLayout();
-    }
+    handleDropRelocationLogic();
 }
 
 function toggleGender(deskId) {
