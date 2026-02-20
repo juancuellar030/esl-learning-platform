@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Charades - ESL Learning Platform</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/charades.css">
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="main-header" id="charades-main-header">
+        <div class="container">
+            <h1><i class="fa-solid fa-graduation-cap"></i> ESL Learning Platform</h1>
+            <p class="tagline">Charades Game</p>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="main-nav" id="charades-main-nav">
+        <div class="container">
+            <a href="tools.html" class="nav-btn" style="text-decoration: none;">
+                <i class="fa-solid fa-arrow-left"></i> Back to Tools
+            </a>
+        </div>
+    </nav>
+
+    <!-- ===== CATEGORY HUB ===== -->
+    <main class="main-content" id="charades-hub">
+        <div class="container">
+            <section class="content-section active">
+                <div class="charades-container">
+                    <div class="charades-hub-header">
+                        <h2><i class="fa-solid fa-masks-theater"></i> Charades</h2>
+                        <p>Choose a category and start acting!</p>
+                    </div>
+
+                    <!-- Language Toggle -->
+                    <div class="charades-lang-toggle">
+                        <span id="charades-lang-en" class="active-lang">🇬🇧 English</span>
+                        <label class="lang-switch">
+                            <input type="checkbox" id="charades-lang-switch">
+                            <span class="slider"></span>
+                        </label>
+                        <span id="charades-lang-es">🇪🇸 Español</span>
+                    </div>
+
+                    <!-- Vocab Categories -->
+                    <div class="charades-section-title">
+                        <i class="fa-solid fa-book"></i> ESL Vocabulary
+                    </div>
+                    <div class="charades-category-grid" id="charades-vocab-grid"></div>
+
+                    <!-- Fun Categories -->
+                    <div class="charades-section-title">
+                        <i class="fa-solid fa-star"></i> Fun Categories
+                    </div>
+                    <div class="charades-category-grid" id="charades-fun-grid"></div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- ===== GAME SCREEN ===== -->
+    <div class="charades-game-screen charades-screen-hidden" id="charades-game">
+        <!-- Top bar -->
+        <div class="charades-game-topbar">
+            <button class="charades-back-btn" onclick="charadesGoToHub()">
+                <i class="fa-solid fa-arrow-left"></i> Quit
+            </button>
+            <div class="charades-score-display">
+                <i class="fa-solid fa-star"></i>
+                <span id="charades-score">0</span>
+            </div>
+        </div>
+
+        <!-- Timer -->
+        <div class="charades-timer-container">
+            <svg class="charades-timer-ring" viewBox="0 0 64 64">
+                <circle class="ring-bg" cx="32" cy="32" r="28"></circle>
+                <circle class="ring-progress" id="charades-ring-progress" cx="32" cy="32" r="28"></circle>
+            </svg>
+            <div class="charades-timer-text" id="charades-timer-text">60</div>
+        </div>
+
+        <!-- Word area -->
+        <div class="charades-word-area">
+            <div class="charades-category-label" id="charades-game-category"></div>
+            <div class="charades-word" id="charades-current-word"></div>
+        </div>
+
+        <!-- Action hints -->
+        <div class="charades-action-hints">
+            <div class="charades-hint skip-hint">
+                <i class="fa-solid fa-arrow-up"></i> Swipe Up = Skip
+            </div>
+            <div class="charades-hint correct-hint">
+                <i class="fa-solid fa-arrow-down"></i> Swipe Down = Correct
+            </div>
+        </div>
+    </div>
+
+    <!-- Flash overlay -->
+    <div class="charades-flash" id="charades-flash">
+        <i class="charades-flash-icon" id="charades-flash-icon"></i>
+    </div>
+
+    <!-- Countdown overlay -->
+    <div class="charades-countdown-overlay charades-screen-hidden" id="charades-countdown">
+        <div class="charades-countdown-number" id="charades-countdown-num">3</div>
+    </div>
+
+    <!-- ===== RESULTS SCREEN ===== -->
+    <div class="charades-results-screen charades-screen-hidden" id="charades-results">
+        <div class="charades-results-card">
+            <h2>⏱️ Time's Up!</h2>
+            <p class="results-subtitle" id="charades-results-subtitle">Great effort!</p>
+
+            <div class="charades-big-score">
+                <span id="charades-final-score">0</span>
+                <span id="charades-final-total">/ 0</span>
+            </div>
+            <div class="charades-results-label">Words Guessed</div>
+
+            <div class="charades-word-list" id="charades-results-list"></div>
+
+            <div class="charades-results-actions">
+                <button class="charades-btn charades-btn-primary" onclick="charadesPlayAgain()">
+                    <i class="fa-solid fa-rotate-right"></i> Play Again
+                </button>
+                <button class="charades-btn charades-btn-secondary" onclick="charadesGoToHub()">
+                    <i class="fa-solid fa-grid-2"></i> Categories
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="main-footer" id="charades-main-footer">
+        <div class="container">
+            <p>ESL Learning Platform © 2025 | Made for Teachers, by Teachers</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/vocabulary-data.js"></script>
+    <script src="js/charades-data.js"></script>
+    <script src="js/charades.js"></script>
+</body>
+
+</html>
