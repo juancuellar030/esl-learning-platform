@@ -418,7 +418,7 @@
     }
 
     function setupTiltControls() {
-        const TILT_THRESHOLD = 20;  // degrees of change from neutral to trigger
+        const TILT_THRESHOLD = 35;  // degrees of deliberate tilt required to trigger
         const COOLDOWN_MS = 800;
 
         const requestAndAttach = () => {
@@ -449,26 +449,27 @@
                     return;
                 }
 
-                // Compute how much the phone has moved from its neutral position
+                // Compute delta from neutral position
                 const deltaBeta = e.beta - tiltBaseline.beta;
                 const deltaGamma = e.gamma - tiltBaseline.gamma;
 
-                // Use whichever axis shows a larger movement
-                // In landscape: gamma changes more with forward/back tilt
-                // In portrait:  beta changes more with forward/back tilt
+                // Use the axis with the larger movement
                 const primary = Math.abs(deltaGamma) >= Math.abs(deltaBeta)
                     ? deltaGamma
                     : deltaBeta;
 
-                if (primary < -TILT_THRESHOLD) {
-                    // Tilted forward/down from neutral → Skip
-                    cooldownActive = true;
-                    markSkip();
-                    setTimeout(() => { cooldownActive = false; }, COOLDOWN_MS);
-                } else if (primary > TILT_THRESHOLD) {
-                    // Tilted backward/up from neutral → Correct
+                // NOTE: direction is intentionally inverted from raw delta —
+                // tilting DOWN (positive primary) → Correct (✓)
+                // tilting UP   (negative primary) → Skip   (✗)
+                if (primary > TILT_THRESHOLD) {
+                    // Tilt down from neutral → Correct
                     cooldownActive = true;
                     markCorrect();
+                    setTimeout(() => { cooldownActive = false; }, COOLDOWN_MS);
+                } else if (primary < -TILT_THRESHOLD) {
+                    // Tilt up from neutral → Skip
+                    cooldownActive = true;
+                    markSkip();
                     setTimeout(() => { cooldownActive = false; }, COOLDOWN_MS);
                 }
             }, true);
