@@ -9,13 +9,14 @@
     // === STATE ===
     const GAME_DURATION = 60; // seconds
     let state = {
-        screen: 'hub', // hub | playing | results
-        language: 'en', // en | es
+        screen: 'hub',        // hub | playing | results
+        language: 'en',       // en | es
+        inputMode: 'swipe',   // swipe | tilt
         selectedCategory: null,
         words: [],
         currentIndex: 0,
         score: 0,
-        results: [], // { word, spanish, result: 'correct' | 'skipped' }
+        results: [],          // { word, spanish, result: 'correct' | 'skipped' }
         timer: GAME_DURATION,
         timerInterval: null,
     };
@@ -381,77 +382,113 @@
 
         document.addEventListener('touchstart', (e) => {
             if (state.screen !== 'playing') return;
-            // Resume audio context on first touch (iOS requirement)
-            getAudioCtx();
+            getAudioCtx(); // Resume audio context on first touch (iOS)
             touchStartY = e.touches[0].clientY;
             touchStartX = e.touches[0].clientX;
         }, { passive: true });
 
         document.addEventListener('touchend', (e) => {
-            if (state.screen !== 'playing') return;
+            // Only handle swipe when in swipe mode
+            if (state.screen !== 'playing' || state.inputMode !== 'swipe') return;
             const deltaY = e.changedTouches[0].clientY - touchStartY;
             const deltaX = e.changedTouches[0].clientX - touchStartX;
             const absDeltaY = Math.abs(deltaY);
             const absDeltaX = Math.abs(deltaX);
 
-            // Require minimum swipe of 40px
             if (Math.max(absDeltaY, absDeltaX) < 40) return;
 
             if (absDeltaY > absDeltaX) {
-                // Vertical swipe
-                if (deltaY < 0) {
-                    // Swipe up = skip
-                    markSkip();
-                } else {
-                    // Swipe down = correct
-                    markCorrect();
-                }
+                if (deltaY < 0) markSkip();
+                else markCorrect();
             }
         }, { passive: true });
     }
 
     // === TILT / DEVICE ORIENTATION CONTROLS ===
+    // In LANDSCAPE mode:
+    //   gamma = forward/back tilt of the phone (the axis we want)
+    //   beta  = left/right lean (NOT what we want — this was the previous bug)
+    //
+    // gamma conventions when phone is landscape:
+    //   ~0°  = flat on table
+    //   negative = top of phone tilts AWAY from user (forward/down) → SKIP
+    //   positive = top of phone tilts TOWARD user (backward/up)     → CORRECT
+    //
+    // We also check screen.orientation / window.orientation to confirm landscape.
     function setupTiltControls() {
-        const TILT_THRESHOLD = 35;  // degrees from neutral to trigger
-        const COOLDOWN_MS = 800;    // prevent rapid-fire
+        const TILT_THRESHOLD = 25;  // degrees — lower threshold for easier triggering
+        const COOLDOWN_MS = 800;
 
-        // Request permission on iOS 13+
-        if (typeof DeviceOrientationEvent !== 'undefined' &&
-            typeof DeviceOrientationEvent.requestPermission === 'function') {
-            document.addEventListener('touchstart', function iosPermission() {
+        const requestAndAttach = () => {
+            if (typeof DeviceOrientationEvent !== 'undefined' &&
+                typeof DeviceOrientationEvent.requestPermission === 'function') {
+                // iOS 13+ — must be triggered by a user gesture
                 DeviceOrientationEvent.requestPermission()
-                    .then(response => {
-                        if (response === 'granted') attachTiltListener();
-                    })
+                    .then(r => { if (r === 'granted') attachTiltListener(); })
                     .catch(() => { });
-                document.removeEventListener('touchstart', iosPermission);
-            }, { once: true });
-        } else if (typeof DeviceOrientationEvent !== 'undefined') {
-            attachTiltListener();
-        }
+            } else if (typeof DeviceOrientationEvent !== 'undefined') {
+                attachTiltListener();
+            }
+        };
+
+        // Hook into first touch so iOS permission dialog appears during user gesture
+        document.addEventListener('touchstart', requestAndAttach, { once: true });
 
         function attachTiltListener() {
             let cooldownActive = false;
 
             window.addEventListener('deviceorientation', (e) => {
-                if (state.screen !== 'playing' || cooldownActive) return;
-                if (e.beta === null) return;
+                if (state.screen !== 'playing' || state.inputMode !== 'tilt' || cooldownActive) return;
+                if (e.gamma === null || e.gamma === undefined) return;
 
-                // In landscape: beta = forward/back tilt
-                // Tilt forward (screen faces away) → beta negative → Skip
-                // Tilt backward (screen faces you) → beta positive → Correct
-                const beta = e.beta;
+                // gamma is the correct axis for landscape forward/back tilt
+                const gamma = e.gamma;
 
-                if (beta < -TILT_THRESHOLD) {
+                if (gamma < -TILT_THRESHOLD) {
+                    // Top of phone tilted away from user = tilt down/forward = Skip
                     cooldownActive = true;
                     markSkip();
                     setTimeout(() => { cooldownActive = false; }, COOLDOWN_MS);
-                } else if (beta > TILT_THRESHOLD) {
+                } else if (gamma > TILT_THRESHOLD) {
+                    // Top of phone tilted toward user = tilt back/up = Correct
                     cooldownActive = true;
                     markCorrect();
                     setTimeout(() => { cooldownActive = false; }, COOLDOWN_MS);
                 }
             }, true);
+        }
+    }
+
+    // === INPUT MODE TOGGLE ===
+    function toggleInputMode() {
+        state.inputMode = state.inputMode === 'swipe' ? 'tilt' : 'swipe';
+        updateInputToggleUI();
+    }
+
+    function updateInputToggleUI() {
+        const btn = $('#charades-input-toggle');
+        const skipHint = document.querySelector('.charades-hint.skip-hint');
+        const correctHint = document.querySelector('.charades-hint.correct-hint');
+
+        if (btn) {
+            if (state.inputMode === 'tilt') {
+                btn.innerHTML = '<i class="fa-solid fa-mobile-screen-button"></i> Tilt';
+                btn.classList.add('tilt-active');
+            } else {
+                btn.innerHTML = '<i class="fa-solid fa-hand-point-up"></i> Swipe';
+                btn.classList.remove('tilt-active');
+            }
+        }
+
+        if (skipHint) {
+            skipHint.innerHTML = state.inputMode === 'tilt'
+                ? '<i class="fa-solid fa-rotate-left"></i> Tilt Forward = Skip'
+                : '<i class="fa-solid fa-arrow-up"></i> Swipe Up = Skip';
+        }
+        if (correctHint) {
+            correctHint.innerHTML = state.inputMode === 'tilt'
+                ? '<i class="fa-solid fa-rotate-right"></i> Tilt Back = Correct'
+                : '<i class="fa-solid fa-arrow-down"></i> Swipe Down = Correct';
         }
     }
 
@@ -502,6 +539,7 @@
 
     // Expose for inline event handlers
     window.charadesGoToHub = goToHub;
+    window.charadesToggleInput = toggleInputMode;
     window.charadesPlayAgain = function () {
         if (state.selectedCategory) {
             // Find the key from the category
