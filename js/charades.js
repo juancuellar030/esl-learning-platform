@@ -405,18 +405,20 @@
     }
 
     // === TILT / DEVICE ORIENTATION CONTROLS ===
-    // In LANDSCAPE mode:
-    //   gamma = forward/back tilt of the phone (the axis we want)
-    //   beta  = left/right lean (NOT what we want — this was the previous bug)
-    //
-    // gamma conventions when phone is landscape:
-    //   ~0°  = flat on table
-    //   negative = top of phone tilts AWAY from user (forward/down) → SKIP
-    //   positive = top of phone tilts TOWARD user (backward/up)     → CORRECT
-    //
-    // We also check screen.orientation / window.orientation to confirm landscape.
+    // === TILT / DEVICE ORIENTATION CONTROLS ===
+    // Strategy: CALIBRATION-BASED delta detection.
+    // We capture the phone's neutral angle the moment tilt mode is turned on,
+    // then only react to changes RELATIVE to that baseline.
+    // This works correctly regardless of landscape/portrait or phone model,
+    // because absolute gamma/beta values vary wildly by orientation.
+    let tiltBaseline = null; // { beta, gamma } — captured on first event after enabling tilt
+
+    function calibrateTilt() {
+        tiltBaseline = null; // resets; will be re-captured on next orientation event
+    }
+
     function setupTiltControls() {
-        const TILT_THRESHOLD = 25;  // degrees — lower threshold for easier triggering
+        const TILT_THRESHOLD = 20;  // degrees of change from neutral to trigger
         const COOLDOWN_MS = 800;
 
         const requestAndAttach = () => {
@@ -439,18 +441,32 @@
 
             window.addEventListener('deviceorientation', (e) => {
                 if (state.screen !== 'playing' || state.inputMode !== 'tilt' || cooldownActive) return;
-                if (e.gamma === null || e.gamma === undefined) return;
+                if (e.beta === null || e.gamma === null) return;
 
-                // gamma is the correct axis for landscape forward/back tilt
-                const gamma = e.gamma;
+                // Capture baseline on first reading after tilt mode is enabled
+                if (!tiltBaseline) {
+                    tiltBaseline = { beta: e.beta, gamma: e.gamma };
+                    return;
+                }
 
-                if (gamma < -TILT_THRESHOLD) {
-                    // Top of phone tilted away from user = tilt down/forward = Skip
+                // Compute how much the phone has moved from its neutral position
+                const deltaBeta = e.beta - tiltBaseline.beta;
+                const deltaGamma = e.gamma - tiltBaseline.gamma;
+
+                // Use whichever axis shows a larger movement
+                // In landscape: gamma changes more with forward/back tilt
+                // In portrait:  beta changes more with forward/back tilt
+                const primary = Math.abs(deltaGamma) >= Math.abs(deltaBeta)
+                    ? deltaGamma
+                    : deltaBeta;
+
+                if (primary < -TILT_THRESHOLD) {
+                    // Tilted forward/down from neutral → Skip
                     cooldownActive = true;
                     markSkip();
                     setTimeout(() => { cooldownActive = false; }, COOLDOWN_MS);
-                } else if (gamma > TILT_THRESHOLD) {
-                    // Top of phone tilted toward user = tilt back/up = Correct
+                } else if (primary > TILT_THRESHOLD) {
+                    // Tilted backward/up from neutral → Correct
                     cooldownActive = true;
                     markCorrect();
                     setTimeout(() => { cooldownActive = false; }, COOLDOWN_MS);
@@ -462,6 +478,9 @@
     // === INPUT MODE TOGGLE ===
     function toggleInputMode() {
         state.inputMode = state.inputMode === 'swipe' ? 'tilt' : 'swipe';
+        if (state.inputMode === 'tilt') {
+            calibrateTilt(); // reset baseline so it re-captures from current phone position
+        }
         updateInputToggleUI();
     }
 
