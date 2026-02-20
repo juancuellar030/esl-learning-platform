@@ -24,12 +24,99 @@
     const $ = (sel) => document.querySelector(sel);
     const $$ = (sel) => document.querySelectorAll(sel);
 
+    // === SOUND EFFECTS (Web Audio API) ===
+    let audioCtx = null;
+    function getAudioCtx() {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        return audioCtx;
+    }
+
+    function playCorrectSound() {
+        const ctx = getAudioCtx();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(600, ctx.currentTime);
+        osc.frequency.linearRampToValueAtTime(900, ctx.currentTime + 0.12);
+        gain.gain.setValueAtTime(0.25, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + 0.25);
+    }
+
+    function playSkipSound() {
+        const ctx = getAudioCtx();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(400, ctx.currentTime);
+        osc.frequency.linearRampToValueAtTime(200, ctx.currentTime + 0.15);
+        gain.gain.setValueAtTime(0.2, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + 0.2);
+    }
+
+    function playTickSound() {
+        const ctx = getAudioCtx();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(880, ctx.currentTime);
+        gain.gain.setValueAtTime(0.15, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + 0.08);
+    }
+
+    function playEndSound() {
+        const ctx = getAudioCtx();
+        [0, 0.15, 0.3].forEach((delay, i) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime([523, 440, 330][i], ctx.currentTime + delay);
+            gain.gain.setValueAtTime(0.25, ctx.currentTime + delay);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + 0.35);
+            osc.start(ctx.currentTime + delay);
+            osc.stop(ctx.currentTime + delay + 0.35);
+        });
+    }
+
     // === INIT ===
     function init() {
         renderCategoryHub();
         setupLanguageToggle();
         setupKeyboardControls();
         setupTouchControls();
+        setupTiltControls();
+    }
+
+    // === FULLSCREEN ===
+    function enterFullscreen() {
+        const el = document.documentElement;
+        const rfs = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
+        if (rfs) {
+            rfs.call(el).catch(() => { });
+        }
+    }
+
+    function exitFullscreen() {
+        const efs = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
+        if (efs && (document.fullscreenElement || document.webkitFullscreenElement)) {
+            efs.call(document).catch(() => { });
+        }
     }
 
     // === RENDER CATEGORY HUB ===
@@ -113,6 +200,7 @@
         state.timer = GAME_DURATION;
         state.screen = 'playing';
 
+        enterFullscreen();
         showGameScreen();
         showCountdown(() => {
             displayCurrentWord();
@@ -204,8 +292,14 @@
             state.timer--;
             updateTimerDisplay(timerText, ringProgress, circumference);
 
+            // Tick sound for last 5 seconds
+            if (state.timer > 0 && state.timer <= 5) {
+                playTickSound();
+            }
+
             if (state.timer <= 0) {
                 clearInterval(state.timerInterval);
+                playEndSound();
                 endGame();
             }
         }, 1000);
@@ -230,6 +324,7 @@
         state.results.push({ word: entry.word, spanish: entry.spanish, result: 'correct' });
         state.score++;
         updateScoreDisplay();
+        playCorrectSound();
         showFlash('correct');
         transitionWord('exit-down');
     }
@@ -238,6 +333,7 @@
         if (state.screen !== 'playing') return;
         const entry = state.words[state.currentIndex];
         state.results.push({ word: entry.word, spanish: entry.spanish, result: 'skipped' });
+        playSkipSound();
         showFlash('skip');
         transitionWord('exit-up');
     }
@@ -285,6 +381,8 @@
 
         document.addEventListener('touchstart', (e) => {
             if (state.screen !== 'playing') return;
+            // Resume audio context on first touch (iOS requirement)
+            getAudioCtx();
             touchStartY = e.touches[0].clientY;
             touchStartX = e.touches[0].clientX;
         }, { passive: true });
@@ -312,7 +410,51 @@
         }, { passive: true });
     }
 
-    // === END GAME ===
+    // === TILT / DEVICE ORIENTATION CONTROLS ===
+    function setupTiltControls() {
+        const TILT_THRESHOLD = 35;  // degrees from neutral to trigger
+        const COOLDOWN_MS = 800;    // prevent rapid-fire
+
+        // Request permission on iOS 13+
+        if (typeof DeviceOrientationEvent !== 'undefined' &&
+            typeof DeviceOrientationEvent.requestPermission === 'function') {
+            document.addEventListener('touchstart', function iosPermission() {
+                DeviceOrientationEvent.requestPermission()
+                    .then(response => {
+                        if (response === 'granted') attachTiltListener();
+                    })
+                    .catch(() => { });
+                document.removeEventListener('touchstart', iosPermission);
+            }, { once: true });
+        } else if (typeof DeviceOrientationEvent !== 'undefined') {
+            attachTiltListener();
+        }
+
+        function attachTiltListener() {
+            let cooldownActive = false;
+
+            window.addEventListener('deviceorientation', (e) => {
+                if (state.screen !== 'playing' || cooldownActive) return;
+                if (e.beta === null) return;
+
+                // In landscape: beta = forward/back tilt
+                // Tilt forward (screen faces away) → beta negative → Skip
+                // Tilt backward (screen faces you) → beta positive → Correct
+                const beta = e.beta;
+
+                if (beta < -TILT_THRESHOLD) {
+                    cooldownActive = true;
+                    markSkip();
+                    setTimeout(() => { cooldownActive = false; }, COOLDOWN_MS);
+                } else if (beta > TILT_THRESHOLD) {
+                    cooldownActive = true;
+                    markCorrect();
+                    setTimeout(() => { cooldownActive = false; }, COOLDOWN_MS);
+                }
+            }, true);
+        }
+    }
+
     function endGame() {
         state.screen = 'results';
         clearInterval(state.timerInterval);
@@ -350,6 +492,7 @@
     function goToHub() {
         state.screen = 'hub';
         clearInterval(state.timerInterval);
+        exitFullscreen();
 
         $('#charades-game').classList.add('charades-screen-hidden');
         $('#charades-results').classList.add('charades-screen-hidden');
