@@ -18,7 +18,6 @@
         .tracker-container {
             max-width: 1800px;
             margin: 0 auto;
-            background: white;
             border-radius: 16px;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
             overflow: hidden;
@@ -26,7 +25,7 @@
         }
 
         .tracker-header {
-            background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%);
+            background: var(--indigo-velvet);
             color: white;
             padding: 30px;
             display: flex;
@@ -46,8 +45,6 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background-image: radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 25%),
-                radial-gradient(circle at 80% 30%, rgba(255, 255, 255, 0.15) 0%, transparent 20%);
             pointer-events: none;
         }
 
@@ -340,21 +337,17 @@
         }
 
         /* Dark Mode Styles */
-        body.dark-mode {
-            background: #1a1a2e;
-        }
-
         body.dark-mode .tracker-container {
-            background: #16213e;
+            background: #2a2a2a;
             border-color: rgba(255, 255, 255, 0.05);
         }
 
         body.dark-mode .tracker-header {
-            background: linear-gradient(135deg, #0f3460 0%, #16213e 100%);
+            background: #2a2a2a;
         }
 
         body.dark-mode .new-item-input {
-            background: #1a1a2e;
+            background: #2a2a2a;
             color: #e0e0e0;
         }
 
@@ -363,30 +356,33 @@
         }
 
         body.dark-mode .table-container {
-            background: #0f3460;
+            background: #2a2a2a;
         }
 
         body.dark-mode table {
-            background: #16213e;
+            background: #313131;
         }
 
         body.dark-mode thead {
-            background: #0f3460;
+            background: #3d348b;
         }
 
         body.dark-mode th {
             color: #e0e0e0;
-            border-bottom-color: #1a1a2e;
+            border-bottom-color: #2a2a2a;
         }
 
         body.dark-mode th.material-header:hover {
-            background: #1a1a2e;
+            background: #332c77;
         }
 
-        body.dark-mode .student-name-header,
+        body.dark-mode .student-name-header {
+            background: #332c77;
+        }
+
         body.dark-mode .student-name-cell {
-            background: #16213e;
-            border-right-color: #0f3460;
+            background: #222222;
+            border-right-color: #222222;
         }
 
         body.dark-mode .student-name-cell {
@@ -394,19 +390,19 @@
         }
 
         body.dark-mode tbody tr:nth-child(even) .student-name-cell {
-            background: #1a1a2e;
+            background: #2a2a2a;
         }
 
         body.dark-mode tbody tr:hover {
-            background: #0f3460;
+            background: #3a3a3a;
         }
 
         body.dark-mode tbody tr:hover .student-name-cell {
-            background: #0f3460;
+            background: #3a3a3a;
         }
 
         body.dark-mode td {
-            border-bottom-color: #0f3460;
+            border-bottom-color: #555555;
         }
 
         body.dark-mode .cell-content.empty:hover {
@@ -434,6 +430,14 @@
                 <a href="tools.html" class="btn btn-secondary">
                     <i class="fa-solid fa-arrow-left"></i> Back
                 </a>
+                <button class="btn btn-secondary" onclick="exportData()" title="Save tracking data to a file">
+                    <i class="fa-solid fa-download"></i> Save
+                </button>
+                <label class="btn btn-secondary" style="margin: 0; cursor: pointer;"
+                    title="Load tracking data from a file">
+                    <i class="fa-solid fa-upload"></i> Load
+                    <input type="file" id="importDataInput" accept=".json" style="display: none;">
+                </label>
                 <input type="text" id="newItemInput" class="new-item-input"
                     placeholder="Enter item name (e.g. Lunch Money)...">
                 <button class="btn btn-add" id="addItemBtn">
@@ -624,6 +628,47 @@
                 renderTable();
             }
         };
+
+        // Export Data to JSON
+        function exportData() {
+            const dataStr = JSON.stringify(appData, null, 2);
+            const blob = new Blob([dataStr], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const dateStr = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD
+            a.download = `material_tracker_${dateStr}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Import Data from JSON
+        document.getElementById('importDataInput').addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    // Basic validation
+                    if (parsed && Array.isArray(parsed.materials) && typeof parsed.tracking === 'object') {
+                        appData = parsed;
+                        saveData();
+                        renderTable();
+                    } else {
+                        throw new Error('Invalid format');
+                    }
+                } catch (error) {
+                    alert('Error loading file. Please make sure it is a valid saved tracker JSON file.');
+                }
+            };
+            reader.readAsText(file);
+            // Reset input so the same file could be loaded again if needed
+            this.value = '';
+        });
 
         // Initialize
         loadData();

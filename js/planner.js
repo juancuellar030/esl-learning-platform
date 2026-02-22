@@ -44,6 +44,7 @@
         loadFromLocalStorage();
         attachEventListeners();
         updateDayVisibility();
+        updateVisualFeedback();
     }
 
     // Set default week to current Monday - Friday
@@ -132,16 +133,9 @@
         });
 
         // Modal controls
-        addActivityBtn.addEventListener('click', addActivityInput);
+        addActivityBtn.addEventListener('click', () => addActivityInput());
         activityCancel.addEventListener('click', closeActivityModal);
         activitySave.addEventListener('click', saveActivities);
-
-        // Close modal on backdrop click
-        activityModal.addEventListener('click', (e) => {
-            if (e.target === activityModal) {
-                closeActivityModal();
-            }
-        });
 
         // Close modal on Escape
         document.addEventListener('keydown', (e) => {
@@ -549,11 +543,205 @@
         }, 3000);
     }
 
+    // ===== DAY VIEWER =====
+    const DAY_NAMES = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'];
+    const DAY_LABELS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+    let currentViewDay = 0; // index into DAY_NAMES
+
+    function getTodayIndex() {
+        const jsDay = new Date().getDay(); // 0=Sun,1=Mon,...,6=Sat
+        if (jsDay >= 1 && jsDay <= 5) return jsDay - 1; // Mon=0 … Fri=4
+        return 0; // default to Monday on weekends
+    }
+
+    function openDayViewer() {
+        currentViewDay = getTodayIndex();
+        renderDayView();
+        document.getElementById('day-viewer-modal').style.display = 'flex';
+    }
+
+    function closeDayViewer() {
+        document.getElementById('day-viewer-modal').style.display = 'none';
+    }
+
+    function navigateDay(delta) {
+        currentViewDay = Math.max(0, Math.min(DAY_NAMES.length - 1, currentViewDay + delta));
+        renderDayView();
+    }
+
+    function renderDayView() {
+        const dayName = DAY_NAMES[currentViewDay];
+        const dayLabel = DAY_LABELS[currentViewDay];
+
+        // Update header
+        document.getElementById('day-viewer-title').textContent = dayLabel;
+
+        // Update arrows
+        document.getElementById('day-prev-btn').disabled = currentViewDay === 0;
+        document.getElementById('day-next-btn').disabled = currentViewDay === DAY_NAMES.length - 1;
+
+        // Gather all class cells for this day, in period order
+        const cells = Array.from(document.querySelectorAll(`[data-class-id^="${dayName}-"]`));
+
+        // Sort by period number
+        cells.sort((a, b) => {
+            const pA = parseInt(a.dataset.classId.split('-')[1]);
+            const pB = parseInt(b.dataset.classId.split('-')[1]);
+            return pA - pB;
+        });
+
+        // Build grouped entries: merge consecutive cells with the same class label
+        const groups = [];
+        cells.forEach(cell => {
+            const classId = cell.dataset.classId;
+            const classBox = cell.querySelector('.class-box');
+            if (!classBox) return;
+            // Skip AP cells
+            if (cell.classList.contains('ap-cell')) return;
+
+            const label = classBox.innerHTML.replace(/<br\s*\/?>/gi, ' ').replace(/<[^>]*>/g, '').trim().replace(/\s+/g, ' ');
+            const timeCell = cell.parentElement.querySelector('td:nth-child(2)');
+            const time = timeCell ? timeCell.textContent.trim() : '';
+            const activities = plannerData.classes[classId]?.activities || [];
+
+            const last = groups[groups.length - 1];
+            if (last && last.label === label) {
+                // Merge: extend time range and combine activities
+                last.timeTo = time.split('-')[1] || time;
+                last.activities = last.activities.concat(activities);
+                last.classIds.push(classId);
+            } else {
+                const parts = time.split('-');
+                groups.push({
+                    label,
+                    timeFrom: parts[0] || '',
+                    timeTo: parts[1] || '',
+                    activities: [...activities],
+                    classIds: [classId]
+                });
+            }
+        });
+
+        // Split into morning (periods 1-5, before lunch) and afternoon (periods 6+)
+        const morningGroups = [];
+        const afternoonGroups = [];
+        groups.forEach(group => {
+            // Check period numbers — periods 1-5 are morning, 6+ are afternoon
+            const firstPeriod = parseInt(group.classIds[0].split('-')[1]);
+            if (firstPeriod <= 5) {
+                morningGroups.push(group);
+            } else {
+                afternoonGroups.push(group);
+            }
+        });
+
+        // Render
+        const container = document.getElementById('day-viewer-classes');
+        if (groups.length === 0) {
+            container.innerHTML = `
+                <div class="day-viewer-empty">
+                    <i class="fa-solid fa-calendar-xmark"></i>
+                    <p>No classes scheduled for ${dayLabel}</p>
+                </div>`;
+            return;
+        }
+
+        // Get current time in minutes for comparison
+        const now = new Date();
+        const currentMinutes = now.getHours() * 60 + now.getMinutes();
+        const isToday = currentViewDay === getTodayIndex() && now.getDay() >= 1 && now.getDay() <= 5;
+
+        const parseTime = (t) => {
+            // Parse "9:10" or "14:00" into minutes since midnight
+            const parts = t.split(':');
+            return parseInt(parts[0]) * 60 + parseInt(parts[1] || 0);
+        };
+
+        const renderColumn = (title, icon, columnGroups) => {
+            const cardsHtml = columnGroups.length > 0
+                ? columnGroups.map(group => {
+                    const timeRange = group.timeFrom + '-' + group.timeTo;
+
+                    // Determine time status: past, current, or upcoming
+                    let timeStatus = '';
+                    if (isToday) {
+                        const startMin = parseTime(group.timeFrom);
+                        const endMin = parseTime(group.timeTo);
+                        if (currentMinutes >= startMin && currentMinutes < endMin) {
+                            timeStatus = 'dv-current';
+                        } else if (currentMinutes >= endMin) {
+                            timeStatus = 'dv-past';
+                        } else {
+                            timeStatus = 'dv-upcoming';
+                        }
+                    }
+
+                    const activitiesHtml = group.activities.length > 0
+                        ? group.activities.map((a, i) => `<div class="dv-activity-card"><span class="dv-activity-num">${i + 1}</span> ${escapeHtml(a)}</div>`).join('')
+                        : '<div class="dv-no-activities"><i class="fa-solid fa-circle-minus"></i> No activities planned</div>';
+
+                    return `
+                        <div class="dv-class-card ${timeStatus}">
+                            <div class="dv-class-header">
+                                <span class="dv-class-label">${escapeHtml(group.label)}</span>
+                                <span class="dv-class-time"><i class="fa-regular fa-clock"></i> ${escapeHtml(timeRange)}</span>
+                            </div>
+                            <div class="dv-activities-list">
+                                ${activitiesHtml}
+                            </div>
+                        </div>`;
+                }).join('')
+                : '<div class="dv-no-activities" style="padding:20px;text-align:center;"><i class="fa-solid fa-circle-minus"></i> No classes</div>';
+
+            return `
+                <div class="dv-column">
+                    <div class="dv-column-title"><i class="fa-solid ${icon}"></i> ${title}</div>
+                    ${cardsHtml}
+                </div>`;
+        };
+
+        container.innerHTML = `
+            <div class="dv-columns-wrapper">
+                ${renderColumn('Morning', 'fa-sun', morningGroups)}
+                ${renderColumn('Afternoon', 'fa-cloud-sun', afternoonGroups)}
+            </div>`;
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // Attach day viewer listeners after DOM is ready
+    function attachDayViewerListeners() {
+        const openBtn = document.getElementById('open-day-viewer-btn');
+        if (openBtn) openBtn.addEventListener('click', openDayViewer);
+
+        const closeBtn = document.getElementById('day-viewer-close');
+        if (closeBtn) closeBtn.addEventListener('click', closeDayViewer);
+
+        const prevBtn = document.getElementById('day-prev-btn');
+        if (prevBtn) prevBtn.addEventListener('click', () => navigateDay(-1));
+
+        const nextBtn = document.getElementById('day-next-btn');
+        if (nextBtn) nextBtn.addEventListener('click', () => navigateDay(1));
+
+        // Close on Escape
+        document.addEventListener('keydown', (e) => {
+            const modal = document.getElementById('day-viewer-modal');
+            if (e.key === 'Escape' && modal && modal.style.display === 'flex') {
+                closeDayViewer();
+            }
+        });
+    }
+
     // Initialize on page load
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init);
+        document.addEventListener('DOMContentLoaded', () => { init(); attachDayViewerListeners(); });
     } else {
         init();
+        attachDayViewerListeners();
     }
 
 })();

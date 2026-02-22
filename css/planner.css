@@ -192,12 +192,12 @@
 
 /* Column Widths for Weekday Table (6 columns) */
 #weekday-table th:nth-child(1) {
-    width: 50px;
+    width: 35px;
 }
 
 /* Period */
 #weekday-table th:nth-child(2) {
-    width: 90px;
+    width: 100px;
 }
 
 /* Time */
@@ -205,17 +205,17 @@
 #weekday-table th:nth-child(4),
 #weekday-table th:nth-child(5),
 #weekday-table th:nth-child(6) {
-    width: calc((100% - 140px) / 4);
+    width: calc((100% - 125px) / 4);
     /* Distribute remaining width equally */
 }
 
 /* Column Widths for Friday Table (3 columns) */
 #friday-table th:nth-child(1) {
-    width: 50px;
+    width: 35px;
 }
 
 #friday-table th:nth-child(2) {
-    width: 90px;
+    width: 100px;
 }
 
 #friday-table th:nth-child(3) {
@@ -278,6 +278,7 @@
     align-items: center;
     justify-content: center;
     text-align: center;
+    position: relative;
 }
 
 .class-cell:hover .class-box {
@@ -289,7 +290,8 @@
 /* Planned class indicator */
 .class-cell.has-activities .class-box {
     border: 3px solid var(--amber-flame);
-    background: linear-gradient(135deg, var(--medium-slate-blue), var(--indigo-velvet));
+    background: var(--indigo-velvet) !important;
+    color: white !important;
     box-shadow: 0 3px 10px rgba(247, 184, 1, 0.3);
 }
 
@@ -298,8 +300,8 @@
     font-family: 'Font Awesome 6 Free';
     font-weight: 900;
     position: absolute;
-    top: 5px;
-    right: 5px;
+    top: -8px;
+    right: -8px;
     background: var(--amber-flame);
     color: var(--indigo-velvet);
     width: 20px;
@@ -648,4 +650,294 @@ body.dark-mode .activity-item input {
     background: #333;
     color: #eee;
     border-color: #555;
+}
+
+/* ===== DAY VIEWER MODAL ===== */
+.day-viewer-modal {
+    max-width: 950px;
+    width: 90vw;
+    text-align: left;
+}
+
+.dv-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 3px solid var(--medium-slate-blue);
+}
+
+.dv-nav h3 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--indigo-velvet);
+    margin: 0;
+    min-width: 140px;
+    text-align: center;
+}
+
+.dv-arrow-btn {
+    background: var(--medium-slate-blue);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    flex-shrink: 0;
+}
+
+.dv-arrow-btn:hover:not(:disabled) {
+    background: var(--indigo-velvet);
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(61, 52, 139, 0.3);
+}
+
+.dv-arrow-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.dv-classes-container {
+    margin-bottom: 20px;
+}
+
+.dv-columns-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    max-height: 60vh;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+@media (max-width: 700px) {
+    .dv-columns-wrapper {
+        grid-template-columns: 1fr;
+    }
+}
+
+.dv-column {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.dv-column-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--indigo-velvet);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #e0e0e0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.dv-column-title i {
+    font-size: 1.1rem;
+    color: var(--amber-flame);
+}
+
+.dv-columns-wrapper::-webkit-scrollbar {
+    width: 6px;
+}
+
+.dv-columns-wrapper::-webkit-scrollbar-track {
+    background: #f0f0f0;
+    border-radius: 3px;
+}
+
+.dv-columns-wrapper::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 3px;
+}
+
+.dv-class-card {
+    background: #f8f9fa;
+    border-radius: 14px;
+    border-left: 5px solid var(--indigo-velvet);
+    overflow: hidden;
+    animation: fadeInUp 0.35s ease both;
+}
+
+.dv-class-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 18px;
+    background: var(--indigo-velvet);
+    color: white;
+}
+
+.dv-class-label {
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.dv-class-time {
+    font-size: 0.85rem;
+    font-weight: 600;
+    opacity: 0.85;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.dv-activities-list {
+    padding: 12px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.dv-activity-card {
+    background: white;
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #333;
+    border: 2px solid #e8e8e8;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.2s ease;
+}
+
+.dv-activity-num {
+    background: var(--indigo-velvet);
+    color: white;
+    min-width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.dv-activity-card:hover {
+    border-color: var(--medium-slate-blue);
+    transform: translateX(4px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+/* ===== TIME-BASED CLASS CARD STATES ===== */
+
+/* Currently happening class — vibrant amber/gold glow */
+.dv-class-card.dv-current {
+    border-left-color: var(--amber-flame);
+    box-shadow: 0 0 16px rgba(247, 184, 1, 0.35), 0 4px 12px rgba(247, 184, 1, 0.15);
+}
+
+.dv-class-card.dv-current .dv-class-header {
+    background: linear-gradient(135deg, #d4a017, var(--amber-flame));
+}
+
+.dv-class-card.dv-current .dv-activity-num {
+    background: var(--amber-flame);
+    color: #333;
+}
+
+/* Past classes — faded/muted */
+.dv-class-card.dv-past {
+    opacity: 0.55;
+}
+
+.dv-class-card.dv-past .dv-class-header {
+    background: #666;
+}
+
+.dv-no-activities {
+    padding: 12px 16px;
+    font-size: 0.9rem;
+    color: #999;
+    font-style: italic;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.dv-no-activities i {
+    color: #ccc;
+}
+
+.day-viewer-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: #999;
+}
+
+.day-viewer-empty i {
+    font-size: 3rem;
+    margin-bottom: 12px;
+    opacity: 0.4;
+    display: block;
+}
+
+.day-viewer-empty p {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+/* Day Viewer Dark Mode */
+body.dark-mode .dv-nav h3 {
+    color: var(--amber-flame);
+}
+
+body.dark-mode .dv-arrow-btn {
+    background: #444;
+    color: #eee;
+}
+
+body.dark-mode .dv-arrow-btn:hover:not(:disabled) {
+    background: var(--medium-slate-blue);
+}
+
+body.dark-mode .dv-class-card {
+    background: #2a2a2a;
+    border-left-color: var(--amber-flame);
+}
+
+body.dark-mode .dv-activity-card {
+    background: #333;
+    border-color: #444;
+    color: #eee;
+}
+
+body.dark-mode .dv-activity-card:hover {
+    border-color: var(--medium-slate-blue);
+}
+
+body.dark-mode .dv-no-activities {
+    color: #777;
+}
+
+body.dark-mode .dv-column-title {
+    color: #ccc;
+    border-bottom-color: #444;
+}
+
+body.dark-mode .dv-columns-wrapper::-webkit-scrollbar-track {
+    background: #333;
+}
+
+body.dark-mode .dv-columns-wrapper::-webkit-scrollbar-thumb {
+    background: #555;
+}
+
+body.dark-mode .day-viewer-empty {
+    color: #777;
 }

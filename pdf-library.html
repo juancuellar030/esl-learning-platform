@@ -31,29 +31,31 @@
     <!-- Main Content -->
     <main class="main-content">
         <div class="container">
-            <!-- Library Header -->
-            <div class="library-header">
-                <h2><i class="fa-solid fa-book"></i> My Book Library</h2>
-                <p>Upload and manage your teaching materials</p>
-            </div>
-
-            <!-- Upload Section -->
-            <div class="upload-section">
-                <div class="upload-area" id="uploadArea">
-                    <i class="fa-solid fa-cloud-arrow-up"></i>
-                    <h3>Upload PDF Books</h3>
-                    <p>Drag and drop PDF files here or click to browse</p>
-                    <p style="font-size: 0.85rem; color: #999;">Supported format: PDF</p>
+            <!-- Library Top Panel -->
+            <div class="library-top-panel">
+                <!-- Library Header -->
+                <div class="library-header">
+                    <h2><i class="fa-solid fa-book"></i> My Book Library</h2>
+                    <p>Upload and manage your teaching materials</p>
                 </div>
-                <input type="file" id="pdfFileInput" accept=".pdf" multiple>
-            </div>
 
-            <!-- Search Section -->
-            <div class="search-section">
-                <div class="search-bar">
-                    <i class="fa-solid fa-search" style="color: #666;"></i>
-                    <input type="text" id="searchInput" placeholder="Search books by title...">
-                    <span id="bookCount" style="color: #666; font-size: 0.9rem;">0 books</span>
+                <!-- Upload Section -->
+                <div class="upload-section">
+                    <div class="upload-area" id="uploadArea">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                        <h3>Upload PDF Books</h3>
+                        <p>Drag and drop PDF files here or click to browse</p>
+                    </div>
+                    <input type="file" id="pdfFileInput" accept=".pdf" multiple>
+                </div>
+
+                <!-- Search Section -->
+                <div class="search-section">
+                    <div class="search-bar">
+                        <i class="fa-solid fa-search" style="color: #666;"></i>
+                        <input type="text" id="searchInput" placeholder="Search books by title...">
+                        <span id="bookCount" style="color: #666; font-size: 0.9rem;">0 books</span>
+                    </div>
                 </div>
             </div>
 
@@ -84,6 +86,7 @@
         // Set PDF.js worker
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
     </script>
+    <script src="js/darkmode.js"></script>
     <script src="js/pdf-library.js"></script>
 </body>
 

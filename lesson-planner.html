@@ -38,7 +38,7 @@
                 <div class="planner-controls">
                     <div class="date-range-control">
                         <label>
-                            <i class="fa-solid fa-calendar-days"></i> Period:
+                            <i class="fa-solid fa-calendar-days"></i> Week:
                         </label>
                         <div class="date-inputs">
                             <div class="date-input-wrapper">
@@ -52,6 +52,9 @@
                     </div>
 
                     <div class="control-actions">
+                        <button class="btn-primary" id="open-day-viewer-btn">
+                            <i class="fa-solid fa-clipboard-list"></i> Today's Plan
+                        </button>
                         <button class="btn-secondary" id="clear-table-btn">
                             <i class="fa-solid fa-trash"></i> Empty Table
                         </button>
@@ -73,7 +76,7 @@
                         <table class="schedule-table" id="weekday-table">
                             <thead>
                                 <tr>
-                                    <th>Period</th>
+                                    <th></th>
                                     <th>Time</th>
                                     <th>Monday
                                         <button class="day-toggle-header active" data-day="monday"
@@ -107,7 +110,7 @@
                                     <td>1</td>
                                     <td>7:00-7:50</td>
                                     <td class="class-cell ap-cell" data-class-id="monday-1">
-                                        <div class="class-box bg-dir">DIR.GRUPO<br>(FORMACIONES/CATE<br>MOCIONAL</div>
+                                        <div class="class-box bg-dir">DIR. GRUPO<br>(FORMACIONES/CAT.<br>EMOCIONAL</div>
                                     </td>
                                     <td class="empty-cell"></td>
                                     <td class="class-cell" data-class-id="wednesday-1">
@@ -130,7 +133,7 @@
                                 </tr>
                                 <!-- Break -->
                                 <tr class="break-row">
-                                    <td>DES</td>
+                                    <td></td>
                                     <td>8:40-9:05</td>
                                     <td colspan="4" class="break-cell">BREAK</td>
                                 </tr>
@@ -187,14 +190,14 @@
                                 </tr>
                                 <!-- Lunch -->
                                 <tr class="break-row">
-                                    <td>ALM</td>
+                                    <td></td>
                                     <td>11:40-12:25</td>
                                     <td colspan="4" class="break-cell">LUNCH</td>
                                 </tr>
                                 <!-- Period 6 -->
                                 <tr>
                                     <td>6</td>
-                                    <td>12:30-1:15</td>
+                                    <td>12:30-13:15</td>
                                     <td class="class-cell" data-class-id="monday-6">
                                         <div class="class-box bg-4c">SCIENCE<br>4C</div>
                                     </td>
@@ -211,12 +214,12 @@
                                 <!-- Period 7 -->
                                 <tr>
                                     <td>7</td>
-                                    <td>1:15-2:00</td>
+                                    <td>13:15-14:00</td>
                                     <td class="class-cell" data-class-id="monday-7">
-                                        <div class="class-box bg-5b">TECHNOLOGY<br>5B</div>
+                                        <div class="class-box bg-5b">TECHNOLOGY <br>5B</div>
                                     </td>
                                     <td class="class-cell" data-class-id="tuesday-7">
-                                        <div class="class-box bg-5c">TECHNOLOGY<br>5C</div>
+                                        <div class="class-box bg-5c">TECHNOLOGY <br>5C</div>
                                     </td>
                                     <td class="class-cell ap-cell" data-class-id="wednesday-7">
                                         <div class="class-box">A.P</div>
@@ -228,7 +231,7 @@
                                 <!-- Period 8 -->
                                 <tr>
                                     <td>8</td>
-                                    <td>2:00-2:45</td>
+                                    <td>14:00-14:45</td>
                                     <td class="class-cell" data-class-id="monday-8">
                                         <div class="class-box bg-5b">TECHNOLOGY<br>5B</div>
                                     </td>
@@ -250,7 +253,7 @@
                         <table class="schedule-table" id="friday-table">
                             <thead>
                                 <tr>
-                                    <th>Period</th>
+                                    <th></th>
                                     <th>Time</th>
                                     <th>Friday
                                         <button class="day-toggle-header active" data-day="friday"
@@ -281,7 +284,7 @@
                                     </td>
                                 </tr>
                                 <tr class="break-row">
-                                    <td>DES</td>
+                                    <td></td>
                                     <td>9:15-9:30</td>
                                     <td class="break-cell">BREAK</td>
                                 </tr>
@@ -344,6 +347,27 @@
             <div class="modal-footer">
                 <button class="btn-secondary" id="activity-cancel">Cancel</button>
                 <button class="btn-primary" id="activity-save">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Day Viewer Modal -->
+    <div id="day-viewer-modal" class="modal-backdrop" style="display: none;">
+        <div class="modal-card day-viewer-modal">
+            <div class="dv-nav">
+                <button class="dv-arrow-btn" id="day-prev-btn" title="Previous Day">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <h3 id="day-viewer-title">Monday</h3>
+                <button class="dv-arrow-btn" id="day-next-btn" title="Next Day">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+            </div>
+            <div id="day-viewer-classes" class="dv-classes-container">
+                <!-- Dynamically populated -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="day-viewer-close">Close</button>
             </div>
         </div>
     </div>

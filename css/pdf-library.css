@@ -1,38 +1,43 @@
 /* PDF Library & Viewer Styles */
 
 /* ===== Library Page ===== */
-.library-header {
-    background: linear-gradient(135deg, var(--medium-slate-blue), var(--dark-slate-blue));
-    padding: 2rem;
+.library-top-panel {
+    background: white;
     border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     margin-bottom: 2rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.library-header {
+    background: white;
+    text-align: center;
+    padding: 2rem;
+    padding-bottom: 0.2rem;
 }
 
 .library-header h2 {
-    color: white;
+    color: var(--dark-slate-blue);
     margin: 0 0 0.5rem 0;
     font-size: 2rem;
 }
 
 .library-header p {
-    color: rgba(255, 255, 255, 0.9);
+    color: #666;
     margin: 0;
 }
 
 /* Upload Section */
 .upload-section {
-    background: white;
-    border-radius: 12px;
+    height: 210px;
     padding: 2rem;
-    margin-bottom: 2rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .upload-area {
     border: 3px dashed var(--medium-slate-blue);
     border-radius: 12px;
-    padding: 3rem;
+    height: 150px;
+    padding: 0.8rem;
     text-align: center;
     background: rgba(99, 102, 241, 0.05);
     transition: all 0.3s ease;
@@ -49,7 +54,7 @@
 .upload-area i {
     font-size: 3rem;
     color: var(--medium-slate-blue);
-    margin-bottom: 1rem;
+    margin-bottom: 0.4rem;
 }
 
 .upload-area h3 {
@@ -68,17 +73,13 @@
 
 /* Search Bar */
 .search-section {
-    margin-bottom: 2rem;
+    padding: 0 2rem 2rem 2rem;
 }
 
 .search-bar {
     display: flex;
     gap: 1rem;
     align-items: center;
-    background: white;
-    padding: 1rem;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .search-bar input {
@@ -564,6 +565,123 @@
     z-index: 10;
     /* Ensure annotations appear above PDF */
     pointer-events: auto;
+}
+
+/* Notification System */
+.notification-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+}
+
+/* ========================================= */
+/* ===== DARK MODE FOR PDF LIBRARY ===== */
+/* ========================================= */
+body.dark-mode .library-top-panel {
+    background: #1e1e2d;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-mode .library-header {
+    background: #1e1e2d;
+}
+
+body.dark-mode .library-header h2 {
+    color: #e0e0e0;
+}
+
+body.dark-mode .library-header p {
+    color: #aaa;
+}
+
+body.dark-mode .upload-area {
+    background: #151521;
+    border-color: #483d8b;
+}
+
+body.dark-mode .upload-area:hover,
+body.dark-mode .upload-area.drag-over {
+    background: #232336;
+    border-color: var(--medium-slate-blue);
+}
+
+body.dark-mode .upload-area h3 {
+    color: #e0e0e0;
+}
+
+body.dark-mode .upload-area p {
+    color: #888;
+}
+
+body.dark-mode .search-bar {
+    background: #151521;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .search-bar input {
+    background: #1e1e2d;
+    border-color: #333;
+    color: #fff;
+}
+
+body.dark-mode .search-bar input:focus {
+    border-color: var(--medium-slate-blue);
+}
+
+body.dark-mode .search-bar input::placeholder {
+    color: #888;
+}
+
+body.dark-mode .book-card {
+    background: #1e1e2d;
+    border-color: #333;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .book-card:hover {
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+    border-color: #555;
+}
+
+body.dark-mode .book-thumbnail {
+    background: #111;
+    border-bottom-color: #333;
+}
+
+body.dark-mode .book-title {
+    color: #eee;
+}
+
+body.dark-mode .book-meta {
+    color: #aaa;
+}
+
+body.dark-mode .empty-state h3 {
+    color: #ddd;
+}
+
+body.dark-mode .empty-state p {
+    color: #888;
+}
+
+body.dark-mode .modal-card {
+    background: #1e1e2d;
+    color: #eee;
+}
+
+body.dark-mode .modal-card h3 {
+    color: #fff;
+}
+
+body.dark-mode .modal-card input {
+    background: #111;
+    border-color: #444;
+    color: #fff;
+}
+
+body.dark-mode .modal-card input:focus {
+    border-color: var(--medium-slate-blue);
 }
 
 /* Loading State */
