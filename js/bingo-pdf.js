@@ -22,12 +22,12 @@
     };
 
     const FONT_MAP = {
-        "'Fredoka One', cursive": { id: 'FredokaOne', url: 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/fredokaone/FredokaOne-Regular.ttf' },
-        "'Bangers', cursive": { id: 'Bangers', url: 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/bangers/Bangers-Regular.ttf' },
-        "'Comic Neue', cursive": { id: 'ComicNeue', url: 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/comicneue/ComicNeue-Bold.ttf' },
-        "'Baloo 2', cursive": { id: 'Baloo2', url: 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/baloo2/Baloo2-Bold.ttf' },
-        "'Bubblegum Sans', cursive": { id: 'BubblegumSans', url: 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/bubblegumsans/BubblegumSans-Regular.ttf' },
-        "'Patrick Hand', cursive": { id: 'PatrickHand', url: 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/patrickhand/PatrickHand-Regular.ttf' }
+        "'Fredoka One', cursive": { id: 'FredokaOne', url: 'https://fonts.gstatic.com/s/fredokaone/v15/k3kUo8kEI-tA1RRcTZGmTlHGCaI.ttf' },
+        "'Bangers', cursive": { id: 'Bangers', url: 'https://fonts.gstatic.com/s/bangers/v25/FeVQS0BTqb0h60ACH55Q3Q.ttf' },
+        "'Comic Neue', cursive": { id: 'ComicNeue', url: 'https://fonts.gstatic.com/s/comicneue/v9/4UaHrEJDsxBrF37olUeD96rp4g.ttf' },
+        "'Baloo 2', cursive": { id: 'Baloo2', url: 'https://fonts.gstatic.com/s/baloo2/v23/wXK0E3kTposypRydzVT08TS3JnAmtdgazZpo_lI.ttf' },
+        "'Bubblegum Sans', cursive": { id: 'BubblegumSans', url: 'https://fonts.gstatic.com/s/bubblegumsans/v22/AYCSpXb_Z9EORv1M5QTjEzMEteaAxIc.ttf' },
+        "'Patrick Hand', cursive": { id: 'PatrickHand', url: 'https://fonts.gstatic.com/s/patrickhand/v25/LDI1apSQOAYtSuYWp8ZhfYe8XsLO.ttf' }
     };
 
     async function loadFontAsBase64(url) {
@@ -146,15 +146,12 @@
         const fontStyle = fontName === 'helvetica' ? 'bold' : 'normal';
 
         // Card background
-        const [bgR, bgG, bgB] = hexToRgb(state.colorCardBg);
-        doc.setFillColor(bgR, bgG, bgB);
+        const [bgR, bgG, bB_bg] = hexToRgb(state.colorCardBg);
+        doc.setFillColor(bgR, bgG, bB_bg);
         doc.roundedRect(x, y, w, h, 3, 3, 'F');
 
-        // Outer border
+        // Extract border colors needed for both inner cells and outer border
         const [bR, bG, bB] = hexToRgb(state.colorBorder);
-        doc.setDrawColor(bR, bG, bB);
-        doc.setLineWidth(0.8);
-        doc.roundedRect(x, y, w, h, 3, 3, 'S');
 
         // Header row
         if (state.showHeader) {
@@ -166,7 +163,7 @@
 
             // Header letters
             doc.setTextColor(255, 255, 255);
-            doc.setFontSize(headerH * 0.72);
+            doc.setFontSize(headerH * 1.3); // Maximized header text size
             doc.setFont(fontName, fontStyle);
             const letters = getHeaderLetters(state);
             letters.forEach((letter, i) => {
@@ -199,14 +196,21 @@
                 // Cell border
                 doc.setDrawColor(bR, bG, bB);
                 doc.setLineWidth(0.3);
-                doc.rect(cx, cy, cellW, cellH, 'S');
+                // Custom drawing for bottom corners to only curve the outer edges
+                if (row === gs - 1 && col === 0) {
+                    doc.rect(cx, cy, cellW, cellH, 'S');
+                } else if (row === gs - 1 && col === gs - 1) {
+                    doc.rect(cx, cy, cellW, cellH, 'S');
+                } else {
+                    doc.rect(cx, cy, cellW, cellH, 'S');
+                }
 
                 if (isFree) {
                     // Free space text
                     doc.setTextColor(255, 255, 255);
                     doc.setFont(fontName, fontStyle);
                     // Increased font size
-                    doc.setFontSize(Math.min(cellW, cellH) * 0.28);
+                    doc.setFontSize(Math.min(cellW, cellH) * 0.35);
                     const freeText = state.freeSpaceText || '★ FREE ★';
                     doc.text(freeText, cx + cellW / 2, cy + cellH / 2, {
                         align: 'center', baseline: 'middle',
@@ -221,11 +225,11 @@
                         doc.setTextColor(tR, tG, tB);
                         doc.setFont(fontName, fontStyle);
                         // Significantly increased base font size
-                        const fontSize = Math.min(cellW, cellH) * 0.35;
+                        const fontSize = Math.min(cellW, cellH) * 0.45;
                         doc.setFontSize(fontSize);
                         const word = typeof item === 'string' ? item : item.name;
                         // Better wrapping width padding
-                        const lines = doc.splitTextToSize(word, cellW - 4);
+                        const lines = doc.splitTextToSize(word, cellW - 2);
                         const lineH = fontSize * 0.42;
                         const totalTextH = lines.length * lineH;
                         const startY = cy + (cellH - totalTextH) / 2 + lineH / 2;
@@ -239,7 +243,19 @@
                         try {
                             const imgData = item.src;
                             const pad = 2;
-                            doc.addImage(imgData, 'JPEG', cx + pad, cy + pad, cellW - pad * 2, cellH - pad * 2);
+                            const availW = cellW - pad * 2;
+                            const availH = cellH - pad * 2;
+
+                            const props = doc.getImageProperties(imgData);
+                            const ratio = Math.min(availW / props.width, availH / props.height);
+                            const finalW = props.width * ratio;
+                            const finalH = props.height * ratio;
+                            const cxOff = (availW - finalW) / 2;
+                            const cyOff = (availH - finalH) / 2;
+
+                            // Let jsPDF interpret the type internally or enforce PNG for transparency
+                            const imgType = imgData.startsWith('data:image/jpeg') ? 'JPEG' : 'PNG';
+                            doc.addImage(imgData, imgType, cx + pad + cxOff, cy + pad + cyOff, finalW, finalH);
                         } catch (e) {
                             // Fallback: show name
                             doc.setTextColor(tR, tG, tB);
@@ -252,6 +268,36 @@
                 }
             }
         }
+
+        // --- OVERLAY TRICK ---
+        // Draw background-colored triangles over the bottom-left and bottom-right 
+        // sharp outer corners so they don't peek out behind the outer rounded border.
+        doc.setFillColor(bgR, bgG, bB_bg);
+
+        // Bottom-left corner clip
+        const blX = x;
+        const blY = y + h;
+        doc.triangle(
+            blX, blY,              // True bottom-left
+            blX + 3, blY,          // Right 3px
+            blX, blY - 3,          // Up 3px
+            'F'
+        );
+
+        // Bottom-right corner clip
+        const brX = x + w;
+        const brY = y + h;
+        doc.triangle(
+            brX, brY,              // True bottom-right
+            brX - 3, brY,          // Left 3px
+            brX, brY - 3,          // Up 3px
+            'F'
+        );
+
+        // Outer border drawn last to cover the sharp inner grid lines and clips
+        doc.setDrawColor(bR, bG, bB);
+        doc.setLineWidth(0.8);
+        doc.roundedRect(x, y, w, h, 3, 3, 'S');
     }
 
     function getHeaderLetters(state) {

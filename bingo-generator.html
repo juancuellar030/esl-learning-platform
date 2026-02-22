@@ -176,20 +176,39 @@
                         <label class="control-label">Colors</label>
                         <div class="color-picker-grid">
                             <div class="color-picker-item">
+                                <div class="color-picker-bubble" data-target="colorCardBg"
+                                    style="--color-val: #ffffff;"></div>
                                 <input type="color" id="colorCardBg" value="#ffffff">
                                 <span>Card BG</span>
                             </div>
                             <div class="color-picker-item">
+                                <div class="color-picker-bubble" data-target="colorBorder"
+                                    style="--color-val: #3d348b;"></div>
                                 <input type="color" id="colorBorder" value="#3d348b">
                                 <span>Borders</span>
                             </div>
                             <div class="color-picker-item">
+                                <div class="color-picker-bubble" data-target="colorHeaderBg"
+                                    style="--color-val: #3d348b;"></div>
                                 <input type="color" id="colorHeaderBg" value="#3d348b">
                                 <span>Header BG</span>
                             </div>
                             <div class="color-picker-item">
+                                <div class="color-picker-bubble" data-target="colorText" style="--color-val: #333333;">
+                                </div>
                                 <input type="color" id="colorText" value="#333333">
                                 <span>Text</span>
+                            </div>
+                        </div>
+
+                        <!-- Custom Color Popover (Hidden by default) -->
+                        <div id="custom-color-popover" class="custom-color-popover" style="display: none;">
+                            <div class="popover-presets" id="popover-presets">
+                                <!-- Populated by JS -->
+                            </div>
+                            <div class="popover-custom">
+                                <label>Hex:</label>
+                                <input type="text" id="popover-hex-input" maxlength="7" spellcheck="false">
                             </div>
                         </div>
                     </div>
@@ -271,7 +290,6 @@
                             <i class="fa-solid fa-wand-magic-sparkles"></i>
                             <span>Generate PDF</span>
                         </button>
-                        <div class="generate-status" id="generateStatus"></div>
                     </div>
 
                     <!-- Caller Session Button -->

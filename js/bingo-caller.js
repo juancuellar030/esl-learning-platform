@@ -278,12 +278,12 @@
                 <!-- Body -->
                 <div style="overflow-y:auto; flex:1;">
                     ${_state.showHeader ? `
-                    <div style="padding:18px 26px 0;">
+                <div style="padding:18px 26px 0;">
                         <p style="margin:0 0 10px; font-size:0.78rem; font-weight:800; color:#888; text-transform:uppercase; letter-spacing:0.08em;">
                             <i class="fa-solid fa-table-columns" style="color:var(--medium-slate-blue); margin-right:5px;"></i>
                             Column Header Intros
                         </p>
-                        <div id="amHeaderRow" style="display:flex; gap:9px; flex-wrap:wrap; margin-bottom:4px;"></div>
+                        <div id="amHeaderRow" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(140px, 1fr)); gap:9px; margin-bottom:4px;"></div>
                     </div>` : ''}
                     <div style="padding:18px 26px 24px;">
                         <p style="margin:0 0 10px; font-size:0.78rem; font-weight:800; color:#888; text-transform:uppercase; letter-spacing:0.08em;">
@@ -308,8 +308,6 @@
                     `"${letter}"`, `header-${i}`,
                     audio => { headerAudio[i] = audio; updateHeaderDot(i); updateAudioBadge(); }
                 );
-                chip.style.flex = '1';
-                chip.style.minWidth = '80px';
                 amHeaderRow.appendChild(chip);
             });
         }
@@ -337,6 +335,7 @@
             display:flex; align-items:center; gap:10px; padding:10px 14px;
             border:2px solid #ebebeb; border-radius:12px; background:#fff;
             transition:border-color 0.25s ease, background 0.25s ease;
+            min-width:0; overflow:hidden;
         `;
 
         row.innerHTML = `
@@ -449,6 +448,7 @@
     function reset() {
         calledItems = [];
         calledSet.clear();
+        randomCalledKeys.clear();
         document.querySelectorAll('.caller-cell.called').forEach(cell => {
             cell.classList.remove('called');
             cell.querySelector('.stamp-overlay')?.remove();
@@ -470,6 +470,35 @@
     }
 
     // ── Random Picker ──────────────────────────────────────────────
+    // Cross-product deck: every item × every header = one combo
+    const randomCalledKeys = new Set();  // "colIdx:itemIdx" keys already picked
+
+    function buildCallDeck() {
+        const pool = _state.itemPool;
+        const letters = getHeaderLetters();
+        const deck = [];
+        // If headers are shown, pair every item with every header
+        if (_state.showHeader) {
+            letters.forEach((letter, colIdx) => {
+                pool.forEach((item, itemIdx) => {
+                    const key = `${colIdx}:${itemIdx}`;
+                    if (!randomCalledKeys.has(key)) {
+                        deck.push({ colIdx, colLetter: letter, itemIdx, item });
+                    }
+                });
+            });
+        } else {
+            // No headers — just pick uncalled items
+            pool.forEach((item, itemIdx) => {
+                const key = `0:${itemIdx}`;
+                if (!randomCalledKeys.has(key)) {
+                    deck.push({ colIdx: 0, colLetter: '', itemIdx, item });
+                }
+            });
+        }
+        return deck;
+    }
+
     function renderRandomPicker() {
         // Clean up old instances
         document.getElementById('randomPickBtn')?.remove();
@@ -498,45 +527,65 @@
         document.body.appendChild(modal);
     }
 
-    let currentRandomIdx = null;
-
     function doRandomPick() {
-        const letters = getHeaderLetters();
-        const uncalled = [];
-        _state.itemPool.forEach((item, itemIdx) => {
-            if (!calledSet.has(itemIdx)) uncalled.push(itemIdx);
-        });
+        const deck = buildCallDeck();
 
-        if (uncalled.length === 0) {
-            alert('All items have been called!');
+        if (deck.length === 0) {
+            alert('All combinations have been called!');
             return;
         }
 
-        const pickIdx = uncalled[Math.floor(Math.random() * uncalled.length)];
-        const item = _state.itemPool[pickIdx];
-        const colIdx = pickIdx % _state.gridSize;
-        const colLetter = letters[colIdx] || '';
+        // Pick a random combo from the remaining deck
+        const pick = deck[Math.floor(Math.random() * deck.length)];
+        const key = `${pick.colIdx}:${pick.itemIdx}`;
+        randomCalledKeys.add(key);
 
-        currentRandomIdx = pickIdx;
-
-        // Mark as called
-        const cell = document.getElementById(`caller-cell-${pickIdx}`);
-        if (cell && !calledSet.has(pickIdx)) {
-            // Using click to trigger the full toggleCall flow and play audio
-            cell.click();
+        // Mark the grid cell as called (only the first time this item appears)
+        if (!calledSet.has(pick.itemIdx)) {
+            const cell = document.getElementById(`caller-cell-${pick.itemIdx}`);
+            if (cell) cell.click();  // triggers toggleCall which adds to calledItems & sidebar
         }
 
-        showRandomModal(pickIdx, item, colLetter, colIdx);
+        // Also record in calledItems for sidebar (with the random header pairing)
+        // But only add to sidebar if the cell was already called (to avoid duplicate from click)
+        if (calledSet.has(pick.itemIdx) && calledItems[calledItems.length - 1]?.itemIdx === pick.itemIdx
+            && calledItems[calledItems.length - 1]?.colLetter !== pick.colLetter) {
+            // The last entry was just added by cell.click() with the grid column letter
+            // Update it to use the randomly-assigned header letter
+            calledItems[calledItems.length - 1].colLetter = pick.colLetter;
+            calledItems[calledItems.length - 1].colIdx = pick.colIdx;
+            updateSidebar();
+        }
+
+        // Play audio: header audio first, then item audio
+        if (_state.showHeader) {
+            playHeaderAudio(pick.colIdx, pick.colLetter);
+            setTimeout(() => {
+                playItemAudio(pick.itemIdx, pick.item, pick.colLetter);
+            }, 800);
+        } else {
+            playItemAudio(pick.itemIdx, pick.item, pick.colLetter);
+        }
+
+        showRandomModal(pick);
     }
 
-    function showRandomModal(pickIdx, item, colLetter, colIdx) {
+    function showRandomModal(pick) {
         const modal = document.getElementById('randomPickModal');
         if (!modal) return;
+
+        const { itemIdx, item, colLetter, colIdx } = pick;
 
         const isWord = _state.mode === 'word';
         const wordHtml = isWord
             ? `<div style="font-size:4rem; font-weight:900; color:#fff; text-shadow:0 4px 15px rgba(0,0,0,0.5); text-align:center;">${escHtml(typeof item === 'string' ? item : item.name)}</div>`
             : `<img src="${item.src}" style="max-width:300px; max-height:300px; border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,0.5); border:6px solid #fff;">`;
+
+        // Show remaining combos count
+        const remaining = buildCallDeck().length;
+        const total = _state.showHeader
+            ? _state.itemPool.length * getHeaderLetters().length
+            : _state.itemPool.length;
 
         modal.innerHTML = `
             <div style="display:flex; flex-direction:column; align-items:center; gap:20px; transform:scale(0.8); animation:popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;">
@@ -550,7 +599,11 @@
                 
                 ${wordHtml}
 
-                <div style="display:flex; gap:15px; margin-top:30px;">
+                <div style="color:rgba(255,255,255,0.5); font-size:0.85rem; font-weight:600; margin-top:5px;">
+                    ${remaining} of ${total} combos remaining
+                </div>
+
+                <div style="display:flex; gap:15px; margin-top:20px;">
                     <button id="rpRepeatBtn" class="btn-secondary" style="font-size:1.1rem; padding:12px 24px; border-radius:50px;">
                         <i class="fa-solid fa-volume-high" style="margin-right:8px;"></i> Repeat Audio
                     </button>
@@ -578,7 +631,12 @@
         closeBtn.addEventListener('click', () => modal.style.display = 'none');
 
         document.getElementById('rpRepeatBtn').addEventListener('click', () => {
-            playItemAudio(pickIdx, item, colLetter);
+            if (_state.showHeader) {
+                playHeaderAudio(colIdx, colLetter);
+                setTimeout(() => playItemAudio(itemIdx, item, colLetter), 800);
+            } else {
+                playItemAudio(itemIdx, item, colLetter);
+            }
         });
 
         document.getElementById('rpNextBtn').addEventListener('click', () => {

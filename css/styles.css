@@ -2186,29 +2186,35 @@ body.dark-mode .password-modal input[type="password"] {
     border-color: var(--medium-slate-blue);
 }
 
-/* ===== TOAST NOTIFICATIONS ===== */
+/* ===== TOAST NOTIFICATIONS (override — compact top-right slide-in) ===== */
 .toast-notification {
     position: fixed;
-    bottom: 30px;
-    right: 30px;
+    top: 20px;
+    right: 20px;
+    left: auto;
     background: white;
-    padding: 15px 25px;
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    padding: 12px 20px;
+    border-radius: 10px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     font-weight: 600;
+    font-size: 0.92rem;
     z-index: 10000;
     opacity: 0;
-    transform: translateY(20px);
-    transition: all 0.3s ease;
-    max-width: 400px;
+    transform: translateX(120%);
+    transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    max-width: 380px;
+    min-width: auto;
+    border: none;
+    border-left: 4px solid var(--medium-slate-blue);
+    justify-content: flex-start;
 }
 
 .toast-notification.show {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateX(0);
 }
 
 .toast-notification.success {
@@ -2218,7 +2224,7 @@ body.dark-mode .password-modal input[type="password"] {
 
 .toast-notification.success i {
     color: #2ECC71;
-    font-size: 1.3rem;
+    font-size: 1.1rem;
 }
 
 .toast-notification.error {
@@ -2228,7 +2234,7 @@ body.dark-mode .password-modal input[type="password"] {
 
 .toast-notification.error i {
     color: #E74C3C;
-    font-size: 1.3rem;
+    font-size: 1.1rem;
 }
 
 .toast-notification.warning {
@@ -2238,7 +2244,7 @@ body.dark-mode .password-modal input[type="password"] {
 
 .toast-notification.warning i {
     color: var(--amber-flame);
-    font-size: 1.3rem;
+    font-size: 1.1rem;
 }
 
 .toast-notification.info {
@@ -2248,12 +2254,13 @@ body.dark-mode .password-modal input[type="password"] {
 
 .toast-notification.info i {
     color: var(--medium-slate-blue);
-    font-size: 1.3rem;
+    font-size: 1.1rem;
 }
 
 body.dark-mode .toast-notification {
     background: #2a2a2a;
     color: #eee;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
 }
 
 body.dark-mode .toast-notification.success {

@@ -106,16 +106,30 @@
         return Array.from({ length: state.gridSize }, (_, i) => defaults[i] || String.fromCharCode(65 + i));
     }
 
-    function showStatus(msg, type) {
-        const s = el.generateStatus();
-        s.textContent = msg;
-        s.className = 'generate-status ' + type;
-    }
+    // ── Toast Notifications ─────────────────────────────────
+    function showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `toast-notification ${type}`;
 
-    function hideStatus() {
-        const s = el.generateStatus();
-        s.style.display = 'none';
-        s.className = 'generate-status';
+        let iconClass = 'fa-info-circle';
+        if (type === 'success') iconClass = 'fa-check-circle';
+        if (type === 'error') iconClass = 'fa-exclamation-circle';
+        if (type === 'warning') iconClass = 'fa-exclamation-triangle';
+
+        toast.innerHTML = `
+            <i class="fa-solid ${iconClass}"></i>
+            <span>${message}</span>
+        `;
+        document.body.appendChild(toast);
+
+        // trigger reflow
+        void toast.offsetWidth;
+        toast.classList.add('show');
+
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 400);
+        }, 3500);
     }
 
     // ── Counter updates ───────────────────────────────────────
@@ -152,7 +166,7 @@
         headerEl.innerHTML = letters.map(l => `<span>${l}</span>`).join('');
 
         // Grid cells
-        grid.style.gridTemplateColumns = `repeat(${state.gridSize}, 28px)`;
+        grid.style.gridTemplateColumns = `repeat(${state.gridSize}, 55px)`;
         const total = state.gridSize * state.gridSize;
         const centerIdx = Math.floor(total / 2);
         grid.innerHTML = '';
@@ -282,7 +296,7 @@
         files.forEach(file => {
             const reader = new FileReader();
             reader.onload = ev => {
-                downscaleImage(ev.target.result, 200, src => {
+                downscaleImage(ev.target.result, 400, src => {
                     state.images.push({ src, name: file.name });
                     addThumbnail(state.images.length - 1, src);
                     updateImageCounter();
@@ -293,19 +307,25 @@
         });
     }
 
-    function downscaleImage(dataUrl, size, cb) {
+    function downscaleImage(dataUrl, maxSize, cb) {
         const img = new Image();
         img.onload = () => {
+            let w = img.width;
+            let h = img.height;
+            // Preserve aspect ratio
+            if (w > maxSize || h > maxSize) {
+                const ratio = Math.min(maxSize / w, maxSize / h);
+                w = Math.round(w * ratio);
+                h = Math.round(h * ratio);
+            }
             const canvas = document.createElement('canvas');
-            canvas.width = size;
-            canvas.height = size;
+            canvas.width = w;
+            canvas.height = h;
             const ctx = canvas.getContext('2d');
-            // Center-crop square
-            const min = Math.min(img.width, img.height);
-            const sx = (img.width - min) / 2;
-            const sy = (img.height - min) / 2;
-            ctx.drawImage(img, sx, sy, min, min, 0, 0, size, size);
-            cb(canvas.toDataURL('image/jpeg', 0.85));
+            ctx.drawImage(img, 0, 0, w, h);
+            // Use original type or PNG to preserve transparency
+            const isJpeg = dataUrl.startsWith('data:image/jpeg');
+            cb(canvas.toDataURL(isJpeg ? 'image/jpeg' : 'image/png', 0.85));
         };
         img.src = dataUrl;
     }
@@ -406,8 +426,106 @@
                 el.colorHeaderBg().value = theme.headerBg;
                 el.colorText().value = theme.text;
 
+                // Update visually for the custom bubble wrappers
+                document.querySelector('[data-target="colorCardBg"]').style.setProperty('--color-val', theme.cardBg);
+                document.querySelector('[data-target="colorBorder"]').style.setProperty('--color-val', theme.border);
+                document.querySelector('[data-target="colorHeaderBg"]').style.setProperty('--color-val', theme.headerBg);
+                document.querySelector('[data-target="colorText"]').style.setProperty('--color-val', theme.text);
+
                 updatePreview();
             });
+        });
+    }
+
+    // ── Custom Color Picker Popover ───────────────────────────
+    function initCustomColorPicker() {
+        const popover = document.getElementById('custom-color-popover');
+        const presetsContainer = document.getElementById('popover-presets');
+        const hexInput = document.getElementById('popover-hex-input');
+
+        let currentTargetId = null;
+        let currentBubble = null;
+
+        // Extract colors from THEMES to use as presets in the popover
+        const presetColors = new Set();
+        Object.values(THEMES).forEach(t => {
+            presetColors.add(t.cardBg);
+            presetColors.add(t.border);
+            presetColors.add(t.headerBg);
+            presetColors.add(t.text);
+        });
+
+        // Add some basic extras
+        ['#ffffff', '#000000', '#f4f4f4', '#ffeb3b', '#f44336', '#2196f3', '#4caf50', '#9c27b0', '#ff9800', '#00bcd4'].forEach(c => presetColors.add(c));
+
+        // Render presets
+        Array.from(presetColors).slice(0, 15).forEach(color => {
+            const btn = document.createElement('button');
+            btn.className = 'preset-color';
+            btn.style.backgroundColor = color;
+            btn.addEventListener('click', () => {
+                applyColor(color);
+            });
+            presetsContainer.appendChild(btn);
+        });
+
+        // Toggle popover on bubble click
+        document.querySelectorAll('.color-picker-bubble').forEach(bubble => {
+            bubble.addEventListener('click', (e) => {
+                e.stopPropagation();
+
+                const targetId = bubble.dataset.target;
+
+                // If clicking same bubble, toggle it
+                if (currentTargetId === targetId && popover.style.display === 'flex') {
+                    popover.style.display = 'none';
+                    return;
+                }
+
+                currentTargetId = targetId;
+                currentBubble = bubble;
+
+                const hiddenInput = document.getElementById(targetId);
+                hexInput.value = hiddenInput.value;
+
+                // Position popover inside the relative parent
+                bubble.parentElement.appendChild(popover);
+                popover.style.display = 'flex';
+            });
+        });
+
+        // Hex input typing
+        hexInput.addEventListener('input', (e) => {
+            let val = e.target.value;
+            if (!val.startsWith('#')) val = '#' + val;
+
+            // Validate hex
+            if (/^#[0-9A-F]{6}$/i.test(val)) {
+                applyColor(val);
+            }
+        });
+
+        function applyColor(hex) {
+            if (!currentTargetId) return;
+
+            hexInput.value = hex;
+
+            // Update hidden native input + state
+            const hiddenInput = document.getElementById(currentTargetId);
+            hiddenInput.value = hex;
+            state[currentTargetId] = hex;
+
+            // Update bubble visual
+            currentBubble.style.setProperty('--color-val', hex);
+
+            updatePreview();
+        }
+
+        // Close on outside click
+        document.addEventListener('click', (e) => {
+            if (popover.style.display === 'flex' && !popover.contains(e.target)) {
+                popover.style.display = 'none';
+            }
         });
     }
 
@@ -438,7 +556,6 @@
     // ── Generate PDF button ───────────────────────────────────
     function initGenerateButton() {
         el.generateBtn().addEventListener('click', async () => {
-            hideStatus();
             const qty = parseInt(el.cardQuantity().value, 10) || 6;
             state.cardQuantity = qty;
             state.paperSize = el.paperSize().value;
@@ -446,7 +563,7 @@
             const pool = getItemPool();
             if (pool.length < itemsRequired()) {
                 const need = itemsRequired();
-                showStatus(`⚠ Not enough ${state.mode === 'word' ? 'words' : 'images'}! Need ${need}, have ${pool.length}.`, 'error');
+                showToast(`⚠ Not enough ${state.mode === 'word' ? 'words' : 'images'}! Need ${need}, have ${pool.length}.`, 'error');
                 return;
             }
 
@@ -463,12 +580,12 @@
 
             try {
                 await window.BingoPDF.generate(state);
-                showStatus('✓ PDF generated and downloaded!', 'success');
+                showToast('✓ PDF generated and downloaded!', 'success');
                 el.callerBtn().style.opacity = '1';
                 el.callerBtn().style.pointerEvents = 'auto';
             } catch (err) {
                 console.error(err);
-                showStatus('✗ PDF generation failed. ' + err.message, 'error');
+                showToast('✗ PDF generation failed. ' + err.message, 'error');
             }
 
             btn.classList.remove('loading');
@@ -482,7 +599,7 @@
         el.callerBtn().addEventListener('click', () => {
             const pool = getItemPool();
             if (pool.length === 0) {
-                showStatus(`⚠ Add some ${state.mode === 'word' ? 'words' : 'images'} first!`, 'error');
+                showToast(`⚠ Add some ${state.mode === 'word' ? 'words' : 'images'} first!`, 'error');
                 return;
             }
             // Populate state if not yet generated
@@ -512,6 +629,7 @@
         initHeaderControls();
         initDesignControls();
         initThemePresets();
+        initCustomColorPicker();
         initCardsPerPage();
         initGenerateButton();
         initCallerButton();
