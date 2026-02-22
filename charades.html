@@ -64,6 +64,27 @@
         </div>
     </main>
 
+    <!-- ===== CUSTOM WORDS MODAL ===== -->
+    <div class="charades-custom-modal-overlay charades-screen-hidden" id="charades-custom-modal">
+        <div class="charades-custom-modal-card">
+            <h3 style="color: var(--indigo-velvet); margin-bottom: 10px;"><i class="fa-solid fa-pen-to-square"></i>
+                Custom Words</h3>
+            <p style="font-size: 0.9rem; color: #666; margin-bottom: 15px;">Enter your words below, one definition per
+                line.</p>
+
+            <input type="text" id="charades-custom-title" class="charades-custom-input"
+                placeholder="Session Title (e.g. Action Verbs)" style="font-family: inherit;">
+            <textarea id="charades-custom-words" class="charades-custom-textarea"
+                placeholder="Running&#10;Jumping&#10;Eating" rows="8" style="font-family: inherit;"></textarea>
+
+            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 15px;">
+                <button class="charades-btn charades-btn-cancel" onclick="charadesCloseCustomModal()">Cancel</button>
+                <button class="charades-btn charades-btn-primary" onclick="charadesStartCustomGame()">Start
+                    Game</button>
+            </div>
+        </div>
+    </div>
+
     <!-- ===== GAME SCREEN ===== -->
     <div class="charades-game-screen charades-screen-hidden" id="charades-game">
         <!-- Top bar -->

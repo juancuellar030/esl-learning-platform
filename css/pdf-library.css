@@ -186,6 +186,16 @@
     transform: scale(1.05);
 }
 
+.btn-rename {
+    background: var(--amber-flame, #f59e0b);
+    color: white;
+}
+
+.btn-rename:hover {
+    background: #d97706;
+    transform: scale(1.05);
+}
+
 .btn-delete {
     background: #ef4444;
     color: white;
@@ -194,6 +204,20 @@
 .btn-delete:hover {
     background: #dc2626;
     transform: scale(1.05);
+}
+
+.rename-input {
+    width: 100%;
+    font-size: 1.1rem;
+    font-family: inherit;
+    font-weight: bold;
+    color: var(--dark-slate-blue);
+    border: 2px solid var(--medium-slate-blue);
+    border-radius: 6px;
+    padding: 2px 5px;
+    margin-bottom: 0.5rem;
+    outline: none;
+    background: rgba(255, 255, 255, 0.9);
 }
 
 .empty-state {

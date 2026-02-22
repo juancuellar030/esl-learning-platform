@@ -1208,8 +1208,36 @@ class PDFViewer {
 
         grid.innerHTML = '';
 
-        // Render all page thumbnails at a small scale
+        // Render all page thumbnails at a small scale using IntersectionObserver
         const thumbScale = 0.3;
+
+        // Set up IntersectionObserver for lazy loading thumbnails
+        if (!this.thumbnailObserver) {
+            this.thumbnailObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const item = entry.target;
+                        const pageNum = Number(item.dataset.page);
+                        const canvas = item.querySelector('canvas');
+
+                        // Render if not already rendered or rendering
+                        if (!canvas.dataset.rendered && !canvas.dataset.rendering) {
+                            canvas.dataset.rendering = "true";
+                            this.renderThumbnail(pageNum, canvas, thumbScale).then(() => {
+                                canvas.dataset.rendered = "true";
+                                canvas.dataset.rendering = "false";
+                            });
+                        }
+                    }
+                });
+            }, {
+                root: document.getElementById('thumbnailGrid'),
+                rootMargin: '100px' // Start loading a bit before they come into view
+            });
+        }
+
+        // Clean up previous observer targets if any
+        this.thumbnailObserver.disconnect();
 
         for (let i = 1; i <= this.totalPages; i++) {
             const item = document.createElement('div');
@@ -1231,8 +1259,8 @@ class PDFViewer {
                 this.goToPage(i);
             });
 
-            // Render thumbnail asynchronously (don't await each one — fire in parallel)
-            this.renderThumbnail(i, canvas, thumbScale);
+            // Observe the item
+            this.thumbnailObserver.observe(item);
         }
     }
 

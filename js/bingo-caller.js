@@ -10,18 +10,26 @@
     let _state = null;
     let calledItems = [];
     let calledSet = new Set();
+    let randomCalledKeys = new Set(); // For the random picker cross-product logic
 
     // Audio stores
     const headerAudio = {}; // colIdx -> Audio
     const itemAudio = {}; // itemIdx -> Audio
+
+    // Raw Blob stores for persistence
+    const headerAudioBlobs = {}; // colIdx -> Blob
+    const itemAudioBlobs = {}; // itemIdx -> Blob
 
     // ── Public API ─────────────────────────────────────────────
     function init(state) {
         _state = state;
         calledItems = [];
         calledSet.clear();
+        randomCalledKeys.clear();
         Object.keys(headerAudio).forEach(k => delete headerAudio[k]);
         Object.keys(itemAudio).forEach(k => delete itemAudio[k]);
+        Object.keys(headerAudioBlobs).forEach(k => delete headerAudioBlobs[k]);
+        Object.keys(itemAudioBlobs).forEach(k => delete itemAudioBlobs[k]);
 
         renderHeaderRow();
         renderGrid();
@@ -306,7 +314,12 @@
             letters.forEach((letter, i) => {
                 const chip = buildAudioChip(
                     `"${letter}"`, `header-${i}`,
-                    audio => { headerAudio[i] = audio; updateHeaderDot(i); updateAudioBadge(); }
+                    (audio, blob) => {
+                        headerAudio[i] = audio;
+                        headerAudioBlobs[i] = blob;
+                        updateHeaderDot(i);
+                        updateAudioBadge();
+                    }
                 );
                 amHeaderRow.appendChild(chip);
             });
@@ -322,7 +335,12 @@
             const row = buildAudioChip(
                 `${_state.showHeader ? `<span style="background:var(--indigo-velvet);color:#fff;border-radius:5px;padding:1px 7px;font-size:0.8rem;margin-right:6px;font-weight:800;">${colLetter}</span>` : ''}${escHtml(label)}`,
                 `item-${itemIdx}`,
-                audio => { itemAudio[itemIdx] = audio; updateCellDot(itemIdx); updateAudioBadge(); }
+                (audio, blob) => {
+                    itemAudio[itemIdx] = audio;
+                    itemAudioBlobs[itemIdx] = blob;
+                    updateCellDot(itemIdx);
+                    updateAudioBadge();
+                }
             );
             amItemList.appendChild(row);
         });
@@ -366,20 +384,34 @@
             const file = e.target.files[0];
             if (!file) return;
             audioEl = new Audio(URL.createObjectURL(file));
-            onLoad(audioEl);
-            row.style.borderColor = '#2e7d32';
-            row.style.background = '#f0fff4';
-            statusEl.style.color = '#2e7d32';
-            const shortName = file.name.length > 22 ? file.name.slice(0, 20) + '…' : file.name;
-            statusEl.textContent = '✓ ' + shortName;
-            playBtn.style.display = 'inline-flex';
+            onLoad(audioEl, file); // passing raw Blob
+
+            // Visual feedback
+            markChipUploaded(row, statusEl, playBtn, file.name);
         });
 
         playBtn.addEventListener('click', () => {
             if (audioEl) { audioEl.currentTime = 0; audioEl.play().catch(() => { }); }
         });
 
+        // Add method to simulate upload for loading state
+        row.loadExistingBlob = (blob) => {
+            if (!blob) return;
+            audioEl = new Audio(URL.createObjectURL(blob));
+            onLoad(audioEl, blob);
+            markChipUploaded(row, statusEl, playBtn, "Loaded audio");
+        };
+
         return row;
+    }
+
+    function markChipUploaded(row, statusEl, playBtn, fileName) {
+        row.style.borderColor = '#2e7d32';
+        row.style.background = '#f0fff4';
+        statusEl.style.color = '#2e7d32';
+        const shortName = fileName.length > 22 ? fileName.slice(0, 20) + '…' : fileName;
+        statusEl.textContent = '✓ ' + shortName;
+        playBtn.style.display = 'inline-flex';
     }
 
     function openAudioManager() {
@@ -470,8 +502,8 @@
     }
 
     // ── Random Picker ──────────────────────────────────────────────
+    // ── Random Picker ──────────────────────────────────────────────
     // Cross-product deck: every item × every header = one combo
-    const randomCalledKeys = new Set();  // "colIdx:itemIdx" keys already picked
 
     function buildCallDeck() {
         const pool = _state.itemPool;
@@ -650,5 +682,66 @@
         if (resetBtn) resetBtn.addEventListener('click', reset);
     });
 
-    window.BingoCaller = { init, reset };
+    // ── Storage Export & Import hooks ───────────────────────────
+    function getCallerState() {
+        return {
+            calledItems: JSON.parse(JSON.stringify(calledItems)),
+            calledSet: Array.from(calledSet),
+            randomCalledKeys: Array.from(randomCalledKeys),
+            headerAudioBlobs: headerAudioBlobs,
+            itemAudioBlobs: itemAudioBlobs
+        };
+    }
+
+    function loadCallerState(data) {
+        if (!data) return;
+
+        // Ensure UI is completely clean and rebuilt first
+        init(_state);
+
+        // Restore collections
+        calledItems = data.calledItems || [];
+        calledSet = new Set(data.calledSet || []);
+        randomCalledKeys = new Set(data.randomCalledKeys || []);
+
+        // Restore UI state for matched Caller items without triggering double-audio playback
+        calledSet.forEach(itemIdx => {
+            const cell = document.getElementById(`caller-cell-${itemIdx}`);
+            if (cell) {
+                cell.classList.add('called');
+
+                // Add red stamp explicitly
+                const stamp = document.createElement('div');
+                stamp.className = 'stamp-overlay';
+                stamp.innerHTML = '<i class="fa-solid fa-circle-xmark"></i>';
+                // Remove existing to avoid dupes
+                const exist = cell.querySelector('.stamp-overlay');
+                if (exist) exist.remove();
+                cell.appendChild(stamp);
+            }
+        });
+
+        updateSidebar();
+
+        // Restore Audio Blobs
+        // We have to feed these to the chip UI nodes so the Object URLs can get reminted and assigned to actual new Audio classes
+        if (data.headerAudioBlobs) {
+            for (const [colIdx, blob] of Object.entries(data.headerAudioBlobs)) {
+                const chip = document.getElementById(`am-row-header-${colIdx}`);
+                if (chip && chip.loadExistingBlob) {
+                    chip.loadExistingBlob(blob);
+                }
+            }
+        }
+        if (data.itemAudioBlobs) {
+            for (const [itemIdx, blob] of Object.entries(data.itemAudioBlobs)) {
+                const chip = document.getElementById(`am-row-item-${itemIdx}`);
+                if (chip && chip.loadExistingBlob) {
+                    chip.loadExistingBlob(blob);
+                }
+            }
+        }
+    }
+
+    window.BingoCaller = { init, reset, getCallerState, loadCallerState };
 })();

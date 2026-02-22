@@ -20,10 +20,12 @@
         headerMode: 'bingo',    // 'bingo' | 'custom' | 'numbers'
         customHeader: '',
         font: "'Fredoka One', cursive",
+        fontWeight: '400',
         colorCardBg: '#ffffff',
         colorBorder: '#3d348b',
         colorHeaderBg: '#3d348b',
         colorText: '#333333',
+        colorHeaderText: '#ffffff',
         // Export
         cardQuantity: 6,
         paperSize: 'letter',
@@ -53,10 +55,12 @@
         headerModeGroup: () => document.getElementById('headerModeGroup'),
         customHeaderInput: () => document.getElementById('customHeaderInput'),
         fontSelect: () => document.getElementById('fontSelect'),
+        fontWeightSelect: () => document.getElementById('fontWeightSelect'),
         colorCardBg: () => document.getElementById('colorCardBg'),
         colorBorder: () => document.getElementById('colorBorder'),
         colorHeaderBg: () => document.getElementById('colorHeaderBg'),
         colorText: () => document.getElementById('colorText'),
+        colorHeaderText: () => document.getElementById('colorHeaderText'),
         cardQuantity: () => document.getElementById('cardQuantity'),
         paperSize: () => document.getElementById('paperSize'),
         generateBtn: () => document.getElementById('generateBtn'),
@@ -158,7 +162,9 @@
         // Colors & font
         card.style.borderColor = state.colorBorder;
         card.style.fontFamily = state.font;
+        card.style.fontWeight = state.fontWeight;
         headerEl.style.background = state.colorHeaderBg;
+        headerEl.style.color = state.colorHeaderText;
         headerEl.style.display = state.showHeader ? 'flex' : 'none';
 
         // Header letters
@@ -377,9 +383,50 @@
     }
 
     // ── Design controls ───────────────────────────────────────
+    function adjustWeightOptions() {
+        const font = state.font || '';
+        const weightSelect = el.fontWeightSelect();
+        if (!weightSelect) return;
+
+        // Disable/enable options based on selected font family
+        if (font.includes('Quicksand')) {
+            weightSelect.disabled = false;
+            Array.from(weightSelect.options).forEach(opt => {
+                opt.disabled = !['300', '400', '500', '600', '700'].includes(opt.value);
+            });
+            if (weightSelect.options[weightSelect.selectedIndex].disabled) weightSelect.value = '600';
+        } else if (font.includes('Montserrat')) {
+            weightSelect.disabled = false;
+            Array.from(weightSelect.options).forEach(opt => opt.disabled = false);
+        } else if (font.includes('Comic Neue')) {
+            weightSelect.disabled = false;
+            Array.from(weightSelect.options).forEach(opt => {
+                opt.disabled = !['400', '700'].includes(opt.value);
+            });
+            if (weightSelect.options[weightSelect.selectedIndex].disabled) weightSelect.value = '700';
+        } else if (font.includes('Baloo 2')) {
+            weightSelect.disabled = false;
+            Array.from(weightSelect.options).forEach(opt => {
+                opt.disabled = !['400', '600', '800'].includes(opt.value);
+            });
+            if (weightSelect.options[weightSelect.selectedIndex].disabled) weightSelect.value = '800';
+        } else {
+            // Other fonts usually just have 400 (Regular)
+            weightSelect.disabled = true;
+            weightSelect.value = '400';
+        }
+        state.fontWeight = weightSelect.value;
+    }
+
     function initDesignControls() {
         el.fontSelect().addEventListener('change', e => {
             state.font = e.target.value;
+            adjustWeightOptions();
+            updatePreview();
+        });
+
+        el.fontWeightSelect().addEventListener('change', e => {
+            state.fontWeight = e.target.value;
             updatePreview();
         });
 
@@ -393,12 +440,17 @@
 
     // ── Theme presets ─────────────────────────────────────────
     const THEMES = {
-        classic: { cardBg: '#ffffff', border: '#3d348b', headerBg: '#3d348b', text: '#333333' },
-        ocean: { cardBg: '#e3f2fd', border: '#1565c0', headerBg: '#1565c0', text: '#0d47a1' },
-        sunset: { cardBg: '#fff8e1', border: '#f18701', headerBg: '#f18701', text: '#5d4037' },
-        candy: { cardBg: '#fce4ec', border: '#ad1457', headerBg: '#ad1457', text: '#880e4f' },
-        forest: { cardBg: '#e8f5e9', border: '#2e7d32', headerBg: '#2e7d32', text: '#1b5e20' },
-        midnight: { cardBg: '#263238', border: '#7678ed', headerBg: '#7678ed', text: '#eceff1' },
+        classic: { cardBg: '#ffffff', border: '#3d348b', headerBg: '#3d348b', text: '#333333', headerText: '#ffffff' },
+        basic: { cardBg: '#ffffff', border: '#dddddd', headerBg: '#000000', text: '#000000', headerText: '#ffffff' },
+        ocean: { cardBg: '#e3f2fd', border: '#1565c0', headerBg: '#1565c0', text: '#0d47a1', headerText: '#ffffff' },
+        sunset: { cardBg: '#fff8e1', border: '#f18701', headerBg: '#f18701', text: '#5d4037', headerText: '#ffffff' },
+        neon: { cardBg: '#12002b', border: '#ff006e', headerBg: '#00f5d4', text: '#00f5d4', headerText: '#12002b' },
+        citrus: { cardBg: '#fffff3', border: '#f9a03f', headerBg: '#77b828', text: '#77b828', headerText: '#ffffff' },
+        // Gradients (bg represents css for live preview, PDF uses linear-gradient mapping)
+        grad_sunset: { isGradient: true, cardBg: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)', border: '#ff9a9e', headerBg: '#ff9a9e', text: '#333333', headerText: '#ffffff', colors: ['#ff9a9e', '#fecfef'] },
+        grad_ocean: { isGradient: true, cardBg: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', border: '#4facfe', headerBg: '#4facfe', text: '#003366', headerText: '#ffffff', colors: ['#4facfe', '#00f2fe'] },
+        grad_forest: { isGradient: true, cardBg: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)', border: '#43e97b', headerBg: '#43e97b', text: '#1e5f32', headerText: '#ffffff', colors: ['#43e97b', '#38f9d7'] },
+        grad_night: { isGradient: true, cardBg: 'linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)', border: '#a18cd1', headerBg: '#a18cd1', text: '#333366', headerText: '#ffffff', colors: ['#a18cd1', '#fbc2eb'] }
     };
 
     function initThemePresets() {
@@ -420,17 +472,22 @@
                 state.colorBorder = theme.border;
                 state.colorHeaderBg = theme.headerBg;
                 state.colorText = theme.text;
+                state.colorHeaderText = theme.headerText;
 
-                el.colorCardBg().value = theme.cardBg;
+                // For gradient themes, the hex inputs for card bg will just stay as whatever they were,
+                // but we might want to set it to the first color of the gradient as a fallback
+                el.colorCardBg().value = theme.isGradient ? theme.colors[0] : theme.cardBg;
                 el.colorBorder().value = theme.border;
                 el.colorHeaderBg().value = theme.headerBg;
                 el.colorText().value = theme.text;
+                el.colorHeaderText().value = theme.headerText;
 
                 // Update visually for the custom bubble wrappers
-                document.querySelector('[data-target="colorCardBg"]').style.setProperty('--color-val', theme.cardBg);
+                document.querySelector('[data-target="colorCardBg"]').style.setProperty('--color-val', theme.isGradient ? theme.colors[0] : theme.cardBg);
                 document.querySelector('[data-target="colorBorder"]').style.setProperty('--color-val', theme.border);
                 document.querySelector('[data-target="colorHeaderBg"]').style.setProperty('--color-val', theme.headerBg);
                 document.querySelector('[data-target="colorText"]').style.setProperty('--color-val', theme.text);
+                document.querySelector('[data-target="colorHeaderText"]').style.setProperty('--color-val', theme.headerText);
 
                 updatePreview();
             });
@@ -619,6 +676,276 @@
         });
     }
 
+    // ── Session Save / Load ───────────────────────────────────
+
+    // Expose for external save
+    function getState() {
+        return state;
+    }
+
+    // Load from external source
+    function loadState(savedState) {
+        Object.assign(state, savedState);
+
+        // Update UI
+
+        // Mode toggle
+        el.modeToggle().forEach(b => b.classList.remove('active'));
+        const modeBtn = document.querySelector(`#modeToggle .pill[data-mode="${state.mode}"]`);
+        if (modeBtn) modeBtn.classList.add('active');
+        if (state.mode === 'word') {
+            el.wordPanel().style.display = '';
+            el.picPanel().style.display = 'none';
+        } else {
+            el.wordPanel().style.display = 'none';
+            el.picPanel().style.display = '';
+        }
+
+        // Grid toggle
+        el.gridToggle().forEach(b => b.classList.remove('active'));
+        const gridBtn = document.querySelector(`#gridSizeToggle .pill[data-size="${state.gridSize}"]`);
+        if (gridBtn) gridBtn.classList.add('active');
+
+        // Free space
+        const fsg = el.freeSpaceGroup();
+        fsg.style.display = (state.gridSize % 2 === 1) ? '' : 'none';
+        el.freeSpaceToggle().checked = state.freeSpace;
+        el.freeSpaceText().disabled = !state.freeSpace;
+        el.freeSpaceText().value = state.freeSpaceText;
+
+        // Words
+        el.wordInput().value = (state.words || []).join('\n');
+        updateWordCounter();
+
+        // Images
+        el.imageThumbnails().innerHTML = '';
+        if (state.images) {
+            state.images.forEach((img, idx) => {
+                addThumbnail(idx, img.src);
+            });
+        }
+        updateImageCounter();
+
+        // Headers
+        el.headerToggle().checked = state.showHeader;
+        el.headerModeGroup().style.display = state.showHeader ? '' : 'none';
+
+        document.querySelectorAll('[name="headerMode"]').forEach(radio => {
+            radio.checked = (radio.value === state.headerMode);
+        });
+
+        el.customHeaderInput().value = state.customHeader;
+        el.customHeaderInput().style.display = state.headerMode === 'custom' ? '' : 'none';
+
+        // Design
+        el.fontSelect().value = state.font;
+        el.fontWeightSelect().value = state.fontWeight;
+        el.colorCardBg().value = state.colorCardBg;
+        el.colorBorder().value = state.colorBorder;
+        el.colorHeaderBg().value = state.colorHeaderBg;
+        el.colorText().value = state.colorText;
+        el.colorHeaderText().value = state.colorHeaderText;
+
+        document.querySelector('[data-target="colorCardBg"]').style.setProperty('--color-val', state.colorCardBg);
+        document.querySelector('[data-target="colorBorder"]').style.setProperty('--color-val', state.colorBorder);
+        document.querySelector('[data-target="colorHeaderBg"]').style.setProperty('--color-val', state.colorHeaderBg);
+        document.querySelector('[data-target="colorText"]').style.setProperty('--color-val', state.colorText);
+        document.querySelector('[data-target="colorHeaderText"]').style.setProperty('--color-val', state.colorHeaderText);
+
+        // Export settings
+        el.cardQuantity().value = state.cardQuantity;
+        el.paperSize().value = state.paperSize;
+
+        el.cardsPerPage().forEach(b => b.classList.remove('active'));
+        const cppBtn = document.querySelector(`#cardsPerPageToggle .pill[data-cards="${state.cardsPerPage}"]`);
+        if (cppBtn) cppBtn.classList.add('active');
+
+        // Caller UI re-init if already open
+        if (el.callerView().style.display !== 'none') {
+            window.BingoCaller.init(state);
+            // We assume caller UI loadCallerState will be handled by the session load flow directly
+        } else {
+            // Revert state of caller button
+            if (state.generatedCards && state.generatedCards.length > 0) {
+                el.callerBtn().style.opacity = '1';
+                el.callerBtn().style.pointerEvents = 'auto';
+            } else {
+                el.callerBtn().style.opacity = '0.65';
+                el.callerBtn().style.pointerEvents = 'none';
+            }
+        }
+
+        updatePreview();
+    }
+
+    function initSessionModals() {
+        const saveModal = document.getElementById('saveSessionModal');
+        const saveNameInput = document.getElementById('saveSessionName');
+        const btnSaveDevice = document.getElementById('confirmSaveSession');
+        const btnExportJson = document.getElementById('exportSessionBtn');
+        const loadModal = document.getElementById('loadSessionModal');
+        const sessionList = document.getElementById('sessionList');
+        const sessionListEmpty = document.getElementById('sessionListEmpty');
+
+        // Save Flow
+        document.getElementById('saveSessionBtn').addEventListener('click', () => {
+            saveNameInput.value = '';
+            saveModal.style.display = 'flex';
+            saveNameInput.focus();
+        });
+
+        document.getElementById('cancelSaveSession').addEventListener('click', () => saveModal.style.display = 'none');
+        saveModal.addEventListener('click', e => { if (e.target === saveModal) saveModal.style.display = 'none'; });
+
+        const performSave = async (isExport) => {
+            const name = saveNameInput.value.trim() || 'Untitled Session';
+            const callerState = window.BingoCaller && window.BingoCaller.getCallerState
+                ? window.BingoCaller.getCallerState()
+                : null;
+
+            const sessionData = {
+                id: Date.now(),
+                name: name,
+                date: new Date().toISOString(),
+                generatorState: state,
+                callerState: callerState
+            };
+
+            btnSaveDevice.classList.add('loading');
+
+            try {
+                if (isExport) {
+                    await window.BingoStorage.exportSessionToJson(sessionData);
+                    showToast('✓ Session exported to JSON file', 'success');
+                } else {
+                    await window.BingoStorage.saveSession(sessionData);
+                    showToast('✓ Session saved to device', 'success');
+                }
+                saveModal.style.display = 'none';
+            } catch (err) {
+                console.error(err);
+                showToast('✗ Save failed: ' + err.message, 'error');
+            } finally {
+                btnSaveDevice.classList.remove('loading');
+            }
+        };
+
+        btnSaveDevice.addEventListener('click', () => performSave(false));
+        btnExportJson.addEventListener('click', () => performSave(true));
+
+        // Load Flow
+        document.getElementById('loadSessionBtn').addEventListener('click', async () => {
+            loadModal.style.display = 'flex';
+            sessionList.style.display = 'none';
+            sessionListEmpty.style.display = 'none';
+
+            try {
+                const sessions = await window.BingoStorage.getSessionsList();
+                if (sessions.length === 0) {
+                    sessionListEmpty.style.display = 'block';
+                } else {
+                    sessionList.innerHTML = '';
+                    sessions.forEach(session => {
+                        const li = document.createElement('li');
+                        li.className = 'session-list-item';
+
+                        const d = new Date(session.date);
+                        const dateStr = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                        li.innerHTML = `
+                            <div class="session-list-info">
+                                <div class="session-list-title">${session.name}</div>
+                                <div class="session-list-meta">
+                                    <span><i class="fa-regular fa-clock"></i> ${dateStr}</span>
+                                    <span><i class="fa-solid fa-${session.mode === 'word' ? 'font' : 'image'}"></i> ${session.itemCount} items</span>
+                                </div>
+                            </div>
+                            <div class="session-list-actions">
+                                <button class="btn-session-load" data-id="${session.id}">Load</button>
+                                <button class="btn-session-delete" data-id="${session.id}" title="Delete"><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                        `;
+                        sessionList.appendChild(li);
+                    });
+                    sessionList.style.display = 'flex';
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Failed to load sessions list', 'error');
+            }
+        });
+
+        document.getElementById('closeLoadSessionModal').addEventListener('click', () => loadModal.style.display = 'none');
+        loadModal.addEventListener('click', e => { if (e.target === loadModal) loadModal.style.display = 'none'; });
+
+        // List Interaction (Delegated)
+        sessionList.addEventListener('click', async e => {
+            const loadBtn = e.target.closest('.btn-session-load');
+            const delBtn = e.target.closest('.btn-session-delete');
+
+            if (delBtn) {
+                const id = delBtn.dataset.id;
+                if (confirm('Delete this saved session?')) {
+                    await window.BingoStorage.deleteSession(id);
+                    delBtn.closest('.session-list-item').remove();
+                    if (sessionList.children.length === 0) {
+                        sessionList.style.display = 'none';
+                        sessionListEmpty.style.display = 'block';
+                    }
+                }
+            } else if (loadBtn) {
+                const id = loadBtn.dataset.id;
+                const fullSession = await window.BingoStorage.getSession(id);
+                if (fullSession) {
+                    loadState(fullSession.generatorState);
+                    // Explicitly jump into Caller UI if we have valid Caller State
+                    if (fullSession.callerState && fullSession.callerState.calledItems) {
+                        el.generatorView().style.display = 'none';
+                        el.callerView().style.display = '';
+                        if (window.BingoCaller && window.BingoCaller.loadCallerState) {
+                            window.BingoCaller.loadCallerState(fullSession.callerState);
+                        }
+                    } else {
+                        // Default to returning to the generator
+                        el.callerView().style.display = 'none';
+                        el.generatorView().style.display = '';
+                    }
+                    showToast('✓ Session loaded', 'success');
+                    loadModal.style.display = 'none';
+                } else {
+                    showToast('Failed to load session details', 'error');
+                }
+            }
+        });
+
+        // JSON Import
+        const importInput = document.getElementById('importSessionFile');
+        importInput.addEventListener('change', async (e) => {
+            if (!e.target.files.length) return;
+            const file = e.target.files[0];
+            try {
+                const parsedSession = await window.BingoStorage.importSessionFromJson(file);
+                loadState(parsedSession.generatorState);
+                if (parsedSession.callerState && parsedSession.callerState.calledItems) {
+                    el.generatorView().style.display = 'none';
+                    el.callerView().style.display = '';
+                    if (window.BingoCaller && window.BingoCaller.loadCallerState) {
+                        window.BingoCaller.loadCallerState(parsedSession.callerState);
+                    }
+                } else {
+                    el.callerView().style.display = 'none';
+                    el.generatorView().style.display = '';
+                }
+                showToast('✓ Session imported successfully', 'success');
+                loadModal.style.display = 'none';
+            } catch (err) {
+                console.error(err);
+                showToast(err.message || 'Failed to import JSON file', 'error');
+            }
+            importInput.value = ''; // Reset
+        });
+    }
+
     // ── Init ──────────────────────────────────────────────────
     function init() {
         initModeToggle();
@@ -633,6 +960,7 @@
         initCardsPerPage();
         initGenerateButton();
         initCallerButton();
+        initSessionModals();
 
         // Initially hide the free space group for even grids
         if (state.gridSize % 2 === 0) {
@@ -642,9 +970,16 @@
         // Caller button starts dimmed until words/images + generate done
         el.callerBtn().style.opacity = '0.65';
 
+        adjustWeightOptions();
         updateWordCounter();
         updatePreview();
     }
+
+    // Expose APIs for other modules
+    window.BingoGenerator = {
+        getState,
+        loadState
+    };
 
     document.addEventListener('DOMContentLoaded', init);
 })();

@@ -22,12 +22,41 @@
     };
 
     const FONT_MAP = {
-        "'Fredoka One', cursive": { id: 'FredokaOne', url: 'https://fonts.gstatic.com/s/fredokaone/v15/k3kUo8kEI-tA1RRcTZGmTlHGCaI.ttf' },
-        "'Bangers', cursive": { id: 'Bangers', url: 'https://fonts.gstatic.com/s/bangers/v25/FeVQS0BTqb0h60ACH55Q3Q.ttf' },
-        "'Comic Neue', cursive": { id: 'ComicNeue', url: 'https://fonts.gstatic.com/s/comicneue/v9/4UaHrEJDsxBrF37olUeD96rp4g.ttf' },
-        "'Baloo 2', cursive": { id: 'Baloo2', url: 'https://fonts.gstatic.com/s/baloo2/v23/wXK0E3kTposypRydzVT08TS3JnAmtdgazZpo_lI.ttf' },
-        "'Bubblegum Sans', cursive": { id: 'BubblegumSans', url: 'https://fonts.gstatic.com/s/bubblegumsans/v22/AYCSpXb_Z9EORv1M5QTjEzMEteaAxIc.ttf' },
-        "'Patrick Hand', cursive": { id: 'PatrickHand', url: 'https://fonts.gstatic.com/s/patrickhand/v25/LDI1apSQOAYtSuYWp8ZhfYe8XsLO.ttf' }
+        "'Fredoka One', cursive": { id: 'FredokaOne', url: 'https://fonts.gstatic.com/s/fredokaone/v15/k3kUo8kEI-tA1RRcTZGmTlHGCaI.ttf', weightDependent: false },
+        "'Bangers', cursive": { id: 'Bangers', url: 'https://fonts.gstatic.com/s/bangers/v25/FeVQS0BTqb0h60ACH55Q3Q.ttf', weightDependent: false },
+        "'Comic Neue', cursive": { id: 'ComicNeue', url: 'https://fonts.gstatic.com/s/comicneue/v9/4UaHrEJDsxBrF37olUeD96rp4g.ttf', weightDependent: false },
+        "'Baloo 2', cursive": { id: 'Baloo2', url: 'https://fonts.gstatic.com/s/baloo2/v23/wXK0E3kTposypRydzVT08TS3JnAmtdgazZpo_lI.ttf', weightDependent: false },
+        "'Bubblegum Sans', cursive": { id: 'BubblegumSans', url: 'https://fonts.gstatic.com/s/bubblegumsans/v22/AYCSpXb_Z9EORv1M5QTjEzMEteaAxIc.ttf', weightDependent: false },
+        "'Patrick Hand', cursive": { id: 'PatrickHand', url: 'https://fonts.gstatic.com/s/patrickhand/v25/LDI1apSQOAYtSuYWp8ZhfYe8XsLO.ttf', weightDependent: false },
+        "'Pacifico', cursive": { id: 'Pacifico', url: 'https://fonts.gstatic.com/s/pacifico/v22/FwZY7-Qmy14u9lezJ-6H6MmBp0u-.ttf', weightDependent: false },
+        "'Quicksand', sans-serif": {
+            id: 'Quicksand',
+            weightDependent: true,
+            weights: {
+                '300': 'https://fonts.gstatic.com/s/quicksand/v37/6xK-dSZaM9iE8KbpRA_LJ3z8mH9BOJvgkKEo18E.ttf',
+                '400': 'https://fonts.gstatic.com/s/quicksand/v37/6xK-dSZaM9iE8KbpRA_LJ3z8mH9BOJvgkP8o18E.ttf',
+                '500': 'https://fonts.gstatic.com/s/quicksand/v37/6xK-dSZaM9iE8KbpRA_LJ3z8mH9BOJvgkM0o18E.ttf',
+                '600': 'https://fonts.gstatic.com/s/quicksand/v37/6xK-dSZaM9iE8KbpRA_LJ3z8mH9BOJvgkCEv18E.ttf',
+                '700': 'https://fonts.gstatic.com/s/quicksand/v37/6xK-dSZaM9iE8KbpRA_LJ3z8mH9BOJvgkBgv18E.ttf'
+            },
+            url: 'https://fonts.gstatic.com/s/quicksand/v37/6xK-dSZaM9iE8KbpRA_LJ3z8mH9BOJvgkP8o18E.ttf' // 400 default
+        },
+        "'Montserrat', sans-serif": {
+            id: 'Montserrat',
+            weightDependent: true,
+            weights: {
+                '100': 'https://fonts.gstatic.com/s/montserrat/v31/JTUHjIg1_i6t8kCHKm4532VJOt5-QNFgpCtr6Uw-.ttf',
+                '200': 'https://fonts.gstatic.com/s/montserrat/v31/JTUHjIg1_i6t8kCHKm4532VJOt5-QNFgpCvr6Ew-.ttf',
+                '300': 'https://fonts.gstatic.com/s/montserrat/v31/JTUHjIg1_i6t8kCHKm4532VJOt5-QNFgpCs16Ew-.ttf',
+                '400': 'https://fonts.gstatic.com/s/montserrat/v31/JTUHjIg1_i6t8kCHKm4532VJOt5-QNFgpCtr6Ew-.ttf',
+                '500': 'https://fonts.gstatic.com/s/montserrat/v31/JTUHjIg1_i6t8kCHKm4532VJOt5-QNFgpCtZ6Ew-.ttf',
+                '600': 'https://fonts.gstatic.com/s/montserrat/v31/JTUHjIg1_i6t8kCHKm4532VJOt5-QNFgpCu170w-.ttf',
+                '700': 'https://fonts.gstatic.com/s/montserrat/v31/JTUHjIg1_i6t8kCHKm4532VJOt5-QNFgpCuM70w-.ttf',
+                '800': 'https://fonts.gstatic.com/s/montserrat/v31/JTUHjIg1_i6t8kCHKm4532VJOt5-QNFgpCvr70w-.ttf',
+                '900': 'https://fonts.gstatic.com/s/montserrat/v31/JTUHjIg1_i6t8kCHKm4532VJOt5-QNFgpCvC70w-.ttf'
+            },
+            url: 'https://fonts.gstatic.com/s/montserrat/v31/JTUHjIg1_i6t8kCHKm4532VJOt5-QNFgpCtr6Ew-.ttf'
+        }
     };
 
     async function loadFontAsBase64(url) {
@@ -76,12 +105,18 @@
         let fontName = 'helvetica';
         const fontInfo = FONT_MAP[state.font];
         if (fontInfo) {
-            const b64 = await loadFontAsBase64(fontInfo.url);
+            let fontUrl = fontInfo.url;
+            if (fontInfo.weightDependent && state.fontWeight && fontInfo.weights[state.fontWeight]) {
+                fontUrl = fontInfo.weights[state.fontWeight];
+            }
+            const b64 = await loadFontAsBase64(fontUrl);
             if (b64) {
-                doc.addFileToVFS(fontInfo.id + '.ttf', b64);
-                // jsPDF built-in fonts use lowercase stylings, addFont takes (filename, fontName, fontStyle)
-                doc.addFont(fontInfo.id + '.ttf', fontInfo.id, 'normal');
-                fontName = fontInfo.id;
+                // In jsPDF, we map to ID+Weight to avoid conflicts
+                const cId = fontInfo.id + (state.fontWeight || '400');
+                doc.addFileToVFS(cId + '.ttf', b64);
+                // Important: registering it with unique cId as the fontName so jsPDF knows it's a specific weight
+                doc.addFont(cId + '.ttf', cId, 'normal');
+                fontName = cId;
             }
         }
 
@@ -146,9 +181,45 @@
         const fontStyle = fontName === 'helvetica' ? 'bold' : 'normal';
 
         // Card background
-        const [bgR, bgG, bB_bg] = hexToRgb(state.colorCardBg);
-        doc.setFillColor(bgR, bgG, bB_bg);
-        doc.roundedRect(x, y, w, h, 3, 3, 'F');
+        let bgR, bgG, bB_bg;
+        if (state.colorCardBg && state.colorCardBg.includes('linear-gradient')) {
+            // Very basic two-color linear gradient parser
+            const colors = state.colorCardBg.match(/#[0-9a-fA-F]{6}/g);
+            if (colors && colors.length >= 2) {
+                // In jsPDF, drawing a perfect gradient as a background requires addGState/Gradients
+                // We'll use a simplified implementation: set a clipping region and draw a smooth transition
+                // Native jsPDF AdvancedAPI gradients:
+                let gradient = new doc.AcroFormTextField(); // Just a dummy to access internal API context if needed, but jsPDF has proper support:
+                // Actually, jsPDF allows gradient filling but it requires context2d or raw PDF commands.
+                // We'll fallback to a pseudo-gradient using lines for simplicity, or just pick the first color if too complex.
+                // For a robust bingo card, drawing 100 thin rects creates a gradient effect.
+                const [r1, g1, b1] = hexToRgb(colors[0]);
+                const [r2, g2, b2] = hexToRgb(colors[1]);
+                const steps = 50;
+                for (let i = 0; i < steps; i++) {
+                    const ratio = i / steps;
+                    const r = r1 + (r2 - r1) * ratio;
+                    const g = g1 + (g2 - g1) * ratio;
+                    const b = b1 + (b2 - b1) * ratio;
+                    doc.setFillColor(r, g, b);
+                    // Draw a slice of the card width
+                    const sliceW = w / steps;
+                    const sliceX = x + (sliceW * i);
+                    doc.rect(sliceX, y, sliceW + 0.5, h, 'F'); // +0.5 to prevent seams
+                }
+                // Then draw a single hollow rounded rect for the border outline on top later
+                doc.setFillColor(r1, g1, b1); // Leave a solid fill context for anything else
+                [bgR, bgG, bB_bg] = [r1, g1, b1];
+            } else {
+                [bgR, bgG, bB_bg] = hexToRgb('#ffffff');
+                doc.setFillColor(bgR, bgG, bB_bg);
+                doc.roundedRect(x, y, w, h, 3, 3, 'F');
+            }
+        } else {
+            [bgR, bgG, bB_bg] = hexToRgb(state.colorCardBg);
+            doc.setFillColor(bgR, bgG, bB_bg);
+            doc.roundedRect(x, y, w, h, 3, 3, 'F');
+        }
 
         // Extract border colors needed for both inner cells and outer border
         const [bR, bG, bB] = hexToRgb(state.colorBorder);
@@ -162,8 +233,9 @@
             doc.rect(x, y + headerH / 2, w, headerH / 2, 'F');
 
             // Header letters
-            doc.setTextColor(255, 255, 255);
-            doc.setFontSize(headerH * 1.3); // Maximized header text size
+            const [htR, htG, htB] = hexToRgb(state.colorHeaderText || '#ffffff');
+            doc.setTextColor(htR, htG, htB);
+            doc.setFontSize(headerH * 1.6); // Maximized header text size
             doc.setFont(fontName, fontStyle);
             const letters = getHeaderLetters(state);
             letters.forEach((letter, i) => {

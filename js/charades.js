@@ -120,7 +120,6 @@
         }
     }
 
-    // === RENDER CATEGORY HUB ===
     function renderCategoryHub() {
         const categories = window.getAllCharadesCategories();
         const grid = $('#charades-vocab-grid');
@@ -150,6 +149,74 @@
             const cat = categories[key];
             if (cat) funGrid.appendChild(createCategoryCard(key, cat));
         }
+
+        // Add custom words card
+        const customCard = document.createElement('div');
+        customCard.className = 'charades-cat-card';
+        customCard.style.setProperty('--cat-color', '#4CAF50');
+        customCard.style.setProperty('--stripe', '#4CAF50');
+        customCard.innerHTML = `
+            <div class="charades-cat-icon" style="color: #4CAF50">
+                <i class="fa-solid fa-plus"></i>
+            </div>
+            <div class="charades-cat-label">${state.language === 'en' ? 'Custom List' : 'Lista Personalizada'}</div>
+            <div class="charades-cat-count">Custom</div>
+        `;
+        customCard.addEventListener('click', openCustomModal);
+        funGrid.appendChild(customCard);
+    }
+
+    // === CUSTOM WORDS MODAL ===
+    function openCustomModal() {
+        $('#charades-custom-title').value = '';
+        $('#charades-custom-words').value = '';
+        $('#charades-custom-modal').classList.remove('charades-screen-hidden');
+    }
+
+    function charadesCloseCustomModal() {
+        $('#charades-custom-modal').classList.add('charades-screen-hidden');
+    }
+
+    function charadesStartCustomGame() {
+        const rawWords = $('#charades-custom-words').value;
+        const titleInput = $('#charades-custom-title').value.trim();
+
+        // Parse words, filtering out empties
+        const wordList = rawWords.split('\n')
+            .map(w => w.trim())
+            .filter(w => w.length > 0)
+            .map(w => ({ word: w, spanish: w })); // use same for both languages
+
+        if (wordList.length === 0) {
+            alert(state.language === 'en' ? 'Please enter at least one word.' : 'Por favor ingrese al menos una palabra.');
+            return;
+        }
+
+        // Build custom category on the fly
+        const customCat = {
+            label: titleInput || 'Custom Words',
+            labelEs: titleInput || 'Palabras Personalizadas',
+            icon: 'fa-solid fa-star',
+            color: '#4CAF50',
+            words: wordList
+        };
+
+        charadesCloseCustomModal();
+
+        state.selectedCategory = customCat;
+        state.words = shuffle([...customCat.words]);
+        state.currentIndex = 0;
+        state.score = 0;
+        state.results = [];
+        state.timer = GAME_DURATION;
+        state.screen = 'playing';
+
+        enterFullscreen();
+        showGameScreen();
+        showCountdown(() => {
+            displayCurrentWord();
+            startTimer();
+        });
     }
 
     function createCategoryCard(key, cat) {
@@ -555,23 +622,34 @@
         $('#charades-results').classList.add('charades-screen-hidden');
         $('#charades-countdown').classList.add('charades-screen-hidden');
         $('#charades-hub').classList.remove('charades-screen-hidden');
+
+        if ($('#charades-custom-modal')) {
+            charadesCloseCustomModal();
+        }
     }
 
     // Expose for inline event handlers
     window.charadesGoToHub = goToHub;
     window.charadesToggleInput = toggleInputMode;
+    window.charadesCloseCustomModal = charadesCloseCustomModal;
+    window.charadesStartCustomGame = charadesStartCustomGame;
+
     window.charadesPlayAgain = function () {
-        if (state.selectedCategory) {
-            // Find the key from the category
-            const categories = window.getAllCharadesCategories();
-            for (const [key, cat] of Object.entries(categories)) {
-                if (cat.label === state.selectedCategory.label) {
-                    startGame(key);
-                    return;
-                }
-            }
-        }
-        goToHub();
+        if (!state.selectedCategory) return goToHub();
+
+        state.words = shuffle([...state.selectedCategory.words]);
+        state.currentIndex = 0;
+        state.score = 0;
+        state.results = [];
+        state.timer = GAME_DURATION;
+        state.screen = 'playing';
+
+        $('#charades-results').classList.add('charades-screen-hidden');
+        showGameScreen();
+        showCountdown(() => {
+            displayCurrentWord();
+            startTimer();
+        });
     };
 
     // === BOOT ===

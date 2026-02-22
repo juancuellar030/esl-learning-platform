@@ -162,6 +162,41 @@ class PDFLibrary {
         localStorage.setItem('pdfLibraryMetadata', JSON.stringify(this.books));
     }
 
+    renameBook(bookId) {
+        const card = document.querySelector(`.book-card[data-id="${bookId}"]`);
+        if (!card) return;
+        const titleEl = card.querySelector('.book-title');
+        if (!titleEl) return;
+
+        const book = this.books.find(b => b.id === bookId);
+        if (!book) return;
+
+        // Replace h3 with an input
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'rename-input';
+        input.value = book.title;
+        input.maxLength = 100;
+        titleEl.replaceWith(input);
+        input.focus();
+        input.select();
+
+        const commit = () => {
+            const newTitle = input.value.trim();
+            if (newTitle && newTitle !== book.title) {
+                book.title = newTitle;
+                this.saveMetadata();
+            }
+            this.renderBooks();
+        };
+
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') { e.preventDefault(); commit(); }
+            if (e.key === 'Escape') { e.preventDefault(); this.renderBooks(); }
+        });
+        input.addEventListener('blur', commit);
+    }
+
     async deleteBook(bookId) {
         if (!confirm('Are you sure you want to delete this book?')) {
             return;
@@ -214,14 +249,14 @@ class PDFLibrary {
 
         grid.innerHTML = this.books.map(book => `
             <div class="book-card" data-id="${book.id}">
-                <div class="book-thumbnail">
+                <div class="book-thumbnail" onclick="library.openBook(${book.id})" style="cursor: pointer;">
                     ${book.thumbnail
                 ? `<img src="${book.thumbnail}" alt="${book.title}" style="max-width: 100%; max-height: 100%; object-fit: contain;">`
                 : '<i class="fa-solid fa-file-pdf"></i>'
             }
                 </div>
                 <div class="book-info">
-                    <h3 title="${book.title}">${book.title}</h3>
+                    <h3 class="book-title" title="${book.title}">${book.title}</h3>
                     <div class="book-meta">
                         <span><i class="fa-solid fa-file"></i> ${book.pages} pages</span>
                         <span><i class="fa-solid fa-hdd"></i> ${book.size}</span>
@@ -230,7 +265,10 @@ class PDFLibrary {
                         <button class="btn-open" onclick="library.openBook(${book.id})">
                             <i class="fa-solid fa-book-open"></i> Open
                         </button>
-                        <button class="btn-delete" onclick="library.deleteBook(${book.id})">
+                        <button class="btn-rename" onclick="event.stopPropagation(); library.renameBook(${book.id})" title="Rename">
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                        <button class="btn-delete" onclick="library.deleteBook(${book.id})" title="Delete">
                             <i class="fa-solid fa-trash"></i>
                         </button>
                     </div>
