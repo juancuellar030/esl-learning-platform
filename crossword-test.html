@@ -1,16 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="assets/graduation-cap-icon.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crossword Test</title>
     <link rel="stylesheet" href="css/practice.css">
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
+
 <body>
     <div class="practice-area" id="practice-area"></div>
-    
+
     <script src="js/vocabulary.js"></script>
     <script src="js/practice.js"></script>
     <script>
@@ -27,7 +30,7 @@
             { word: 'chicken', spanish: 'pollo', category: 'animals' },
             { word: 'rabbit', spanish: 'conejo', category: 'animals' }
         ];
-        
+
         // Initialize PracticeModule
         PracticeModule.words = testWords;
         PracticeModule.config = {
@@ -35,25 +38,25 @@
             face: 'easy',
             settings: {}
         };
-        
+
         // Generate crossword
         const container = document.getElementById('practice-area');
         PracticeModule.renderCrossword(container);
-        
+
         console.log('Crossword generated!');
         console.log('Placed words:', PracticeModule.crosswordData.placedWords);
-        
+
         // Log intersection statistics
         let totalIntersections = 0;
         let connectedWords = 0;
         let isolatedWords = 0;
-        
+
         for (const word of PracticeModule.crosswordData.placedWords) {
             let hasIntersection = false;
             for (let i = 0; i < word.word.length; i++) {
                 const r = word.dir === 'across' ? word.r : word.r + i;
                 const c = word.dir === 'across' ? word.c + i : word.c;
-                
+
                 const otherWord = PracticeModule.crosswordData.placedWords.find(pw => {
                     if (pw === word) return false;
                     for (let j = 0; j < pw.word.length; j++) {
@@ -63,20 +66,20 @@
                     }
                     return false;
                 });
-                
+
                 if (otherWord) {
                     hasIntersection = true;
                     totalIntersections++;
                 }
             }
-            
+
             if (hasIntersection) {
                 connectedWords++;
             } else {
                 isolatedWords++;
             }
         }
-        
+
         console.log('Statistics:');
         console.log('- Total intersections:', totalIntersections);
         console.log('- Connected words:', connectedWords);
@@ -84,4 +87,5 @@
         console.log('- Connection rate:', Math.round((connectedWords / testWords.length) * 100) + '%');
     </script>
 </body>
+
 </html>

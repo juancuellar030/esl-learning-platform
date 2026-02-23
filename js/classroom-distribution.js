@@ -1,12 +1,5 @@
 
-const students = [
-    'ALEJANDRA H.', 'ALEJANDRO C.', 'ANAMARIA C.', 'ANTONELLA P.', 'BRIANA C.',
-    'DANIEL P.', 'DANNA P.', 'EMILIANO Q.', 'EMILIANO T.', 'EMILIO R.',
-    'ERMES V.', 'EVA MARIA P.', 'JUAN J. RÍOS', 'JUAN J. SARRIAS', 'KESHIA C.',
-    'LAURA S.', 'LAURA BERNAL', 'LORENZO R.', 'LUCIANO M.', 'MATIAS F.',
-    'MIA H.', 'PABLO A.', 'PAULA V.', 'SAMANTHA C', 'SAMUEL G.',
-    'SANTIAGO O.', 'SARA LUCÍA V.', 'THOMAS C.', 'VALERIA P.'
-];
+const students = studentNames;
 
 const GRID_ROWS = 7;
 const GRID_COLS = 7;

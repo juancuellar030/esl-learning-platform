@@ -1,11 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="assets/graduation-cap-icon.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interactive RYB Color Wheel</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Reddit+Sans:wght@300;400;500;600;700;800&family=Google+Sans+Flex:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&family=Open+Sans:wght@300;400;600;700&family=Nunito:wght@300;400;600;700;800&family=Architects+Daughter&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Reddit+Sans:wght@300;400;500;600;700;800&family=Google+Sans+Flex:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&family=Open+Sans:wght@300;400;600;700&family=Nunito:wght@300;400;600;700;800&family=Architects+Daughter&display=swap"
+        rel="stylesheet">
     <style>
         :root {
             --indigo-velvet: #3d348b;
@@ -32,7 +36,10 @@
         }
 
         /* Apply font to all form elements */
-        input, select, button, textarea {
+        input,
+        select,
+        button,
+        textarea {
             font-family: 'Reddit Sans', 'Google Sans Flex', sans-serif;
         }
 
@@ -45,7 +52,7 @@
             padding: 60px 40px 40px;
             background: white;
             border-radius: 30px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             position: relative;
             max-width: 900px;
             width: 100%;
@@ -75,7 +82,7 @@
         #color-wheel {
             width: 100%;
             height: 100%;
-            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.15));
+            filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.15));
         }
 
         .segment {
@@ -142,7 +149,7 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            box-shadow: inset 0 0 25px rgba(0,0,0,0.08), 0 5px 15px rgba(0,0,0,0.1);
+            box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.08), 0 5px 15px rgba(0, 0, 0, 0.1);
             z-index: 5;
             text-align: center;
             padding: 15px;
@@ -173,8 +180,13 @@
         }
 
         @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         .back-link {
@@ -202,16 +214,19 @@
                 padding-top: 80px;
                 gap: 30px;
             }
+
             .wheel-container {
                 width: 320px;
                 height: 320px;
             }
+
             .controls {
                 width: 100%;
                 flex-direction: row;
                 flex-wrap: wrap;
                 justify-content: center;
             }
+
             .control-btn {
                 padding: 12px 20px;
                 font-size: 0.9rem;
@@ -258,7 +273,7 @@
 
         body.dark-mode .container {
             background-color: #1e1e1e;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
         }
 
         body.dark-mode h1 {
@@ -268,7 +283,7 @@
         body.dark-mode .indicator {
             background: #2d2d2d;
             border-color: #444;
-            box-shadow: inset 0 0 25px rgba(0,0,0,0.2), 0 5px 15px rgba(0,0,0,0.3);
+            box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.2), 0 5px 15px rgba(0, 0, 0, 0.3);
         }
 
         body.dark-mode #color-name {
@@ -301,7 +316,7 @@
             background: #333;
             color: #f1c40f;
             border: 3px solid white;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
             cursor: pointer;
             font-size: 1.5rem;
             display: flex;
@@ -334,7 +349,7 @@
             background: var(--indigo-velvet);
             color: white;
             border: 3px solid white;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
             cursor: pointer;
             font-size: 1.5rem;
             display: flex;
@@ -350,7 +365,7 @@
             background: white;
             border-radius: 15px;
             padding: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             display: none;
             flex-direction: column;
             gap: 10px;
@@ -382,15 +397,17 @@
         }
     </style>
 </head>
+
 <body>
     <script src="js/themes.js"></script>
     <script src="js/darkmode.js"></script>
     <div style="position: relative; width: 100%; max-width: 900px;">
-        <a href="#" class="back-link" onclick="window.close(); return false;"><i class="fa-solid fa-circle-arrow-left"></i> Back to Vocabulary</a>
-        
+        <a href="#" class="back-link" onclick="window.close(); return false;"><i
+                class="fa-solid fa-circle-arrow-left"></i> Back to Vocabulary</a>
+
         <div class="container">
             <h1>Interactive RYB Color Wheel</h1>
-            
+
             <div class="wheel-container">
                 <svg id="color-wheel" viewBox="0 0 100 100">
                     <!-- Segments will be generated by JS -->
@@ -440,16 +457,16 @@
             colors.forEach((c, i) => {
                 const startAngle = i * angleStep;
                 const endAngle = (i + 1) * angleStep;
-                
+
                 const pathData = describeArc(centerX, centerY, innerRadius, outerRadius, startAngle, endAngle);
-                
+
                 const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
                 path.setAttribute("d", pathData);
                 path.setAttribute("fill", c.color);
                 path.setAttribute("class", "segment");
                 path.setAttribute("data-name", c.name);
                 path.setAttribute("data-type", c.type);
-                
+
                 path.addEventListener('mouseenter', () => {
                     nameDisplay.textContent = c.name;
                     typeDisplay.textContent = c.type.charAt(0).toUpperCase() + c.type.slice(1);
@@ -515,7 +532,7 @@
 
         // Add slow rotation animation
         svg.classList.add('animation-spin');
-        
+
         // Pause animation on hover
         svg.addEventListener('mouseenter', () => {
             svg.style.animationPlayState = 'paused';
@@ -525,4 +542,5 @@
         });
     </script>
 </body>
+
 </html>

@@ -3,6 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="assets/graduation-cap-icon.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Material Tracker - ESL Learning Platform</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -471,17 +472,11 @@
     <!-- Notification Container -->
     <div id="notificationContainer" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
 
+    <script src="js/students-data.js"></script>
     <script>
         // Data Handling
         const STORAGE_KEY = 'esl_material_tracker_data';
-        const students = [
-            'ALEJANDRA H.', 'ALEJANDRO C.', 'ANAMARIA C.', 'ANTONELLA P.', 'BRIANA C.',
-            'DANIEL P.', 'DANNA P.', 'EMILIANO Q.', 'EMILIANO T.', 'EMILIO R.',
-            'ERMES V.', 'EVA MARIA P.', 'JUAN J. RÍOS', 'JUAN J. SARRIAS', 'JUANA LUNA', 'KESHIA C.',
-            'LAURA S.', 'LAURA BERNAL', 'LORENZO R.', 'LUCIANO M.', 'MATIAS F.',
-            'MIA H.', 'PABLO A.', 'PAULA V.', 'SAMANTHA C', 'SAMUEL G.',
-            'SANTIAGO O.', 'SARA LUCÍA V.', 'THOMAS C.', 'VALERIA P.'
-        ];
+        const students = studentNames;
 
         let appData = {
             materials: [], // Array of material names
