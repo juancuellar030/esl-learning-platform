@@ -147,8 +147,8 @@
         }
     }
 
-    function playItemAudio(itemIdx, item, colLetter) {
-        const colIdx = itemIdx % _state.gridSize;
+    function playItemAudio(itemIdx, item, colLetter, overrideColIdx) {
+        const colIdx = (overrideColIdx !== undefined && overrideColIdx !== null) ? overrideColIdx : itemIdx % _state.gridSize;
         if (itemAudio[itemIdx]) {
             // Chain: header audio first → then item audio
             if (_state.showHeader && headerAudio[colIdx]) {
@@ -209,6 +209,23 @@
                 osc.start(ctx.currentTime + i * 0.18);
                 osc.stop(ctx.currentTime + i * 0.18 + 0.4);
             });
+        } catch (e) { }
+    }
+
+    function playNextPickSound() {
+        try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain); gain.connect(ctx.destination);
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(440, ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.1);
+            gain.gain.setValueAtTime(0, ctx.currentTime);
+            gain.gain.linearRampToValueAtTime(0.3, ctx.currentTime + 0.03);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+            osc.start(ctx.currentTime);
+            osc.stop(ctx.currentTime + 0.4);
         } catch (e) { }
     }
 
@@ -573,33 +590,31 @@
         randomCalledKeys.add(key);
 
         // Mark the grid cell as called (only the first time this item appears)
+        const cell = document.getElementById(`caller-cell-${pick.itemIdx}`);
         if (!calledSet.has(pick.itemIdx)) {
-            const cell = document.getElementById(`caller-cell-${pick.itemIdx}`);
-            if (cell) cell.click();  // triggers toggleCall which adds to calledItems & sidebar
+            calledSet.add(pick.itemIdx);
+            if (cell) {
+                cell.classList.add('called');
+                const stamp = document.createElement('div');
+                stamp.className = 'stamp-overlay';
+                stamp.innerHTML = '<i class="fa-solid fa-circle-xmark"></i>';
+                cell.appendChild(stamp);
+            }
         }
 
-        // Also record in calledItems for sidebar (with the random header pairing)
-        // But only add to sidebar if the cell was already called (to avoid duplicate from click)
-        if (calledSet.has(pick.itemIdx) && calledItems[calledItems.length - 1]?.itemIdx === pick.itemIdx
-            && calledItems[calledItems.length - 1]?.colLetter !== pick.colLetter) {
-            // The last entry was just added by cell.click() with the grid column letter
-            // Update it to use the randomly-assigned header letter
-            calledItems[calledItems.length - 1].colLetter = pick.colLetter;
-            calledItems[calledItems.length - 1].colIdx = pick.colIdx;
-            updateSidebar();
-        }
-
-        // Play audio: header audio first, then item audio
-        if (_state.showHeader) {
-            playHeaderAudio(pick.colIdx, pick.colLetter);
-            setTimeout(() => {
-                playItemAudio(pick.itemIdx, pick.item, pick.colLetter);
-            }, 800);
-        } else {
-            playItemAudio(pick.itemIdx, pick.item, pick.colLetter);
-        }
+        // ALWAYS add to calledItems for sidebar history!
+        calledItems.push({ itemIdx: pick.itemIdx, item: pick.item, colLetter: pick.colLetter, colIdx: pick.colIdx });
+        updateSidebar();
 
         showRandomModal(pick);
+
+        // Play alert sound cue first
+        playNextPickSound();
+
+        // Delay the item audio slightly so the sound cue finishes
+        setTimeout(() => {
+            playItemAudio(pick.itemIdx, pick.item, pick.colLetter, pick.colIdx);
+        }, 500);
     }
 
     function showRandomModal(pick) {
@@ -663,12 +678,7 @@
         closeBtn.addEventListener('click', () => modal.style.display = 'none');
 
         document.getElementById('rpRepeatBtn').addEventListener('click', () => {
-            if (_state.showHeader) {
-                playHeaderAudio(colIdx, colLetter);
-                setTimeout(() => playItemAudio(itemIdx, item, colLetter), 800);
-            } else {
-                playItemAudio(itemIdx, item, colLetter);
-            }
+            playItemAudio(itemIdx, item, colLetter, colIdx);
         });
 
         document.getElementById('rpNextBtn').addEventListener('click', () => {
@@ -693,7 +703,9 @@
         };
     }
 
-    function loadCallerState(data) {
+    function loadCallerState(data, stateObj) {
+        if (stateObj) _state = stateObj;
+        if (!_state) return;
         if (!data) return;
 
         // Ensure UI is completely clean and rebuilt first

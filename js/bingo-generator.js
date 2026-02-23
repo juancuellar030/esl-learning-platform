@@ -903,7 +903,7 @@
                         el.generatorView().style.display = 'none';
                         el.callerView().style.display = '';
                         if (window.BingoCaller && window.BingoCaller.loadCallerState) {
-                            window.BingoCaller.loadCallerState(fullSession.callerState);
+                            window.BingoCaller.loadCallerState(fullSession.callerState, state);
                         }
                     } else {
                         // Default to returning to the generator
@@ -930,7 +930,7 @@
                     el.generatorView().style.display = 'none';
                     el.callerView().style.display = '';
                     if (window.BingoCaller && window.BingoCaller.loadCallerState) {
-                        window.BingoCaller.loadCallerState(parsedSession.callerState);
+                        window.BingoCaller.loadCallerState(parsedSession.callerState, state);
                     }
                 } else {
                     el.callerView().style.display = 'none';
