@@ -990,7 +990,7 @@
 /* ===== CALLER SESSION LAYOUT ===== */
 .caller-layout {
     display: grid;
-    grid-template-columns: 1fr 280px;
+    grid-template-columns: 1fr 300px;
     gap: 24px;
     align-items: start;
     animation: fadeInUp 0.5s ease both;
@@ -1223,6 +1223,61 @@
     font-weight: 800;
 }
 
+/* ===== CALLED ITEMS GROUPED BY HEADER ===== */
+.called-group {
+    margin-bottom: 10px;
+}
+
+.called-group-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    margin-bottom: 5px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--indigo-velvet), var(--medium-slate-blue));
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+.called-group-letter {
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 900;
+    min-width: 24px;
+    text-align: center;
+}
+
+.called-group-count {
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    border-radius: 20px;
+    padding: 1px 8px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    margin-left: auto;
+}
+
+.called-group-items {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.called-group-items .called-list-item {
+    padding: 7px 10px;
+    margin-bottom: 4px;
+    font-size: 0.82rem;
+    border-width: 1px;
+}
+
+.called-group-items .called-list-item .call-number {
+    width: 24px;
+    height: 24px;
+    font-size: 0.68rem;
+}
+
 /* ===== VIEW SWITCH ===== */
 #callerView {
     animation: fadeInUp 0.5s ease both;
@@ -1336,6 +1391,10 @@ body.dark-mode .called-list-item {
     border-color: #333;
     color: #ddd;
     background: #2a2a3e;
+}
+
+body.dark-mode .called-group-header {
+    background: linear-gradient(135deg, #2a2a4e, #44448e);
 }
 
 body.dark-mode .preview-cell {

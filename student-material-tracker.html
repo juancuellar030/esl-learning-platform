@@ -8,6 +8,7 @@
     <title>Student Material Tracker - ESL Learning Platform</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/google-drive.css">
     <style>
         body {
             font-family: 'Reddit Sans', 'Google Sans Flex', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -439,6 +440,9 @@
                     <i class="fa-solid fa-upload"></i> Load
                     <input type="file" id="importDataInput" accept=".json" style="display: none;">
                 </label>
+                <button class="btn btn-secondary" id="open-drive-btn" title="Google Drive">
+                    <i class="fa-brands fa-google-drive"></i> Drive
+                </button>
                 <input type="text" id="newItemInput" class="new-item-input"
                     placeholder="Enter item name (e.g. Lunch Money)...">
                 <button class="btn btn-add" id="addItemBtn">
@@ -669,7 +673,43 @@
         loadData();
 
     </script>
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="https://accounts.google.com/gsi/client"></script>
+    <script src="js/google-drive-service.js"></script>
     <script src="js/darkmode.js"></script>
+    <script>
+        // ── Google Drive integration for Student Material Tracker ──
+        (function () {
+            const STORAGE_KEY = 'esl_material_tracker_data';
+            const driveService = new GoogleDriveService({
+                folderName: 'ESL - Material Tracker',
+                fileExtension: '.json',
+                onSave: () => {
+                    const data = localStorage.getItem(STORAGE_KEY);
+                    return data ? JSON.parse(data) : null;
+                },
+                onLoad: (data) => {
+                    if (!data || !Array.isArray(data.materials) || typeof data.tracking !== 'object') {
+                        alert('Invalid tracker file.'); return;
+                    }
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+                    location.reload();
+                },
+                onNotify: (msg, type) => {
+                    const container = document.getElementById('notificationContainer');
+                    if (!container) { alert(msg); return; }
+                    const el = document.createElement('div');
+                    el.style.cssText = 'background:#333;color:#fff;padding:12px 20px;border-radius:10px;margin-bottom:8px;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,0.2);animation:popIn 0.3s ease;';
+                    if (type === 'success') el.style.background = '#00b894';
+                    else if (type === 'error') el.style.background = '#d63031';
+                    el.textContent = msg;
+                    container.appendChild(el);
+                    setTimeout(() => el.remove(), 3000);
+                }
+            });
+            document.getElementById('open-drive-btn').addEventListener('click', () => driveService.openModal());
+        })();
+    </script>
 </body>
 
 </html>

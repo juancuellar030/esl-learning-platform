@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/classroom-distribution.css">
+    <link rel="stylesheet" href="css/google-drive.css">
 </head>
 
 <body>
@@ -53,6 +54,9 @@
                     <i class="fa-solid fa-file-import"></i> Import JSON
                     <input type="file" id="import-file" accept=".json" style="display: none;">
                 </label>
+                <button class="drive-nav-btn" id="open-drive-btn">
+                    <i class="fa-brands fa-google-drive"></i> Drive
+                </button>
                 <button class="btn-secondary" id="add-student-btn"
                     style="background-color: var(--tiger-orange); color: white;">
                     <i class="fa-solid fa-user-plus"></i> Add Student
@@ -95,9 +99,38 @@
         </div>
     </footer>
 
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="https://accounts.google.com/gsi/client"></script>
     <script src="js/students-data.js"></script>
     <script src="js/classroom-distribution.js"></script>
+    <script src="js/google-drive-service.js"></script>
     <script src="js/darkmode.js"></script>
+    <script>
+        // ── Google Drive integration for Classroom Distribution ──
+        (function () {
+            const STORAGE_KEY = 'classroom_layout_data';
+            const driveService = new GoogleDriveService({
+                folderName: 'ESL - Classroom Layouts',
+                fileExtension: '.json',
+                onSave: () => {
+                    const data = localStorage.getItem(STORAGE_KEY);
+                    return data ? JSON.parse(data) : null;
+                },
+                onLoad: (data) => {
+                    if (!data || typeof data !== 'object') {
+                        alert('Invalid layout file.'); return;
+                    }
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+                    location.reload();
+                },
+                onNotify: (msg, type) => {
+                    if (typeof showNotification === 'function') { showNotification(msg); return; }
+                    alert(msg);
+                }
+            });
+            document.getElementById('open-drive-btn').addEventListener('click', () => driveService.openModal());
+        })();
+    </script>
 </body>
 
 </html>

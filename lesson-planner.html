@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/planner.css">
+    <link rel="stylesheet" href="css/google-drive.css">
 </head>
 
 <body>
@@ -66,6 +67,9 @@
                             <i class="fa-solid fa-upload"></i> Upload Planning
                             <input type="file" id="import-json-input" accept=".json" style="display: none;">
                         </label>
+                        <button class="drive-nav-btn" id="open-drive-btn">
+                            <i class="fa-brands fa-google-drive"></i> Google Drive
+                        </button>
                     </div>
                 </div>
 
@@ -379,8 +383,41 @@
         </div>
     </footer>
 
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="https://accounts.google.com/gsi/client"></script>
     <script src="js/planner.js"></script>
+    <script src="js/google-drive-service.js"></script>
     <script src="js/darkmode.js"></script>
+    <script>
+        // ── Google Drive integration for Lesson Planner ──
+        (function () {
+            const STORAGE_KEY = 'weeklyPlannerData';
+            const driveService = new GoogleDriveService({
+                folderName: 'ESL - Lesson Plans',
+                fileExtension: '.json',
+                onSave: () => {
+                    const data = localStorage.getItem(STORAGE_KEY);
+                    return data ? JSON.parse(data) : null;
+                },
+                onLoad: (data) => {
+                    if (!data || !data.classes || typeof data.classes !== 'object') {
+                        alert('Invalid lesson plan file.'); return;
+                    }
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+                    location.reload();
+                },
+                onNotify: (msg, type) => {
+                    const toast = document.createElement('div');
+                    toast.className = `toast-notification ${type}`;
+                    toast.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i><span>${msg}</span>`;
+                    document.body.appendChild(toast);
+                    setTimeout(() => toast.classList.add('show'), 10);
+                    setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 3000);
+                }
+            });
+            document.getElementById('open-drive-btn').addEventListener('click', () => driveService.openModal());
+        })();
+    </script>
 </body>
 
 </html>

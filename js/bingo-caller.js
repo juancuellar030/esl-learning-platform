@@ -478,19 +478,73 @@
         if (!list || !count) return;
         count.textContent = calledItems.length;
         list.innerHTML = '';
-        [...calledItems].reverse().forEach((entry, i) => {
-            const num = calledItems.length - i;
-            const word = entry.item && (typeof entry.item === 'string' ? entry.item : entry.item.name);
-            const li = document.createElement('li');
-            li.className = 'called-list-item';
-            li.style.animationDelay = `${i * 0.04}s`;
-            li.innerHTML = `
-                <span class="call-number">${num}</span>
-                ${_state.showHeader ? `<span class="call-header">${entry.colLetter}</span>` : ''}
-                <span>${escHtml(word || ('Image ' + (entry.itemIdx + 1)))}</span>
-            `;
-            list.appendChild(li);
-        });
+
+        // If headers are enabled, group by header letter; otherwise flat reverse-chrono list
+        if (_state.showHeader) {
+            const letters = getHeaderLetters();
+
+            // Build a map: headerLetter -> array of {num, word}
+            const groups = {};
+            letters.forEach(l => { groups[l] = []; });
+
+            calledItems.forEach((entry, i) => {
+                const num = i + 1; // original call order
+                const word = entry.item && (typeof entry.item === 'string' ? entry.item : entry.item.name);
+                const label = word || ('Image ' + (entry.itemIdx + 1));
+                const key = entry.colLetter || '';
+                if (!groups[key]) groups[key] = [];
+                groups[key].push({ num, label });
+            });
+
+            // Render each header group
+            letters.forEach(letter => {
+                const items = groups[letter];
+                if (!items || items.length === 0) return; // skip empty groups
+
+                // Sort items alphabetically within the group
+                const sorted = [...items].sort((a, b) => a.label.localeCompare(b.label, 'en', { sensitivity: 'base' }));
+
+                // Group header
+                const groupEl = document.createElement('div');
+                groupEl.className = 'called-group';
+
+                const headerEl = document.createElement('div');
+                headerEl.className = 'called-group-header';
+                headerEl.innerHTML = `<span class="called-group-letter">${escHtml(letter)}</span><span class="called-group-count">${sorted.length}</span>`;
+                groupEl.appendChild(headerEl);
+
+                const itemsContainer = document.createElement('ul');
+                itemsContainer.className = 'called-group-items';
+
+                sorted.forEach((item, idx) => {
+                    const li = document.createElement('li');
+                    li.className = 'called-list-item';
+                    li.style.animationDelay = `${idx * 0.03}s`;
+                    li.innerHTML = `
+                        <span class="call-number">${item.num}</span>
+                        <span>${escHtml(item.label)}</span>
+                    `;
+                    itemsContainer.appendChild(li);
+                });
+
+                groupEl.appendChild(itemsContainer);
+                list.appendChild(groupEl);
+            });
+        } else {
+            // No headers — flat reverse-chronological list
+            [...calledItems].reverse().forEach((entry, i) => {
+                const num = calledItems.length - i;
+                const word = entry.item && (typeof entry.item === 'string' ? entry.item : entry.item.name);
+                const li = document.createElement('li');
+                li.className = 'called-list-item';
+                li.style.animationDelay = `${i * 0.04}s`;
+                li.innerHTML = `
+                    <span class="call-number">${num}</span>
+                    <span>${escHtml(word || ('Image ' + (entry.itemIdx + 1)))}</span>
+                `;
+                list.appendChild(li);
+            });
+        }
     }
 
     // ── Reset ──────────────────────────────────────────────────────
