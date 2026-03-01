@@ -28,8 +28,8 @@ const QuizGame = (() => {
     let hasAnswered = false;
     let selectedAvatar = null;
 
-    // Custom quiz state
     let sourceMode = 'vocab'; // 'vocab' | 'custom'
+    let gameMode = 'automatic'; // 'automatic' | 'student-paced' | 'teacher-paced'
     let customRows = [];
 
     // Avatar library — 32 animal photos
@@ -69,6 +69,7 @@ const QuizGame = (() => {
         $('btn-start-game').addEventListener('click', startCountdown);
         $('btn-play-again').addEventListener('click', playAgain);
         $('btn-new-game').addEventListener('click', () => { cleanup(); showScreen('screen-role'); });
+        $('btn-change-avatar').addEventListener('click', toggleWaitingAvatars);
 
         // Steppers
         $('q-minus').addEventListener('click', () => adjustStepper('q-count', -5, 5, 50));
@@ -107,6 +108,32 @@ const QuizGame = (() => {
 
         // Custom quiz: add row button
         $('btn-add-row').addEventListener('click', () => addCustomRows(1));
+
+        // Game mode toggle
+        document.querySelectorAll('.qg-mode-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.qg-mode-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                gameMode = btn.dataset.mode;
+
+                // Disable shuffle for teacher-paced
+                const shuffleCheckbox = $('opt-shuffle');
+                const shuffleLabel = shuffleCheckbox.closest('.qg-toggle-option');
+                if (gameMode === 'teacher-paced') {
+                    shuffleCheckbox.checked = false;
+                    shuffleCheckbox.disabled = true;
+                    shuffleLabel.style.opacity = '0.4';
+                    shuffleLabel.style.pointerEvents = 'none';
+                } else {
+                    shuffleCheckbox.disabled = false;
+                    shuffleLabel.style.opacity = '';
+                    shuffleLabel.style.pointerEvents = '';
+                }
+            });
+        });
+
+        // Teacher-paced: Next Question
+        $('btn-next-question').addEventListener('click', teacherNextQuestion);
     }
 
     function adjustStepper(id, delta, min, max) {
@@ -350,6 +377,12 @@ const QuizGame = (() => {
         playSound('click');
     }
 
+    function toggleWaitingAvatars() {
+        const grid = $('avatar-grid-waiting');
+        grid.classList.toggle('visible');
+        playSound('click');
+    }
+
     // ===== QUESTION GENERATION =====
     function generateQuestions(selectedCats, level, count) {
         let pool = [...(window.vocabularyBank || [])];
@@ -372,8 +405,8 @@ const QuizGame = (() => {
             return null;
         }
 
-        // Shuffle pool
-        shuffle(pool);
+        // Shuffle pool only if shuffle enabled — otherwise keep natural order
+        if (config.shuffle) shuffle(pool);
 
         const qs = [];
         const usedWords = new Set();
@@ -440,7 +473,8 @@ const QuizGame = (() => {
             shuffle: $('opt-shuffle').checked,
             showAnswer: $('opt-show-answer').checked,
             streaks: $('opt-streaks').checked,
-            sound: $('opt-sound').checked
+            sound: $('opt-sound').checked,
+            gameMode: gameMode
         };
         soundEnabled = config.sound;
 
@@ -493,7 +527,7 @@ const QuizGame = (() => {
         $('btn-start-game').disabled = count < 1;
 
         container.innerHTML = '';
-        Object.values(players).forEach((p, i) => {
+        Object.entries(players).forEach(([uid, p], i) => {
             const div = document.createElement('div');
             div.className = 'qg-lobby-player';
             div.style.animationDelay = (i * 0.05) + 's';
@@ -503,8 +537,37 @@ const QuizGame = (() => {
                 const idx = parseInt(avatarId.replace('animal_', ''));
                 avatarHtml = `<img class="player-avatar-img" src="${getAvatarSrc(idx)}" alt="">`;
             }
-            div.innerHTML = `${avatarHtml} <span class="player-name">${escapeHtml(p.name)}</span>`;
+
+            let bootHtml = '';
+            if (role === 'host') {
+                bootHtml = `<button class="qg-boot-btn" aria-label="Remove Player" data-uid="${uid}" data-name="${escapeHtml(p.name)}">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>`;
+            }
+
+            div.innerHTML = `${avatarHtml} <span class="player-name">${escapeHtml(p.name)}</span>${bootHtml}`;
+
+            if (role === 'host') {
+                const bootBtn = div.querySelector('.qg-boot-btn');
+                if (bootBtn) {
+                    bootBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        bootPlayer(bootBtn.dataset.uid, bootBtn.dataset.name);
+                    });
+                }
+            }
             container.appendChild(div);
+        });
+    }
+
+    function bootPlayer(uid, name) {
+        // Immediately remove from local state for instant UI feedback
+        delete players[uid];
+        renderLobbyPlayers();
+
+        // Remove from Firebase
+        FirebaseService.removePlayer(gameCode, uid).catch(err => {
+            console.error('[QuizGame] Failed to boot player:', err);
         });
     }
 
@@ -571,6 +634,14 @@ const QuizGame = (() => {
                     }
                 });
                 listeners.push(unsub);
+
+                const kickUnsub = FirebaseService.onFieldChange(gameCode, 'players/' + FirebaseService.getUid(), val => {
+                    if (val === null && role === 'player' && $('screen-waiting').classList.contains('active')) {
+                        alert('You have been removed from the lobby by the host.');
+                        cancelLobby();
+                    }
+                });
+                listeners.push(kickUnsub);
             }
         }).catch(err => {
             showScreen('screen-join');
@@ -639,17 +710,45 @@ const QuizGame = (() => {
         $('tv-total-players').textContent = Object.keys(players).length;
         currentQ = -1;
 
-        // Listen for player answers
+        const gm = config.gameMode || 'automatic';
+
+        // Show/hide teacher controls based on mode
+        $('tv-teacher-controls').classList.toggle('qg-hidden', gm !== 'teacher-paced');
+
+        // Listen for player answers/progress
         if (!FirebaseService.isDemo()) {
             const unsub = FirebaseService.onPlayersChange(gameCode, p => {
                 players = p || {};
                 updateHostLeaderboard();
-                updateAnswerCounts();
+                if (gm !== 'student-paced') {
+                    updateAnswerCounts();
+                }
             });
             listeners.push(unsub);
         }
 
-        nextQuestion();
+        if (gm === 'student-paced') {
+            // Student-paced: host just monitors; push status so students start
+            if (!FirebaseService.isDemo()) {
+                FirebaseService.updateSessionField(gameCode, 'status', 'playing');
+            }
+            $('tv-q-num').textContent = '—';
+            $('tv-question').innerHTML = '<div style="text-align:center; opacity:0.7;"><i class="fa-solid fa-users" style="font-size:2rem; margin-bottom:10px;"></i><br>Students are answering at their own pace.<br>Watch the leaderboard update live!</div>';
+            $('tv-answers').innerHTML = '';
+            $('tv-answered').textContent = '—';
+
+            // Show an End Game button for the host
+            $('tv-teacher-controls').classList.remove('qg-hidden');
+            $('btn-next-question').innerHTML = '<i class="fa-solid fa-flag-checkered"></i> End Game';
+            $('btn-next-question').onclick = () => {
+                endGame();
+            };
+        } else {
+            // Reset button for teacher-paced
+            $('btn-next-question').innerHTML = 'Next Question <i class="fa-solid fa-arrow-right"></i>';
+            $('btn-next-question').onclick = teacherNextQuestion;
+            nextQuestion();
+        }
     }
 
     function nextQuestion() {
@@ -675,7 +774,11 @@ const QuizGame = (() => {
 
         // Update UI
         $('tv-q-num').textContent = currentQ + 1;
-        $('tv-question').textContent = q.text;
+        let qHtml = `<div>${escapeHtml(q.text)}</div>`;
+        if (q.imageData) {
+            qHtml = `<img src="${q.imageData}" style="max-height: 200px; max-width: 100%; border-radius: 12px; margin-bottom: 15px; object-fit: contain;" alt="Question Image" />` + qHtml;
+        }
+        $('tv-question').innerHTML = qHtml;
         $('tv-answered').textContent = '0';
 
         // Render answer bars
@@ -736,7 +839,7 @@ const QuizGame = (() => {
     }
 
     function updateAnswerCounts() {
-        if (isAdvancing) return; // Prevent re-entrant calls during reveal/transition
+        if (isAdvancing) return;
 
         let answered = 0;
         answerCounts = [0, 0, 0, 0];
@@ -753,29 +856,86 @@ const QuizGame = (() => {
             if (el) el.textContent = answerCounts[i];
         }
 
-        // Auto-advance if all answered
-        if (answered >= Object.keys(players).length && answered > 0) {
-            clearInterval(timerInterval);
-            isAdvancing = true; // Lock to prevent cascade
-            setTimeout(revealAnswer, 500);
+        const gm = config.gameMode || 'automatic';
+
+        // Auto-advance or auto-reveal when all answer
+        if (gm === 'automatic' || gm === 'teacher-paced') {
+            if (answered >= Object.keys(players).length && answered > 0) {
+                clearInterval(timerInterval);
+                isAdvancing = true;
+                setTimeout(revealAnswer, 500);
+            }
+        }
+    }
+
+    function getPlayerProgress(p) {
+        const gm = config.gameMode || 'automatic';
+        if (gm === 'student-paced') {
+            return p.progress || 0;
+        } else {
+            // For automatic and teacher-paced, all players are at the same question
+            // Their progress is currentQ + 1 if they answered, or just currentQ if we are still waiting
+            if (isAdvancing) return currentQ + 1; // Round over
+            return p.currentAnswer !== null && p.currentAnswer !== undefined ? currentQ + 1 : currentQ;
         }
     }
 
     function updateHostLeaderboard() {
+        const tot = questions.length || 1;
+
         const sorted = Object.entries(players)
-            .map(([uid, p]) => ({ uid, ...p }))
-            .sort((a, b) => b.score - a.score);
+            .map(([uid, p]) => {
+                const prog = getPlayerProgress(p);
+                return { uid, prog, isDone: prog >= tot, ...p };
+            })
+            // Sort completed first, then by score descending (or progress desc if score is 0)
+            .sort((a, b) => {
+                if (a.isDone && !b.isDone) return -1;
+                if (!a.isDone && b.isDone) return 1;
+                if (a.score !== b.score) return (b.score || 0) - (a.score || 0);
+                return b.prog - a.prog;
+            });
 
         const list = $('tv-lb-list');
         list.innerHTML = '';
         sorted.forEach((p, i) => {
             const row = document.createElement('div');
             row.className = 'qg-tv-lb-row';
-            const streakHtml = p.streak >= 3 ? `<span class="fire">🔥</span>${p.streak}` : (p.streak > 0 ? `${p.streak}` : '');
+            if (p.isDone) {
+                row.style.background = 'rgba(118, 120, 237, 0.15)';
+                row.style.border = '1px solid rgba(118, 120, 237, 0.3)';
+            } else if (i === 0 && (p.score || 0) > 0) {
+                row.style.background = 'rgba(247, 184, 1, 0.15)';
+            }
+
+            const streak = p.streak || 0;
+            const streakHtml = streak >= 3 ? `<span class="fire">🔥</span>${streak}` : (streak > 0 ? `⚡${streak}` : '');
+
+            // Progress width (0 to 100%)
+            const pct = Math.min(100, Math.round((p.prog / tot) * 100));
+
+            // Determine bar streak class
+            let barClass = '';
+            if (streak >= 5) barClass = 'streak-5';
+            else if (streak >= 3) barClass = 'streak-3';
+            else if (streak >= 2) barClass = 'streak-2';
+
+            let statusTag = '';
+            if (p.isDone) {
+                statusTag = `<span style="font-size: 0.7rem; background: var(--medium-slate-blue); color: white; padding: 2px 6px; border-radius: 4px; margin-left: 8px;">Completed</span>`;
+            }
+
             row.innerHTML = `
                 <span class="qg-tv-lb-rank">${i + 1}</span>
-                <span class="qg-tv-lb-name">${escapeHtml(p.name)}</span>
-                <span class="qg-tv-lb-score">${p.score}</span>
+                <div class="qg-tv-lb-progress-wrap">
+                    <div class="qg-tv-lb-info">
+                        <span class="qg-tv-lb-name">${escapeHtml(p.name)} ${statusTag}</span>
+                        <span class="qg-tv-lb-score">${p.score || 0}</span>
+                    </div>
+                    <div class="qg-tv-lb-bar-bg">
+                        <div class="qg-tv-lb-bar ${barClass}" style="width: ${pct}%; transition: width 0.5s ease-out;"></div>
+                    </div>
+                </div>
                 <span class="qg-tv-lb-streak">${streakHtml}</span>
             `;
             list.appendChild(row);
@@ -784,7 +944,7 @@ const QuizGame = (() => {
 
     function revealAnswer() {
         clearInterval(timerInterval);
-        isAdvancing = true; // Lock to prevent any re-entrant calls
+        isAdvancing = true;
         const q = questions[currentQ];
         if (!q) return;
 
@@ -792,7 +952,6 @@ const QuizGame = (() => {
         const correctEl = $('tv-ans-' + q.correctIndex);
         if (correctEl) correctEl.classList.add('correct-answer');
 
-        // Calculate scores for each player
         if (!FirebaseService.isDemo()) {
             FirebaseService.updateSessionField(gameCode, 'status', 'reviewing');
         }
@@ -802,7 +961,6 @@ const QuizGame = (() => {
             if (p.currentAnswer !== null && p.currentAnswer !== undefined) {
                 const idx = typeof p.currentAnswer === 'object' ? p.currentAnswer.index : p.currentAnswer;
                 if (idx === q.correctIndex) {
-                    // Correct!
                     const timeBonus = Math.round((timeLeft / config.timer) * 50);
                     const streakMultiplier = config.streaks ? Math.min(p.streak + 1, 5) : 1;
                     const basePoints = 100;
@@ -813,7 +971,6 @@ const QuizGame = (() => {
                     p.streak = 0;
                 }
             } else {
-                // Didn't answer
                 p.streak = 0;
             }
 
@@ -824,10 +981,27 @@ const QuizGame = (() => {
 
         updateHostLeaderboard();
 
-        // Wait then advance — isAdvancing resets inside nextQuestion
-        setTimeout(() => {
-            nextQuestion();
-        }, 3000);
+        const gm = config.gameMode || 'automatic';
+
+        if (gm === 'teacher-paced') {
+            // Show the Next Question button — teacher decides when to proceed
+            $('tv-teacher-controls').classList.remove('qg-hidden');
+            if (currentQ >= questions.length - 1) {
+                $('btn-next-question').innerHTML = '<i class="fa-solid fa-flag-checkered"></i> Finish Quiz';
+            } else {
+                $('btn-next-question').innerHTML = 'Next Question <i class="fa-solid fa-arrow-right"></i>';
+            }
+        } else {
+            // Automatic mode: wait then advance
+            setTimeout(() => {
+                nextQuestion();
+            }, 3000);
+        }
+    }
+
+    function teacherNextQuestion() {
+        $('tv-teacher-controls').classList.add('qg-hidden');
+        nextQuestion();
     }
 
     // ===== PLAYER: GAME PLAY =====
@@ -839,35 +1013,88 @@ const QuizGame = (() => {
         myStreak = 0;
 
         if (!FirebaseService.isDemo()) {
-            // Listen for current question changes
-            const unsub1 = FirebaseService.onFieldChange(gameCode, 'currentQuestion', qIdx => {
-                if (qIdx === null || qIdx === -1) return;
-                loadPlayerQuestion(qIdx);
-            });
-            listeners.push(unsub1);
-
-            // Listen for status
-            const unsub2 = FirebaseService.onFieldChange(gameCode, 'status', status => {
-                if (status === 'reviewing') {
-                    revealPlayerAnswer();
-                } else if (status === 'finished') {
-                    showResults();
-                }
-            });
-            listeners.push(unsub2);
-
-            // Get initial game state
+            // Get initial game state first
             FirebaseService.getSession(gameCode).then(session => {
-                if (session) {
-                    questions = session.questions || [];
-                    config = session.config || {};
-                    soundEnabled = config.sound !== false;
+                if (!session) return;
+                questions = session.questions || [];
+                config = session.config || {};
+                soundEnabled = config.sound !== false;
+                const gm = config.gameMode || 'automatic';
+
+                if (gm === 'student-paced') {
+                    // Student-paced: start from question 0 and advance locally
+                    currentQ = -1;
+                    studentPacedNextQuestion();
+
+                    // Listen for game end
+                    const unsub2 = FirebaseService.onFieldChange(gameCode, 'status', status => {
+                        if (status === 'finished') {
+                            showResults();
+                        }
+                    });
+                    listeners.push(unsub2);
+                } else {
+                    // Automatic & Teacher-paced: listen for host-pushed question
+                    const unsub1 = FirebaseService.onFieldChange(gameCode, 'currentQuestion', qIdx => {
+                        if (qIdx === null || qIdx === -1) return;
+                        loadPlayerQuestion(qIdx);
+                    });
+                    listeners.push(unsub1);
+
+                    const unsub2 = FirebaseService.onFieldChange(gameCode, 'status', status => {
+                        if (status === 'reviewing') {
+                            revealPlayerAnswer();
+                        } else if (status === 'finished') {
+                            showResults();
+                        }
+                    });
+                    listeners.push(unsub2);
+
                     if (session.currentQuestion >= 0) {
                         loadPlayerQuestion(session.currentQuestion);
                     }
                 }
             });
         }
+    }
+
+    // Student-paced: advance to next question locally
+    function studentPacedNextQuestion() {
+        currentQ++;
+        if (currentQ >= questions.length) {
+            // Student finished all questions
+            showResults();
+            // Report final score to Firebase
+            if (!FirebaseService.isDemo()) {
+                FirebaseService.updatePlayerScore(gameCode, FirebaseService.getUid(), myScore, myStreak);
+                FirebaseService.updateSessionField(gameCode,
+                    'players/' + FirebaseService.getUid() + '/progress', questions.length);
+            }
+            return;
+        }
+
+        hasAnswered = false;
+        const q = questions[currentQ];
+        if (!q) return;
+
+        $('sv-score').textContent = myScore;
+        $('sv-progress').textContent = `${currentQ + 1} / ${questions.length}`;
+        updateStreakDisplay();
+        let qHtml = `<div>${escapeHtml(q.text)}</div>`;
+        if (q.imageData) {
+            qHtml = `<img src="${q.imageData}" style="max-height: 150px; max-width: 100%; border-radius: 12px; margin-bottom: 10px; object-fit: contain;" alt="Question Image" />` + qHtml;
+        }
+        $('sv-question').innerHTML = qHtml;
+
+        const btns = document.querySelectorAll('.qg-answer-btn');
+        btns.forEach((btn, i) => {
+            btn.textContent = q.options[i] || '';
+            btn.className = 'qg-answer-btn qg-ans-' + i;
+            btn.disabled = false;
+        });
+
+        // Start local timer
+        startPlayerTimer(config.timer, config.timer);
     }
 
     function loadPlayerQuestion(qIdx) {
@@ -892,7 +1119,11 @@ const QuizGame = (() => {
             $('sv-score').textContent = myScore;
             $('sv-progress').textContent = `${currentQ + 1} / ${questions.length}`;
             updateStreakDisplay();
-            $('sv-question').textContent = q.text;
+            let qHtml = `<div>${escapeHtml(q.text)}</div>`;
+            if (q.imageData) {
+                qHtml = `<img src="${q.imageData}" style="max-height: 150px; max-width: 100%; border-radius: 12px; margin-bottom: 10px; object-fit: contain;" alt="Question Image" />` + qHtml;
+            }
+            $('sv-question').innerHTML = qHtml;
 
             const btns = document.querySelectorAll('.qg-answer-btn');
             btns.forEach((btn, i) => {
@@ -919,6 +1150,26 @@ const QuizGame = (() => {
                 timeLeft = 0;
                 clearInterval(timerInterval);
                 disableAnswerButtons();
+
+                const gm = config.gameMode || 'automatic';
+                if (gm === 'student-paced' && !hasAnswered) {
+                    // Auto-advance when time runs out in student-paced
+                    hasAnswered = true;
+                    myStreak = 0;
+                    showFeedback(false, 0);
+                    // Show correct answer briefly
+                    const q = questions[currentQ];
+                    if (q) {
+                        const btns = document.querySelectorAll('.qg-answer-btn');
+                        btns.forEach((btn, i) => {
+                            if (i === q.correctIndex) btn.classList.add('correct');
+                        });
+                    }
+                    if (!FirebaseService.isDemo()) {
+                        FirebaseService.updatePlayerScore(gameCode, FirebaseService.getUid(), myScore, myStreak);
+                    }
+                    setTimeout(() => studentPacedNextQuestion(), 2000);
+                }
             }
             updateTimerUI(timeLeft, total);
         }, 100);
@@ -937,6 +1188,57 @@ const QuizGame = (() => {
 
         // Submit to Firebase
         FirebaseService.submitAnswer(gameCode, index);
+
+        const gm = config.gameMode || 'automatic';
+        if (gm === 'student-paced') {
+            // Immediately reveal and advance locally
+            studentPacedRevealAndAdvance(index);
+        }
+    }
+
+    function studentPacedRevealAndAdvance(selectedIdx) {
+        clearInterval(timerInterval);
+        const q = questions[currentQ];
+        if (!q) return;
+
+        const btns = document.querySelectorAll('.qg-answer-btn');
+        btns.forEach((btn, i) => {
+            btn.classList.add('disabled');
+            if (i === q.correctIndex) btn.classList.add('correct');
+        });
+
+        if (selectedIdx === q.correctIndex) {
+            const timeBonus = Math.round((timeLeft / config.timer) * 50);
+            const streakMultiplier = config.streaks ? Math.min(myStreak + 1, 5) : 1;
+            const points = Math.round((100 + timeBonus) * (1 + (streakMultiplier - 1) * 0.2));
+            myScore += points;
+            myStreak++;
+            showFeedback(true, points);
+            playSound('correct');
+        } else {
+            const selectedBtn = document.querySelector(`.qg-answer-btn[data-index="${selectedIdx}"]`);
+            if (selectedBtn) selectedBtn.classList.add('wrong');
+            myStreak = 0;
+            showFeedback(false, 0);
+            playSound('wrong');
+        }
+
+        $('sv-score').textContent = myScore;
+        $('sv-score').classList.add('pop');
+        setTimeout(() => $('sv-score').classList.remove('pop'), 300);
+        updateStreakDisplay();
+
+        // Report score to Firebase
+        if (!FirebaseService.isDemo()) {
+            FirebaseService.updatePlayerScore(gameCode, FirebaseService.getUid(), myScore, myStreak);
+            FirebaseService.updateSessionField(gameCode,
+                'players/' + FirebaseService.getUid() + '/progress', currentQ + 1);
+        }
+
+        // Auto-advance to next question after brief delay
+        setTimeout(() => {
+            studentPacedNextQuestion();
+        }, 2000);
     }
 
     function revealPlayerAnswer() {

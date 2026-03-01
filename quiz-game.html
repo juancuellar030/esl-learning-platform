@@ -60,6 +60,28 @@
                     </div>
                 </div>
 
+                <!-- Game Mode Toggle -->
+                <div class="qg-setup-section">
+                    <label class="qg-setup-label">Game Mode</label>
+                    <div class="qg-mode-toggle">
+                        <button class="qg-mode-btn active" data-mode="automatic">
+                            <i class="fa-solid fa-robot"></i>
+                            <span class="qg-mode-label">Automatic</span>
+                            <span class="qg-mode-desc">Auto-advance when all answer</span>
+                        </button>
+                        <button class="qg-mode-btn" data-mode="student-paced">
+                            <i class="fa-solid fa-user-graduate"></i>
+                            <span class="qg-mode-label">Student-Paced</span>
+                            <span class="qg-mode-desc">Each student goes at own speed</span>
+                        </button>
+                        <button class="qg-mode-btn" data-mode="teacher-paced">
+                            <i class="fa-solid fa-chalkboard-user"></i>
+                            <span class="qg-mode-label">Teacher-Paced</span>
+                            <span class="qg-mode-desc">Teacher controls the flow</span>
+                        </button>
+                    </div>
+                </div>
+
                 <!-- VOCAB MODE -->
                 <div id="vocab-mode">
                     <div class="qg-setup-section">
@@ -217,7 +239,9 @@
                 <div class="qg-waiting-avatar" id="waiting-avatar"></div>
                 <h2>You're In!</h2>
                 <p class="qg-waiting-name" id="waiting-name"></p>
-                <p class="qg-waiting-msg">Change your avatar while you wait!</p>
+                <button type="button" class="qg-change-avatar-btn" id="btn-change-avatar">
+                    <i class="fa-solid fa-shuffle"></i> Change Avatar
+                </button>
                 <div class="qg-avatar-grid-waiting" id="avatar-grid-waiting">
                     <!-- Populated by JS -->
                 </div>
@@ -247,6 +271,12 @@
                 <div class="qg-tv-leaderboard" id="tv-leaderboard">
                     <h3><i class="fa-solid fa-trophy"></i> Leaderboard</h3>
                     <div class="qg-tv-lb-list" id="tv-lb-list"></div>
+                </div>
+                <!-- Teacher-Paced: Next Question button -->
+                <div class="qg-tv-teacher-controls qg-hidden" id="tv-teacher-controls">
+                    <button class="qg-btn qg-btn-accent qg-btn-lg qg-pulse" id="btn-next-question">
+                        <i class="fa-solid fa-forward"></i> Next Question
+                    </button>
                 </div>
             </div>
 

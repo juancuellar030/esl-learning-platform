@@ -203,6 +203,16 @@ const FirebaseService = (() => {
         db.ref('sessions/' + code + '/players/' + uid).onDisconnect().remove();
     }
 
+    function removePlayer(code, uid) {
+        if (isDemo()) {
+            if (window._demoSession && window._demoSession.players) {
+                delete window._demoSession.players[uid];
+            }
+            return Promise.resolve();
+        }
+        return db.ref('sessions/' + code + '/players/' + uid).remove();
+    }
+
     function deleteSession(code) {
         if (isDemo()) {
             window._demoSession = null;
@@ -229,6 +239,7 @@ const FirebaseService = (() => {
         updatePlayerScore,
         clearAllAnswers,
         setupDisconnect,
+        removePlayer,
         deleteSession
     };
 })();
