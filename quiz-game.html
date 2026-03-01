@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="assets/graduation-cap-icon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Quiz Game - ESL Learning Platform</title>
+    <meta name="description"
+        content="Real-time multiplayer quiz game for ESL classrooms. Host or join a live quiz session with your class.">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/quiz-game.css">
+    <!-- Firebase CDN (compat) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+</head>
+
+<body>
+    <div class="qg-app" id="quiz-app">
+
+        <!-- ===== SCREEN: ROLE SELECT ===== -->
+        <div class="qg-screen active" id="screen-role">
+            <div class="qg-role-container">
+                <div class="qg-logo-area">
+                    <i class="fa-solid fa-bolt qg-logo-icon"></i>
+                    <h1 class="qg-title">Live Quiz</h1>
+                    <p class="qg-subtitle">Real-time multiplayer classroom quiz</p>
+                </div>
+                <div class="qg-role-cards">
+                    <button class="qg-role-card qg-role-host" id="btn-role-host">
+                        <div class="qg-role-icon"><i class="fa-solid fa-chalkboard-user"></i></div>
+                        <h2>Host a Game</h2>
+                        <p>Create a quiz and invite your students</p>
+                    </button>
+                    <button class="qg-role-card qg-role-join" id="btn-role-join">
+                        <div class="qg-role-icon"><i class="fa-solid fa-gamepad"></i></div>
+                        <h2>Join a Game</h2>
+                        <p>Enter a game code to play</p>
+                    </button>
+                </div>
+                <a href="tools.html" class="qg-back-link"><i class="fa-solid fa-arrow-left"></i> Back to Tools</a>
+            </div>
+        </div>
+
+        <!-- ===== SCREEN: HOST SETUP ===== -->
+        <div class="qg-screen" id="screen-setup">
+            <div class="qg-setup-panel">
+                <h2><i class="fa-solid fa-wand-magic-sparkles"></i> Create Your Quiz</h2>
+
+                <!-- Source Mode Toggle -->
+                <div class="qg-setup-section">
+                    <label class="qg-setup-label">Quiz Source</label>
+                    <div class="qg-source-toggle">
+                        <button class="qg-source-btn active" id="src-vocab" data-source="vocab"><i
+                                class="fa-solid fa-book"></i> Vocabulary Bank</button>
+                        <button class="qg-source-btn" id="src-custom" data-source="custom"><i
+                                class="fa-solid fa-pen-ruler"></i> Custom Quiz</button>
+                    </div>
+                </div>
+
+                <!-- VOCAB MODE -->
+                <div id="vocab-mode">
+                    <div class="qg-setup-section">
+                        <label class="qg-setup-label">Vocabulary Categories</label>
+                        <div class="qg-category-chips" id="category-chips">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <div class="qg-setup-section">
+                        <label class="qg-setup-label">Difficulty Level</label>
+                        <div class="qg-level-btns">
+                            <button class="qg-level-btn active" data-level="all">All</button>
+                            <button class="qg-level-btn" data-level="beginner">Beginner</button>
+                            <button class="qg-level-btn" data-level="intermediate">Intermediate</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CUSTOM MODE (hidden by default) -->
+                <div id="custom-mode" class="qg-hidden">
+                    <div class="qg-setup-section">
+                        <label class="qg-setup-label">Your Questions</label>
+                        <p class="qg-custom-hint">Enter words/concepts and their clues. Optional: attach images or
+                            audio.</p>
+                        <div class="qg-custom-list" id="custom-list">
+                            <!-- Rows populated by JS -->
+                        </div>
+                        <button class="qg-btn qg-btn-add-row" id="btn-add-row">
+                            <i class="fa-solid fa-plus"></i> Add Question
+                        </button>
+                    </div>
+                </div>
+
+
+
+                <div class="qg-setup-row">
+                    <div class="qg-setup-section">
+                        <label class="qg-setup-label">Questions</label>
+                        <div class="qg-stepper">
+                            <button class="qg-step-btn" id="q-minus"><i class="fa-solid fa-minus"></i></button>
+                            <span class="qg-step-value" id="q-count">10</span>
+                            <button class="qg-step-btn" id="q-plus"><i class="fa-solid fa-plus"></i></button>
+                        </div>
+                    </div>
+                    <div class="qg-setup-section">
+                        <label class="qg-setup-label">Timer (seconds)</label>
+                        <div class="qg-stepper">
+                            <button class="qg-step-btn" id="t-minus"><i class="fa-solid fa-minus"></i></button>
+                            <span class="qg-step-value" id="t-count">15</span>
+                            <button class="qg-step-btn" id="t-plus"><i class="fa-solid fa-plus"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="qg-setup-section">
+                    <label class="qg-setup-label">Options</label>
+                    <div class="qg-options-grid">
+                        <label class="qg-toggle-option">
+                            <input type="checkbox" id="opt-shuffle" checked>
+                            <span>Shuffle Questions</span>
+                        </label>
+                        <label class="qg-toggle-option">
+                            <input type="checkbox" id="opt-show-answer" checked>
+                            <span>Show Correct Answer</span>
+                        </label>
+                        <label class="qg-toggle-option">
+                            <input type="checkbox" id="opt-streaks" checked>
+                            <span>Streak Bonuses</span>
+                        </label>
+                        <label class="qg-toggle-option">
+                            <input type="checkbox" id="opt-sound" checked>
+                            <span>Sound Effects</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="qg-setup-actions">
+                    <button class="qg-btn qg-btn-ghost" id="btn-setup-back"><i class="fa-solid fa-arrow-left"></i>
+                        Back</button>
+                    <button class="qg-btn qg-btn-primary qg-btn-lg" id="btn-create-game"><i
+                            class="fa-solid fa-play"></i> Create Game</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== SCREEN: LOBBY ===== -->
+        <div class="qg-screen" id="screen-lobby">
+            <div class="qg-lobby-container">
+                <div class="qg-lobby-header">
+                    <h2>Join at <span class="qg-lobby-url">this page</span></h2>
+                    <div class="qg-game-code" id="game-code-display">------</div>
+                    <div class="qg-lobby-player-count">
+                        <i class="fa-solid fa-users"></i>
+                        <span id="player-count">0</span> players joined
+                    </div>
+                </div>
+                <div class="qg-lobby-players" id="lobby-players">
+                    <!-- Player cards populated by JS -->
+                </div>
+                <div class="qg-lobby-actions">
+                    <button class="qg-btn qg-btn-ghost" id="btn-lobby-cancel"><i class="fa-solid fa-xmark"></i>
+                        Cancel</button>
+                    <button class="qg-btn qg-btn-accent qg-btn-lg qg-pulse" id="btn-start-game" disabled>
+                        <i class="fa-solid fa-rocket"></i> Start Game
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== SCREEN: JOIN ===== -->
+        <div class="qg-screen" id="screen-join">
+            <div class="qg-join-panel">
+                <h2><i class="fa-solid fa-right-to-bracket"></i> Join Game</h2>
+                <div class="qg-join-field">
+                    <label>Game Code</label>
+                    <input type="text" id="join-code" maxlength="6" placeholder="ABCD12" autocomplete="off"
+                        spellcheck="false">
+                </div>
+                <div class="qg-join-field">
+                    <label>Your Name</label>
+                    <input type="text" id="join-name" maxlength="20" placeholder="Enter your name" autocomplete="off">
+                </div>
+                <div class="qg-join-field">
+                    <label>Choose Your Avatar</label>
+                    <div class="qg-avatar-grid" id="avatar-grid-join">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+                <div class="qg-join-actions">
+                    <button class="qg-btn qg-btn-ghost" id="btn-join-back"><i class="fa-solid fa-arrow-left"></i>
+                        Back</button>
+                    <button class="qg-btn qg-btn-accent qg-btn-lg" id="btn-join-game"><i class="fa-solid fa-play"></i>
+                        Join!</button>
+                </div>
+                <p class="qg-join-error" id="join-error"></p>
+            </div>
+        </div>
+
+        <!-- ===== SCREEN: WAITING (Student) ===== -->
+        <div class="qg-screen" id="screen-waiting">
+            <div class="qg-waiting-container">
+                <div class="qg-waiting-avatar" id="waiting-avatar"></div>
+                <h2>You're In!</h2>
+                <p class="qg-waiting-name" id="waiting-name"></p>
+                <p class="qg-waiting-msg">Pick your avatar while you wait!</p>
+                <div class="qg-avatar-grid qg-avatar-grid-lg" id="avatar-grid-waiting">
+                    <!-- Populated by JS -->
+                </div>
+                <p class="qg-waiting-dots">Waiting for the host to start<span
+                        class="qg-dots"><span>.</span><span>.</span><span>.</span></span></p>
+            </div>
+        </div>
+
+        <!-- ===== SCREEN: GAME (Shared — content differs by role) ===== -->
+        <div class="qg-screen" id="screen-game">
+            <!-- Teacher view: question + leaderboard -->
+            <div class="qg-teacher-view" id="teacher-view">
+                <div class="qg-tv-header">
+                    <div class="qg-tv-progress">
+                        <span id="tv-q-num">1</span> / <span id="tv-q-total">10</span>
+                    </div>
+                    <div class="qg-tv-timer-bar">
+                        <div class="qg-tv-timer-fill" id="tv-timer-fill"></div>
+                    </div>
+                    <div class="qg-tv-answered"><i class="fa-solid fa-check-circle"></i> <span id="tv-answered">0</span>
+                        / <span id="tv-total-players">0</span></div>
+                </div>
+                <div class="qg-tv-question" id="tv-question">Loading question...</div>
+                <div class="qg-tv-answers" id="tv-answers">
+                    <!-- 4 answer bars with distribution -->
+                </div>
+                <div class="qg-tv-leaderboard" id="tv-leaderboard">
+                    <h3><i class="fa-solid fa-trophy"></i> Leaderboard</h3>
+                    <div class="qg-tv-lb-list" id="tv-lb-list"></div>
+                </div>
+            </div>
+
+            <!-- Student view: question + answer buttons -->
+            <div class="qg-student-view" id="student-view">
+                <div class="qg-sv-header">
+                    <div class="qg-sv-score">
+                        <span class="qg-sv-score-label">Score</span>
+                        <span class="qg-sv-score-value" id="sv-score">0</span>
+                    </div>
+                    <div class="qg-sv-progress" id="sv-progress">1 / 10</div>
+                    <div class="qg-sv-streak" id="sv-streak"></div>
+                </div>
+                <div class="qg-sv-timer">
+                    <div class="qg-sv-timer-fill" id="sv-timer-fill"></div>
+                </div>
+                <div class="qg-sv-question" id="sv-question">Loading question...</div>
+                <div class="qg-sv-answers" id="sv-answers">
+                    <button class="qg-answer-btn qg-ans-0" data-index="0"></button>
+                    <button class="qg-answer-btn qg-ans-1" data-index="1"></button>
+                    <button class="qg-answer-btn qg-ans-2" data-index="2"></button>
+                    <button class="qg-answer-btn qg-ans-3" data-index="3"></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== SCREEN: RESULTS ===== -->
+        <div class="qg-screen" id="screen-results">
+            <div class="qg-results-container">
+                <h2 class="qg-results-title">🏆 Game Over!</h2>
+                <div class="qg-podium" id="podium">
+                    <div class="qg-podium-place qg-place-2" id="podium-2">
+                        <div class="qg-podium-avatar">🥈</div>
+                        <div class="qg-podium-name"></div>
+                        <div class="qg-podium-score"></div>
+                        <div class="qg-podium-bar"></div>
+                    </div>
+                    <div class="qg-podium-place qg-place-1" id="podium-1">
+                        <div class="qg-podium-avatar">🥇</div>
+                        <div class="qg-podium-name"></div>
+                        <div class="qg-podium-score"></div>
+                        <div class="qg-podium-bar"></div>
+                    </div>
+                    <div class="qg-podium-place qg-place-3" id="podium-3">
+                        <div class="qg-podium-avatar">🥉</div>
+                        <div class="qg-podium-name"></div>
+                        <div class="qg-podium-score"></div>
+                        <div class="qg-podium-bar"></div>
+                    </div>
+                </div>
+                <div class="qg-results-table-wrap">
+                    <table class="qg-results-table" id="results-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Name</th>
+                                <th>Score</th>
+                                <th>Streak</th>
+                            </tr>
+                        </thead>
+                        <tbody id="results-tbody"></tbody>
+                    </table>
+                </div>
+                <div class="qg-results-actions">
+                    <button class="qg-btn qg-btn-accent qg-btn-lg" id="btn-play-again"><i
+                            class="fa-solid fa-rotate-right"></i> Play Again</button>
+                    <button class="qg-btn qg-btn-ghost" id="btn-new-game"><i class="fa-solid fa-house"></i> New
+                        Game</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== OVERLAY: Countdown ===== -->
+        <div class="qg-overlay" id="overlay-countdown">
+            <div class="qg-countdown-number" id="countdown-number">3</div>
+        </div>
+
+        <!-- ===== OVERLAY: Feedback ===== -->
+        <div class="qg-overlay qg-feedback" id="overlay-feedback">
+            <div class="qg-feedback-icon" id="feedback-icon"></div>
+            <div class="qg-feedback-text" id="feedback-text"></div>
+            <div class="qg-feedback-points" id="feedback-points"></div>
+        </div>
+
+        <!-- ===== Confetti Canvas ===== -->
+        <canvas id="confetti-canvas"></canvas>
+
+    </div>
+
+    <script src="js/vocabulary-data.js"></script>
+    <script src="js/firebase-service.js"></script>
+    <script src="js/darkmode.js"></script>
+    <script src="js/quiz-game.js"></script>
+</body>
+
+</html>
