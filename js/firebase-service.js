@@ -10,13 +10,13 @@ const FirebaseService = (() => {
     // ========== CONFIGURATION ==========
     // Replace with your Firebase project config
     const firebaseConfig = {
-        apiKey: "YOUR_API_KEY",
-        authDomain: "YOUR_PROJECT.firebaseapp.com",
-        databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
-        projectId: "YOUR_PROJECT_ID",
-        storageBucket: "YOUR_PROJECT.appspot.com",
-        messagingSenderId: "YOUR_SENDER_ID",
-        appId: "YOUR_APP_ID"
+        apiKey: "AIzaSyDgOhstW80tmUsrfYNQSrAI5gD0iwScPKk",
+        authDomain: "esl-quiz-game.firebaseapp.com",
+        databaseURL: "https://esl-quiz-game-default-rtdb.firebaseio.com",
+        projectId: "esl-quiz-game",
+        storageBucket: "esl-quiz-game.firebasestorage.app",
+        messagingSenderId: "33988271478",
+        appId: "1:33988271478:web:6d471eb5f06a266133ae57"
     };
 
     let db = null;
