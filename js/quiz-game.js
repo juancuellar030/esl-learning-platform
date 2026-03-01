@@ -20,6 +20,7 @@ const QuizGame = (() => {
     // Host state
     let players = {};
     let answerCounts = [0, 0, 0, 0];
+    let isAdvancing = false; // Guard flag to prevent re-entrant revealAnswer
 
     // Player state
     let myScore = 0;
@@ -31,13 +32,12 @@ const QuizGame = (() => {
     let sourceMode = 'vocab'; // 'vocab' | 'custom'
     let customRows = [];
 
-    // Avatar library (fallback emoji set)
-    const AVATAR_EMOJIS = [
-        '🦊', '🐼', '🐸', '🦁', '🐯', '🐨', '🐰', '🐷',
-        '🐮', '🐵', '🦄', '🐲', '🐙', '🦋', '🐧', '🐶',
-        '🐱', '🦜', '🐻', '🦉', '🐢', '🦈', '🐝', '🐬',
-        '🦩', '🐺', '🦇', '🐠'
-    ];
+    // Avatar library — 32 animal photos
+    const AVATAR_COUNT = 32;
+    const AVATAR_PATH = 'assets/images/live-quiz-avatars/';
+    function getAvatarSrc(index) {
+        return AVATAR_PATH + 'animal_' + index + '.png';
+    }
 
     // Sound
     let audioCtx = null;
@@ -52,7 +52,7 @@ const QuizGame = (() => {
             bindEvents();
             populateCategories();
             initAvatarGrids();
-            addCustomRows(4); // start with 4 rows
+            addCustomRows(4);
         });
     }
 
@@ -62,7 +62,9 @@ const QuizGame = (() => {
         $('btn-setup-back').addEventListener('click', () => showScreen('screen-role'));
         $('btn-join-back').addEventListener('click', () => showScreen('screen-role'));
         $('btn-create-game').addEventListener('click', createGame);
-        $('btn-join-game').addEventListener('click', joinGame);
+        $('btn-join-next').addEventListener('click', joinStep1);
+        $('btn-avatar-back').addEventListener('click', () => showScreen('screen-join'));
+        $('btn-join-game').addEventListener('click', joinStep2);
         $('btn-lobby-cancel').addEventListener('click', cancelLobby);
         $('btn-start-game').addEventListener('click', startCountdown);
         $('btn-play-again').addEventListener('click', playAgain);
@@ -305,7 +307,7 @@ const QuizGame = (() => {
 
     // ===== AVATAR SYSTEM =====
     function initAvatarGrids() {
-        populateAvatarGrid('avatar-grid-join');
+        populateAvatarGrid('avatar-grid-select');
         populateAvatarGrid('avatar-grid-waiting');
     }
 
@@ -314,33 +316,35 @@ const QuizGame = (() => {
         if (!container) return;
         container.innerHTML = '';
 
-        AVATAR_EMOJIS.forEach((emoji, i) => {
+        for (let i = 1; i <= AVATAR_COUNT; i++) {
             const btn = document.createElement('button');
             btn.type = 'button';
             btn.className = 'qg-avatar-option';
-            btn.dataset.avatar = emoji;
-            btn.dataset.index = i;
-            btn.textContent = emoji;
-            btn.addEventListener('click', () => selectAvatar(emoji, containerId));
+            btn.dataset.avatar = 'animal_' + i;
+            btn.innerHTML = `<img src="${getAvatarSrc(i)}" alt="Animal ${i}" loading="lazy">`;
+            btn.addEventListener('click', () => selectAvatar('animal_' + i));
             container.appendChild(btn);
-        });
+        }
     }
 
-    function selectAvatar(emoji, sourceGridId) {
-        selectedAvatar = emoji;
+    function selectAvatar(avatarId) {
+        selectedAvatar = avatarId;
 
-        // Sync selection across both grids
+        // Sync selection across all grids
         document.querySelectorAll('.qg-avatar-option').forEach(opt => {
-            opt.classList.toggle('selected', opt.dataset.avatar === emoji);
+            opt.classList.toggle('selected', opt.dataset.avatar === avatarId);
         });
 
         // Update waiting screen avatar display
         const waitingAvatar = $('waiting-avatar');
-        if (waitingAvatar) waitingAvatar.textContent = emoji;
+        if (waitingAvatar) {
+            const idx = parseInt(avatarId.replace('animal_', ''));
+            waitingAvatar.innerHTML = `<img src="${getAvatarSrc(idx)}" alt="Your avatar">`;
+        }
 
         // Update Firebase if in session
         if (gameCode && !FirebaseService.isDemo()) {
-            FirebaseService.updateSessionField(gameCode, 'players/' + FirebaseService.getUid() + '/avatar', emoji);
+            FirebaseService.updateSessionField(gameCode, 'players/' + FirebaseService.getUid() + '/avatar', avatarId);
         }
 
         playSound('click');
@@ -493,8 +497,13 @@ const QuizGame = (() => {
             const div = document.createElement('div');
             div.className = 'qg-lobby-player';
             div.style.animationDelay = (i * 0.05) + 's';
-            const avatar = p.avatar || '👤';
-            div.innerHTML = `<span class="player-avatar">${avatar}</span> ${escapeHtml(p.name)}`;
+            const avatarId = p.avatar || '';
+            let avatarHtml = '<i class="fa-solid fa-user"></i>';
+            if (avatarId.startsWith('animal_')) {
+                const idx = parseInt(avatarId.replace('animal_', ''));
+                avatarHtml = `<img class="player-avatar-img" src="${getAvatarSrc(idx)}" alt="">`;
+            }
+            div.innerHTML = `${avatarHtml} <span class="player-name">${escapeHtml(p.name)}</span>`;
             container.appendChild(div);
         });
     }
@@ -505,8 +514,8 @@ const QuizGame = (() => {
         showScreen('screen-role');
     }
 
-    // ===== PLAYER: JOIN GAME =====
-    function joinGame() {
+    // ===== PLAYER: JOIN GAME (Two-step) =====
+    function joinStep1() {
         const code = $('join-code').value.trim().toUpperCase();
         const name = $('join-name').value.trim();
 
@@ -521,21 +530,40 @@ const QuizGame = (() => {
             return;
         }
 
-        role = 'player';
+        // Store temporarily and show avatar selection
         gameCode = code;
         playerName = name;
+        selectedAvatar = null;
+        // Reset avatar selection
+        document.querySelectorAll('.qg-avatar-option').forEach(o => o.classList.remove('selected'));
+        showScreen('screen-avatar');
+    }
 
-        FirebaseService.joinSession(code, name).then(() => {
-            $('waiting-name').textContent = name;
+    function joinStep2() {
+        if (!selectedAvatar) {
+            // Auto-select a random one
+            const idx = Math.floor(Math.random() * AVATAR_COUNT) + 1;
+            selectedAvatar = 'animal_' + idx;
+        }
+
+        role = 'player';
+
+        FirebaseService.joinSession(gameCode, playerName).then(() => {
+            // Update avatar in Firebase
+            if (!FirebaseService.isDemo()) {
+                FirebaseService.updateSessionField(gameCode, 'players/' + FirebaseService.getUid() + '/avatar', selectedAvatar);
+            }
+
+            const idx = parseInt(selectedAvatar.replace('animal_', ''));
+            $('waiting-avatar').innerHTML = `<img src="${getAvatarSrc(idx)}" alt="Your avatar">`;
+            $('waiting-name').textContent = playerName;
             showScreen('screen-waiting');
 
             if (!FirebaseService.isDemo()) {
-                FirebaseService.setupDisconnect(code);
-                // Listen for game status changes
-                const unsub = FirebaseService.onFieldChange(code, 'status', status => {
+                FirebaseService.setupDisconnect(gameCode);
+                const unsub = FirebaseService.onFieldChange(gameCode, 'status', status => {
                     if (status === 'countdown') {
                         runCountdown(() => {
-                            // After countdown, listen for game state
                             listenAsPlayer();
                         });
                     } else if (status === 'finished') {
@@ -545,6 +573,7 @@ const QuizGame = (() => {
                 listeners.push(unsub);
             }
         }).catch(err => {
+            showScreen('screen-join');
             $('join-error').textContent = 'Could not join game. Check your code.';
             console.error(err);
         });
@@ -634,6 +663,7 @@ const QuizGame = (() => {
         hasAnswered = false;
         answerCounts = [0, 0, 0, 0];
         timeLeft = config.timer;
+        isAdvancing = false; // Allow answer counting for new question
 
         // Clear previous answers
         if (!FirebaseService.isDemo()) {
@@ -706,6 +736,8 @@ const QuizGame = (() => {
     }
 
     function updateAnswerCounts() {
+        if (isAdvancing) return; // Prevent re-entrant calls during reveal/transition
+
         let answered = 0;
         answerCounts = [0, 0, 0, 0];
         Object.values(players).forEach(p => {
@@ -724,6 +756,7 @@ const QuizGame = (() => {
         // Auto-advance if all answered
         if (answered >= Object.keys(players).length && answered > 0) {
             clearInterval(timerInterval);
+            isAdvancing = true; // Lock to prevent cascade
             setTimeout(revealAnswer, 500);
         }
     }
@@ -751,6 +784,7 @@ const QuizGame = (() => {
 
     function revealAnswer() {
         clearInterval(timerInterval);
+        isAdvancing = true; // Lock to prevent any re-entrant calls
         const q = questions[currentQ];
         if (!q) return;
 
@@ -790,7 +824,7 @@ const QuizGame = (() => {
 
         updateHostLeaderboard();
 
-        // Wait then advance
+        // Wait then advance — isAdvancing resets inside nextQuestion
         setTimeout(() => {
             nextQuestion();
         }, 3000);

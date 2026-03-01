@@ -170,7 +170,7 @@
             </div>
         </div>
 
-        <!-- ===== SCREEN: JOIN ===== -->
+        <!-- ===== SCREEN: JOIN (Step 1: Code & Name) ===== -->
         <div class="qg-screen" id="screen-join">
             <div class="qg-join-panel">
                 <h2><i class="fa-solid fa-right-to-bracket"></i> Join Game</h2>
@@ -183,19 +183,31 @@
                     <label>Your Name</label>
                     <input type="text" id="join-name" maxlength="20" placeholder="Enter your name" autocomplete="off">
                 </div>
-                <div class="qg-join-field">
-                    <label>Choose Your Avatar</label>
-                    <div class="qg-avatar-grid" id="avatar-grid-join">
-                        <!-- Populated by JS -->
-                    </div>
-                </div>
                 <div class="qg-join-actions">
                     <button class="qg-btn qg-btn-ghost" id="btn-join-back"><i class="fa-solid fa-arrow-left"></i>
+                        Back</button>
+                    <button class="qg-btn qg-btn-accent qg-btn-lg" id="btn-join-next"><i
+                            class="fa-solid fa-arrow-right"></i>
+                        Next</button>
+                </div>
+                <p class="qg-join-error" id="join-error"></p>
+            </div>
+        </div>
+
+        <!-- ===== SCREEN: AVATAR SELECTION (Step 2) ===== -->
+        <div class="qg-screen" id="screen-avatar">
+            <div class="qg-avatar-panel">
+                <h2><i class="fa-solid fa-paw"></i> Choose Your Avatar</h2>
+                <p class="qg-avatar-subtitle">Pick an animal to represent you in the game!</p>
+                <div class="qg-avatar-grid-select" id="avatar-grid-select">
+                    <!-- Populated by JS -->
+                </div>
+                <div class="qg-join-actions">
+                    <button class="qg-btn qg-btn-ghost" id="btn-avatar-back"><i class="fa-solid fa-arrow-left"></i>
                         Back</button>
                     <button class="qg-btn qg-btn-accent qg-btn-lg" id="btn-join-game"><i class="fa-solid fa-play"></i>
                         Join!</button>
                 </div>
-                <p class="qg-join-error" id="join-error"></p>
             </div>
         </div>
 
@@ -205,8 +217,8 @@
                 <div class="qg-waiting-avatar" id="waiting-avatar"></div>
                 <h2>You're In!</h2>
                 <p class="qg-waiting-name" id="waiting-name"></p>
-                <p class="qg-waiting-msg">Pick your avatar while you wait!</p>
-                <div class="qg-avatar-grid qg-avatar-grid-lg" id="avatar-grid-waiting">
+                <p class="qg-waiting-msg">Change your avatar while you wait!</p>
+                <div class="qg-avatar-grid-waiting" id="avatar-grid-waiting">
                     <!-- Populated by JS -->
                 </div>
                 <p class="qg-waiting-dots">Waiting for the host to start<span

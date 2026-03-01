@@ -1193,25 +1193,31 @@
 .qg-sv-answers {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    padding: 10px 14px 20px;
-    flex-shrink: 0;
+    grid-template-rows: 1fr 1fr;
+    gap: 12px;
+    padding: 16px 20px 24px;
+    flex: 1;
+    max-height: 60vh;
 }
 
 .qg-answer-btn {
     border: none;
     border-radius: 18px;
-    padding: 20px 16px;
-    font-size: clamp(0.95rem, 2.5vw, 1.15rem);
+    padding: 24px 20px;
+    font-size: clamp(1.05rem, 3vw, 1.4rem);
     font-weight: 700;
     font-family: inherit;
     color: white;
     cursor: pointer;
     transition: all 0.2s ease;
-    min-height: 80px;
+    min-height: 100px;
     word-wrap: break-word;
     line-height: 1.3;
     animation: popIn 0.3s ease backwards;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
 }
 
 .qg-answer-btn:nth-child(1) {
@@ -1680,23 +1686,62 @@ body.dark-mode .qg-join-field input {
     display: none;
 }
 
-/* ===== AVATAR SELECTOR ===== */
-.qg-avatar-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    justify-content: center;
-    padding: 4px 0;
+/* ===== AVATAR SELECTOR (squircle photos) ===== */
+
+/* Avatar selection panel (step 2 of join) */
+.qg-avatar-panel {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 28px;
+    padding: 32px 28px;
+    max-width: 540px;
+    width: 90%;
+    animation: popIn 0.4s ease;
+    text-align: center;
 }
 
+.qg-avatar-panel h2 {
+    font-size: 1.6rem;
+    color: var(--deep-navy);
+    margin-bottom: 4px;
+}
+
+.qg-avatar-subtitle {
+    color: #888;
+    font-size: 0.9rem;
+    margin-bottom: 18px;
+}
+
+/* Grid layouts for avatar selection & waiting */
+.qg-avatar-grid-select {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 10px;
+    justify-items: center;
+    padding: 8px 0;
+    max-width: 520px;
+    margin: 0 auto 20px;
+}
+
+.qg-avatar-grid-waiting {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 8px;
+    justify-items: center;
+    max-width: 420px;
+    margin: 12px auto 16px;
+}
+
+/* Individual squircle avatar button */
 .qg-avatar-option {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
+    width: 56px;
+    height: 56px;
+    border-radius: 22%;
     border: 3px solid #e0e0e0;
     background: #f0f0f5;
     cursor: pointer;
-    font-size: 1.5rem;
+    padding: 0;
+    overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1705,21 +1750,21 @@ body.dark-mode .qg-join-field input {
 }
 
 .qg-avatar-option:hover {
-    transform: scale(1.15);
+    transform: scale(1.12);
     border-color: var(--medium-slate-blue);
 }
 
 .qg-avatar-option.selected {
     border-color: var(--medium-slate-blue);
-    box-shadow: 0 0 0 3px rgba(118, 120, 237, 0.3);
-    transform: scale(1.15);
+    box-shadow: 0 0 0 3px rgba(118, 120, 237, 0.35);
+    transform: scale(1.12);
 }
 
 .qg-avatar-option.selected::after {
     content: '✓';
     position: absolute;
-    bottom: -4px;
-    right: -4px;
+    bottom: -3px;
+    right: -3px;
     width: 20px;
     height: 20px;
     background: var(--medium-slate-blue);
@@ -1738,24 +1783,53 @@ body.dark-mode .qg-join-field input {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    border-radius: 50%;
+    border-radius: 22%;
 }
 
-/* Large avatar grid for waiting screen */
-.qg-avatar-grid-lg {
-    max-width: 420px;
-    margin: 16px auto;
+/* Waiting screen grid slightly smaller */
+.qg-avatar-grid-waiting .qg-avatar-option {
+    width: 46px;
+    height: 46px;
 }
 
-.qg-avatar-grid-lg .qg-avatar-option {
-    width: 56px;
-    height: 56px;
-    font-size: 1.8rem;
-    border-width: 3px;
+/* Lobby player cards with larger avatars  */
+.qg-lobby-player {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 14px;
+    padding: 8px 14px;
+    animation: fadeIn 0.3s ease backwards;
+    font-weight: 600;
 }
 
-.qg-avatar-grid-lg .qg-avatar-option.selected {
-    animation: avatarBounce 0.4s ease;
+.player-avatar-img {
+    width: 44px;
+    height: 44px;
+    border-radius: 22%;
+    object-fit: cover;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    flex-shrink: 0;
+}
+
+.player-name {
+    font-size: 1rem;
+}
+
+/* Waiting avatar display */
+.qg-waiting-avatar {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 12px;
+}
+
+.qg-waiting-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 22%;
+    border: 3px solid rgba(255, 255, 255, 0.3);
 }
 
 @keyframes avatarBounce {
@@ -1776,23 +1850,43 @@ body.dark-mode .qg-join-field input {
     }
 }
 
-/* Waiting avatar display */
-.qg-waiting-avatar {
-    font-size: 4rem;
-    margin-bottom: 12px;
-    animation: float 2.5s ease-in-out infinite;
-}
-
+/* Waiting dots */
 .qg-waiting-dots {
     opacity: 0.5;
     font-size: 0.95rem;
     margin-top: 16px;
 }
 
-/* Lobby player avatars */
-.qg-lobby-player .player-avatar {
-    font-size: 1.2rem;
-    flex-shrink: 0;
+/* ===== RESPONSIVE: Avatar grid + answer buttons ===== */
+@media (max-width: 600px) {
+    .qg-avatar-grid-select {
+        grid-template-columns: repeat(6, 1fr);
+        gap: 8px;
+    }
+
+    .qg-avatar-grid-select .qg-avatar-option {
+        width: 48px;
+        height: 48px;
+    }
+
+    .qg-avatar-grid-waiting {
+        grid-template-columns: repeat(6, 1fr);
+    }
+
+    .qg-avatar-panel {
+        padding: 24px 16px;
+    }
+
+    .qg-sv-answers {
+        padding: 10px 12px 16px;
+        gap: 8px;
+    }
+
+    .qg-answer-btn {
+        min-height: 80px;
+        padding: 16px 12px;
+        font-size: clamp(1rem, 4vw, 1.2rem);
+    }
 }
 
 /* ===== DARK MODE: New features ===== */
@@ -1846,6 +1940,19 @@ body.dark-mode .qg-avatar-option {
     background: #1e1e2d;
     border-color: #3a3a50;
 }
+
+body.dark-mode .qg-avatar-panel {
+    background: rgba(25, 25, 40, 0.95);
+}
+
+body.dark-mode .qg-avatar-panel h2 {
+    color: #eee;
+}
+
+body.dark-mode .qg-avatar-subtitle {
+    color: #888;
+}
+
 
 body.dark-mode .qg-avatar-option.selected {
     border-color: var(--amber-flame);
