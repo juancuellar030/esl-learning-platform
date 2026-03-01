@@ -38,6 +38,32 @@
 
     let currentEditingClassId = null;
 
+    // Find all class-cell IDs on the same day with the same lesson label
+    function findLinkedClassIds(classId) {
+        const dayName = classId.split('-')[0]; // e.g. "tuesday"
+        const cell = document.querySelector(`[data-class-id="${classId}"]`);
+        if (!cell) return [classId];
+        const classBox = cell.querySelector('.class-box');
+        if (!classBox) return [classId];
+
+        // Normalize label: strip HTML, collapse whitespace
+        const normalize = (el) => el.innerHTML.replace(/<br\s*\/?>/gi, ' ').replace(/<[^>]*>/g, '').trim().replace(/\s+/g, ' ');
+        const label = normalize(classBox);
+
+        // Find all cells on the same day
+        const allDayCells = document.querySelectorAll(`[data-class-id^="${dayName}-"]`);
+        const linked = [];
+        allDayCells.forEach(c => {
+            if (c.classList.contains('ap-cell')) return;
+            const box = c.querySelector('.class-box');
+            if (!box) return;
+            if (normalize(box) === label) {
+                linked.push(c.dataset.classId);
+            }
+        });
+        return linked.length > 0 ? linked : [classId];
+    }
+
     // Initialize
     function init() {
         setDefaultWeek();
@@ -155,9 +181,17 @@
         modalClassName.textContent = className;
         modalClassTime.textContent = time;
 
-        // Load existing activities
+        // Load existing activities — check all linked siblings
         activitiesList.innerHTML = '';
-        const existingActivities = plannerData.classes[classId]?.activities || [];
+        const linkedIds = findLinkedClassIds(classId);
+        let existingActivities = [];
+        for (const id of linkedIds) {
+            const acts = plannerData.classes[id]?.activities || [];
+            if (acts.length > 0) {
+                existingActivities = acts;
+                break;
+            }
+        }
 
         if (existingActivities.length === 0) {
             addActivityInput();
@@ -189,63 +223,20 @@
         }
     }
 
-    // Populate Import Select
+    // Populate Import Select — excludes linked siblings of the current class
     function populateImportSelect() {
         importClassSelect.innerHTML = '<option value="">Select a class...</option>';
 
-        Object.entries(plannerData.classes).forEach(([classId, data]) => {
-            // Don't show current class and ensure it has activities
-            if (classId !== currentEditingClassId && data.activities && data.activities.length > 0) {
-                const option = document.createElement('option');
-                option.value = classId;
-                option.textContent = `${data.className} (${data.time}) - ${data.activities.length} activities`;
-                importClassSelect.appendChild(option);
-            }
-        });
-
-        if (importClassSelect.options.length <= 1) {
-            const option = document.createElement('option');
-            option.disabled = true;
-            option.textContent = 'No other classes with activities found';
-            importClassSelect.appendChild(option);
-        }
-    }
-
-    // Import Activities
-    function importActivitiesFromClass() {
-        const sourceClassId = importClassSelect.value;
-        if (!sourceClassId) {
-            showToast('Please select a class to import from', 'warning');
-            return;
-        }
-
-        const sourceActivities = plannerData.classes[sourceClassId]?.activities || [];
-
-        sourceActivities.forEach(activity => {
-            addActivityInput(activity);
-        });
-
-        showToast(`Imported ${sourceActivities.length} activities`, 'success');
-        importOptionsContainer.style.display = 'none';
-    }
-
-    // Toggle Import Options
-    function toggleImportOptions() {
-        if (importOptionsContainer.style.display === 'none') {
-            populateImportSelect();
-            importOptionsContainer.style.display = 'block';
-        } else {
-            importOptionsContainer.style.display = 'none';
-        }
-    }
-
-    // Populate Import Select
-    function populateImportSelect() {
-        importClassSelect.innerHTML = '<option value="">Select a class...</option>';
+        const linkedIds = findLinkedClassIds(currentEditingClassId);
+        const seen = new Set();
 
         Object.entries(plannerData.classes).forEach(([classId, data]) => {
-            // Don't show current class and ensure it has activities
-            if (classId !== currentEditingClassId && data.activities && data.activities.length > 0) {
+            // Exclude current class, its linked siblings, and ensure it has activities
+            if (!linkedIds.includes(classId) && data.activities && data.activities.length > 0) {
+                const label = data.className;
+                if (seen.has(label)) return;
+                seen.add(label);
+
                 const option = document.createElement('option');
                 option.value = classId;
                 option.textContent = `${data.className} (${data.time}) - ${data.activities.length} activities`;
@@ -312,22 +303,28 @@
             .map(input => input.value.trim())
             .filter(activity => activity.length > 0);
 
-        if (activities.length > 0) {
-            // Get class info
-            const cell = document.querySelector(`[data-class-id="${currentEditingClassId}"]`);
-            const classBox = cell.querySelector('.class-box');
-            const className = classBox.textContent.trim();
-            const timeCell = cell.parentElement.querySelector('td:nth-child(2)');
-            const time = timeCell ? timeCell.textContent.trim() : '';
+        // Save (or clear) for ALL linked siblings
+        const linkedIds = findLinkedClassIds(currentEditingClassId);
 
-            plannerData.classes[currentEditingClassId] = {
-                className: className,
-                time: time,
-                activities: activities
-            };
+        if (activities.length > 0) {
+            linkedIds.forEach(id => {
+                const cell = document.querySelector(`[data-class-id="${id}"]`);
+                const classBox = cell.querySelector('.class-box');
+                const className = classBox.textContent.trim();
+                const timeCell = cell.parentElement.querySelector('td:nth-child(2)');
+                const time = timeCell ? timeCell.textContent.trim() : '';
+
+                plannerData.classes[id] = {
+                    className: className,
+                    time: time,
+                    activities: activities
+                };
+            });
         } else {
-            // Remove if no activities
-            delete plannerData.classes[currentEditingClassId];
+            // Remove all linked siblings if no activities
+            linkedIds.forEach(id => {
+                delete plannerData.classes[id];
+            });
         }
 
         saveToLocalStorage();

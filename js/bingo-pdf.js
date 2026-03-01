@@ -19,6 +19,7 @@
         1: { cols: 1, rows: 1, landscape: false },
         2: { cols: 2, rows: 1, landscape: true },
         4: { cols: 2, rows: 2, landscape: false },
+        6: { cols: 2, rows: 3, landscape: false },
     };
 
     const FONT_MAP = {

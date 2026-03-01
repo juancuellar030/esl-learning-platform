@@ -595,6 +595,29 @@
                 state.cardsPerPage = parseInt(btn.dataset.cards, 10);
             });
         });
+
+        el.paperSize().addEventListener('change', (e) => {
+            const size = e.target.value;
+            state.paperSize = size;
+
+            const btn6 = Array.from(el.cardsPerPage()).find(btn => btn.dataset.cards === '6');
+            if (btn6) {
+                if (size === 'legal') {
+                    btn6.style.display = '';
+                } else {
+                    btn6.style.display = 'none';
+                    if (state.cardsPerPage === 6) {
+                        // Fallback to 1 card
+                        el.cardsPerPage().forEach(b => b.classList.remove('active'));
+                        const btn1 = Array.from(el.cardsPerPage()).find(b => b.dataset.cards === '1');
+                        if (btn1) {
+                            btn1.classList.add('active');
+                            state.cardsPerPage = 1;
+                        }
+                    }
+                }
+            }
+        });
     }
 
     // ── Card generation (for PDF + Caller) ───────────────────
@@ -755,6 +778,11 @@
         // Export settings
         el.cardQuantity().value = state.cardQuantity;
         el.paperSize().value = state.paperSize;
+
+        const btn6 = document.querySelector(`#cardsPerPageToggle .pill[data-cards="6"]`);
+        if (btn6) {
+            btn6.style.display = state.paperSize === 'legal' ? '' : 'none';
+        }
 
         el.cardsPerPage().forEach(b => b.classList.remove('active'));
         const cppBtn = document.querySelector(`#cardsPerPageToggle .pill[data-cards="${state.cardsPerPage}"]`);
