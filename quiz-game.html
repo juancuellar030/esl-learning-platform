@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/quiz-game.css">
+    <link rel="stylesheet" href="css/google-drive.css">
     <!-- Firebase CDN (compat) -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
@@ -251,32 +252,11 @@
                 <button type="button" class="qg-change-avatar-btn" id="btn-change-avatar">
                     <i class="fa-solid fa-shuffle"></i> Change Avatar
                 </button>
+                <button type="button" class="qg-change-avatar-btn" id="btn-change-theme" style="margin-top: 10px;">
+                    <i class="fa-solid fa-palette"></i> Themes
+                </button>
                 <p class="qg-waiting-dots">Waiting for the host to start<span
                         class="qg-dots"><span>.</span><span>.</span><span>.</span></span></p>
-
-                <!-- ===== LOBBY THEME BAR ===== -->
-                <div class="qg-lobby-theme-bar" id="lobby-theme-bar">
-                    <span class="qg-theme-bar-label"><i class="fa-solid fa-palette"></i> Theme</span>
-                    <div class="qg-theme-swatches">
-                        <button class="qg-theme-swatch active" data-theme="default" title="Default"
-                            style="background: linear-gradient(135deg,#3d348b,#7678ed);"></button>
-                        <button class="qg-theme-swatch" data-theme="neon" title="Neon"
-                            style="background: linear-gradient(135deg,#0a0a1a,#00f5ff);"></button>
-                        <button class="qg-theme-swatch" data-theme="forest" title="Forest"
-                            style="background: linear-gradient(135deg,#1a3d2b,#52b788);"></button>
-                        <button class="qg-theme-swatch" data-theme="winter" title="Winter"
-                            style="background: linear-gradient(135deg,#a8d8ea,#48cae4);"></button>
-                        <button class="qg-theme-swatch" data-theme="candy" title="Candy"
-                            style="background: linear-gradient(135deg,#f72585,#c77dff);"></button>
-                        <button class="qg-theme-swatch" data-theme="pastel" title="Pastel"
-                            style="background: linear-gradient(135deg,#ffd6e7,#c77dff);"></button>
-                        <button class="qg-theme-swatch" data-theme="ocean" title="Ocean"
-                            style="background: linear-gradient(135deg,#023e8a,#90e0ef);"></button>
-                    </div>
-                    <button class="qg-dark-toggle" id="qg-lobby-dark-toggle" title="Toggle Dark Mode">
-                        <i class="fa-solid fa-moon" id="qg-dark-icon"></i>
-                    </button>
-                </div>
             </div>
         </div>
 
@@ -381,6 +361,16 @@
                     <button class="qg-btn qg-btn-ghost" id="btn-new-game"><i class="fa-solid fa-house"></i> New
                         Game</button>
                 </div>
+
+                <!-- Extra Actions: Download & Drive -->
+                <div class="qg-results-extra-actions">
+                    <button class="qg-extra-btn" id="btn-download-results" title="Download Scoreboard (CSV)">
+                        <i class="fa-solid fa-file-csv"></i> Download CSV
+                    </button>
+                    <button class="qg-extra-btn" id="btn-save-drive" title="Save to Google Drive">
+                        <i class="fa-brands fa-google-drive"></i> Save to Drive
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -428,6 +418,50 @@
             </div>
         </div>
 
+        <!-- ===== OVERLAY: Change Theme Modal ===== -->
+        <div class="qg-overlay" id="overlay-theme-modal"
+            style="align-items: center; justify-content: center; padding: 20px;">
+            <div class="qg-join-panel"
+                style="position: relative; max-width: 500px; padding: 30px; margin: 0 auto; text-align: center;">
+                <button class="qg-modal-close" id="btn-close-theme-modal"
+                    style="position: absolute; top: 15px; right: 20px; border: none; background: transparent; font-size: 1.8rem; color: #888; cursor: pointer; transition: color 0.2s;">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+                <h2 style="margin-bottom: 25px; color: var(--indigo-velvet); justify-content: center;">
+                    <i class="fa-solid fa-palette"></i> Select Theme
+                </h2>
+                <div class="qg-theme-modal-content"
+                    style="display: flex; flex-direction: column; gap: 20px; align-items: center;">
+                    <div class="qg-theme-swatches"
+                        style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; width: 100%;">
+                        <button class="qg-theme-swatch active" data-theme="default" title="Default"
+                            style="background: linear-gradient(135deg,#3d348b,#7678ed);">Default</button>
+                        <button class="qg-theme-swatch" data-theme="neon" title="Neon"
+                            style="background: linear-gradient(135deg,#0a0a1a,#00f5ff);">Neon</button>
+                        <button class="qg-theme-swatch" data-theme="forest" title="Forest"
+                            style="background: linear-gradient(135deg,#1a3d2b,#52b788);">Forest</button>
+                        <button class="qg-theme-swatch" data-theme="winter" title="Winter"
+                            style="background: linear-gradient(135deg,#a8d8ea,#48cae4);">Winter</button>
+                        <button class="qg-theme-swatch" data-theme="candy" title="Candy"
+                            style="background: linear-gradient(135deg,#f72585,#c77dff);">Candy</button>
+                        <button class="qg-theme-swatch" data-theme="pastel" title="Pastel"
+                            style="background: linear-gradient(135deg,#ffd6e7,#c77dff);">Pastel</button>
+                        <button class="qg-theme-swatch" data-theme="ocean" title="Ocean"
+                            style="background: linear-gradient(135deg,#023e8a,#90e0ef);">Ocean</button>
+                    </div>
+
+                    <div style="width: 100%; height: 1px; background: rgba(0,0,0,0.05); margin: 5px 0;"></div>
+
+                    <div style="display: flex; align-items: center; justify-content: center; width: 100%;">
+                        <button class="qg-dark-toggle" id="qg-lobby-dark-toggle" title="Toggle Dark Mode"
+                            style="background: #333; color: #f1c40f; border: none; width: 50px; height: 50px; border-radius: 50%; font-size: 1.5rem; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                            <i class="fa-solid fa-moon" id="qg-dark-icon"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- ===== OVERLAY: Countdown ===== -->
         <div class="qg-overlay" id="overlay-countdown">
             <div class="qg-countdown-number" id="countdown-number">3</div>
@@ -448,6 +482,7 @@
     <script src="js/vocabulary-data.js"></script>
     <script src="js/firebase-service.js"></script>
     <script src="js/darkmode.js"></script>
+    <script src="js/google-drive-service.js"></script>
     <script src="js/quiz-game.js"></script>
 </body>
 

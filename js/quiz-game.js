@@ -32,8 +32,8 @@ const QuizGame = (() => {
     let gameMode = 'automatic'; // 'automatic' | 'student-paced' | 'teacher-paced'
     let customRows = [];
 
-    // Avatar library — 32 animal photos
-    const AVATAR_COUNT = 32;
+    // Avatar library — 35 animal photos
+    const AVATAR_COUNT = 35;
     const AVATAR_PATH = 'assets/images/live-quiz-avatars/';
     function getAvatarSrc(index) {
         return AVATAR_PATH + 'animal_' + index + '.png';
@@ -43,18 +43,93 @@ const QuizGame = (() => {
     let audioCtx = null;
     let soundEnabled = true;
 
+    // Google Drive
+    let driveService = null;
+    let lastSortedResults = [];
+
     // ===== DOM REFS =====
     const $ = id => document.getElementById(id);
 
     // ===== INITIALIZATION =====
     function init() {
         loadQuizTheme();
-        FirebaseService.init().then(() => {
+        FirebaseService.init().then(user => {
             bindEvents();
             populateCategories();
             initAvatarGrids();
             addCustomRows(4);
+            initDriveService();
+
+            // Host Resumption Logic: If we have a saved code and we are the host, resume host role
+            const savedCode = sessionStorage.getItem('qg-last-code');
+            if (savedCode && user) {
+                FirebaseService.getSession(savedCode).then(session => {
+                    if (!session) return;
+
+                    if (session.hostId === user.uid) {
+                        console.log(`[QuizGame] Resuming host role for session: ${savedCode}`);
+                        role = 'host';
+                        gameCode = savedCode;
+                        config = session.config || {};
+                        questions = session.questions || [];
+
+                        if (session.status === 'lobby') {
+                            showLobby(savedCode);
+                            const unsub = FirebaseService.onPlayersChange(savedCode, p => {
+                                players = p || {};
+                                renderLobbyPlayers();
+                            });
+                            listeners.push(unsub);
+                        } else {
+                            startHostGame();
+                        }
+                    } else if (session.players && session.players[user.uid]) {
+                        console.log(`[QuizGame] Resuming player role for session: ${savedCode}`);
+                        role = 'player';
+                        gameCode = savedCode;
+                        playerName = session.players[user.uid].name;
+                        selectedAvatar = session.players[user.uid].avatar;
+
+                        // Determine where to land
+                        const status = session.status;
+                        if (status === 'lobby') {
+                            // Re-setup player lobby state
+                            const idx = selectedAvatar ? parseInt(selectedAvatar.replace('animal_', '')) : 1;
+                            $('waiting-avatar').innerHTML = `<img src="${getAvatarSrc(idx)}" alt="Your avatar">`;
+                            $('waiting-name').textContent = playerName;
+                            showScreen('screen-waiting');
+                        } else if (status === 'countdown') {
+                            runCountdown(() => listenAsPlayer());
+                        } else if (status === 'finished') {
+                            showResults();
+                        } else {
+                            listenAsPlayer();
+                        }
+
+                        // Re-attach all player-side listeners consistently
+                        setupPlayerListeners();
+                    }
+                });
+            }
         });
+    }
+
+    function initDriveService() {
+        if (typeof GoogleDriveService !== 'undefined') {
+            driveService = new GoogleDriveService({
+                folderName: 'ESL Quiz Scoreboards',
+                fileExtension: '.json',
+                onSave: () => ({
+                    gameCode: gameCode,
+                    date: new Date().toLocaleString(),
+                    results: lastSortedResults
+                }),
+                onNotify: (msg, type) => {
+                    // Using basic alert if no toast system exists here
+                    console.log(`[Drive] ${type}: ${msg}`);
+                }
+            });
+        }
     }
 
     function bindEvents() {
@@ -69,7 +144,11 @@ const QuizGame = (() => {
         $('btn-lobby-cancel').addEventListener('click', cancelLobby);
         $('btn-start-game').addEventListener('click', startCountdown);
         $('btn-play-again').addEventListener('click', playAgain);
-        $('btn-new-game').addEventListener('click', () => { cleanup(); showScreen('screen-role'); });
+        $('btn-new-game').addEventListener('click', () => {
+            sessionStorage.removeItem('qg-last-code');
+            cleanup();
+            showScreen('screen-role');
+        });
         $('btn-change-avatar').addEventListener('click', toggleWaitingAvatars);
         $('btn-close-avatar-modal').addEventListener('click', toggleWaitingAvatars);
         $('btn-save-avatar').addEventListener('click', toggleWaitingAvatars);
@@ -169,6 +248,20 @@ const QuizGame = (() => {
             });
         });
 
+        // Theme modal open/close
+        const btnChangeTheme = $('btn-change-theme');
+        if (btnChangeTheme) {
+            btnChangeTheme.addEventListener('click', () => {
+                $('overlay-theme-modal').style.display = 'flex';
+            });
+        }
+        const btnCloseThemeModal = $('btn-close-theme-modal');
+        if (btnCloseThemeModal) {
+            btnCloseThemeModal.addEventListener('click', () => {
+                $('overlay-theme-modal').style.display = 'none';
+            });
+        }
+
         // Lobby dark mode toggle
         const darkToggle = $('qg-lobby-dark-toggle');
         if (darkToggle) {
@@ -177,8 +270,20 @@ const QuizGame = (() => {
                 const isDark = app.classList.contains('qg-dark');
                 const currentTheme = app.dataset.theme || 'default';
                 applyQuizTheme(currentTheme, !isDark);
+
+                // Sync global body dark mode
+                if (!isDark) {
+                    document.body.classList.add('dark-mode');
+                    localStorage.setItem('dark-mode', 'enabled');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                    localStorage.setItem('dark-mode', 'disabled');
+                }
             });
         }
+
+        $('btn-download-results')?.addEventListener('click', downloadScoreboard);
+        $('btn-save-drive')?.addEventListener('click', () => driveService?.openModal());
     }
 
     function adjustStepper(id, delta, min, max) {
@@ -441,9 +546,8 @@ const QuizGame = (() => {
         const maxJumps = 20 + Math.floor(Math.random() * 10);
         const intervalTime = 70;
 
-        playSound('click');
-
         const jumpInterval = setInterval(() => {
+            playSound('click');
             options.forEach(opt => opt.classList.remove('selected'));
             const randomIndex = Math.floor(Math.random() * options.length);
             options[randomIndex].classList.add('selected');
@@ -580,8 +684,11 @@ const QuizGame = (() => {
         FirebaseService.createSession(config, questions).then(code => {
             gameCode = code;
 
+            // Save code for host resumption on refresh
+            sessionStorage.setItem('qg-last-code', code);
+
             if (!FirebaseService.isDemo()) {
-                // Automatically delete the session if the host closes/refreshes the page
+                // Automatically delete the session if the host closes/re freshes the page
                 FirebaseService.setupHostDisconnect(code);
             }
 
@@ -661,6 +768,7 @@ const QuizGame = (() => {
 
     function cancelLobby() {
         if (gameCode) FirebaseService.deleteSession(gameCode);
+        sessionStorage.removeItem('qg-last-code');
         cleanup();
         showScreen('screen-role');
     }
@@ -735,40 +843,54 @@ const QuizGame = (() => {
 
             if (!FirebaseService.isDemo()) {
                 FirebaseService.setupDisconnect(gameCode);
-
-                const unsub = FirebaseService.onFieldChange(gameCode, 'status', status => {
-                    // Only trigger transitions while in waiting — not mid-game (listenAsPlayer handles that)
-                    if (!$('screen-waiting').classList.contains('active')) return;
-                    if (status === 'countdown') {
-                        runCountdown(() => {
-                            listenAsPlayer();
-                        });
-                    } else if (status === 'finished') {
-                        showResults();
-                    }
-                });
-                listeners.push(unsub);
-
-                const kickUnsub = FirebaseService.onFieldChange(gameCode, 'players/' + FirebaseService.getUid(), val => {
-                    if (val === null && role === 'player' && $('screen-waiting').classList.contains('active')) {
-                        showDisconnectScreen('Oops!', 'You have been removed from the lobby by the host.');
-                    }
-                });
-                listeners.push(kickUnsub);
-
-                // Listen for session deletion (host refresh/disconnect)
-                const sessionUnsub = FirebaseService.onSessionValue(gameCode, val => {
-                    if (val === null && role === 'player') {
-                        showDisconnectScreen('Disconnected', 'The host has ended the session or disconnected.');
-                    }
-                });
-                listeners.push(sessionUnsub);
+                setupPlayerListeners();
             }
         }).catch(err => {
             showScreen('screen-join');
             $('join-error').textContent = 'Could not join game. Check your code.';
             console.error(err);
         });
+    }
+
+    // ===== PLAYER LISTENERS HELPER =====
+    function setupPlayerListeners() {
+        if (FirebaseService.isDemo()) return;
+
+        // 1. Status transition listener
+        const unsubStatus = FirebaseService.onFieldChange(gameCode, 'status', status => {
+            // Handle playing/reviewing even if countdown was missed
+            if (status === 'countdown' && $('screen-waiting').classList.contains('active')) {
+                runCountdown(() => listenAsPlayer());
+            } else if ((status === 'playing' || status === 'reviewing') && $('screen-waiting').classList.contains('active')) {
+                console.log(`[QuizGame] Syncing to active game on status: ${status}`);
+                listenAsPlayer();
+            } else if (status === 'finished') {
+                showResults();
+            }
+        });
+        listeners.push(unsubStatus);
+
+        // 2. Kick listener (player removed by host)
+        const unsubKick = FirebaseService.onFieldChange(gameCode, 'players/' + FirebaseService.getUid(), val => {
+            // If player is null and we are still in game screens, they were kicked
+            if (val === null && role === 'player') {
+                // Ignore if we are already seeing the booted/disconnect screen
+                if ($('screen-booted').classList.contains('active')) return;
+
+                console.log('[QuizGame] Player data removed - showing disconnect screen.');
+                showDisconnectScreen('Oops!', 'You have been removed from the lobby by the host.');
+            }
+        });
+        listeners.push(unsubKick);
+
+        // 3. Session End listener (host deleted the session)
+        const unsubSession = FirebaseService.onSessionValue(gameCode, val => {
+            if (val === null && role === 'player') {
+                if ($('screen-booted').classList.contains('active')) return;
+                showDisconnectScreen('Disconnected', 'The host has ended the session or disconnected.');
+            }
+        });
+        listeners.push(unsubSession);
     }
 
     // ===== GAME FLOW: COUNTDOWN =====
@@ -1481,6 +1603,8 @@ const QuizGame = (() => {
             .map(([uid, p]) => ({ uid, name: p.name, score: p.score || 0, streak: p.streak || 0 }))
             .sort((a, b) => b.score - a.score);
 
+        lastSortedResults = sorted;
+
         // Podium
         for (let i = 0; i < 3; i++) {
             const place = $('podium-' + (i + 1));
@@ -1508,6 +1632,26 @@ const QuizGame = (() => {
             `;
             tbody.appendChild(tr);
         });
+    }
+
+    function downloadScoreboard() {
+        if (!lastSortedResults || lastSortedResults.length === 0) return;
+
+        let csv = 'Rank,Name,Score,Max Streak\n';
+        lastSortedResults.forEach((p, i) => {
+            csv += `${i + 1},"${p.name.replace(/"/g, '""')}",${p.score},${p.streak}\n`;
+        });
+
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 16);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `scoreboard_${gameCode || 'quiz'}_${timestamp}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     }
 
     // ===== CONFETTI =====
@@ -1660,6 +1804,7 @@ const QuizGame = (() => {
 
     // ===== SCREEN MANAGEMENT =====
     function showScreen(id) {
+        console.log(`[QuizGame] Transitioning to screen: ${id} (Role: ${role})`);
         document.querySelectorAll('.qg-screen').forEach(s => s.classList.remove('active'));
         $(id).classList.add('active');
 
@@ -1687,7 +1832,9 @@ const QuizGame = (() => {
         $('teacher-view').classList.remove('active');
         $('student-view').classList.remove('active');
         hideSessionBadge();
-        sessionStorage.removeItem('qg-last-code');
+
+        // Only remove if it's a full cleanup (leaving session)
+        // Note: we don't remove on refresh, only on manual 'New Game' or 'Cancel'
     }
 
     function playAgain() {
@@ -1933,8 +2080,20 @@ const QuizGame = (() => {
 
     function loadQuizTheme() {
         const theme = localStorage.getItem('qg-theme') || 'default';
-        const isDark = localStorage.getItem('qg-dark') === '1';
+        const globalDark = localStorage.getItem('dark-mode') === 'enabled';
+
+        // If qg-dark isn't set yet, inherit from global dark mode
+        const isDarkStr = localStorage.getItem('qg-dark');
+        const isDark = isDarkStr !== null ? (isDarkStr === '1') : globalDark;
+
         applyQuizTheme(theme, isDark);
+
+        // Sync global body dark mode on load
+        if (isDark) {
+            document.body.classList.add('dark-mode');
+        } else {
+            document.body.classList.remove('dark-mode');
+        }
     }
 
     function updateThemeSwatches(activeTheme) {

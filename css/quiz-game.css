@@ -2429,32 +2429,40 @@ body.dark-mode .qg-avatar-option.selected::after {
 }
 
 .qg-theme-swatches {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    width: 100%;
 }
 
 .qg-theme-swatch {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    border: 3px solid transparent;
+    height: 44px;
+    border-radius: 12px;
+    border: 2px solid transparent;
     cursor: pointer;
-    transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     outline: none;
-    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 0.95rem;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    letter-spacing: 0.5px;
 }
 
 .qg-theme-swatch:hover {
-    transform: scale(1.18);
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+    filter: brightness(1.1);
 }
 
 .qg-theme-swatch.active {
     border-color: white;
-    transform: scale(1.22);
-    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5), 0 4px 14px rgba(0, 0, 0, 0.35);
+    transform: scale(1.02);
+    box-shadow: 0 0 0 2px var(--indigo-velvet), 0 6px 20px rgba(0, 0, 0, 0.3);
 }
 
 /* Dark mode toggle button */
@@ -2492,12 +2500,24 @@ body.dark-mode .qg-avatar-option.selected::after {
 
 .qg-app.qg-theme-neon .qg-logo-icon,
 .qg-app.qg-theme-neon .qg-role-icon {
+    color: #00b4d8;
+    filter: drop-shadow(0 0 8px rgba(0, 180, 216, 0.4));
+}
+
+.qg-app.qg-theme-neon.qg-dark .qg-logo-icon,
+.qg-app.qg-theme-neon.qg-dark .qg-role-icon {
     color: #00f5ff;
     filter: drop-shadow(0 0 8px rgba(0, 245, 255, 0.7));
 }
 
 .qg-app.qg-theme-neon .qg-game-code,
 .qg-app.qg-theme-neon .qg-waiting-name {
+    color: #00b4d8;
+    text-shadow: 0 0 15px rgba(0, 180, 216, 0.3);
+}
+
+.qg-app.qg-theme-neon.qg-dark .qg-game-code,
+.qg-app.qg-theme-neon.qg-dark .qg-waiting-name {
     color: #00f5ff;
     text-shadow: 0 0 15px rgba(0, 245, 255, 0.5);
 }
@@ -2650,4 +2670,42 @@ body.dark-mode .qg-avatar-option.selected::after {
 .qg-app.qg-dark .qg-btn-ghost {
     border-color: #3a3a50;
     color: #aaa;
+}
+
+/* Added for Booted screen and Waiting container layout rules */
+#screen-booted {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    box-sizing: border-box;
+    overflow-y: auto;
+    height: 100vh;
+}
+
+#screen-waiting {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.qg-waiting-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    width: 100%;
+    max-width: 600px;
+    animation: slideUpFade 0.5s ease 0.1s both;
+}
+
+/* Hide global dark mode toggle on quiz pages */
+#dark-mode-toggle {
+    display: none !important;
 }
