@@ -108,12 +108,15 @@ const FirebaseService = (() => {
             if (!window._demoSession) return Promise.reject('Session not found');
             if (!window._demoSession.players) window._demoSession.players = {};
             window._demoSession.players[uid] = playerData;
-            return Promise.resolve(playerData);
+            return Promise.resolve(window._demoSession);
         }
+        let sessionSnapshot = null;
         return db.ref('sessions/' + code).once('value').then(snap => {
             if (!snap.exists()) throw new Error('Session not found');
+            sessionSnapshot = snap.val();
+            // Allow joining in any session state (lobby, countdown, playing, reviewing)
             return db.ref('sessions/' + code + '/players/' + uid).set(playerData);
-        }).then(() => playerData);
+        }).then(() => sessionSnapshot);
     }
 
     function updateSessionField(code, field, value) {
@@ -203,6 +206,11 @@ const FirebaseService = (() => {
         db.ref('sessions/' + code + '/players/' + uid).onDisconnect().remove();
     }
 
+    function setupHostDisconnect(code) {
+        if (isDemo()) return;
+        db.ref('sessions/' + code).onDisconnect().remove();
+    }
+
     function removePlayer(code, uid) {
         if (isDemo()) {
             if (window._demoSession && window._demoSession.players) {
@@ -239,6 +247,7 @@ const FirebaseService = (() => {
         updatePlayerScore,
         clearAllAnswers,
         setupDisconnect,
+        setupHostDisconnect,
         removePlayer,
         deleteSession
     };
