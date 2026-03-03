@@ -144,15 +144,17 @@ const FirebaseService = (() => {
     function onSessionValue(code, callback) {
         if (isDemo()) return () => { };
         const ref = db.ref('sessions/' + code);
-        ref.on('value', snap => callback(snap.val()));
-        return () => ref.off('value');
+        const handler = snap => callback(snap.val());
+        ref.on('value', handler);
+        return () => ref.off('value', handler);
     }
 
     function onFieldChange(code, field, callback) {
         if (isDemo()) return () => { };
         const ref = db.ref('sessions/' + code + '/' + field);
-        ref.on('value', snap => callback(snap.val()));
-        return () => ref.off('value');
+        const handler = snap => callback(snap.val());
+        ref.on('value', handler);
+        return () => ref.off('value', handler);
     }
 
     function onPlayersChange(code, callback) {
@@ -162,8 +164,9 @@ const FirebaseService = (() => {
     function onChildAdded(code, field, callback) {
         if (isDemo()) return () => { };
         const ref = db.ref('sessions/' + code + '/' + field);
-        ref.on('child_added', snap => callback(snap.key, snap.val()));
-        return () => ref.off('child_added');
+        const handler = snap => callback(snap.key, snap.val());
+        ref.on('child_added', handler);
+        return () => ref.off('child_added', handler);
     }
 
     // ========== PLAYER OPERATIONS ==========

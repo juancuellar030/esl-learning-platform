@@ -2355,9 +2355,11 @@ body.dark-mode .qg-avatar-option.selected::after {
 }
 
 /* All screens must layer above the bg canvas */
-.qg-screen,
-.qg-overlay,
-#confetti-canvas,
+.qg-screen {
+    z-index: 1;
+    /* position: absolute is already set above — do NOT override to relative */
+}
+
 .qg-session-badge {
     z-index: 1;
     position: relative;
@@ -2673,7 +2675,7 @@ body.dark-mode .qg-avatar-option.selected::after {
 }
 
 /* Added for Booted screen and Waiting container layout rules */
-#screen-booted {
+#screen-booted.active {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -2684,7 +2686,7 @@ body.dark-mode .qg-avatar-option.selected::after {
     height: 100vh;
 }
 
-#screen-waiting {
+#screen-waiting.active {
     display: flex;
     flex-direction: column;
     align-items: center;

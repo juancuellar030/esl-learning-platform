@@ -27,6 +27,7 @@ const QuizGame = (() => {
     let myStreak = 0;
     let hasAnswered = false;
     let selectedAvatar = null;
+    let playerGameStarted = false; // Guard: prevents listenAsPlayer() being triggered multiple times
 
     let sourceMode = 'vocab'; // 'vocab' | 'custom'
     let gameMode = 'automatic'; // 'automatic' | 'student-paced' | 'teacher-paced'
@@ -842,8 +843,11 @@ const QuizGame = (() => {
             }
 
             if (!FirebaseService.isDemo()) {
+                console.log('[QuizGame][Player] Setting up listeners for code:', gameCode, '| UID:', FirebaseService.getUid());
                 FirebaseService.setupDisconnect(gameCode);
                 setupPlayerListeners();
+            } else {
+                console.warn('[QuizGame][Player] Firebase is in demo mode — real-time listeners will NOT fire.');
             }
         }).catch(err => {
             showScreen('screen-join');
@@ -854,18 +858,37 @@ const QuizGame = (() => {
 
     // ===== PLAYER LISTENERS HELPER =====
     function setupPlayerListeners() {
-        if (FirebaseService.isDemo()) return;
+        if (FirebaseService.isDemo()) {
+            console.warn('[QuizGame][Player] setupPlayerListeners: demo mode — skipping.');
+            return;
+        }
+
+        console.log('[QuizGame][Player] setupPlayerListeners() called. gameCode:', gameCode, '| playerGameStarted:', playerGameStarted);
 
         // 1. Status transition listener
         const unsubStatus = FirebaseService.onFieldChange(gameCode, 'status', status => {
-            // Handle playing/reviewing even if countdown was missed
-            if (status === 'countdown' && $('screen-waiting').classList.contains('active')) {
+            const waitingActive = $('screen-waiting').classList.contains('active');
+            console.log('[QuizGame][Player] status changed =>', status, '| screen-waiting active:', waitingActive, '| playerGameStarted:', playerGameStarted);
+
+            // Once the game transition has been triggered, only handle game-end from here.
+            // All in-game status changes (reviewing, finished) are handled by listenAsPlayer()'s own listeners.
+            if (playerGameStarted) {
+                if (status === 'finished') showResults();
+                return;
+            }
+
+            if (status === 'countdown' && waitingActive) {
+                playerGameStarted = true;
+                console.log('[QuizGame][Player] Starting countdown -> listenAsPlayer()');
                 runCountdown(() => listenAsPlayer());
-            } else if ((status === 'playing' || status === 'reviewing') && $('screen-waiting').classList.contains('active')) {
-                console.log(`[QuizGame] Syncing to active game on status: ${status}`);
+            } else if ((status === 'playing' || status === 'reviewing') && waitingActive) {
+                console.log(`[QuizGame][Player] Syncing to active game on status: ${status}`);
+                playerGameStarted = true;
                 listenAsPlayer();
             } else if (status === 'finished') {
                 showResults();
+            } else {
+                console.warn('[QuizGame][Player] Status fired but no action taken. screen-waiting active:', waitingActive);
             }
         });
         listeners.push(unsubStatus);
@@ -891,6 +914,7 @@ const QuizGame = (() => {
             }
         });
         listeners.push(unsubSession);
+        console.log('[QuizGame][Player] All listeners registered.');
     }
 
     // ===== GAME FLOW: COUNTDOWN =====
@@ -1260,11 +1284,15 @@ const QuizGame = (() => {
         if (!FirebaseService.isDemo()) {
             // Get initial game state first
             FirebaseService.getSession(gameCode).then(session => {
-                if (!session) return;
+                if (!session) {
+                    console.error('[QuizGame][Player] listenAsPlayer: getSession returned null! gameCode:', gameCode);
+                    return;
+                }
                 questions = session.questions || [];
                 config = session.config || {};
                 soundEnabled = config.sound !== false;
                 const gm = config.gameMode || 'automatic';
+                console.log('[QuizGame][Player] listenAsPlayer: session loaded. questions:', questions.length, '| currentQuestion:', session.currentQuestion, '| gameMode:', gm);
 
                 if (gm === 'student-paced') {
                     // Student-paced: start from question 0 and advance locally
@@ -1279,9 +1307,12 @@ const QuizGame = (() => {
                     });
                     listeners.push(unsub2);
                 } else {
-                    // Automatic & Teacher-paced: listen for host-pushed question
+                    // Automatic & Teacher-paced: listen for host-pushed question changes.
+                    // Guard: skip if the question is the same as the one being loaded explicitly below,
+                    // to avoid a redundant double-load on the initial attach.
                     const unsub1 = FirebaseService.onFieldChange(gameCode, 'currentQuestion', qIdx => {
                         if (qIdx === null || qIdx === -1) return;
+                        if (qIdx === currentQ) return; // already loaded explicitly below
                         loadPlayerQuestion(qIdx);
                     });
                     listeners.push(unsub1);
@@ -1295,8 +1326,15 @@ const QuizGame = (() => {
                     });
                     listeners.push(unsub2);
 
+                    // Explicitly load the current question using the already-fetched session data.
+                    // This is essential: onFieldChange's immediate-fire is not guaranteed before
+                    // the Firebase initial sync completes, so without this explicit call the player
+                    // could be stuck seeing "Loading question..." until the host advances.
                     if (session.currentQuestion >= 0) {
+                        console.log('[QuizGame][Player] Explicitly loading question index:', session.currentQuestion);
                         loadPlayerQuestion(session.currentQuestion);
+                    } else {
+                        console.warn('[QuizGame][Player] session.currentQuestion is', session.currentQuestion, '- waiting for host to set it.');
                     }
                 }
             });
@@ -1345,13 +1383,21 @@ const QuizGame = (() => {
     function loadPlayerQuestion(qIdx) {
         currentQ = qIdx;
         hasAnswered = false;
+        console.log('[QuizGame][Player] loadPlayerQuestion called. qIdx:', qIdx);
 
         FirebaseService.getSession(gameCode).then(session => {
-            if (!session) return;
+            if (!session) {
+                console.error('[QuizGame][Player] loadPlayerQuestion: getSession returned null!');
+                return;
+            }
             questions = session.questions || [];
             config = session.config || {};
             const q = questions[currentQ];
-            if (!q) return;
+            if (!q) {
+                console.error('[QuizGame][Player] loadPlayerQuestion: question at index', currentQ, 'is undefined! questions.length:', questions.length);
+                return;
+            }
+            console.log('[QuizGame][Player] Rendering question', currentQ, ':', q.text?.substring(0, 50));
 
             // Update player data
             const pData = session.players ? session.players[FirebaseService.getUid()] : null;
@@ -1377,9 +1423,14 @@ const QuizGame = (() => {
                 btn.disabled = false;
             });
 
-            // Start local timer
-            const elapsed = (Date.now() - (session.questionStartedAt || Date.now())) / 1000;
-            const remaining = Math.max(0, config.timer - elapsed);
+            // Start local timer — questionStartedAt helps sync the timer with
+            // the host, but due to non-atomic Firebase writes the field may
+            // still hold the PREVIOUS question's timestamp when we fetch. 
+            // Clamp to a minimum so the player always gets a usable timer.
+            const startedAt = session.questionStartedAt || 0;
+            const elapsed = startedAt > 0 ? (Date.now() - startedAt) / 1000 : 0;
+            const remaining = Math.max(3, config.timer - elapsed); // minimum 3s floor
+            console.log('[QuizGame][Player] Timer: elapsed', elapsed.toFixed(1), 's | remaining', remaining.toFixed(1), 's');
             startPlayerTimer(remaining, config.timer);
         });
     }
@@ -1829,6 +1880,7 @@ const QuizGame = (() => {
         myScore = 0;
         myStreak = 0;
         hasAnswered = false;
+        playerGameStarted = false; // Reset so next session starts clean
         $('teacher-view').classList.remove('active');
         $('student-view').classList.remove('active');
         hideSessionBadge();
