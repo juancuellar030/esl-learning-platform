@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="assets/graduation-cap-icon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grading Scale Generator - ESL Learning Platform</title>
+    <meta name="description" content="Generate custom grading scales and calculate student grades from CSV uploads.">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/grading-scale.css">
+    <link rel="stylesheet" href="css/google-drive.css">
+</head>
+
+<body>
+    <div class="grading-scale-page">
+
+        <!-- Main Container -->
+        <div class="gs-container">
+
+            <!-- Header -->
+            <div class="gs-header">
+                <h1><i class="fa-solid fa-scale-balanced"></i> Grading Scale Generator</h1>
+                <a href="tools.html" class="gs-back-btn">
+                    <i class="fa-solid fa-arrow-left"></i> Back to Tools
+                </a>
+            </div>
+
+            <!-- Body -->
+            <div class="gs-body">
+
+                <!-- ==================== SECTION 1: SETUP ==================== -->
+                <div class="gs-section">
+                    <div class="gs-section-header">
+                        <i class="fa-solid fa-sliders"></i>
+                        <h2>Scale Configuration</h2>
+                    </div>
+                    <div class="gs-section-body">
+                        <div class="gs-form-grid">
+                            <div class="gs-field">
+                                <label for="gs-pmax">Max Score</label>
+                                <input type="number" id="gs-pmax" value="100" min="1" step="1">
+                                <span class="gs-hint">Maximum score a student can get</span>
+                            </div>
+                            <div class="gs-field">
+                                <label for="gs-exig">Exigency (%)</label>
+                                <input type="number" id="gs-exig" value="60" min="1" max="100" step="1">
+                                <span class="gs-hint">Percentage of max score needed to pass</span>
+                            </div>
+                            <div class="gs-field">
+                                <label for="gs-nmin">Min Grade</label>
+                                <input type="number" id="gs-nmin" value="1.0" min="0" step="0.1">
+                                <span class="gs-hint">Lowest possible grade (e.g. 1.0)</span>
+                            </div>
+                            <div class="gs-field">
+                                <label for="gs-nmax">Max Grade</label>
+                                <input type="number" id="gs-nmax" value="7.0" min="1" step="0.1">
+                                <span class="gs-hint">Highest possible grade (e.g. 7.0)</span>
+                            </div>
+                            <div class="gs-field">
+                                <label for="gs-napr">Passing Grade</label>
+                                <input type="number" id="gs-napr" value="4.0" min="0" step="0.1">
+                                <span class="gs-hint">Minimum grade to pass (e.g. 4.0)</span>
+                            </div>
+                            <div class="gs-field">
+                                <label for="gs-increment">Increment</label>
+                                <select id="gs-increment">
+                                    <option value="0.5">0.5</option>
+                                    <option value="1" selected>1.0</option>
+                                    <option value="2">2.0</option>
+                                    <option value="5">5.0</option>
+                                    <option value="10">10.0</option>
+                                </select>
+                                <span class="gs-hint">Score step between each row</span>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 10px; margin-top: 10px;">
+                            <button id="gs-generate-btn" class="gs-generate-btn" style="margin-top: 0;">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> Generate Scale
+                            </button>
+                            <button id="gs-drive-btn" class="gs-generate-btn"
+                                style="margin-top: 0; background: linear-gradient(135deg, #4285F4, #0F9D58);">
+                                <i class="fa-brands fa-google-drive"></i> Save/Load to Drive
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ==================== SECTION 2: SCALE TABLE ==================== -->
+                <div class="gs-section">
+                    <div class="gs-section-header">
+                        <i class="fa-solid fa-table-list"></i>
+                        <h2>Generated Scale</h2>
+                    </div>
+                    <div class="gs-section-body" id="gs-scale-body">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- ==================== SECTION 3: STUDENT GRADING ==================== -->
+                <div class="gs-section">
+                    <div class="gs-section-header">
+                        <i class="fa-solid fa-user-graduate"></i>
+                        <h2>Student Grading</h2>
+                    </div>
+                    <div class="gs-section-body">
+                        <div class="gs-upload-area">
+                            <input type="file" id="gs-csv-input" accept=".csv,.txt" style="display:none;">
+                            <button id="gs-upload-btn" class="gs-upload-btn">
+                                <i class="fa-solid fa-file-csv"></i> Upload Student CSV
+                            </button>
+                            <button id="gs-calc-btn" class="gs-calc-btn">
+                                <i class="fa-solid fa-calculator"></i> Calculate All Grades
+                            </button>
+                            <button id="gs-export-btn" class="gs-export-btn">
+                                <i class="fa-solid fa-download"></i> Export CSV
+                            </button>
+                            <span id="gs-file-info" class="gs-file-info"></span>
+                        </div>
+
+                        <!-- Summary stats -->
+                        <div id="gs-summary-bar" class="gs-summary-bar" style="display:none;"></div>
+
+                        <!-- Student table -->
+                        <div id="gs-students-body">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <!-- /gs-body -->
+
+        </div>
+        <!-- /gs-container -->
+
+        <div class="gs-footer">
+            ESL Learning Platform © 2025 | Made for Teachers, by Teachers
+        </div>
+
+    </div>
+
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://apis.google.com/js/api.js" async defer></script>
+    <script src="js/google-drive-service.js"></script>
+    <script src="js/darkmode.js"></script>
+    <script src="js/grading-scale.js"></script>
+</body>
+
+</html>
