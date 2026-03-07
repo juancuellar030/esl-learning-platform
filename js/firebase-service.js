@@ -232,6 +232,117 @@ const FirebaseService = (() => {
         return db.ref('sessions/' + code).remove();
     }
 
+    // ========== TEST BUILDER OPERATIONS ==========
+    function publishTest(testData) {
+        const code = generateGameCode();
+        const payload = {
+            ...testData,
+            code: code,
+            active: true,
+            publishedAt: Date.now(),
+            expiresAt: Date.now() + (7 * 24 * 60 * 60 * 1000) // 7 days
+        };
+        if (isDemo()) {
+            if (!window._demoTests) window._demoTests = {};
+            window._demoTests[code] = payload;
+            // Store code in localStorage so dashboard can find it
+            try { localStorage.setItem('lastPublishedCode', code); } catch (e) { }
+            return Promise.resolve(code);
+        }
+        return db.ref('tests/' + code).set(payload).then(() => {
+            try { localStorage.setItem('lastPublishedCode', code); } catch (e) { }
+            return code;
+        });
+    }
+
+    function updatePublishedTest(code, testData) {
+        // Update test data in-place without overwriting responses
+        const updates = {
+            title: testData.title,
+            description: testData.description,
+            settings: testData.settings,
+            questions: testData.questions,
+            updatedAt: Date.now()
+        };
+        if (isDemo()) {
+            if (window._demoTests && window._demoTests[code]) {
+                Object.assign(window._demoTests[code], updates);
+            }
+            return Promise.resolve(code);
+        }
+        return db.ref('tests/' + code).update(updates).then(() => code);
+    }
+
+    function getPublishedTest(code) {
+        if (isDemo()) {
+            const test = window._demoTests ? window._demoTests[code] : null;
+            return Promise.resolve(test);
+        }
+        return db.ref('tests/' + code).once('value').then(s => s.val());
+    }
+
+    function submitTestResponse(code, response) {
+        const responseId = 'r-' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
+        if (isDemo()) {
+            if (!window._demoTests) window._demoTests = {};
+            if (!window._demoTests[code]) return Promise.reject('Test not found');
+            if (!window._demoTests[code].responses) window._demoTests[code].responses = {};
+            window._demoTests[code].responses[responseId] = response;
+            return Promise.resolve(responseId);
+        }
+        return db.ref('tests/' + code + '/responses/' + responseId).set(response).then(() => responseId);
+    }
+
+    function deactivateTest(code) {
+        if (isDemo()) {
+            if (window._demoTests && window._demoTests[code]) {
+                window._demoTests[code].active = false;
+            }
+            return Promise.resolve();
+        }
+        return db.ref('tests/' + code + '/active').set(false);
+    }
+
+    function onNewResponse(code, callback) {
+        if (isDemo()) {
+            // For demo mode, poll _demoTests responses
+            const alreadySeen = new Set();
+            const poll = () => {
+                const responses = (window._demoTests && window._demoTests[code] && window._demoTests[code].responses) || {};
+                Object.entries(responses).forEach(([id, resp]) => {
+                    if (!alreadySeen.has(id)) {
+                        alreadySeen.add(id);
+                        callback(id, resp);
+                    }
+                });
+            };
+            poll();
+            const interval = setInterval(poll, 3000);
+            return () => clearInterval(interval);
+        }
+
+        const ref = db.ref('tests/' + code + '/responses');
+        const seen = new Set();
+        const handler = snap => {
+            if (!seen.has(snap.key)) {
+                seen.add(snap.key);
+                callback(snap.key, snap.val());
+            }
+        };
+
+        // First: load all existing responses
+        ref.once('value').then(snapshot => {
+            snapshot.forEach(child => {
+                seen.add(child.key);
+                callback(child.key, child.val());
+            });
+            // Then: listen for new ones
+            ref.on('child_added', handler);
+        });
+
+        return () => ref.off('child_added', handler);
+    }
+
     // ========== PUBLIC API ==========
     return {
         init,
@@ -252,6 +363,13 @@ const FirebaseService = (() => {
         setupDisconnect,
         setupHostDisconnect,
         removePlayer,
-        deleteSession
+        deleteSession,
+        // Test Builder
+        publishTest,
+        updatePublishedTest,
+        getPublishedTest,
+        submitTestResponse,
+        deactivateTest,
+        onNewResponse
     };
 })();

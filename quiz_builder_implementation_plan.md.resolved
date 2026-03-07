@@ -1,0 +1,475 @@
+# Quiz / Test Builder Tool — Implementation Plan
+
+## Overview
+
+A new standalone tool for the ESL Learning Platform that lets teachers **design custom assessments** with multiple question formats, media support, and advanced settings — then **share those tests** with students via a code or link so they can be taken on any device. Results are collected in real time.
+
+> **Key distinction from Live Quiz:** The Live Quiz is a real-time multiplayer *game* where everyone answers simultaneously and scores are ranked. The Quiz Builder is an *assessment tool* — the teacher creates a test offline, shares it, and students take it independently at their own pace. Think "Google Forms for ESL assessments, but beautiful."
+
+---
+
+## User Review Required
+
+> [!IMPORTANT]
+> **This is a large feature.** The plan below is organized in **4 implementation phases** so we can deliver incrementally, get your feedback, and adjust. Please review each section and let me know if you'd like to re-prioritize, remove, or adjust anything before I begin.
+
+> [!WARNING]
+> **Media file storage (Feature 2):** Uploaded audio/images need to live somewhere accessible when a student takes a shared test on another device. Options analyzed below — this has cost/complexity implications worth discussing.
+
+> [!CAUTION]
+> **Google Sheets integration (Feature 7):** Requires a Google Apps Script web app deployment on your Google account. It's feasible but involves steps outside this codebase. Full analysis below.
+
+---
+
+## Architecture Decisions
+
+### Consistent with existing patterns
+- **Standalone HTML page** (`test-builder.html`) + dedicated CSS (`css/test-builder.css`) + JS (`js/test-builder.js`)
+- **Separate student-facing HTML page** (`take-test.html`) — a minimal, isolated page students access via shared link. **No navigation to other tools** (no header, no tools link, no back button to dashboard).
+- **Firebase Realtime Database** — reuses the existing [firebase-service.js](file:///c:/Users/Admin/Documents/esl-learning-platform/js/firebase-service.js) config for test sharing & real-time result collection
+- **Google Drive** — reuses [GoogleDriveService](file:///c:/Users/Admin/Documents/esl-learning-platform/js/google-drive-service.js#17-397) for teacher save/load of quiz templates
+- **CSS custom properties** — follows existing theming (`--indigo-velvet`, `--medium-slate-blue`, etc.) + dark mode via `body.dark-mode`
+- **No build system** — pure vanilla HTML/CSS/JS, consistent with the rest of the platform
+
+### New patterns introduced
+- **Test data model** — a JSON schema for the test definition stored in localStorage, Google Drive, and Firebase
+- **Student-facing isolated page** — `take-test.html` will be a self-contained page with no access to the rest of the platform
+- **Google Apps Script webhook** — for pushing results to Google Sheets (optional, can be added later)
+
+---
+
+## Proposed Changes
+
+### Phase 1: Core Builder UI & Question Formats
+
+The teacher-facing builder where tests are designed.
+
+---
+
+#### [NEW] [test-builder.html](file:///c:/Users/Admin/Documents/esl-learning-platform/test-builder.html)
+
+The main builder page. Structured as a multi-panel layout:
+
+1. **Header** — Title + back to tools
+2. **Sidebar / Question List Panel** — Draggable list of all questions in the test, with add/delete/reorder
+3. **Main Editor Panel** — Edits the currently selected question
+4. **Preview Panel** — Live preview of how the question will look to students
+5. **Settings Bar** — Global test settings (title, description, time limit, shuffle, etc.)
+
+**Question format selector** with the following types:
+
+| Question Type | Description | Complexity |
+|---|---|---|
+| **Multiple Choice** | 2-6 options, single or multi-select correct | Medium |
+| **True / False** | Two fixed options | Low |
+| **Fill in the Blank** | Text input with or without a word bank | Medium |
+| **Matching / Joining** | Connect items from two columns | High |
+| **Unjumble Words** | Rearrange scrambled words into correct order | Medium |
+| **Unjumble Letters** | Rearrange scrambled letters to form a word | Medium |
+| **Drag & Drop to Category** | Sort items into 2+ categories | High |
+
+---
+
+#### [NEW] [css/test-builder.css](file:///c:/Users/Admin/Documents/esl-learning-platform/css/test-builder.css)
+
+- Full styling for the builder interface
+- Responsive layout (sidebar collapses on mobile)
+- Dark mode support via CSS custom properties
+- Animated transitions for adding/removing questions, panel switches
+- Consistent with the platform's visual language
+
+---
+
+#### [NEW] [js/test-builder.js](file:///c:/Users/Admin/Documents/esl-learning-platform/js/test-builder.js)
+
+Core logic module (IIFE pattern like `QuizGame`):
+
+- **State management** — Test data model, current question index, undo history
+- **Question CRUD** — Add, edit, delete, duplicate, reorder questions
+- **Format-specific editors** — Renders the correct editor UI per question type
+- **Live preview renderer** — Renders a read-only preview of the current question
+- **Import/Export** — LocalStorage save, JSON export, Google Drive integration
+- **Validation** — Ensures all questions have required fields before sharing
+
+**Test data model (JSON schema):**
+```javascript
+{
+  id: "uuid",
+  title: "Unit 3 Vocabulary Test",
+  description: "...",
+  createdAt: timestamp,
+  updatedAt: timestamp,
+  settings: {
+    timeLimit: 0,           // 0 = no limit, else seconds
+    shuffleQuestions: true,
+    shuffleOptions: true,
+    showResults: true,      // show score at end
+    allowRetake: false,
+    collectName: true,
+    collectGroup: true,
+    groupOptions: ["3A", "3B", "3C", "4A", "4B", "4C", "5A", "5B", "5C", "5D"],  // NEW — default course groups
+    enableFullscreen: true   // NEW — anti-cheating fullscreen mode
+  },
+  questions: [
+    {
+      id: "q-uuid",
+      type: "multiple-choice",  // | "true-false" | "fill-blank" | "matching" | "unjumble-words" | "unjumble-letters" | "drag-drop-category"
+      prompt: "What is the meaning of 'apple'?",
+      media: {                  // optional
+        type: "image",          // | "audio"
+        data: "base64string",   // for local/Drive storage
+        filename: "apple.jpg"
+      },
+      // Type-specific fields:
+      options: [...],           // for MC, T/F
+      correctAnswer: 0,        // index or array of indices
+      multiSelect: false,       // MC: multiple correct answers
+      pairs: [...],            // for matching
+      blanks: [...],           // for fill-blank
+      wordBank: [...],         // for fill-blank with word bank
+      words: [...],            // for unjumble
+      categories: [...],       // for drag-drop
+      items: [...],            // for drag-drop
+      points: 1                // point value
+    }
+  ]
+}
+```
+
+**Student response data model (stored in Firebase):**
+```javascript
+{
+  studentName: "Juan",
+  group: "4B",
+  answers: [...],
+  score: 8,
+  maxScore: 10,
+  startedAt: 1709769600000,      // NEW — timestamp when test began
+  completedAt: 1709770200000,    // NEW — timestamp when submitted
+  durationSeconds: 600,          // NEW — elapsed time in seconds
+  violations: [                  // NEW — anti-cheating log
+    { type: "tab-switch", timestamp: 1709769800000 },
+    { type: "fullscreen-exit", timestamp: 1709769900000 }
+  ],
+  violationCount: 2              // NEW — quick summary for teacher view
+}
+```
+
+---
+
+#### [MODIFY] [tools.html](file:///c:/Users/Admin/Documents/esl-learning-platform/tools.html)
+
+Add a new dashboard card for the Quiz Builder tool:
+
+```html
+<!-- Quiz / Test Builder Card -->
+<a href="test-builder.html" class="dashboard-card"
+    style="text-decoration: none; color: inherit; display: block;">
+    <div class="card-icon"><i class="fa-solid fa-file-pen"></i></div>
+    <h3>Quiz Builder</h3>
+    <p>Design custom tests with multiple question types and share them with students</p>
+</a>
+```
+
+---
+
+### Phase 2: Media Uploads & Advanced Settings
+
+---
+
+#### Media Upload Strategy
+
+> [!IMPORTANT]
+> **The central challenge:** When a teacher uploads an image/audio file and then shares the test, that media must be accessible to students on other devices.
+
+**Recommended approach: Base64 encoding inside the test JSON**
+
+| Approach | Pros | Cons |
+|---|---|---|
+| **Base64 in JSON** ✅ | No external storage needed; works with existing Drive/Firebase; fully self-contained | Increases JSON size; Firebase RTDB has 10MB per write limit; large media will be slow |
+| Firebase Storage | Proper file hosting; URL-based access | Requires enabling Firebase Storage, setting up security rules, uploading SDK; additional Firebase costs |
+| External image URLs only | Zero storage needed | Teacher must host images elsewhere; unreliable; poor UX |
+
+**My recommendation:** Start with **Base64** for images (compress/resize to max ~500KB each) and audio (compress with reasonable limits). This keeps everything self-contained within the existing infrastructure. If tests get very large, we can add Firebase Storage later as an upgrade.
+
+**Implementation:**
+- File input accepts `image/*` and `audio/*`
+- Client-side image resizing (canvas-based, max 800px width) before Base64 encoding
+- Audio: accept MP3/WAV up to ~2MB, encode to Base64
+- Display previews in the editor and in the student-facing test
+
+---
+
+#### Advanced Question Settings (per question type)
+
+| Question Type | Advanced Settings |
+|---|---|
+| **Multiple Choice** | Toggle single/multi-select · Image options (each option can be an image) · Audio options (each option can be an audio clip) · Custom number of options (2-6) |
+| **True / False** | Custom labels (e.g., "Correct/Incorrect" instead of "True/False") |
+| **Fill in the Blank** | Toggle word bank on/off · Case-sensitive matching toggle · Accept multiple correct answers |
+| **Matching** | Number of pairs (3-8) · Shuffle right column |
+| **Unjumble** | Show hint (first letter) toggle |
+| **Drag & Drop** | Number of categories (2-4) · Allow items to belong to multiple categories |
+
+---
+
+### Phase 3: Test Sharing & Student Taking
+
+---
+
+#### [NEW] [take-test.html](file:///c:/Users/Admin/Documents/esl-learning-platform/take-test.html)
+
+An **isolated, student-facing page** with:
+
+- **No header, no navigation, no links to other tools** — students see only the test
+- A clean, beautiful, animated test interface
+- Student identification form (name + **course group dropdown** with default options: 3A, 3B, 3C, 4A, 4B, 4C, 5A, 5B, 5C, 5D)
+- **Full-screen anti-cheating mode** — page enters fullscreen when the test begins
+- Question-by-question navigation with progress bar
+- Timer display (if time limit set)
+- **Timing data capture** — records start time, end time, and duration
+- Results screen at the end
+
+---
+
+#### Full-Screen Anti-Cheating Mode
+
+> [!IMPORTANT]
+> **How it works:** When a student clicks "Start Test" on the identification screen, the page requests fullscreen via the Fullscreen API (`document.documentElement.requestFullscreen()`). While the test is active:
+>
+> - If the student **exits fullscreen** (presses Escape or uses browser controls), the `fullscreenchange` event fires and a warning overlay appears
+> - If the student **switches to a different tab**, the `visibilitychange` event detects `document.hidden === true` and logs the incident
+> - Each violation is logged with its type (`tab-switch` or `fullscreen-exit`) and timestamp
+> - The total violation count is included in the student's response data sent to Firebase
+> - The teacher sees the violation count on the response dashboard (Phase 4)
+>
+> **Graceful degradation:** If the browser doesn't support Fullscreen API (rare) or the user denies the prompt, the test still works — violations are simply not tracked.
+
+---
+
+#### Test Timing Data Collection
+
+> [!NOTE]
+> Each student response automatically records:
+> - `startedAt` — timestamp when the student clicks "Start Test"
+> - `completedAt` — timestamp when the student submits the final answer
+> - `durationSeconds` — calculated elapsed time
+>
+> These appear in the teacher's response dashboard and CSV export (Phase 4).
+
+---
+
+#### [NEW] [css/take-test.css](file:///c:/Users/Admin/Documents/esl-learning-platform/css/take-test.css)
+
+- Beautiful, animated, student-friendly design
+- Each question type has its own visual treatment with smooth transitions
+- **Fullscreen warning overlay** styling (semi-transparent backdrop with centered warning)
+- Confetti/celebration animations on completion
+- Mobile-first responsive design (students will use phones/tablets)
+- Dark mode support
+
+---
+
+#### [NEW] [js/take-test.js](file:///c:/Users/Admin/Documents/esl-learning-platform/js/take-test.js)
+
+- Reads test code from URL parameter (`?code=ABCDEF`)
+- Fetches test data from Firebase RTDB
+- **Student ID screen** with name input + course group dropdown (populated from `settings.groupOptions`)
+- **Fullscreen management** — requests fullscreen on test start, monitors `fullscreenchange` and `visibilitychange`
+- **Timing** — captures `startedAt` on test start, `completedAt` on submit, calculates `durationSeconds`
+- Renders each question type with interactive UI
+- Collects answers, timing, and violation data; submits to Firebase
+- Shows results if enabled in test settings
+
+---
+
+#### Sharing Mechanism
+
+**How it works:**
+
+1. Teacher clicks **"Share Test"** in the builder
+2. The system:
+   - Generates a 6-character alphanumeric code (like the Live Quiz)
+   - Uploads the full test JSON to Firebase under `tests/{CODE}`
+   - Sets an expiration timestamp (e.g., 7 days by default, configurable)
+3. Teacher gets:
+   - The **code** to share verbally in class
+   - A **direct URL**: `https://yoursite.com/take-test.html?code=ABCDEF`
+   - A **QR code** (generated client-side) students can scan
+4. Students:
+   - Visit `take-test.html` and enter the code, OR
+   - Open the direct link / scan QR
+   - Enter name and select course group → take the test
+
+> [!NOTE]
+> The URL will be relative to wherever this platform is hosted. If you deploy via GitHub Pages or Firebase Hosting, the link will be a full URL. For local dev, it'll be `http://localhost:8080/take-test.html?code=ABCDEF`.
+
+**Security considerations:**
+- Tests are **public by read** on Firebase (anyone with the code can take it) — this is intentional for ease of sharing
+- The code is unguessable (6 chars from `ABCDEFGHJKLMNPQRSTUVWXYZ23456789` = ~887 million combinations)
+- Teacher can **deactivate** a shared test to stop new submissions
+- Firebase security rules should allow read of `tests/{code}` and write to `tests/{code}/responses/{responseId}` — but NOT allow modifying the test itself
+- **Full-screen mode** adds an extra layer of academic integrity monitoring
+
+---
+
+#### Modifications to Firebase
+
+#### [MODIFY] [js/firebase-service.js](file:///c:/Users/Admin/Documents/esl-learning-platform/js/firebase-service.js)
+
+Add new methods for the Quiz Builder (keeping existing live quiz functionality intact):
+
+```javascript
+// ========== TEST BUILDER OPERATIONS ==========
+function publishTest(testData) { ... }
+function getPublishedTest(code) { ... }
+function submitTestResponse(code, response) { ... }
+function onNewResponse(code, callback) { ... }
+function deactivateTest(code) { ... }
+```
+
+---
+
+### Phase 4: Real-Time Response Collection
+
+---
+
+#### Response Collection Strategy
+
+> [!IMPORTANT]
+> **Two complementary approaches recommended:**
+
+**Approach A — Firebase RTDB (built-in, real-time):**
+- Student responses are written to `tests/{code}/responses/{responseId}` in Firebase
+- Teacher can view responses in real time from the builder page (a "Responses" tab)
+- Responses include: student name, **course group**, answers, score, **start time, duration, and violation count**
+- Teacher can export responses as CSV from the builder
+
+**Approach B — Google Sheets (optional add-on):**
+
+| Aspect | Details |
+|---|---|
+| **How** | A Google Apps Script deployed as a web app receives POST requests with response data |
+| **Setup** | Teacher creates a Google Sheet → deploys a small Apps Script → pastes the webhook URL into the builder settings |
+| **Data sent** | Student name, group, each answer, score, **start time, duration, violation count** |
+| **Limitation** | Requires the teacher to set up a Google Apps Script (one-time), which involves ~5 steps outside this codebase |
+
+**My recommendation:** Implement Firebase-based collection first (Approach A) — it's fully within our control and works immediately. Add the Google Sheets webhook as an optional "advanced" feature with clear setup instructions.
+
+---
+
+#### Response Dashboard (in test-builder.html)
+
+A "Responses" tab in the builder that shows:
+- Live response counter
+- Student name, **course group**, score, **start time, duration**
+- **Violation count per student** (with color coding: 0 = green, 1-2 = yellow, 3+ = red)
+- Per-question breakdown (% correct per question)
+- Export to CSV button (includes all timing and violation data)
+
+---
+
+## New Files Summary
+
+| File | Purpose |
+|---|---|
+| `test-builder.html` | Teacher-facing builder UI |
+| `css/test-builder.css` | Builder styling |
+| `js/test-builder.js` | Builder logic, question CRUD, sharing, responses |
+| `take-test.html` | Student-facing test-taking page (isolated) |
+| `css/take-test.css` | Student test styling (beautiful animations) |
+| `js/take-test.js` | Test-taking logic, answer collection |
+
+## Modified Files Summary
+
+| File | Change |
+|---|---|
+| [tools.html](file:///c:/Users/Admin/Documents/esl-learning-platform/tools.html) | Add Quiz Builder card to dashboard |
+| [js/firebase-service.js](file:///c:/Users/Admin/Documents/esl-learning-platform/js/firebase-service.js) | Add test publishing/response methods |
+
+---
+
+## Limitations & Honest Assessment
+
+Here's my frank assessment of challenges and limitations:
+
+### ✅ Fully feasible (no major obstacles)
+- All 7 question types (MC, T/F, matching, fill-blank, unjumble words, unjumble letters, drag-drop)
+- Advanced settings per question type
+- Student name + course group collection (3A–5D default, teacher-configurable)
+- Save/load to localStorage and Google Drive
+- Share via code + link
+- Beautiful animations for all question types
+- Firebase-based real-time response collection
+- CSV export of results (including timing and violation data)
+- Isolated student page (no access to other tools)
+- **Full-screen anti-cheating mode** — Fullscreen API is well-supported in Chrome, Edge, Firefox, Safari
+- **Test timing data** — simple timestamp capture, no complexity
+- **Course group selection** — dropdown populated from configurable list
+
+### ⚠️ Feasible with caveats
+- **Media uploads (images/audio):** Works well with Base64, but there's a practical limit. If a teacher creates a 30-question test with images on every question, the JSON could be 15-20MB — Firebase RTDB limits writes to 16MB. **Mitigation:** Aggressive image compression, and a warning if the test exceeds ~10MB.
+- **QR code generation:** Requires adding a small library (e.g., `qrcode.js`, ~33KB). This is a minor addition but worth noting since the project currently has no npm dependencies.
+- **Drag & drop on mobile:** HTML5 drag-and-drop has poor mobile support. **Mitigation:** Use touch event handling (touchstart/touchmove/touchend) along with mouse events, which I'll implement manually (no library needed).
+
+### ⚠️ Requires setup outside this codebase
+- **Google Sheets integration:** The teacher needs to create a Google Apps Script web app and paste the webhook URL. I can provide detailed instructions and even a pre-built Apps Script they can copy-paste, but this is a one-time setup step that can't be fully automated from our side.
+- **Firebase security rules:** The current RTDB rules may need updating to allow public read of `tests/{code}` for unauthenticated students. I'll provide the exact rules to add.
+- **Hosting:** For the shareable link to work as a URL (not just a code), the platform needs to be hosted somewhere publicly accessible (e.g., Firebase Hosting, GitHub Pages, school server).
+
+### ❌ Not realistic within this project's architecture
+- **Audio recording in browser** (e.g., teacher recording a prompt): Technically possible with the MediaRecorder API, but adds significant complexity and file size. **Recommendation:** Keep it to file upload only for audio.
+- **Real-time collaborative test editing** (multiple teachers editing the same test): Would require a fundamentally different architecture. Out of scope.
+- **Automatic grading of free-text responses:** Fill-in-the-blank can check exact matches (with case-insensitivity toggle), but natural language understanding is beyond scope.
+
+---
+
+## Implementation Phases & Effort Estimate
+
+| Phase | Scope | Files | Est. Implementation Size |
+|---|---|---|---|
+| **Phase 1** | Builder UI + all 7 question types + preview | `test-builder.html`, `css/test-builder.css`, `js/test-builder.js`, [tools.html](file:///c:/Users/Admin/Documents/esl-learning-platform/tools.html) | Large (~2000-3000 lines) |
+| **Phase 2** | Media uploads + advanced settings per type | Extends Phase 1 files | Medium (~500-800 lines) |
+| **Phase 3** | Student-facing test page + sharing via code/link/QR | `take-test.html`, `css/take-test.css`, `js/take-test.js`, [firebase-service.js](file:///c:/Users/Admin/Documents/esl-learning-platform/js/firebase-service.js) | Large (~1500-2500 lines) |
+| **Phase 4** | Response collection dashboard + CSV export + Google Sheets hook | Extends builder + Firebase | Medium (~500-800 lines) |
+
+**Total estimated:** ~5000-7000 lines of new code across 6 new files and 2 modified files.
+
+---
+
+## Verification Plan
+
+### Manual Verification (per phase)
+
+**Phase 1 — Builder UI:**
+1. Start the local dev server with `node server.js`
+2. Open `http://127.0.0.1:8080/tools.html` and verify the new "Quiz Builder" card appears
+3. Click the card and verify the builder page loads
+4. Create a test with at least one question of each type (MC, T/F, fill-blank, matching, unjumble words, unjumble letters, drag-drop)
+5. Verify live preview renders correctly for each type
+6. Save to localStorage and reload — verify the test persists
+7. Test dark mode toggle
+
+**Phase 2 — Media & Settings:**
+1. Upload an image to a multiple-choice question and verify it displays in the editor preview
+2. Upload an audio file and verify playback works in the editor
+3. Toggle multi-select for MC and verify behavior changes
+4. Toggle word bank for fill-in-the-blank
+5. Save a media-heavy test to Google Drive and reload it
+
+**Phase 3 — Sharing & Taking:**
+1. Create a test and click "Share"
+2. Copy the share code and open `take-test.html?code=XXXXXX` in a separate browser / incognito
+3. Enter student name and group → take the test → verify results screen
+4. Verify the student page has NO navigation to other tools
+5. Test on a mobile device (or mobile emulation) for responsive design
+6. Verify timer works if time limit is set
+
+**Phase 4 — Response Collection:**
+1. Have 2-3 students (or incognito tabs) take a shared test
+2. Verify responses appear in real-time on the teacher's response dashboard
+3. Export responses as CSV and verify data correctness
+4. Test Google Sheets webhook (if configured)
+
+### Browser Testing
+- I will use the Playwright browser tool to verify page rendering, navigation, and core interactions after each phase.
