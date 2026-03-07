@@ -299,6 +299,21 @@ const TakeTest = (function () {
         document.getElementById('btn-next').addEventListener('click', nextQuestion);
         document.getElementById('btn-prev').addEventListener('click', prevQuestion);
         document.getElementById('btn-submit-test').addEventListener('click', submitTest);
+
+        // Incomplete question warning handlers
+        document.getElementById('btn-go-back').addEventListener('click', () => {
+            document.getElementById('incomplete-warning').style.display = 'none';
+            pendingDirection = null;
+        });
+        document.getElementById('btn-continue-anyway').addEventListener('click', () => {
+            document.getElementById('incomplete-warning').style.display = 'none';
+            if (pendingDirection === 'next') {
+                doNext();
+            } else if (pendingDirection === 'submit') {
+                submitTest(true);   // force submit
+            }
+            pendingDirection = null;
+        });
     }
 
     let pendingDirection = null;  // 'next' or 'submit' — used by incomplete warning
@@ -374,13 +389,15 @@ const TakeTest = (function () {
         bindQuestionInteractions(q);
     }
 
-    // ===== QUESTION RENDERERS =====
     function renderMCQuestion(q) {
         const opts = q.options.map((opt, i) => {
             const selected = answers[currentQ] === i ? 'selected' : '';
+            const img = q.optionImages && q.optionImages[i]
+                ? `<img class="tt-option-img" src="${q.optionImages[i]}" alt="" />`
+                : '';
             return `<div class="tt-option ${selected}" data-idx="${i}">
                 <span class="tt-opt-letter">${LETTERS[i]}</span>
-                <span class="tt-opt-text">${escapeHtml(opt)}</span>
+                <span class="tt-opt-text">${img}${escapeHtml(opt)}</span>
             </div>`;
         }).join('');
         return `<div class="tt-options">${opts}</div>`;
@@ -438,7 +455,10 @@ const TakeTest = (function () {
 
         const leftItems = q.pairs.map((p, i) => {
             const isMatched = currentMatches[i] !== undefined && currentMatches[i] !== '';
-            return `<div class="tt-match-item tt-match-item-left ${isMatched ? 'matched' : ''}" data-idx="${i}">${escapeHtml(p.left)}</div>`;
+            const img = q.pairImages && q.pairImages[i]
+                ? `<img class="tt-match-img" src="${q.pairImages[i]}" alt="" />`
+                : '';
+            return `<div class="tt-match-item tt-match-item-left ${isMatched ? 'matched' : ''}" data-idx="${i}">${img}${escapeHtml(p.left)}</div>`;
         }).join('');
 
         const rightItems = rightOptions.map((r, i) => {
@@ -531,7 +551,7 @@ const TakeTest = (function () {
         const placedFlat = Object.values(placedItems).flat();
         const pool = allItems.map((item, i) => {
             const isPlaced = placedFlat.includes(item) ? 'placed' : '';
-            return `<span class="tt-dd-pool-item ${isPlaced}" data-item="${escapeHtml(item)}" data-idx="${i}">${escapeHtml(item)}</span>`;
+            return `<span class="tt-dd-pool-item ${isPlaced}" data-item="${escapeHtml(item)}" data-idx="${i}" draggable="true">${escapeHtml(item)}</span>`;
         }).join('');
 
         return `<div class="tt-dd-categories">${cats}</div>
@@ -664,19 +684,31 @@ const TakeTest = (function () {
     }
 
     function bindDragDrop(q) {
-        // Simple click-to-place: click pool item, then click category
+        // === Click-to-place: click pool item, then click category ===
         let selectedItem = null;
 
         document.querySelectorAll('.tt-dd-pool-item').forEach(item => {
             item.addEventListener('click', () => {
                 if (item.classList.contains('placed')) return;
-                document.querySelectorAll('.tt-dd-pool-item').forEach(i => i.style.borderColor = '');
-                item.style.borderColor = 'var(--medium-slate-blue, #7b68ee)';
+                document.querySelectorAll('.tt-dd-pool-item').forEach(i => i.classList.remove('dd-selected'));
+                item.classList.add('dd-selected');
                 selectedItem = item.dataset.item;
+            });
+
+            // === Mouse drag support ===
+            item.addEventListener('dragstart', (e) => {
+                if (item.classList.contains('placed')) { e.preventDefault(); return; }
+                item.classList.add('dragging');
+                e.dataTransfer.setData('text/plain', item.dataset.item);
+                e.dataTransfer.effectAllowed = 'move';
+            });
+            item.addEventListener('dragend', () => {
+                item.classList.remove('dragging');
             });
         });
 
         document.querySelectorAll('.tt-dd-category').forEach(cat => {
+            // Click-to-place
             cat.addEventListener('click', () => {
                 if (!selectedItem) return;
                 const ci = parseInt(cat.dataset.cat);
@@ -686,9 +718,31 @@ const TakeTest = (function () {
                 selectedItem = null;
                 renderQuestion();
             });
+
+            // Drag-over highlight
+            cat.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                cat.classList.add('drag-over-cat');
+            });
+            cat.addEventListener('dragleave', () => {
+                cat.classList.remove('drag-over-cat');
+            });
+            cat.addEventListener('drop', (e) => {
+                e.preventDefault();
+                cat.classList.remove('drag-over-cat');
+                const itemValue = e.dataTransfer.getData('text/plain');
+                if (!itemValue) return;
+                const ci = parseInt(cat.dataset.cat);
+                if (!answers[currentQ]) answers[currentQ] = {};
+                if (!answers[currentQ][ci]) answers[currentQ][ci] = [];
+                answers[currentQ][ci].push(itemValue);
+                selectedItem = null;
+                renderQuestion();
+            });
         });
 
-        // Remove from category
+        // Remove from category (click placed item)
         document.querySelectorAll('.tt-dd-item').forEach(item => {
             item.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -810,7 +864,14 @@ const TakeTest = (function () {
     }
 
     // ===== SUBMIT TEST =====
-    async function submitTest() {
+    async function submitTest(force) {
+        // If not forced, check if current question is answered
+        if (force !== true && !isQuestionAnswered()) {
+            pendingDirection = 'submit';
+            document.getElementById('incomplete-warning').style.display = 'flex';
+            return;
+        }
+
         if (timerInterval) clearInterval(timerInterval);
 
         const completedAt = Date.now();

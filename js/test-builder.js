@@ -552,15 +552,27 @@ const TestBuilder = (function () {
 
     // Multiple Choice
     function renderMCEditor(q) {
-        const options = q.options.map((opt, i) => `
+        if (!q.optionImages) q.optionImages = [];
+        const options = q.options.map((opt, i) => {
+            const imgThumb = q.optionImages[i]
+                ? `<div class="opt-img-thumb"><img src="${q.optionImages[i]}" /><button class="opt-img-remove" data-index="${i}" title="Remove image"><i class="fa-solid fa-xmark"></i></button></div>`
+                : '';
+            return `
             <div class="option-item ${q.correctAnswer === i || (Array.isArray(q.correctAnswer) && q.correctAnswer.includes(i)) ? 'correct' : ''}" data-index="${i}">
                 <span class="correct-toggle" data-index="${i}" title="Mark as correct">
                     <i class="fa-solid fa-check"></i>
                 </span>
-                <input type="text" value="${escapeHtml(opt)}" placeholder="Option ${LETTERS[i]}..." data-index="${i}" class="mc-option-input" />
+                <div class="opt-content">
+                    <input type="text" value="${escapeHtml(opt)}" placeholder="Option ${LETTERS[i]}..." data-index="${i}" class="mc-option-input" />
+                    ${imgThumb}
+                    <label class="opt-img-upload" data-index="${i}" title="Add image">
+                        <i class="fa-solid fa-image"></i>
+                        <input type="file" accept="image/*" data-index="${i}" class="mc-opt-img-input" style="display:none;" />
+                    </label>
+                </div>
                 ${q.options.length > 2 ? `<button class="remove-option" data-index="${i}" title="Remove"><i class="fa-solid fa-xmark"></i></button>` : ''}
             </div>
-        `).join('');
+        `}).join('');
 
         return `
             <div class="option-list" id="mc-options">${options}</div>
@@ -628,14 +640,26 @@ const TestBuilder = (function () {
 
     // Matching
     function renderMatchEditor(q) {
-        const pairs = q.pairs.map((p, i) => `
+        if (!q.pairImages) q.pairImages = [];
+        const pairs = q.pairs.map((p, i) => {
+            const leftImg = q.pairImages[i]
+                ? `<div class="opt-img-thumb small"><img src="${q.pairImages[i]}" /><button class="pair-img-remove" data-index="${i}" title="Remove"><i class="fa-solid fa-xmark"></i></button></div>`
+                : '';
+            return `
             <div class="pair-item" data-index="${i}">
-                <input type="text" value="${escapeHtml(p.left)}" placeholder="Item ${i + 1}" class="match-left" data-index="${i}" />
+                <div class="pair-left-wrap">
+                    <input type="text" value="${escapeHtml(p.left)}" placeholder="Item ${i + 1}" class="match-left" data-index="${i}" />
+                    ${leftImg}
+                    <label class="opt-img-upload small" data-index="${i}" title="Add image">
+                        <i class="fa-solid fa-image"></i>
+                        <input type="file" accept="image/*" data-index="${i}" class="pair-img-input" style="display:none;" />
+                    </label>
+                </div>
                 <span class="pair-arrow"><i class="fa-solid fa-arrows-left-right"></i></span>
                 <input type="text" value="${escapeHtml(p.right)}" placeholder="Match ${i + 1}" class="match-right" data-index="${i}" />
                 ${q.pairs.length > 2 ? `<button class="remove-pair" data-index="${i}"><i class="fa-solid fa-xmark"></i></button>` : ''}
             </div>
-        `).join('');
+        `}).join('');
 
         return `
             <div class="pair-list" id="match-pairs">${pairs}</div>
@@ -782,6 +806,36 @@ const TestBuilder = (function () {
                 autoSave();
             });
         }
+
+        // Option image uploads
+        document.querySelectorAll('.mc-opt-img-input').forEach(input => {
+            input.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file || !file.type.startsWith('image/')) return;
+                const idx = parseInt(input.dataset.index);
+                const reader = new FileReader();
+                reader.onload = () => {
+                    if (!q.optionImages) q.optionImages = [];
+                    q.optionImages[idx] = reader.result;
+                    renderEditor();
+                    renderPreview();
+                    autoSave();
+                };
+                reader.readAsDataURL(file);
+            });
+        });
+
+        // Remove option image
+        document.querySelectorAll('.opt-img-remove').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const idx = parseInt(btn.dataset.index);
+                if (q.optionImages) q.optionImages[idx] = null;
+                renderEditor();
+                renderPreview();
+                autoSave();
+            });
+        });
     }
 
     function bindTFEditor(q) {
@@ -910,6 +964,36 @@ const TestBuilder = (function () {
                 autoSave();
             });
         }
+
+        // Pair image uploads
+        document.querySelectorAll('.pair-img-input').forEach(input => {
+            input.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file || !file.type.startsWith('image/')) return;
+                const idx = parseInt(input.dataset.index);
+                const reader = new FileReader();
+                reader.onload = () => {
+                    if (!q.pairImages) q.pairImages = [];
+                    q.pairImages[idx] = reader.result;
+                    renderEditor();
+                    renderPreview();
+                    autoSave();
+                };
+                reader.readAsDataURL(file);
+            });
+        });
+
+        // Remove pair image
+        document.querySelectorAll('.pair-img-remove').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const idx = parseInt(btn.dataset.index);
+                if (q.pairImages) q.pairImages[idx] = null;
+                renderEditor();
+                renderPreview();
+                autoSave();
+            });
+        });
     }
 
     function bindUWEditor(q) {
@@ -1096,11 +1180,16 @@ const TestBuilder = (function () {
 
     function renderMCPreview(q) {
         return `<div class="preview-options">
-            ${q.options.map((opt, i) => `
+            ${q.options.map((opt, i) => {
+            const img = q.optionImages && q.optionImages[i]
+                ? `<img src="${q.optionImages[i]}" style="max-height:40px;border-radius:4px;margin-right:6px;vertical-align:middle;" />`
+                : '';
+            return `
                 <div class="preview-option ${q.correctAnswer === i ? 'correct-answer' : ''}">
                     <span class="option-letter">${LETTERS[i]}</span>
-                    <span>${escapeHtml(opt) || '<span style="color:#ccc;">—</span>'}</span>
-                </div>`).join('')}
+                    <span>${img}${escapeHtml(opt) || '<span style="color:#ccc;">—</span>'}</span>
+                </div>`;
+        }).join('')}
         </div>`;
     }
 
@@ -1127,11 +1216,14 @@ const TestBuilder = (function () {
     }
 
     function renderMatchPreview(q) {
-        const shuffled = [...q.pairs].map(p => p.right);
-        // Don't shuffle in preview — show correct order
         return `<div class="preview-matching">
             <div class="preview-match-col">
-                ${q.pairs.map(p => `<div class="preview-match-item">${escapeHtml(p.left) || '—'}</div>`).join('')}
+                ${q.pairs.map((p, i) => {
+            const img = q.pairImages && q.pairImages[i]
+                ? `<img src="${q.pairImages[i]}" style="max-height:30px;border-radius:4px;margin-right:4px;vertical-align:middle;" />`
+                : '';
+            return `<div class="preview-match-item">${img}${escapeHtml(p.left) || '—'}</div>`;
+        }).join('')}
             </div>
             <div class="preview-match-col">
                 ${q.pairs.map(p => `<div class="preview-match-item">${escapeHtml(p.right) || '—'}</div>`).join('')}
