@@ -234,6 +234,8 @@ const TakeTest = (function () {
         if (!isFS && fullscreenEnabled && screens.question.style.display !== 'none') {
             violations.push({ type: 'fullscreen-exit', timestamp: Date.now() });
             document.getElementById('fs-warning').style.display = 'flex';
+        } else if (isFS) {
+            document.getElementById('fs-warning').style.display = 'none';
         }
     }
 
@@ -249,7 +251,7 @@ const TakeTest = (function () {
         if (btnReturnFs) {
             btnReturnFs.addEventListener('click', () => {
                 requestFullscreen();
-                document.getElementById('screen-alert').style.display = 'none';
+                document.getElementById('fs-warning').style.display = 'none';
             });
         }
 
@@ -479,7 +481,7 @@ const TakeTest = (function () {
             const isMatched = currentMatches.includes(r);
             return `<div class="tt-match-item tt-match-item-right ${isMatched ? 'matched' : ''}" data-value="${escapeHtml(r)}" data-idx="${i}">
                 <span class="tt-match-text">${escapeHtml(r)}</span>
-                <button class="tt-match-clear" data-value="${escapeHtml(r)}"><i class="fa-solid fa-xmark"></i></button>
+                <button class="tt-match-clear" data-value="${escapeHtml(r)}"><i class="fa-solid fa-trash-can"></i></button>
             </div>`;
         }).join('');
 
@@ -503,8 +505,15 @@ const TakeTest = (function () {
             hintHtml = `<div class="tt-unjumble-hint">Hint: starts with "${escapeHtml(q.words[0])}"</div>`;
         }
 
+        const placedCounts = {};
+        placed.forEach(w => placedCounts[w] = (placedCounts[w] || 0) + 1);
+
         const tiles = words.map((w, i) => {
-            const isPlaced = placed.includes(w) ? 'placed' : '';
+            let isPlaced = '';
+            if (placedCounts[w] > 0) {
+                isPlaced = 'placed';
+                placedCounts[w]--;
+            }
             return `<span class="tt-unjumble-tile ${isPlaced}" data-word="${escapeHtml(w)}" data-idx="${i}">${escapeHtml(w)}</span>`;
         }).join('');
 
@@ -527,9 +536,16 @@ const TakeTest = (function () {
             hintHtml = `<div class="tt-unjumble-hint">Hint: starts with "${q.correctWord[0]}"</div>`;
         }
 
+        const placedCounts = {};
+        placed.forEach(l => placedCounts[l] = (placedCounts[l] || 0) + 1);
+
         const tiles = letters.map((l, i) => {
-            const isPlaced = placed.length > 0 && placed.filter(x => x === l).length >= letters.filter((x, j) => x === l && placed.includes(x) && j <= i).length ? '' : '';
-            return `<span class="tt-unjumble-tile" data-letter="${escapeHtml(l)}" data-idx="${i}">${escapeHtml(l.toUpperCase())}</span>`;
+            let isPlaced = '';
+            if (placedCounts[l] > 0) {
+                isPlaced = 'placed';
+                placedCounts[l]--;
+            }
+            return `<span class="tt-unjumble-tile ${isPlaced}" data-letter="${escapeHtml(l)}" data-idx="${i}">${escapeHtml(l.toUpperCase())}</span>`;
         }).join('');
 
         const answerChips = placed.map((l, i) =>
@@ -697,12 +713,31 @@ const TakeTest = (function () {
 
         // Remove from answer zone
         document.querySelectorAll('.tt-answer-chip').forEach(chip => {
+            // Click to remove
             chip.addEventListener('click', () => {
                 const idx = parseInt(chip.dataset.idx);
                 if (answers[currentQ]) {
                     answers[currentQ].splice(idx, 1);
                 }
                 renderQuestion();
+            });
+
+            // Drag out to remove
+            chip.setAttribute('draggable', 'true');
+            chip.addEventListener('dragstart', (e) => {
+                chip.classList.add('dragging');
+                e.dataTransfer.setData('application/x-remove-chip-idx', chip.dataset.idx);
+                e.dataTransfer.effectAllowed = 'move';
+            });
+            chip.addEventListener('dragend', (e) => {
+                chip.classList.remove('dragging');
+                if (e.dataTransfer.dropEffect === 'none') {
+                    const idx = parseInt(chip.dataset.idx);
+                    if (answers[currentQ]) {
+                        answers[currentQ].splice(idx, 1);
+                        renderQuestion();
+                    }
+                }
             });
         });
     }
