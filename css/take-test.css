@@ -995,6 +995,98 @@ body {
     }
 }
 
+/* ===== IMAGE OPTIONS GRID & LIGHTBOX ===== */
+.tt-options-img-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.tt-options.tt-img-row {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.tt-options.tt-img-row .tt-option-card {
+    flex: 1;
+    min-width: 150px;
+    max-width: 250px;
+}
+
+.tt-option-card {
+    flex-direction: column;
+    text-align: center;
+    padding: 20px 15px;
+    gap: 15px;
+}
+
+.tt-option-card .tt-opt-text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.tt-option-card .tt-option-img {
+    max-width: 100%;
+    max-height: 120px;
+    object-fit: contain;
+    border-radius: 8px;
+    cursor: zoom-in;
+    transition: transform 0.2s;
+}
+
+.tt-option-card .tt-option-img:hover {
+    transform: scale(1.05);
+}
+
+.tt-lightbox {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+}
+
+.tt-lightbox-content {
+    position: relative;
+    max-width: 90%;
+    max-height: 90vh;
+}
+
+.tt-lightbox-content img {
+    max-width: 100%;
+    max-height: 90vh;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    object-fit: contain;
+}
+
+.tt-btn-close-lightbox {
+    position: absolute;
+    top: -40px;
+    right: 0;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 2rem;
+    cursor: pointer;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+
+.tt-btn-close-lightbox:hover {
+    opacity: 1;
+}
+
 /* ===== RESPONSIVE ===== */
 @media (max-width: 600px) {
 

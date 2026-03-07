@@ -249,10 +249,19 @@ const TakeTest = (function () {
         if (btnReturnFs) {
             btnReturnFs.addEventListener('click', () => {
                 requestFullscreen();
-                document.getElementById('fs-warning').style.display = 'none';
+                document.getElementById('screen-alert').style.display = 'none';
             });
         }
 
+        // Lightbox close events
+        const lightbox = document.getElementById('image-lightbox');
+        const btnCloseLb = document.getElementById('btn-close-lightbox');
+        if (lightbox && btnCloseLb) {
+            btnCloseLb.addEventListener('click', () => lightbox.style.display = 'none');
+            lightbox.addEventListener('click', (e) => {
+                if (e.target === lightbox) lightbox.style.display = 'none';
+            });
+        }
         // Incomplete question warning handlers
         const btnGoBack = document.getElementById('btn-go-back');
         const btnContinue = document.getElementById('btn-continue-anyway');
@@ -390,17 +399,22 @@ const TakeTest = (function () {
     }
 
     function renderMCQuestion(q) {
+        const hasImages = q.optionImages && q.optionImages.some(img => img);
+        const gridClass = hasImages
+            ? (q.options.length <= 3 ? 'tt-options-img-grid tt-img-row' : 'tt-options-img-grid')
+            : '';
+
         const opts = q.options.map((opt, i) => {
             const selected = answers[currentQ] === i ? 'selected' : '';
             const img = q.optionImages && q.optionImages[i]
-                ? `<img class="tt-option-img" src="${q.optionImages[i]}" alt="" />`
+                ? `<img class="tt-option-img" src="${q.optionImages[i]}" alt="" data-preview="${q.optionImages[i]}" />`
                 : '';
-            return `<div class="tt-option ${selected}" data-idx="${i}">
+            return `<div class="tt-option ${hasImages ? 'tt-option-card' : ''} ${selected}" data-idx="${i}">
                 <span class="tt-opt-letter">${LETTERS[i]}</span>
                 <span class="tt-opt-text">${img}${escapeHtml(opt)}</span>
             </div>`;
         }).join('');
-        return `<div class="tt-options">${opts}</div>`;
+        return `<div class="tt-options ${gridClass}">${opts}</div>`;
     }
 
     function renderTFQuestion(q) {
@@ -564,12 +578,21 @@ const TakeTest = (function () {
             case 'multiple-choice':
             case 'true-false':
                 document.querySelectorAll('.tt-option').forEach(opt => {
-                    opt.addEventListener('click', () => {
+                    opt.addEventListener('click', (e) => {
+                        // Don't select option if clicking preview image
+                        if (e.target.closest('.tt-option-img')) return;
                         answers[currentQ] = parseInt(opt.dataset.idx);
                         document.querySelectorAll('.tt-option').forEach(o => o.classList.remove('selected'));
                         opt.classList.add('selected');
                         opt.querySelector('.tt-opt-letter').style.transform = 'scale(1.1)';
                         setTimeout(() => opt.querySelector('.tt-opt-letter').style.transform = '', 200);
+                    });
+                });
+                // Image preview lightbox
+                document.querySelectorAll('.tt-option-img[data-preview]').forEach(img => {
+                    img.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        showImageLightbox(img.dataset.preview);
                     });
                 });
                 break;
@@ -1037,6 +1060,15 @@ const TakeTest = (function () {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
+    }
+
+    function showImageLightbox(src) {
+        const lightbox = document.getElementById('image-lightbox');
+        const img = document.getElementById('lightbox-img');
+        if (lightbox && img) {
+            img.src = src;
+            lightbox.style.display = 'flex';
+        }
     }
 
     function shuffleArray(arr) {
