@@ -369,7 +369,7 @@ const TakeTest = (function () {
         let mediaHtml = '';
         if (q.media && q.media.data) {
             if (q.media.type === 'image') {
-                mediaHtml = `<div class="tt-q-media"><img src="${q.media.data}" alt="Question image" /></div>`;
+                mediaHtml = `<div class="tt-q-media"><img class="tt-q-media-img" src="${q.media.data}" alt="Question image" data-preview="${q.media.data}" /></div>`;
             } else if (q.media.type === 'audio') {
                 mediaHtml = `<div class="tt-q-media"><audio controls src="${q.media.data}"></audio></div>`;
             }
@@ -470,7 +470,7 @@ const TakeTest = (function () {
         const leftItems = q.pairs.map((p, i) => {
             const isMatched = currentMatches[i] !== undefined && currentMatches[i] !== '';
             const img = q.pairImages && q.pairImages[i]
-                ? `<img class="tt-match-img" src="${q.pairImages[i]}" alt="" />`
+                ? `<img class="tt-match-img" src="${q.pairImages[i]}" alt="" data-preview="${q.pairImages[i]}" />`
                 : '';
             return `<div class="tt-match-item tt-match-item-left ${isMatched ? 'matched' : ''}" data-idx="${i}">${img}${escapeHtml(p.left)}</div>`;
         }).join('');
@@ -588,13 +588,6 @@ const TakeTest = (function () {
                         setTimeout(() => opt.querySelector('.tt-opt-letter').style.transform = '', 200);
                     });
                 });
-                // Image preview lightbox
-                document.querySelectorAll('.tt-option-img[data-preview]').forEach(img => {
-                    img.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        showImageLightbox(img.dataset.preview);
-                    });
-                });
                 break;
 
             case 'fill-blank':
@@ -640,6 +633,14 @@ const TakeTest = (function () {
                 bindDragDrop(q);
                 break;
         }
+
+        // Global Image preview lightbox (applies to all img with data-preview)
+        document.querySelectorAll('img[data-preview]').forEach(img => {
+            img.addEventListener('click', (e) => {
+                e.stopPropagation();
+                showImageLightbox(img.dataset.preview);
+            });
+        });
     }
 
     function bindUnjumble(mode) {

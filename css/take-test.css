@@ -995,6 +995,16 @@ body {
     }
 }
 
+/* ===== GLOBAL LIGHTBOX IMAGE TRIGGER ===== */
+img[data-preview] {
+    cursor: zoom-in;
+    transition: transform 0.2s;
+}
+
+img[data-preview]:hover {
+    transform: scale(1.03);
+}
+
 /* ===== IMAGE OPTIONS GRID & LIGHTBOX ===== */
 .tt-options-img-grid {
     display: grid;
