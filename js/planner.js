@@ -262,6 +262,14 @@
 
         const sourceActivities = plannerData.classes[sourceClassId]?.activities || [];
 
+        // Find and remove any empty inputs before appending imported ones
+        const inputs = activitiesList.querySelectorAll('input');
+        inputs.forEach(input => {
+            if (input.value.trim() === '') {
+                input.closest('.activity-item').remove();
+            }
+        });
+
         sourceActivities.forEach(activity => {
             addActivityInput(activity);
         });
@@ -274,26 +282,115 @@
     function addActivityInput(value = '') {
         const activityItem = document.createElement('div');
         activityItem.className = 'activity-item';
+        activityItem.draggable = true;
+
+        const dragHandle = document.createElement('span');
+        dragHandle.className = 'drag-handle';
+        dragHandle.innerHTML = '<i class="fa-solid fa-grip-vertical"></i>';
+
+        const qNumber = document.createElement('span');
+        qNumber.className = 'q-number';
+        qNumber.textContent = document.querySelectorAll('.activity-item').length + 1;
 
         const input = document.createElement('input');
         input.type = 'text';
         input.placeholder = 'Enter activity description...';
         input.value = value;
 
+        const controlsContainer = document.createElement('div');
+        controlsContainer.className = 'activity-controls';
+
         const removeBtn = document.createElement('button');
+        removeBtn.className = 'btn-remove';
         removeBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
+        removeBtn.title = 'Delete Activity';
         removeBtn.addEventListener('click', () => {
             activityItem.remove();
+            updateActivityNumbers();
         });
 
+        controlsContainer.appendChild(removeBtn);
+
+        activityItem.appendChild(dragHandle);
+        activityItem.appendChild(qNumber);
         activityItem.appendChild(input);
-        activityItem.appendChild(removeBtn);
+        activityItem.appendChild(controlsContainer);
         activitiesList.appendChild(activityItem);
+
+        // Drag and Drop Logic
+        activityItem.addEventListener('dragstart', (e) => {
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', ''); // Required for Firefox
+            setTimeout(() => activityItem.classList.add('dragging'), 0);
+        });
+
+        activityItem.addEventListener('dragend', () => {
+            activityItem.classList.remove('dragging');
+            const items = activitiesList.querySelectorAll('.activity-item');
+            items.forEach(it => it.classList.remove('drag-over'));
+            updateActivityNumbers();
+        });
+
+        activityItem.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+
+            const draggingItem = activitiesList.querySelector('.dragging');
+            if (!draggingItem || draggingItem === activityItem) return;
+
+            activityItem.classList.add('drag-over');
+
+            const bounding = activityItem.getBoundingClientRect();
+            const offset = bounding.y + (bounding.height / 2);
+            if (e.clientY - offset > 0) {
+                activityItem.style.borderBottom = "2px solid var(--amber-flame)";
+                activityItem.style.borderTop = "";
+            } else {
+                activityItem.style.borderTop = "2px solid var(--amber-flame)";
+                activityItem.style.borderBottom = "";
+            }
+        });
+
+        activityItem.addEventListener('dragleave', () => {
+            activityItem.classList.remove('drag-over');
+            activityItem.style.borderTop = "";
+            activityItem.style.borderBottom = "";
+        });
+
+        activityItem.addEventListener('drop', (e) => {
+            e.preventDefault();
+            activityItem.classList.remove('drag-over');
+            activityItem.style.borderTop = "";
+            activityItem.style.borderBottom = "";
+
+            const draggingItem = activitiesList.querySelector('.dragging');
+            if (!draggingItem || draggingItem === activityItem) return;
+
+            const bounding = activityItem.getBoundingClientRect();
+            const offset = bounding.y + (bounding.height / 2);
+
+            if (e.clientY - offset > 0) {
+                activityItem.after(draggingItem);
+            } else {
+                activityItem.before(draggingItem);
+            }
+        });
+
+        updateActivityNumbers();
 
         // Focus on new input
         if (!value) {
             input.focus();
         }
+    }
+
+    // Helper to update the numbers incrementally
+    function updateActivityNumbers() {
+        const items = activitiesList.querySelectorAll('.activity-item');
+        items.forEach((item, index) => {
+            const qNum = item.querySelector('.q-number');
+            if (qNum) qNum.textContent = index + 1;
+        });
     }
 
     // Save activities
