@@ -1,224 +1,286 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/png" href="assets/graduation-cap-icon.png">
-    <title>Take Test - ESL Learning Platform</title>
-    <meta name="description" content="Take an ESL assessment shared by your teacher.">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Reddit+Sans:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="css/take-test.css">
-    <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/png" href="assets/graduation-cap-icon.png" />
+  <title>Take Test - ESL Learning Platform</title>
+  <meta name="description" content="Take an ESL assessment shared by your teacher." />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Reddit+Sans:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/take-test.css?v=2" />
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+    }
 
-        .main-header,
-        .main-nav,
-        .main-footer,
-        .main-content {
-            display: none;
-        }
-    </style>
+    .main-header,
+    .main-nav,
+    .main-footer,
+    .main-content {
+      display: none;
+    }
+  </style>
 </head>
 
 <body>
-    <!-- Loading -->
-    <div class="tt-screen tt-loading" id="screen-loading">
-        <div class="tt-loading-spinner"></div>
-        <p>Loading test...</p>
+  <canvas id="tt-bg-canvas" style="position:fixed;inset:0;z-index:0;pointer-events:none;"></canvas>
+  <!-- Loading -->
+  <div class="tt-screen tt-loading" id="screen-loading">
+    <div class="tt-loading-spinner"></div>
+    <p>Loading test...</p>
+  </div>
+
+  <!-- Error -->
+  <div class="tt-screen tt-error" id="screen-error" style="display: none">
+    <div class="tt-error-icon">
+      <i class="fa-solid fa-circle-exclamation"></i>
     </div>
+    <h2 id="error-title">Test Not Found</h2>
+    <p id="error-message">This test code is invalid or has expired.</p>
+    <a href="tools.html" class="tt-btn tt-btn-primary">Go Back</a>
+  </div>
 
-    <!-- Error -->
-    <div class="tt-screen tt-error" id="screen-error" style="display:none;">
-        <div class="tt-error-icon"><i class="fa-solid fa-circle-exclamation"></i></div>
-        <h2 id="error-title">Test Not Found</h2>
-        <p id="error-message">This test code is invalid or has expired.</p>
-        <a href="tools.html" class="tt-btn tt-btn-primary">Go Back</a>
+  <!-- Code Entry (if no ?code in URL) -->
+  <div class="tt-screen tt-code-entry" id="screen-code" style="display: none">
+    <div class="tt-code-card">
+      <h1><i class="fa-solid fa-file-pen"></i> ESL Test</h1>
+      <p>Enter the test code from your teacher</p>
+      <div class="tt-code-inputs" id="code-inputs">
+        <input type="text" maxlength="1" class="code-char" data-idx="0" autocomplete="off" />
+        <input type="text" maxlength="1" class="code-char" data-idx="1" autocomplete="off" />
+        <input type="text" maxlength="1" class="code-char" data-idx="2" autocomplete="off" />
+        <input type="text" maxlength="1" class="code-char" data-idx="3" autocomplete="off" />
+        <input type="text" maxlength="1" class="code-char" data-idx="4" autocomplete="off" />
+        <input type="text" maxlength="1" class="code-char" data-idx="5" autocomplete="off" />
+      </div>
+      <button class="tt-btn tt-btn-primary" id="btn-submit-code">
+        <i class="fa-solid fa-arrow-right"></i> Join Test
+      </button>
     </div>
+  </div>
 
-    <!-- Code Entry (if no ?code in URL) -->
-    <div class="tt-screen tt-code-entry" id="screen-code" style="display:none;">
-        <div class="tt-code-card">
-            <h1><i class="fa-solid fa-file-pen"></i> ESL Test</h1>
-            <p>Enter the test code from your teacher</p>
-            <div class="tt-code-inputs" id="code-inputs">
-                <input type="text" maxlength="1" class="code-char" data-idx="0" autocomplete="off" />
-                <input type="text" maxlength="1" class="code-char" data-idx="1" autocomplete="off" />
-                <input type="text" maxlength="1" class="code-char" data-idx="2" autocomplete="off" />
-                <input type="text" maxlength="1" class="code-char" data-idx="3" autocomplete="off" />
-                <input type="text" maxlength="1" class="code-char" data-idx="4" autocomplete="off" />
-                <input type="text" maxlength="1" class="code-char" data-idx="5" autocomplete="off" />
-            </div>
-            <button class="tt-btn tt-btn-primary" id="btn-submit-code"><i class="fa-solid fa-arrow-right"></i> Join
-                Test</button>
-        </div>
+  <!-- Student ID -->
+  <div class="tt-screen tt-student-id" id="screen-student" style="display: none">
+    <div class="tt-student-card">
+      <h1 id="test-title-display">Test</h1>
+      <p id="test-desc-display"></p>
+      <div class="tt-field" id="name-field-container">
+        <label>Your Name</label>
+        <input type="text" id="student-name" placeholder="Enter your full name" autocomplete="name" />
+      </div>
+      <div class="tt-field" id="group-field-container">
+        <label>Course Group</label>
+        <select id="student-group">
+          <option value="">Select your group...</option>
+        </select>
+      </div>
+      <button class="tt-btn tt-btn-primary tt-btn-large" id="btn-start-test">
+        <i class="fa-solid fa-play"></i> Start Test
+      </button>
+      <div class="tt-test-info">
+        <span id="info-questions"><i class="fa-solid fa-list"></i> 0 questions</span>
+        <span id="info-time"><i class="fa-solid fa-clock"></i> No time limit</span>
+      </div>
     </div>
+  </div>
 
-    <!-- Student ID -->
-    <div class="tt-screen tt-student-id" id="screen-student" style="display:none;">
-        <div class="tt-student-card">
-            <h1 id="test-title-display">Test</h1>
-            <p id="test-desc-display"></p>
-            <div class="tt-field" id="name-field-container">
-                <label>Your Name</label>
-                <input type="text" id="student-name" placeholder="Enter your full name" autocomplete="name" />
-            </div>
-            <div class="tt-field" id="group-field-container">
-                <label>Course Group</label>
-                <select id="student-group">
-                    <option value="">Select your group...</option>
-                </select>
-            </div>
-            <button class="tt-btn tt-btn-primary tt-btn-large" id="btn-start-test">
-                <i class="fa-solid fa-play"></i> Start Test
-            </button>
-            <div class="tt-test-info">
-                <span id="info-questions"><i class="fa-solid fa-list"></i> 0 questions</span>
-                <span id="info-time"><i class="fa-solid fa-clock"></i> No time limit</span>
-            </div>
-        </div>
+  <!-- Question Screen -->
+  <div class="tt-screen tt-question" id="screen-question" style="display: none">
+    <div class="tt-question-header">
+      <div class="tt-progress-bar">
+        <div class="tt-progress-fill" id="progress-fill"></div>
+      </div>
+      <div class="tt-question-meta">
+        <span id="q-counter">1 / 10</span>
+        <span id="q-timer" style="display: none"><i class="fa-solid fa-clock"></i>
+          <span id="timer-text">00:00</span></span>
+      </div>
     </div>
-
-    <!-- Question Screen -->
-    <div class="tt-screen tt-question" id="screen-question" style="display:none;">
-        <div class="tt-question-header">
-            <div class="tt-progress-bar">
-                <div class="tt-progress-fill" id="progress-fill"></div>
-            </div>
-            <div class="tt-question-meta">
-                <span id="q-counter">1 / 10</span>
-                <span id="q-timer" style="display:none;"><i class="fa-solid fa-clock"></i> <span
-                        id="timer-text">00:00</span></span>
-            </div>
-        </div>
-        <div class="tt-question-body" id="question-body"></div>
-        <div class="tt-question-footer">
-            <button class="tt-btn tt-btn-secondary" id="btn-prev" style="display:none;"><i
-                    class="fa-solid fa-arrow-left"></i> Previous</button>
-            <button class="tt-btn tt-btn-primary" id="btn-next">Next <i class="fa-solid fa-arrow-right"></i></button>
-            <button class="tt-btn tt-btn-success" id="btn-submit-test" style="display:none;"><i
-                    class="fa-solid fa-check"></i> Submit Test</button>
-        </div>
-
+    <div class="tt-question-body" id="question-body"></div>
+    <div class="tt-question-footer">
+      <button class="tt-btn tt-btn-secondary" id="btn-prev" style="display: none">
+        <i class="fa-solid fa-arrow-left"></i> Previous
+      </button>
+      <button class="tt-btn tt-btn-primary" id="btn-next">
+        Next <i class="fa-solid fa-arrow-right"></i>
+      </button>
+      <button class="tt-btn tt-btn-success" id="btn-submit-test" style="display: none">
+        <i class="fa-solid fa-check"></i> Submit Test
+      </button>
     </div>
+  </div>
 
-    <!-- Fullscreen Warning Overlay -->
-    <div class="tt-fs-warning" id="fs-warning" style="display:none;">
-        <div class="tt-fs-warning-card">
-            <i class="fa-solid fa-triangle-exclamation"></i>
-            <h2>Fullscreen Required</h2>
-            <p>Please stay in fullscreen mode during the test.</p>
-            <button class="tt-btn tt-btn-primary" id="btn-return-fs"><i class="fa-solid fa-expand"></i> Return to
-                Fullscreen</button>
-        </div>
+  <!-- Fullscreen Warning Overlay -->
+  <div class="tt-fs-warning" id="fs-warning" style="display: none">
+    <div class="tt-fs-warning-card">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+      <h2>Fullscreen Required</h2>
+      <p>Please stay in fullscreen mode during the test.</p>
+      <button class="tt-btn tt-btn-primary" id="btn-return-fs">
+        <i class="fa-solid fa-expand"></i> Return to Fullscreen
+      </button>
     </div>
+  </div>
 
-    <!-- Incomplete Question Warning -->
-    <div class="tt-incomplete-warning" id="incomplete-warning" style="display:none;">
-        <div class="tt-incomplete-card">
-            <i class="fa-solid fa-circle-exclamation"></i>
-            <h2>Question Incomplete</h2>
-            <p>You haven't answered this question yet. Would you like to continue anyway?</p>
-            <div class="tt-incomplete-actions">
-                <button class="tt-btn tt-btn-secondary" id="btn-go-back"><i class="fa-solid fa-arrow-left"></i> Go
-                    Back</button>
-                <button class="tt-btn tt-btn-primary" id="btn-continue-anyway">Continue Anyway <i
-                        class="fa-solid fa-arrow-right"></i></button>
-            </div>
-        </div>
+  <!-- Incomplete Question Warning -->
+  <div class="tt-incomplete-warning" id="incomplete-warning" style="display: none">
+    <div class="tt-incomplete-card">
+      <i class="fa-solid fa-circle-exclamation"></i>
+      <h2>Question Incomplete</h2>
+      <p>
+        You haven't answered this question yet. Would you like to continue
+        anyway?
+      </p>
+      <div class="tt-incomplete-actions">
+        <button class="tt-btn tt-btn-secondary" id="btn-go-back">
+          <i class="fa-solid fa-arrow-left"></i> Go Back
+        </button>
+        <button class="tt-btn tt-btn-primary" id="btn-continue-anyway">
+          Continue Anyway <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
     </div>
+  </div>
 
-    <!-- Image Lightbox -->
-    <div class="tt-lightbox" id="image-lightbox" style="display:none;">
-        <div class="tt-lightbox-content">
-            <button class="tt-btn-close-lightbox" id="btn-close-lightbox"><i class="fa-solid fa-xmark"></i></button>
-            <img id="lightbox-img" src="" alt="Enlarged view" />
-        </div>
+  <!-- Image Lightbox -->
+  <div class="tt-lightbox" id="image-lightbox" style="display: none">
+    <div class="tt-lightbox-content">
+      <button class="tt-btn-close-lightbox" id="btn-close-lightbox">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+      <img id="lightbox-img" src="" alt="Enlarged view" />
     </div>
+  </div>
 
-    <!-- Results -->
-    <div class="tt-screen tt-results" id="screen-results" style="display:none;">
-        <div class="tt-confetti" id="confetti-container"></div>
-        <div class="tt-results-card">
-            <div class="tt-results-header">
-                <h1><i class="fa-solid fa-award"></i> Test Complete!</h1>
-            </div>
-            <div class="tt-score-circle" id="score-circle">
-                <svg width="140" height="140" viewBox="0 0 140 140" class="tt-score-svg">
-                    <!-- Background ring -->
-                    <circle cx="70" cy="70" r="62" class="tt-score-ring-bg"></circle>
-                    <!-- Animated fill ring -->
-                    <circle cx="70" cy="70" r="62" class="tt-score-ring-fill" id="score-ring-fill"></circle>
-                </svg>
-                <div class="tt-score-content">
-                    <span class="tt-score-value" id="score-value">0%</span>
-                    <span class="tt-score-label" id="score-label">Score</span>
-                </div>
-            </div>
-            <div class="tt-results-details" id="results-details"></div>
-            <div class="tt-results-actions">
-                <button class="tt-btn tt-btn-secondary" id="btn-review-answers" style="display:none;"><i
-                        class="fa-solid fa-list-check"></i> Review Answers</button>
-                <button class="tt-btn tt-btn-primary" id="btn-close-results">Close</button>
-            </div>
+  <!-- Results -->
+  <div class="tt-screen tt-results" id="screen-results" style="display: none">
+    <div class="tt-confetti" id="confetti-container"></div>
+    <div class="tt-results-card">
+      <div class="tt-results-header">
+        <h1><i class="fa-solid fa-award"></i> Test Complete!</h1>
+      </div>
+      <div class="tt-score-circle" id="score-circle">
+        <svg width="140" height="140" viewBox="0 0 140 140" class="tt-score-svg">
+          <!-- Background ring -->
+          <circle cx="70" cy="70" r="62" class="tt-score-ring-bg"></circle>
+          <!-- Animated fill ring -->
+          <circle cx="70" cy="70" r="62" class="tt-score-ring-fill" id="score-ring-fill"></circle>
+        </svg>
+        <div class="tt-score-content">
+          <span class="tt-score-value" id="score-value">0%</span>
+          <span class="tt-score-label" id="score-label">Score</span>
         </div>
-        <!-- Answer Review Section -->
-        <div class="tt-answer-review" id="answer-review" style="display:none;">
-            <div class="tt-review-header">
-                <h2><i class="fa-solid fa-list-check"></i> Answer Review</h2>
-                <button class="tt-btn tt-btn-secondary tt-btn-sm" id="btn-back-to-score"><i
-                        class="fa-solid fa-arrow-left"></i> Back to Score</button>
-            </div>
-            <div class="tt-review-list" id="review-list"></div>
-        </div>
+      </div>
+      <div class="tt-results-details" id="results-details"></div>
+      <div class="tt-results-actions">
+        <button class="tt-btn tt-btn-secondary" id="btn-review-answers" style="display: none">
+          <i class="fa-solid fa-list-check"></i> Review Answers
+        </button>
+        <button class="tt-btn tt-btn-primary" id="btn-close-results">
+          Close
+        </button>
+      </div>
     </div>
+    <!-- Answer Review Section -->
+    <div class="tt-answer-review" id="answer-review" style="display: none">
+      <div class="tt-review-header">
+        <h2><i class="fa-solid fa-list-check"></i> Answer Review</h2>
+        <button class="tt-btn tt-btn-secondary tt-btn-sm" id="btn-back-to-score">
+          <i class="fa-solid fa-arrow-left"></i> Back to Score
+        </button>
+      </div>
+      <div class="tt-review-list" id="review-list"></div>
+    </div>
+  </div>
 
-    <!-- Global Elements -->
+  <!-- Global Elements -->
 
-    <!-- Floating Theme Button -->
-    <button class="tt-theme-fab" id="btn-theme-fab" title="Change Theme" style="display:none;">
-        <i class="fa-solid fa-palette"></i>
+  <!-- Floating Theme Button -->
+  <button class="tt-theme-fab" id="btn-theme-fab" title="Change Theme" style="display: none">
+    <i class="fa-solid fa-palette"></i> Themes
+  </button>
+
+  <!-- Theme Picker Popup -->
+  <div class="tt-theme-picker" id="theme-picker" style="display: none">
+    <div class="tt-theme-picker-header">
+      <span>Choose Theme</span>
+      <div style="display: flex; gap: 8px;">
+        <button class="tt-theme-anim-toggle" id="tt-anim-toggle" title="Toggle background animations">
+          <i class="fa-solid fa-pause" id="tt-anim-icon"></i>
+        </button>
+        <button class="tt-theme-dark-toggle" id="tt-dark-toggle" title="Toggle dark mode">
+          <i class="fa-solid fa-moon" id="tt-dark-icon"></i>
+        </button>
+      </div>
+    </div>
+    <div class="tt-theme-swatches">
+      <button class="tt-theme-swatch active" data-theme="default" title="Default"
+        style="background-color: #5145cd"></button>
+      <button class="tt-theme-swatch" data-theme="neon" title="Neon" style="background-color: #00d4ff"></button>
+      <button class="tt-theme-swatch" data-theme="forest" title="Forest" style="background-color: #208b5e"></button>
+      <button class="tt-theme-swatch" data-theme="winter" title="Winter" style="background-color: #3498db"></button>
+      <button class="tt-theme-swatch" data-theme="candy" title="Candy" style="background-color: #c026d3"></button>
+      <button class="tt-theme-swatch" data-theme="pastel" title="Pastel" style="background-color: #f472b6"></button>
+      <button class="tt-theme-swatch" data-theme="ocean" title="Ocean" style="background-color: #0284c7"></button>
+    </div>
+  </div>
+  <!-- Restart Warning Modal -->
+  <div class="tt-fs-warning" id="restart-warning" style="display: none">
+    <div class="tt-fs-warning-card">
+      <div class="tt-fs-warning-icon">
+        <i class="fa-solid fa-rotate-right"></i>
+      </div>
+      <h2>Restart Quiz?</h2>
+      <p>
+        Are you sure you want to restart the quiz? All current progress will
+        be lost and you will start from the beginning.
+      </p>
+      <div style="
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 24px;
+          ">
+        <button class="tt-btn tt-btn-secondary" id="btn-cancel-restart">
+          Cancel
+        </button>
+        <button class="tt-btn tt-btn-primary" id="btn-confirm-restart" style="background: #e74c3c">
+          Restart
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom Context Menu -->
+  <div id="tt-context-menu" class="tt-context-menu" style="display: none">
+    <button id="cm-btn-theme" class="cm-btn">
+      <i class="fa-solid fa-palette"></i> Change Theme
     </button>
+    <button id="cm-btn-prev" class="cm-btn">
+      <i class="fa-solid fa-arrow-left"></i> Previous Question
+    </button>
+    <button id="cm-btn-next" class="cm-btn">
+      <i class="fa-solid fa-arrow-right"></i> Next Question
+    </button>
+    <div class="cm-divider"></div>
+    <button id="cm-btn-restart" class="cm-btn cm-btn-danger">
+      <i class="fa-solid fa-rotate-right"></i> Restart Quiz
+    </button>
+  </div>
 
-    <!-- Theme Picker Popup -->
-    <div class="tt-theme-picker" id="theme-picker" style="display:none;">
-        <div class="tt-theme-picker-header">
-            <span>Choose Theme</span>
-            <button class="tt-theme-dark-toggle" id="tt-dark-toggle" title="Toggle dark mode">
-                <i class="fa-solid fa-moon" id="tt-dark-icon"></i>
-            </button>
-        </div>
-        <div class="tt-theme-swatches">
-            <button class="tt-theme-swatch active" data-theme="default" title="Default"
-                style="background-color: #5145cd;"></button>
-            <button class="tt-theme-swatch" data-theme="neon" title="Neon" style="background-color: #00d4ff;"></button>
-            <button class="tt-theme-swatch" data-theme="forest" title="Forest"
-                style="background-color: #208b5e;"></button>
-            <button class="tt-theme-swatch" data-theme="winter" title="Winter"
-                style="background-color: #3498db;"></button>
-            <button class="tt-theme-swatch" data-theme="candy" title="Candy"
-                style="background-color: #c026d3;"></button>
-            <button class="tt-theme-swatch" data-theme="pastel" title="Pastel"
-                style="background-color: #f472b6;"></button>
-            <button class="tt-theme-swatch" data-theme="ocean" title="Ocean"
-                style="background-color: #0284c7;"></button>
-        </div>
-    </div>
-
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-    <script src="js/firebase-service.js"></script>
-    <script src="js/take-test.js"></script>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="js/firebase-service.js"></script>
+  <script src="js/take-test.js"></script>
 </body>
 
 </html>

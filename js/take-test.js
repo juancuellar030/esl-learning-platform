@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Take Test Module
  * Student-facing test-taking interface with fullscreen anti-cheat, timing, and answer collection.
  */
@@ -22,6 +22,11 @@ const TakeTest = (function () {
     // Theme state
     let currentTheme = 'default';
     let isDarkMode = false;
+    let bgAnimationsEnabled = localStorage.getItem('tt-anim-enabled') !== 'false';
+
+    // Animation state
+    let bgAnimFrame = null;
+    let bgParticles = [];
 
     // ===== THEME DEFINITIONS =====
     const TT_THEMES = {
@@ -57,6 +62,140 @@ const TakeTest = (function () {
 
     // ===== DOM CACHE =====
     let screens = {};
+
+    // ===== BACKGROUND ANIMATIONS =====
+    function startBgAnimation(theme, isDark) {
+        if (!bgAnimationsEnabled) return stopBgAnimation();
+
+        const canvas = document.getElementById('tt-bg-canvas');
+        if (!canvas) return;
+
+        // Cancel existing
+        if (bgAnimFrame) cancelAnimationFrame(bgAnimFrame);
+        bgParticles = [];
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const ctx = canvas.getContext('2d');
+        const themeData = TT_THEMES[theme] || TT_THEMES['default'];
+
+        // Define particle colors based on theme if not explicitly defined
+        const defaultParticles = {
+            'default': 'rgba(255,255,255,0.08)',
+            'neon': 'rgba(0,245,255,0.16)',
+            'forest': 'rgba(82,183,136,0.12)',
+            'winter': 'rgba(255,255,255,0.18)',
+            'candy': 'rgba(255,157,226,0.14)',
+            'pastel': 'rgba(255,255,255,0.14)',
+            'ocean': 'rgba(144,224,239,0.14)'
+        };
+        const particleColor = defaultParticles[theme] || 'rgba(255,255,255,0.1)';
+
+        // Particle configs per theme
+        const configs = {
+            default: { count: 18, speed: 0.25, size: [3, 10], shape: 'circle' },
+            neon: { count: 20, speed: 0.5, size: [6, 12], shape: 'line' },
+            forest: { count: 14, speed: 0.2, size: [6, 12], shape: 'circle' },
+            winter: { count: 25, speed: 0.4, size: [5, 15], shape: 'snow' },
+            candy: { count: 16, speed: 0.3, size: [5, 15], shape: 'circle' },
+            pastel: { count: 15, speed: 0.22, size: [6, 12], shape: 'circle' },
+            ocean: { count: 18, speed: 0.3, size: [5, 15], shape: 'wave' }
+        };
+        const cfg = configs[theme] || configs['default'];
+
+        // Build particles
+        for (let i = 0; i < cfg.count; i++) {
+            bgParticles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                r: cfg.size[0] + Math.random() * (cfg.size[1] - cfg.size[0]),
+                vx: (Math.random() - 0.5) * cfg.speed,
+                vy: theme === 'winter' ? (Math.random() * cfg.speed + 0.15) : (Math.random() - 0.5) * cfg.speed,
+                opacity: 0.3 + Math.random() * 0.5,
+                phase: Math.random() * Math.PI * 2,
+                shape: cfg.shape
+            });
+        }
+
+        function drawFrame() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            bgParticles.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.phase += 0.01;
+
+                // Wrap around edges
+                if (p.x < -20) p.x = canvas.width + 20;
+                if (p.x > canvas.width + 20) p.x = -20;
+                if (p.y > canvas.height + 20) p.y = -20;
+                if (p.y < -20) p.y = canvas.height + 20;
+
+                const breathe = Math.sin(p.phase) * 0.15;
+                const alpha = Math.min(1, p.opacity + breathe);
+
+                ctx.save();
+                ctx.globalAlpha = alpha;
+                ctx.fillStyle = particleColor;
+                ctx.strokeStyle = particleColor;
+
+                if (p.shape === 'snow') {
+                    // Snowflake: simple asterisk
+                    ctx.lineWidth = 1.5;
+                    for (let arm = 0; arm < 6; arm++) {
+                        ctx.save();
+                        ctx.translate(p.x, p.y);
+                        ctx.rotate((arm * Math.PI) / 3);
+                        ctx.beginPath();
+                        ctx.moveTo(0, 0);
+                        ctx.lineTo(0, -p.r);
+                        ctx.stroke();
+                        ctx.restore();
+                    }
+                } else if (p.shape === 'line') {
+                    // Neon streak
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(p.x, p.y);
+                    ctx.lineTo(p.x + p.vx * 30, p.y + p.vy * 30);
+                    ctx.stroke();
+                } else {
+                    // Soft circle
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                ctx.restore();
+            });
+
+            bgAnimFrame = requestAnimationFrame(drawFrame);
+        }
+        drawFrame();
+    }
+
+    function stopBgAnimation() {
+        if (bgAnimFrame) { cancelAnimationFrame(bgAnimFrame); bgAnimFrame = null; }
+        const canvas = document.getElementById('tt-bg-canvas');
+        if (canvas) canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    // Resize handler for bg canvas
+    window.addEventListener('resize', () => {
+        const canvas = document.getElementById('tt-bg-canvas');
+        if (canvas && bgAnimFrame) {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            // No need to rebuild particles immediately, they will wrap
+        }
+    });
+
+    // Listen to theme changes from the global scope
+    window.addEventListener('test-theme-changed', (e) => {
+        bgAnimationsEnabled = localStorage.getItem('tt-anim-enabled') !== 'false';
+        startBgAnimation(e.detail.theme, e.detail.isDark);
+    });
 
     // ===== INITIALIZATION =====
     function init() {
@@ -372,7 +511,7 @@ const TakeTest = (function () {
         });
     }
 
-    let pendingDirection = null;  // 'next' or 'submit' — used by incomplete warning
+    let pendingDirection = null;  // 'next' or 'submit' ΓÇö used by incomplete warning
 
     function nextQuestion() {
         if (!isQuestionAnswered()) {
@@ -870,7 +1009,7 @@ const TakeTest = (function () {
         // Draw lines for existing matches
         setTimeout(() => renderMatchLines(), 50);
 
-        // Left column click — select
+        // Left column click ΓÇö select
         document.querySelectorAll('.tt-match-item-left').forEach(item => {
             item.addEventListener('click', () => {
                 if (item.classList.contains('matched')) return;
@@ -880,7 +1019,7 @@ const TakeTest = (function () {
             });
         });
 
-        // Right column click — connect
+        // Right column click ΓÇö connect
         document.querySelectorAll('.tt-match-item-right').forEach(item => {
             item.addEventListener('click', (e) => {
                 if (e.target.closest('.tt-match-clear')) return; // handled separately
@@ -895,7 +1034,7 @@ const TakeTest = (function () {
             });
         });
 
-        // Clear button — undo match
+        // Clear button ΓÇö undo match
         document.querySelectorAll('.tt-match-clear').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -1121,7 +1260,7 @@ const TakeTest = (function () {
             <div class="tt-results-row"><span>Time</span><span>${mm}m ${ss}s</span></div>
         `;
 
-        // Confetti — only for 70% or above
+        // Confetti ΓÇö only for 70% or above
         if (response.percentage >= 70) {
             const pieces = response.percentage >= 90 ? 60 : response.percentage >= 80 ? 40 : 20;
             spawnConfetti(pieces);
@@ -1146,7 +1285,7 @@ const TakeTest = (function () {
     }
 
     function showResultsMinimal() {
-        document.getElementById('score-value').textContent = '✓';
+        document.getElementById('score-value').textContent = 'Γ£ô';
         document.getElementById('score-circle').style.borderColor = '#34d399';
         document.getElementById('results-details').innerHTML = `
             <div class="tt-results-row"><span>Your test has been submitted successfully.</span></div>
@@ -1239,6 +1378,29 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Animation toggle
+    const animToggle = document.getElementById('tt-anim-toggle');
+    if (animToggle) {
+        // Init toggle icon state
+        const icon = document.getElementById('tt-anim-icon');
+        const animEnabled = localStorage.getItem('tt-anim-enabled') !== 'false';
+        if (icon) icon.className = animEnabled ? 'fa-solid fa-pause' : 'fa-solid fa-play';
+
+        animToggle.addEventListener('click', () => {
+            const currentlyEnabled = localStorage.getItem('tt-anim-enabled') !== 'false';
+            const willEnable = !currentlyEnabled;
+            localStorage.setItem('tt-anim-enabled', willEnable ? 'true' : 'false');
+
+            if (icon) icon.className = willEnable ? 'fa-solid fa-pause' : 'fa-solid fa-play';
+
+            // Access internal state via function params or global read
+            const isDark = document.body.classList.contains('tt-dark');
+            const activeTheme = document.querySelector('.tt-theme-swatch.active');
+            const theme = activeTheme ? activeTheme.dataset.theme : 'default';
+            applyTestTheme(theme, isDark);
+        });
+    }
+
     // Review Answers button
     const btnReview = document.getElementById('btn-review-answers');
     if (btnReview) {
@@ -1316,14 +1478,33 @@ function applyTestTheme(theme, isDark) {
     if (icon) {
         icon.className = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
     }
+
+    // Update canvas animations via the exposed global function
+    // For encapsulation, we attach it to window or use custom events, but since startBgAnimation is inside IIFE...
+    // Let's expose it to window just for the theme engine, OR better yet: 
+    // we can just put the theme engine *inside* the IIFE or make applyTestTheme call a private function.
+    // However, since applyTestTheme is standalone here, we'll dispatch an event or use the internal var.
+    // Actually, `applyTestTheme` IS outside the IIFE!
+
+    // Quick fix: Dispatch a custom event and let the IIFE pick it up
+    window.dispatchEvent(new CustomEvent('test-theme-changed', {
+        detail: { theme, isDark }
+    }));
 }
+
+// Attach listener for the custom event inside the IIFE or out... 
+// Wait, startBgAnimation is in the IIFE but applyTestTheme is not.
+// Let's just listen to it globally.
+window.addEventListener('test-theme-changed', (e) => {
+    // Reconfigure the internal global startBgAnimation function if we had exposed it.
+});
 
 // ===== ANSWER REVIEW =====
 function buildAnswerReview() {
     const reviewList = document.getElementById('review-list');
     if (!reviewList) return;
 
-    // Access state from TakeTest closure — we stored lastGraded on window
+    // Access state from TakeTest closure ΓÇö we stored lastGraded on window
     const graded = window._ttLastGraded;
     const questions = window._ttQuestions;
     const studentAnswers = window._ttAnswers;
@@ -1429,3 +1610,98 @@ function buildAnswerReview() {
 
     reviewList.innerHTML = html;
 }
+
+// ===== ANTI-CHEAT: KEYBOARD & CONTEXT MENU =====
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. Block Keyboard Shortcuts (Copy, Paste, Print, Save, Select All)
+    document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey || e.metaKey) {
+            const blockedKeys = ['c', 'v', 'x', 'a', 'p', 's'];
+            if (blockedKeys.includes(e.key.toLowerCase())) {
+                e.preventDefault();
+            }
+        }
+    });
+
+    // 2. Custom Context Menu
+    const contextMenu = document.getElementById('tt-context-menu');
+    if (!contextMenu) return;
+
+    // We must capture the contextmenu on the document. Overriding inline styles just in case it's on body
+    document.body.oncontextmenu = null;
+
+    document.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+
+        // Only show if the quiz hasn't finished completely (optional)
+        // For now, always show it as it has 'Restart'.
+
+        let x = e.clientX;
+        let y = e.clientY;
+
+        // Ensure menu stays within viewport
+        const menuWidth = 220;
+        const menuHeight = 200;
+
+        if (x + menuWidth > window.innerWidth) x = window.innerWidth - menuWidth - 10;
+        if (y + menuHeight > window.innerHeight) y = window.innerHeight - menuHeight - 10;
+
+        contextMenu.style.left = `${x}px`;
+        contextMenu.style.top = `${y}px`;
+        contextMenu.style.display = 'block';
+    });
+
+    // Hide context menu on outside click
+    document.addEventListener('click', (e) => {
+        if (!contextMenu.contains(e.target)) {
+            contextMenu.style.display = 'none';
+        }
+    });
+
+    // Context Menu Actions
+    document.getElementById('cm-btn-theme')?.addEventListener('click', () => {
+        contextMenu.style.display = 'none';
+        const picker = document.getElementById('theme-picker');
+        if (picker) {
+            picker.style.display = picker.style.display === 'block' ? 'none' : 'block';
+        }
+    });
+
+    document.getElementById('cm-btn-prev')?.addEventListener('click', () => {
+        contextMenu.style.display = 'none';
+        const scrQ = document.getElementById('screen-question');
+        if (scrQ && scrQ.style.display !== 'none') {
+            const btnPrev = document.getElementById('btn-prev');
+            if (btnPrev && !btnPrev.disabled) btnPrev.click();
+        }
+    });
+
+    document.getElementById('cm-btn-next')?.addEventListener('click', () => {
+        contextMenu.style.display = 'none';
+        const scrQ = document.getElementById('screen-question');
+        if (scrQ && scrQ.style.display !== 'none') {
+            const btnNext = document.getElementById('btn-next');
+            if (btnNext && !btnNext.disabled) btnNext.click();
+        }
+    });
+
+    document.getElementById('cm-btn-restart')?.addEventListener('click', () => {
+        contextMenu.style.display = 'none';
+
+        // Show the stylized restart modal
+        const restartModal = document.getElementById('restart-warning');
+        if (restartModal) {
+            restartModal.style.display = 'flex';
+        }
+    });
+
+    // Wire up the new restart modal buttons
+    document.getElementById('btn-cancel-restart')?.addEventListener('click', () => {
+        const restartModal = document.getElementById('restart-warning');
+        if (restartModal) restartModal.style.display = 'none';
+    });
+
+    document.getElementById('btn-confirm-restart')?.addEventListener('click', () => {
+        location.reload();
+    });
+});
