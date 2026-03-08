@@ -46,6 +46,7 @@ const QuizGame = (() => {
 
     // Google Drive
     let driveService = null;
+    let customQuizDriveService = null;
     let lastSortedResults = [];
 
     // ===== DOM REFS =====
@@ -60,6 +61,7 @@ const QuizGame = (() => {
             initAvatarGrids();
             addCustomRows(4);
             initDriveService();
+            initCustomQuizDriveService();
 
             // Host Resumption Logic: If we have a saved code and we are the host, resume host role
             const savedCode = sessionStorage.getItem('qg-last-code');
@@ -133,6 +135,65 @@ const QuizGame = (() => {
         }
     }
 
+    function initCustomQuizDriveService() {
+        if (typeof GoogleDriveService !== 'undefined') {
+            customQuizDriveService = new GoogleDriveService({
+                folderName: 'ESL Custom Quizzes',
+                fileExtension: '.json',
+                onSave: () => {
+                    const validRows = customRows.filter(r => r.word.trim() || r.clue.trim());
+                    if (validRows.length === 0) {
+                        alert('Your quiz is empty. Add at least one word or clue to save.');
+                        return null;
+                    }
+                    return validRows.map(r => ({
+                        word: r.word,
+                        clue: r.clue,
+                        imageData: r.imageData,
+                        imageName: r.imageName,
+                        audioData: r.audioData,
+                        audioName: r.audioName
+                    }));
+                },
+                onLoad: (data, filename) => {
+                    if (!Array.isArray(data)) {
+                        alert('Invalid custom quiz format.');
+                        return;
+                    }
+                    // Clear existing
+                    $('custom-list').innerHTML = '';
+                    customRows = [];
+
+                    data.forEach(rowData => {
+                        const rowId = 'cq-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5);
+                        const newRow = {
+                            id: rowId,
+                            word: rowData.word || '',
+                            clue: rowData.clue || '',
+                            imageData: rowData.imageData || null,
+                            imageName: rowData.imageName || '',
+                            audioData: rowData.audioData || null,
+                            audioName: rowData.audioName || ''
+                        };
+                        customRows.push(newRow);
+                        renderCustomRow($('custom-list'), newRow, customRows.length);
+                    });
+
+                    // Add empty row if none loaded
+                    if (customRows.length === 0) {
+                        addCustomRows(1);
+                    }
+                },
+                onNotify: (msg, type) => {
+                    console.log(`[Custom Quiz Drive] ${type}: ${msg}`);
+                    if (type === 'error') {
+                        alert(`Save/Load Error: ${msg}`);
+                    }
+                }
+            });
+        }
+    }
+
     function bindEvents() {
         $('btn-role-host').addEventListener('click', () => showScreen('screen-setup'));
         $('btn-role-join').addEventListener('click', () => showScreen('screen-join'));
@@ -170,6 +231,8 @@ const QuizGame = (() => {
         $('q-plus').addEventListener('click', () => adjustStepper('q-count', 5, 5, 50));
         $('t-minus').addEventListener('click', () => adjustStepper('t-count', -5, 5, 60));
         $('t-plus').addEventListener('click', () => adjustStepper('t-count', 5, 5, 60));
+        $('b-minus').addEventListener('click', () => adjustStepper('b-count', -1, 1, 10));
+        $('b-plus').addEventListener('click', () => adjustStepper('b-count', 1, 1, 10));
 
         // Level buttons
         document.querySelectorAll('.qg-level-btn').forEach(btn => {
@@ -200,8 +263,22 @@ const QuizGame = (() => {
             });
         });
 
-        // Custom quiz: add row button
+        // Custom quiz buttons
         $('btn-add-row').addEventListener('click', () => addCustomRows(1));
+
+        const btnCustomSaveDrive = $('btn-custom-save-drive');
+        if (btnCustomSaveDrive) {
+            btnCustomSaveDrive.addEventListener('click', () => {
+                if (customQuizDriveService) customQuizDriveService.openModal();
+            });
+        }
+
+        const btnCustomLoadDrive = $('btn-custom-load-drive');
+        if (btnCustomLoadDrive) {
+            btnCustomLoadDrive.addEventListener('click', () => {
+                if (customQuizDriveService) customQuizDriveService.openModal();
+            });
+        }
 
         // Game mode toggle
         document.querySelectorAll('.qg-mode-btn').forEach(btn => {
@@ -388,7 +465,23 @@ const QuizGame = (() => {
 
         // Image upload
         const imgBtn = row.querySelector('.cq-img-btn');
-        const imgInput = row.querySelector('.cq-img-input');
+        const imgInput = row.querySelector('.cq-img-input'); // Corrected: This should be imgInput
+        const audioBtn = row.querySelector('.cq-audio-btn'); // Added: Need audioBtn here for initial state
+        const audioInput = row.querySelector('.cq-audio-input'); // Added: Need audioInput here for initial state
+
+        // Initial state for loaded rows
+        if (rowData.imageName) {
+            imgBtn.classList.add('has-file');
+            imgBtn.querySelector('.file-name').textContent = rowData.imageName.length > 12 ? rowData.imageName.slice(0, 10) + '…' : rowData.imageName;
+        }
+        if (rowData.audioName) {
+            audioBtn.classList.add('has-file');
+            audioBtn.querySelector('.file-name').textContent = rowData.audioName.length > 12 ? rowData.audioName.slice(0, 10) + '…' : rowData.audioName;
+        }
+
+        row.querySelector('.cq-word').value = rowData.word || '';
+        row.querySelector('.cq-clue').value = rowData.clue || '';
+
         imgBtn.addEventListener('click', () => imgInput.click());
         imgInput.addEventListener('change', () => {
             const file = imgInput.files[0];
@@ -403,8 +496,6 @@ const QuizGame = (() => {
         });
 
         // Audio upload
-        const audioBtn = row.querySelector('.cq-audio-btn');
-        const audioInput = row.querySelector('.cq-audio-input');
         audioBtn.addEventListener('click', () => audioInput.click());
         audioInput.addEventListener('change', () => {
             const file = audioInput.files[0];
@@ -659,7 +750,9 @@ const QuizGame = (() => {
             showAnswer: $('opt-show-answer').checked,
             streaks: $('opt-streaks').checked,
             sound: $('opt-sound').checked,
-            gameMode: gameMode
+            gameMode: gameMode,
+            bonusEnabled: $('opt-bonus-stage').checked,
+            bonusFrequency: parseInt($('b-count').textContent)
         };
         soundEnabled = config.sound;
 
@@ -1025,6 +1118,13 @@ const QuizGame = (() => {
             return;
         }
 
+        // Handle Bonus Stage BEFORE showing the next question
+        if (!skipBonusCheck && config.bonusEnabled && currentQ > 0 && currentQ % config.bonusFrequency === 0) {
+            startBonusStage('host');
+            return;
+        }
+        skipBonusCheck = false; // reset for future calls
+
         const q = questions[currentQ];
         hasAnswered = false;
         answerCounts = [0, 0, 0, 0];
@@ -1034,9 +1134,11 @@ const QuizGame = (() => {
         // Clear previous answers
         if (!FirebaseService.isDemo()) {
             FirebaseService.clearAllAnswers(gameCode, players);
-            FirebaseService.updateSessionField(gameCode, 'currentQuestion', currentQ);
-            FirebaseService.updateSessionField(gameCode, 'questionStartedAt', Date.now());
-            FirebaseService.updateSessionField(gameCode, 'status', 'playing');
+            FirebaseService.updateSessionFields(gameCode, {
+                'currentQuestion': currentQ,
+                'questionStartedAt': Date.now(),
+                'status': 'playing'
+            });
         }
 
         // Update UI
@@ -1320,6 +1422,8 @@ const QuizGame = (() => {
                     const unsub2 = FirebaseService.onFieldChange(gameCode, 'status', status => {
                         if (status === 'reviewing') {
                             revealPlayerAnswer();
+                        } else if (status === 'bonus') {
+                            startBonusStage('auto');
                         } else if (status === 'finished') {
                             showResults();
                         }
@@ -1363,6 +1467,13 @@ const QuizGame = (() => {
         $('sv-score').textContent = myScore;
         $('sv-progress').textContent = `${currentQ + 1} / ${questions.length}`;
         updateStreakDisplay();
+
+        // Hide bonus stage, show question
+        $('sv-bonus-container').classList.add('qg-hidden');
+        $('sv-question').classList.remove('qg-hidden');
+        $('sv-answers').classList.remove('qg-hidden');
+        $('sv-timer-container').classList.remove('qg-hidden');
+
         let qHtml = `<div>${escapeHtml(q.text)}</div>`;
         if (q.imageData) {
             qHtml = `<img src="${q.imageData}" style="max-height: 150px; max-width: 100%; border-radius: 12px; margin-bottom: 10px; object-fit: contain;" alt="Question Image" />` + qHtml;
@@ -1374,10 +1485,32 @@ const QuizGame = (() => {
             btn.textContent = q.options[i] || '';
             btn.className = 'qg-answer-btn qg-ans-' + i;
             btn.disabled = false;
+            btn.style.display = ''; // Reset visibility
         });
 
+        // Apply pending powerups
+        let timerDuration = config.timer;
+        if (pendingPowerup === '5050') {
+            // Remove 2 wrong answers
+            const wrongIndices = [];
+            q.options.forEach((_, i) => { if (i !== q.correctIndex) wrongIndices.push(i); });
+            // Shuffle and pick 2 to hide
+            wrongIndices.sort(() => Math.random() - 0.5);
+            const toHide = wrongIndices.slice(0, 2);
+            toHide.forEach(idx => {
+                const btn = btns[idx];
+                if (btn) {
+                    btn.style.display = 'none';
+                }
+            });
+            pendingPowerup = null;
+        } else if (pendingPowerup === 'time') {
+            timerDuration = config.timer * 2;
+            pendingPowerup = null;
+        }
+
         // Start local timer
-        startPlayerTimer(config.timer, config.timer);
+        startPlayerTimer(timerDuration, timerDuration);
     }
 
     function loadPlayerQuestion(qIdx) {
@@ -1407,6 +1540,12 @@ const QuizGame = (() => {
             }
 
             // Render
+            // Hide bonus stage, show question
+            $('sv-bonus-container').classList.add('qg-hidden');
+            $('sv-question').classList.remove('qg-hidden');
+            $('sv-answers').classList.remove('qg-hidden');
+            $('sv-timer-container').classList.remove('qg-hidden');
+
             $('sv-score').textContent = myScore;
             $('sv-progress').textContent = `${currentQ + 1} / ${questions.length}`;
             updateStreakDisplay();
@@ -1421,7 +1560,27 @@ const QuizGame = (() => {
                 btn.textContent = q.options[i] || '';
                 btn.className = 'qg-answer-btn qg-ans-' + i;
                 btn.disabled = false;
+                btn.style.display = ''; // Reset visibility
             });
+
+            // Apply pending powerups
+            let timerDuration = config.timer;
+            if (pendingPowerup === '5050') {
+                const wrongIndices = [];
+                q.options.forEach((_, i) => { if (i !== q.correctIndex) wrongIndices.push(i); });
+                wrongIndices.sort(() => Math.random() - 0.5);
+                const toHide = wrongIndices.slice(0, 2);
+                toHide.forEach(idx => {
+                    const btn = btns[idx];
+                    if (btn) {
+                        btn.style.display = 'none';
+                    }
+                });
+                pendingPowerup = null;
+            } else if (pendingPowerup === 'time') {
+                timerDuration = config.timer * 2;
+                pendingPowerup = null;
+            }
 
             // Start local timer — questionStartedAt helps sync the timer with
             // the host, but due to non-atomic Firebase writes the field may
@@ -1429,9 +1588,9 @@ const QuizGame = (() => {
             // Clamp to a minimum so the player always gets a usable timer.
             const startedAt = session.questionStartedAt || 0;
             const elapsed = startedAt > 0 ? (Date.now() - startedAt) / 1000 : 0;
-            const remaining = Math.max(3, config.timer - elapsed); // minimum 3s floor
+            const remaining = Math.max(3, timerDuration - elapsed);
             console.log('[QuizGame][Player] Timer: elapsed', elapsed.toFixed(1), 's | remaining', remaining.toFixed(1), 's');
-            startPlayerTimer(remaining, config.timer);
+            startPlayerTimer(remaining, timerDuration);
         });
     }
 
@@ -1533,7 +1692,11 @@ const QuizGame = (() => {
 
         // Auto-advance to next question after brief delay
         setTimeout(() => {
-            studentPacedNextQuestion();
+            if (config.bonusEnabled && (currentQ + 1) % config.bonusFrequency === 0 && (currentQ + 1) < questions.length) {
+                startBonusStage('student-paced');
+            } else {
+                studentPacedNextQuestion();
+            }
         }, 2000);
     }
 
@@ -1633,6 +1796,11 @@ const QuizGame = (() => {
         // Gather final scores
         const finalPlayers = role === 'host' ? players : {};
 
+        const extraActions = document.querySelector('.qg-results-extra-actions');
+        if (extraActions) {
+            extraActions.style.display = role === 'host' ? 'flex' : 'none';
+        }
+
         if (role === 'host') {
             renderResults(finalPlayers);
         } else {
@@ -1703,6 +1871,196 @@ const QuizGame = (() => {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+    }
+
+    // ===== BONUS STAGE LOGIC =====
+    let isBonusActive = false;
+    let skipBonusCheck = false;
+    let pendingPowerup = null; // Stores '5050' or 'time' for the NEXT question
+
+    function startBonusStage(context) {
+        isBonusActive = true;
+
+        if (role === 'host') {
+            // Hide question/answer/timer, show the indicator
+            $('tv-question').classList.add('qg-hidden');
+            $('tv-answers').classList.add('qg-hidden');
+            $('tv-timer-container').classList.add('qg-hidden');
+            $('tv-bonus-indicator').classList.remove('qg-hidden');
+
+            // Push status to Firebase so players trigger bonus too
+            if (!FirebaseService.isDemo()) {
+                FirebaseService.updateSessionField(gameCode, 'status', 'bonus');
+            }
+
+            // Wait for players to finish bonus then resume
+            setTimeout(() => {
+                $('tv-bonus-indicator').classList.add('qg-hidden');
+                $('tv-question').classList.remove('qg-hidden');
+                $('tv-answers').classList.remove('qg-hidden');
+                $('tv-timer-container').classList.remove('qg-hidden');
+                isBonusActive = false;
+                if (context !== 'student-paced') {
+                    skipBonusCheck = true;
+                    nextQuestion();
+                }
+            }, 18000);
+            return;
+        }
+
+        // Student View Logic
+        $('sv-question').classList.add('qg-hidden');
+        $('sv-answers').classList.add('qg-hidden');
+        $('sv-timer-container').classList.add('qg-hidden');
+
+        const bonusContainer = $('sv-bonus-container');
+        bonusContainer.classList.remove('qg-hidden');
+
+        // Generate Rewards
+        const rewards = generateBonusRewards();
+        renderBonusCards(rewards, context);
+    }
+
+    function generateBonusRewards() {
+        const pool = [
+            { type: 'points', val: 100, text: '+100 Pts', icon: 'fa-coins', class: 'positive' },
+            { type: 'points', val: 200, text: '+200 Pts', icon: 'fa-coins', class: 'positive' },
+            { type: 'points', val: 500, text: '+500 Pts', icon: 'fa-gem', class: 'positive' },
+            { type: 'points', val: -100, text: '-100 Pts', icon: 'fa-skull', class: 'negative' },
+            { type: 'points', val: -200, text: '-200 Pts', icon: 'fa-skull-crossbones', class: 'negative' },
+            { type: 'powerup', val: '5050', text: '50:50', icon: 'fa-arrows-down-to-line', class: 'powerup' },
+            { type: 'powerup', val: 'time', text: '+Extra Time', icon: 'fa-stopwatch-20', class: 'powerup' },
+            { type: 'points', val: 0, text: 'Blank', icon: 'fa-ghost', class: 'powerup' }
+        ];
+
+        const shuffled = [...pool].sort(() => Math.random() - 0.5);
+        return shuffled.slice(0, 6);
+    }
+
+    function renderBonusCards(rewards, context) {
+        const grid = $('sv-bonus-grid');
+        grid.innerHTML = '';
+        grid.parentNode.classList.remove('shuffling');
+
+        rewards.forEach((r, i) => {
+            const wrapper = document.createElement('div');
+            wrapper.className = `qg-bonus-card-wrapper qg-bonus-pos-${i}`;
+            wrapper.dataset.index = i;
+
+            const card = document.createElement('div');
+            // Cards start face-up (NOT flipped) — showing their reward
+            card.className = 'qg-bonus-card';
+
+            card.innerHTML = `
+                <div class="qg-bonus-card-inner">
+                    <div class="qg-bonus-card-front"><i class="fa-solid fa-question"></i></div>
+                    <div class="qg-bonus-card-back ${r.class}">
+                        <i class="fa-solid ${r.icon}"></i>
+                        <div class="qg-bonus-card-text">${r.text}</div>
+                    </div>
+                </div>
+            `;
+
+            wrapper.appendChild(card);
+            grid.appendChild(wrapper);
+        });
+
+        // Phase 1: Show rewards for 3 seconds (cards are face-up)
+        setTimeout(() => {
+            // Phase 2: Flip cards face-down (add is-flipped to show the question-mark side)
+            const cards = grid.querySelectorAll('.qg-bonus-card');
+            cards.forEach(c => c.classList.add('is-flipped'));
+
+            // Phase 3: Start shuffling after the flip animation completes
+            setTimeout(() => {
+                shuffleBonusCards(grid, rewards, context);
+            }, 800);
+        }, 3000);
+    }
+
+    function shuffleBonusCards(grid, rewards, context) {
+        grid.parentNode.classList.add('shuffling');
+        const wrappers = Array.from(grid.querySelectorAll('.qg-bonus-card-wrapper'));
+        let positions = [0, 1, 2, 3, 4, 5];
+
+        let shuffles = 0;
+        const shuffleInterval = setInterval(() => {
+            positions = positions.sort(() => Math.random() - 0.5);
+
+            wrappers.forEach((w, i) => {
+                w.className = `qg-bonus-card-wrapper qg-bonus-pos-${positions[i]}`;
+            });
+
+            shuffles++;
+            if (shuffles > 8) {
+                clearInterval(shuffleInterval);
+                grid.parentNode.classList.remove('shuffling');
+
+                // Enable clicks — cards are still face-down (is-flipped)
+                wrappers.forEach((w, i) => {
+                    const card = w.querySelector('.qg-bonus-card');
+                    card.addEventListener('click', () => {
+                        if (!isBonusActive) return;
+                        selectBonusCard(card, rewards[i], context, grid);
+                    }, { once: true });
+                });
+            }
+        }, 400);
+    }
+
+    function selectBonusCard(selectedCard, reward, context, grid) {
+        isBonusActive = false;
+
+        // Play sound based on reward type
+        if (reward.type === 'points' && reward.val > 0) {
+            playSound('bonus-positive');
+        } else if (reward.type === 'powerup') {
+            playSound('bonus-positive');
+        } else if (reward.type === 'points' && reward.val < 0) {
+            playSound('bonus-negative');
+        } else {
+            playSound('click');
+        }
+
+        // Flip ALL cards face-up to reveal everything
+        grid.querySelectorAll('.qg-bonus-card').forEach(c => {
+            c.classList.remove('is-flipped');
+            if (c !== selectedCard) {
+                c.classList.add('not-selected');
+            }
+        });
+
+        // Highlight selected card
+        selectedCard.classList.add('selected');
+
+        // Apply reward
+        if (reward.type === 'points') {
+            myScore += reward.val;
+            $('sv-score').textContent = myScore;
+            $('sv-score').classList.add('pop');
+            setTimeout(() => $('sv-score').classList.remove('pop'), 300);
+
+            if (!FirebaseService.isDemo()) {
+                FirebaseService.updatePlayerScore(gameCode, FirebaseService.getUid(), myScore, myStreak);
+            }
+        } else if (reward.type === 'powerup') {
+            pendingPowerup = reward.val; // '5050' or 'time'
+            console.log('[QuizGame] Powerup earned and stored:', pendingPowerup);
+        }
+
+        // Leave visible for a moment then resume
+        setTimeout(() => {
+            $('sv-bonus-container').classList.add('qg-hidden');
+            if (context === 'student-paced') {
+                studentPacedNextQuestion();
+            } else {
+                // For host-paced/auto, show "waiting" until host advances
+                $('sv-question').classList.remove('qg-hidden');
+                $('sv-answers').classList.remove('qg-hidden');
+                $('sv-question').innerHTML = '<h3>Waiting for host...</h3>';
+                $('sv-answers').innerHTML = '';
+            }
+        }, 3500);
     }
 
     // ===== CONFETTI =====
@@ -1831,6 +2189,27 @@ const QuizGame = (() => {
                     gain.gain.exponentialRampToValueAtTime(0.001, now + 1);
                     osc.start(now);
                     osc.stop(now + 1);
+                    break;
+                case 'bonus-positive':
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523, now);      // C5
+                    osc.frequency.setValueAtTime(659, now + 0.1); // E5
+                    osc.frequency.setValueAtTime(784, now + 0.2); // G5
+                    osc.frequency.setValueAtTime(1047, now + 0.3); // C6
+                    gain.gain.setValueAtTime(0.18, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+                    osc.start(now);
+                    osc.stop(now + 0.6);
+                    break;
+                case 'bonus-negative':
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(350, now);
+                    osc.frequency.setValueAtTime(250, now + 0.15);
+                    osc.frequency.setValueAtTime(180, now + 0.3);
+                    gain.gain.setValueAtTime(0.12, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+                    osc.start(now);
+                    osc.stop(now + 0.45);
                     break;
             }
         } catch (e) {

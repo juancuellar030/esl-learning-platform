@@ -133,6 +133,23 @@ const FirebaseService = (() => {
         return db.ref('sessions/' + code + '/' + field).set(value);
     }
 
+    function updateSessionFields(code, updates) {
+        if (isDemo()) {
+            if (!window._demoSession) return Promise.reject('No demo session');
+            Object.keys(updates).forEach(field => {
+                const parts = field.split('/');
+                let obj = window._demoSession;
+                for (let i = 0; i < parts.length - 1; i++) {
+                    if (!obj[parts[i]]) obj[parts[i]] = {};
+                    obj = obj[parts[i]];
+                }
+                obj[parts[parts.length - 1]] = updates[field];
+            });
+            return Promise.resolve();
+        }
+        return db.ref('sessions/' + code).update(updates);
+    }
+
     function getSession(code) {
         if (isDemo()) {
             return Promise.resolve(window._demoSession || null);
@@ -352,6 +369,7 @@ const FirebaseService = (() => {
         createSession,
         joinSession,
         updateSessionField,
+        updateSessionFields,
         getSession,
         onSessionValue,
         onFieldChange,
