@@ -17,6 +17,43 @@ const TakeTest = (function () {
     let fullscreenEnabled = false;
     let timerInterval = null;
     let timeRemaining = 0;
+    let lastGraded = null; // store graded results for review
+
+    // Theme state
+    let currentTheme = 'default';
+    let isDarkMode = false;
+
+    // ===== THEME DEFINITIONS =====
+    const TT_THEMES = {
+        'default': {
+            '--tt-bg-from': '#3d348b', '--tt-bg-to': '#7678ed',
+            dark: { '--tt-bg-from': '#1a1530', '--tt-bg-to': '#2c2a5a' }
+        },
+        'neon': {
+            '--tt-bg-from': '#0a6e7a', '--tt-bg-to': '#00b4d8',
+            dark: { '--tt-bg-from': '#05050f', '--tt-bg-to': '#0d0d2b' }
+        },
+        'forest': {
+            '--tt-bg-from': '#1a3d2b', '--tt-bg-to': '#2d6a4f',
+            dark: { '--tt-bg-from': '#0a1a11', '--tt-bg-to': '#152d1e' }
+        },
+        'winter': {
+            '--tt-bg-from': '#4a9bbe', '--tt-bg-to': '#2a7fa8',
+            dark: { '--tt-bg-from': '#0a2233', '--tt-bg-to': '#1a3a55' }
+        },
+        'candy': {
+            '--tt-bg-from': '#a8005a', '--tt-bg-to': '#6a00c0',
+            dark: { '--tt-bg-from': '#3d0030', '--tt-bg-to': '#28004a' }
+        },
+        'pastel': {
+            '--tt-bg-from': '#b57bee', '--tt-bg-to': '#ee88b5',
+            dark: { '--tt-bg-from': '#3d1f5a', '--tt-bg-to': '#5a1f3a' }
+        },
+        'ocean': {
+            '--tt-bg-from': '#023e8a', '--tt-bg-to': '#0077b6',
+            dark: { '--tt-bg-from': '#03045e', '--tt-bg-to': '#023e8a' }
+        }
+    };
 
     // ===== DOM CACHE =====
     let screens = {};
@@ -112,6 +149,9 @@ const TakeTest = (function () {
             fullscreenEnabled = testData.settings && testData.settings.enableFullscreen;
             answers = new Array(testData.questions.length).fill(null);
 
+            // Apply default theme to avoid a blank white background initially
+            applyTestTheme('default', false);
+
             showStudentScreen();
         } catch (err) {
             console.error('Load test error:', err);
@@ -157,6 +197,11 @@ const TakeTest = (function () {
 
         // Start button
         document.getElementById('btn-start-test').addEventListener('click', startTest);
+
+        // Show theme FAB if allowed
+        if (testData.settings && testData.settings.allowThemes) {
+            document.getElementById('btn-theme-fab').style.display = '';
+        }
 
         showScreen('student');
     }
@@ -1019,25 +1064,53 @@ const TakeTest = (function () {
 
         // Show results
         if (testData.settings && testData.settings.showResults !== false) {
-            showResults(response);
+            showResults(response, graded);
         } else {
             showResultsMinimal();
         }
     }
 
     // ===== RESULTS =====
-    function showResults(response) {
-        document.getElementById('score-value').textContent = response.percentage + '%';
+    function showResults(response, graded) {
+        lastGraded = graded;
 
-        // Color the score circle
-        const circle = document.getElementById('score-circle');
-        if (response.percentage >= 80) {
-            circle.style.borderColor = '#34d399';
-        } else if (response.percentage >= 50) {
-            circle.style.borderColor = '#f5a623';
-        } else {
-            circle.style.borderColor = '#e74c3c';
-        }
+        const scoreRingFill = document.getElementById('score-ring-fill');
+        const scoreValueSpan = document.getElementById('score-value');
+
+        let ringColor = '#e74c3c'; // Red (below 50%)
+        if (response.percentage >= 80) ringColor = '#34d399'; // Green
+        else if (response.percentage >= 50) ringColor = '#f5a623'; // Orange
+
+        scoreRingFill.style.stroke = ringColor;
+
+        // Animate counter and ring
+        const targetPercent = response.percentage;
+        scoreValueSpan.textContent = '0%';
+        scoreRingFill.style.strokeDashoffset = '389.55'; // 2 * PI * 62 = full circumference
+
+        // Give the UI a tick to render before starting animation
+        setTimeout(() => {
+            // Animate SVG stroke
+            const offset = 389.55 - (targetPercent / 100) * 389.55;
+            scoreRingFill.style.strokeDashoffset = offset;
+
+            // Animate number count-up
+            let currentNum = 0;
+            const duration = 1500; // ms
+            const interval = 20; // ms
+            const steps = duration / interval;
+            const inc = targetPercent / steps;
+
+            const timer = setInterval(() => {
+                currentNum += inc;
+                if (currentNum >= targetPercent) {
+                    currentNum = targetPercent;
+                    clearInterval(timer);
+                }
+                scoreValueSpan.textContent = Math.round(currentNum) + '%';
+            }, interval);
+
+        }, 50);
 
         // Details
         const details = document.getElementById('results-details');
@@ -1054,10 +1127,20 @@ const TakeTest = (function () {
             spawnConfetti(pieces);
         }
 
+        // Show Review Answers button if enabled
+        if (testData.settings && testData.settings.showAnswerReview) {
+            document.getElementById('btn-review-answers').style.display = '';
+        }
+
         // Close button
         document.getElementById('btn-close-results').addEventListener('click', () => {
             window.close();
         });
+
+        // Expose data for answer review
+        window._ttLastGraded = graded;
+        window._ttQuestions = testData.questions;
+        window._ttAnswers = answers;
 
         showScreen('results');
     }
@@ -1119,6 +1202,230 @@ const TakeTest = (function () {
     return { init };
 })();
 
+// ===== THEME & REVIEW EVENT BINDINGS (outside IIFE for DOM access) =====
 document.addEventListener('DOMContentLoaded', () => {
     TakeTest.init();
+
+    // Theme FAB toggle
+    const fab = document.getElementById('btn-theme-fab');
+    const picker = document.getElementById('theme-picker');
+    if (fab && picker) {
+        fab.addEventListener('click', (e) => {
+            e.stopPropagation();
+            picker.style.display = picker.style.display === 'none' ? '' : 'none';
+        });
+        document.addEventListener('click', (e) => {
+            if (!picker.contains(e.target) && e.target !== fab) {
+                picker.style.display = 'none';
+            }
+        });
+    }
+
+    // Theme swatch clicks
+    document.querySelectorAll('.tt-theme-swatch').forEach(btn => {
+        btn.addEventListener('click', () => {
+            applyTestTheme(btn.dataset.theme, document.body.classList.contains('tt-dark'));
+        });
+    });
+
+    // Dark mode toggle
+    const darkToggle = document.getElementById('tt-dark-toggle');
+    if (darkToggle) {
+        darkToggle.addEventListener('click', () => {
+            const isDark = document.body.classList.contains('tt-dark');
+            const activeTheme = document.querySelector('.tt-theme-swatch.active');
+            const theme = activeTheme ? activeTheme.dataset.theme : 'default';
+            applyTestTheme(theme, !isDark);
+        });
+    }
+
+    // Review Answers button
+    const btnReview = document.getElementById('btn-review-answers');
+    if (btnReview) {
+        btnReview.addEventListener('click', () => {
+            document.querySelector('.tt-results-card').style.display = 'none';
+            buildAnswerReview();
+            document.getElementById('answer-review').style.display = '';
+        });
+    }
+
+    // Back to Score button
+    const btnBackToScore = document.getElementById('btn-back-to-score');
+    if (btnBackToScore) {
+        btnBackToScore.addEventListener('click', () => {
+            document.getElementById('answer-review').style.display = 'none';
+            document.querySelector('.tt-results-card').style.display = '';
+        });
+    }
 });
+
+// ===== THEME ENGINE =====
+function applyTestTheme(theme, isDark) {
+    const TT_THEMES = {
+        'default': {
+            '--tt-bg-from': '#3d348b', '--tt-bg-to': '#7678ed',
+            dark: { '--tt-bg-from': '#1a1530', '--tt-bg-to': '#2c2a5a' }
+        },
+        'neon': {
+            '--tt-bg-from': '#0a6e7a', '--tt-bg-to': '#00b4d8',
+            dark: { '--tt-bg-from': '#05050f', '--tt-bg-to': '#0d0d2b' }
+        },
+        'forest': {
+            '--tt-bg-from': '#1a3d2b', '--tt-bg-to': '#2d6a4f',
+            dark: { '--tt-bg-from': '#0a1a11', '--tt-bg-to': '#152d1e' }
+        },
+        'winter': {
+            '--tt-bg-from': '#4a9bbe', '--tt-bg-to': '#2a7fa8',
+            dark: { '--tt-bg-from': '#0a2233', '--tt-bg-to': '#1a3a55' }
+        },
+        'candy': {
+            '--tt-bg-from': '#a8005a', '--tt-bg-to': '#6a00c0',
+            dark: { '--tt-bg-from': '#3d0030', '--tt-bg-to': '#28004a' }
+        },
+        'pastel': {
+            '--tt-bg-from': '#b57bee', '--tt-bg-to': '#ee88b5',
+            dark: { '--tt-bg-from': '#3d1f5a', '--tt-bg-to': '#5a1f3a' }
+        },
+        'ocean': {
+            '--tt-bg-from': '#023e8a', '--tt-bg-to': '#0077b6',
+            dark: { '--tt-bg-from': '#03045e', '--tt-bg-to': '#023e8a' }
+        }
+    };
+
+    const themeData = TT_THEMES[theme] || TT_THEMES['default'];
+    const vars = isDark ? Object.assign({}, themeData, themeData.dark || {}) : themeData;
+
+    // Apply CSS variables to body
+    document.body.style.setProperty('--tt-bg-from', vars['--tt-bg-from']);
+    document.body.style.setProperty('--tt-bg-to', vars['--tt-bg-to']);
+
+    // Toggle dark class
+    if (isDark) {
+        document.body.classList.add('tt-dark');
+    } else {
+        document.body.classList.remove('tt-dark');
+    }
+
+    // Update active swatch
+    document.querySelectorAll('.tt-theme-swatch').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.theme === theme);
+    });
+
+    // Update dark icon
+    const icon = document.getElementById('tt-dark-icon');
+    if (icon) {
+        icon.className = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+    }
+}
+
+// ===== ANSWER REVIEW =====
+function buildAnswerReview() {
+    const reviewList = document.getElementById('review-list');
+    if (!reviewList) return;
+
+    // Access state from TakeTest closure — we stored lastGraded on window
+    const graded = window._ttLastGraded;
+    const questions = window._ttQuestions;
+    const studentAnswers = window._ttAnswers;
+    if (!graded || !questions) return;
+
+    const typeIcons = {
+        'multiple-choice': 'fa-list-ol',
+        'true-false': 'fa-check-double',
+        'fill-blank': 'fa-pen-to-square',
+        'matching': 'fa-right-left',
+        'unjumble-words': 'fa-shuffle',
+        'unjumble-letters': 'fa-spell-check',
+        'drag-drop-category': 'fa-layer-group'
+    };
+
+    const escapeHtml = (text) => {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    };
+
+    let html = '';
+    questions.forEach((q, i) => {
+        const g = graded[i];
+        const icon = typeIcons[q.type] || 'fa-question';
+        const isCorrect = g.correct;
+        const statusClass = isCorrect ? 'tt-review-correct' : 'tt-review-wrong';
+        const statusIcon = isCorrect ? '<i class="fa-solid fa-circle-check"></i>' : '<i class="fa-solid fa-circle-xmark"></i>';
+
+        let studentAnswerText = '';
+        let correctAnswerText = '';
+
+        switch (q.type) {
+            case 'multiple-choice':
+                const sa = studentAnswers[i];
+                studentAnswerText = (sa !== null && sa !== undefined && q.options) ? escapeHtml(q.options[sa]?.text || q.options[sa] || 'No answer') : 'No answer';
+                correctAnswerText = q.options ? escapeHtml(q.options[q.correctAnswer]?.text || q.options[q.correctAnswer] || '') : '';
+                break;
+            case 'true-false':
+                const saT = studentAnswers[i];
+                const labels = q.trueLabel && q.falseLabel ? [q.trueLabel, q.falseLabel] : ['True', 'False'];
+                studentAnswerText = saT === 0 ? labels[0] : saT === 1 ? labels[1] : 'No answer';
+                correctAnswerText = q.correctAnswer === 0 ? labels[0] : labels[1];
+                break;
+            case 'fill-blank':
+                const fbAns = studentAnswers[i];
+                studentAnswerText = Array.isArray(fbAns) ? fbAns.map(a => a || '(empty)').join(', ') : 'No answer';
+                correctAnswerText = (q.blanks || []).join(', ');
+                break;
+            case 'matching':
+                const mAns = studentAnswers[i];
+                studentAnswerText = Array.isArray(mAns) ? mAns.map(a => a || '(empty)').join(', ') : 'No answer';
+                correctAnswerText = (q.pairs || []).map(p => p.right).join(', ');
+                break;
+            case 'unjumble-words':
+                const uwAns = studentAnswers[i];
+                studentAnswerText = Array.isArray(uwAns) ? uwAns.join(' ') : 'No answer';
+                correctAnswerText = (q.words || []).join(' ');
+                break;
+            case 'unjumble-letters':
+                const ulAns = studentAnswers[i];
+                studentAnswerText = Array.isArray(ulAns) ? ulAns.join('') : 'No answer';
+                correctAnswerText = q.correctWord || '';
+                break;
+            case 'drag-drop-category':
+                const ddAns = studentAnswers[i];
+                if (ddAns && typeof ddAns === 'object' && q.categories) {
+                    studentAnswerText = q.categories.map((cat, ci) => {
+                        const items = ddAns[ci] || [];
+                        return `${escapeHtml(cat.name)}: ${items.length > 0 ? items.map(it => escapeHtml(it)).join(', ') : '(empty)'}`;
+                    }).join(' | ');
+                    correctAnswerText = q.categories.map(cat => `${escapeHtml(cat.name)}: ${cat.items.map(it => escapeHtml(it)).join(', ')}`).join(' | ');
+                } else {
+                    studentAnswerText = 'No answer';
+                    correctAnswerText = '';
+                }
+                break;
+            default:
+                studentAnswerText = 'N/A';
+        }
+
+        html += `
+            <div class="tt-review-card ${statusClass}">
+                <div class="tt-review-card-header">
+                    <span class="tt-review-q-num"><i class="fa-solid ${icon}"></i> Q${i + 1}</span>
+                    <span class="tt-review-status">${statusIcon}</span>
+                </div>
+                <div class="tt-review-prompt">${escapeHtml(q.prompt || q.text || '')}</div>
+                <div class="tt-review-answer-row">
+                    <div class="tt-review-student-answer">
+                        <span class="tt-review-label">Your answer:</span>
+                        <span class="tt-review-value">${studentAnswerText}</span>
+                    </div>
+                    ${!isCorrect ? `
+                    <div class="tt-review-correct-answer">
+                        <span class="tt-review-label">Correct answer:</span>
+                        <span class="tt-review-value">${correctAnswerText}</span>
+                    </div>` : ''}
+                </div>
+            </div>`;
+    });
+
+    reviewList.innerHTML = html;
+}

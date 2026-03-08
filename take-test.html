@@ -107,6 +107,7 @@
             <button class="tt-btn tt-btn-success" id="btn-submit-test" style="display:none;"><i
                     class="fa-solid fa-check"></i> Submit Test</button>
         </div>
+
     </div>
 
     <!-- Fullscreen Warning Overlay -->
@@ -151,11 +152,64 @@
                 <h1><i class="fa-solid fa-award"></i> Test Complete!</h1>
             </div>
             <div class="tt-score-circle" id="score-circle">
-                <span class="tt-score-value" id="score-value">0%</span>
-                <span class="tt-score-label">Score</span>
+                <svg width="140" height="140" viewBox="0 0 140 140" class="tt-score-svg">
+                    <!-- Background ring -->
+                    <circle cx="70" cy="70" r="62" class="tt-score-ring-bg"></circle>
+                    <!-- Animated fill ring -->
+                    <circle cx="70" cy="70" r="62" class="tt-score-ring-fill" id="score-ring-fill"></circle>
+                </svg>
+                <div class="tt-score-content">
+                    <span class="tt-score-value" id="score-value">0%</span>
+                    <span class="tt-score-label" id="score-label">Score</span>
+                </div>
             </div>
             <div class="tt-results-details" id="results-details"></div>
-            <button class="tt-btn tt-btn-primary" id="btn-close-results">Close</button>
+            <div class="tt-results-actions">
+                <button class="tt-btn tt-btn-secondary" id="btn-review-answers" style="display:none;"><i
+                        class="fa-solid fa-list-check"></i> Review Answers</button>
+                <button class="tt-btn tt-btn-primary" id="btn-close-results">Close</button>
+            </div>
+        </div>
+        <!-- Answer Review Section -->
+        <div class="tt-answer-review" id="answer-review" style="display:none;">
+            <div class="tt-review-header">
+                <h2><i class="fa-solid fa-list-check"></i> Answer Review</h2>
+                <button class="tt-btn tt-btn-secondary tt-btn-sm" id="btn-back-to-score"><i
+                        class="fa-solid fa-arrow-left"></i> Back to Score</button>
+            </div>
+            <div class="tt-review-list" id="review-list"></div>
+        </div>
+    </div>
+
+    <!-- Global Elements -->
+
+    <!-- Floating Theme Button -->
+    <button class="tt-theme-fab" id="btn-theme-fab" title="Change Theme" style="display:none;">
+        <i class="fa-solid fa-palette"></i>
+    </button>
+
+    <!-- Theme Picker Popup -->
+    <div class="tt-theme-picker" id="theme-picker" style="display:none;">
+        <div class="tt-theme-picker-header">
+            <span>Choose Theme</span>
+            <button class="tt-theme-dark-toggle" id="tt-dark-toggle" title="Toggle dark mode">
+                <i class="fa-solid fa-moon" id="tt-dark-icon"></i>
+            </button>
+        </div>
+        <div class="tt-theme-swatches">
+            <button class="tt-theme-swatch active" data-theme="default" title="Default"
+                style="background-color: #5145cd;"></button>
+            <button class="tt-theme-swatch" data-theme="neon" title="Neon" style="background-color: #00d4ff;"></button>
+            <button class="tt-theme-swatch" data-theme="forest" title="Forest"
+                style="background-color: #208b5e;"></button>
+            <button class="tt-theme-swatch" data-theme="winter" title="Winter"
+                style="background-color: #3498db;"></button>
+            <button class="tt-theme-swatch" data-theme="candy" title="Candy"
+                style="background-color: #c026d3;"></button>
+            <button class="tt-theme-swatch" data-theme="pastel" title="Pastel"
+                style="background-color: #f472b6;"></button>
+            <button class="tt-theme-swatch" data-theme="ocean" title="Ocean"
+                style="background-color: #0284c7;"></button>
         </div>
     </div>
 

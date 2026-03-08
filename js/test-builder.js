@@ -70,6 +70,8 @@ const TestBuilder = (function () {
         dom.collectNameToggle = document.getElementById('setting-collect-name');
         dom.collectGroupToggle = document.getElementById('setting-collect-group');
         dom.fullscreenToggle = document.getElementById('setting-fullscreen');
+        dom.allowThemesToggle = document.getElementById('setting-allow-themes');
+        dom.showAnswerReviewToggle = document.getElementById('setting-show-answer-review');
         dom.groupPills = document.getElementById('group-pills');
         dom.addGroupInput = document.getElementById('add-group-input');
         dom.btnAddGroup = document.getElementById('btn-add-group');
@@ -96,6 +98,8 @@ const TestBuilder = (function () {
                 // Ensure new fields exist
                 if (!testData.settings.groupOptions) testData.settings.groupOptions = [...DEFAULT_GROUPS];
                 if (testData.settings.enableFullscreen === undefined) testData.settings.enableFullscreen = true;
+                if (testData.settings.allowThemes === undefined) testData.settings.allowThemes = true;
+                if (testData.settings.showAnswerReview === undefined) testData.settings.showAnswerReview = true;
             } catch (e) {
                 testData = createEmptyTest();
             }
@@ -120,7 +124,9 @@ const TestBuilder = (function () {
                 collectName: true,
                 collectGroup: true,
                 groupOptions: [...DEFAULT_GROUPS],
-                enableFullscreen: true
+                enableFullscreen: true,
+                allowThemes: true,
+                showAnswerReview: true
             },
             questions: []
         };
@@ -188,6 +194,8 @@ const TestBuilder = (function () {
         bindToggle(dom.collectNameToggle, 'collectName');
         bindToggle(dom.collectGroupToggle, 'collectGroup');
         bindToggle(dom.fullscreenToggle, 'enableFullscreen');
+        bindToggle(dom.allowThemesToggle, 'allowThemes');
+        bindToggle(dom.showAnswerReviewToggle, 'showAnswerReview');
 
         // Add group
         dom.btnAddGroup.addEventListener('click', addGroup);
@@ -1290,6 +1298,8 @@ const TestBuilder = (function () {
         dom.collectNameToggle.checked = s.collectName;
         dom.collectGroupToggle.checked = s.collectGroup;
         dom.fullscreenToggle.checked = s.enableFullscreen;
+        dom.allowThemesToggle.checked = s.allowThemes;
+        dom.showAnswerReviewToggle.checked = s.showAnswerReview;
         renderGroupPills();
         dom.settingsOverlay.classList.add('active');
     }
