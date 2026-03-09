@@ -1171,6 +1171,7 @@ const QuizGame = (() => {
         answersEl.innerHTML = '';
         const icons = ['▲', '◆', '●', '■'];
         q.options.forEach((opt, i) => {
+            if (!opt || opt.trim() === '') return;
             const div = document.createElement('div');
             div.className = 'qg-tv-answer';
             div.id = 'tv-ans-' + i;
@@ -1498,10 +1499,15 @@ const QuizGame = (() => {
 
         const btns = document.querySelectorAll('.qg-answer-btn');
         btns.forEach((btn, i) => {
-            btn.textContent = q.options[i] || '';
-            btn.className = 'qg-answer-btn qg-ans-' + i;
-            btn.disabled = false;
-            btn.style.display = ''; // Reset visibility
+            if (i < q.options.length && q.options[i] && q.options[i].trim() !== '') {
+                btn.textContent = q.options[i];
+                btn.className = 'qg-answer-btn qg-ans-' + i;
+                btn.disabled = false;
+                btn.style.display = ''; // Reset visibility
+                btn.style.opacity = '1';
+            } else {
+                btn.style.display = 'none';
+            }
         });
 
         // Apply pending powerups
@@ -1573,10 +1579,15 @@ const QuizGame = (() => {
 
             const btns = document.querySelectorAll('.qg-answer-btn');
             btns.forEach((btn, i) => {
-                btn.textContent = q.options[i] || '';
-                btn.className = 'qg-answer-btn qg-ans-' + i;
-                btn.disabled = false;
-                btn.style.display = ''; // Reset visibility
+                if (i < q.options.length && q.options[i] && q.options[i].trim() !== '') {
+                    btn.textContent = q.options[i];
+                    btn.className = 'qg-answer-btn qg-ans-' + i;
+                    btn.disabled = false;
+                    btn.style.display = ''; // Reset visibility
+                    btn.style.opacity = '1';
+                } else {
+                    btn.style.display = 'none';
+                }
             });
 
             // Apply pending powerups
@@ -2072,9 +2083,8 @@ const QuizGame = (() => {
             } else {
                 // For host-paced/auto, show "waiting" until host advances
                 $('sv-question').classList.remove('qg-hidden');
-                $('sv-answers').classList.remove('qg-hidden');
+                $('sv-answers').classList.add('qg-hidden');
                 $('sv-question').innerHTML = '<h3>Waiting for host...</h3>';
-                $('sv-answers').innerHTML = '';
             }
         }, 3500);
     }
