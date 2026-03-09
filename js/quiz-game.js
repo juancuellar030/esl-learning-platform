@@ -141,14 +141,15 @@ const QuizGame = (() => {
                 folderName: 'ESL Custom Quizzes',
                 fileExtension: '.json',
                 onSave: () => {
-                    const validRows = customRows.filter(r => r.word.trim() || r.clue.trim());
+                    const validRows = customRows.filter(r => r.question.trim() && r.options.some(opt => opt.trim()));
                     if (validRows.length === 0) {
-                        alert('Your quiz is empty. Add at least one word or clue to save.');
+                        alert('Your quiz is empty. Add at least one question with options to save.');
                         return null;
                     }
                     return validRows.map(r => ({
-                        word: r.word,
-                        clue: r.clue,
+                        question: r.question,
+                        options: r.options,
+                        correctIndex: r.correctIndex,
                         imageData: r.imageData,
                         imageName: r.imageName,
                         audioData: r.audioData,
@@ -168,8 +169,9 @@ const QuizGame = (() => {
                         const rowId = 'cq-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5);
                         const newRow = {
                             id: rowId,
-                            word: rowData.word || '',
-                            clue: rowData.clue || '',
+                            question: rowData.question || '',
+                            options: rowData.options || ['', '', '', ''],
+                            correctIndex: rowData.correctIndex !== undefined ? rowData.correctIndex : 0,
                             imageData: rowData.imageData || null,
                             imageName: rowData.imageName || '',
                             audioData: rowData.audioData || null,
@@ -428,7 +430,7 @@ const QuizGame = (() => {
         const list = $('custom-list');
         for (let i = 0; i < count; i++) {
             const rowId = 'cq-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5);
-            const rowData = { id: rowId, word: '', clue: '', imageData: null, audioData: null, imageName: '', audioName: '' };
+            const rowData = { id: rowId, question: '', options: ['', '', '', ''], correctIndex: 0, imageData: null, audioData: null, imageName: '', audioName: '' };
             customRows.push(rowData);
             renderCustomRow(list, rowData, customRows.length);
         }
@@ -441,8 +443,8 @@ const QuizGame = (() => {
         row.innerHTML = `
             <span class="qg-custom-row-num">Q${num}</span>
             <div class="qg-custom-inputs">
-                <input type="text" class="cq-word" placeholder="Word / Concept" maxlength="60">
-                <input type="text" class="cq-clue" placeholder="Clue / Definition" maxlength="150">
+                <input type="text" class="cq-question" placeholder="Enter question..." maxlength="150">
+                <div class="qg-custom-options-grid"></div>
             </div>
             <div class="qg-custom-media">
                 <button class="qg-media-btn cq-img-btn" type="button">
@@ -460,8 +462,35 @@ const QuizGame = (() => {
         `;
 
         // Bind events
-        row.querySelector('.cq-word').addEventListener('input', e => { rowData.word = e.target.value; });
-        row.querySelector('.cq-clue').addEventListener('input', e => { rowData.clue = e.target.value; });
+        const qInput = row.querySelector('.cq-question');
+        qInput.value = rowData.question || '';
+        qInput.addEventListener('input', e => { rowData.question = e.target.value; });
+
+        const optionsGrid = row.querySelector('.qg-custom-options-grid');
+        for (let i = 0; i < 4; i++) {
+            const optWrapper = document.createElement('div');
+            optWrapper.className = 'qg-custom-option-wrapper';
+
+            const radio = document.createElement('input');
+            radio.type = 'radio';
+            radio.name = 'correct-' + rowData.id;
+            radio.checked = rowData.correctIndex === i;
+            radio.addEventListener('change', () => { rowData.correctIndex = i; });
+
+            const textInput = document.createElement('input');
+            textInput.type = 'text';
+            textInput.placeholder = 'Option ' + (i + 1);
+            textInput.maxLength = 60;
+            textInput.value = rowData.options && rowData.options[i] ? rowData.options[i] : '';
+            textInput.addEventListener('input', e => {
+                if (!rowData.options) rowData.options = ['', '', '', ''];
+                rowData.options[i] = e.target.value;
+            });
+
+            optWrapper.appendChild(radio);
+            optWrapper.appendChild(textInput);
+            optionsGrid.appendChild(optWrapper);
+        }
 
         // Image upload
         const imgBtn = row.querySelector('.cq-img-btn');
@@ -479,8 +508,7 @@ const QuizGame = (() => {
             audioBtn.querySelector('.file-name').textContent = rowData.audioName.length > 12 ? rowData.audioName.slice(0, 10) + '…' : rowData.audioName;
         }
 
-        row.querySelector('.cq-word').value = rowData.word || '';
-        row.querySelector('.cq-clue').value = rowData.clue || '';
+
 
         imgBtn.addEventListener('click', () => imgInput.click());
         imgInput.addEventListener('change', () => {
@@ -526,10 +554,10 @@ const QuizGame = (() => {
     }
 
     function generateCustomQuestions() {
-        const validRows = customRows.filter(r => r.word.trim() && r.clue.trim());
+        const validRows = customRows.filter(r => r.question.trim() && r.options.filter(o => o.trim()).length >= 2);
 
-        if (validRows.length < 2) {
-            alert('Please add at least 2 questions with both a word and clue.');
+        if (validRows.length === 0) {
+            alert('Please add at least 1 question with at least 2 options.');
             return null;
         }
 
@@ -537,35 +565,23 @@ const QuizGame = (() => {
 
         for (let i = 0; i < validRows.length; i++) {
             const item = validRows[i];
-            // Get distractors from other custom rows
-            const distractors = validRows.filter((r, idx) => idx !== i);
-            shuffle(distractors);
-            const picks = distractors.slice(0, Math.min(3, distractors.length));
 
-            // Fill remaining distractors if < 3 available
-            while (picks.length < 3) {
-                picks.push({ word: '—', clue: '(no option)' });
+            const rawOptions = item.options.map((opt, idx) => ({ opt: opt.trim(), isCorrect: idx === item.correctIndex }));
+            let validOptions = rawOptions.filter(o => o.opt);
+
+            let correctOption = validOptions.find(o => o.isCorrect);
+            if (!correctOption) {
+                validOptions[0].isCorrect = true;
+                correctOption = validOptions[0];
             }
 
-            const type = Math.random() < 0.5 ? 'word-to-clue' : 'clue-to-word';
-            let questionText, optionsList;
-
-            if (type === 'word-to-clue') {
-                questionText = `What does "${item.word.trim()}" mean?`;
-                optionsList = [item.clue.trim(), ...picks.map(p => p.clue.trim())];
-            } else {
-                questionText = item.clue.trim();
-                optionsList = [item.word.trim(), ...picks.map(p => p.word.trim())];
-            }
-
-            const shuffledOpts = optionsList.map((opt, idx) => ({ opt, isCorrect: idx === 0 }));
-            shuffle(shuffledOpts);
+            shuffle(validOptions);
 
             qs.push({
-                text: questionText,
-                options: shuffledOpts.map(s => s.opt),
-                correctIndex: shuffledOpts.findIndex(s => s.isCorrect),
-                word: item.word.trim(),
+                text: item.question.trim(),
+                options: validOptions.map(s => s.opt),
+                correctIndex: validOptions.findIndex(s => s.isCorrect),
+                word: item.question.trim().slice(0, 20),
                 imageData: item.imageData || null,
                 audioData: item.audioData || null
             });
