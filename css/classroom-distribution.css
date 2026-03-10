@@ -17,12 +17,12 @@
 }
 
 body.dark-mode {
-    --grid-bg: #2c3e50;
-    --grid-line: #34495e;
-    --relocation-bg: #34495e;
-    --boy-color: #3f5d75;
-    --girl-color: #6a4a75;
-    --teacher-color: #2e6b52;
+    --grid-bg: #1e1e1e;
+    --grid-line: #444444;
+    --relocation-bg: #1e1e1e;
+    --boy-color: #2c3e50;
+    --girl-color: #4a235a;
+    --teacher-color: #1b4332;
 }
 
 .distribution-container {
@@ -62,7 +62,7 @@ body.dark-mode {
 }
 
 body.dark-mode .toolbar {
-    background: #2c3e50;
+    background: #1e1e1e;
 }
 
 .classroom-grid-wrapper {
@@ -76,7 +76,7 @@ body.dark-mode .toolbar {
 }
 
 body.dark-mode .classroom-grid-wrapper {
-    background: rgba(0, 0, 0, 0.2);
+    background: #2d2d2d;
 }
 
 .classroom-grid {
