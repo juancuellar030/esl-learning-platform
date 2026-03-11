@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/student-behavior-tracker.css">
     <link rel="stylesheet" href="css/google-drive.css">
-    
+
 </head>
 
 <body>
@@ -34,7 +34,9 @@
                 <button class="btn btn-save" id="saveData"><i class="fa-solid fa-floppy-disk"></i> Save</button>
                 <button class="btn btn-load" id="loadData"><i class="fa-solid fa-folder-open"></i> Load</button>
                 <button class="btn btn-drive" id="openDrive"><i class="fa-brands fa-google-drive"></i> Drive</button>
+                <button class="btn btn-prize" id="openPrizeCalculator"><i class="fa-solid fa-gift"></i> Prizes</button>
                 <input type="file" id="fileInput" accept=".json" style="display: none;">
+                <input type="file" id="prizeFilesInput" accept=".json" multiple style="display: none;">
             </div>
         </div>
 
@@ -111,6 +113,86 @@
 
     <!-- Slide-in Notification Container -->
     <div class="notification-container" id="notificationContainer"></div>
+
+    <!-- Prize Calculator Modal -->
+    <div class="prize-modal-overlay" id="prizeModal" style="display: none;">
+        <div class="prize-modal-card">
+            <div class="prize-modal-header">
+                <div>
+                    <h3><i class="fa-solid fa-gift"></i> Prize Calculator</h3>
+                    <p>Select multiple weeks to calculate who qualifies for a prize (0-2 marks total).</p>
+                </div>
+                <button class="prize-close-btn" id="prizeCloseBtn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div class="prize-modal-body" id="prizeModalBody">
+                <div class="prize-input-section">
+                    <div class="prize-source-group">
+                        <button class="btn btn-load" id="prizeLoadLocalBtn">
+                            <i class="fa-solid fa-file-import"></i> Load Local Files
+                        </button>
+                        <button class="btn btn-drive" id="prizeLoadDriveBtn">
+                            <i class="fa-brands fa-google-drive"></i> Select from Drive
+                        </button>
+                    </div>
+
+                    <div class="prize-selected-files" id="prizeSelectedFiles" style="display: none;">
+                        <h4>Selected Weeks:</h4>
+                        <ul id="prizeFilesList"></ul>
+                        <button class="btn btn-finish" id="prizeCalculateBtn"
+                            style="margin-top: 15px; width: 100%; justify-content: center;">
+                            <i class="fa-solid fa-calculator"></i> Calculate Prizes
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Drive Selection View -->
+                <div class="prize-drive-section" id="prizeDriveSection" style="display: none;">
+                    <div class="prize-drive-header">
+                        <h4><i class="fa-brands fa-google-drive"></i> Select Weeks from Drive</h4>
+                        <button class="btn-link" id="prizeDriveBackBtn"><i class="fa-solid fa-arrow-left"></i>
+                            Back</button>
+                    </div>
+                    <div class="gds-file-list prize-drive-list" id="prizeDriveList">
+                        <div class="gds-empty">Loading files...</div>
+                    </div>
+                    <button class="btn btn-save" id="prizeDriveConfirmBtn"
+                        style="margin-top: 15px; width: 100%; justify-content: center;" disabled>
+                        Confirm Selection
+                    </button>
+                </div>
+
+                <!-- Results View -->
+                <div class="prize-results-section" id="prizeResultsSection" style="display: none;">
+                    <button class="btn-link prize-back-link" id="prizeResultsBackBtn">
+                        <i class="fa-solid fa-arrow-left"></i> Calculate Again
+                    </button>
+                    <div class="prize-report-actions"
+                        style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
+                        <button class="btn btn-drive" id="prizeSaveReportBtn">
+                            <i class="fa-solid fa-cloud-arrow-up"></i> Save Report
+                        </button>
+                    </div>
+
+                    <div class="prize-winners-container">
+                        <div class="prize-group winners-group">
+                            <div class="prize-group-header">
+                                <i class="fa-solid fa-trophy" style="color: #f1c40f;"></i> Qualify for Prize (0-2 Marks)
+                            </div>
+                            <div class="prize-list" id="prizeWinnersList"></div>
+                        </div>
+                        <div class="prize-group losers-group">
+                            <div class="prize-group-header">
+                                <i class="fa-solid fa-circle-xmark" style="color: #e74c3c;"></i> Did Not Qualify (3+
+                                Marks)
+                            </div>
+                            <div class="prize-list" id="prizeLosersList"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- ESL Platform Footer -->
     <footer class="main-footer">
@@ -514,6 +596,266 @@
                         inp.value = `behavior-${getSelectedWeek().replace(/[^a-zA-Z0-9]/g, '-')}`;
                     }
                 }, 400);
+            });
+
+            // ── Prize Calculator Logic ────────────────────────────
+            const prizeModal = document.getElementById('prizeModal');
+            const prizeCloseBtn = document.getElementById('prizeCloseBtn');
+            const prizeLoadLocalBtn = document.getElementById('prizeLoadLocalBtn');
+            const prizeFilesInput = document.getElementById('prizeFilesInput');
+            const prizeLoadDriveBtn = document.getElementById('prizeLoadDriveBtn');
+            const prizeSelectedFiles = document.getElementById('prizeSelectedFiles');
+            const prizeFilesList = document.getElementById('prizeFilesList');
+            const prizeCalculateBtn = document.getElementById('prizeCalculateBtn');
+            const prizeDriveSection = document.getElementById('prizeDriveSection');
+            const prizeDriveList = document.getElementById('prizeDriveList');
+            const prizeDriveBackBtn = document.getElementById('prizeDriveBackBtn');
+            const prizeDriveConfirmBtn = document.getElementById('prizeDriveConfirmBtn');
+            const prizeResultsSection = document.getElementById('prizeResultsSection');
+            const prizeResultsBackBtn = document.getElementById('prizeResultsBackBtn');
+            const prizeWinnersList = document.getElementById('prizeWinnersList');
+            const prizeLosersList = document.getElementById('prizeLosersList');
+            const prizeSaveReportBtn = document.getElementById('prizeSaveReportBtn');
+
+            let loadedPrizeData = [];
+            let driveFilesAvailable = [];
+            let currentPrizeReport = null; // Store final calculated report to save
+
+            // Second Google Drive Service instance just for saving prize reports
+            const prizeReportDriveService = new GoogleDriveService({
+                folderName: 'ESL - Prize Reports',
+                fileExtension: '.json',
+                onSave: () => currentPrizeReport,
+                onNotify: (msg, type) => showNotification(msg, type === 'success' ? 'success' : type === 'error' ? 'error' : 'info')
+            });
+
+            document.getElementById('openPrizeCalculator').addEventListener('click', () => {
+                prizeModal.style.display = 'flex';
+                resetPrizeModal();
+            });
+
+            prizeCloseBtn.addEventListener('click', () => {
+                prizeModal.style.display = 'none';
+            });
+
+            // Local Files
+            prizeLoadLocalBtn.addEventListener('click', () => prizeFilesInput.click());
+
+            prizeFilesInput.addEventListener('change', (e) => {
+                const files = e.target.files;
+                if (!files || files.length === 0) return;
+
+                loadedPrizeData = [];
+                let filesProcessed = 0;
+
+                Array.from(files).forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        try {
+                            const data = JSON.parse(event.target.result);
+                            if (data.behaviorData && data.week) {
+                                loadedPrizeData.push(data);
+                            }
+                        } catch (err) {
+                            console.error('Error parsing prize file:', err);
+                        }
+                        filesProcessed++;
+                        if (filesProcessed === files.length) {
+                            showPrizeSelectedFiles();
+                        }
+                    };
+                    reader.readAsText(file);
+                });
+                e.target.value = '';
+            });
+
+            // Google Drive Integration for Prizes
+            prizeLoadDriveBtn.addEventListener('click', async () => {
+                if (!driveService.isSignedIn) {
+                    const ok = await driveService.init();
+                    if (!ok) {
+                        showNotification('Google Drive not configured.', 'error');
+                        return;
+                    }
+                    driveService.signIn();
+                    return;
+                }
+
+                // Switch to Drive view Mode
+                document.querySelector('.prize-input-section').style.display = 'none';
+                prizeDriveSection.style.display = 'block';
+                prizeDriveConfirmBtn.disabled = true;
+
+                prizeDriveList.innerHTML = '<div class="gds-empty">Loading files...</div>';
+
+                // Just use driveService to list files from 'ESL - Behavior Tracker'
+                try {
+                    const files = await driveService.listFiles(); // Note: we need to temporarily hijack or manually call but driveService.listFiles() renders to main modal.
+                    // Actually, driveService.listFiles() returns the files.
+                    // Let's manually fetch them so we don't mess up its UI.
+                    const folderId = await driveService._getOrCreateFolder();
+                    const response = await gapi.client.drive.files.list({
+                        q: `'${folderId}' in parents and trashed=false`,
+                        fields: 'files(id, name, modifiedTime)',
+                        orderBy: 'modifiedTime desc',
+                        pageSize: 50
+                    });
+
+                    driveFilesAvailable = response.result.files || [];
+                    renderPrizeDriveList();
+                } catch (err) {
+                    console.error(err);
+                    prizeDriveList.innerHTML = '<div class="gds-empty text-danger">Error loading files</div>';
+                }
+            });
+
+            prizeDriveBackBtn.addEventListener('click', () => {
+                prizeDriveSection.style.display = 'none';
+                document.querySelector('.prize-input-section').style.display = 'block';
+            });
+
+            function renderPrizeDriveList() {
+                if (driveFilesAvailable.length === 0) {
+                    prizeDriveList.innerHTML = '<div class="gds-empty">No files found in Drive</div>';
+                    return;
+                }
+
+                prizeDriveList.innerHTML = driveFilesAvailable.map(f => {
+                    return `
+                        <div class="gds-file-item prize-drive-item" style="cursor: pointer;">
+                            <label style="display: flex; align-items: center; width: 100%; cursor: pointer;">
+                                <input type="checkbox" class="prize-drive-checkbox" value="${f.id}" data-name="${driveService._escHtml(f.name)}" style="margin-right: 10px; transform: scale(1.2);">
+                                <div>
+                                    <div class="gds-file-name">${driveService._escHtml(f.name)}</div>
+                                    <div class="gds-file-meta">${new Date(f.modifiedTime).toLocaleDateString()}</div>
+                                </div>
+                            </label>
+                        </div>
+                    `;
+                }).join('');
+
+                document.querySelectorAll('.prize-drive-checkbox').forEach(chk => {
+                    chk.addEventListener('change', () => {
+                        const checked = document.querySelectorAll('.prize-drive-checkbox:checked').length;
+                        prizeDriveConfirmBtn.disabled = checked === 0;
+                    });
+                });
+            }
+
+            prizeDriveConfirmBtn.addEventListener('click', async () => {
+                const checkedNodes = document.querySelectorAll('.prize-drive-checkbox:checked');
+                if (checkedNodes.length === 0) return;
+
+                prizeDriveConfirmBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Downloading...';
+                prizeDriveConfirmBtn.disabled = true;
+
+                loadedPrizeData = [];
+                let fetches = [];
+                checkedNodes.forEach(node => {
+                    fetches.push(gapi.client.drive.files.get({ fileId: node.value, alt: 'media' })
+                        .then(res => {
+                            const data = typeof res.result === 'string' ? JSON.parse(res.result) : res.result;
+                            if (data.behaviorData) loadedPrizeData.push(data);
+                        })
+                        .catch(err => console.error('Failed to parse drive prize file', err))
+                    );
+                });
+
+                await Promise.all(fetches);
+
+                prizeDriveConfirmBtn.innerHTML = 'Confirm Selection';
+                prizeDriveSection.style.display = 'none';
+                document.querySelector('.prize-input-section').style.display = 'block';
+                showPrizeSelectedFiles();
+            });
+
+            function showPrizeSelectedFiles() {
+                prizeSelectedFiles.style.display = 'block';
+                prizeFilesList.innerHTML = loadedPrizeData.map(d => `<li><i class="fa-solid fa-check" style="color:#2ecc71;"></i> Week: ${d.week}</li>`).join('');
+            }
+
+            function resetPrizeModal() {
+                loadedPrizeData = [];
+                document.querySelector('.prize-input-section').style.display = 'block';
+                prizeSelectedFiles.style.display = 'none';
+                prizeDriveSection.style.display = 'none';
+                prizeResultsSection.style.display = 'none';
+                prizeFilesInput.value = '';
+            }
+
+            prizeCalculateBtn.addEventListener('click', () => {
+                if (loadedPrizeData.length === 0) return;
+
+                let aggregatedMarks = {};
+                students.forEach(s => aggregatedMarks[s] = 0);
+
+                // Aggregate logic
+                loadedPrizeData.forEach(weekData => {
+                    const behav = weekData.behaviorData;
+                    if (!behav) return;
+                    for (const student of students) {
+                        if (behav[student]) {
+                            const marksCount = Object.values(behav[student]).filter(m => m !== '').length;
+                            aggregatedMarks[student] += marksCount;
+                        }
+                    }
+                });
+
+                const winners = [];
+                const losers = [];
+
+                for (const student of students) {
+                    if (aggregatedMarks[student] <= 2) winners.push({ name: student, marks: aggregatedMarks[student] });
+                    else losers.push({ name: student, marks: aggregatedMarks[student] });
+                }
+
+                // Prepare report data for saving
+                currentPrizeReport = {
+                    reportDate: new Date().toISOString(),
+                    includedWeeks: loadedPrizeData.map(d => d.week).join(', '),
+                    winners: winners,
+                    losers: losers
+                };
+
+                // Render lists
+                winners.sort((a, b) => a.marks - b.marks);
+                losers.sort((a, b) => b.marks - a.marks);
+
+                prizeWinnersList.innerHTML = winners.map((w, index) => `
+                    <div class="prize-student-card" style="animation-delay: ${index * 0.05}s">
+                        <span class="prize-student-name">${w.name}</span>
+                        <span class="prize-student-marks marks-good">${w.marks} marks</span>
+                    </div>
+                `).join('');
+
+                prizeLosersList.innerHTML = losers.map((l, index) => `
+                    <div class="prize-student-card" style="animation-delay: ${index * 0.05}s">
+                        <span class="prize-student-name">${l.name}</span>
+                        <span class="prize-student-marks marks-bad">${l.marks} marks</span>
+                    </div>
+                `).join('');
+
+                document.querySelector('.prize-input-section').style.display = 'none';
+                prizeResultsSection.style.display = 'block';
+            });
+
+            prizeResultsBackBtn.addEventListener('click', resetPrizeModal);
+
+            // Save report to drive
+            prizeSaveReportBtn.addEventListener('click', async () => {
+                if (!prizeReportDriveService.isSignedIn) {
+                    const ok = await prizeReportDriveService.init();
+                    if (!ok) {
+                        showNotification('Google Drive not configured.', 'error');
+                        return;
+                    }
+                    prizeReportDriveService.signIn();
+                    return;
+                }
+
+                const filename = `prize-report-${new Date().toISOString().split('T')[0]}`;
+                prizeReportDriveService.modalEl = prizeModal; // Trick the service so it doesn't open its own HTML modal if it has to
+                prizeReportDriveService.saveFile(filename);
             });
         });
     </script>

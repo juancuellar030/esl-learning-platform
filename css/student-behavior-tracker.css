@@ -1067,3 +1067,416 @@ body.dark-mode .success-message {
     color: #95d5b2;
     border-left-color: #2e7d32;
 }
+
+/* ===== PRIZE CALCULATOR BUTTON ===== */
+.btn-prize {
+    background: linear-gradient(135deg, #f39c12 0%, #d35400 100%);
+    color: white;
+    font-weight: 700;
+    box-shadow: 0 4px 15px rgba(211, 84, 0, 0.4);
+    animation: pulseGlow 2s infinite alternate;
+}
+
+.btn-prize:hover {
+    background: linear-gradient(135deg, #f1c40f 0%, #e67e22 100%);
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 6px 20px rgba(241, 196, 15, 0.5);
+}
+
+@keyframes pulseGlow {
+    0% {
+        box-shadow: 0 0 10px rgba(243, 156, 18, 0.3);
+    }
+
+    100% {
+        box-shadow: 0 0 20px rgba(243, 156, 18, 0.6);
+    }
+}
+
+/* ===== PRIZE CALCULATOR MODAL ===== */
+.prize-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(5px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease;
+}
+
+.prize-modal-card {
+    background: white;
+    width: 90%;
+    max-width: 600px;
+    border-radius: 16px;
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+}
+
+.prize-modal-header {
+    background: linear-gradient(135deg, var(--indigo-velvet) 0%, var(--medium-slate-blue) 100%);
+    color: white;
+    padding: 24px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.prize-modal-header h3 {
+    margin: 0 0 5px 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.prize-modal-header p {
+    margin: 0;
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.prize-close-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.prize-close-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: rotate(90deg);
+}
+
+.prize-modal-body {
+    padding: 30px;
+    overflow-y: auto;
+    background: #fdfdfd;
+}
+
+/* Source Selection */
+.prize-source-group {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.prize-source-group .btn {
+    flex: 1;
+    min-width: 200px;
+    justify-content: center;
+    padding: 20px;
+    font-size: 16px;
+}
+
+/* Selected Files */
+.prize-selected-files {
+    margin-top: 25px;
+    padding: 20px;
+    background: #f4f6f9;
+    border-radius: 12px;
+    border: 1px solid #dde3ec;
+}
+
+.prize-selected-files h4 {
+    margin-bottom: 15px;
+    color: #2c3e50;
+    font-weight: 700;
+}
+
+.prize-selected-files ul {
+    list-style: none;
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+.prize-selected-files li {
+    padding: 8px 12px;
+    background: white;
+    margin-bottom: 8px;
+    border-radius: 6px;
+    font-size: 14px;
+    color: #34495e;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* Drive Section */
+.prize-drive-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.prize-drive-header h4 {
+    color: #2c3e50;
+    font-weight: 700;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.prize-drive-list {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #dde3ec;
+    border-radius: 8px;
+}
+
+.prize-drive-item {
+    transition: background 0.2s;
+}
+
+.prize-drive-item:hover {
+    background: #f4f6f9;
+}
+
+/* Results Section */
+.prize-winners-container {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.prize-group {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    border: 1px solid #dde3ec;
+}
+
+.winners-group {
+    border-color: #f1c40f;
+}
+
+.losers-group {
+    border-color: #e74c3c;
+}
+
+.prize-group-header {
+    padding: 15px 20px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #dde3ec;
+}
+
+.winners-group .prize-group-header {
+    background: #fffdf5;
+    color: #b8860b;
+    border-bottom-color: #f1c40f;
+}
+
+.losers-group .prize-group-header {
+    background: #fff5f5;
+    color: #c0392b;
+    border-bottom-color: #fadbd8;
+}
+
+.prize-list {
+    padding: 15px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+.prize-student-card {
+    padding: 12px;
+    border-radius: 8px;
+    background: #f8f9fa;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    animation: slideUp 0.3s ease-out both;
+}
+
+.winners-group .prize-student-card {
+    background: white;
+    border: 1px solid #fcf3cf;
+    box-shadow: 0 2px 5px rgba(241, 196, 15, 0.1);
+}
+
+.losers-group .prize-student-card {
+    background: white;
+    border: 1px solid #fadbd8;
+    box-shadow: 0 2px 5px rgba(231, 76, 60, 0.1);
+}
+
+.prize-student-name {
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 14px;
+}
+
+.prize-student-marks {
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 8px;
+    border-radius: 12px;
+}
+
+.marks-good {
+    background: #eafaf1;
+    color: #27ae60;
+}
+
+.marks-bad {
+    background: #fdedec;
+    color: #c0392b;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.prize-back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    color: var(--medium-slate-blue);
+    font-weight: 600;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.prize-back-link:hover {
+    color: var(--indigo-velvet);
+    text-decoration: underline;
+}
+
+/* PRIZE MODAL DARK MODE OVERRIDES */
+body.dark-mode .prize-modal-card {
+    background: #1e1e1e;
+}
+
+body.dark-mode .prize-modal-body {
+    background: #1e1e1e;
+}
+
+body.dark-mode .prize-selected-files {
+    background: #252525;
+    border-color: #444;
+}
+
+body.dark-mode .prize-selected-files h4,
+body.dark-mode .prize-drive-header h4 {
+    color: #f5f5f5;
+}
+
+body.dark-mode .prize-selected-files li {
+    background: #2d2d2d;
+    color: #ddd;
+    border: 1px solid #444;
+}
+
+body.dark-mode .prize-group {
+    background: #252525;
+    border-color: #444;
+}
+
+body.dark-mode .winners-group {
+    border-color: #b8860b;
+}
+
+body.dark-mode .losers-group {
+    border-color: #9b2020;
+}
+
+body.dark-mode .winners-group .prize-group-header {
+    background: #2a2510;
+    color: #f1c40f;
+    border-bottom: 1px solid #574600;
+}
+
+body.dark-mode .losers-group .prize-group-header {
+    background: #3a1515;
+    color: #e74c3c;
+    border-bottom: 1px solid #5a1515;
+}
+
+body.dark-mode .winners-group .prize-student-card {
+    background: #252525;
+    border-color: #574600;
+}
+
+body.dark-mode .losers-group .prize-student-card {
+    background: #252525;
+    border-color: #5a1515;
+}
+
+body.dark-mode .prize-student-name {
+    color: #ddd;
+}
+
+body.dark-mode .marks-good {
+    background: #1b4332;
+    color: #95d5b2;
+}
+
+body.dark-mode .marks-bad {
+    background: #4a1010;
+    color: #ff9999;
+}
+
+body.dark-mode .prize-drive-list {
+    border-color: #444;
+}
+
+body.dark-mode .prize-drive-item:hover {
+    background: #2d2d2d;
+}
+
+body.dark-mode .btn-link {
+    color: #8c9eff;
+}
+
+body.dark-mode .btn-link:hover {
+    color: #aab6ff;
+}
