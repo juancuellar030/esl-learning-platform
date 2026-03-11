@@ -1338,11 +1338,11 @@ body.dark-mode .notification.info {
 }
 
 .winners-perfect-group {
-    border-color: #f1c40f;
+    border-color: #27ae60;
 }
 
 .winners-eligible-group {
-    border-color: #27ae60;
+    border-color: #f1c40f;
 }
 
 .losers-group {
@@ -1361,15 +1361,15 @@ body.dark-mode .notification.info {
 }
 
 .winners-perfect-group .prize-group-header {
-    background: #fffdf5;
-    color: #b8860b;
-    border-bottom-color: #f1c40f;
-}
-
-.winners-eligible-group .prize-group-header {
     background: #f4fbf7;
     color: #1a7b42;
     border-bottom-color: #27ae60;
+}
+
+.winners-eligible-group .prize-group-header {
+    background: #fffdf5;
+    color: #b8860b;
+    border-bottom-color: #f1c40f;
 }
 
 .losers-group .prize-group-header {
@@ -1399,14 +1399,14 @@ body.dark-mode .notification.info {
 
 .perfect-card {
     background: white;
-    border: 1px solid #fcf3cf;
-    box-shadow: 0 2px 5px rgba(241, 196, 15, 0.1);
+    border: 1px solid #d5f5e3;
+    box-shadow: 0 2px 5px rgba(39, 174, 96, 0.1);
 }
 
 .eligible-card {
     background: white;
-    border: 1px solid #d5f5e3;
-    box-shadow: 0 2px 5px rgba(39, 174, 96, 0.1);
+    border: 1px solid #fcf3cf;
+    box-shadow: 0 2px 5px rgba(241, 196, 15, 0.1);
 }
 
 .losers-group .prize-student-card {
@@ -1429,13 +1429,13 @@ body.dark-mode .notification.info {
 }
 
 .marks-good {
-    background: #eafaf1;
-    color: #27ae60;
+    background: #fef9e7;
+    color: #d4ac0d;
 }
 
 .marks-perfect {
-    background: #fef9e7;
-    color: #d4ac0d;
+    background: #eafaf1;
+    color: #27ae60;
 }
 
 .marks-bad {
@@ -1548,11 +1548,11 @@ body.dark-mode .prize-group {
 }
 
 body.dark-mode .winners-perfect-group {
-    border-color: #b8860b;
+    border-color: #1a7b42;
 }
 
 body.dark-mode .winners-eligible-group {
-    border-color: #1a7b42;
+    border-color: #b8860b;
 }
 
 body.dark-mode .losers-group {
@@ -1560,15 +1560,15 @@ body.dark-mode .losers-group {
 }
 
 body.dark-mode .winners-perfect-group .prize-group-header {
-    background: #2a2510;
-    color: #f1c40f;
-    border-bottom: 1px solid #574600;
-}
-
-body.dark-mode .winners-eligible-group .prize-group-header {
     background: #1b3a2a;
     color: #27ae60;
     border-bottom: 1px solid #1a5232;
+}
+
+body.dark-mode .winners-eligible-group .prize-group-header {
+    background: #2a2510;
+    color: #f1c40f;
+    border-bottom: 1px solid #574600;
 }
 
 body.dark-mode .losers-group .prize-group-header {
@@ -1579,12 +1579,12 @@ body.dark-mode .losers-group .prize-group-header {
 
 body.dark-mode .perfect-card {
     background: #252525;
-    border-color: #574600;
+    border-color: #1a5232;
 }
 
 body.dark-mode .eligible-card {
     background: #252525;
-    border-color: #1a5232;
+    border-color: #574600;
 }
 
 body.dark-mode .losers-group .prize-student-card {
@@ -1597,13 +1597,13 @@ body.dark-mode .prize-student-name {
 }
 
 body.dark-mode .marks-good {
-    background: #1b4332;
-    color: #95d5b2;
+    background: #3b300f;
+    color: #e5c156;
 }
 
 body.dark-mode .marks-perfect {
-    background: #3b300f;
-    color: #e5c156;
+    background: #1b4332;
+    color: #95d5b2;
 }
 
 body.dark-mode .marks-bad {
