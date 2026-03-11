@@ -13,7 +13,23 @@
 
 </head>
 
-<body>
+<body class="behavior-tracker-page">
+
+    <!-- Custom Alert Modal -->
+    <div class="modal-overlay" id="customAlertModal"
+        style="display: none; z-index: 10000; justify-content: center; align-items: center; background: rgba(0,0,0,0.6); position: fixed; top: 0; left: 0; right: 0; bottom: 0; backdrop-filter: blur(4px);">
+        <div class="modal-card"
+            style="background: white; border-radius: 16px; padding: 30px; max-width: 400px; width: 90%; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.2); animation: scaleIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+            <div id="customAlertIcon" style="font-size: 3rem; margin-bottom: 15px;"></div>
+            <h2 id="customAlertTitle" style="color: var(--indigo-velvet); margin-bottom: 15px; font-size: 1.5rem;">
+                Notice</h2>
+            <p id="customAlertMessage" style="color: #444; font-size: 1.1rem; margin-bottom: 25px; line-height: 1.5;">
+            </p>
+            <button class="btn btn-save" id="customAlertBtn"
+                style="width: 100%; justify-content: center; padding: 12px; font-size: 1.1rem;">OK</button>
+        </div>
+    </div>
+
     <!-- Behavior Tracker Container -->
     <div class="tracker-container">
         <div class="tracker-header">
@@ -378,6 +394,9 @@
                         showNotification(`Found saved data for ${getSelectedWeek()}. Loading...`, 'info');
                         // Call loadFile which will hydrate the data
                         globalDriveService.loadFile(files[0].id, files[0].name);
+                    } else {
+                        // Empty the table if no data is found for the week
+                        clearTable();
                     }
                 }).catch(err => {
                     console.error('Auto-load check failed:', err);

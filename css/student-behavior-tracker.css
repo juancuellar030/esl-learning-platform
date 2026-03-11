@@ -430,21 +430,65 @@ tbody tr:nth-child(even) .student-name-cell {
 .error-message {
     background: #ffebee;
     color: #c62828;
-    padding: 10px;
+    padding: 12px 20px;
     margin: 10px 0;
-    border-radius: 4px;
-    border-left: 4px solid #c62828;
-    font-family: monospace;
-    font-size: 12px;
+    border-radius: 8px;
+    border-left: 5px solid #c62828;
+    font-weight: 500;
+    font-size: 14px;
+    box-shadow: 0 4px 12px rgba(198, 40, 40, 0.15);
 }
 
 .success-message {
     background: #e8f5e9;
     color: #2e7d32;
-    padding: 10px;
+    padding: 12px 20px;
     margin: 10px 0;
-    border-radius: 4px;
-    border-left: 4px solid #2e7d32;
+    border-radius: 8px;
+    border-left: 5px solid #2e7d32;
+    font-weight: 500;
+    font-size: 14px;
+    box-shadow: 0 4px 12px rgba(46, 125, 50, 0.15);
+}
+
+.info-message {
+    background: #e8f0fe;
+    color: #1a73e8;
+    padding: 12px 20px;
+    margin: 10px 0;
+    border-radius: 8px;
+    border-left: 5px solid #1a73e8;
+    font-weight: 500;
+    font-size: 14px;
+    box-shadow: 0 4px 12px rgba(26, 115, 232, 0.15);
+}
+
+#notifications {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: none;
+}
+
+#notifications>div {
+    pointer-events: auto;
+    animation: slideInNotification 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes slideInNotification {
+    from {
+        opacity: 0;
+        transform: translateX(50px) scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
 }
 
 /* ===== SUBJECT MARK COLOURS ===== */
