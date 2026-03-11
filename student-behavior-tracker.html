@@ -288,7 +288,6 @@
             notification.innerHTML = `
                 <div class="notification-header">
                     <div class="notification-title">${icon} ${title || defaultTitle}</div>
-                    <button class="notification-close" onclick="this.parentElement.parentElement.remove()">×</button>
                 </div>
                 <div class="notification-message">${message}</div>
             `;
@@ -311,6 +310,32 @@
         }
 
         function showSuccess(message) { showNotification(message, 'success', 'Success'); }
+
+        // ── Custom Confirm Modal ───────────────────────────────
+        function customConfirm(title, message, onConfirm) {
+            const modal = document.getElementById('customConfirmModal');
+            document.getElementById('customConfirmTitle').textContent = title;
+            document.getElementById('customConfirmMessage').innerHTML = message.replace(/\n/g, '<br>');
+
+            const acceptBtn = document.getElementById('customConfirmAccept');
+            const cancelBtn = document.getElementById('customConfirmCancel');
+
+            // Clean up old listeners
+            const oldAccept = acceptBtn.cloneNode(true);
+            const oldCancel = cancelBtn.cloneNode(true);
+            acceptBtn.parentNode.replaceChild(oldAccept, acceptBtn);
+            cancelBtn.parentNode.replaceChild(oldCancel, cancelBtn);
+
+            modal.style.display = 'flex';
+
+            oldAccept.addEventListener('click', () => {
+                modal.style.display = 'none';
+                if (onConfirm) onConfirm();
+            });
+            oldCancel.addEventListener('click', () => {
+                modal.style.display = 'none';
+            });
+        }
 
         // ── Subject selector pills ──────────────────────────────
         function setupSubjectPills() {
@@ -516,17 +541,17 @@
         // ── Finish week / Clear ─────────────────────────────────
         function finishWeek() {
             if (weekCompleted) {
-                if (confirm('Week is already finished. Reset week status?')) {
+                customConfirm('Reset Week', 'Week is already finished. Reset week status?', () => {
                     weekCompleted = false;
                     document.querySelectorAll('tbody tr').forEach(row => row.classList.remove('week-completed'));
                     students.forEach(student => updateRowStatus(student));
                     document.getElementById('finishWeek').innerHTML = '<i class="fa-solid fa-flag-checkered"></i> Finish Week';
                     document.getElementById('finishWeek').style.background = '';
                     showSuccess('Week status reset');
-                }
+                });
                 return;
             }
-            if (confirm('Mark this week as completed?')) {
+            customConfirm('Finish Week', 'Mark this week as completed?', () => {
                 weekCompleted = true;
                 let clean = 0;
                 students.forEach(student => {
@@ -540,21 +565,27 @@
                 btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Week Completed';
                 btn.style.background = '#00b894';
                 showSuccess(`Week completed! ${clean} students had clean records.`);
-            }
+            });
         }
 
         function clearAllMarks(force = false, silent = false) {
-            if (force === true || confirm('Clear all marks and week status?')) {
-                weekCompleted = false;
-                initializeBehaviorData();
-                document.querySelectorAll('.clickable-cell').forEach(cell => {
-                    cell.textContent = ''; cell.className = 'clickable-cell';
-                });
-                document.querySelectorAll('tbody tr').forEach(row => row.className = '');
-                document.getElementById('finishWeek').innerHTML = '<i class="fa-solid fa-flag-checkered"></i> Finish Week';
-                document.getElementById('finishWeek').style.background = '';
-                if (!silent) showSuccess('All marks cleared');
+            if (force === true) {
+                executeClearAllMarks(silent);
+            } else {
+                customConfirm('Clear All', 'Are you sure you want to clear all marks and reset week status?', () => executeClearAllMarks(silent));
             }
+        }
+
+        function executeClearAllMarks(silent) {
+            weekCompleted = false;
+            initializeBehaviorData();
+            document.querySelectorAll('.clickable-cell').forEach(cell => {
+                cell.textContent = ''; cell.className = 'clickable-cell';
+            });
+            document.querySelectorAll('tbody tr').forEach(row => row.className = '');
+            document.getElementById('finishWeek').innerHTML = '<i class="fa-solid fa-flag-checkered"></i> Finish Week';
+            document.getElementById('finishWeek').style.background = '';
+            if (!silent) showSuccess('All marks cleared');
         }
 
         // ── Save / Load (local file) ────────────────────────────
@@ -603,9 +634,9 @@
                 try {
                     const parsedData = JSON.parse(e.target.result);
                     if (parsedData.behaviorData && parsedData.week) {
-                        if (confirm(`Load data from ${parsedData.week}?\nSaved: ${new Date(parsedData.savedDate).toLocaleDateString()}\n\nThis will replace current marks.`)) {
+                        customConfirm('Load Data', `Load data from ${parsedData.week}?\nSaved: ${new Date(parsedData.savedDate).toLocaleDateString()}\n\nThis will replace current marks.`, () => {
                             loadDataFromObject(parsedData);
-                        }
+                        });
                     } else { showError('Invalid file format'); }
                 } catch (error) { showError('Error parsing file', error); }
             };
@@ -631,10 +662,31 @@
             document.getElementById('weekSelector').addEventListener('change', handleWeekChange);
             document.getElementById('fileInput').addEventListener('change', handleFileSelect);
 
+            let isNavigatingAway = false;
+            let pendingNavigationUrl = null;
+
+            // Intercept link clicks to show our custom confirmation
+            document.addEventListener('click', function (e) {
+                const link = e.target.closest('a');
+                if (link && !link.hasAttribute('download') && link.href && link.target !== '_blank') {
+                    if (hasUnsavedData && !isNavigatingAway) {
+                        e.preventDefault();
+                        pendingNavigationUrl = link.href;
+                        customConfirm('Unsaved Data', 'You have unsaved behavior marks. Are you sure you want to leave without saving?', () => {
+                            isNavigatingAway = true;
+                            window.location.href = pendingNavigationUrl;
+                        });
+                    }
+                }
+            });
+
+            // The native beforeunload is still needed to catch tab closes and refreshes, 
+            // but modern browsers don't allow custom styling for it. We keep the fallback just in case.
             window.addEventListener('beforeunload', function (e) {
-                if (hasUnsavedData) {
+                if (hasUnsavedData && !isNavigatingAway) {
                     const msg = 'You have unsaved behavior marks. Save or use Drive first.';
-                    e.returnValue = msg; return msg;
+                    e.returnValue = msg;
+                    return msg;
                 }
             });
 
