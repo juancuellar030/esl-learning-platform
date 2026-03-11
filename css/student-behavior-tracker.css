@@ -1177,7 +1177,7 @@ body.dark-mode .success-message {
 .prize-modal-card {
     background: white;
     width: 90%;
-    max-width: 600px;
+    max-width: 950px;
     border-radius: 16px;
     box-shadow: 0 24px 48px rgba(0, 0, 0, 0.2);
     overflow: hidden;
@@ -1331,8 +1331,12 @@ body.dark-mode .success-message {
     border: 1px solid #dde3ec;
 }
 
-.winners-group {
+.winners-perfect-group {
     border-color: #f1c40f;
+}
+
+.winners-eligible-group {
+    border-color: #27ae60;
 }
 
 .losers-group {
@@ -1350,10 +1354,16 @@ body.dark-mode .success-message {
     border-bottom: 1px solid #dde3ec;
 }
 
-.winners-group .prize-group-header {
+.winners-perfect-group .prize-group-header {
     background: #fffdf5;
     color: #b8860b;
     border-bottom-color: #f1c40f;
+}
+
+.winners-eligible-group .prize-group-header {
+    background: #f4fbf7;
+    color: #1a7b42;
+    border-bottom-color: #27ae60;
 }
 
 .losers-group .prize-group-header {
@@ -1365,7 +1375,7 @@ body.dark-mode .success-message {
 .prize-list {
     padding: 15px;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
     gap: 10px;
     max-height: 250px;
     overflow-y: auto;
@@ -1381,10 +1391,16 @@ body.dark-mode .success-message {
     animation: slideUp 0.3s ease-out both;
 }
 
-.winners-group .prize-student-card {
+.perfect-card {
     background: white;
     border: 1px solid #fcf3cf;
     box-shadow: 0 2px 5px rgba(241, 196, 15, 0.1);
+}
+
+.eligible-card {
+    background: white;
+    border: 1px solid #d5f5e3;
+    box-shadow: 0 2px 5px rgba(39, 174, 96, 0.1);
 }
 
 .losers-group .prize-student-card {
@@ -1411,9 +1427,48 @@ body.dark-mode .success-message {
     color: #27ae60;
 }
 
+.marks-perfect {
+    background: #fef9e7;
+    color: #d4ac0d;
+}
+
 .marks-bad {
     background: #fdedec;
     color: #c0392b;
+}
+
+/* Tabs */
+.prize-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #dde3ec;
+}
+
+.prize-tab-btn {
+    background: transparent;
+    border: none;
+    color: #7f8c8d;
+    font-weight: 700;
+    font-size: 16px;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+}
+
+.prize-tab-btn:hover {
+    color: var(--medium-slate-blue);
+}
+
+.prize-tab-btn.active {
+    color: var(--indigo-velvet);
+    border-bottom-color: var(--indigo-velvet);
+}
+
+.prize-tab-content {
+    animation: fadeIn 0.3s ease;
 }
 
 @keyframes slideUp {
@@ -1486,18 +1541,28 @@ body.dark-mode .prize-group {
     border-color: #444;
 }
 
-body.dark-mode .winners-group {
+body.dark-mode .winners-perfect-group {
     border-color: #b8860b;
+}
+
+body.dark-mode .winners-eligible-group {
+    border-color: #1a7b42;
 }
 
 body.dark-mode .losers-group {
     border-color: #9b2020;
 }
 
-body.dark-mode .winners-group .prize-group-header {
+body.dark-mode .winners-perfect-group .prize-group-header {
     background: #2a2510;
     color: #f1c40f;
     border-bottom: 1px solid #574600;
+}
+
+body.dark-mode .winners-eligible-group .prize-group-header {
+    background: #1b3a2a;
+    color: #27ae60;
+    border-bottom: 1px solid #1a5232;
 }
 
 body.dark-mode .losers-group .prize-group-header {
@@ -1506,9 +1571,14 @@ body.dark-mode .losers-group .prize-group-header {
     border-bottom: 1px solid #5a1515;
 }
 
-body.dark-mode .winners-group .prize-student-card {
+body.dark-mode .perfect-card {
     background: #252525;
     border-color: #574600;
+}
+
+body.dark-mode .eligible-card {
+    background: #252525;
+    border-color: #1a5232;
 }
 
 body.dark-mode .losers-group .prize-student-card {
@@ -1523,6 +1593,11 @@ body.dark-mode .prize-student-name {
 body.dark-mode .marks-good {
     background: #1b4332;
     color: #95d5b2;
+}
+
+body.dark-mode .marks-perfect {
+    background: #3b300f;
+    color: #e5c156;
 }
 
 body.dark-mode .marks-bad {
@@ -1544,4 +1619,21 @@ body.dark-mode .btn-link {
 
 body.dark-mode .btn-link:hover {
     color: #aab6ff;
+}
+
+body.dark-mode .prize-tabs {
+    border-bottom-color: #444;
+}
+
+body.dark-mode .prize-tab-btn {
+    color: #888;
+}
+
+body.dark-mode .prize-tab-btn:hover {
+    color: #8c9eff;
+}
+
+body.dark-mode .prize-tab-btn.active {
+    color: #b39ddb;
+    border-bottom-color: #b39ddb;
 }

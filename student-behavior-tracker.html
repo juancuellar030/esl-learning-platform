@@ -184,25 +184,44 @@
                         <i class="fa-solid fa-arrow-left"></i> Calculate Again
                     </button>
                     <div class="prize-report-actions"
-                        style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
+                        style="display: flex; justify-content: flex-end; margin-bottom: 20px;">
                         <button class="btn btn-drive" id="prizeSaveReportBtn">
                             <i class="fa-solid fa-cloud-arrow-up"></i> Save Report
                         </button>
                     </div>
 
-                    <div class="prize-winners-container">
-                        <div class="prize-group winners-group">
-                            <div class="prize-group-header">
-                                <i class="fa-solid fa-trophy" style="color: #f1c40f;"></i> Qualify for Prize (0-2 Marks)
+                    <!-- Tabs -->
+                    <div class="prize-tabs">
+                        <button class="prize-tab-btn active" data-tab="qualified">Qualify for Prize</button>
+                        <button class="prize-tab-btn" data-tab="disqualified">Did Not Qualify</button>
+                    </div>
+
+                    <div class="prize-tab-content active" id="tab-qualified">
+                        <div class="prize-winners-container">
+                            <div class="prize-group winners-perfect-group">
+                                <div class="prize-group-header">
+                                    <i class="fa-solid fa-trophy" style="color: #f1c40f;"></i> Perfect (0 Marks)
+                                </div>
+                                <div class="prize-list" id="prizePerfectList"></div>
                             </div>
-                            <div class="prize-list" id="prizeWinnersList"></div>
+                            <div class="prize-group winners-eligible-group">
+                                <div class="prize-group-header">
+                                    <i class="fa-solid fa-medal" style="color: #27ae60;"></i> Eligible (1-2 Marks)
+                                </div>
+                                <div class="prize-list" id="prizeEligibleList"></div>
+                            </div>
                         </div>
-                        <div class="prize-group losers-group">
-                            <div class="prize-group-header">
-                                <i class="fa-solid fa-circle-xmark" style="color: #e74c3c;"></i> Did Not Qualify (3+
-                                Marks)
+                    </div>
+
+                    <div class="prize-tab-content" id="tab-disqualified" style="display: none;">
+                        <div class="prize-winners-container">
+                            <div class="prize-group losers-group">
+                                <div class="prize-group-header">
+                                    <i class="fa-solid fa-circle-xmark" style="color: #e74c3c;"></i> Did Not Qualify (3+
+                                    Marks)
+                                </div>
+                                <div class="prize-list" id="prizeLosersList"></div>
                             </div>
-                            <div class="prize-list" id="prizeLosersList"></div>
                         </div>
                     </div>
                 </div>
@@ -656,9 +675,12 @@
             const prizeDriveConfirmBtn = document.getElementById('prizeDriveConfirmBtn');
             const prizeResultsSection = document.getElementById('prizeResultsSection');
             const prizeResultsBackBtn = document.getElementById('prizeResultsBackBtn');
-            const prizeWinnersList = document.getElementById('prizeWinnersList');
+            const prizePerfectList = document.getElementById('prizePerfectList');
+            const prizeEligibleList = document.getElementById('prizeEligibleList');
             const prizeLosersList = document.getElementById('prizeLosersList');
             const prizeSaveReportBtn = document.getElementById('prizeSaveReportBtn');
+            const prizeTabBtns = document.querySelectorAll('.prize-tab-btn');
+            const prizeTabContents = document.querySelectorAll('.prize-tab-content');
 
             let loadedPrizeData = [];
             let driveFilesAvailable = [];
@@ -844,11 +866,13 @@
                     }
                 });
 
-                const winners = [];
+                const perfect = [];
+                const eligible = [];
                 const losers = [];
 
                 for (const student of students) {
-                    if (aggregatedMarks[student] <= 2) winners.push({ name: student, marks: aggregatedMarks[student] });
+                    if (aggregatedMarks[student] === 0) perfect.push({ name: student, marks: aggregatedMarks[student] });
+                    else if (aggregatedMarks[student] <= 2) eligible.push({ name: student, marks: aggregatedMarks[student] });
                     else losers.push({ name: student, marks: aggregatedMarks[student] });
                 }
 
@@ -856,16 +880,25 @@
                 currentPrizeReport = {
                     reportDate: new Date().toISOString(),
                     includedWeeks: loadedPrizeData.map(d => d.week).join(', '),
-                    winners: winners,
+                    perfect: perfect,
+                    eligible: eligible,
                     losers: losers
                 };
 
                 // Render lists
-                winners.sort((a, b) => a.marks - b.marks);
+                perfect.sort((a, b) => a.marks - b.marks);
+                eligible.sort((a, b) => a.marks - b.marks);
                 losers.sort((a, b) => b.marks - a.marks);
 
-                prizeWinnersList.innerHTML = winners.map((w, index) => `
-                    <div class="prize-student-card" style="animation-delay: ${index * 0.05}s">
+                prizePerfectList.innerHTML = perfect.map((w, index) => `
+                    <div class="prize-student-card perfect-card" style="animation-delay: ${index * 0.05}s">
+                        <span class="prize-student-name">${w.name}</span>
+                        <span class="prize-student-marks marks-perfect">${w.marks} marks</span>
+                    </div>
+                `).join('');
+
+                prizeEligibleList.innerHTML = eligible.map((w, index) => `
+                    <div class="prize-student-card eligible-card" style="animation-delay: ${index * 0.05}s">
                         <span class="prize-student-name">${w.name}</span>
                         <span class="prize-student-marks marks-good">${w.marks} marks</span>
                     </div>
@@ -883,6 +916,20 @@
             });
 
             prizeResultsBackBtn.addEventListener('click', resetPrizeModal);
+
+            // Handle Result Tabs
+            prizeTabBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    prizeTabBtns.forEach(b => b.classList.remove('active'));
+                    prizeTabContents.forEach(c => c.style.display = 'none');
+                    prizeTabContents.forEach(c => c.classList.remove('active'));
+
+                    btn.classList.add('active');
+                    const targetContent = document.getElementById(`tab-${btn.dataset.tab}`);
+                    targetContent.style.display = 'block';
+                    targetContent.classList.add('active');
+                });
+            });
 
             // Save report to drive
             prizeSaveReportBtn.addEventListener('click', async () => {
