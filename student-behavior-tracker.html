@@ -356,10 +356,33 @@
             }
         }
 
+        let globalDriveService = null;
+
         function handleWeekChange() {
             selectedWeek = document.getElementById('weekSelector').value;
             document.getElementById('currentWeek').textContent = getSelectedWeek();
             debugLog(`Week: ${getSelectedWeek()}`);
+
+            // Auto-load from Drive if connected
+            if (globalDriveService && globalDriveService.isSignedIn) {
+                const targetFilename = `behavior-${getSelectedWeek().replace(/[^a-zA-Z0-9]/g, '-')}.json`;
+                globalDriveService._getOrCreateFolder().then(folderId => {
+                    return gapi.client.drive.files.list({
+                        q: `'${folderId}' in parents and name='${targetFilename}' and trashed=false`,
+                        fields: 'files(id, name)',
+                        spaces: 'drive'
+                    });
+                }).then(response => {
+                    const files = response.result.files;
+                    if (files && files.length > 0) {
+                        showNotification(`Found saved data for ${getSelectedWeek()}. Loading...`, 'info');
+                        // Call loadFile which will hydrate the data
+                        globalDriveService.loadFile(files[0].id, files[0].name);
+                    }
+                }).catch(err => {
+                    console.error('Auto-load check failed:', err);
+                });
+            }
         }
 
         // ── Table ───────────────────────────────────────────────
@@ -586,6 +609,7 @@
                 onLoad: (data) => loadDataFromObject(data),
                 onNotify: (msg, type) => showNotification(msg, type === 'success' ? 'success' : type === 'error' ? 'error' : 'info')
             });
+            globalDriveService = driveService;
 
             document.getElementById('openDrive').addEventListener('click', () => {
                 driveService.openModal();

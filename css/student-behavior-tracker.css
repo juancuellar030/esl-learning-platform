@@ -519,6 +519,27 @@ tbody tr:nth-child(even) .student-name-cell {
     background: #1557b0;
 }
 
+/* ===== LINK BUTTON ===== */
+.btn-link {
+    background: transparent;
+    border: none;
+    color: var(--medium-slate-blue);
+    font-weight: 600;
+    cursor: pointer;
+    padding: 8px 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    transition: all 0.2s;
+    border-radius: 6px;
+}
+
+.btn-link:hover {
+    background: rgba(100, 100, 220, 0.1);
+    color: var(--indigo-velvet);
+}
+
 /* ===== SUBJECT SELECTOR BAR ===== */
 .subject-selector-bar {
     background: #f4f6f9;
