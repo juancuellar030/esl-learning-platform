@@ -132,16 +132,20 @@
 
     <!-- Custom Alert/Confirm Modal -->
     <div class="prize-modal-overlay" id="customConfirmModal" style="display: none; z-index: 10000;">
-        <div class="prize-modal-card" style="max-width: 400px; padding: 24px;">
-            <div class="prize-modal-header" style="margin-bottom: 16px;">
-                <h2 id="customConfirmTitle">Confirm</h2>
+        <div class="prize-modal-card" style="max-width: 400px;">
+            <div class="prize-modal-header">
+                <h3 id="customConfirmTitle"
+                    style="margin:0; font-size: 1.5rem; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-circle-question"></i> Confirm
+                </h3>
             </div>
-            <div class="prize-modal-body" style="min-height: auto;">
-                <p id="customConfirmMessage" style="font-size: 16px; margin-bottom: 24px; color: var(--text-dark);"></p>
+            <div class="prize-modal-body">
+                <p id="customConfirmMessage"
+                    style="font-size: 16px; margin-bottom: 24px; line-height: 1.5; color: inherit;"></p>
                 <div style="display: flex; gap: 12px; justify-content: flex-end;">
-                    <button class="btn-link" id="customConfirmCancel">Cancel</button>
+                    <button class="btn-link" id="customConfirmCancel" style="font-weight: 600;">Cancel</button>
                     <button class="btn" id="customConfirmAccept"
-                        style="background: var(--primary-color);">Confirm</button>
+                        style="background: var(--medium-slate-blue); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 10px rgba(123, 104, 238, 0.3);">Confirm</button>
                 </div>
             </div>
         </div>
@@ -705,6 +709,7 @@
             // but modern browsers don't allow custom styling for it. We keep the fallback just in case.
             window.addEventListener('beforeunload', function (e) {
                 if (hasUnsavedData && !isNavigatingAway) {
+                    e.preventDefault(); // Required for modern browsers to show the prompt
                     const msg = 'You have unsaved behavior marks. Save or use Drive first.';
                     e.returnValue = msg;
                     return msg;
