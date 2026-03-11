@@ -415,7 +415,8 @@
                         globalDriveService.loadFile(files[0].id, files[0].name);
                     } else {
                         // Empty the table if no data is found for the week
-                        clearTable();
+                        clearAllMarks(true, true);
+                        showNotification(`New blank sheet for ${getSelectedWeek()}`, 'info');
                     }
                 }).catch(err => {
                     console.error('Auto-load check failed:', err);
@@ -542,8 +543,8 @@
             }
         }
 
-        function clearAllMarks() {
-            if (confirm('Clear all marks and week status?')) {
+        function clearAllMarks(force = false, silent = false) {
+            if (force === true || confirm('Clear all marks and week status?')) {
                 weekCompleted = false;
                 initializeBehaviorData();
                 document.querySelectorAll('.clickable-cell').forEach(cell => {
@@ -552,7 +553,7 @@
                 document.querySelectorAll('tbody tr').forEach(row => row.className = '');
                 document.getElementById('finishWeek').innerHTML = '<i class="fa-solid fa-flag-checkered"></i> Finish Week';
                 document.getElementById('finishWeek').style.background = '';
-                showSuccess('All marks cleared');
+                if (!silent) showSuccess('All marks cleared');
             }
         }
 
