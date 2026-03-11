@@ -138,8 +138,9 @@
 
         scaleData.forEach(row => {
             const isPassing = row.grade >= napr;
-            const rowClass = isPassing ? 'gs-passing-row' : 'gs-failing-row';
-            const badgeClass = isPassing ? 'gs-grade-pass' : 'gs-grade-fail';
+            const isWarning = isPassing && row.grade <= napr + 0.2;
+            const rowClass = isWarning ? 'gs-warning-row' : (isPassing ? 'gs-passing-row' : 'gs-failing-row');
+            const badgeClass = isWarning ? 'gs-grade-warn' : (isPassing ? 'gs-grade-pass' : 'gs-grade-fail');
             html += `
                 <tr class="${rowClass}">
                     <td>${row.score.toFixed(1)}</td>
@@ -228,12 +229,23 @@
 
         students.forEach((s, i) => {
             const gradeDisplay = s.grade !== null ? s.grade.toFixed(1) : '—';
-            const gradeClass = s.grade !== null ? (s.grade >= napr ? 'gs-grade-pass' : 'gs-grade-fail') : '';
-            const statusHtml = s.grade !== null
-                ? (s.grade >= napr
-                    ? '<span class="gs-status-badge gs-status-pass">PASS</span>'
-                    : '<span class="gs-status-badge gs-status-fail">FAIL</span>')
-                : '';
+            let gradeClass = '';
+            let statusHtml = '';
+
+            if (s.grade !== null) {
+                if (s.grade >= napr) {
+                    if (s.grade <= napr + 0.2) {
+                        gradeClass = 'gs-grade-warn';
+                        statusHtml = '<span class="gs-status-badge gs-status-warn">WARN</span>';
+                    } else {
+                        gradeClass = 'gs-grade-pass';
+                        statusHtml = '<span class="gs-status-badge gs-status-pass">PASS</span>';
+                    }
+                } else {
+                    gradeClass = 'gs-grade-fail';
+                    statusHtml = '<span class="gs-status-badge gs-status-fail">FAIL</span>';
+                }
+            }
 
             html += `
                 <tr>
@@ -385,7 +397,14 @@
         let csv = 'Name,Score,Grade,Status\n';
         students.forEach(s => {
             const grade = s.grade !== null ? s.grade.toFixed(1) : '';
-            const status = s.grade !== null ? (s.grade >= napr ? 'PASS' : 'FAIL') : '';
+            let status = '';
+            if (s.grade !== null) {
+                if (s.grade >= napr) {
+                    status = (s.grade <= napr + 0.2) ? 'WARN' : 'PASS';
+                } else {
+                    status = 'FAIL';
+                }
+            }
             csv += `"${s.name}",${s.score},${grade},${status}\n`;
         });
 
