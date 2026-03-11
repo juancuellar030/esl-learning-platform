@@ -130,6 +130,23 @@
     <!-- Slide-in Notification Container -->
     <div class="notification-container" id="notificationContainer"></div>
 
+    <!-- Custom Alert/Confirm Modal -->
+    <div class="prize-modal-overlay" id="customConfirmModal" style="display: none; z-index: 10000;">
+        <div class="prize-modal-card" style="max-width: 400px; padding: 24px;">
+            <div class="prize-modal-header" style="margin-bottom: 16px;">
+                <h2 id="customConfirmTitle">Confirm</h2>
+            </div>
+            <div class="prize-modal-body" style="min-height: auto;">
+                <p id="customConfirmMessage" style="font-size: 16px; margin-bottom: 24px; color: var(--text-dark);"></p>
+                <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                    <button class="btn-link" id="customConfirmCancel">Cancel</button>
+                    <button class="btn" id="customConfirmAccept"
+                        style="background: var(--primary-color);">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Prize Calculator Modal -->
     <div class="prize-modal-overlay" id="prizeModal" style="display: none;">
         <div class="prize-modal-card">
@@ -447,6 +464,9 @@
                 }).catch(err => {
                     console.error('Auto-load check failed:', err);
                 });
+            } else {
+                showNotification(`Please Sign In to Google Drive to auto-load marks for ${getSelectedWeek()}`, 'info');
+                clearAllMarks(true, true);
             }
         }
 
