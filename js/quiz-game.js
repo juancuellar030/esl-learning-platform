@@ -1493,7 +1493,7 @@ const QuizGame = (() => {
 
         let qHtml = `<div>${escapeHtml(q.text)}</div>`;
         if (q.imageData) {
-            qHtml += `<img src="${q.imageData}" style="max-height: 300px; max-width: 100%; border-radius: 12px; margin-top: 12px; object-fit: contain;" alt="Question Image" />`;
+            qHtml += `<img src="${q.imageData}" style="max-height: 300px; max-width: 100%; border-radius: 12px; margin-top: 12px; margin-left: 16px; object-fit: contain;" alt="Question Image" />`;
         }
         $('sv-question').innerHTML = qHtml;
 
@@ -1573,7 +1573,7 @@ const QuizGame = (() => {
             updateStreakDisplay();
             let qHtml = `<div>${escapeHtml(q.text)}</div>`;
             if (q.imageData) {
-                qHtml += `<img src="${q.imageData}" style="max-height: 300px; max-width: 100%; border-radius: 12px; margin-top: 12px; object-fit: contain;" alt="Question Image" />`;
+                qHtml += `<img src="${q.imageData}" style="max-height: 300px; max-width: 100%; border-radius: 12px; margin-top: 12px; margin-left: 16px; object-fit: contain;" alt="Question Image" />`;
             }
             $('sv-question').innerHTML = qHtml;
 
