@@ -1,0 +1,850 @@
+/* =============================================
+   STUDENT TURN TRACKER – STYLES
+   ============================================= */
+
+/* ── Page Layout ─────────────────────────────── */
+.turn-tracker-page {
+    background: var(--medium-slate-blue);
+    min-height: 100vh;
+    font-family: 'Reddit Sans', 'Google Sans Flex', sans-serif;
+}
+
+.tracker-wrapper {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* ── Header Bar ──────────────────────────────── */
+.tt-header {
+    background: var(--indigo-velvet);
+    color: white;
+    padding: 18px 28px;
+    border-radius: 16px;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.tt-header h1 {
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+}
+
+.tt-header-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.tt-btn {
+    border: none;
+    border-radius: 12px;
+    padding: 10px 18px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-family: inherit;
+    text-decoration: none;
+    color: inherit;
+}
+
+.tt-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+}
+
+.tt-btn-back {
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+}
+
+.tt-btn-back:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+.tt-btn-drive {
+    background: #4285F4;
+    color: white;
+}
+
+.tt-btn-drive:hover {
+    background: #3367d6;
+}
+
+.tt-btn-reset {
+    background: #e74c3c;
+    color: white;
+}
+
+.tt-btn-reset:hover {
+    background: #c0392b;
+}
+
+/* ── Controls Bar ────────────────────────────── */
+.tt-controls-bar {
+    background: white;
+    border-radius: 14px;
+    padding: 14px 20px;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.tt-picker-group {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.tt-picker-btn {
+    border: 2px solid var(--medium-slate-blue);
+    background: white;
+    color: var(--indigo-velvet);
+    border-radius: 12px;
+    padding: 9px 16px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-family: inherit;
+}
+
+.tt-picker-btn:hover {
+    background: var(--medium-slate-blue);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(118, 120, 237, 0.3);
+}
+
+.tt-picker-btn.active {
+    background: var(--indigo-velvet);
+    color: white;
+    border-color: var(--indigo-velvet);
+}
+
+.tt-filter-group {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.tt-filter-btn {
+    border: 2px solid #e0e0e0;
+    background: white;
+    color: #555;
+    border-radius: 10px;
+    padding: 7px 14px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.tt-filter-btn:hover {
+    border-color: var(--medium-slate-blue);
+    color: var(--indigo-velvet);
+}
+
+.tt-filter-btn.active {
+    background: var(--indigo-velvet);
+    color: white;
+    border-color: var(--indigo-velvet);
+}
+
+.tt-filter-btn .filter-count {
+    background: rgba(0, 0, 0, 0.12);
+    border-radius: 6px;
+    padding: 1px 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.tt-filter-btn.active .filter-count {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+/* ── Student Grid ────────────────────────────── */
+.tt-student-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.tt-student-card {
+    background: white;
+    border: 3px solid #e0e0e0;
+    border-radius: 14px;
+    padding: 16px 12px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    position: relative;
+    user-select: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.tt-student-card:hover {
+    border-color: var(--medium-slate-blue);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.tt-student-card.status-correct {
+    border-color: #27ae60;
+    background: #f0faf4;
+}
+
+.tt-student-card.status-participated {
+    border-color: #f39c12;
+    background: #fef9f0;
+}
+
+.tt-student-card.status-absent {
+    opacity: 0.4;
+    border-color: #bbb;
+    background: #f5f5f5;
+    pointer-events: none;
+    transform: scale(0.95);
+}
+
+.tt-student-card.status-absent .tt-absent-toggle {
+    pointer-events: auto;
+    opacity: 1;
+}
+
+.tt-student-card.hop-highlight {
+    border-color: var(--amber-flame) !important;
+    background: #fffbe6 !important;
+    box-shadow: 0 0 0 4px rgba(247, 184, 1, 0.35), 0 8px 24px rgba(0, 0, 0, 0.12) !important;
+    transform: scale(1.08) !important;
+    z-index: 5;
+}
+
+.tt-student-name {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--indigo-velvet);
+    line-height: 1.2;
+}
+
+.tt-turn-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 8px;
+    background: #f0f0f0;
+    color: #666;
+}
+
+.tt-turn-badge.has-turns {
+    background: var(--indigo-velvet);
+    color: white;
+}
+
+.tt-student-card .tt-status-icon {
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    font-size: 0.85rem;
+}
+
+.tt-absent-toggle {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    background: none;
+    border: none;
+    font-size: 0.75rem;
+    cursor: pointer;
+    color: #bbb;
+    padding: 3px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    line-height: 1;
+}
+
+.tt-absent-toggle:hover {
+    color: #e74c3c;
+    background: rgba(231, 76, 60, 0.08);
+}
+
+.tt-student-card.status-absent .tt-absent-toggle {
+    color: #e74c3c;
+}
+
+/* ── Winner Overlay ──────────────────────────── */
+.tt-winner-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9000;
+    animation: ttFadeIn 0.3s ease;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.tt-winner-overlay.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+@keyframes ttFadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.tt-winner-card {
+    background: white;
+    border-radius: 20px;
+    padding: 40px 50px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: ttBounceIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    max-width: 420px;
+    width: 90%;
+}
+
+@keyframes ttBounceIn {
+    0% {
+        transform: scale(0.3);
+        opacity: 0;
+    }
+
+    60% {
+        transform: scale(1.05);
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.tt-winner-card .winner-emoji {
+    font-size: 3.5rem;
+    margin-bottom: 10px;
+}
+
+.tt-winner-card .winner-name {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--indigo-velvet);
+    margin-bottom: 8px;
+}
+
+.tt-winner-card .winner-subtitle {
+    font-size: 0.95rem;
+    color: #888;
+    margin-bottom: 24px;
+}
+
+.tt-winner-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.tt-action-btn {
+    border: none;
+    border-radius: 12px;
+    padding: 12px 22px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: inherit;
+}
+
+.tt-action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+}
+
+.tt-action-correct {
+    background: #27ae60;
+    color: white;
+}
+
+.tt-action-correct:hover {
+    background: #219a52;
+}
+
+.tt-action-participated {
+    background: #f39c12;
+    color: white;
+}
+
+.tt-action-participated:hover {
+    background: #d68910;
+}
+
+.tt-action-skip {
+    background: #ecf0f1;
+    color: #555;
+}
+
+.tt-action-skip:hover {
+    background: #dfe4e5;
+}
+
+.tt-action-close {
+    background: #ecf0f1;
+    color: #555;
+}
+
+.tt-action-close:hover {
+    background: #dfe4e5;
+}
+
+/* ── Roulette Overlay ────────────────────────── */
+.tt-roulette-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 8500;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.tt-roulette-overlay.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.tt-roulette-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.tt-roulette-pointer {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 16px solid transparent;
+    border-right: 16px solid transparent;
+    border-top: 30px solid var(--cayenne-red);
+    z-index: 10;
+    filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.3));
+}
+
+#rouletteCanvas {
+    border-radius: 50%;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3), 0 0 0 8px var(--indigo-velvet), 0 0 0 12px rgba(255, 255, 255, 0.2);
+}
+
+.tt-roulette-spin-btn {
+    background: var(--cayenne-red);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    padding: 14px 36px;
+    font-size: 1.1rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+    box-shadow: 0 4px 16px rgba(243, 91, 4, 0.35);
+}
+
+.tt-roulette-spin-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 22px rgba(243, 91, 4, 0.45);
+}
+
+.tt-roulette-spin-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.tt-roulette-close {
+    position: absolute;
+    top: -40px;
+    right: -40px;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tt-roulette-close:hover {
+    background: rgba(255, 255, 255, 0.35);
+}
+
+/* ── Balloon Overlay ─────────────────────────── */
+.tt-balloon-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 10, 40, 0.8);
+    backdrop-filter: blur(4px);
+    z-index: 8500;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    overflow: hidden;
+}
+
+.tt-balloon-overlay.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.tt-balloon-close {
+    position: absolute;
+    top: 20px;
+    right: 24px;
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    font-size: 1.3rem;
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.2s ease;
+}
+
+.tt-balloon-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.tt-balloon-hint {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 600;
+    opacity: 0.7;
+    z-index: 10;
+    text-align: center;
+    pointer-events: none;
+}
+
+.tt-balloon {
+    position: absolute;
+    cursor: pointer;
+    transition: transform 0.15s ease;
+    user-select: none;
+}
+
+.tt-balloon:hover {
+    transform: scale(1.15) !important;
+}
+
+.tt-balloon svg {
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+}
+
+.tt-balloon-pop {
+    position: absolute;
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: white;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    animation: ttPopReveal 0.6s ease forwards;
+    z-index: 20;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+@keyframes ttPopReveal {
+    0% {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+
+    60% {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* ── Notification ────────────────────────────── */
+.tt-notification-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 11000;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.tt-notification {
+    background: white;
+    border-radius: 12px;
+    padding: 14px 20px;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15);
+    font-size: 0.9rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: ttSlideIn 0.3s ease;
+    transition: opacity 0.3s ease;
+    max-width: 360px;
+}
+
+.tt-notification.success {
+    border-left: 4px solid #27ae60;
+    color: #1a6b3c;
+}
+
+.tt-notification.error {
+    border-left: 4px solid #e74c3c;
+    color: #922b21;
+}
+
+.tt-notification.info {
+    border-left: 4px solid var(--medium-slate-blue);
+    color: var(--indigo-velvet);
+}
+
+@keyframes ttSlideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* ── Footer ──────────────────────────────────── */
+.turn-tracker-page .main-footer {
+    margin-top: 20px;
+}
+
+/* ── Responsive ──────────────────────────────── */
+@media (max-width: 768px) {
+    .tt-header {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .tt-header-controls {
+        justify-content: center;
+    }
+
+    .tt-controls-bar {
+        flex-direction: column;
+    }
+
+    .tt-student-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 8px;
+    }
+
+    .tt-winner-card {
+        padding: 28px 24px;
+    }
+
+    .tt-winner-card .winner-name {
+        font-size: 1.5rem;
+    }
+}
+
+/* =============================================
+   DARK MODE
+   ============================================= */
+body.dark-mode.turn-tracker-page {
+    background: #1a1a2e;
+}
+
+body.dark-mode .tt-header {
+    background: #16213e;
+}
+
+body.dark-mode .tt-controls-bar {
+    background: #1e1e2e;
+    border: 1px solid #333;
+}
+
+body.dark-mode .tt-picker-btn {
+    background: #2a2a3e;
+    color: #c3c3ff;
+    border-color: #444;
+}
+
+body.dark-mode .tt-picker-btn:hover {
+    background: var(--medium-slate-blue);
+    color: white;
+    border-color: var(--medium-slate-blue);
+}
+
+body.dark-mode .tt-picker-btn.active {
+    background: var(--indigo-velvet);
+    color: white;
+    border-color: var(--indigo-velvet);
+}
+
+body.dark-mode .tt-filter-btn {
+    background: #2a2a3e;
+    color: #aaa;
+    border-color: #444;
+}
+
+body.dark-mode .tt-filter-btn:hover {
+    border-color: var(--medium-slate-blue);
+    color: #c3c3ff;
+}
+
+body.dark-mode .tt-filter-btn.active {
+    background: var(--indigo-velvet);
+    color: white;
+    border-color: var(--indigo-velvet);
+}
+
+body.dark-mode .tt-student-card {
+    background: #1e1e2e;
+    border-color: #333;
+}
+
+body.dark-mode .tt-student-card:hover {
+    border-color: var(--medium-slate-blue);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .tt-student-card.status-correct {
+    background: #1a2e1a;
+    border-color: #27ae60;
+}
+
+body.dark-mode .tt-student-card.status-participated {
+    background: #2e2a1a;
+    border-color: #f39c12;
+}
+
+body.dark-mode .tt-student-card.status-absent {
+    background: #1a1a1a;
+    border-color: #444;
+}
+
+body.dark-mode .tt-student-name {
+    color: #c3c3ff;
+}
+
+body.dark-mode .tt-turn-badge {
+    background: #333;
+    color: #aaa;
+}
+
+body.dark-mode .tt-turn-badge.has-turns {
+    background: var(--medium-slate-blue);
+    color: white;
+}
+
+body.dark-mode .tt-absent-toggle {
+    color: #666;
+}
+
+body.dark-mode .tt-winner-card {
+    background: #1e1e2e;
+}
+
+body.dark-mode .tt-winner-card .winner-name {
+    color: #c3c3ff;
+}
+
+body.dark-mode .tt-winner-card .winner-subtitle {
+    color: #777;
+}
+
+body.dark-mode .tt-action-skip,
+body.dark-mode .tt-action-close {
+    background: #333;
+    color: #ccc;
+}
+
+body.dark-mode .tt-notification {
+    background: #1e1e2e;
+    border-color: #333;
+}
+
+body.dark-mode .tt-notification.success {
+    color: #6bcf8b;
+}
+
+body.dark-mode .tt-notification.error {
+    color: #ff8787;
+}
+
+body.dark-mode .tt-notification.info {
+    color: #a3a3ff;
+}
+
+body.dark-mode .tt-student-card.hop-highlight {
+    background: #2e2a1a !important;
+    border-color: var(--amber-flame) !important;
+}

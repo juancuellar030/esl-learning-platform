@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="assets/graduation-cap-icon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Turn Tracker - ESL Learning Platform</title>
+    <meta name="description"
+        content="Track student participation with fun random pickers — roulette wheel, balloon pop, and hopping selector.">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/student-turn-tracker.css">
+    <link rel="stylesheet" href="css/google-drive.css">
+    <!-- canvas-confetti for balloon pop effect -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+</head>
+
+<body class="turn-tracker-page">
+
+    <!-- Notification Container -->
+    <div class="tt-notification-container" id="ttNotifications"></div>
+
+    <div class="tracker-wrapper">
+
+        <!-- ── Header ──────────────────────────────────────── -->
+        <div class="tt-header">
+            <h1><i class="fa-solid fa-users-viewfinder"></i> Student Turn Tracker</h1>
+            <div class="tt-header-controls">
+                <a href="tools.html" class="tt-btn tt-btn-back">
+                    <i class="fa-solid fa-arrow-left"></i> Back
+                </a>
+                <button class="tt-btn tt-btn-drive" id="ttDriveBtn">
+                    <i class="fa-brands fa-google-drive"></i> Drive
+                </button>
+                <button class="tt-btn tt-btn-reset" id="ttResetAll" title="Clear all data">
+                    <i class="fa-solid fa-broom"></i> Clear All
+                </button>
+            </div>
+        </div>
+
+        <!-- ── Controls Bar ────────────────────────────────── -->
+        <div class="tt-controls-bar">
+            <!-- Picker Buttons -->
+            <div class="tt-picker-group">
+                <span style="font-weight:700; color:var(--indigo-velvet); font-size:0.85rem; margin-right:4px;">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Pick:
+                </span>
+                <button class="tt-picker-btn" id="ttPickerRoulette" title="Spinning Roulette Wheel">
+                    <i class="fa-solid fa-dharmachakra"></i> Roulette
+                </button>
+                <button class="tt-picker-btn" id="ttPickerBalloon" title="Balloon Pop">
+                    <i class="fa-solid fa-burst"></i> Balloons
+                </button>
+                <button class="tt-picker-btn" id="ttPickerHop" title="Hopping Name Picker">
+                    <i class="fa-solid fa-shuffle"></i> Hop
+                </button>
+            </div>
+
+            <!-- Filter Buttons -->
+            <div class="tt-filter-group">
+                <button class="tt-filter-btn active" data-filter="all">
+                    <i class="fa-solid fa-users"></i> All <span class="filter-count">0</span>
+                </button>
+                <button class="tt-filter-btn" data-filter="correct">
+                    <i class="fa-solid fa-circle-check" style="color:#27ae60;"></i> Correct <span
+                        class="filter-count">0</span>
+                </button>
+                <button class="tt-filter-btn" data-filter="participated">
+                    <i class="fa-solid fa-circle" style="color:#f39c12;"></i> Participated <span
+                        class="filter-count">0</span>
+                </button>
+                <button class="tt-filter-btn" data-filter="unselected">
+                    <i class="fa-solid fa-circle-question" style="color:#bbb;"></i> Unselected <span
+                        class="filter-count">0</span>
+                </button>
+                <button class="tt-btn" id="ttResetCategories"
+                    style="background:#ecf0f1; color:#555; font-size:0.82rem; padding:7px 12px;"
+                    title="Reset turn categories for a new activity">
+                    <i class="fa-solid fa-rotate-left"></i> Reset Turns
+                </button>
+            </div>
+        </div>
+
+        <!-- ── Student Grid ────────────────────────────────── -->
+        <div class="tt-student-grid" id="ttStudentGrid">
+            <!-- Cards rendered by JS -->
+        </div>
+
+    </div>
+
+    <!-- ── Winner Overlay ──────────────────────────────── -->
+    <div class="tt-winner-overlay" id="ttWinnerOverlay">
+        <div class="tt-winner-card">
+            <div class="winner-emoji">🎉</div>
+            <div class="winner-name" id="ttWinnerName">—</div>
+            <div class="winner-subtitle">What happened?</div>
+            <div class="tt-winner-actions">
+                <button class="tt-action-btn tt-action-correct" id="ttWinnerCorrect">
+                    <i class="fa-solid fa-check"></i> Correct Answer
+                </button>
+                <button class="tt-action-btn tt-action-participated" id="ttWinnerParticipated">
+                    <i class="fa-solid fa-hand"></i> Participated
+                </button>
+                <button class="tt-action-btn tt-action-skip" id="ttWinnerSkip">
+                    <i class="fa-solid fa-forward"></i> Skip
+                </button>
+            </div>
+            <button class="tt-action-btn tt-action-close" id="ttWinnerClose"
+                style="margin-top:12px; font-size:0.82rem;">
+                <i class="fa-solid fa-xmark"></i> Close
+            </button>
+        </div>
+    </div>
+
+    <!-- ── Roulette Overlay ────────────────────────────── -->
+    <div class="tt-roulette-overlay" id="ttRouletteOverlay">
+        <div class="tt-roulette-container">
+            <button class="tt-roulette-close" id="rouletteCloseBtn" title="Close">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="tt-roulette-pointer"></div>
+            <canvas id="rouletteCanvas" width="420" height="420"></canvas>
+            <button class="tt-roulette-spin-btn" id="rouletteSpinBtn">
+                <i class="fa-solid fa-play"></i> SPIN!
+            </button>
+        </div>
+    </div>
+
+    <!-- ── Balloon Overlay ─────────────────────────────── -->
+    <div class="tt-balloon-overlay" id="ttBalloonOverlay">
+        <button class="tt-balloon-close" id="balloonCloseBtn" title="Close">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+        <div class="tt-balloon-hint">🎈 Tap a balloon to pop it!</div>
+    </div>
+
+    <!-- ── Footer ──────────────────────────────────────── -->
+    <footer class="main-footer">
+        <div class="container">
+            <p>ESL Learning Platform © 2025 | Made for Teachers, by Teachers</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="https://accounts.google.com/gsi/client"></script>
+    <script src="js/students-data.js"></script>
+    <script src="js/google-drive-service.js"></script>
+    <script src="js/student-turn-tracker.js"></script>
+    <script src="js/darkmode.js"></script>
+</body>
+
+</html>
