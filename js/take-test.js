@@ -662,7 +662,7 @@ const TakeTest = (function () {
             }).join('')}</div>`;
         }
 
-        return `${sentencesHtml}${wordBankHtml}`;
+        return `${wordBankHtml}<div class="tt-fb-card">${sentencesHtml}</div>`;
     }
 
     // Cache shuffled right options per question so re-renders keep stable positions

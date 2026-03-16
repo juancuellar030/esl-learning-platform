@@ -1513,7 +1513,7 @@ const TestBuilder = (function () {
             return `<div class="preview-fill-blank">${escaped}</div>`;
         }).join('');
 
-        return sentencesHtml;
+        return `<div class="tt-fb-card" style="background: white; padding: 16px; border-radius: 12px; border: 1px solid #e0e2e8; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 12px;">${sentencesHtml}</div>`;
     }
 
     function renderMatchPreview(q) {
