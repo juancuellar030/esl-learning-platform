@@ -45,6 +45,9 @@
                 <button class="header-btn btn-settings" id="btn-settings">
                     <i class="fa-solid fa-gear"></i> <span>Settings</span>
                 </button>
+                <button class="header-btn" id="btn-export-json" title="Export JSON">
+                    <i class="fa-solid fa-file-export"></i> <span>Export</span>
+                </button>
                 <button class="header-btn btn-save" id="btn-save">
                     <i class="fa-solid fa-floppy-disk"></i> <span>Save</span>
                 </button>
@@ -197,7 +200,14 @@
 
                 <!-- Results -->
                 <div class="settings-section">
-                    <h4>Results</h4>
+                    <h4>Results & Grading</h4>
+                    <div class="toggle-row">
+                        <span class="toggle-label">Grade Drag & Drop per item (Partial Grading)</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="setting-partial-grading" />
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
                     <div class="toggle-row">
                         <span class="toggle-label">Allow students to review answers after test</span>
                         <label class="toggle-switch">
@@ -311,6 +321,16 @@
                             class="fa-solid fa-ban"></i> Deactivate Test</button>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Image Lightbox -->
+    <div class="tt-lightbox" id="image-lightbox" style="display: none">
+        <div class="tt-lightbox-content">
+            <button class="tt-btn-close-lightbox" id="btn-close-lightbox">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <img id="lightbox-img" src="" alt="Enlarged view" />
         </div>
     </div>
 

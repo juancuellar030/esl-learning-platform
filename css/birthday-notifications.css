@@ -186,6 +186,25 @@
     gap: 10px;
 }
 
+.bday-nav-btn {
+    background: rgba(255, 255, 255, 0.15);
+    border: none;
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.bday-nav-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
 .birthday-panel-close {
     background: rgba(255, 255, 255, 0.2);
     border: none;
@@ -234,21 +253,22 @@
     transition: all 0.2s ease;
     background: #f8f9fa;
     border: 2px solid transparent;
+    cursor: pointer;
 }
 
 .birthday-item:hover {
     background: #f0f0ff;
     border-color: var(--medium-slate-blue);
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(100, 100, 255, 0.1);
 }
 
 .birthday-item.is-today {
     background: linear-gradient(135deg, #fff8e1, #fff3cd);
     border-color: var(--amber-flame);
-    cursor: pointer;
 }
 
 .birthday-item.is-today:hover {
-    transform: translateX(4px);
     box-shadow: 0 4px 12px rgba(247, 184, 1, 0.3);
 }
 
@@ -306,6 +326,10 @@
     color: #2e7d32;
 }
 
+.birthday-item-days.past-tag {
+    background: #f1f3f5;
+    color: #6c757d;
+}
 
 /* ===== CELEBRATION OVERLAY ===== */
 .celebration-overlay {
@@ -583,6 +607,11 @@ body.dark-mode .birthday-item-date {
 body.dark-mode .birthday-item-days.soon-tag {
     background: #1b4332;
     color: #95d5b2;
+}
+
+body.dark-mode .birthday-item-days.past-tag {
+    background: #333;
+    color: #aaa;
 }
 
 body.dark-mode .birthday-panel-empty {

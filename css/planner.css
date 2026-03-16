@@ -245,7 +245,7 @@
 }
 
 .schedule-table tbody tr:hover {
-    background: #f8f9fa;
+    background: #3f3f3f;
 }
 
 /* Period and Time columns */
@@ -983,4 +983,8 @@ body.dark-mode .dv-columns-wrapper::-webkit-scrollbar-thumb {
 
 body.dark-mode .day-viewer-empty {
     color: #777;
+}
+
+body.dark-mode .date-inputs {
+    background: #2a2a2a;
 }

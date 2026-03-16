@@ -81,12 +81,44 @@
             .sort((a, b) => a.daysUntil - b.daysUntil);
     }
 
+    // ─── DOM Injection & State ──────────────────────────────
+    let viewedMonth = today().getMonth();
+    let viewedYear = today().getFullYear();
 
-    // ─── DOM Injection ──────────────────────────────────────
+    function getStudentMonthDisplayInfo(s, viewMonth, viewYear) {
+        const now = today();
+        const [mm, dd] = s.birthdate.split('-').map(Number);
+
+        const bdayDate = new Date(viewYear, viewMonth, dd);
+
+        const dayOfWeek = bdayDate.getDay();
+        let effectiveDate = new Date(bdayDate);
+        if (dayOfWeek === 0) effectiveDate.setDate(bdayDate.getDate() + 1);
+        if (dayOfWeek === 6) effectiveDate.setDate(bdayDate.getDate() + 2);
+
+        const nowMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const effectiveDays = Math.round((effectiveDate - nowMidnight) / (1000 * 60 * 60 * 24));
+
+        const dismissKey = `birthday_celebrated_${s.name}_${effectiveDate.getFullYear()}_${effectiveDate.getMonth()}_${effectiveDate.getDate()}`;
+        const dismissed = localStorage.getItem(dismissKey);
+
+        const isToday = effectiveDays === 0 && !dismissed;
+
+        return {
+            name: s.name,
+            birthdate: s.birthdate,
+            isToday: isToday,
+            wasWeekend: isToday && (dayOfWeek === 0 || dayOfWeek === 6),
+            daysDiff: effectiveDays,
+            bdayDate: bdayDate
+        };
+    }
+
     function injectBirthdayUI() {
-        const upcoming = getUpcomingBirthdays();
-        const todayBirthdays = upcoming.filter(s => s.isToday);
-        const count = upcoming.length;
+        // Evaluate globally first to power the bell badge correctly
+        const upcomingGlobally = getUpcomingBirthdays();
+        const todayBirthdays = upcomingGlobally.filter(s => s.isToday);
+        const count = upcomingGlobally.length;
 
         // Bell Button
         const bell = document.createElement('button');
@@ -110,9 +142,11 @@
         panel.className = 'birthday-panel';
         panel.id = 'birthdayPanel';
         panel.innerHTML = `
-            <div class="birthday-panel-header">
-                <h3><i class="fa-solid fa-cake-candles"></i> Upcoming Birthdays</h3>
-                <button class="birthday-panel-close" id="birthdayPanelClose"><i class="fa-solid fa-xmark"></i></button>
+            <div class="birthday-panel-header" style="padding: 16px 20px;">
+                <button class="bday-nav-btn" id="bdayMonthPrev" title="Previous Month"><i class="fa-solid fa-chevron-left"></i></button>
+                <h3 id="bdayMonthTitle" style="margin: 0; flex: 1; text-align: center; display: flex; justify-content: center; align-items: center; gap: 8px;"><i class="fa-solid fa-cake-candles"></i> Month</h3>
+                <button class="bday-nav-btn" id="bdayMonthNext" title="Next Month"><i class="fa-solid fa-chevron-right"></i></button>
+                <button class="birthday-panel-close" id="birthdayPanelClose" style="margin-left: 12px;"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="birthday-panel-body" id="birthdayPanelBody"></div>
         `;
@@ -136,39 +170,83 @@
         `;
         document.body.appendChild(celeb);
 
-        // Populate Panel
-        renderPanel(upcoming);
+        // Initialize state purely functionally
+        viewedMonth = today().getMonth();
+        viewedYear = today().getFullYear();
+        renderPanelWithState();
 
         // Events
         bell.addEventListener('click', togglePanel);
         overlay.addEventListener('click', closePanel);
         document.getElementById('birthdayPanelClose').addEventListener('click', closePanel);
         document.getElementById('celebrationCloseBtn').addEventListener('click', closeCelebration);
+
+        document.getElementById('bdayMonthPrev').addEventListener('click', () => changeMonth(-1));
+        document.getElementById('bdayMonthNext').addEventListener('click', () => changeMonth(1));
     }
 
-    function renderPanel(upcoming) {
+    function changeMonth(delta) {
+        viewedMonth += delta;
+        if (viewedMonth > 11) {
+            viewedMonth = 0;
+            viewedYear++;
+        } else if (viewedMonth < 0) {
+            viewedMonth = 11;
+            viewedYear--;
+        }
+        renderPanelWithState();
+    }
+
+    function renderPanelWithState() {
+        const title = document.getElementById('bdayMonthTitle');
+        if (title) {
+            title.innerHTML = `<i class="fa-solid fa-calendar-days"></i> ${MONTH_NAMES[viewedMonth]} ${viewedYear}`;
+        }
+
+        const monthBirthdays = STUDENTS_DATA.filter(s => {
+            const mm = Number(s.birthdate.split('-')[0]);
+            return (mm - 1) === viewedMonth;
+        }).map(s => getStudentMonthDisplayInfo(s, viewedMonth, viewedYear))
+            .sort((a, b) => a.bdayDate.getDate() - b.bdayDate.getDate());
+
+        renderPanel(monthBirthdays);
+    }
+
+    function renderPanel(monthBirthdays) {
         const body = document.getElementById('birthdayPanelBody');
         if (!body) return;
 
-        if (upcoming.length === 0) {
+        if (monthBirthdays.length === 0) {
             body.innerHTML = `
                 <div class="birthday-panel-empty">
-                    <i class="fa-solid fa-calendar-check"></i>
-                    <p>No upcoming birthdays in the next ${UPCOMING_DAYS} days</p>
+                    <i class="fa-solid fa-calendar-xmark"></i>
+                    <p>No birthdays in ${MONTH_NAMES[viewedMonth]}</p>
                 </div>
             `;
             return;
         }
 
-        body.innerHTML = upcoming.map(s => {
+        body.innerHTML = monthBirthdays.map(s => {
             const isToday = s.isToday;
-            const daysLabel = isToday ? '🎉 Today!' : `${s.daysUntil} day${s.daysUntil !== 1 ? 's' : ''}`;
-            const daysClass = isToday ? 'today-tag' : 'soon-tag';
+
+            let daysLabel = '';
+            let daysClass = 'soon-tag';
+
+            if (isToday) {
+                daysLabel = '🎉 Today!';
+                daysClass = 'today-tag';
+            } else if (s.daysDiff < 0) {
+                daysLabel = formatBirthdate(s.birthdate);
+                daysClass = 'past-tag'; // We will add styling for this
+            } else {
+                daysLabel = `In ${s.daysDiff} day${s.daysDiff !== 1 ? 's' : ''}`;
+            }
+
             const weekendNote = s.wasWeekend && isToday ? ' (weekend b-day)' : '';
 
             return `
                 <div class="birthday-item ${isToday ? 'is-today' : ''}" 
-                     ${isToday ? `onclick="window._birthdaySystem.openCelebration('${s.name.replace(/'/g, "\\'")}', '${s.birthdate}')"` : ''}>
+                     onclick="window._birthdaySystem.openCelebration('${s.name.replace(/'/g, "\\'")}', '${s.birthdate}')">
                     <div class="birthday-item-icon">
                         <i class="fa-solid ${isToday ? 'fa-gift' : 'fa-cake-candles'}"></i>
                     </div>
@@ -191,6 +269,11 @@
         if (isOpen) {
             closePanel();
         } else {
+            // Reset to current month when opening
+            viewedMonth = today().getMonth();
+            viewedYear = today().getFullYear();
+            renderPanelWithState();
+
             panel.classList.add('active');
             overlay.classList.add('active');
         }
@@ -249,9 +332,8 @@
         stopBirthdayMusic();
 
         // Refresh panel data after dismissing
-        const upcoming = getUpcomingBirthdays();
-        renderPanel(upcoming);
-        updateBellBadge(upcoming);
+        renderPanelWithState();
+        updateBellBadge(getUpcomingBirthdays());
     }
 
     function updateBellBadge(upcoming) {

@@ -60,6 +60,7 @@ const TestBuilder = (function () {
         dom.btnSettings = document.getElementById('btn-settings');
         dom.btnCloseSettings = document.getElementById('btn-close-settings');
         dom.btnSave = document.getElementById('btn-save');
+        dom.btnExportJson = document.getElementById('btn-export-json');
         dom.testTitleInput = document.getElementById('setting-test-title');
         dom.testDescInput = document.getElementById('setting-test-desc');
         dom.timeLimitInput = document.getElementById('setting-time-limit');
@@ -72,6 +73,7 @@ const TestBuilder = (function () {
         dom.fullscreenToggle = document.getElementById('setting-fullscreen');
         dom.allowThemesToggle = document.getElementById('setting-allow-themes');
         dom.showAnswerReviewToggle = document.getElementById('setting-show-answer-review');
+        dom.partialGradingToggle = document.getElementById('setting-partial-grading');
         dom.groupPills = document.getElementById('group-pills');
         dom.addGroupInput = document.getElementById('add-group-input');
         dom.btnAddGroup = document.getElementById('btn-add-group');
@@ -100,6 +102,7 @@ const TestBuilder = (function () {
                 if (testData.settings.enableFullscreen === undefined) testData.settings.enableFullscreen = true;
                 if (testData.settings.allowThemes === undefined) testData.settings.allowThemes = true;
                 if (testData.settings.showAnswerReview === undefined) testData.settings.showAnswerReview = true;
+                if (testData.settings.partialGradingDragDrop === undefined) testData.settings.partialGradingDragDrop = false;
             } catch (e) {
                 testData = createEmptyTest();
             }
@@ -126,7 +129,8 @@ const TestBuilder = (function () {
                 groupOptions: [...DEFAULT_GROUPS],
                 enableFullscreen: true,
                 allowThemes: true,
-                showAnswerReview: true
+                showAnswerReview: true,
+                partialGradingDragDrop: false
             },
             questions: []
         };
@@ -144,8 +148,22 @@ const TestBuilder = (function () {
             toggleDropdown();
         });
 
-        document.addEventListener('click', () => {
+        document.addEventListener('click', (e) => {
             if (dropdownOpen) closeDropdown();
+
+            const zoomBtn = e.target.closest('.tt-zoom-btn');
+            if (zoomBtn) {
+                const imgSrc = zoomBtn.dataset.img;
+                const lightbox = document.getElementById('image-lightbox');
+                if (lightbox && imgSrc) {
+                    document.getElementById('lightbox-img').src = imgSrc;
+                    lightbox.style.display = 'flex';
+                }
+            }
+
+            if (e.target.closest('.tt-btn-close-lightbox') || e.target.classList.contains('tt-lightbox')) {
+                document.getElementById('image-lightbox').style.display = 'none';
+            }
         });
 
         // Settings modal
@@ -160,6 +178,21 @@ const TestBuilder = (function () {
             saveTest();
             showToast('Test saved!');
         });
+
+        // Export JSON
+        if (dom.btnExportJson) {
+            dom.btnExportJson.addEventListener('click', () => {
+                saveTest(); // Ensure we have latest
+                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(testData, null, 2));
+                const downloadAnchorNode = document.createElement('a');
+                downloadAnchorNode.setAttribute("href", dataStr);
+                downloadAnchorNode.setAttribute("download", (testData.title || "quiz") + ".json");
+                document.body.appendChild(downloadAnchorNode); // required for firefox
+                downloadAnchorNode.click();
+                downloadAnchorNode.remove();
+                showToast('Quiz exported to JSON!');
+            });
+        }
 
         // Save Settings button (inside settings modal)
         const btnSaveSettings = document.getElementById('btn-save-settings');
@@ -185,6 +218,48 @@ const TestBuilder = (function () {
             testData.settings.timeLimit = parseInt(e.target.value) || 0;
             autoSave();
         });
+        dom.shuffleQuestionsToggle.addEventListener('change', (e) => {
+            testData.settings.shuffleQuestions = e.target.checked;
+            autoSave();
+        });
+        dom.shuffleOptionsToggle.addEventListener('change', (e) => {
+            testData.settings.shuffleOptions = e.target.checked;
+            autoSave();
+        });
+        dom.showResultsToggle.addEventListener('change', (e) => {
+            testData.settings.showResults = e.target.checked;
+            autoSave();
+        });
+        dom.allowRetakeToggle.addEventListener('change', (e) => {
+            testData.settings.allowRetake = e.target.checked;
+            autoSave();
+        });
+        dom.collectNameToggle.addEventListener('change', (e) => {
+            testData.settings.collectName = e.target.checked;
+            autoSave();
+        });
+        dom.collectGroupToggle.addEventListener('change', (e) => {
+            testData.settings.collectGroup = e.target.checked;
+            autoSave();
+        });
+        dom.fullscreenToggle.addEventListener('change', (e) => {
+            testData.settings.enableFullscreen = e.target.checked;
+            autoSave();
+        });
+        dom.allowThemesToggle.addEventListener('change', (e) => {
+            testData.settings.allowThemes = e.target.checked;
+            autoSave();
+        });
+        dom.showAnswerReviewToggle.addEventListener('change', (e) => {
+            testData.settings.showAnswerReview = e.target.checked;
+            autoSave();
+        });
+        if (dom.partialGradingToggle) {
+            dom.partialGradingToggle.addEventListener('change', (e) => {
+                testData.settings.partialGradingDragDrop = e.target.checked;
+                autoSave();
+            });
+        }
 
         // Toggles
         bindToggle(dom.shuffleQuestionsToggle, 'shuffleQuestions');
@@ -735,10 +810,22 @@ const TestBuilder = (function () {
 
     // Drag & Drop Category
     function renderDDEditor(q) {
+        if (!q.itemImages) q.itemImages = {};
         const cats = q.categories.map((cat, ci) => {
-            const chips = cat.items.map((item, ii) => `
-                <span class="cat-item-chip">${escapeHtml(item)}<button class="remove-chip" data-cat="${ci}" data-item="${ii}"><i class="fa-solid fa-xmark"></i></button></span>
-            `).join('');
+            const chips = cat.items.map((item, ii) => {
+                const imgThumb = q.itemImages[item]
+                    ? `<div class="opt-img-thumb"><img src="${q.itemImages[item]}" /><button class="dd-img-remove" data-item="${escapeHtml(item)}" title="Remove image"><i class="fa-solid fa-xmark"></i></button></div>`
+                    : '';
+                return `
+                <div class="cat-item-chip-container" style="display:inline-flex; flex-direction:column; align-items:center; gap:4px; margin-right:6px; margin-bottom:6px; border:1px solid #ddd; padding:4px; border-radius:6px; background:#fff;">
+                    <span class="cat-item-chip" style="margin:0;">${escapeHtml(item)}<button class="remove-chip" data-cat="${ci}" data-item="${ii}"><i class="fa-solid fa-xmark"></i></button></span>
+                    ${imgThumb}
+                    <label class="opt-img-upload dd-img-upload" data-item="${escapeHtml(item)}" title="Add image" style="font-size:0.75rem; cursor:pointer; color:var(--medium-slate-blue);">
+                        <i class="fa-solid fa-image"></i> Image
+                        <input type="file" accept="image/*" class="dd-item-img-input" data-item="${escapeHtml(item)}" style="display:none;" />
+                    </label>
+                </div>`;
+            }).join('');
             return `
                 <div class="category-block" data-cat="${ci}">
                     <div class="cat-header">
@@ -1138,6 +1225,38 @@ const TestBuilder = (function () {
                 autoSave();
             });
         }
+
+        // DD image uploads
+        document.querySelectorAll('.dd-item-img-input').forEach(input => {
+            input.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file || !file.type.startsWith('image/')) return;
+                const itemtext = input.dataset.item;
+                const reader = new FileReader();
+                reader.onload = () => {
+                    if (!q.itemImages) q.itemImages = {};
+                    q.itemImages[itemtext] = reader.result;
+                    renderEditor();
+                    renderPreview();
+                    autoSave();
+                };
+                reader.readAsDataURL(file);
+            });
+        });
+
+        // Remove DD image
+        document.querySelectorAll('.dd-img-remove').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const itemtext = btn.dataset.item;
+                if (q.itemImages && q.itemImages[itemtext]) {
+                    delete q.itemImages[itemtext];
+                }
+                renderEditor();
+                renderPreview();
+                autoSave();
+            });
+        });
     }
 
     // ===== PREVIEW RENDERING =====
@@ -1271,7 +1390,18 @@ const TestBuilder = (function () {
                     <div class="preview-cat-box">
                         <div class="cat-title">${escapeHtml(cat.name) || 'Untitled'}</div>
                         <div class="preview-cat-items">
-                            ${cat.items.map(it => `<span class="preview-cat-item-chip">${escapeHtml(it)}</span>`).join('')}
+                            ${cat.items.map(it => {
+            const hasImg = q.itemImages && q.itemImages[it];
+            if (hasImg) {
+                return `<div class="preview-cat-item-chip tt-dd-card">
+                    <div class="tt-dd-img-wrap">
+                        <img src="${q.itemImages[it]}" class="tt-dd-card-img" />
+                    </div>
+                    <span class="tt-dd-text">${escapeHtml(it)}</span>
+                </div>`;
+            }
+            return `<span class="preview-cat-item-chip">${escapeHtml(it)}</span>`;
+        }).join('')}
                             ${cat.items.length === 0 ? '<span style="color:#ccc;font-size:0.8rem;">Drop items here</span>' : ''}
                         </div>
                     </div>`).join('')}
@@ -1280,7 +1410,18 @@ const TestBuilder = (function () {
                 <div style="margin-top:12px;">
                     <div style="font-size:0.75rem;color:#888;font-weight:600;margin-bottom:6px;text-transform:uppercase;">Items to sort:</div>
                     <div class="preview-unjumble">
-                        ${shuffleArray([...allItems]).map(it => `<span class="preview-unjumble-chip">${escapeHtml(it)}</span>`).join('')}
+                        ${shuffleArray([...allItems]).map(it => {
+            const hasImg = q.itemImages && q.itemImages[it];
+            if (hasImg) {
+                return `<div class="preview-unjumble-chip tt-dd-card">
+                    <div class="tt-dd-img-wrap">
+                        <img src="${q.itemImages[it]}" class="tt-dd-card-img" />
+                    </div>
+                    <span class="tt-dd-text">${escapeHtml(it)}</span>
+                </div>`;
+            }
+            return `<span class="preview-unjumble-chip">${escapeHtml(it)}</span>`;
+        }).join('')}
                     </div>
                 </div>` : ''}`;
     }
@@ -1300,6 +1441,7 @@ const TestBuilder = (function () {
         dom.fullscreenToggle.checked = s.enableFullscreen;
         dom.allowThemesToggle.checked = s.allowThemes;
         dom.showAnswerReviewToggle.checked = s.showAnswerReview;
+        if (dom.partialGradingToggle) dom.partialGradingToggle.checked = s.partialGradingDragDrop;
         renderGroupPills();
         dom.settingsOverlay.classList.add('active');
     }

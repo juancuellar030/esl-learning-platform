@@ -211,6 +211,23 @@ const TakeTest = (function () {
             showScreen('code');
             setupCodeEntry();
         }
+
+        // Global zoom listener
+        document.addEventListener('click', (e) => {
+            const zoomBtn = e.target.closest('.tt-zoom-btn');
+            if (zoomBtn) {
+                const imgSrc = zoomBtn.dataset.img;
+                const lightbox = document.getElementById('image-lightbox');
+                if (lightbox && imgSrc) {
+                    document.getElementById('lightbox-img').src = imgSrc;
+                    lightbox.style.display = 'flex';
+                }
+            }
+
+            if (e.target.closest('.tt-btn-close-lightbox') || e.target.classList.contains('tt-lightbox')) {
+                document.getElementById('image-lightbox').style.display = 'none';
+            }
+        });
     }
 
     function cacheScreens() {
@@ -753,9 +770,19 @@ const TakeTest = (function () {
 
         const cats = q.categories.map((cat, ci) => {
             const items = placedItems[ci] || [];
-            const chips = items.map(item =>
-                `<span class="tt-dd-item" data-cat="${ci}" data-item="${escapeHtml(item)}">${escapeHtml(item)}</span>`
-            ).join('');
+            const chips = items.map(item => {
+                const hasImg = q.itemImages && q.itemImages[item];
+                if (hasImg) {
+                    return `<div class="tt-dd-item tt-dd-card" data-cat="${ci}" data-item="${escapeHtml(item)}">
+                        <div class="tt-dd-img-wrap">
+                            <img src="${q.itemImages[item]}" class="tt-dd-card-img" />
+                            <button class="tt-zoom-btn" data-img="${q.itemImages[item]}"><i class="fa-solid fa-expand"></i></button>
+                        </div>
+                        <span class="tt-dd-text">${escapeHtml(item)}</span>
+                    </div>`;
+                }
+                return `<span class="tt-dd-item" data-cat="${ci}" data-item="${escapeHtml(item)}">${escapeHtml(item)}</span>`;
+            }).join('');
             return `<div class="tt-dd-category" data-cat="${ci}">
                 <h4>${escapeHtml(cat.name)}</h4>
                 <div class="tt-dd-cat-items">${chips}</div>
@@ -763,10 +790,21 @@ const TakeTest = (function () {
         }).join('');
 
         const placedFlat = Object.values(placedItems).flat();
-        const pool = allItems.map((item, i) => {
-            const isPlaced = placedFlat.includes(item) ? 'placed' : '';
-            return `<span class="tt-dd-pool-item ${isPlaced}" data-item="${escapeHtml(item)}" data-idx="${i}" draggable="true">${escapeHtml(item)}</span>`;
-        }).join('');
+        const pool = allItems
+            .filter(item => !placedFlat.includes(item))
+            .map((item, i) => {
+                const hasImg = q.itemImages && q.itemImages[item];
+                if (hasImg) {
+                    return `<div class="tt-dd-pool-item tt-dd-card" data-item="${escapeHtml(item)}" data-idx="${i}" draggable="true">
+                        <div class="tt-dd-img-wrap">
+                            <img src="${q.itemImages[item]}" class="tt-dd-card-img" />
+                            <button class="tt-zoom-btn" data-img="${q.itemImages[item]}"><i class="fa-solid fa-expand"></i></button>
+                        </div>
+                        <span class="tt-dd-text">${escapeHtml(item)}</span>
+                    </div>`;
+                }
+                return `<span class="tt-dd-pool-item" data-item="${escapeHtml(item)}" data-idx="${i}" draggable="true">${escapeHtml(item)}</span>`;
+            }).join('');
 
         return `<div class="tt-dd-categories">${cats}</div>
             <div class="tt-dd-pool">${pool}</div>`;
@@ -1123,51 +1161,90 @@ const TakeTest = (function () {
         // Grade
         let totalPoints = 0;
         let earnedPoints = 0;
+
+        // Pre-calculate total points to ensure robustness
+        testData.questions.forEach(q => {
+            if (q.type === 'drag-drop-category' && testData.settings.partialGradingDragDrop) {
+                // If partial grading, total points for THIS question is the number of items
+                totalPoints += (q.categories || []).reduce((acc, cat) => acc + (cat.items || []).length, 0);
+            } else {
+                // Otherwise points for this question is the specified points (default 1)
+                const pts = parseFloat(q.points);
+                totalPoints += isNaN(pts) ? 1 : pts;
+            }
+        });
+
         const graded = testData.questions.map((q, i) => {
             const studentAnswer = answers[i];
-            let correct = false;
-            totalPoints += (q.points || 1);
+            let earnedInQuestion = 0;
+            const pts = parseFloat(q.points);
+            let currentQPoints = isNaN(pts) ? 1 : pts;
 
             switch (q.type) {
                 case 'multiple-choice':
                 case 'true-false':
-                    correct = studentAnswer === q.correctAnswer;
+                    if (studentAnswer === q.correctAnswer) earnedInQuestion = currentQPoints;
                     break;
                 case 'fill-blank':
                     if (Array.isArray(studentAnswer) && q.blanks) {
-                        correct = q.blanks.every((b, bi) => {
+                        const allCorrect = q.blanks.every((b, bi) => {
                             const ans = studentAnswer[bi] || '';
                             return q.caseSensitive ? ans === b : ans.toLowerCase() === b.toLowerCase();
                         });
+                        if (allCorrect) earnedInQuestion = currentQPoints;
                     }
                     break;
                 case 'matching':
                     if (Array.isArray(studentAnswer) && q.pairs) {
-                        correct = q.pairs.every((p, pi) => studentAnswer[pi] === p.right);
+                        const allCorrect = q.pairs.every((p, pi) => studentAnswer[pi] === p.right);
+                        if (allCorrect) earnedInQuestion = currentQPoints;
                     }
                     break;
                 case 'unjumble-words':
                     if (Array.isArray(studentAnswer) && q.words) {
-                        correct = JSON.stringify(studentAnswer) === JSON.stringify(q.words);
+                        const allCorrect = JSON.stringify(studentAnswer) === JSON.stringify(q.words);
+                        if (allCorrect) earnedInQuestion = currentQPoints;
                     }
                     break;
                 case 'unjumble-letters':
                     if (Array.isArray(studentAnswer) && q.correctWord) {
-                        correct = studentAnswer.join('') === q.correctWord;
+                        const allCorrect = studentAnswer.join('') === q.correctWord;
+                        if (allCorrect) earnedInQuestion = currentQPoints;
                     }
                     break;
                 case 'drag-drop-category':
                     if (studentAnswer && typeof studentAnswer === 'object' && q.categories) {
-                        correct = q.categories.every((cat, ci) => {
-                            const placed = studentAnswer[ci] || [];
-                            return cat.items.length === placed.length && cat.items.every(item => placed.includes(item));
-                        });
+                        if (testData.settings.partialGradingDragDrop) {
+                            let totalItems = 0;
+                            let correctlyPlaced = 0;
+                            q.categories.forEach((cat, ci) => {
+                                totalItems += (cat.items || []).length;
+                                const placed = studentAnswer[ci] || [];
+                                placed.forEach(item => {
+                                    if (cat.items.includes(item)) correctlyPlaced++;
+                                });
+                            });
+                            earnedInQuestion = correctlyPlaced;
+                            currentQPoints = totalItems;
+                        } else {
+                            const allCorrect = q.categories.every((cat, ci) => {
+                                const placed = studentAnswer[ci] || [];
+                                return cat.items.length === placed.length && cat.items.every(item => placed.includes(item));
+                            });
+                            if (allCorrect) earnedInQuestion = currentQPoints;
+                        }
                     }
                     break;
             }
 
-            if (correct) earnedPoints += (q.points || 1);
-            return { questionId: q.id, answer: studentAnswer, correct, points: correct ? (q.points || 1) : 0 };
+            earnedPoints += earnedInQuestion;
+            return {
+                questionId: q.id,
+                answer: studentAnswer,
+                correct: currentQPoints > 0 ? (earnedInQuestion === currentQPoints) : true,
+                points: earnedInQuestion,
+                maxPoints: currentQPoints
+            };
         });
 
         const response = {
@@ -1573,14 +1650,41 @@ function buildAnswerReview() {
             case 'drag-drop-category':
                 const ddAns = studentAnswers[i];
                 if (ddAns && typeof ddAns === 'object' && q.categories) {
-                    studentAnswerText = q.categories.map((cat, ci) => {
-                        const items = ddAns[ci] || [];
-                        return `${escapeHtml(cat.name)}: ${items.length > 0 ? items.map(it => escapeHtml(it)).join(', ') : '(empty)'}`;
-                    }).join(' | ');
-                    correctAnswerText = q.categories.map(cat => `${escapeHtml(cat.name)}: ${cat.items.map(it => escapeHtml(it)).join(', ')}`).join(' | ');
+                    studentAnswerText = `<div class="tt-review-dd-breakdown">`;
+                    q.categories.forEach((cat, ci) => {
+                        const placed = ddAns[ci] || [];
+                        const correctItems = cat.items || [];
+
+                        studentAnswerText += `
+                            <div class="tt-review-dd-cat">
+                                <span class="tt-review-dd-cat-name">${escapeHtml(cat.name)}</span>
+                                <div class="tt-review-dd-items">
+                                    ${placed.map(item => {
+                            const isCorrect = correctItems.includes(item);
+                            if (isCorrect) {
+                                return `<span class="tt-review-dd-item correct" title="Correctly placed"><i class="fa-solid fa-check"></i> ${escapeHtml(item)}</span>`;
+                            } else {
+                                // Find where it actually belongs
+                                const correctCat = q.categories.find(c => c.items.includes(item));
+                                const belongsTo = correctCat ? correctCat.name : 'None';
+                                return `<span class="tt-review-dd-item wrong" title="Belongs in: ${escapeHtml(belongsTo)}"><i class="fa-solid fa-xmark"></i> ${escapeHtml(item)}</span>`;
+                            }
+                        }).join('')}
+                                    ${correctItems.filter(item => !placed.includes(item)).map(item => {
+                            return `<span class="tt-review-dd-item missing" title="Missing from this category"><i class="fa-solid fa-ellipsis"></i> ${escapeHtml(item)}</span>`;
+                        }).join('')}
+                                    ${placed.length === 0 && correctItems.length === 0 ? '<span class="tt-review-dd-empty">Empty</span>' : ''}
+                                </div>
+                            </div>`;
+                    });
+                    studentAnswerText += `</div>`;
+
+                    // Correct answer text for DD is redundant if we show breakdown above, 
+                    // but we can summarize what was missing globally if needed.
+                    correctAnswerText = "See breakdown above";
                 } else {
                     studentAnswerText = 'No answer';
-                    correctAnswerText = '';
+                    correctAnswerText = q.categories ? q.categories.map(cat => `${escapeHtml(cat.name)}: ${cat.items.map(it => escapeHtml(it)).join(', ')}`).join(' | ') : '';
                 }
                 break;
             default:
