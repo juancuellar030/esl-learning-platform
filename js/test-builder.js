@@ -201,33 +201,54 @@ const TestBuilder = (function () {
                 if (!file) return;
                 const reader = new FileReader();
                 reader.onload = (evt) => {
+                    // 1. Parse the JSON
+                    let imported;
                     try {
                         // Strip UTF-8 BOM if present (common in Windows-saved files)
                         const raw = evt.target.result.replace(/^\uFEFF/, '');
-                        const imported = JSON.parse(raw);
-                        if (!imported.questions || !Array.isArray(imported.questions)) {
-                            showToast('Invalid quiz file — missing questions array.');
-                            return;
-                        }
-                        // Merge into testData, keeping defaults for missing fields
-                        Object.assign(testData, imported);
-                        if (!testData.settings) testData.settings = {};
-                        if (!testData.settings.groupOptions) testData.settings.groupOptions = [...DEFAULT_GROUPS];
-                        if (testData.settings.partialGradingDragDrop === undefined) testData.settings.partialGradingDragDrop = false;
-                        dom.headerTitle.textContent = testData.title || 'Untitled Test';
-                        saveTest();
-                        renderSidebar();
-                        if (testData.questions.length > 0) {
-                            selectQuestion(0);
-                        } else {
-                            renderEditorEmpty();
-                            renderPreviewEmpty();
-                        }
-                        showToast(`Imported: ${file.name}`);
-                    } catch (err) {
-                        console.error('[Import] JSON parse failed:', err);
+                        imported = JSON.parse(raw);
+                    } catch (parseErr) {
+                        console.error('[Import] JSON parse failed:', parseErr);
                         showToast('Could not parse file — is it a valid JSON quiz?');
+                        dom.importJsonInput.value = '';
+                        return;
                     }
+
+                    if (!imported.questions || !Array.isArray(imported.questions)) {
+                        showToast('Invalid quiz file — missing questions array.');
+                        dom.importJsonInput.value = '';
+                        return;
+                    }
+
+                    // 2. Merge into testData
+                    Object.assign(testData, imported);
+                    if (!testData.settings) testData.settings = {};
+                    if (!testData.settings.groupOptions) testData.settings.groupOptions = [...DEFAULT_GROUPS];
+                    if (testData.settings.partialGradingDragDrop === undefined) testData.settings.partialGradingDragDrop = false;
+                    dom.headerTitle.textContent = testData.title || 'Untitled Test';
+
+                    // 3. Try to save — handle storage quota errors gracefully
+                    try {
+                        saveTest();
+                    } catch (saveErr) {
+                        console.warn('[Import] Could not save to localStorage:', saveErr);
+                        if (saveErr.name === 'QuotaExceededError' || saveErr.code === 22) {
+                            showToast('Quiz loaded but too large for local storage — media was stripped to fit.');
+                            // Strip embedded media from questions to reduce size
+                            testData.questions.forEach(q => { q.media = null; if (q.optionImages) q.optionImages = []; });
+                            try { saveTest(); } catch (e) { console.error('[Import] Still cannot save after stripping media:', e); }
+                        }
+                    }
+
+                    // 4. Render the imported quiz regardless of save success
+                    renderSidebar();
+                    if (testData.questions.length > 0) {
+                        selectQuestion(0);
+                    } else {
+                        renderEditorEmpty();
+                        renderPreviewEmpty();
+                    }
+                    showToast(`Imported: ${file.name}`);
                     // Reset so the same file can be re-imported
                     dom.importJsonInput.value = '';
                 };
