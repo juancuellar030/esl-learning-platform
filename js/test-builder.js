@@ -202,7 +202,9 @@ const TestBuilder = (function () {
                 const reader = new FileReader();
                 reader.onload = (evt) => {
                     try {
-                        const imported = JSON.parse(evt.target.result);
+                        // Strip UTF-8 BOM if present (common in Windows-saved files)
+                        const raw = evt.target.result.replace(/^\uFEFF/, '');
+                        const imported = JSON.parse(raw);
                         if (!imported.questions || !Array.isArray(imported.questions)) {
                             showToast('Invalid quiz file — missing questions array.');
                             return;
@@ -223,6 +225,7 @@ const TestBuilder = (function () {
                         }
                         showToast(`Imported: ${file.name}`);
                     } catch (err) {
+                        console.error('[Import] JSON parse failed:', err);
                         showToast('Could not parse file — is it a valid JSON quiz?');
                     }
                     // Reset so the same file can be re-imported
@@ -476,7 +479,7 @@ const TestBuilder = (function () {
                 base.customLabels = false;
                 break;
             case 'fill-blank':
-                base.sentence = 'The ___ is blue.';
+                base.sentences = ['The ___ is blue.'];
                 base.blanks = ['sky'];
                 base.wordBank = [];
                 base.useWordBank = false;
@@ -792,6 +795,20 @@ const TestBuilder = (function () {
 
     // Fill in the Blank
     function renderFBEditor(q) {
+        // Migration for older quizzes with a single sentence string
+        if (q.sentence !== undefined && !q.sentences) {
+            q.sentences = [q.sentence];
+            delete q.sentence;
+        }
+        if (!q.sentences) q.sentences = ['The ___ is blue.'];
+
+        const sentencesHTML = q.sentences.map((sentence, i) => `
+            <div class="sentence-slot" style="display:flex; gap:10px; margin-bottom:8px;">
+                <input type="text" class="fb-sentence-input" value="${escapeHtml(sentence)}" placeholder="Sentence ${i + 1} (use ___ for blanks)" data-index="${i}" style="flex:1;" />
+                ${q.sentences.length > 1 ? `<button class="remove-option" data-index="${i}" data-action="remove-sentence"><i class="fa-solid fa-xmark"></i></button>` : ''}
+            </div>
+        `).join('');
+
         const blanks = q.blanks.map((b, i) => `
             <div class="blank-slot">
                 <span class="blank-number">${i + 1}</span>
@@ -802,8 +819,9 @@ const TestBuilder = (function () {
 
         return `
             <div class="field-group">
-                <label>Sentence (use ___ for blanks)</label>
-                <input type="text" id="fb-sentence" value="${escapeHtml(q.sentence || '')}" placeholder="The ___ is blue." />
+                <label>Sentences (use ___ for blanks)</label>
+                <div id="fb-sentences">${sentencesHTML}</div>
+                <button class="btn-add-option" id="btn-add-sentence" style="margin-top:8px;"><i class="fa-solid fa-plus"></i> Add sentence</button>
             </div>
             <div class="field-group">
                 <label>Correct Answers</label>
@@ -1073,12 +1091,31 @@ const TestBuilder = (function () {
     }
 
     function bindFBEditor(q) {
-        const sentenceEl = document.getElementById('fb-sentence');
-        sentenceEl.addEventListener('input', () => {
-            q.sentence = sentenceEl.value;
-            renderPreview();
-            autoSave();
+        document.querySelectorAll('.fb-sentence-input').forEach(input => {
+            input.addEventListener('input', () => {
+                q.sentences[parseInt(input.dataset.index)] = input.value;
+                renderPreview();
+                autoSave();
+            });
         });
+
+        document.querySelectorAll('[data-action="remove-sentence"]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                q.sentences.splice(parseInt(btn.dataset.index), 1);
+                renderEditor();
+                renderPreview();
+                autoSave();
+            });
+        });
+
+        const addSentenceBtn = document.getElementById('btn-add-sentence');
+        if (addSentenceBtn) {
+            addSentenceBtn.addEventListener('click', () => {
+                q.sentences.push('');
+                renderEditor();
+                autoSave();
+            });
+        }
 
         document.querySelectorAll('.fb-blank-input').forEach(input => {
             input.addEventListener('input', () => {
