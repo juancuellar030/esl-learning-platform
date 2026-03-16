@@ -45,6 +45,11 @@
                 <button class="header-btn btn-settings" id="btn-settings">
                     <i class="fa-solid fa-gear"></i> <span>Settings</span>
                 </button>
+                <label class="header-btn" id="btn-import-json" title="Import quiz from JSON file"
+                    style="cursor:pointer;">
+                    <i class="fa-solid fa-file-import"></i> <span>Import</span>
+                    <input type="file" id="import-json-input" accept=".json,application/json" style="display:none;" />
+                </label>
                 <div class="export-dropdown-wrap" id="export-dropdown-wrap">
                     <button class="header-btn" id="btn-export-toggle" title="Export options">
                         <i class="fa-solid fa-file-export"></i> <span>Export</span> <i class="fa-solid fa-caret-down"

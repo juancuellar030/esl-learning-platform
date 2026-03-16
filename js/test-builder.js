@@ -65,6 +65,7 @@ const TestBuilder = (function () {
         dom.exportDropdownWrap = document.getElementById('export-dropdown-wrap');
         dom.btnDownloadJson = document.getElementById('btn-download-json');
         dom.btnExportToDrive = document.getElementById('btn-export-to-drive');
+        dom.importJsonInput = document.getElementById('import-json-input');
         dom.testTitleInput = document.getElementById('setting-test-title');
         dom.testDescInput = document.getElementById('setting-test-desc');
         dom.timeLimitInput = document.getElementById('setting-time-limit');
@@ -189,6 +190,44 @@ const TestBuilder = (function () {
             saveTest();
             showToast('Test saved!');
         });
+
+        // Import JSON from local file
+        if (dom.importJsonInput) {
+            dom.importJsonInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (evt) => {
+                    try {
+                        const imported = JSON.parse(evt.target.result);
+                        if (!imported.questions || !Array.isArray(imported.questions)) {
+                            showToast('Invalid quiz file — missing questions array.');
+                            return;
+                        }
+                        // Merge into testData, keeping defaults for missing fields
+                        Object.assign(testData, imported);
+                        if (!testData.settings) testData.settings = {};
+                        if (!testData.settings.groupOptions) testData.settings.groupOptions = [...DEFAULT_GROUPS];
+                        if (testData.settings.partialGradingDragDrop === undefined) testData.settings.partialGradingDragDrop = false;
+                        dom.headerTitle.textContent = testData.title || 'Untitled Test';
+                        saveTest();
+                        renderSidebar();
+                        if (testData.questions.length > 0) {
+                            selectQuestion(0);
+                        } else {
+                            renderEditorEmpty();
+                            renderPreviewEmpty();
+                        }
+                        showToast(`Imported: ${file.name}`);
+                    } catch (err) {
+                        showToast('Could not parse file — is it a valid JSON quiz?');
+                    }
+                    // Reset so the same file can be re-imported
+                    dom.importJsonInput.value = '';
+                };
+                reader.readAsText(file);
+            });
+        }
 
         // Export dropdown toggle
         if (dom.btnExportToggle) {
