@@ -102,7 +102,10 @@ const TestBuilder = (function () {
         if (saved) {
             try {
                 testData = JSON.parse(saved);
-                // Ensure new fields exist
+                // Ensure settings object and all new fields exist (guard against older saved formats)
+                if (!testData.settings || typeof testData.settings !== 'object') {
+                    testData.settings = {};
+                }
                 if (!testData.settings.groupOptions) testData.settings.groupOptions = [...DEFAULT_GROUPS];
                 if (testData.settings.enableFullscreen === undefined) testData.settings.enableFullscreen = true;
                 if (testData.settings.allowThemes === undefined) testData.settings.allowThemes = true;
