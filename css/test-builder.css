@@ -335,6 +335,59 @@
     font-size: 0.9rem;
 }
 
+/* Export dropdown */
+.export-dropdown-wrap {
+    position: relative;
+}
+
+.export-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.18);
+    padding: 6px;
+    z-index: 200;
+    min-width: 188px;
+    border: 1px solid #e0e2e8;
+    animation: dropdownIn 0.18s ease;
+}
+
+.export-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.export-menu-item:hover {
+    background: #f0f1f6;
+    color: var(--indigo-velvet);
+}
+
+.export-menu-item i {
+    width: 20px;
+    text-align: center;
+    color: var(--medium-slate-blue);
+    font-size: 0.9rem;
+}
+
+.export-menu-item:last-child i {
+    color: #1a73e8;
+}
+
 /* ===== MAIN EDITOR PANEL ===== */
 .editor-panel {
     overflow-y: auto;

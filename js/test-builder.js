@@ -60,7 +60,11 @@ const TestBuilder = (function () {
         dom.btnSettings = document.getElementById('btn-settings');
         dom.btnCloseSettings = document.getElementById('btn-close-settings');
         dom.btnSave = document.getElementById('btn-save');
-        dom.btnExportJson = document.getElementById('btn-export-json');
+        dom.btnExportToggle = document.getElementById('btn-export-toggle');
+        dom.exportMenu = document.getElementById('export-menu');
+        dom.exportDropdownWrap = document.getElementById('export-dropdown-wrap');
+        dom.btnDownloadJson = document.getElementById('btn-download-json');
+        dom.btnExportToDrive = document.getElementById('btn-export-to-drive');
         dom.testTitleInput = document.getElementById('setting-test-title');
         dom.testDescInput = document.getElementById('setting-test-desc');
         dom.timeLimitInput = document.getElementById('setting-time-limit');
@@ -151,6 +155,13 @@ const TestBuilder = (function () {
         document.addEventListener('click', (e) => {
             if (dropdownOpen) closeDropdown();
 
+            // Close export menu when clicking outside
+            if (dom.exportMenu && dom.exportMenu.style.display === 'block') {
+                if (!dom.exportDropdownWrap.contains(e.target)) {
+                    dom.exportMenu.style.display = 'none';
+                }
+            }
+
             const zoomBtn = e.target.closest('.tt-zoom-btn');
             if (zoomBtn) {
                 const imgSrc = zoomBtn.dataset.img;
@@ -179,18 +190,70 @@ const TestBuilder = (function () {
             showToast('Test saved!');
         });
 
-        // Export JSON
-        if (dom.btnExportJson) {
-            dom.btnExportJson.addEventListener('click', () => {
-                saveTest(); // Ensure we have latest
-                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(testData, null, 2));
-                const downloadAnchorNode = document.createElement('a');
-                downloadAnchorNode.setAttribute("href", dataStr);
-                downloadAnchorNode.setAttribute("download", (testData.title || "quiz") + ".json");
-                document.body.appendChild(downloadAnchorNode); // required for firefox
-                downloadAnchorNode.click();
-                downloadAnchorNode.remove();
-                showToast('Quiz exported to JSON!');
+        // Export dropdown toggle
+        if (dom.btnExportToggle) {
+            dom.btnExportToggle.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const isOpen = dom.exportMenu.style.display === 'block';
+                dom.exportMenu.style.display = isOpen ? 'none' : 'block';
+            });
+        }
+
+        // Export option: Download JSON locally
+        if (dom.btnDownloadJson) {
+            dom.btnDownloadJson.addEventListener('click', () => {
+                dom.exportMenu.style.display = 'none';
+                saveTest();
+                const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(testData, null, 2));
+                const a = document.createElement('a');
+                a.setAttribute('href', dataStr);
+                a.setAttribute('download', (testData.title || 'quiz') + '.json');
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                showToast('Quiz downloaded as JSON!');
+            });
+        }
+
+        // Export option: Save to Google Drive
+        if (dom.btnExportToDrive) {
+            dom.btnExportToDrive.addEventListener('click', async () => {
+                dom.exportMenu.style.display = 'none';
+                saveTest();
+
+                // Ensure Drive service is ready
+                if (!driveService) {
+                    showToast('Google Drive not available.');
+                    return;
+                }
+
+                if (!driveService._initialized) {
+                    showToast('Initializing Google Drive...');
+                    const ok = await driveService.init();
+                    if (!ok) {
+                        showToast('Could not initialize Google Drive.');
+                        return;
+                    }
+                }
+
+                if (!driveService.isSignedIn) {
+                    // Open the Drive modal so user can sign in; after sign-in the modal
+                    // handles listing files. We hook a one-time post-sign-in save.
+                    showToast('Please sign in to Google Drive first.');
+                    driveService.openModal();
+                    // After the user signs in, offer them to save via a banner
+                    const origCallback = driveService.tokenClient._callback;
+                    driveService.tokenClient._callback = async (tokenResponse) => {
+                        if (origCallback) origCallback(tokenResponse);
+                        if (tokenResponse && tokenResponse.access_token) {
+                            await driveService.saveFile(testData.title || 'quiz');
+                        }
+                        driveService.tokenClient._callback = origCallback;
+                    };
+                    return;
+                }
+
+                await driveService.saveFile(testData.title || 'quiz');
             });
         }
 
