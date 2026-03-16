@@ -1495,14 +1495,25 @@ const TestBuilder = (function () {
     }
 
     function renderFBPreview(q) {
-        let sentence = escapeHtml(q.sentence || '');
+        // Migrate old single-sentence format
+        if (q.sentence !== undefined && !q.sentences) {
+            q.sentences = [q.sentence];
+            delete q.sentence;
+        }
+        const sentences = q.sentences || [];
+
         let blankIdx = 0;
-        sentence = sentence.replace(/___/g, () => {
-            const answer = q.blanks[blankIdx] || '?';
-            blankIdx++;
-            return `<span class="preview-blank-slot">${escapeHtml(answer)}</span>`;
-        });
-        return `<div class="preview-fill-blank">${sentence}</div>`;
+        const sentencesHtml = sentences.map(s => {
+            let escaped = escapeHtml(s);
+            escaped = escaped.replace(/___/g, () => {
+                const answer = q.blanks[blankIdx] || '?';
+                blankIdx++;
+                return `<span class="preview-blank-slot">${escapeHtml(answer)}</span>`;
+            });
+            return `<div class="preview-fill-blank">${escaped}</div>`;
+        }).join('');
+
+        return sentencesHtml;
     }
 
     function renderMatchPreview(q) {

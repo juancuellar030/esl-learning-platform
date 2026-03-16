@@ -633,13 +633,22 @@ const TakeTest = (function () {
     }
 
     function renderFBQuestion(q) {
-        // Replace ___ with inputs
-        let sentence = escapeHtml(q.sentence || '');
+        // Migrate old single-sentence format
+        if (q.sentence !== undefined && !q.sentences) {
+            q.sentences = [q.sentence];
+            delete q.sentence;
+        }
+        const sentences = q.sentences || [];
+
         let blankIdx = 0;
-        sentence = sentence.replace(/___/g, () => {
-            const val = answers[currentQ] && answers[currentQ][blankIdx] ? answers[currentQ][blankIdx] : '';
-            return `<input type="text" class="tt-blank-input" data-blank="${blankIdx++}" value="${escapeHtml(val)}" placeholder="..." />`;
-        });
+        const sentencesHtml = sentences.map(s => {
+            let escaped = escapeHtml(s);
+            escaped = escaped.replace(/___/g, () => {
+                const val = answers[currentQ] && answers[currentQ][blankIdx] ? answers[currentQ][blankIdx] : '';
+                return `<input type="text" class="tt-blank-input" data-blank="${blankIdx++}" value="${escapeHtml(val)}" placeholder="..." />`;
+            });
+            return `<div class="tt-fill-blank-sentence">${escaped}</div>`;
+        }).join('');
 
         let wordBankHtml = '';
         if (q.useWordBank && q.blanks && q.blanks.length > 0) {
@@ -653,7 +662,7 @@ const TakeTest = (function () {
             }).join('')}</div>`;
         }
 
-        return `<div class="tt-fill-blank-sentence">${sentence}</div>${wordBankHtml}`;
+        return `${sentencesHtml}${wordBankHtml}`;
     }
 
     // Cache shuffled right options per question so re-renders keep stable positions
