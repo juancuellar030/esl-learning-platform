@@ -1004,6 +1004,42 @@
     color: white;
 }
 
+/* Preview: Multi-Select */
+.preview-ms-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 8px;
+}
+
+.preview-ms-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border: 2px solid #e8eaef;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    color: #555;
+    background: #fafbfd;
+}
+
+.preview-ms-option.correct-answer {
+    border-color: #34d399;
+    background: #ecfdf5;
+    color: #065f46;
+}
+
+.preview-ms-checkbox {
+    font-size: 1rem;
+    flex-shrink: 0;
+    color: #bbb;
+}
+
+.preview-ms-option.correct-answer .preview-ms-checkbox {
+    color: #34d399;
+}
+
+
 /* Preview: True/False */
 .preview-tf {
     display: flex;

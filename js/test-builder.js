@@ -14,7 +14,8 @@ const TestBuilder = (function () {
         { id: 'matching', label: 'Matching', icon: 'fa-right-left' },
         { id: 'unjumble-words', label: 'Unjumble Words', icon: 'fa-shuffle' },
         { id: 'unjumble-letters', label: 'Unjumble Letters', icon: 'fa-spell-check' },
-        { id: 'drag-drop-category', label: 'Drag & Drop', icon: 'fa-layer-group' }
+        { id: 'drag-drop-category', label: 'Drag & Drop', icon: 'fa-layer-group' },
+        { id: 'multi-select', label: 'Multiple Select', icon: 'fa-square-check' }
     ];
     const DEFAULT_GROUPS = ['3A', '3B', '3C', '4A', '4B', '4C', '5A', '5B', '5C', '5D'];
     const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -530,6 +531,11 @@ const TestBuilder = (function () {
                     { name: 'Category 2', items: [] }
                 ];
                 break;
+            case 'multi-select':
+                base.options = ['', '', '', ''];
+                base.correctAnswers = [];   // array of correct option indices
+                base.partialCredit = false; // if true, award proportional points
+                break;
         }
 
         return base;
@@ -758,6 +764,7 @@ const TestBuilder = (function () {
             case 'unjumble-words': return renderUWEditor(q);
             case 'unjumble-letters': return renderULEditor(q);
             case 'drag-drop-category': return renderDDEditor(q);
+            case 'multi-select': return renderMSEditor(q);
             default: return '<p>Unknown question type</p>';
         }
     }
@@ -990,6 +997,98 @@ const TestBuilder = (function () {
         `;
     }
 
+    // Multiple Select
+    function renderMSEditor(q) {
+        if (!Array.isArray(q.correctAnswers)) q.correctAnswers = [];
+        const options = q.options.map((opt, i) => {
+            const isCorrect = q.correctAnswers.includes(i);
+            return `
+            <div class="option-item ${isCorrect ? 'correct' : ''}" data-index="${i}">
+                <span class="correct-toggle ms-correct-toggle" data-index="${i}" title="${isCorrect ? 'Remove from correct' : 'Mark as correct'}">
+                    <i class="fa-solid ${isCorrect ? 'fa-square-check' : 'fa-square'}"></i>
+                </span>
+                <div class="opt-content">
+                    <input type="text" value="${escapeHtml(opt)}" placeholder="Option ${LETTERS[i]}..." data-index="${i}" class="ms-option-input" />
+                </div>
+                ${q.options.length > 2 ? `<button class="remove-option ms-remove-option" data-index="${i}" title="Remove"><i class="fa-solid fa-xmark"></i></button>` : ''}
+            </div>
+        `}).join('');
+
+        return `
+            <div style="font-size:0.8rem;color:#888;margin-bottom:10px;"><i class="fa-solid fa-circle-info" style="margin-right:4px;"></i>Click the checkbox icon to toggle correct answers. Multiple answers can be correct.</div>
+            <div class="option-list" id="ms-options">${options}</div>
+            ${q.options.length < 8 ? '<button class="btn-add-option" id="btn-add-ms-option"><i class="fa-solid fa-plus"></i> Add option</button>' : ''}
+            <div style="margin-top:14px;padding:10px 12px;background:var(--surface-2, #f5f5f7);border-radius:8px;">
+                <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:0.9rem;">
+                    <input type="checkbox" id="ms-partial-credit" ${q.partialCredit ? 'checked' : ''} />
+                    <span><b>Allow partial credit</b> <span style="color:#888;font-size:0.82em;">(award proportional points for partially correct answers)</span></span>
+                </label>
+            </div>
+        `;
+    }
+
+    function bindMSEditor(q) {
+        // Option text inputs
+        document.querySelectorAll('.ms-option-input').forEach(input => {
+            input.addEventListener('input', () => {
+                q.options[parseInt(input.dataset.index)] = input.value;
+                renderPreview();
+                autoSave();
+            });
+        });
+
+        // Toggle correct answers (multi-select: add/remove from array)
+        document.querySelectorAll('.ms-correct-toggle').forEach(toggle => {
+            toggle.addEventListener('click', () => {
+                const idx = parseInt(toggle.dataset.index);
+                if (!Array.isArray(q.correctAnswers)) q.correctAnswers = [];
+                const pos = q.correctAnswers.indexOf(idx);
+                if (pos === -1) {
+                    q.correctAnswers.push(idx);
+                } else {
+                    q.correctAnswers.splice(pos, 1);
+                }
+                renderEditor();
+                renderPreview();
+                autoSave();
+            });
+        });
+
+        // Remove option
+        document.querySelectorAll('.ms-remove-option').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const idx = parseInt(btn.dataset.index);
+                q.options.splice(idx, 1);
+                // Remap correctAnswers indices
+                q.correctAnswers = q.correctAnswers
+                    .filter(ci => ci !== idx)
+                    .map(ci => ci > idx ? ci - 1 : ci);
+                renderEditor();
+                renderPreview();
+                autoSave();
+            });
+        });
+
+        // Add option
+        const addBtn = document.getElementById('btn-add-ms-option');
+        if (addBtn) {
+            addBtn.addEventListener('click', () => {
+                q.options.push('');
+                renderEditor();
+                autoSave();
+            });
+        }
+
+        // Partial credit toggle
+        const partialEl = document.getElementById('ms-partial-credit');
+        if (partialEl) {
+            partialEl.addEventListener('change', () => {
+                q.partialCredit = partialEl.checked;
+                autoSave();
+            });
+        }
+    }
+
     // ===== BIND TYPE-SPECIFIC EDITORS =====
     function bindTypeEditor(q) {
         switch (q.type) {
@@ -1000,6 +1099,7 @@ const TestBuilder = (function () {
             case 'unjumble-words': bindUWEditor(q); break;
             case 'unjumble-letters': bindULEditor(q); break;
             case 'drag-drop-category': bindDDEditor(q); break;
+            case 'multi-select': bindMSEditor(q); break;
         }
     }
 
@@ -1464,6 +1564,7 @@ const TestBuilder = (function () {
             case 'unjumble-words': return renderUWPreview(q);
             case 'unjumble-letters': return renderULPreview(q);
             case 'drag-drop-category': return renderDDPreview(q);
+            case 'multi-select': return renderMSPreview(q);
             default: return '';
         }
     }
@@ -1600,6 +1701,22 @@ const TestBuilder = (function () {
                 </div>` : ''}`;
     }
 
+    function renderMSPreview(q) {
+        if (!Array.isArray(q.correctAnswers)) q.correctAnswers = [];
+        const correctCount = q.correctAnswers.length;
+        return `<div class="preview-ms-options">
+            ${q.options.map((opt, i) => {
+            const isCorrect = q.correctAnswers.includes(i);
+            return `
+                <div class="preview-ms-option ${isCorrect ? 'correct-answer' : ''}">
+                    <span class="preview-ms-checkbox">${isCorrect ? '<i class="fa-solid fa-square-check"></i>' : '<i class="fa-regular fa-square"></i>'}</span>
+                    <span>${escapeHtml(opt) || '<span style="color:#ccc;">—</span>'}</span>
+                </div>`;
+        }).join('')}
+            ${correctCount === 0 ? '<div style="color:#f0a500;font-size:0.78rem;margin-top:6px;"><i class="fa-solid fa-triangle-exclamation"></i> No correct answers selected yet</div>' : ''}
+        </div>`;
+    }
+
     // ===== SETTINGS =====
     function openSettings() {
         const s = testData.settings;
@@ -1659,7 +1776,11 @@ const TestBuilder = (function () {
 
     function saveTest() {
         testData.updatedAt = Date.now();
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(testData));
+        try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(testData));
+        } catch (e) {
+            console.warn('Auto-save failed: LocalStorage quota exceeded. The test is too large to save locally.', e);
+        }
     }
 
     // ===== TOAST =====

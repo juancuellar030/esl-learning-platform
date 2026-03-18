@@ -795,6 +795,91 @@ body {
     box-shadow: inset 0 0 0 2px rgba(123, 104, 238, 0.2);
 }
 
+/* ===== MULTIPLE SELECT ===== */
+.tt-ms-hint {
+    font-size: 0.88rem;
+    color: rgba(255, 255, 255, 0.85);
+    text-align: center;
+    margin-bottom: 14px;
+    font-style: italic;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.tt-ms-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 12px;
+}
+
+.tt-ms-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(6px);
+    color: white;
+    font-weight: 600;
+    user-select: none;
+}
+
+.tt-ms-option:hover {
+    border-color: rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.28);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+.tt-ms-option.ms-selected {
+    border-color: white;
+    background: rgba(255, 255, 255, 0.35);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.25), 0 6px 20px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+}
+
+.tt-ms-checkbox {
+    font-size: 1.3rem;
+    flex-shrink: 0;
+    transition: transform 0.15s ease;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.tt-ms-option.ms-selected .tt-ms-checkbox {
+    color: white;
+    transform: scale(1.15);
+}
+
+.tt-ms-opt-text {
+    font-size: 0.98rem;
+    line-height: 1.3;
+}
+
+/* Dark mode ms */
+.tt-dark .tt-ms-option {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.tt-dark .tt-ms-option.ms-selected {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+/* Answer Review — ms breakdown reuses dd-item styles */
+.tt-review-ms-breakdown {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 4px;
+}
+
 /* ===== DRAG & DROP CARD STYLES ===== */
 .tt-dd-card {
     width: 150px;

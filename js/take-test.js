@@ -593,6 +593,7 @@ const TakeTest = (function () {
             case 'unjumble-words': html += renderUWQuestion(q); break;
             case 'unjumble-letters': html += renderULQuestion(q); break;
             case 'drag-drop-category': html += renderDDQuestion(q); break;
+            case 'multi-select': html += renderMSQuestion(q); break;
         }
 
         body.innerHTML = html;
@@ -618,6 +619,25 @@ const TakeTest = (function () {
             </div>`;
         }).join('');
         return `<div class="tt-options ${gridClass}">${opts}</div>`;
+    }
+
+    function renderMSQuestion(q) {
+        const selectedArr = Array.isArray(answers[currentQ]) ? answers[currentQ] : [];
+        const opts = q.options.map((opt, i) => {
+            const isSelected = selectedArr.includes(i);
+            return `<div class="tt-ms-option ${isSelected ? 'ms-selected' : ''}" data-idx="${i}">
+                <span class="tt-ms-checkbox">
+                    ${isSelected
+                    ? '<i class="fa-solid fa-square-check"></i>'
+                    : '<i class="fa-regular fa-square"></i>'}
+                </span>
+                <span class="tt-ms-opt-text">${escapeHtml(opt)}</span>
+            </div>`;
+        }).join('');
+        return `
+            <div class="tt-ms-hint"><i class="fa-solid fa-circle-info"></i> Select all that apply</div>
+            <div class="tt-ms-options">${opts}</div>
+        `;
     }
 
     function renderTFQuestion(q) {
@@ -833,6 +853,22 @@ const TakeTest = (function () {
                         opt.classList.add('selected');
                         opt.querySelector('.tt-opt-letter').style.transform = 'scale(1.1)';
                         setTimeout(() => opt.querySelector('.tt-opt-letter').style.transform = '', 200);
+                    });
+                });
+                break;
+
+            case 'multi-select':
+                document.querySelectorAll('.tt-ms-option').forEach(opt => {
+                    opt.addEventListener('click', () => {
+                        const idx = parseInt(opt.dataset.idx);
+                        if (!Array.isArray(answers[currentQ])) answers[currentQ] = [];
+                        const pos = answers[currentQ].indexOf(idx);
+                        if (pos === -1) {
+                            answers[currentQ].push(idx);
+                        } else {
+                            answers[currentQ].splice(pos, 1);
+                        }
+                        renderQuestion();
                     });
                 });
                 break;
@@ -1136,6 +1172,8 @@ const TakeTest = (function () {
             case 'multiple-choice':
             case 'true-false':
                 return a !== null && a !== undefined;
+            case 'multi-select':
+                return Array.isArray(a) && a.length > 0;
             case 'fill-blank':
                 if (!Array.isArray(a)) return false;
                 return (q.blanks || []).every((_, i) => a[i] && a[i].trim() !== '');
@@ -1193,6 +1231,28 @@ const TakeTest = (function () {
                 case 'multiple-choice':
                 case 'true-false':
                     if (studentAnswer === q.correctAnswer) earnedInQuestion = currentQPoints;
+                    break;
+                case 'multi-select':
+                    if (Array.isArray(studentAnswer) && Array.isArray(q.correctAnswers) && q.correctAnswers.length > 0) {
+                        const correctSet = new Set(q.correctAnswers);
+                        const studentSet = new Set(studentAnswer);
+                        // Check exact match (student selected all correct and no wrong)
+                        const exactMatch = correctSet.size === studentSet.size &&
+                            [...correctSet].every(c => studentSet.has(c));
+                        if (exactMatch) {
+                            earnedInQuestion = currentQPoints;
+                        } else if (q.partialCredit) {
+                            // Partial: (correctly selected - incorrectly selected) / total correct
+                            let correctlySelected = 0;
+                            let incorrectlySelected = 0;
+                            studentAnswer.forEach(idx => {
+                                if (correctSet.has(idx)) correctlySelected++;
+                                else incorrectlySelected++;
+                            });
+                            const ratio = Math.max(0, (correctlySelected - incorrectlySelected) / correctSet.size);
+                            earnedInQuestion = Math.round(ratio * currentQPoints * 100) / 100;
+                        }
+                    }
                     break;
                 case 'fill-blank':
                     if (Array.isArray(studentAnswer) && q.blanks) {
@@ -1603,7 +1663,8 @@ function buildAnswerReview() {
         'matching': 'fa-right-left',
         'unjumble-words': 'fa-shuffle',
         'unjumble-letters': 'fa-spell-check',
-        'drag-drop-category': 'fa-layer-group'
+        'drag-drop-category': 'fa-layer-group',
+        'multi-select': 'fa-square-check'
     };
 
     const escapeHtml = (text) => {
@@ -1636,6 +1697,30 @@ function buildAnswerReview() {
                 studentAnswerText = saT === 0 ? labels[0] : saT === 1 ? labels[1] : 'No answer';
                 correctAnswerText = q.correctAnswer === 0 ? labels[0] : labels[1];
                 break;
+            case 'multi-select': {
+                const msAns = studentAnswers[i];
+                const correctSet = new Set(q.correctAnswers || []);
+                if (Array.isArray(msAns) && q.options) {
+                    studentAnswerText = `<div class="tt-review-ms-breakdown">`;
+                    q.options.forEach((opt, oi) => {
+                        const studentSelected = msAns.includes(oi);
+                        const wasCorrect = correctSet.has(oi);
+                        let chipClass = '';
+                        let chipIcon = '';
+                        if (studentSelected && wasCorrect) { chipClass = 'correct'; chipIcon = '<i class="fa-solid fa-check"></i>'; }
+                        else if (studentSelected && !wasCorrect) { chipClass = 'wrong'; chipIcon = '<i class="fa-solid fa-xmark"></i>'; }
+                        else if (!studentSelected && wasCorrect) { chipClass = 'missing'; chipIcon = '<i class="fa-solid fa-ellipsis"></i>'; }
+                        else return; // Not selected, not correct — skip
+                        studentAnswerText += `<span class="tt-review-dd-item ${chipClass}">${chipIcon} ${escapeHtml(opt)}</span>`;
+                    });
+                    studentAnswerText += `</div>`;
+                    correctAnswerText = (q.correctAnswers || []).map(ci => escapeHtml(q.options[ci] || '')).join(', ');
+                } else {
+                    studentAnswerText = 'No answer';
+                    correctAnswerText = (q.correctAnswers || []).map(ci => escapeHtml((q.options || [])[ci] || '')).join(', ');
+                }
+                break;
+            }
             case 'fill-blank':
                 const fbAns = studentAnswers[i];
                 studentAnswerText = Array.isArray(fbAns) ? fbAns.map(a => a || '(empty)').join(', ') : 'No answer';
