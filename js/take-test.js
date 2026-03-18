@@ -343,6 +343,7 @@ const TakeTest = (function () {
             opt.textContent = g;
             groupSelect.appendChild(opt);
         });
+        console.log('[TakeTest] Groups populated');
 
         // Test info
         document.getElementById('info-questions').innerHTML = `<i class="fa-solid fa-list"></i> ${testData.questions.length} questions`;
@@ -355,7 +356,7 @@ const TakeTest = (function () {
         document.getElementById('btn-start-test').addEventListener('click', startTest);
 
         // Show theme FAB if allowed
-        if (testData.settings && testData.settings.allowThemes) {
+        if (settings.allowThemes) {
             document.getElementById('btn-theme-fab').style.display = '';
         }
 
@@ -364,15 +365,18 @@ const TakeTest = (function () {
 
     // ===== START TEST =====
     function startTest() {
+        console.log('[TakeTest] startTest initiating...');
         const settings = testData.settings || {};
         const name = document.getElementById('student-name').value.trim();
         const group = document.getElementById('student-group').value;
 
         if (settings.collectName !== false && !name) {
+            console.log('[TakeTest] Name required');
             document.getElementById('student-name').style.borderColor = '#e74c3c';
             return;
         }
         if (settings.collectGroup !== false && !group) {
+            console.log('[TakeTest] Group required');
             document.getElementById('student-group').style.borderColor = '#e74c3c';
             return;
         }
@@ -1193,8 +1197,10 @@ const TakeTest = (function () {
 
     // ===== SUBMIT TEST =====
     async function submitTest(force) {
+        console.log('[TakeTest] submitTest called, force:', force);
         // If not forced, check if current question is answered
         if (force !== true && !isQuestionAnswered()) {
+            console.log('[TakeTest] Question not answered, showing warning');
             pendingDirection = 'submit';
             document.getElementById('incomplete-warning').style.display = 'flex';
             return;
@@ -1204,6 +1210,7 @@ const TakeTest = (function () {
 
         const completedAt = Date.now();
         const durationSeconds = Math.round((completedAt - startedAt) / 1000);
+        console.log('[TakeTest] Test duration (s):', durationSeconds);
 
         // Grade
         let totalPoints = 0;
@@ -1335,7 +1342,7 @@ const TakeTest = (function () {
         try {
             await FirebaseService.submitTestResponse(testCode, response);
         } catch (e) {
-            console.error('Submit error:', e);
+            console.error('[TakeTest] Submit error:', e);
         }
 
         // Exit fullscreen

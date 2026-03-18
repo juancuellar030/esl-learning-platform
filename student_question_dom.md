@@ -1,0 +1,34 @@
+- generic [active] [ref=e1]:
+  - text:      
+  - generic [ref=e2]:
+    - generic [ref=e6]:
+      - generic [ref=e7]: 1 / 1
+      - text: 
+    - generic [ref=e8]:
+      - generic [ref=e9]: Select vowels
+      - generic [ref=e10]:
+        - generic [ref=e11]: 
+        - text: Select all that apply
+      - generic [ref=e12]:
+        - generic [ref=e13] [cursor=pointer]:
+          - generic [ref=e15]: 
+          - generic [ref=e16]: A
+        - generic [ref=e17] [cursor=pointer]:
+          - generic [ref=e19]: 
+          - generic [ref=e20]: B
+        - generic [ref=e21] [cursor=pointer]:
+          - generic [ref=e23]: 
+          - generic [ref=e24]: E
+        - generic [ref=e25] [cursor=pointer]:
+          - generic [ref=e27]: 
+          - generic [ref=e28]: C
+    - generic [ref=e29]:
+      - text:  
+      - button " Submit Test" [ref=e30] [cursor=pointer]:
+        - generic [ref=e31]: 
+        - text: Submit Test
+  - text:          
+  - button " Themes" [ref=e32] [cursor=pointer]:
+    - generic [ref=e33]: 
+    - text: Themes
+  - text:       

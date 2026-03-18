@@ -1836,6 +1836,13 @@ const TestBuilder = (function () {
                 autoSave();
             }
 
+            // Ensure our real-time listener is starting for this specific code
+            if (code !== responsesCode) {
+                responsesCode = code;
+                responsesData = {}; // Clear old if switching
+                startResponseListener(code);
+            }
+
             // Show share info
             dom.shareCodeDisplay.textContent = code;
             const baseUrl = window.location.origin + window.location.pathname.replace('test-builder.html', 'take-test.html');
@@ -2113,17 +2120,20 @@ const TestBuilder = (function () {
     }
 
     async function openResponsesModal() {
+        console.log('[TestBuilder] openResponsesModal called. testData.shareCode:', testData.shareCode, 'responsesCode:', responsesCode);
         dom.responsesOverlay.classList.add('active');
 
         if (testData.shareCode && testData.shareCode !== responsesCode) {
+            console.log('[TestBuilder] Share code changed or new. Initializing listener for:', testData.shareCode);
             responsesCode = testData.shareCode;
             responsesData = {};
             startResponseListener(responsesCode);
         } else if (testData.shareCode && testData.shareCode === responsesCode) {
+            console.log('[TestBuilder] Already listening to:', responsesCode);
             // Already listening — just re-render what we have
             renderResponsesTable();
         } else {
-            // No share code at all
+            console.log('[TestBuilder] No share code found.');
             renderResponsesTable();
         }
     }
@@ -2133,18 +2143,30 @@ const TestBuilder = (function () {
     }
 
     function startResponseListener(code) {
+        console.log('[TestBuilder] startResponseListener starting for code:', code);
         // Clean up any existing listener
-        if (responsesUnsubscribe) { responsesUnsubscribe(); responsesUnsubscribe = null; }
-        if (responsesPollInterval) { clearInterval(responsesPollInterval); responsesPollInterval = null; }
+        if (responsesUnsubscribe) {
+            console.log('[TestBuilder] Cleaning up previous listener');
+            responsesUnsubscribe();
+            responsesUnsubscribe = null;
+        }
+        if (responsesPollInterval) {
+            console.log('[TestBuilder] Cleaning up previous poll interval');
+            clearInterval(responsesPollInterval);
+            responsesPollInterval = null;
+        }
 
         try {
+            console.log('[TestBuilder] Setting up Firebase child_added listener...');
             // Use onNewResponse for real-time updates
             responsesUnsubscribe = FirebaseService.onNewResponse(code, (id, response) => {
+                console.log('[TestBuilder] New response RECEIVED! ID:', id);
                 responsesData[id] = response;
                 renderResponsesTable();
                 updateResponseBadge();
             });
         } catch (e) {
+            console.log('[TestBuilder] Firebase listener FAILED, falling back to polling:', e.message);
             // Fallback: poll every 5 seconds
             const poll = async () => {
                 try {
