@@ -1,0 +1,9 @@
+[     705ms] ReferenceError: currentShareCode is not defined
+    at Object.init (http://localhost:8080/js/test-builder.js:40:9)
+    at HTMLDocument.<anonymous> (http://localhost:8080/js/test-builder.js:2338:17)
+[  219598ms] ReferenceError: currentShareCode is not defined
+    at Object.init (http://localhost:8080/js/test-builder.js:40:9)
+    at HTMLDocument.<anonymous> (http://localhost:8080/js/test-builder.js:2338:17)
+[  275371ms] ReferenceError: currentShareCode is not defined
+    at Object.init (http://localhost:8080/js/test-builder.js:40:9)
+    at HTMLDocument.<anonymous> (http://localhost:8080/js/test-builder.js:2338:17)

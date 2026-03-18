@@ -320,6 +320,16 @@ const FirebaseService = (() => {
         return db.ref('tests/' + code + '/active').set(false);
     }
 
+    function clearTestResponses(code) {
+        if (isDemo()) {
+            if (window._demoTests && window._demoTests[code]) {
+                window._demoTests[code].responses = {};
+            }
+            return Promise.resolve();
+        }
+        return db.ref('tests/' + code + '/responses').remove();
+    }
+
     function onNewResponse(code, callback) {
         if (isDemo()) {
             // For demo mode, poll _demoTests responses
@@ -388,6 +398,7 @@ const FirebaseService = (() => {
         getPublishedTest,
         submitTestResponse,
         deactivateTest,
+        clearTestResponses,
         onNewResponse
     };
 })();

@@ -37,10 +37,10 @@ const TestBuilder = (function () {
         initGoogleDrive();
         renderSidebar();
         // Auto-start response listener if a share code was persisted
-        if (currentShareCode) {
-            responsesCode = currentShareCode;
+        if (testData.shareCode) {
+            responsesCode = testData.shareCode;
             FirebaseService.init().then(() => {
-                startResponseListener(currentShareCode);
+                startResponseListener(testData.shareCode);
             }).catch(() => { });
         }
         if (testData.questions.length > 0) {
@@ -1811,14 +1811,6 @@ const TestBuilder = (function () {
     }
 
     // ===== SHARING =====
-    let currentShareCode = null;
-
-    // Restore share code from localStorage on load
-    try {
-        const savedCode = localStorage.getItem('lastPublishedCode');
-        if (savedCode) currentShareCode = savedCode;
-    } catch (e) { }
-
     async function openShareModal() {
         if (testData.questions.length === 0) {
             showToast('Add at least one question before sharing');
@@ -1833,15 +1825,15 @@ const TestBuilder = (function () {
             await FirebaseService.init();
 
             let code;
-            if (currentShareCode) {
-                // Reuse existing code — update the test data in place
-                code = currentShareCode;
+            if (testData.shareCode) {
+                // Reuse existing code for this specific test
+                code = testData.shareCode;
                 await FirebaseService.updatePublishedTest(code, testData);
             } else {
-                // First time sharing — publish and get a new code
+                // First time sharing this test
                 code = await FirebaseService.publishTest(testData);
-                currentShareCode = code;
-                try { localStorage.setItem('lastPublishedCode', code); } catch (e) { }
+                testData.shareCode = code;
+                autoSave();
             }
 
             // Show share info
@@ -1856,7 +1848,7 @@ const TestBuilder = (function () {
             dom.shareContentLoading.style.display = 'none';
             dom.shareContentReady.style.display = 'block';
 
-            showToast(currentShareCode ? 'Test updated!' : 'Test published!');
+            showToast(testData.shareCode ? 'Test updated!' : 'Test published!');
         } catch (err) {
             console.error('Publish error:', err);
             showToast('Error publishing test');
@@ -1869,11 +1861,11 @@ const TestBuilder = (function () {
     }
 
     async function deactivateSharedTest() {
-        if (!currentShareCode) return;
+        if (!testData.shareCode) return;
         try {
-            await FirebaseService.deactivateTest(currentShareCode);
-            currentShareCode = null;
-            try { localStorage.removeItem('lastPublishedCode'); } catch (e) { }
+            await FirebaseService.deactivateTest(testData.shareCode);
+            testData.shareCode = null;
+            autoSave();
             showToast('Test deactivated');
             closeShareModal();
         } catch (err) {
@@ -2077,6 +2069,7 @@ const TestBuilder = (function () {
         dom.btnResponses = document.getElementById('btn-responses');
         dom.responsesOverlay = document.getElementById('responses-overlay');
         dom.btnCloseResponses = document.getElementById('btn-close-responses');
+        dom.btnClearResponses = document.getElementById('btn-clear-responses');
         dom.responseBadge = document.getElementById('response-badge');
         dom.btnExportCsv = document.getElementById('btn-export-csv');
         dom.statCount = document.getElementById('stat-count');
@@ -2091,25 +2084,42 @@ const TestBuilder = (function () {
 
         dom.btnResponses.addEventListener('click', openResponsesModal);
         dom.btnCloseResponses.addEventListener('click', closeResponsesModal);
+        if (dom.btnClearResponses) {
+            dom.btnClearResponses.addEventListener('click', clearResponses);
+        }
         dom.responsesOverlay.addEventListener('click', (e) => {
             if (e.target === dom.responsesOverlay) closeResponsesModal();
         });
         dom.btnExportCsv.addEventListener('click', exportCsv);
     }
 
+    async function clearResponses() {
+        if (!testData.shareCode) return;
+
+        if (!confirm('Are you sure you want to delete all responses for this shared test? This cannot be undone.')) {
+            return;
+        }
+
+        try {
+            await FirebaseService.clearTestResponses(testData.shareCode);
+            responsesData = {};
+            renderResponsesTable();
+            updateResponseBadge();
+            showToast('All responses deleted');
+        } catch (err) {
+            console.error('Error clearing responses:', err);
+            showToast('Error clearing responses');
+        }
+    }
+
     async function openResponsesModal() {
         dom.responsesOverlay.classList.add('active');
 
-        // Restore share code from localStorage if lost (e.g. page reload)
-        if (!currentShareCode) {
-            try { currentShareCode = localStorage.getItem('lastPublishedCode') || null; } catch (e) { }
-        }
-
-        if (currentShareCode && currentShareCode !== responsesCode) {
-            responsesCode = currentShareCode;
+        if (testData.shareCode && testData.shareCode !== responsesCode) {
+            responsesCode = testData.shareCode;
             responsesData = {};
             startResponseListener(responsesCode);
-        } else if (currentShareCode && currentShareCode === responsesCode) {
+        } else if (testData.shareCode && testData.shareCode === responsesCode) {
             // Already listening — just re-render what we have
             renderResponsesTable();
         } else {
