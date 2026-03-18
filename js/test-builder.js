@@ -96,6 +96,8 @@ const TestBuilder = (function () {
         dom.btnCopyUrl = document.getElementById('btn-copy-url');
         dom.shareQr = document.getElementById('share-qr');
         dom.btnDeactivate = document.getElementById('btn-deactivate-test');
+        // Responses modal elements
+        dom.autoSaveDriveToggle = document.getElementById('setting-auto-save-drive');
     }
 
     function loadOrCreateTest() {
@@ -112,6 +114,7 @@ const TestBuilder = (function () {
                 if (testData.settings.allowThemes === undefined) testData.settings.allowThemes = true;
                 if (testData.settings.showAnswerReview === undefined) testData.settings.showAnswerReview = true;
                 if (testData.settings.partialGradingDragDrop === undefined) testData.settings.partialGradingDragDrop = false;
+                if (testData.settings.autoSaveResponses === undefined) testData.settings.autoSaveResponses = false;
             } catch (e) {
                 testData = createEmptyTest();
             }
@@ -139,7 +142,8 @@ const TestBuilder = (function () {
                 enableFullscreen: true,
                 allowThemes: true,
                 showAnswerReview: true,
-                partialGradingDragDrop: false
+                partialGradingDragDrop: false,
+                autoSaveResponses: false
             },
             questions: []
         };
@@ -2066,6 +2070,31 @@ const TestBuilder = (function () {
         driveBtn.addEventListener('click', () => driveService.openModal());
     }
 
+    let syncTimeout = null;
+    function syncResponsesToDrive() {
+        if (!testData.settings.autoSaveResponses) return;
+        if (!driveService || !driveService.isSignedIn) return;
+        if (!testData.shareCode) return;
+
+        // Debounce to 5 seconds to avoid hitting Drive API rate limits if many students submit at once
+        if (syncTimeout) clearTimeout(syncTimeout);
+        syncTimeout = setTimeout(async () => {
+            const filename = `Responses - ${testData.title} - ${testData.shareCode}`;
+            const data = {
+                testId: testData.id,
+                testTitle: testData.title,
+                shareCode: testData.shareCode,
+                lastUpdated: Date.now(),
+                responses: responsesData
+            };
+            try {
+                await driveService.saveData(filename, data);
+            } catch (err) {
+                console.error('[Drive Sync] Failed:', err);
+            }
+        }, 5000);
+    }
+
     // ===== RESPONSE DASHBOARD (Phase 4) =====
     let responsesData = {};      // { responseId: responseObj }
     let responsesUnsubscribe = null;
@@ -2098,6 +2127,18 @@ const TestBuilder = (function () {
             if (e.target === dom.responsesOverlay) closeResponsesModal();
         });
         dom.btnExportCsv.addEventListener('click', exportCsv);
+
+        // Initialize toggle state
+        if (dom.autoSaveDriveToggle) {
+            dom.autoSaveDriveToggle.checked = !!testData.settings.autoSaveResponses;
+            dom.autoSaveDriveToggle.addEventListener('change', () => {
+                testData.settings.autoSaveResponses = dom.autoSaveDriveToggle.checked;
+                saveTest();
+                if (testData.settings.autoSaveResponses) {
+                    syncResponsesToDrive();
+                }
+            });
+        }
     }
 
     async function clearResponses() {
@@ -2155,6 +2196,7 @@ const TestBuilder = (function () {
                 responsesData[id] = response;
                 renderResponsesTable();
                 updateResponseBadge();
+                syncResponsesToDrive();
             });
         } catch (e) {
             // Fallback: poll every 5 seconds
@@ -2165,6 +2207,7 @@ const TestBuilder = (function () {
                         responsesData = test.responses;
                         renderResponsesTable();
                         updateResponseBadge();
+                        syncResponsesToDrive();
                     }
                 } catch (err) { /* silent */ }
             };

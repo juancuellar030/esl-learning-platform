@@ -168,8 +168,17 @@ class GoogleDriveService {
         if (!this.isSignedIn) { this.onNotify('Please sign in first', 'error'); return; }
         try {
             const data = this.onSave();
-            if (!data) throw new Error('No data to save');
+            return await this.saveData(filename, data);
+        } catch (error) {
+            console.error('Error saving to Drive:', error);
+            this.onNotify('Failed to save: ' + error.message, 'error');
+        }
+    }
 
+    async saveData(filename, data) {
+        if (!this.isSignedIn) return;
+        try {
+            if (!data) throw new Error('No data to save');
             if (!filename.endsWith(this.fileExtension)) filename += this.fileExtension;
 
             const folderId = await this._getOrCreateFolder();
@@ -190,9 +199,10 @@ class GoogleDriveService {
 
             this.onNotify(`Saved "${filename}" to Google Drive`, 'success');
             this.listFiles();
+            return await response.json();
         } catch (error) {
-            console.error('Error saving to Drive:', error);
-            this.onNotify('Failed to save: ' + error.message, 'error');
+            console.error('Error in saveData:', error);
+            throw error;
         }
     }
 
