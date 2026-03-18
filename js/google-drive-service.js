@@ -175,17 +175,25 @@ class GoogleDriveService {
         }
     }
 
-    async saveData(filename, data) {
+    async saveData(filename, data, mimeType = 'application/json') {
         if (!this.isSignedIn) return;
         try {
             if (!data) throw new Error('No data to save');
-            if (!filename.endsWith(this.fileExtension)) filename += this.fileExtension;
+
+            // Handle file extension
+            const ext = mimeType === 'text/csv' ? '.csv' : this.fileExtension;
+            if (!filename.toLowerCase().endsWith(ext)) filename += ext;
 
             const folderId = await this._getOrCreateFolder();
-            const fileContent = JSON.stringify(data, null, 2);
-            const file = new Blob([fileContent], { type: 'application/json' });
 
-            const metadata = { name: filename, mimeType: 'application/json', parents: [folderId] };
+            // Prepare content
+            let fileContent = data;
+            if (mimeType === 'application/json' && typeof data !== 'string') {
+                fileContent = JSON.stringify(data, null, 2);
+            }
+            const file = new Blob([fileContent], { type: mimeType });
+
+            const metadata = { name: filename, mimeType: mimeType, parents: [folderId] };
             const form = new FormData();
             form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
             form.append('file', file);
@@ -197,7 +205,7 @@ class GoogleDriveService {
             });
             if (!response.ok) throw new Error('Upload failed: ' + response.statusText);
 
-            this.onNotify(`Saved "${filename}" to Google Drive`, 'success');
+            this.onNotify(`Synced "${filename}" to Google Drive`, 'success');
             this.listFiles();
             return await response.json();
         } catch (error) {

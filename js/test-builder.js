@@ -2076,19 +2076,36 @@ const TestBuilder = (function () {
         if (!driveService || !driveService.isSignedIn) return;
         if (!testData.shareCode) return;
 
-        // Debounce to 5 seconds to avoid hitting Drive API rate limits if many students submit at once
+        // Debounce to 5 seconds to avoid hitting Drive API rate limits
         if (syncTimeout) clearTimeout(syncTimeout);
         syncTimeout = setTimeout(async () => {
-            const filename = `Responses - ${testData.title} - ${testData.shareCode}`;
-            const data = {
-                testId: testData.id,
-                testTitle: testData.title,
-                shareCode: testData.shareCode,
-                lastUpdated: Date.now(),
-                responses: responsesData
-            };
             try {
-                await driveService.saveData(filename, data);
+                const responses = Object.values(responsesData);
+                if (responses.length === 0) return;
+
+                // Group by Submision Date (YYYY-MM-DD) and Student Group
+                const groups = {};
+                responses.forEach(r => {
+                    const dateObj = r.submittedAt ? new Date(r.submittedAt) : new Date();
+                    const dateKey = dateObj.toLocaleDateString('en-CA'); // YYYY-MM-DD
+                    const groupName = r.studentGroup || 'No Group';
+                    const key = `${dateKey}_${groupName}`;
+
+                    if (!groups[key]) {
+                        groups[key] = { date: dateKey, group: groupName, list: [] };
+                    }
+                    groups[key].list.push(r);
+                });
+
+                // Sync each group-date combination as a separate CSV
+                for (const key in groups) {
+                    const { date, group, list } = groups[key];
+                    const csvContent = generateCsvContent(list);
+                    const safeTitle = (testData.title || 'Untitled').replace(/[\\/:*?"<>|]/g, '');
+                    const filename = `Responses - ${safeTitle} - ${date} - ${group}`;
+
+                    await driveService.saveData(filename, csvContent, 'text/csv');
+                }
             } catch (err) {
                 console.error('[Drive Sync] Failed:', err);
             }
@@ -2334,9 +2351,8 @@ const TestBuilder = (function () {
         return d.innerHTML;
     }
 
-    function exportCsv() {
-        const responses = Object.values(responsesData);
-        if (responses.length === 0) { showToast('No responses to export'); return; }
+    function generateCsvContent(responses) {
+        if (!responses || responses.length === 0) return '';
 
         const headers = [
             'Name', 'Group', 'Score', 'Max Score', 'Percentage',
@@ -2372,7 +2388,14 @@ const TestBuilder = (function () {
             return row.join(',');
         });
 
-        const csvContent = [headers.join(','), ...rows].join('\n');
+        return [headers.join(','), ...rows].join('\n');
+    }
+
+    function exportCsv() {
+        const responses = Object.values(responsesData);
+        if (responses.length === 0) { showToast('No responses to export'); return; }
+
+        const csvContent = generateCsvContent(responses);
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
