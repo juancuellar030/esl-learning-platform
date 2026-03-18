@@ -371,12 +371,10 @@ const TakeTest = (function () {
         const group = document.getElementById('student-group').value;
 
         if (settings.collectName !== false && !name) {
-            console.log('[TakeTest] Name required');
             document.getElementById('student-name').style.borderColor = '#e74c3c';
             return;
         }
         if (settings.collectGroup !== false && !group) {
-            console.log('[TakeTest] Group required');
             document.getElementById('student-group').style.borderColor = '#e74c3c';
             return;
         }
