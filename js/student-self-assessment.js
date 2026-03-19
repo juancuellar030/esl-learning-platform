@@ -54,7 +54,7 @@
         { value: 4, label: 'Siempre' }
     ];
 
-    const GROUPS = ['4A', '4B', '4C', '5A', '5B'];
+    const GROUPS = ['3A', '3B', '3C', '4A', '4B', '4C', '5A', '5B', '5C', '5D'];
 
     // ── State ────────────────────────────────────────────────────
     let studentName = '';
