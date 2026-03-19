@@ -240,9 +240,25 @@ class GoogleDriveService {
         if (!this.isSignedIn) { this.onNotify('Please sign in first', 'error'); return; }
         try {
             const response = await gapi.client.drive.files.get({ fileId, alt: 'media' });
-            const data = typeof response.result === 'string'
-                ? JSON.parse(response.result)
-                : response.result;
+
+            // gapi.client returns the raw file body in response.body (a string)
+            // when using alt:'media'. response.result is often an empty object {}
+            // for large files, so we must parse response.body first.
+            let data;
+            if (response.body && typeof response.body === 'string' && response.body.trim()) {
+                try {
+                    data = JSON.parse(response.body);
+                } catch (parseErr) {
+                    throw new Error('Could not parse file — is it a valid JSON quiz?');
+                }
+            } else if (response.result && typeof response.result === 'object' && Object.keys(response.result).length > 0) {
+                data = response.result;
+            } else if (typeof response.result === 'string' && response.result.trim()) {
+                data = JSON.parse(response.result);
+            } else {
+                throw new Error('File appears to be empty or unreadable.');
+            }
+
             this.onLoad(data, filename);
             this.onNotify('Loaded from Google Drive', 'success');
             this.closeModal();
