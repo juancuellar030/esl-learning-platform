@@ -1,0 +1,18 @@
+Main descriptor 1: Evito distraerme y participo de los aprendizajes de la clase
+Explanation: Esto significa que le prestas atención al profesor y a la clase en lugar de ponerte a hacer otras cosas. Por ejemplo, evitas ponerte a jugar con tu regla, usar marcadores, pegar stickers, pintar, recortar, usar pegante o escribir cartas cuando no te lo han pedido. En cambio, escuchas con cuidado cuando el profesor explica o cuando otros compañeros están participando.
+Main descriptor 2: Soy responsable y me preparo a tiempo para las actividades evaluativas
+Explanation: Esto significa que te esfuerzas estudiando juiciosamente en casa. Por ejemplo, si hay una prueba o examen programado, repasas tus apuntes con anticipación y haces las actividades extra que te comparten para practicar, en vez de dejar el estudio para el último minuto.
+Main descriptor 3: Respeto y pongo atención a las explicaciones de la clase
+Explanation: Esto significa que cuando participas y hablas frente a tus compañeros, tus ideas ayudan a entender mejor el tema que están estudiando. Por ejemplo, levantas la mano para dar buenas opiniones que sumen a la clase, en lugar de usar tu turno para hacer chistes, bromas o comentarios que no tienen nada que ver con el tema.
+Main descriptor 4: Trabajo con calidad y sigo instrucciones
+Explanation: Esto significa que haces tus tareas, diseños y proyectos con mucho cuidado, esfuerzo y creatividad. Por ejemplo, cuando entregas un trabajo, se nota que seguiste paso a paso las instrucciones que dio el profesor y que lo hiciste lo mejor posible, en lugar de hacerlo de afán o sin ganas.
+Main descriptor 5: Presento responsablemente el material escolar para la clase
+Explanation: Esto significa que siempre traes al colegio las cosas que vas a necesitar para poder aprender. Por ejemplo, no se te olvida traer tus libros de texto a la clase, o si van a hacer un experimento científico o una manualidad, te aseguras de traer desde tu casa todos los materiales que el profesor pidió.
+Main descriptor 6: Soy responsable y desarrollo a tiempo las actividades diarias de la clase
+Explanation: Esto significa que aprovechas el tiempo para terminar tus trabajos completos en el tiempo indicado. Por ejemplo, te concentras en terminar tus proyectos en el salón o en la sala de sistemas, en lugar de ponerte a jugar cuando aún no has terminado de cumplir con los deberes que pidió el profesor.
+Main descriptor 7: Soy solidario con todos los que lo necesitan
+Explanation: Esto significa que te gusta ayudar y compartir. Por ejemplo, si ves que a un compañero le hace falta un lápiz, una regla o algún material, tú se lo prestas. También, si ves que alguien está confundido o necesita ayuda con su trabajo, le explicas y lo guías amablemente.
+Main descriptor 8: Demuestro hábitos de cortesía, respeto por mí y por los demás
+Explanation: Esto significa que eres amable y te pones en los zapatos de los demás. Por ejemplo, tratas a todos con respeto y eres considerado cuando das tu opinión sobre las tareas y trabajos de tus compañeros, usando palabras amables en lugar de hacer comentarios que los puedan hacer sentir mal.
+Main descriptor 9: Cuido el medio ambiente y promuevo el orden y la limpieza
+Explanation: Esto significa que ayudas a cuidar tu entorno escolar para que se vea siempre bonito. Por ejemplo, botas la basura en su lugar, no dejas cosas tiradas y te aseguras de dejar tu pupitre limpio y ordenado incluso cuando ya se han terminado las clases.

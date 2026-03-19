@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="assets/graduation-cap-icon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autoevaluación Estudiantil - ESL Learning Platform</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/google-drive.css">
+    <link rel="stylesheet" href="css/student-self-assessment.css">
+</head>
+
+<body>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         TEACHER-ONLY TOOLBAR (visible only via ?teacher=1)
+    ═══════════════════════════════════════════════════════════ -->
+    <div id="sa-teacher-bar" class="sa-teacher-bar" style="display:none;">
+        <div class="sa-teacher-bar-label">
+            <i class="fa-solid fa-chalkboard-user"></i>
+            Panel del Profesor
+        </div>
+
+        <span id="sa-submission-count" class="sa-teacher-counter">0 respuestas</span>
+
+        <button id="sa-drive-btn" class="sa-teacher-btn sa-teacher-btn-drive">
+            <i class="fa-brands fa-google-drive"></i> Guardar en Drive
+        </button>
+
+        <button id="sa-csv-btn" class="sa-teacher-btn sa-teacher-btn-csv">
+            <i class="fa-solid fa-file-csv"></i> Exportar CSV
+        </button>
+
+        <!-- Dark mode toggle -->
+        <label style="display:flex;align-items:center;gap:8px;color:#ccc;font-size:0.85rem;cursor:pointer;">
+            <i class="fa-solid fa-moon" style="color:#a78bfa;"></i>
+            <label class="sa-dm-toggle">
+                <input type="checkbox" id="sa-dm-toggle">
+                <span class="sa-dm-slider"></span>
+            </label>
+        </label>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         MAIN PAGE
+    ═══════════════════════════════════════════════════════════ -->
+    <div class="sa-page">
+
+        <!-- ─── LOGO / HEADER (always) ─────────────────────────── -->
+        <div class="sa-logo">
+            <div class="sa-sparkles" id="sa-agree-icon" style="display:inline-block;position:relative;">
+                <div class="sa-logo-icon">
+                    <i class="fa-solid fa-star-half-stroke"></i>
+                </div>
+            </div>
+            <h1>Autoevaluación</h1>
+            <p>Reflexiona honestamente sobre tu desempeño este período</p>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════
+             SCREEN 1 — ENTRY (Name + Group)
+        ═══════════════════════════════════════════════════════ -->
+        <div id="sa-screen-entry" class="sa-screen active">
+            <div class="sa-card">
+                <h2 class="sa-entry-title">
+                    <i class="fa-solid fa-user-pen" style="color:var(--sa-accent);"></i>
+                    ¡Hola! ¿Cómo te llamas?
+                </h2>
+                <p class="sa-entry-subtitle">
+                    Escribe tu nombre y selecciona tu grupo para comenzar la autoevaluación.
+                </p>
+
+                <div class="sa-form-group">
+                    <label for="sa-name">
+                        <i class="fa-solid fa-signature" style="color:var(--sa-accent);"></i>
+                        Tu nombre completo
+                    </label>
+                    <input type="text" id="sa-name" class="sa-input" placeholder="Ej: María García..."
+                        autocomplete="off" spellcheck="false" autofocus />
+                </div>
+
+                <div class="sa-form-group">
+                    <label for="sa-group">
+                        <i class="fa-solid fa-users" style="color:var(--sa-accent);"></i>
+                        Tu grupo
+                    </label>
+                    <div class="sa-select-wrapper">
+                        <select id="sa-group" class="sa-select">
+                            <option value="" disabled selected>Selecciona tu grupo...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button id="sa-start-btn" class="sa-btn sa-btn-primary sa-btn-full" style="margin-top:8px;">
+                    <i class="fa-solid fa-rocket"></i>
+                    ¡Comenzar mi autoevaluación!
+                </button>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════
+             SCREEN 2 — SURVEY
+        ═══════════════════════════════════════════════════════ -->
+        <div id="sa-screen-survey" class="sa-screen">
+            <div class="sa-card">
+
+                <!-- Survey header -->
+                <div class="sa-survey-header">
+                    <div>
+                        <div class="sa-survey-title">
+                            <i class="fa-solid fa-clipboard-list" style="color:var(--sa-accent);"></i>
+                            Mi autoevaluación
+                        </div>
+                        <div class="sa-survey-subtitle">
+                            Elige la respuesta que mejor describe tu comportamiento este período.
+                        </div>
+                    </div>
+                    <div class="sa-student-badge">
+                        <i class="fa-solid fa-user-check"></i>
+                        <span id="sa-student-badge-name">Estudiante</span>
+                    </div>
+                </div>
+
+                <!-- Progress -->
+                <div class="sa-progress-wrap">
+                    <div class="sa-progress-label">
+                        <span id="sa-progress-count">0 de 9 preguntas respondidas</span>
+                        <span id="sa-progress-pct">0%</span>
+                    </div>
+                    <div class="sa-progress-track">
+                        <div class="sa-progress-fill" id="sa-progress-fill" style="width:0%;"></div>
+                    </div>
+                </div>
+
+                <!-- Criteria cards (rendered by JS) -->
+                <div class="sa-criteria-list" id="sa-criteria-list"></div>
+
+                <!-- Warning + Calculate button -->
+                <div class="sa-calculate-wrap">
+                    <p class="sa-unanswered-warning" id="sa-unanswered-warn"></p>
+                    <button id="sa-calc-btn" class="sa-btn sa-btn-primary sa-btn-full">
+                        <i class="fa-solid fa-calculator"></i>
+                        Calcular mi nota
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════
+             SCREEN 3 — RESULT
+        ═══════════════════════════════════════════════════════ -->
+        <div id="sa-screen-result" class="sa-screen">
+            <div class="sa-card">
+                <div class="sa-result-center">
+
+                    <div class="sa-result-title">
+                        <i class="fa-solid fa-chart-pie" style="color:var(--sa-accent);"></i>
+                        ¡Tu nota está lista!
+                    </div>
+                    <p class="sa-result-subtitle">
+                        Basada en tus respuestas, esta es tu nota sugerida para este período.
+                    </p>
+
+                    <!-- Animated SVG score ring -->
+                    <div class="sa-score-ring-wrap">
+                        <svg class="sa-score-svg" width="200" height="200" viewBox="0 0 200 200">
+                            <defs>
+                                <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#3d348b" />
+                                    <stop offset="100%" stop-color="#7678ed" />
+                                </linearGradient>
+                            </defs>
+                            <circle class="sa-score-ring-bg" cx="100" cy="100" r="80" />
+                            <circle id="sa-ring-fill" class="sa-score-ring-fill" cx="100" cy="100" r="80" />
+                        </svg>
+                        <div class="sa-score-number">
+                            <span class="sa-score-value" id="sa-score-display">—</span>
+                            <span class="sa-score-label-small">de 5.0</span>
+                        </div>
+                    </div>
+
+                    <p class="sa-score-question">
+                        ¿Estás de acuerdo con esta nota?
+                    </p>
+                    <p class="sa-score-hint">
+                        Recuerda ser honesto/a. Tu nota refleja tu esfuerzo y comportamiento.
+                    </p>
+
+                    <div class="sa-result-btns">
+                        <button id="sa-agree-btn" class="sa-btn sa-btn-success">
+                            <i class="fa-solid fa-circle-check"></i>
+                            Estoy de acuerdo
+                        </button>
+                        <button id="sa-disagree-btn" class="sa-btn sa-btn-danger">
+                            <i class="fa-solid fa-circle-xmark"></i>
+                            No estoy de acuerdo
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════
+             SCREEN 4A — AGREE (Thank you)
+        ═══════════════════════════════════════════════════════ -->
+        <div id="sa-screen-agree" class="sa-screen">
+            <div class="sa-card">
+                <div class="sa-agree-center">
+                    <span class="sa-agree-emoji">🎉</span>
+
+                    <h2 class="sa-agree-title">¡Muchas gracias!</h2>
+                    <p class="sa-agree-text">
+                        Tu autoevaluación ha sido guardada exitosamente.
+                        Recuerda que la honestidad es el primer paso para mejorar.
+                        ¡Sigue así y sigue creciendo!
+                    </p>
+
+                    <!-- Shown only when student disagreed + adjusted -->
+                    <p id="sa-agree-note"
+                        style="display:none; font-weight:700; color:var(--sa-accent); font-size:1.1rem; margin-bottom:20px;">
+                    </p>
+
+                    <button class="sa-btn sa-btn-secondary" onclick="window.close();" style="min-width:200px;">
+                        <i class="fa-solid fa-xmark-circle"></i>
+                        Cerrar esta ventana
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════
+             SCREEN 4B — DISAGREE (Radial Score Picker)
+        ═══════════════════════════════════════════════════════ -->
+        <div id="sa-screen-disagree" class="sa-screen">
+            <div class="sa-card">
+                <h2 class="sa-disagree-title">
+                    <i class="fa-solid fa-sliders" style="color:var(--sa-accent);"></i>
+                    Elige tu propia nota
+                </h2>
+                <p class="sa-disagree-subtitle">
+                    Gira el selector para elegir la nota que crees que mereces entre <strong>3.0</strong> y
+                    <strong>5.0</strong>.
+                </p>
+
+                <div class="sa-radial-wrap">
+                    <div class="sa-radial-container" id="sa-radial-container">
+                        <svg id="sa-radial-svg" viewBox="0 0 280 280"
+                            style="width:280px;height:280px;overflow:visible;"></svg>
+                    </div>
+
+                    <p class="sa-radial-hint">
+                        <i class="fa-solid fa-hand-pointer"></i>
+                        Haz clic y arrastra el selector para ajustar tu nota
+                    </p>
+
+                    <div style="text-align:center;">
+                        <div style="font-size:1rem; color:var(--sa-text-muted); margin-bottom:6px;">Tu nota
+                            seleccionada:</div>
+                        <div id="sa-radial-score-text"
+                            style="font-size:3rem; font-weight:800; color:var(--sa-accent); line-height:1;">3.5</div>
+                    </div>
+
+                    <button id="sa-confirm-score-btn" class="sa-btn sa-btn-primary sa-btn-full"
+                        style="max-width:340px;">
+                        <i class="fa-solid fa-check-circle"></i>
+                        Confirmar mi nota
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- .sa-page -->
+
+    <!-- Google APIs for Drive integration -->
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="https://accounts.google.com/gsi/client"></script>
+
+    <!-- Platform JS -->
+    <script src="js/google-drive-service.js"></script>
+    <script src="js/student-self-assessment.js"></script>
+
+</body>
+
+</html>
