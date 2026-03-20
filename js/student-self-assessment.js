@@ -67,8 +67,6 @@
     let generatedScore = null;
     let adjustedScore = null;
     let decision = null; // 'agree' | 'disagree'
-    let submissions = []; // all session submissions for teacher
-    let driveService = null;
     let currentRadialScore = 3.5;
 
     // ── DOM helpers ──────────────────────────────────────────────
@@ -77,13 +75,8 @@
 
     // ── Init ─────────────────────────────────────────────────────
     function init() {
-        // Check for teacher mode
-        const isTeacher = new URLSearchParams(window.location.search).has('teacher');
-        if (isTeacher) {
-            document.body.classList.add('teacher-mode');
-            $('sa-teacher-bar').style.display = 'flex';
-            setupTeacherBar();
-        }
+        // Init Themes
+        setupThemes();
 
         // Populate group dropdown
         const groupSelect = $('sa-group');
@@ -567,12 +560,6 @@
             adjustedScore: decision === 'disagree' ? adjustedScore : null
         };
 
-        submissions.push(submission);
-
-        // Update teacher counter (if visible locally)
-        const counter = $('sa-submission-count');
-        if (counter) counter.textContent = `${submissions.length} respuesta${submissions.length !== 1 ? 's' : ''}`;
-
         // Send to Google Apps Script Webhook
         if (APPS_SCRIPT_WEBHOOK_URL && APPS_SCRIPT_WEBHOOK_URL !== "") {
             fetch(APPS_SCRIPT_WEBHOOK_URL, {
@@ -591,79 +578,97 @@
                 });
         }
 
-        // Auto-save to local Drive is removed, teacher relies on Sheets now
-
-        console.log('[SelfAssessment] Submission saved locally:', submission);
+        console.log('[SelfAssessment] Submission sent:', submission);
     }
 
-    // ── Teacher Bar ───────────────────────────────────────────────
-    function setupTeacherBar() {
-        // Dark mode toggle
-        const dmToggle = $('sa-dm-toggle');
-        const storedDark = localStorage.getItem('darkMode');
-        if (storedDark === 'true') {
-            document.body.classList.add('dark-mode');
-            if (dmToggle) dmToggle.checked = true;
-        }
-        if (dmToggle) {
-            dmToggle.addEventListener('change', () => {
-                document.body.classList.toggle('dark-mode', dmToggle.checked);
-                localStorage.setItem('darkMode', dmToggle.checked);
+    // ── Theme Engine ──────────────────────────────────────────────
+    function setupThemes() {
+        const fab = $('btn-theme-fab');
+        const picker = $('theme-picker');
+        const darkToggle = $('sa-dark-toggle');
+        const darkIcon = $('sa-dark-icon');
+        const swatches = document.querySelectorAll('.sa-theme-swatch');
+
+        // Theme Definitions
+        const themes = {
+            'default': '#7b68ee', // medium-slate-blue
+            'neon': '#00d4ff',
+            'forest': '#208b5e',
+            'winter': '#3498db',
+            'candy': '#c026d3',
+            'pastel': '#f472b6',
+            'ocean': '#0284c7'
+        };
+
+        // Initialize from localStorage or default
+        const currentTheme = localStorage.getItem('sa_theme') || 'default';
+        const isDark = localStorage.getItem('sa_dark') === 'true';
+
+        applyTheme(currentTheme);
+        setDarkMode(isDark);
+
+        // Toggle Picker
+        if (fab && picker) {
+            fab.addEventListener('click', (e) => {
+                e.stopPropagation();
+                picker.style.display = picker.style.display === 'none' ? 'block' : 'none';
+            });
+
+            // Close Picker when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!picker.contains(e.target) && e.target !== fab && !fab.contains(e.target)) {
+                    picker.style.display = 'none';
+                }
             });
         }
 
-        // Drive button
-        $('sa-drive-btn').addEventListener('click', () => {
-            if (!driveService) {
-                driveService = new GoogleDriveService({
-                    folderName: 'ESL - Autoevaluaciones',
-                    fileExtension: '.json',
-                    onSave: () => ({ submissions }),
-                    onLoad: (data) => {
-                        if (data.submissions) {
-                            submissions = data.submissions;
-                            const counter = $('sa-submission-count');
-                            if (counter) counter.textContent = `${submissions.length} respuesta${submissions.length !== 1 ? 's' : ''}`;
-                            showToast('Datos cargados de Drive', 'success');
-                        }
-                    },
-                    onNotify: (msg, type) => showToast(msg, type)
-                });
-            }
-            driveService.openModal();
-        });
-
-        // CSV Export
-        $('sa-csv-btn').addEventListener('click', exportCSV);
-    }
-
-    // ── CSV Export ────────────────────────────────────────────────
-    function exportCSV() {
-        if (!submissions.length) {
-            showToast('No hay respuestas para exportar aún', 'error');
-            return;
+        // Dark Mode Toggle
+        if (darkToggle) {
+            darkToggle.addEventListener('click', () => {
+                const newState = !document.body.classList.contains('dark-mode');
+                setDarkMode(newState);
+            });
         }
 
-        const criteriaHeaders = CRITERIA.map((_, i) => `"Criterio ${i + 1}"`).join(',');
-        let csv = `"Fecha/Hora","Nombre","Grupo",${criteriaHeaders},"Nota Generada","Decisión","Nota Ajustada"\n`;
+        // Theme Swatches
+        if (swatches) {
+            swatches.forEach(swatch => {
+                swatch.addEventListener('click', () => {
+                    const themeName = swatch.dataset.theme;
+                    applyTheme(themeName);
+                });
+            });
+        }
 
-        submissions.forEach(sub => {
-            const criteriaValues = CRITERIA.map((_, i) => `"${sub.answers[`c${i + 1}`] || ''}"`).join(',');
-            const decision = sub.decision === 'agree' ? 'De acuerdo' : 'En desacuerdo';
-            const adjusted = sub.adjustedScore !== null ? sub.adjustedScore.toFixed(1) : '';
-            csv += `"${sub.timestamp}","${sub.name}","${sub.group}",${criteriaValues},"${sub.generatedScore.toFixed(1)}","${decision}","${adjusted}"\n`;
-        });
+        function applyTheme(themeName) {
+            const color = themes[themeName] || themes['default'];
+            document.documentElement.style.setProperty('--medium-slate-blue', color);
+            localStorage.setItem('sa_theme', themeName);
 
-        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        const date = new Date().toLocaleDateString('es-CO').replace(/\//g, '-');
-        link.download = `autoevaluaciones_${date}.csv`;
-        link.click();
-        URL.revokeObjectURL(url);
-        showToast('CSV exportado correctamente', 'success');
+            // Update active swatch
+            if (swatches) {
+                swatches.forEach(s => {
+                    if (s.dataset.theme === themeName) {
+                        s.classList.add('active');
+                    } else {
+                        s.classList.remove('active');
+                    }
+                });
+            }
+        }
+
+        function setDarkMode(active) {
+            if (active) {
+                document.body.classList.add('dark-mode');
+                if (darkIcon) darkIcon.classList.replace('fa-moon', 'fa-sun');
+            } else {
+                document.body.classList.remove('dark-mode');
+                if (darkIcon) darkIcon.classList.replace('fa-sun', 'fa-moon');
+            }
+            localStorage.setItem('sa_dark', active);
+        }
     }
+
 
     // ── Toast ─────────────────────────────────────────────────────
     function showToast(msg, type = 'info') {

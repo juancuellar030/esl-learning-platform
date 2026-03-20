@@ -36,16 +36,12 @@ body.dark-mode {
 /* ── Page Wrapper ──────────────────────────────────────────── */
 .sa-page {
     min-height: 100vh;
-    background: var(--sa-bg);
+    background: var(--medium-slate-blue);
     display: flex;
     flex-direction: column;
     align-items: center;
     padding: 30px 20px 60px;
     transition: background var(--sa-transition);
-}
-
-body.dark-mode .sa-page {
-    background: linear-gradient(135deg, #0f0f1a 0%, #1a0a2e 100%);
 }
 
 /* ── Decorative background orbs ───────────────────────────── */
@@ -138,13 +134,13 @@ body.dark-mode .sa-page {
 .sa-logo h1 {
     font-size: 1.7rem;
     font-weight: 800;
-    color: var(--sa-text);
+    color: white;
     margin-bottom: 6px;
     transition: color var(--sa-transition);
 }
 
 .sa-logo p {
-    color: var(--sa-text-muted);
+    color: white;
     font-size: 1rem;
     transition: color var(--sa-transition);
 }
@@ -956,171 +952,140 @@ body.dark-mode .sa-radial-thumb {
     text-align: center;
 }
 
-/* ── Teacher Toolbar ───────────────────────────────────────── */
-.sa-teacher-bar {
+/* ── Theme Picker & FAB ────────────────────────────────────── */
+.sa-theme-fab {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    background: rgba(29, 28, 50, 0.95);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(118, 120, 237, 0.3);
-    padding: 10px 24px;
+    top: 14px;
+    right: 24px;
+    height: 42px;
+    padding: 0 16px;
+    border-radius: 21px;
+    border: none;
+    background: var(--sa-accent-dark);
+    color: white;
+    font-size: 0.95rem;
+    font-family: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    z-index: 50;
     display: flex;
     align-items: center;
-    gap: 14px;
-    z-index: 9999;
+    gap: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.sa-theme-fab:hover {
+    transform: scale(1.05);
+    background: var(--sa-accent);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.sa-theme-fab:active {
+    transform: scale(0.95);
+}
+
+body.dark-mode .sa-theme-fab {
+    background: var(--sa-amber);
+    color: var(--sa-accent-dark);
+}
+
+body.dark-mode .sa-theme-fab:hover {
+    background: #ffd166;
+}
+
+.sa-theme-picker {
+    position: fixed;
+    top: 64px;
+    right: 24px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 18px;
+    padding: 16px;
+    z-index: 51;
+    box-shadow: var(--sa-shadow-lg);
+    animation: saFadeSlideIn 0.25s ease;
+    min-width: 200px;
+}
+
+body.dark-mode .sa-theme-picker {
+    background: rgba(20, 20, 35, 0.95);
+    color: #eee;
+}
+
+.sa-theme-picker-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--sa-text-muted);
+}
+
+body.dark-mode .sa-theme-picker-header {
+    color: #bbb;
+}
+
+.sa-theme-dark-toggle {
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    box-sizing: border-box;
+    flex-shrink: 0;
+    border-radius: 50%;
+    border: 2px solid var(--sa-card-border);
+    background: transparent;
+    cursor: pointer;
+    color: var(--sa-text-muted);
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+body.dark-mode .sa-theme-dark-toggle {
+    border-color: rgba(118, 120, 237, 0.3);
+    color: var(--sa-amber);
+}
+
+.sa-theme-dark-toggle:hover {
+    border-color: var(--sa-accent);
+    color: var(--sa-accent);
+}
+
+.sa-theme-swatches {
+    display: flex;
+    gap: 8px;
     flex-wrap: wrap;
 }
 
-.sa-teacher-bar-label {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: var(--sa-amber);
-    font-weight: 800;
-    font-size: 0.9rem;
-    margin-right: auto;
-}
-
-.sa-teacher-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 18px;
-    border: none;
-    border-radius: 50px;
-    font-size: 0.88rem;
-    font-weight: 700;
-    font-family: 'Reddit Sans', sans-serif;
-    cursor: pointer;
-    transition: all 0.25s;
-}
-
-.sa-teacher-btn-drive {
-    background: rgba(118, 120, 237, 0.2);
-    color: var(--sa-accent);
-    border: 1.5px solid rgba(118, 120, 237, 0.4);
-}
-
-.sa-teacher-btn-drive:hover {
-    background: var(--sa-accent);
-    color: white;
-}
-
-.sa-teacher-btn-csv {
-    background: rgba(16, 185, 129, 0.15);
-    color: #10b981;
-    border: 1.5px solid rgba(16, 185, 129, 0.3);
-}
-
-.sa-teacher-btn-csv:hover {
-    background: #10b981;
-    color: white;
-}
-
-.sa-teacher-btn-dm {
-    background: rgba(255, 255, 255, 0.08);
-    color: #ccc;
-    border: 1.5px solid rgba(255, 255, 255, 0.15);
-}
-
-.sa-teacher-counter {
-    background: rgba(247, 184, 1, 0.15);
-    border: 1.5px solid rgba(247, 184, 1, 0.3);
-    color: var(--sa-amber);
-    padding: 6px 14px;
-    border-radius: 50px;
-    font-size: 0.85rem;
-    font-weight: 700;
-}
-
-/* When teacher bar is shown, push page down */
-body.teacher-mode .sa-page {
-    padding-top: 70px;
-}
-
-/* ── Toast Notification ────────────────────────────────────── */
-.sa-toast {
-    position: fixed;
-    bottom: 30px;
-    left: 50%;
-    transform: translateX(-50%) translateY(80px);
-    background: #1e1e3a;
-    color: white;
-    padding: 14px 24px;
-    border-radius: 50px;
-    font-size: 0.95rem;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-    z-index: 99999;
-    opacity: 0;
-    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s;
-    white-space: nowrap;
-}
-
-.sa-toast.show {
-    transform: translateX(-50%) translateY(0);
-    opacity: 1;
-}
-
-.sa-toast.success {
-    border-left: 4px solid #10b981;
-}
-
-.sa-toast.error {
-    border-left: 4px solid #ef4444;
-}
-
-.sa-toast.info {
-    border-left: 4px solid var(--sa-accent);
-}
-
-/* ── Dark mode toggle (in teacher bar) ────────────────────── */
-.sa-dm-toggle {
-    position: relative;
-    width: 40px;
-    height: 22px;
-    display: inline-block;
-}
-
-.sa-dm-toggle input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-
-.sa-dm-slider {
-    position: absolute;
-    inset: 0;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 50px;
-    cursor: pointer;
-    transition: background 0.3s;
-    border: 1.5px solid rgba(255, 255, 255, 0.2);
-}
-
-.sa-dm-slider::before {
-    content: '';
-    position: absolute;
-    width: 16px;
-    height: 16px;
-    top: 2px;
-    left: 2px;
-    background: white;
+.sa-theme-swatch {
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
-    transition: transform 0.3s;
+    border: 3px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
-.sa-dm-toggle input:checked+.sa-dm-slider {
-    background: var(--sa-accent);
+.sa-theme-swatch:hover {
+    transform: scale(1.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-.sa-dm-toggle input:checked+.sa-dm-slider::before {
-    transform: translateX(18px);
+.sa-theme-swatch.active {
+    border-color: white;
+    box-shadow:
+        0 0 0 2px var(--sa-accent),
+        0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .sa-theme-swatch.active {
+    border-color: var(--sa-amber);
 }
 
 /* ── Responsive ────────────────────────────────────────────── */

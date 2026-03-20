@@ -15,35 +15,6 @@
 <body>
 
     <!-- ═══════════════════════════════════════════════════════════
-         TEACHER-ONLY TOOLBAR (visible only via ?teacher=1)
-    ═══════════════════════════════════════════════════════════ -->
-    <div id="sa-teacher-bar" class="sa-teacher-bar" style="display:none;">
-        <div class="sa-teacher-bar-label">
-            <i class="fa-solid fa-chalkboard-user"></i>
-            Panel del Profesor
-        </div>
-
-        <span id="sa-submission-count" class="sa-teacher-counter">0 respuestas</span>
-
-        <button id="sa-drive-btn" class="sa-teacher-btn sa-teacher-btn-drive">
-            <i class="fa-brands fa-google-drive"></i> Guardar en Drive
-        </button>
-
-        <button id="sa-csv-btn" class="sa-teacher-btn sa-teacher-btn-csv">
-            <i class="fa-solid fa-file-csv"></i> Exportar CSV
-        </button>
-
-        <!-- Dark mode toggle -->
-        <label style="display:flex;align-items:center;gap:8px;color:#ccc;font-size:0.85rem;cursor:pointer;">
-            <i class="fa-solid fa-moon" style="color:#a78bfa;"></i>
-            <label class="sa-dm-toggle">
-                <input type="checkbox" id="sa-dm-toggle">
-                <span class="sa-dm-slider"></span>
-            </label>
-        </label>
-    </div>
-
-    <!-- ═══════════════════════════════════════════════════════════
          MAIN PAGE
     ═══════════════════════════════════════════════════════════ -->
     <div class="sa-page">
@@ -273,12 +244,34 @@
 
     </div><!-- .sa-page -->
 
-    <!-- Google APIs for Drive integration -->
-    <script src="https://apis.google.com/js/api.js"></script>
-    <script src="https://accounts.google.com/gsi/client"></script>
+    <!-- Global Elements -->
+    <button class="sa-theme-fab" id="btn-theme-fab" title="Cambiar tema">
+        <i class="fa-solid fa-palette"></i> Temas
+    </button>
+
+    <div class="sa-theme-picker" id="theme-picker" style="display: none">
+        <div class="sa-theme-picker-header">
+            <span>Elige un tema</span>
+            <button class="sa-theme-dark-toggle" id="sa-dark-toggle" title="Modo oscuro">
+                <i class="fa-solid fa-moon" id="sa-dark-icon"></i>
+            </button>
+        </div>
+        <div class="sa-theme-swatches">
+            <button class="sa-theme-swatch active" data-theme="default" title="Default"
+                style="background-color: #7b61ff"></button>
+            <button class="sa-theme-swatch" data-theme="neon" title="Neon" style="background-color: #00d4ff"></button>
+            <button class="sa-theme-swatch" data-theme="forest" title="Forest"
+                style="background-color: #208b5e"></button>
+            <button class="sa-theme-swatch" data-theme="winter" title="Winter"
+                style="background-color: #3498db"></button>
+            <button class="sa-theme-swatch" data-theme="candy" title="Candy" style="background-color: #c026d3"></button>
+            <button class="sa-theme-swatch" data-theme="pastel" title="Pastel"
+                style="background-color: #f472b6"></button>
+            <button class="sa-theme-swatch" data-theme="ocean" title="Ocean" style="background-color: #0284c7"></button>
+        </div>
+    </div>
 
     <!-- Platform JS -->
-    <script src="js/google-drive-service.js"></script>
     <script src="js/student-self-assessment.js"></script>
 
 </body>
