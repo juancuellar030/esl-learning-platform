@@ -51,14 +51,34 @@
         }
 
         .tracker-header h1 {
-            font-size: 2.2rem;
-            font-weight: 800;
-            letter-spacing: -1px;
             display: flex;
             align-items: center;
             gap: 15px;
             z-index: 1;
+            margin: 0;
+        }
+
+        .tracker-title-input {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            font-family: inherit;
+            outline: none;
+            width: auto;
+            min-width: 300px;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .tracker-title-input:hover,
+        .tracker-title-input:focus {
+            border-bottom-color: rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px 8px 0 0;
         }
 
         .controls {
@@ -175,10 +195,39 @@
         th.material-header {
             min-width: 150px;
             position: relative;
+            padding-left: 30px;
+            /* Space for grab handle */
+            border-right: 2px solid #ced6d9;
         }
 
         th.material-header:hover {
             background: #d1d8dd;
+        }
+
+        th.material-header.over {
+            background: #c0cdd6;
+            border-left: 3px solid #7b68ee;
+        }
+
+        .drag-handle {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #b2bec3;
+            cursor: grab;
+            font-size: 14px;
+            opacity: 0.5;
+            transition: opacity 0.2s, color 0.2s;
+        }
+
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+
+        th.material-header:hover .drag-handle {
+            opacity: 1;
+            color: #636e72;
         }
 
         /* Student Name Column Sticky */
@@ -202,6 +251,45 @@
             color: #2d3436;
             text-align: left;
             font-size: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .student-toggle-btn {
+            background: transparent;
+            border: none;
+            color: #b2bec3;
+            cursor: pointer;
+            padding: 5px;
+            font-size: 14px;
+            transition: color 0.2s, transform 0.2s;
+            opacity: 0;
+            margin-left: 10px;
+        }
+
+        .student-name-cell:hover .student-toggle-btn {
+            opacity: 1;
+        }
+
+        .student-toggle-btn:hover {
+            color: #ff7675;
+            transform: scale(1.1);
+        }
+
+        tr.inactive-row .student-name-cell span {
+            text-decoration: line-through;
+            color: #b2bec3;
+        }
+
+        tr.inactive-row .student-toggle-btn {
+            opacity: 1;
+            color: #ff7675;
+        }
+
+        tr.inactive-row td:not(.student-name-cell) {
+            opacity: 0.3;
+            pointer-events: none;
         }
 
         /* Rows */
@@ -224,6 +312,7 @@
         /* Cells */
         td {
             border-bottom: 1px solid #f1f2f6;
+            border-right: 2px solid #f1f2f6;
             padding: 0;
             transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
@@ -250,14 +339,21 @@
 
         .cell-content.brought {
             background: #00b894;
-            /* Mint Green */
-            /* Juicy Glow */
             box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.1);
         }
 
         .cell-content.missing {
             background: #ff7675;
-            /* Soft Red */
+        }
+
+        .cell-content.text-mode {
+            background: #f0e9ff;
+            cursor: default;
+            padding: 0 6px;
+        }
+
+        body.dark-mode .cell-content.text-mode {
+            background: #3d2f6b;
         }
 
         /* Icons */
@@ -275,6 +371,42 @@
 
         .cell-content.missing .status-icon {
             transform: scale(1);
+        }
+
+        /* Inline text input inside cell */
+        .cell-text-input {
+            width: 100%;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-size: 16px;
+            font-weight: 600;
+            color: #5a3e99;
+            text-align: center;
+            cursor: text;
+            padding: 0 4px;
+        }
+
+        body.dark-mode .cell-text-input {
+            color: #c9b8ff;
+        }
+
+        /* Double-click hint on empty cells */
+        .cell-content.empty::after {
+            content: 'dbl-click for text';
+            font-size: 15px;
+            color: #ccc;
+            position: absolute;
+            bottom: 4px;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .cell-content.empty:hover::after {
+            opacity: 1;
         }
 
         /* Delete Column Button */
@@ -391,6 +523,10 @@
             color: #e0e0e0;
         }
 
+        body.dark-mode tr.inactive-row .student-name-cell span {
+            color: #6c7a89;
+        }
+
         body.dark-mode tbody tr:nth-child(even) .student-name-cell {
             background: #2a2a2a;
         }
@@ -405,6 +541,16 @@
 
         body.dark-mode td {
             border-bottom-color: #555555;
+            border-right-color: #555555;
+        }
+
+        body.dark-mode th.material-header {
+            border-right-color: #4a4a4a;
+        }
+
+        body.dark-mode th.material-header.over {
+            background: #4a4a4a;
+            border-left-color: #a29bfe;
         }
 
         body.dark-mode .cell-content.empty:hover {
@@ -418,6 +564,42 @@
         body.dark-mode .empty-state i {
             color: #2c3e50;
         }
+
+        /* Clear badge on text cells */
+        .cell-clear-btn {
+            position: absolute;
+            top: 3px;
+            right: 3px;
+            background: #a29bfe;
+            color: white;
+            border: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            opacity: 0;
+            transition: opacity 0.2s, transform 0.2s;
+            transform: scale(0.7);
+        }
+
+        .cell-content.text-mode:hover .cell-clear-btn {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .cell-clear-btn:hover {
+            background: #6c5ce7;
+            transform: scale(1.15);
+        }
+
+        /* Hint on empty hover */
+        body.dark-mode .cell-content.empty::after {
+            color: #555;
+        }
     </style>
 </head>
 
@@ -426,7 +608,11 @@
     <div class="tracker-container">
         <!-- Header -->
         <header class="tracker-header">
-            <h1><i class="fa-solid fa-box-open"></i> Student Material Tracker</h1>
+            <h1>
+                <i class="fa-solid fa-box-open"></i>
+                <input type="text" id="trackerTitleInput" class="tracker-title-input"
+                    value="Student Material Tracker" />
+            </h1>
 
             <div class="controls">
                 <a href="tools.html" class="btn btn-secondary">
@@ -434,6 +620,9 @@
                 </a>
                 <button class="btn btn-secondary" onclick="exportData()" title="Save tracking data to a file">
                     <i class="fa-solid fa-download"></i> Save
+                </button>
+                <button class="btn btn-secondary" onclick="exportCSV()" title="Export as CSV spreadsheet">
+                    <i class="fa-solid fa-file-csv"></i> Export CSV
                 </button>
                 <label class="btn btn-secondary" style="margin: 0; cursor: pointer;"
                     title="Load tracking data from a file">
@@ -483,8 +672,10 @@
         const students = studentNames;
 
         let appData = {
+            title: 'Student Material Tracker',
             materials: [], // Array of material names
-            tracking: {}   // Object: { StudentName: { MaterialName: 'brought' | 'missing' | null } }
+            tracking: {},   // Object: { StudentName: { MaterialName: 'brought' | 'missing' | null } }
+            inactiveStudents: {} // Object: { StudentName: boolean }
         };
 
         // Load Data
@@ -492,12 +683,21 @@
             const saved = localStorage.getItem(STORAGE_KEY);
             if (saved) {
                 appData = JSON.parse(saved);
+                if (!appData.title) appData.title = 'Student Material Tracker';
+                if (!appData.inactiveStudents) appData.inactiveStudents = {};
+                document.getElementById('trackerTitleInput').value = appData.title;
             } else {
                 // Initialize empty tracking for all students
                 students.forEach(s => appData.tracking[s] = {});
             }
             renderTable();
         }
+
+        // Setup Title Editor
+        document.getElementById('trackerTitleInput').addEventListener('input', (e) => {
+            appData.title = e.target.value || 'Student Material Tracker';
+            saveData();
+        });
 
         // Save Data
         function saveData() {
@@ -525,23 +725,54 @@
             appData.materials.forEach((material, index) => {
                 const th = document.createElement('th');
                 th.className = 'material-header';
+                th.draggable = true;
+                th.dataset.index = index;
                 th.innerHTML = `
+                    <div class="drag-handle" title="Drag to reorder"><i class="fa-solid fa-grip-vertical"></i></div>
                     ${material}
                     <button class="delete-col-btn" onclick="deleteMaterial(${index})" title="Remove Column">
                         <i class="fa-solid fa-times"></i>
                     </button>
                 `;
+
+                // Drag Events
+                th.addEventListener('dragstart', handleDragStart);
+                th.addEventListener('dragover', handleDragOver);
+                th.addEventListener('drop', handleDrop);
+                th.addEventListener('dragenter', handleDragEnter);
+                th.addEventListener('dragleave', handleDragLeave);
+                th.addEventListener('dragend', handleDragEnd);
+
                 headerRow.appendChild(th);
             });
 
             // Render Rows
             students.forEach(student => {
+                const isInactive = appData.inactiveStudents && appData.inactiveStudents[student];
                 const tr = document.createElement('tr');
+                if (isInactive) tr.className = 'inactive-row';
 
                 // Name Cell
                 const nameTd = document.createElement('td');
                 nameTd.className = 'student-name-cell';
-                nameTd.textContent = student;
+
+                const nameSpan = document.createElement('span');
+                nameSpan.textContent = student;
+                nameTd.appendChild(nameSpan);
+
+                const toggleBtn = document.createElement('button');
+                toggleBtn.className = 'student-toggle-btn';
+                toggleBtn.title = isInactive ? 'Reactivate Student' : 'Deactivate Student';
+                toggleBtn.innerHTML = `<i class="fa-solid fa-power-off"></i>`;
+                toggleBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    if (!appData.inactiveStudents) appData.inactiveStudents = {};
+                    appData.inactiveStudents[student] = !isInactive;
+                    saveData();
+                    renderTable();
+                };
+                nameTd.appendChild(toggleBtn);
+
                 tr.appendChild(nameTd);
 
                 // Material Cells
@@ -550,14 +781,69 @@
                     const td = document.createElement('td');
 
                     const contentDiv = document.createElement('div');
-                    contentDiv.className = `cell-content ${status || 'empty'}`;
-                    contentDiv.onclick = () => toggleStatus(student, material);
 
-                    let icon = '';
-                    if (status === 'brought') icon = '<i class="status-icon fa-solid fa-check"></i>';
-                    if (status === 'missing') icon = '<i class="status-icon fa-solid fa-xmark"></i>';
+                    const isText = status && typeof status === 'object' && 'text' in status;
 
-                    contentDiv.innerHTML = icon;
+                    if (isText) {
+                        contentDiv.className = 'cell-content text-mode';
+
+                        const inp = document.createElement('input');
+                        inp.type = 'text';
+                        inp.className = 'cell-text-input';
+                        inp.placeholder = 'Type note…';
+                        inp.value = status.text || '';
+                        inp.title = 'Click to edit. Single-click the ✖ badge to clear.';
+                        inp.dataset.student = student;
+                        inp.dataset.material = material;
+
+                        inp.addEventListener('input', () => {
+                            appData.tracking[student][material] = { text: inp.value };
+                            saveData();
+                        });
+
+                        // Clicking into input should NOT bubble and accidentally toggle
+                        inp.addEventListener('click', e => e.stopPropagation());
+
+                        contentDiv.appendChild(inp);
+
+                        // Small clear badge on top-right of text cell
+                        const clearBtn = document.createElement('button');
+                        clearBtn.className = 'cell-clear-btn';
+                        clearBtn.title = 'Clear (back to empty)';
+                        clearBtn.innerHTML = '<i class="fa-solid fa-rotate-left"></i>';
+                        clearBtn.addEventListener('click', e => {
+                            e.stopPropagation();
+                            appData.tracking[student][material] = null;
+                            saveData();
+                            renderTable();
+                        });
+                        contentDiv.appendChild(clearBtn);
+
+                    } else {
+                        contentDiv.className = `cell-content ${status || 'empty'}`;
+
+                        // Single click: cycle brought → missing → empty
+                        contentDiv.addEventListener('click', () => toggleStatus(student, material));
+
+                        // Double click: enter text mode immediately
+                        contentDiv.addEventListener('dblclick', (e) => {
+                            e.stopPropagation();
+                            appData.tracking[student][material] = { text: '' };
+                            saveData();
+                            renderTable();
+                            // Focus the newly created input for that cell
+                            setTimeout(() => {
+                                const inp = document.querySelector(`.cell-text-input[data-student="${CSS.escape(student)}"][data-material="${CSS.escape(material)}"]`);
+                                if (inp) inp.focus();
+                            }, 50);
+                        });
+
+                        let icon = '';
+                        if (status === 'brought') icon = '<i class="status-icon fa-solid fa-check"></i>';
+                        if (status === 'missing') icon = '<i class="status-icon fa-solid fa-xmark"></i>';
+                        contentDiv.innerHTML = icon;
+                    }
+
                     td.appendChild(contentDiv);
                     tr.appendChild(td);
                 });
@@ -567,6 +853,55 @@
         }
 
         // Logic Helpers
+        let dragSrcIndex = null;
+
+        function handleDragStart(e) {
+            this.style.opacity = '0.4';
+            dragSrcIndex = parseInt(this.dataset.index);
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', dragSrcIndex);
+        }
+
+        function handleDragOver(e) {
+            if (e.preventDefault) {
+                e.preventDefault();
+            }
+            e.dataTransfer.dropEffect = 'move';
+            return false;
+        }
+
+        function handleDragEnter(e) {
+            this.classList.add('over');
+        }
+
+        function handleDragLeave(e) {
+            this.classList.remove('over');
+        }
+
+        function handleDrop(e) {
+            if (e.stopPropagation) {
+                e.stopPropagation();
+            }
+
+            const dropIndex = parseInt(this.dataset.index);
+
+            if (dragSrcIndex !== null && dragSrcIndex !== dropIndex) {
+                // Reorder materials array
+                const movedMaterial = appData.materials.splice(dragSrcIndex, 1)[0];
+                appData.materials.splice(dropIndex, 0, movedMaterial);
+
+                saveData();
+                renderTable();
+            }
+            return false;
+        }
+
+        function handleDragEnd(e) {
+            this.style.opacity = '1';
+            const cols = document.querySelectorAll('.material-header');
+            cols.forEach(col => col.classList.remove('over'));
+        }
+
         function getStudentStatus(student, material) {
             if (!appData.tracking[student]) appData.tracking[student] = {};
             return appData.tracking[student][material];
@@ -574,13 +909,16 @@
 
         function toggleStatus(student, material) {
             const current = getStudentStatus(student, material);
+            // Skip text-mode in single-click cycle; dblclick handles text entry
+            if (current && typeof current === 'object' && 'text' in current) return;
+
             let next = 'brought';
             if (current === 'brought') next = 'missing';
             else if (current === 'missing') next = null; // Back to empty
 
             appData.tracking[student][material] = next;
             saveData();
-            renderTable(); // Re-render to show animation state (or optimize to update DOM directly for better performance, but renderTable is fast enough for <30 rows)
+            renderTable();
         }
 
         // Add Material
@@ -636,7 +974,41 @@
             const a = document.createElement('a');
             a.href = url;
             const dateStr = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD
-            a.download = `material_tracker_${dateStr}.json`;
+            const safeTitle = (appData.title || 'tracker').replace(/[^a-z0-9]/gi, '_').toLowerCase();
+            a.download = `${safeTitle}_${dateStr}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Export Data to CSV
+        function exportCSV() {
+            let csvContent = "Student Name";
+            appData.materials.forEach(m => csvContent += `,"${m.replace(/"/g, '""')}"`);
+            csvContent += "\n";
+
+            students.forEach(student => {
+                let row = `"${student}"`;
+                appData.materials.forEach(material => {
+                    const status = getStudentStatus(student, material);
+                    let text = '';
+                    if (status === 'brought') text = 'Brought';
+                    else if (status === 'missing') text = 'Missing';
+                    else if (status && typeof status === 'object' && 'text' in status) text = status.text;
+
+                    row += `,"${text.replace(/"/g, '""')}"`;
+                });
+                csvContent += row + "\n";
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const dateStr = new Date().toLocaleDateString('en-CA');
+            const safeTitle = (appData.title || 'tracker').replace(/[^a-z0-9]/gi, '_').toLowerCase();
+            a.download = `${safeTitle}_${dateStr}.csv`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
