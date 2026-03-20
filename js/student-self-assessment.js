@@ -7,6 +7,10 @@
 (function () {
     'use strict';
 
+    // ── Configuration ────────────────────────────────────────────
+    // PEGA AQUÍ LA URL DE TU APLICACIÓN WEB DE GOOGLE APPS SCRIPT
+    const APPS_SCRIPT_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbz6QrPtwr6dkF04DgFfnXiQLR1mmRaOGx9fmY1D6G64aLnpZPb4o74hwkL40VE7CMDlDQ/exec";
+
     // ── Criteria Data ────────────────────────────────────────────
     const CRITERIA = [
         {
@@ -540,6 +544,11 @@
 
     // ── Save submission ───────────────────────────────────────────
     function saveSubmission() {
+        $('sa-agree-btn').disabled = true;
+        $('sa-disagree-btn').disabled = true;
+        const confirmBtn = $('sa-confirm-score-btn');
+        if (confirmBtn) confirmBtn.disabled = true;
+
         const timestamp = new Date().toISOString();
         const answerLabels = {};
         CRITERIA.forEach((_, i) => {
@@ -560,16 +569,31 @@
 
         submissions.push(submission);
 
-        // Update teacher counter
+        // Update teacher counter (if visible locally)
         const counter = $('sa-submission-count');
         if (counter) counter.textContent = `${submissions.length} respuesta${submissions.length !== 1 ? 's' : ''}`;
 
-        // Auto-save to Drive if connected
-        if (driveService && driveService.isSignedIn) {
-            driveService.saveData('autoevaluaciones', { submissions }, 'application/json').catch(console.error);
+        // Send to Google Apps Script Webhook
+        if (APPS_SCRIPT_WEBHOOK_URL && APPS_SCRIPT_WEBHOOK_URL !== "") {
+            fetch(APPS_SCRIPT_WEBHOOK_URL, {
+                method: 'POST',
+                // Using text/plain avoids CORS preflight issues in simple setups
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(submission)
+            })
+                .then(r => r.json())
+                .then(data => {
+                    console.log('[SelfAssessment] Saved to Sheets successfully:', data);
+                })
+                .catch(err => {
+                    console.error('[SelfAssessment] Error saving to Sheets:', err);
+                    showToast('Hubo un error guardando tu nota en línea. Avísale al profesor.', 'error');
+                });
         }
 
-        console.log('[SelfAssessment] Submission saved:', submission);
+        // Auto-save to local Drive is removed, teacher relies on Sheets now
+
+        console.log('[SelfAssessment] Submission saved locally:', submission);
     }
 
     // ── Teacher Bar ───────────────────────────────────────────────
