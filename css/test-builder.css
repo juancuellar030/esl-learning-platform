@@ -1920,8 +1920,8 @@ body.dark-mode .preview-media img {
 
 /* Wider modal for responses table */
 .responses-modal {
-    max-width: 860px;
-    width: 95vw;
+    max-width: 980px;
+    width: 98vw;
     max-height: 90vh;
     display: flex;
     flex-direction: column;

@@ -2342,6 +2342,8 @@ const TestBuilder = (function () {
         dom.responsesEmpty = document.getElementById('responses-empty');
         dom.responsesTable = document.getElementById('responses-table');
         dom.responsesTbody = document.getElementById('responses-tbody');
+        dom.btnUploadJson = document.getElementById('btn-upload-json');
+        dom.uploadJsonInput = document.getElementById('upload-json-input');
 
         dom.btnResponses.addEventListener('click', openResponsesModal);
         dom.btnCloseResponses.addEventListener('click', closeResponsesModal);
@@ -2351,7 +2353,56 @@ const TestBuilder = (function () {
         dom.responsesOverlay.addEventListener('click', (e) => {
             if (e.target === dom.responsesOverlay) closeResponsesModal();
         });
-        dom.btnExportCsv.addEventListener('click', exportCsv);
+        if (dom.btnExportCsv) {
+            dom.btnExportCsv.addEventListener('click', exportCsv);
+        }
+
+        if (dom.btnUploadJson && dom.uploadJsonInput) {
+            dom.btnUploadJson.addEventListener('click', () => {
+                dom.uploadJsonInput.click();
+            });
+
+            dom.uploadJsonInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    try {
+                        const parsed = JSON.parse(ev.target.result);
+                        if (typeof parsed === 'object' && parsed !== null) {
+                            // Check if this is a full published test export
+                            if (parsed.responses && typeof parsed.responses === 'object') {
+                                responsesData = parsed.responses;
+                            } else if (parsed.studentName || parsed.answers || parsed.submittedAt) {
+                                // It's a single response exported individually
+                                responsesData = { "imported_response": parsed };
+                            } else {
+                                // Assume it's a direct export of the responses node (dictionary of responses)
+                                responsesData = parsed;
+                            }
+                            renderResponsesTable();
+                            updateResponseBadge();
+                            showToast('Responses loaded successfully');
+
+                            // Reset code selector since we're viewing offline file data
+                            if (dom.responsesTestCode) dom.responsesTestCode.style.display = 'none';
+                            const sel = document.getElementById('resp-code-selector');
+                            if (sel) sel.value = '';
+                        } else {
+                            throw new Error('Invalid JSON structure');
+                        }
+                    } catch (err) {
+                        console.error('Error parsing JSON:', err);
+                        showToast('Error parsing JSON file');
+                    }
+                };
+                reader.readAsText(file);
+
+                // Reset input so the same file can be uploaded again if needed
+                e.target.value = '';
+            });
+        }
 
         // Initialize toggle state
         if (dom.autoSaveDriveToggle) {
