@@ -252,7 +252,11 @@
     <div class="settings-overlay" id="responses-overlay">
         <div class="settings-modal responses-modal">
             <div class="settings-modal-header">
-                <h2><i class="fa-solid fa-chart-bar"></i> Student Responses</h2>
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <h2><i class="fa-solid fa-chart-bar"></i> Student Responses</h2>
+                    <span id="responses-test-code"
+                        style="display:none;font-weight:700;background:rgba(255,255,255,0.1);padding:0.4rem 0.8rem;border-radius:8px;font-size:1.1rem;color:#f39c12;letter-spacing:1px;white-space:nowrap;margin-right:1rem;"></span>
+                </div>
                 <div style="display:flex;align-items:center;gap:12px;">
                     <div class="toggle-row" style="border:none;padding:0;gap:8px;margin-right:12px;"
                         title="Automatically save every new response to your Google Drive">
@@ -279,15 +283,6 @@
                         <span class="toolbar-stat" style="font-size:1.1rem;font-weight:600;"><i
                                 class="fa-solid fa-users"></i>
                             <span id="stat-count">0</span> Responses</span>
-                        <div style="flex:1"></div>
-                        <label title="Save responses as CSV files in Google Drive automatically"
-                            style="display:flex;align-items:center;gap:6px;font-size:0.85rem;color:#666;cursor:pointer;">
-                            <input type="checkbox" id="setting-auto-save-drive"
-                                style="accent-color:var(--indigo-velvet);">
-                            Auto-sync to Drive
-                        </label>
-                        <button class="btn-add-option" id="btn-export-csv"><i class="fa-solid fa-file-csv"></i> Download
-                            CSV</button>
                     </div>
                     <div id="responses-tabs" class="responses-tabs"></div>
                 </div>
@@ -329,6 +324,7 @@
                                 <th>#</th>
                                 <th>Name</th>
                                 <th>Group</th>
+                                <th>Status</th>
                                 <th>Score</th>
                                 <th>Time</th>
                                 <th>Violations</th>

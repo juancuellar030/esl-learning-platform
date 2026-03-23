@@ -2130,6 +2130,15 @@ body.dark-mode .preview-media img {
     transition: background 0.15s;
 }
 
+.responses-table tbody tr.tr-pending {
+    background-color: #f1f3f8;
+    color: #888;
+}
+
+.responses-table tbody tr.tr-pending td {
+    color: #888;
+}
+
 .responses-table tbody tr:hover {
     background: #fafbfd;
 }
@@ -2217,6 +2226,15 @@ body.dark-mode .responses-table thead th {
 
 body.dark-mode .responses-table tbody tr {
     border-color: #2a2a3a;
+}
+
+body.dark-mode .responses-table tbody tr.tr-pending {
+    background-color: #42445aff;
+    opacity: 0.6;
+}
+
+body.dark-mode .responses-table tbody tr.tr-pending td {
+    color: #888;
 }
 
 body.dark-mode .responses-table tbody tr:hover {

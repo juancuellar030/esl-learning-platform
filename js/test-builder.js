@@ -20,6 +20,20 @@ const TestBuilder = (function () {
     const DEFAULT_GROUPS = ['3A', '3B', '3C', '4A', '4B', '4C', '5A', '5B', '5C', '5D'];
     const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
+    // ===== EMBEDDED STUDENT DATA (2026) =====
+    const STUDENT_DATA = {
+        '3A': ['ANDRADE RODRIGUEZ SILVANA', 'BUITRAGO MÉNDEZ JUAN ANDRÉS', 'CABRERA BARRERO JULIETA', 'CAMACHO SALAZAR JULIANA', 'CAMERO PERDOMO JOSÉ MIGUEL', 'CASTAÑEDA RENGIFO ISABELLA', 'CHACÓN RAMÍREZ THOMAS', 'CORTES LOSADA ARIADNA VALENTINA', 'GOMEZ GONZALEZ AARON', 'GRANJA PABÓN THIAGO', 'GUEVARA ORTIZ JUAN ÁLVARO', 'HERNANDEZ CELEITA MARIA ANTONIA', 'MACIAS IBÁÑEZ SAMUEL ANDRÉS', 'MOGOLLÓN RODRÍGUEZ MELISSA', 'NIÑO GALINDO SAMANTHA VICTORIA', 'PATIÑO CLAROS GABRIELA', 'RAMOS MORA VALENTINA ESTRELLITA', 'RIVERA HERRERA MAYTE', 'RUGELES CASTAÑEDA DYLAN THOMAS', 'SAAVEDRA OYOLA EIDER IVAN', 'SÁNCHEZ LUCUARA CELESTE', 'SERRATO MORENO EMILIANO', 'TAMAYO CASTAÑEDA SAMUEL', 'TORRES SARRIA ANTONELLA', 'VÁSQUEZ PEREZ EMILIANO', 'YASNO ÁVILA MATIAS'],
+        '3B': ['ARIAS MAJE GABRIEL MATIAS', 'BALLESTEROS COLLAZOS CRISTOBAL', 'BORRERO CORREA ANNIE DANIELA', 'CALDERÓN MORALES EMILIANO', 'CASAS BUITRAGO CELESTE SOFIA', 'CELORIO OVIEDO KILIAN ANDREI', 'CRÍALES MORENO JULIETA', 'DIAZ MEJÍA RONNY ESTIVEN', 'GAITÁN VELÁSQUEZ GABRIELLA', 'GONZALEZ SUAREZ ANA MARIA', 'GRANJA PABÓN IVANNA', 'IBAGON RANGEL EMILY', 'JIMÉNEZ ZAMBRANO FEDERICK', 'MARIN ORDOÑEZ SARA VICTORIA', 'MORA MURCIA JULIÁN FELIPE', 'ORDOÑEZ GUTIÉRREZ MARTIN', 'PATIÑO MARTÍNEZ EDINSON', 'POLANIA BASTIDAS DYLAN SANTIAGO', 'PUENTES DIAZ LUIS ESTEBAN', 'PUENTES REYES EMMANUEL', 'SABI MONJE ANTONELLA', 'SALAZAR DIAZ ANNY MILAGROS', 'SANCHEZ OSPITIA LUCIANA', 'SIERRA MEDINA MATHIAS', 'VARGAS RODRIGUEZ MARIANA', 'VARGAS TRUJILLO EMMANUEL'],
+        '3C': ['ACOSTA PARRA SALOMÓN', 'ÁVILA ORTEGA GABRIELA', 'AVILÉS DUSSÁN MATHIAS', 'BARRERO GÓMEZ SANTIAGO', 'BARRETO RAMIREZ NHARA ISABELA', 'BASTOS CÁRDENAS SIMÓN', 'BUITRAGO JAVELA EMMA', 'CALLEJAS SOSA EMILIA', 'CASTILLO ROJAS GABRIELA', 'DIAZ CARVAJAL ARTURO', 'FRANCO DÍAZ ALAN JERÓNIMO', 'JIMÉNEZ BOHADA EMILIANO', 'MEJÍA BORRERO MARIANA', 'MORALES FARFÁN MARTINA', 'OSORIO RUIZ JUAN ANDRÉS', 'ROBLEDO SANTANA SALOME', 'RODRIGUEZ ALVAREZ MARTIN ANDRES', 'ROJAS CLAROS SELENE', 'ROJAS SANDOVAL AVRIL CATALINA', 'SANCHEZ HERNANDEZ ISAAC', 'SANCHEZ LOPEZ DYLAN ARMANDO', 'SILVA BAHAMÓN MANUEL FELIPE', 'SOTELO BRAVO JUAN JOSE', 'TOVAR VARGAS GABRIELA', 'TRIVIÑO GARCÍA YULIANY'],
+        '4A': ['ALMARIO URREGO JERONIMO', 'ARISTIZABAL ALVARADO ISABELLA', 'ASTAIZA MONTEALEGRE SALOMÉ', 'BLANCO VANEGAS SAMUEL', 'CALDERÓN RINCÓN SARA', 'CAMAYO CABRERA JUAN ALVARO', 'CARDENAS MONTES SAMUEL', 'CENDALES QUEVEDO JEREMY EITHAN', 'CUELLAR AMAYA MILAN', 'CUELLAR JAVELA JUAN MARTIN', 'DURAN SANCHEZ SALOMÉ', 'FONSECA PEÑA LUCIANA', 'GONZALEZ CORAL NICOLAS', 'GURTIERREZ REYES MANUELA', 'JOAQUI CARDOZO WILLIAM SANTIAGO', 'LEÓN NIÑO SARA MARIA', 'LEYVA GONZALEZ ANA LUCÍA', 'LOPEZ ANDRADE SALOME', 'MUÑOZ RAMON MATHIAS', 'MURCIA ASENCIO SANTIAGO', 'OÑATE SALAMANCA LUCIA', 'ORTIZ CHAVARRO THOMAS FELIPE', 'PEREZ TRUJILLO ALAN MATHIAS', 'PINILLA JIMENEZ SARA VICTORIA', 'REYEZ PEREZ MATHIAS', 'RICARDO CUTA ELIZABETH', 'RUBIANO YARA TOMÁS', 'POLO MURCIA DAVID SANTIAGO', 'SANCHEZ DÍAZ JAIRO ANDRES'],
+        '4B': ['ALARCON SABOGAL ANA LUCIA', 'BARRIOS GALINDO SAMUEL', 'BONILLA QUINTERO VALENTINA', 'CALDERON FONSECA JULIANA', 'FANDIÑO CORTES VICTORIA', 'FIERRO QUINTERO ANA SOFÍA', 'FIGUEROA MORENO RAFAEL SANTIAGO', 'GUERRERO MUÑOZ ANGEL GABRIEL', 'JAVELA PLAZAS SAMUEL ANDRES', 'MADRID BONILLA EMANUEL', 'MORA QUIMBAYA THIAGO JULIAN', 'MORENO MONJE TOMAS', 'MOSQUERA ROJAS SALOMÉ', 'MUNAR MOSQUERA JERONIMO', 'MURCIA OCAMPO TOMAS', 'OLAYA IZQUIERDO PALOMA', 'ORTIZ MOLANO GABRIELA', 'PACHECO GAMBOA LUCIANA', 'PARDO VARON EMMANUEL', 'PERDOMO CÓRDOBA JUAN ESTEBAN', 'QUESADA RODRIGUEZ ANTONELLA', 'RIVERA MUÑOZ ABRIL', 'RIVERA ROJAS LUCIANA', 'ROA RAMIREZ ANA SOFÍA', 'SASTOQUE VILLARREAL JOSÉ DAVID', 'TRILLERAS RINCON JUAN PABLO', 'TRUJILLO RIVERA ANA VICTORIA', 'URRIAGO ANDRADE CELESTE', 'VASQUEZ RAMIREZ SANTIAGO'],
+        '4C': ['ALEGRÍA PLAZAS PABLO JOSÉ', 'BERNAL MOTTA LAURA VALENTINA', 'CABRERA MENDEZ ANAMARIA', 'CARRILLO GOMEZ ALEJANDRO', 'CASTRO LEYTON BRIANA ALETH', 'CELORIO OVIEDO KESHIA CAROLINA', 'CERQUERA MONTEALEGRE THOMAS', 'CÉSPEDES CORTES SAMANTHA', 'FIERRO JOVEN MATIAS', 'GUTIERREZ HUELGO SAMUEL', 'HERNANDEZ DUSSAN MIA', 'HUERTAS JAIMES ALEJANDRA', 'LUNA CALDERON JUANA VICTORIA', 'MOTTA BERNATE LUCIANO', 'OTALORA BARBOSA SANTIGO ANDRÉS', 'PATIÑO RICO DANIEL', 'PEÑA OSORIO VALERIA', 'PENNA LAISECA ANTONELLA', 'PEREZ LOPEZ EVA MARIA', 'PORTILLA BENITEZ DANNA', 'QUIROZ GARCIA EMILIANO', 'RAMOS VARGAS LORENZO', 'RENDON CUELLAR EMILIO', 'RIOS SERRATO JUAN JOSÉ', 'RODRIGUEZ SARRIAS JUAN JOSÉ', 'SANDOVAL SANCHEZ LAURA', 'TAMAYO TORRES EMILIANO', 'VANEGAS TORRES SARA LUCÍA', 'VICTORIA HERNANDEZ PAULA ANDREA', 'VIEDA DIAZ ERMES SANTIAGO'],
+        '5A': ['ARISTIZABAL RINCÓN MARÍA JOSÉ', 'ARTUNDUAGA PASTRANA MARIANA', 'BARREIRO GARCÍA SANTIAGO', 'BARRETO DUSSAN MARTÍN', 'BONILLA QUIROGA ANA SOFIA', 'BONILLA RAMIREZ JHON FREDY', 'CAMACHO SALAZAR THALIANA', 'CARDENAS TOVAR DANIEL MATHIAS', 'CEDEÑO CEDEÑO ISABELLA', 'CUELLAR CELIS EMILIANO', 'DÍAZ MEJÍA MARÍA CELESTE', 'DÍAZ RODRIGUEZ CELESTE', 'DUSSÁN ROJAS ORALIS ARIANA', 'GONZÁLEZ FERNÁNDEZ ÁNGEL GABRIEL', 'GONZALEZ SUAREZ LUCIANA CELESTE', 'HERNÁNDEZ ZEA SAMUEL', 'HUESO HERNANDEZ JOSE ALEJANDRO', 'LUGO SILVA DALIANA LUCIA', 'PERDOMO HERRERA SAMUEL', 'PERLAZA MEDINA SAMUEL JOSÉ', 'PINZÓN NÁRVAEZ SARA VALENTINA', 'POLANCO VEGA EMMANUEL', 'SANCHEZ DONATO THALYA', 'SILVA CABRERA JOSÉ DAVID', 'TELLO PERÉZ GUADALUPE', 'URREA VANEGAS SANTIAGO', 'VARGAS TRUJILLO SIMON ALFREDO', 'VARGAS VASQUEZ DYLAN SAMUEL'],
+        '5B': ['ACERO SOTO DANNA SOFIA', 'AGUIRRE POLANIA MARTHA LUCIA', 'AGUIRRE SANTOFIMIO GABRIELA', 'ANDRADE TAMAYO ANA ISABEL', 'AREVALO GONZALEZ ANGELA MARÍA', 'CHACÓN RUJANA ZAHIRA SOFÍA', 'CLAROS AGUDELO ARIADNA CLAROS', 'ESPINOSA BUSTACARA ANA ISABELLA', 'ESQUIVEL MOSQUERA ANTONELLA', 'GUIO QUINTERO JUAN PABLO', 'HERNANDEZ PINEDA JULIAN DAVID', 'MEJÍA BORRERO JUAN ESTEBAN', 'MONJE ORDOÑEZ MARÍA VICTORIA', 'MOSQUERA BAYLÓN KEVIN SAMUEL', 'OBREGÓN SÁNCHEZ JUAN MARTÍN', 'ORTEGA CORTÉS NICOLL MARIANA', 'ORTIZ GONZÁLEZ RAFAEL THOMAS', 'PALACIOS SANCHÉZ MARÍA ANTONIA', 'PARRA VITOVIZ NICOLAS MAURICIO', 'PERDOMO GRAFFE LUCIANA', 'PINCHAO VALENZUELA MARTÍN', 'ROJAS PAYAN GABRIEL DAVID', 'SORA ORTIZ JERÓNIMO', 'TOVAR BAHAMÓN SAMUEL DAVID', 'TRUJILLO TORREJANO LENIN SANTIAGO', 'VERGARA MOLANO JUAN FELIPE', 'VILLARREAL BASTIDAS IANN SANTIAGO', 'ZORRO FERNÁNDEZ SALOMÉ'],
+        '5C': ['CABREJO GONZÁLEZ SAMUEL', 'CARDENAS RODIGUEZ EDUARD SANTIAGO', 'CHINCHILLA RÍOS VIOLETTA', 'CLAVIJO PERDOMO EMMA', 'CORREDOR AROCA MATÍAS', 'CUBILLOS CAMACHO VALERIA', 'DÍAZ SONS ANGEL MARTÍN', 'DUSSAN LEMUS JULIETA', 'GAITÁN VARGAS ANA LUCÍA', 'ICOPO MELENDEZ LUCAS ANDRÉS', 'JARA ALDANA MARTÍN', 'MEDINA OBANDO DAVID ESTEBAN', 'MOLINA LOZADA SAMANTHA', 'ORTIGOZA GÓMEZ MIA SALOMÉ', 'PACHECO PEREZ GABRIEL ALEJANDRO', 'PALOMINO HERNÁNDEZ MARTÍN', 'PÉREZ NIÑO ABRIL', 'PINEDA UNÍ EMMANUEL', 'PRECIADO CUERVO ISABELLA', 'PUENTES SUAREZ GINA MARCELA', 'RAMÍREZ SALCEDO JUAN ANDRÉS', 'RAMIREZ YEPEZ LUCIA', 'RENGIFO OTALORA JUANA VALERIA', 'RINCÓN MEDINA SAMUEL NICOLÁS', 'ROMERO TAMAYO EMILY LUCIANA', 'VALENCIA PACHECO JORGE MARÍO', 'VELEZ GOMEZ MIGUEL ANGEL', 'ZAPATA SALAZAR JUAN ANDRÉS'],
+        '5D': ['ALMARIO GAMBOA DANTE', 'ALVARADO GÓMEZ JERÓNIMO', 'ALVIRA CHARRY JUAN SEBASTIÁN', 'ÁNGEL PERDOMO THIAGO EMMANUEL', 'CAMACHO GARCÍA DIEGO ANDRÉS', 'CARVAJAL PLAZA LUCIANA', 'CONTRERAS GARCÍA ANALUCIA', 'CORTES TRUJILLO JERONIMO', 'DÍAZ POLANIA GABRIELA', 'FAJARDO CASTAÑEDA MARÍA PAZ', 'FORTALECHE POLANIA SARA DAILY', 'GUTIERREZ DUSSÁN SARA VALENTINA', 'HERRERA LEÓN AMÉRICA ISABELA', 'MAYOR MOTTA JERÓNIMO', 'MENESES TEJADA JULIETA MARÍA', 'ORDOÑEZ GÓMEZ JUAN JOSÉ', 'OYOLA CUTIVA JOSE ALEJANDRO', 'PERALTA MEDINA SALOME', 'PINO ALARCÓN SANTIAGO', 'PUENTES DÍAZ ADRIAN FELIPE', 'PULIDO LOSADA JUAN JOSE', 'RIVERA DÍAZ ANA SOFIA', 'RUBIANO ORTIZ DANTE', 'SÁNCHEZ HERNÁNDEZ SALOMÉ', 'SUAZA FAJARDO ISABELLA', 'TAMAYO ALVARADO EMILIANO', 'TRUJILLO MONTEALEGRE ISABELLA', 'VARGAS ZAPATA ADRIAN EDUARDO']
+    };
+
     // ===== STATE =====
     let testData = null;
     let currentQuestionIndex = -1;
@@ -2107,7 +2121,8 @@ const TestBuilder = (function () {
                 // Sync each group-date combination as a separate CSV
                 for (const key in groups) {
                     const { date, group, list } = groups[key];
-                    const csvContent = '\uFEFF' + generateCsvContent(list); // Add BOM for better Excel compatibility
+                    const roster = _buildRosterForExport(list, group);
+                    const csvContent = '\uFEFF' + generateCsvContent(roster); // Add BOM for better Excel compatibility
                     const safeTitle = (testData.title || 'Untitled').replace(/[\\/:*?"<>|]/g, '');
                     const filename = `Responses - ${safeTitle} - ${date} - ${group}`;
 
@@ -2129,6 +2144,7 @@ const TestBuilder = (function () {
     function initResponsesDom() {
         dom.btnResponses = document.getElementById('btn-responses');
         dom.responsesOverlay = document.getElementById('responses-overlay');
+        dom.responsesTestCode = document.getElementById('responses-test-code');
         dom.btnCloseResponses = document.getElementById('btn-close-responses');
         dom.btnClearResponses = document.getElementById('btn-clear-responses');
         dom.responsesTabs = document.getElementById('responses-tabs');
@@ -2188,6 +2204,15 @@ const TestBuilder = (function () {
     }
 
     async function openResponsesModal() {
+        if (dom.responsesTestCode) {
+            if (testData.shareCode) {
+                dom.responsesTestCode.textContent = `CODE: ${testData.shareCode}`;
+                dom.responsesTestCode.style.display = 'inline-block';
+            } else {
+                dom.responsesTestCode.style.display = 'none';
+            }
+        }
+
         dom.responsesOverlay.classList.add('active');
 
         if (testData.shareCode && testData.shareCode !== responsesCode) {
@@ -2244,14 +2269,68 @@ const TestBuilder = (function () {
     }
 
     function renderResponsesTable() {
-        const allResponses = Object.values(responsesData);
+        const rawResponses = Object.values(responsesData);
+        const allRoster = [];
+
+        // Prepopulate roster from settings
+        if (testData.settings && testData.settings.groupOptions) {
+            testData.settings.groupOptions.forEach(groupCode => {
+                const students = STUDENT_DATA[groupCode] || [];
+                students.forEach(name => {
+                    allRoster.push({
+                        isExpected: true,
+                        studentName: name,
+                        studentGroup: groupCode,
+                        status: 'pending',
+                        responseData: null,
+                        hasRetake: false
+                    });
+                });
+            });
+        }
+
+        // Apply actual responses to roster
+        // Sort oldest to newest so the newest overwrites the responseData and marks hasRetake
+        rawResponses.sort((a, b) => (a.submittedAt || 0) - (b.submittedAt || 0)).forEach(r => {
+            const students = (r.coStudents && r.coStudents.length > 0) ? r.coStudents : [r.studentName || 'Unknown'];
+            const group = r.studentGroup || 'No Group';
+
+            students.forEach(sName => {
+                const match = allRoster.find(x => x.studentName === sName && x.studentGroup === group);
+                if (match) {
+                    if (match.status === 'submitted') match.hasRetake = true;
+                    match.status = 'submitted';
+                    match.responseData = r; // latest
+                } else {
+                    allRoster.push({
+                        isExpected: false,
+                        studentName: sName,
+                        studentGroup: group,
+                        status: 'submitted',
+                        responseData: r,
+                        hasRetake: false
+                    });
+                }
+            });
+        });
+
+        // Filter responses by active tab
+        let displayRoster = activeGroupTab === 'all'
+            ? allRoster
+            : allRoster.filter(r => r.studentGroup === activeGroupTab);
+
+        // Final display sort (alphabetical by group then name)
+        displayRoster.sort((a, b) => {
+            if (a.studentGroup !== b.studentGroup) return (a.studentGroup || '').localeCompare(b.studentGroup || '');
+            return (a.studentName || '').localeCompare(b.studentName || '');
+        });
 
         // Build Tabs UI
         if (dom.responsesTabs) {
-            if (allResponses.length === 0) {
+            if (allRoster.length === 0) {
                 dom.responsesTabs.innerHTML = '';
             } else {
-                const uniqueGroups = Array.from(new Set(allResponses.map(r => r.studentGroup).filter(Boolean))).sort();
+                const uniqueGroups = Array.from(new Set(allRoster.map(r => r.studentGroup).filter(Boolean))).sort();
                 let tabsHtml = `<button class="resp-tab ${activeGroupTab === 'all' ? 'active' : ''}" data-group="all">All Groups</button>`;
                 uniqueGroups.forEach(g => {
                     tabsHtml += `<button class="resp-tab ${activeGroupTab === g ? 'active' : ''}" data-group="${esc(g)}">${esc(g)}</button>`;
@@ -2268,12 +2347,7 @@ const TestBuilder = (function () {
             }
         }
 
-        // Filter responses by active tab
-        const displayResponses = activeGroupTab === 'all'
-            ? allResponses
-            : allResponses.filter(r => r.studentGroup === activeGroupTab);
-
-        if (displayResponses.length === 0) {
+        if (displayRoster.length === 0) {
             dom.responsesEmpty.style.display = 'flex';
             dom.responsesTable.style.display = 'none';
             dom.qBreakdown.style.display = 'none';
@@ -2284,29 +2358,43 @@ const TestBuilder = (function () {
         dom.responsesEmpty.style.display = 'none';
         dom.responsesTable.style.display = 'table';
 
-        updateStats(displayResponses);
-        renderAccuracyBars(displayResponses);
+        // Update stats computing only submitted tests
+        const submittedOnly = displayRoster.filter(r => r.status === 'submitted').map(r => r.responseData);
+        updateStats(submittedOnly);
+        renderAccuracyBars(submittedOnly);
 
-        dom.responsesTbody.innerHTML = displayResponses
-            .sort((a, b) => b.submittedAt - a.submittedAt)
+        dom.responsesTbody.innerHTML = displayRoster
             .map((r, i) => {
-                const pct = r.totalPoints > 0 ? Math.round((r.score / r.totalPoints) * 100) : 0;
-                const scoreClass = pct >= 80 ? 'score-high' : pct >= 50 ? 'score-mid' : 'score-low';
-                const vc = r.violationCount || 0;
-                const violClass = vc === 0 ? 'viol-0' : vc <= 2 ? `viol-${vc}` : 'viol-high';
-                const dur = r.durationSeconds ? formatDuration(r.durationSeconds) : '—';
-                const submitted = r.submittedAt ? new Date(r.submittedAt).toLocaleString() : '—';
-                const retakeBadge = r.isRetake
-                    ? '<span class="retake-badge retake-yes"><i class="fa-solid fa-triangle-exclamation"></i> Yes</span>'
-                    : '<span class="retake-badge retake-no">—</span>';
+                const isSub = r.status === 'submitted';
+                const d = r.responseData || {};
 
-                return `<tr>
-                    <td>${displayResponses.length - i}</td>
+                let pct = 0, scoreClass = '', vc = 0, violClass = '', dur = '—', submitted = '—', retakeBadge = '—';
+
+                if (isSub) {
+                    pct = d.totalPoints > 0 ? Math.round((d.score / d.totalPoints) * 100) : 0;
+                    scoreClass = pct >= 80 ? 'score-high' : pct >= 50 ? 'score-mid' : 'score-low';
+                    vc = d.violationCount || 0;
+                    violClass = vc === 0 ? 'viol-0' : vc <= 2 ? `viol-${vc}` : 'viol-high';
+                    dur = d.durationSeconds ? formatDuration(d.durationSeconds) : '—';
+                    submitted = d.submittedAt ? new Date(d.submittedAt).toLocaleString() : '—';
+                    retakeBadge = (r.hasRetake || d.isRetake)
+                        ? '<span class="retake-badge retake-yes" title="Student submitted more than once"><i class="fa-solid fa-triangle-exclamation"></i> Yes</span>'
+                        : '<span class="retake-badge retake-no">—</span>';
+                }
+
+                const trClass = isSub ? '' : 'class="tr-pending"';
+                const statusBadge = isSub
+                    ? '<span style="color:#27ae60;font-weight:700;"><i class="fa-solid fa-check-circle"></i> Yes</span>'
+                    : '<span style="color:#95a5a6;font-weight:700;"><i class="fa-solid fa-clock"></i> No</span>';
+
+                return `<tr ${trClass}>
+                    <td>${i + 1}</td>
                     <td>${esc(r.studentName || '—')}</td>
                     <td>${esc(r.studentGroup || '—')}</td>
-                    <td class="score-cell ${scoreClass}">${r.score ?? 0}/${r.totalPoints ?? 0} (${pct}%)</td>
+                    <td>${statusBadge}</td>
+                    ${isSub ? `<td class="score-cell ${scoreClass}">${d.score ?? 0}/${d.totalPoints ?? 0} (${pct}%)</td>` : '<td class="score-cell">—</td>'}
                     <td>${dur}</td>
-                    <td><span class="viol-badge ${violClass}">${vc}</span></td>
+                    ${isSub ? `<td><span class="viol-badge ${violClass}">${vc}</span></td>` : '<td>—</td>'}
                     <td>${retakeBadge}</td>
                     <td style="font-size:0.8rem;color:#888;">${submitted}</td>
                 </tr>`;
@@ -2393,11 +2481,11 @@ const TestBuilder = (function () {
         return d.innerHTML;
     }
 
-    function generateCsvContent(responses) {
-        if (!responses || responses.length === 0) return '';
+    function generateCsvContent(roster) {
+        if (!roster || roster.length === 0) return '';
 
         const headers = [
-            'Name', 'Group', 'Score', 'Max Score', 'Percentage',
+            'Name', 'Group', 'Status', 'Score', 'Max Score', 'Percentage',
             'Time (s)', 'Started At', 'Completed At', 'Violations', 'Retake', 'Submitted At'
         ];
 
@@ -2406,52 +2494,86 @@ const TestBuilder = (function () {
             headers.push(`Q${i + 1} Correct`);
         });
 
-        // Use flatMap to generate one row per student if pairs/trios exist
-        const rows = responses.flatMap(r => {
-            const pct = r.totalPoints > 0 ? Math.round((r.score / r.totalPoints) * 100) : 0;
-            const students = (r.coStudents && r.coStudents.length > 0) ? r.coStudents : [r.studentName || ''];
+        const rows = roster.map(r => {
+            const isSub = r.status === 'submitted';
+            const d = r.responseData || {};
+            const pct = (isSub && d.totalPoints > 0) ? Math.round((d.score / d.totalPoints) * 100) : '';
 
-            return students.map(studentName => {
-                const row = [
-                    `"${studentName.replace(/"/g, '""')}"`,
-                    `"${(r.studentGroup || '').replace(/"/g, '""')}"`,
-                    r.score ?? 0,
-                    r.totalPoints ?? 0,
-                    pct + '%',
-                    r.durationSeconds ?? '',
-                    r.startedAt ? new Date(r.startedAt).toISOString() : '',
-                    r.completedAt ? new Date(r.completedAt).toISOString() : '',
-                    r.violationCount ?? 0,
-                    r.isRetake ? 'Yes' : 'No',
-                    r.submittedAt ? new Date(r.submittedAt).toISOString() : ''
-                ];
+            const row = [
+                `"${(r.studentName || '').replace(/"/g, '""')}"`,
+                `"${(r.studentGroup || '').replace(/"/g, '""')}"`,
+                isSub ? 'Submitted' : 'Pending',
+                isSub ? (d.score ?? 0) : '',
+                isSub ? (d.totalPoints ?? 0) : '',
+                isSub ? (pct + '%') : '',
+                isSub ? (d.durationSeconds ?? '') : '',
+                isSub && d.startedAt ? new Date(d.startedAt).toISOString() : '',
+                isSub && d.completedAt ? new Date(d.completedAt).toISOString() : '',
+                isSub ? (d.violationCount ?? 0) : '',
+                isSub ? ((r.hasRetake || d.isRetake) ? 'Yes' : 'No') : '',
+                isSub && d.submittedAt ? new Date(d.submittedAt).toISOString() : ''
+            ];
 
-                // Per-question correctness
-                testData.questions.forEach((q, i) => {
-                    const ans = r.answers && r.answers[i];
+            // Per-question correctness
+            testData.questions.forEach((q, i) => {
+                if (!isSub) {
+                    row.push('');
+                } else {
+                    const ans = d.answers && d.answers[i];
                     row.push(ans && ans.correct ? 1 : 0);
-                });
-
-                return row.join(',');
+                }
             });
+
+            return row.join(',');
         });
 
         return [headers.join(','), ...rows].join('\n');
     }
 
-    function exportCsv() {
-        // Only export responses from the currently active group tab
-        const allResponses = Object.values(responsesData);
-        const displayResponses = activeGroupTab === 'all'
-            ? allResponses
-            : allResponses.filter(r => r.studentGroup === activeGroupTab);
+    function _buildRosterForExport(rawResponses, filterGroup = 'all') {
+        const allRoster = [];
+        if (testData.settings && testData.settings.groupOptions) {
+            testData.settings.groupOptions.forEach(groupCode => {
+                const students = STUDENT_DATA[groupCode] || [];
+                students.forEach(name => {
+                    allRoster.push({ isExpected: true, studentName: name, studentGroup: groupCode, status: 'pending', responseData: null, hasRetake: false });
+                });
+            });
+        }
+        rawResponses.sort((a, b) => (a.submittedAt || 0) - (b.submittedAt || 0)).forEach(r => {
+            const students = (r.coStudents && r.coStudents.length > 0) ? r.coStudents : [r.studentName || 'Unknown'];
+            const group = r.studentGroup || 'No Group';
+            students.forEach(sName => {
+                const match = allRoster.find(x => x.studentName === sName && x.studentGroup === group);
+                if (match) {
+                    if (match.status === 'submitted') match.hasRetake = true;
+                    match.status = 'submitted'; match.responseData = r;
+                } else {
+                    allRoster.push({ isExpected: false, studentName: sName, studentGroup: group, status: 'submitted', responseData: r, hasRetake: false });
+                }
+            });
+        });
 
-        if (displayResponses.length === 0) {
+        let displayRoster = filterGroup === 'all' ? allRoster : allRoster.filter(r => r.studentGroup === filterGroup);
+        if (filterGroup === 'all') {
+            displayRoster.sort((a, b) => {
+                if (a.studentGroup !== b.studentGroup) return (a.studentGroup || '').localeCompare(b.studentGroup || '');
+                return (a.studentName || '').localeCompare(b.studentName || '');
+            });
+        }
+        return displayRoster;
+    }
+
+    function exportCsv() {
+        const rawResponses = Object.values(responsesData);
+        const displayRoster = _buildRosterForExport(rawResponses, activeGroupTab);
+
+        if (displayRoster.length === 0) {
             showToast('No responses to export');
             return;
         }
 
-        const csvContent = generateCsvContent(displayResponses);
+        const csvContent = generateCsvContent(displayRoster);
         // Prepend BOM (\uFEFF) for Excel to read UTF-8 accents correctly
         const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
