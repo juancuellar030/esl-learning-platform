@@ -442,6 +442,28 @@
     background: #eef0ff;
 }
 
+.gs-sortable {
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.gs-sortable:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.gs-sortable i {
+    margin-left: 6px;
+    font-size: 0.85em;
+    opacity: 0.5;
+    transition: opacity 0.2s, color 0.2s;
+}
+
+.gs-sortable.active i {
+    opacity: 1;
+    color: #f1c40f;
+}
+
 .gs-students-table .gs-student-name {
     font-weight: 600;
     color: #333;
@@ -762,6 +784,10 @@ body.dark-mode .gs-students-table tbody tr:nth-child(even) {
 body.dark-mode .gs-scale-table tbody tr:hover,
 body.dark-mode .gs-students-table tbody tr:hover {
     background: #2a2a50;
+}
+
+body.dark-mode .gs-sortable:hover {
+    background: rgba(255, 255, 255, 0.05);
 }
 
 body.dark-mode .gs-scale-table tbody tr.gs-passing-row {

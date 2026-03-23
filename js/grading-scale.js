@@ -10,6 +10,7 @@
     let scaleData = [];
     let students = [];
     let scaleGenerated = false;
+    let currentSort = { column: null, direction: 'asc' };
 
     // ===== DOM REFS =====
     const $ = id => document.getElementById(id);
@@ -241,15 +242,20 @@
             return;
         }
 
+        const getSortIcon = (col) => {
+            if (currentSort.column !== col) return '<i class="fa-solid fa-sort"></i>';
+            return currentSort.direction === 'asc' ? '<i class="fa-solid fa-sort-up"></i>' : '<i class="fa-solid fa-sort-down"></i>';
+        };
+
         let html = `
         <div class="gs-students-wrapper">
             <table class="gs-students-table">
                 <thead>
                     <tr>
                         <th>#</th>
-                        <th>Student Name</th>
-                        <th>Score</th>
-                        <th>Grade</th>
+                        <th class="gs-sortable ${currentSort.column === 'name' ? 'active' : ''}" data-sort="name">Student Name ${getSortIcon('name')}</th>
+                        <th class="gs-sortable ${currentSort.column === 'score' ? 'active' : ''}" data-sort="score">Score ${getSortIcon('score')}</th>
+                        <th class="gs-sortable ${currentSort.column === 'grade' ? 'active' : ''}" data-sort="grade">Grade ${getSortIcon('grade')}</th>
                         <th>Status</th>
                     </tr>
                 </thead>
@@ -301,7 +307,44 @@
             input.addEventListener('input', onScoreChange);
         });
 
+        // Bind sort headers
+        container.querySelectorAll('.gs-sortable').forEach(th => {
+            th.addEventListener('click', () => {
+                const col = th.dataset.sort;
+                sortStudents(col);
+            });
+        });
+
         updateSummary();
+    }
+
+    function sortStudents(column) {
+        if (currentSort.column === column) {
+            currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+        } else {
+            currentSort.column = column;
+            currentSort.direction = 'asc';
+        }
+
+        students.sort((a, b) => {
+            let valA = a[column];
+            let valB = b[column];
+
+            // Normalize values for sorting
+            if (column === 'score' || column === 'grade') {
+                valA = (valA === '' || valA === null || isNaN(valA)) ? -1 : parseFloat(valA);
+                valB = (valB === '' || valB === null || isNaN(valB)) ? -1 : parseFloat(valB);
+            } else if (column === 'name') {
+                valA = (valA || '').toLowerCase();
+                valB = (valB || '').toLowerCase();
+            }
+
+            if (valA < valB) return currentSort.direction === 'asc' ? -1 : 1;
+            if (valA > valB) return currentSort.direction === 'asc' ? 1 : -1;
+            return 0;
+        });
+
+        renderStudentsTable();
     }
 
     function onScoreChange(e) {
