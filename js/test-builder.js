@@ -6,7 +6,8 @@ const TestBuilder = (function () {
     'use strict';
 
     // ===== CONSTANTS =====
-    const STORAGE_KEY = 'esl_test_builder_data';
+    const STORAGE_KEY = 'esl_test_builder_data'; // Legacy key — kept only for migration
+    const REGISTRY_KEY = 'esl_active_tests';
     const QUESTION_TYPES = [
         { id: 'multiple-choice', label: 'Multiple Choice', icon: 'fa-list-ul' },
         { id: 'true-false', label: 'True / False', icon: 'fa-check-double' },
@@ -50,6 +51,9 @@ const TestBuilder = (function () {
         initResponsesDom();
         initGoogleDrive();
         renderSidebar();
+        renderTestSwitcher();
+        // Ensure current test is in the registry
+        _updateRegistry(testData);
         // Auto-start response listener if a share code was persisted
         if (testData.shareCode) {
             responsesCode = testData.shareCode;
@@ -113,30 +117,77 @@ const TestBuilder = (function () {
         dom.btnDeactivate = document.getElementById('btn-deactivate-test');
         // Responses modal elements
         dom.autoSaveDriveToggle = document.getElementById('setting-auto-save-drive');
+        // Test switcher
+        dom.testSwitcherBtn = document.getElementById('btn-switch-test');
+        dom.testSwitcherDropdown = document.getElementById('test-switcher-dropdown');
     }
 
-    function loadOrCreateTest() {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) {
+    // ===== REGISTRY HELPERS =====
+    function _getRegistry() {
+        try { return JSON.parse(localStorage.getItem(REGISTRY_KEY)) || []; } catch { return []; }
+    }
+
+    function _updateRegistry(td) {
+        const reg = _getRegistry();
+        const idx = reg.findIndex(e => e.id === td.id);
+        const entry = {
+            id: td.id,
+            title: td.title || 'Untitled Test',
+            shareCode: td.shareCode || null,
+            active: td.shareCode ? true : false,
+            updatedAt: td.updatedAt || Date.now()
+        };
+        if (idx >= 0) reg[idx] = entry; else reg.unshift(entry);
+        localStorage.setItem(REGISTRY_KEY, JSON.stringify(reg));
+    }
+
+    function _removeFromRegistry(id) {
+        const reg = _getRegistry().filter(e => e.id !== id);
+        localStorage.setItem(REGISTRY_KEY, JSON.stringify(reg));
+    }
+
+    function _patchSettings(td) {
+        if (!td.settings || typeof td.settings !== 'object') td.settings = {};
+        if (!td.settings.groupOptions) td.settings.groupOptions = [...DEFAULT_GROUPS];
+        if (td.settings.enableFullscreen === undefined) td.settings.enableFullscreen = true;
+        if (td.settings.allowThemes === undefined) td.settings.allowThemes = true;
+        if (td.settings.showAnswerReview === undefined) td.settings.showAnswerReview = true;
+        if (td.settings.partialGradingDragDrop === undefined) td.settings.partialGradingDragDrop = false;
+        if (td.settings.autoSaveResponses === undefined) td.settings.autoSaveResponses = false;
+        if (td.settings.allowMultiStudent === undefined) td.settings.allowMultiStudent = false;
+        return td;
+    }
+
+    function loadOrCreateTest(idToLoad) {
+        // === Migration from legacy single-key storage ===
+        const legacyRaw = localStorage.getItem(STORAGE_KEY);
+        if (legacyRaw) {
             try {
-                testData = JSON.parse(saved);
-                // Ensure settings object and all new fields exist (guard against older saved formats)
-                if (!testData.settings || typeof testData.settings !== 'object') {
-                    testData.settings = {};
+                const legacy = JSON.parse(legacyRaw);
+                if (legacy && legacy.id) {
+                    _patchSettings(legacy);
+                    localStorage.setItem('esl_test_' + legacy.id, JSON.stringify(legacy));
+                    _updateRegistry(legacy);
+                    localStorage.removeItem(STORAGE_KEY);
+                    if (!idToLoad) idToLoad = legacy.id;
                 }
-                if (!testData.settings.groupOptions) testData.settings.groupOptions = [...DEFAULT_GROUPS];
-                if (testData.settings.enableFullscreen === undefined) testData.settings.enableFullscreen = true;
-                if (testData.settings.allowThemes === undefined) testData.settings.allowThemes = true;
-                if (testData.settings.showAnswerReview === undefined) testData.settings.showAnswerReview = true;
-                if (testData.settings.partialGradingDragDrop === undefined) testData.settings.partialGradingDragDrop = false;
-                if (testData.settings.autoSaveResponses === undefined) testData.settings.autoSaveResponses = false;
-                if (testData.settings.allowMultiStudent === undefined) testData.settings.allowMultiStudent = false;
-            } catch (e) {
-                testData = createEmptyTest();
-            }
-        } else {
-            testData = createEmptyTest();
+            } catch (e) { localStorage.removeItem(STORAGE_KEY); }
         }
+
+        // === Load specific test or most recent from registry ===
+        const reg = _getRegistry();
+        const targetId = idToLoad || (reg.length > 0 ? reg[0].id : null);
+
+        if (targetId) {
+            const raw = localStorage.getItem('esl_test_' + targetId);
+            if (raw) {
+                try {
+                    testData = _patchSettings(JSON.parse(raw));
+                    return;
+                } catch (e) { /* fall through */ }
+            }
+        }
+        testData = createEmptyTest();
     }
 
     function createEmptyTest() {
@@ -455,6 +506,26 @@ const TestBuilder = (function () {
             navigator.clipboard.writeText(dom.shareUrl.value).then(() => showToast('Link copied!'));
         });
         dom.btnDeactivate.addEventListener('click', deactivateSharedTest);
+
+        // Test Switcher toggle
+        if (dom.testSwitcherBtn) {
+            dom.testSwitcherBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const isVisible = dom.testSwitcherDropdown.style.display === 'block';
+                if (!isVisible) {
+                    renderTestSwitcher();
+                    dom.testSwitcherDropdown.style.display = 'block';
+                } else {
+                    dom.testSwitcherDropdown.style.display = 'none';
+                }
+            });
+            document.addEventListener('click', (e) => {
+                if (dom.testSwitcherDropdown &&
+                    !e.target.closest('#test-switcher-wrap')) {
+                    dom.testSwitcherDropdown.style.display = 'none';
+                }
+            });
+        }
     }
 
     function bindToggle(toggle, key) {
@@ -1805,9 +1876,11 @@ const TestBuilder = (function () {
     function saveTest() {
         testData.updatedAt = Date.now();
         try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(testData));
+            localStorage.setItem('esl_test_' + testData.id, JSON.stringify(testData));
+            _updateRegistry(testData);
+            if (dom.testSwitcherDropdown) renderTestSwitcher();
         } catch (e) {
-            console.warn('Auto-save failed: LocalStorage quota exceeded. The test is too large to save locally.', e);
+            console.warn('Auto-save failed: LocalStorage quota exceeded.', e);
         }
     }
 
@@ -1899,13 +1972,122 @@ const TestBuilder = (function () {
         if (!testData.shareCode) return;
         try {
             await FirebaseService.deactivateTest(testData.shareCode);
+            // Mark registry entry as inactive (but keep the shareCode for history)
+            const reg = _getRegistry();
+            const idx = reg.findIndex(e => e.id === testData.id);
+            if (idx >= 0) { reg[idx].active = false; }
+            localStorage.setItem(REGISTRY_KEY, JSON.stringify(reg));
+
             testData.shareCode = null;
             autoSave();
+            renderTestSwitcher();
             showToast('Test deactivated');
             closeShareModal();
         } catch (err) {
             showToast('Error deactivating test');
         }
+    }
+
+    // ===== TEST SWITCHER =====
+    function renderTestSwitcher() {
+        if (!dom.testSwitcherDropdown) return;
+        const reg = _getRegistry();
+        if (reg.length === 0) {
+            dom.testSwitcherDropdown.innerHTML = '<div class="ts-empty">No saved tests</div>';
+            return;
+        }
+        dom.testSwitcherDropdown.innerHTML = reg.map(entry => {
+            const isCurrent = entry.id === testData.id;
+            const dot = entry.active ? '<span class="ts-dot ts-dot-active" title="Live"></span>'
+                : entry.shareCode ? '<span class="ts-dot ts-dot-inactive" title="Inactive (has history)"></span>'
+                    : '<span class="ts-dot ts-dot-none"></span>';
+            return `<div class="ts-item${isCurrent ? ' ts-current' : ''}" data-id="${entry.id}">
+                ${dot}
+                <span class="ts-title">${esc(entry.title)}</span>
+                ${entry.shareCode ? `<span class="ts-code">${entry.shareCode}</span>` : ''}
+                <button class="ts-delete btn-remove" data-id="${entry.id}" title="Delete this test"><i class="fa-solid fa-trash"></i></button>
+            </div>`;
+        }).join('') +
+            `<div class="ts-new-wrap"><button id="ts-btn-new" class="ts-new-btn"><i class="fa-solid fa-plus"></i> New Test</button></div>`;
+
+        dom.testSwitcherDropdown.querySelectorAll('.ts-item').forEach(el => {
+            el.addEventListener('click', (e) => {
+                if (e.target.closest('.ts-delete')) return;
+                switchToTest(el.dataset.id);
+            });
+        });
+        dom.testSwitcherDropdown.querySelectorAll('.ts-delete').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                deleteTestEntry(btn.dataset.id);
+            });
+        });
+        const newBtn = dom.testSwitcherDropdown.querySelector('#ts-btn-new');
+        if (newBtn) newBtn.addEventListener('click', newTest);
+    }
+
+    function switchToTest(id) {
+        if (id === testData.id) { dom.testSwitcherDropdown.style.display = 'none'; return; }
+        saveTest(); // Save current before switching
+        loadOrCreateTest(id);
+        // Reinitialize UI with new testData
+        renderSidebar();
+        if (testData.questions.length > 0) selectQuestion(0);
+        else { renderEditorEmpty(); renderPreviewEmpty(); }
+        document.getElementById('builder-title').textContent = testData.title;
+        // Reinitialize response listener for new test
+        responsesCode = null;
+        responsesData = {};
+        if (responsesUnsubscribe) { responsesUnsubscribe(); responsesUnsubscribe = null; }
+        if (testData.shareCode) {
+            responsesCode = testData.shareCode;
+            FirebaseService.init().then(() => startResponseListener(testData.shareCode)).catch(() => { });
+        }
+        updateResponseBadge();
+        dom.testSwitcherDropdown.style.display = 'none';
+        showToast(`Switched to: ${testData.title}`);
+        renderTestSwitcher();
+    }
+
+    function newTest() {
+        saveTest();
+        testData = createEmptyTest();
+        saveTest();
+        renderSidebar();
+        renderEditorEmpty();
+        renderPreviewEmpty();
+        document.getElementById('builder-title').textContent = testData.title;
+        responsesCode = null;
+        responsesData = {};
+        if (responsesUnsubscribe) { responsesUnsubscribe(); responsesUnsubscribe = null; }
+        updateResponseBadge();
+        dom.testSwitcherDropdown.style.display = 'none';
+        showToast('New test created');
+    }
+
+    async function deleteTestEntry(id) {
+        const reg = _getRegistry();
+        const entry = reg.find(e => e.id === id);
+        if (!entry) return;
+        const confirmMsg = entry.shareCode
+            ? `Delete "${entry.title}"? This will also delete all Firebase responses. This cannot be undone.`
+            : `Delete "${entry.title}" from your test list?`;
+        if (!confirm(confirmMsg)) return;
+        // Delete from Firebase if it has a code
+        if (entry.shareCode) {
+            try { await FirebaseService.deleteSession(entry.shareCode); } catch (e) { }
+        }
+        localStorage.removeItem('esl_test_' + id);
+        _removeFromRegistry(id);
+        // If we deleted the current test, switch to next
+        if (id === testData.id) {
+            const remaining = _getRegistry();
+            if (remaining.length > 0) switchToTest(remaining[0].id);
+            else newTest();
+        } else {
+            renderTestSwitcher();
+        }
+        showToast('Test deleted');
     }
 
     // Simple QR code generator using canvas (basic version)
@@ -2204,27 +2386,80 @@ const TestBuilder = (function () {
     }
 
     async function openResponsesModal() {
-        if (dom.responsesTestCode) {
-            if (testData.shareCode) {
-                dom.responsesTestCode.textContent = `CODE: ${testData.shareCode}`;
-                dom.responsesTestCode.style.display = 'inline-block';
-            } else {
-                dom.responsesTestCode.style.display = 'none';
-            }
-        }
-
         dom.responsesOverlay.classList.add('active');
 
-        if (testData.shareCode && testData.shareCode !== responsesCode) {
-            responsesCode = testData.shareCode;
-            responsesData = {};
-            startResponseListener(responsesCode);
-        } else if (testData.shareCode && testData.shareCode === responsesCode) {
-            // Already listening — just re-render what we have
-            renderResponsesTable();
-        } else {
-            renderResponsesTable();
+        // Build/update the code selector from the registry
+        _renderResponsesCodeSelector();
+
+        // Default: use the current test's shareCode if nothing is selected yet
+        const selectorEl = document.getElementById('resp-code-selector');
+        const selectedCode = selectorEl ? selectorEl.value : (testData.shareCode || '');
+
+        _switchResponsesCode(selectedCode);
+    }
+
+    function _renderResponsesCodeSelector() {
+        let container = document.getElementById('resp-code-selector-wrap');
+        if (!container) return; // Not in DOM yet — will add to HTML
+        const reg = _getRegistry().filter(e => e.shareCode);
+        if (reg.length === 0) {
+            container.style.display = 'none';
+            return;
         }
+        container.style.display = 'flex';
+        const currentVal = document.getElementById('resp-code-selector')?.value || (testData.shareCode || '');
+        container.innerHTML = `<select id="resp-code-selector" class="resp-code-select">` +
+            reg.map(e => {
+                const dot = e.active ? '🟢' : '⚫';
+                return `<option value="${esc(e.shareCode)}" ${e.shareCode === currentVal ? 'selected' : ''}>${dot} ${esc(e.title)} (${e.shareCode})</option>`;
+            }).join('') +
+            `</select>`;
+        const sel = document.getElementById('resp-code-selector');
+        if (sel) sel.addEventListener('change', () => _switchResponsesCode(sel.value));
+    }
+
+    function _switchResponsesCode(code) {
+        if (!code) {
+            if (dom.responsesTestCode) dom.responsesTestCode.style.display = 'none';
+            renderResponsesTable();
+            return;
+        }
+        // Update test code display
+        if (dom.responsesTestCode) {
+            dom.responsesTestCode.textContent = `CODE: ${code}`;
+            dom.responsesTestCode.style.display = 'inline-block';
+        }
+        if (code === responsesCode) {
+            renderResponsesTable();
+            return;
+        }
+        // Check if active in registry
+        const reg = _getRegistry();
+        const entry = reg.find(e => e.shareCode === code);
+        const isActive = entry ? entry.active : false;
+
+        responsesCode = code;
+        responsesData = {};
+        if (responsesUnsubscribe) { responsesUnsubscribe(); responsesUnsubscribe = null; }
+        if (responsesPollInterval) { clearInterval(responsesPollInterval); responsesPollInterval = null; }
+
+        if (isActive) {
+            startResponseListener(code);
+        } else {
+            loadHistoricalResponses(code);
+        }
+    }
+
+    async function loadHistoricalResponses(code) {
+        try {
+            await FirebaseService.init();
+            const test = await FirebaseService.getPublishedTest(code);
+            responsesData = (test && test.responses) ? test.responses : {};
+        } catch (e) {
+            responsesData = {};
+        }
+        renderResponsesTable();
+        updateResponseBadge();
     }
 
     function closeResponsesModal() {

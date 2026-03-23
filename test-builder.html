@@ -40,6 +40,13 @@
             <div class="builder-header-left">
                 <a href="tools.html" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Tools</a>
                 <h1><i class="fa-solid fa-file-pen"></i> <span id="builder-title">Untitled Test</span></h1>
+                <div class="test-switcher-wrap" id="test-switcher-wrap">
+                    <button id="btn-switch-test" class="header-btn btn-switch-test">
+                        <i class="fa-solid fa-folder-open"></i> My Tests <i class="fa-solid fa-chevron-down"
+                            style="font-size:0.7em;margin-left:2px;opacity:0.7;"></i>
+                    </button>
+                    <div id="test-switcher-dropdown" class="test-switcher-dropdown" style="display:none;"></div>
+                </div>
             </div>
             <div class="builder-header-right">
                 <button class="header-btn btn-settings" id="btn-settings">
@@ -252,10 +259,11 @@
     <div class="settings-overlay" id="responses-overlay">
         <div class="settings-modal responses-modal">
             <div class="settings-modal-header">
-                <div style="display:flex;align-items:center;gap:12px;">
+                <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
                     <h2><i class="fa-solid fa-chart-bar"></i> Student Responses</h2>
                     <span id="responses-test-code"
                         style="display:none;font-weight:700;background:rgba(255,255,255,0.1);padding:0.4rem 0.8rem;border-radius:8px;font-size:1.1rem;color:#f39c12;letter-spacing:1px;white-space:nowrap;margin-right:1rem;"></span>
+                    <div id="resp-code-selector-wrap" class="resp-code-selector-wrap" style="display:none;"></div>
                 </div>
                 <div style="display:flex;align-items:center;gap:12px;">
                     <div class="toggle-row" style="border:none;padding:0;gap:8px;margin-right:12px;"

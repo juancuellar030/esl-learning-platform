@@ -2345,3 +2345,185 @@ body.dark-mode .opt-img-upload {
 body.dark-mode .opt-img-thumb img {
     border-color: #444;
 }
+
+/* ===== TEST SWITCHER ===== */
+.test-switcher-wrap {
+    position: relative;
+}
+
+.btn-switch-test {
+    background: rgba(255, 255, 255, 0.12);
+    color: white;
+    white-space: nowrap;
+}
+
+.btn-switch-test:hover {
+    background: rgba(255, 255, 255, 0.22);
+}
+
+.test-switcher-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    min-width: 300px;
+    max-width: 420px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.22);
+    z-index: 1000;
+    padding: 6px 0;
+    overflow: hidden;
+}
+
+.ts-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    cursor: pointer;
+    transition: background 0.15s;
+    font-size: 0.9rem;
+}
+
+.ts-item:hover {
+    background: #f0f2f8;
+}
+
+.ts-item.ts-current {
+    background: #eef0fb;
+    font-weight: 700;
+}
+
+.ts-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.ts-dot-active {
+    background: #27ae60;
+}
+
+.ts-dot-inactive {
+    background: #95a5a6;
+}
+
+.ts-dot-none {
+    background: transparent;
+    border: 1.5px solid #ccc;
+}
+
+.ts-title {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #333;
+}
+
+.ts-code {
+    font-size: 0.75rem;
+    background: #e8eaf0;
+    color: #555;
+    padding: 2px 7px;
+    border-radius: 6px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.ts-delete {
+    padding: 4px 7px;
+    font-size: 0.75rem;
+    opacity: 0;
+    transition: opacity 0.15s;
+}
+
+.ts-item:hover .ts-delete {
+    opacity: 1;
+}
+
+.ts-new-wrap {
+    border-top: 1px solid #f0f1f6;
+    padding: 6px 10px;
+}
+
+.ts-new-btn {
+    width: 100%;
+    background: var(--indigo-velvet);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    transition: background 0.15s;
+    font-family: inherit;
+}
+
+.ts-new-btn:hover {
+    background: var(--medium-slate-blue);
+}
+
+.ts-empty {
+    padding: 16px;
+    color: #888;
+    font-size: 0.85rem;
+    text-align: center;
+}
+
+/* Dark mode for test switcher */
+body.dark-mode .test-switcher-dropdown {
+    background: #252538;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .ts-item:hover {
+    background: #1e1e2e;
+}
+
+body.dark-mode .ts-item.ts-current {
+    background: #2a2a40;
+}
+
+body.dark-mode .ts-title {
+    color: #ddd;
+}
+
+body.dark-mode .ts-code {
+    background: #333;
+    color: #aaa;
+}
+
+body.dark-mode .ts-new-wrap {
+    border-color: #333;
+}
+
+/* ===== RESPONSES CODE SELECTOR ===== */
+.resp-code-selector-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.resp-code-select {
+    background: rgba(255, 255, 255, 0.12);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 8px;
+    padding: 5px 10px;
+    font-size: 0.85rem;
+    font-family: inherit;
+    cursor: pointer;
+    max-width: 280px;
+}
+
+.resp-code-select option {
+    background: #2a2a3e;
+    color: #eee;
+}
