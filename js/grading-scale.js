@@ -168,10 +168,40 @@
             /^(name|nombre|student|alumno|estudiante|#|n°|nro)/i.test(c));
         const startIndex = looksLikeHeader ? 1 : 0;
 
+        let nameIndex = 0;
+        let scoreIndex = -1;
+
+        if (looksLikeHeader) {
+            nameIndex = firstCells.findIndex(c => /^(name|nombre|student|alumno|estudiante)/i.test(c));
+            if (nameIndex === -1) nameIndex = 0; // fallback
+
+            scoreIndex = firstCells.findIndex(c => /^(score|puntaje|puntos|nota)$/i.test(c));
+            if (scoreIndex === -1) {
+                scoreIndex = firstCells.findIndex(c => /^(score|puntaje|puntos)/i.test(c) && !/max/i.test(c));
+            }
+        }
+
         for (let i = startIndex; i < lines.length; i++) {
             const cells = lines[i].split(sep).map(c => c.trim().replace(/^["']|["']$/g, ''));
-            if (cells.length > 0 && cells[0]) {
-                result.push({ name: cells[0], score: '', grade: null });
+            if (cells.length > nameIndex && cells[nameIndex]) {
+                const name = cells[nameIndex];
+                let score = '';
+
+                if (scoreIndex !== -1 && cells.length > scoreIndex) {
+                    const scoreStr = cells[scoreIndex].replace(',', '.');
+                    const parsedScore = parseFloat(scoreStr);
+                    if (!isNaN(parsedScore)) {
+                        score = parsedScore;
+                    }
+                } else if (!looksLikeHeader && cells.length >= 2) {
+                    const scoreStr = cells[1].replace(',', '.');
+                    const parsedScore = parseFloat(scoreStr);
+                    if (!isNaN(parsedScore)) {
+                        score = parsedScore;
+                    }
+                }
+
+                result.push({ name: name, score: score, grade: null });
             }
         }
         return result;
