@@ -274,10 +274,27 @@
                 </div>
             </div>
             <div class="settings-modal-body" style="padding:0;">
+                <div class="responses-toolbar" style="padding:16px 20px;">
+                    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+                        <span class="toolbar-stat" style="font-size:1.1rem;font-weight:600;"><i
+                                class="fa-solid fa-users"></i>
+                            <span id="stat-count">0</span> Responses</span>
+                        <div style="flex:1"></div>
+                        <label title="Save responses as CSV files in Google Drive automatically"
+                            style="display:flex;align-items:center;gap:6px;font-size:0.85rem;color:#666;cursor:pointer;">
+                            <input type="checkbox" id="setting-auto-save-drive"
+                                style="accent-color:var(--indigo-velvet);">
+                            Auto-sync to Drive
+                        </label>
+                        <button class="btn-add-option" id="btn-export-csv"><i class="fa-solid fa-file-csv"></i> Download
+                            CSV</button>
+                    </div>
+                    <div id="responses-tabs" class="responses-tabs"></div>
+                </div>
                 <!-- Stats bar -->
                 <div class="responses-stats" id="responses-stats">
                     <div class="resp-stat">
-                        <span class="resp-stat-value" id="stat-count">0</span>
+                        <span class="resp-stat-value" id="stat-count-large">0</span>
                         <span class="resp-stat-label">Responses</span>
                     </div>
                     <div class="resp-stat">

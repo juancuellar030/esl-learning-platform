@@ -2080,21 +2080,18 @@ const TestBuilder = (function () {
         driveBtn.addEventListener('click', () => driveService.openModal());
     }
 
-    let syncTimeout = null;
-    function syncResponsesToDrive() {
-        if (!testData.settings.autoSaveResponses) return;
-        if (!driveService || !driveService.isSignedIn) return;
-        if (!testData.shareCode) return;
+    let driveSyncTimer = null; // Renamed from syncTimeout to avoid conflict and be more descriptive
+    async function syncResponsesToDrive() {
+        if (!testData.shareCode || !testData.settings.autoSaveResponses) return;
+        if (!Object.keys(responsesData).length) return;
 
-        // Debounce to 5 seconds to avoid hitting Drive API rate limits
-        if (syncTimeout) clearTimeout(syncTimeout);
-        syncTimeout = setTimeout(async () => {
+        if (driveSyncTimer) clearTimeout(driveSyncTimer);
+        driveSyncTimer = setTimeout(async () => {
             try {
                 const responses = Object.values(responsesData);
-                if (responses.length === 0) return;
-
-                // Group by Submision Date (YYYY-MM-DD) and Student Group
                 const groups = {};
+
+                // Group responses by exact date string and student group
                 responses.forEach(r => {
                     const dateObj = r.submittedAt ? new Date(r.submittedAt) : new Date();
                     const dateKey = dateObj.toLocaleDateString('en-CA'); // YYYY-MM-DD
@@ -2110,7 +2107,7 @@ const TestBuilder = (function () {
                 // Sync each group-date combination as a separate CSV
                 for (const key in groups) {
                     const { date, group, list } = groups[key];
-                    const csvContent = generateCsvContent(list);
+                    const csvContent = '\uFEFF' + generateCsvContent(list); // Add BOM for better Excel compatibility
                     const safeTitle = (testData.title || 'Untitled').replace(/[\\/:*?"<>|]/g, '');
                     const filename = `Responses - ${safeTitle} - ${date} - ${group}`;
 
@@ -2127,15 +2124,18 @@ const TestBuilder = (function () {
     let responsesUnsubscribe = null;
     let responsesPollInterval = null;
     let responsesCode = null;    // the active share code being monitored
+    let activeGroupTab = 'all';
 
     function initResponsesDom() {
         dom.btnResponses = document.getElementById('btn-responses');
         dom.responsesOverlay = document.getElementById('responses-overlay');
         dom.btnCloseResponses = document.getElementById('btn-close-responses');
         dom.btnClearResponses = document.getElementById('btn-clear-responses');
+        dom.responsesTabs = document.getElementById('responses-tabs');
         dom.responseBadge = document.getElementById('response-badge');
         dom.btnExportCsv = document.getElementById('btn-export-csv');
         dom.statCount = document.getElementById('stat-count');
+        dom.statCountLarge = document.getElementById('stat-count-large');
         dom.statAvgScore = document.getElementById('stat-avg-score');
         dom.statAvgTime = document.getElementById('stat-avg-time');
         dom.statViolations = document.getElementById('stat-violations');
@@ -2244,9 +2244,36 @@ const TestBuilder = (function () {
     }
 
     function renderResponsesTable() {
-        const responses = Object.values(responsesData);
+        const allResponses = Object.values(responsesData);
 
-        if (responses.length === 0) {
+        // Build Tabs UI
+        if (dom.responsesTabs) {
+            if (allResponses.length === 0) {
+                dom.responsesTabs.innerHTML = '';
+            } else {
+                const uniqueGroups = Array.from(new Set(allResponses.map(r => r.studentGroup).filter(Boolean))).sort();
+                let tabsHtml = `<button class="resp-tab ${activeGroupTab === 'all' ? 'active' : ''}" data-group="all">All Groups</button>`;
+                uniqueGroups.forEach(g => {
+                    tabsHtml += `<button class="resp-tab ${activeGroupTab === g ? 'active' : ''}" data-group="${esc(g)}">${esc(g)}</button>`;
+                });
+                dom.responsesTabs.innerHTML = tabsHtml;
+
+                // Bind tab clicks
+                dom.responsesTabs.querySelectorAll('.resp-tab').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        activeGroupTab = e.target.getAttribute('data-group');
+                        renderResponsesTable();
+                    });
+                });
+            }
+        }
+
+        // Filter responses by active tab
+        const displayResponses = activeGroupTab === 'all'
+            ? allResponses
+            : allResponses.filter(r => r.studentGroup === activeGroupTab);
+
+        if (displayResponses.length === 0) {
             dom.responsesEmpty.style.display = 'flex';
             dom.responsesTable.style.display = 'none';
             dom.qBreakdown.style.display = 'none';
@@ -2257,10 +2284,10 @@ const TestBuilder = (function () {
         dom.responsesEmpty.style.display = 'none';
         dom.responsesTable.style.display = 'table';
 
-        updateStats(responses);
-        renderAccuracyBars(responses);
+        updateStats(displayResponses);
+        renderAccuracyBars(displayResponses);
 
-        dom.responsesTbody.innerHTML = responses
+        dom.responsesTbody.innerHTML = displayResponses
             .sort((a, b) => b.submittedAt - a.submittedAt)
             .map((r, i) => {
                 const pct = r.totalPoints > 0 ? Math.round((r.score / r.totalPoints) * 100) : 0;
@@ -2274,7 +2301,7 @@ const TestBuilder = (function () {
                     : '<span class="retake-badge retake-no">—</span>';
 
                 return `<tr>
-                    <td>${responses.length - i}</td>
+                    <td>${displayResponses.length - i}</td>
                     <td>${esc(r.studentName || '—')}</td>
                     <td>${esc(r.studentGroup || '—')}</td>
                     <td class="score-cell ${scoreClass}">${r.score ?? 0}/${r.totalPoints ?? 0} (${pct}%)</td>
@@ -2288,7 +2315,8 @@ const TestBuilder = (function () {
 
     function updateStats(responses) {
         const n = responses.length;
-        dom.statCount.textContent = n;
+        if (dom.statCount) dom.statCount.textContent = n;
+        if (dom.statCountLarge) dom.statCountLarge.textContent = n;
 
         if (n === 0) {
             dom.statAvgScore.textContent = '—';
@@ -2378,44 +2406,62 @@ const TestBuilder = (function () {
             headers.push(`Q${i + 1} Correct`);
         });
 
-        const rows = responses.map(r => {
+        // Use flatMap to generate one row per student if pairs/trios exist
+        const rows = responses.flatMap(r => {
             const pct = r.totalPoints > 0 ? Math.round((r.score / r.totalPoints) * 100) : 0;
-            const row = [
-                `"${(r.studentName || '').replace(/"/g, '""')}"`,
-                `"${(r.studentGroup || '').replace(/"/g, '""')}"`,
-                r.score ?? 0,
-                r.totalPoints ?? 0,
-                pct + '%',
-                r.durationSeconds ?? '',
-                r.startedAt ? new Date(r.startedAt).toISOString() : '',
-                r.completedAt ? new Date(r.completedAt).toISOString() : '',
-                r.violationCount ?? 0,
-                r.isRetake ? 'Yes' : 'No',
-                r.submittedAt ? new Date(r.submittedAt).toISOString() : ''
-            ];
+            const students = (r.coStudents && r.coStudents.length > 0) ? r.coStudents : [r.studentName || ''];
 
-            // Per-question correctness
-            testData.questions.forEach((q, i) => {
-                const ans = r.answers && r.answers[i];
-                row.push(ans && ans.correct ? 1 : 0);
+            return students.map(studentName => {
+                const row = [
+                    `"${studentName.replace(/"/g, '""')}"`,
+                    `"${(r.studentGroup || '').replace(/"/g, '""')}"`,
+                    r.score ?? 0,
+                    r.totalPoints ?? 0,
+                    pct + '%',
+                    r.durationSeconds ?? '',
+                    r.startedAt ? new Date(r.startedAt).toISOString() : '',
+                    r.completedAt ? new Date(r.completedAt).toISOString() : '',
+                    r.violationCount ?? 0,
+                    r.isRetake ? 'Yes' : 'No',
+                    r.submittedAt ? new Date(r.submittedAt).toISOString() : ''
+                ];
+
+                // Per-question correctness
+                testData.questions.forEach((q, i) => {
+                    const ans = r.answers && r.answers[i];
+                    row.push(ans && ans.correct ? 1 : 0);
+                });
+
+                return row.join(',');
             });
-
-            return row.join(',');
         });
 
         return [headers.join(','), ...rows].join('\n');
     }
 
     function exportCsv() {
-        const responses = Object.values(responsesData);
-        if (responses.length === 0) { showToast('No responses to export'); return; }
+        // Only export responses from the currently active group tab
+        const allResponses = Object.values(responsesData);
+        const displayResponses = activeGroupTab === 'all'
+            ? allResponses
+            : allResponses.filter(r => r.studentGroup === activeGroupTab);
 
-        const csvContent = generateCsvContent(responses);
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        if (displayResponses.length === 0) {
+            showToast('No responses to export');
+            return;
+        }
+
+        const csvContent = generateCsvContent(displayResponses);
+        // Prepend BOM (\uFEFF) for Excel to read UTF-8 accents correctly
+        const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `${(testData.title || 'test').replace(/[^a-z0-9]/gi, '_')}_responses.csv`;
+
+        const baseName = (testData.title || 'test').replace(/[^a-z0-9]/gi, '_');
+        const groupSuffix = activeGroupTab === 'all' ? 'All' : activeGroupTab.replace(/[^a-z0-9]/gi, '');
+        link.download = `${baseName}_Responses_${groupSuffix}.csv`;
+
         link.click();
         URL.revokeObjectURL(url);
         showToast('CSV exported!');

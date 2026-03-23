@@ -1934,6 +1934,44 @@ body.dark-mode .preview-media img {
     flex-direction: column;
 }
 
+.responses-tabs {
+    display: flex;
+    gap: 8px;
+    padding-bottom: 4px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    /* Firefox */
+}
+
+.responses-tabs::-webkit-scrollbar {
+    display: none;
+    /* Safari and Chrome */
+}
+
+.resp-tab {
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid #e0e2e8;
+    background: white;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.resp-tab:hover {
+    border-color: #d0d2da;
+    background: #f4f5fa;
+}
+
+.resp-tab.active {
+    background: var(--indigo-velvet);
+    color: white;
+    border-color: var(--indigo-velvet);
+}
+
 /* Responses badge on button */
 .response-badge {
     background: #e74c3c;
