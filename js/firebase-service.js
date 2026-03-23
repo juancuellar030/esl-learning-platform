@@ -370,6 +370,24 @@ const FirebaseService = (() => {
         return () => ref.off('child_added', handler);
     }
 
+    async function getSubmittedNames(code) {
+        if (isDemo()) {
+            const responses = (window._demoTests && window._demoTests[code] && window._demoTests[code].responses) || {};
+            const names = [];
+            Object.values(responses).forEach(r => {
+                if (r.studentName) names.push(r.studentName);
+            });
+            return names;
+        }
+        const snap = await db.ref('tests/' + code + '/responses').once('value');
+        const names = [];
+        snap.forEach(child => {
+            const r = child.val();
+            if (r && r.studentName) names.push(r.studentName);
+        });
+        return names;
+    }
+
     // ========== PUBLIC API ==========
     return {
         init,
@@ -399,6 +417,7 @@ const FirebaseService = (() => {
         submitTestResponse,
         deactivateTest,
         clearTestResponses,
-        onNewResponse
+        onNewResponse,
+        getSubmittedNames
     };
 })();

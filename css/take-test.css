@@ -283,6 +283,167 @@ body {
     gap: 6px;
 }
 
+/* ===== GROUP SELECTOR PILLS ===== */
+.tt-group-selector {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.tt-group-pill {
+    padding: 10px 20px;
+    border: 2px solid #e0e2e8;
+    border-radius: 12px;
+    background: white;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: #555;
+    font-family: inherit;
+}
+
+.tt-group-pill:hover {
+    border-color: var(--tt-secondary, var(--medium-slate-blue, #7b68ee));
+    background: #f8f6ff;
+}
+
+.tt-group-pill.active {
+    border-color: var(--tt-secondary, var(--medium-slate-blue, #7b68ee));
+    background: var(--tt-secondary, var(--medium-slate-blue, #7b68ee));
+    color: white;
+}
+
+/* ===== NAME SEARCH + AUTOCOMPLETE ===== */
+.tt-name-search-wrap {
+    position: relative;
+}
+
+.tt-autocomplete-dropdown {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    max-height: 200px;
+    overflow-y: auto;
+    background: white;
+    border: 2px solid var(--tt-secondary, var(--medium-slate-blue, #7b68ee));
+    border-top: none;
+    border-radius: 0 0 12px 12px;
+    z-index: 100;
+    display: none;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.tt-autocomplete-dropdown.open {
+    display: block;
+}
+
+.tt-autocomplete-item {
+    padding: 10px 16px;
+    cursor: pointer;
+    font-size: 0.92rem;
+    color: #333;
+    transition: background 0.15s;
+    border-bottom: 1px solid #f0f1f6;
+}
+
+.tt-autocomplete-item:last-child {
+    border-bottom: none;
+}
+
+.tt-autocomplete-item:hover,
+.tt-autocomplete-item.highlighted {
+    background: #f0edff;
+    color: var(--tt-primary, var(--indigo-velvet, #2c1f56));
+}
+
+.tt-autocomplete-item .tt-match {
+    font-weight: 700;
+    color: var(--tt-secondary, var(--medium-slate-blue, #7b68ee));
+}
+
+.tt-autocomplete-empty {
+    padding: 14px 16px;
+    color: #aaa;
+    font-size: 0.88rem;
+    text-align: center;
+    font-style: italic;
+}
+
+/* ===== SELECTED STUDENTS ===== */
+.tt-selected-students {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.tt-selected-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: 10px;
+    background: var(--tt-secondary, var(--medium-slate-blue, #7b68ee));
+    color: white;
+    font-size: 0.88rem;
+    font-weight: 600;
+    animation: chipIn 0.25s ease;
+}
+
+@keyframes chipIn {
+    from {
+        opacity: 0;
+        transform: scale(0.85);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.tt-selected-chip .tt-chip-remove {
+    width: 20px;
+    height: 20px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.25);
+    color: white;
+    font-size: 0.65rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+    padding: 0;
+}
+
+.tt-selected-chip .tt-chip-remove:hover {
+    background: rgba(255, 255, 255, 0.45);
+}
+
+/* ===== RETAKE BADGE (responses table) ===== */
+.retake-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.retake-badge.retake-yes {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.retake-badge.retake-no {
+    color: #aaa;
+}
+
 /* ===== QUESTION SCREEN ===== */
 .tt-question {
     background: transparent;

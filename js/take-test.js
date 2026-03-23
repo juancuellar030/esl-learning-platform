@@ -7,6 +7,20 @@ const TakeTest = (function () {
 
     const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
+    // ===== EMBEDDED STUDENT DATA (2026) =====
+    const STUDENT_DATA = {
+        'Group 3A': ['ANDRADE RODRIGUEZ SILVANA', 'BUITRAGO MÉNDEZ JUAN ANDRÉS', 'CABRERA BARRERO JULIETA', 'CAMACHO SALAZAR JULIANA', 'CAMERO PERDOMO JOSÉ MIGUEL', 'CASTAÑEDA RENGIFO ISABELLA', 'CHACÓN RAMÍREZ THOMAS', 'CORTES LOSADA ARIADNA VALENTINA', 'GOMEZ GONZALEZ AARON', 'GRANJA PABÓN THIAGO', 'GUEVARA ORTIZ JUAN ÁLVARO', 'HERNANDEZ CELEITA MARIA ANTONIA', 'MACIAS IBÁÑEZ SAMUEL ANDRÉS', 'MOGOLLÓN RODRÍGUEZ MELISSA', 'NIÑO GALINDO SAMANTHA VICTORIA', 'PATIÑO CLAROS GABRIELA', 'RAMOS MORA VALENTINA ESTRELLITA', 'RIVERA HERRERA MAYTE', 'RUGELES CASTAÑEDA DYLAN THOMAS', 'SAAVEDRA OYOLA EIDER IVAN', 'SÁNCHEZ LUCUARA CELESTE', 'SERRATO MORENO EMILIANO', 'TAMAYO CASTAÑEDA SAMUEL', 'TORRES SARRIA ANTONELLA', 'VÁSQUEZ PEREZ EMILIANO', 'YASNO ÁVILA MATIAS'],
+        'Group 3B': ['ARIAS MAJE GABRIEL MATIAS', 'BALLESTEROS COLLAZOS CRISTOBAL', 'BORRERO CORREA ANNIE DANIELA', 'CALDERÓN MORALES EMILIANO', 'CASAS BUITRAGO CELESTE SOFIA', 'CELORIO OVIEDO KILIAN ANDREI', 'CRÍALES MORENO JULIETA', 'DIAZ MEJÍA RONNY ESTIVEN', 'GAITÁN VELÁSQUEZ GABRIELLA', 'GONZALEZ SUAREZ ANA MARIA', 'GRANJA PABÓN IVANNA', 'IBAGON RANGEL EMILY', 'JIMÉNEZ ZAMBRANO FEDERICK', 'MARIN ORDOÑEZ SARA VICTORIA', 'MORA MURCIA JULIÁN FELIPE', 'ORDOÑEZ GUTIÉRREZ MARTIN', 'PATIÑO MARTÍNEZ EDINSON', 'POLANIA BASTIDAS DYLAN SANTIAGO', 'PUENTES DIAZ LUIS ESTEBAN', 'PUENTES REYES EMMANUEL', 'SABI MONJE ANTONELLA', 'SALAZAR DIAZ ANNY MILAGROS', 'SANCHEZ OSPITIA LUCIANA', 'SIERRA MEDINA MATHIAS', 'VARGAS RODRIGUEZ MARIANA', 'VARGAS TRUJILLO EMMANUEL'],
+        'Group 3C': ['ACOSTA PARRA SALOMÓN', 'ÁVILA ORTEGA GABRIELA', 'AVILÉS DUSSÁN MATHIAS', 'BARRERO GÓMEZ SANTIAGO', 'BARRETO RAMIREZ NHARA ISABELA', 'BASTOS CÁRDENAS SIMÓN', 'BUITRAGO JAVELA EMMA', 'CALLEJAS SOSA EMILIA', 'CASTILLO ROJAS GABRIELA', 'DIAZ CARVAJAL ARTURO', 'FRANCO DÍAZ ALAN JERÓNIMO', 'JIMÉNEZ BOHADA EMILIANO', 'MEJÍA BORRERO MARIANA', 'MORALES FARFÁN MARTINA', 'OSORIO RUIZ JUAN ANDRÉS', 'ROBLEDO SANTANA SALOME', 'RODRIGUEZ ALVAREZ MARTIN ANDRES', 'ROJAS CLAROS SELENE', 'ROJAS SANDOVAL AVRIL CATALINA', 'SANCHEZ HERNANDEZ ISAAC', 'SANCHEZ LOPEZ DYLAN ARMANDO', 'SILVA BAHAMÓN MANUEL FELIPE', 'SOTELO BRAVO JUAN JOSE', 'TOVAR VARGAS GABRIELA', 'TRIVIÑO GARCÍA YULIANY'],
+        'Group 4A': ['ALMARIO URREGO JERONIMO', 'ARISTIZABAL ALVARADO ISABELLA', 'ASTAIZA MONTEALEGRE SALOMÉ', 'BLANCO VANEGAS SAMUEL', 'CALDERÓN RINCÓN SARA', 'CAMAYO CABRERA JUAN ALVARO', 'CARDENAS MONTES SAMUEL', 'CENDALES QUEVEDO JEREMY EITHAN', 'CUELLAR AMAYA MILAN', 'CUELLAR JAVELA JUAN MARTIN', 'DURAN SANCHEZ SALOMÉ', 'FONSECA PEÑA LUCIANA', 'GONZALEZ CORAL NICOLAS', 'GURTIERREZ REYES MANUELA', 'JOAQUI CARDOZO WILLIAM SANTIAGO', 'LEÓN NIÑO SARA MARIA', 'LEYVA GONZALEZ ANA LUCÍA', 'LOPEZ ANDRADE SALOME', 'MUÑOZ RAMON MATHIAS', 'MURCIA ASENCIO SANTIAGO', 'OÑATE SALAMANCA LUCIA', 'ORTIZ CHAVARRO THOMAS FELIPE', 'PEREZ TRUJILLO ALAN MATHIAS', 'PINILLA JIMENEZ SARA VICTORIA', 'REYEZ PEREZ MATHIAS', 'RICARDO CUTA ELIZABETH', 'RUBIANO YARA TOMÁS', 'POLO MURCIA DAVID SANTIAGO', 'SANCHEZ DÍAZ JAIRO ANDRES'],
+        'Group 4B': ['ALARCON SABOGAL ANA LUCIA', 'BARRIOS GALINDO SAMUEL', 'BONILLA QUINTERO VALENTINA', 'CALDERON FONSECA JULIANA', 'FANDIÑO CORTES VICTORIA', 'FIERRO QUINTERO ANA SOFÍA', 'FIGUEROA MORENO RAFAEL SANTIAGO', 'GUERRERO MUÑOZ ANGEL GABRIEL', 'JAVELA PLAZAS SAMUEL ANDRES', 'MADRID BONILLA EMANUEL', 'MORA QUIMBAYA THIAGO JULIAN', 'MORENO MONJE TOMAS', 'MOSQUERA ROJAS SALOMÉ', 'MUNAR MOSQUERA JERONIMO', 'MURCIA OCAMPO TOMAS', 'OLAYA IZQUIERDO PALOMA', 'ORTIZ MOLANO GABRIELA', 'PACHECO GAMBOA LUCIANA', 'PARDO VARON EMMANUEL', 'PERDOMO CÓRDOBA JUAN ESTEBAN', 'QUESADA RODRIGUEZ ANTONELLA', 'RIVERA MUÑOZ ABRIL', 'RIVERA ROJAS LUCIANA', 'ROA RAMIREZ ANA SOFÍA', 'SASTOQUE VILLARREAL JOSÉ DAVID', 'TRILLERAS RINCON JUAN PABLO', 'TRUJILLO RIVERA ANA VICTORIA', 'URRIAGO ANDRADE CELESTE', 'VASQUEZ RAMIREZ SANTIAGO'],
+        'Group 4C': ['ALEGRÍA PLAZAS PABLO JOSÉ', 'BERNAL MOTTA LAURA VALENTINA', 'CABRERA MENDEZ ANAMARIA', 'CARRILLO GOMEZ ALEJANDRO', 'CASTRO LEYTON BRIANA ALETH', 'CELORIO OVIEDO KESHIA CAROLINA', 'CERQUERA MONTEALEGRE THOMAS', 'CÉSPEDES CORTES SAMANTHA', 'FIERRO JOVEN MATIAS', 'GUTIERREZ HUELGO SAMUEL', 'HERNANDEZ DUSSAN MIA', 'HUERTAS JAIMES ALEJANDRA', 'LUNA CALDERON JUANA VICTORIA', 'MOTTA BERNATE LUCIANO', 'OTALORA BARBOSA SANTIGO ANDRÉS', 'PATIÑO RICO DANIEL', 'PEÑA OSORIO VALERIA', 'PENNA LAISECA ANTONELLA', 'PEREZ LOPEZ EVA MARIA', 'PORTILLA BENITEZ DANNA', 'QUIROZ GARCIA EMILIANO', 'RAMOS VARGAS LORENZO', 'RENDON CUELLAR EMILIO', 'RIOS SERRATO JUAN JOSÉ', 'RODRIGUEZ SARRIAS JUAN JOSÉ', 'SANDOVAL SANCHEZ LAURA', 'TAMAYO TORRES EMILIANO', 'VANEGAS TORRES SARA LUCÍA', 'VICTORIA HERNANDEZ PAULA ANDREA', 'VIEDA DIAZ ERMES SANTIAGO'],
+        'Group 5A': ['ARISTIZABAL RINCÓN MARÍA JOSÉ', 'ARTUNDUAGA PASTRANA MARIANA', 'BARREIRO GARCÍA SANTIAGO', 'BARRETO DUSSAN MARTÍN', 'BONILLA QUIROGA ANA SOFIA', 'BONILLA RAMIREZ JHON FREDY', 'CAMACHO SALAZAR THALIANA', 'CARDENAS TOVAR DANIEL MATHIAS', 'CEDEÑO CEDEÑO ISABELLA', 'CUELLAR CELIS EMILIANO', 'DÍAZ MEJÍA MARÍA CELESTE', 'DÍAZ RODRIGUEZ CELESTE', 'DUSSÁN ROJAS ORALIS ARIANA', 'GONZÁLEZ FERNÁNDEZ ÁNGEL GABRIEL', 'GONZALEZ SUAREZ LUCIANA CELESTE', 'HERNÁNDEZ ZEA SAMUEL', 'HUESO HERNANDEZ JOSE ALEJANDRO', 'LUGO SILVA DALIANA LUCIA', 'PERDOMO HERRERA SAMUEL', 'PERLAZA MEDINA SAMUEL JOSÉ', 'PINZÓN NÁRVAEZ SARA VALENTINA', 'POLANCO VEGA EMMANUEL', 'SANCHEZ DONATO THALYA', 'SILVA CABRERA JOSÉ DAVID', 'TELLO PERÉZ GUADALUPE', 'URREA VANEGAS SANTIAGO', 'VARGAS TRUJILLO SIMON ALFREDO', 'VARGAS VASQUEZ DYLAN SAMUEL'],
+        'Group 5B': ['ACERO SOTO DANNA SOFIA', 'AGUIRRE POLANIA MARTHA LUCIA', 'AGUIRRE SANTOFIMIO GABRIELA', 'ANDRADE TAMAYO ANA ISABEL', 'AREVALO GONZALEZ ANGELA MARÍA', 'CHACÓN RUJANA ZAHIRA SOFÍA', 'CLAROS AGUDELO ARIADNA CLAROS', 'ESPINOSA BUSTACARA ANA ISABELLA', 'ESQUIVEL MOSQUERA ANTONELLA', 'GUIO QUINTERO JUAN PABLO', 'HERNANDEZ PINEDA JULIAN DAVID', 'MEJÍA BORRERO JUAN ESTEBAN', 'MONJE ORDOÑEZ MARÍA VICTORIA', 'MOSQUERA BAYLÓN KEVIN SAMUEL', 'OBREGÓN SÁNCHEZ JUAN MARTÍN', 'ORTEGA CORTÉS NICOLL MARIANA', 'ORTIZ GONZÁLEZ RAFAEL THOMAS', 'PALACIOS SANCHÉZ MARÍA ANTONIA', 'PARRA VITOVIZ NICOLAS MAURICIO', 'PERDOMO GRAFFE LUCIANA', 'PINCHAO VALENZUELA MARTÍN', 'ROJAS PAYAN GABRIEL DAVID', 'SORA ORTIZ JERÓNIMO', 'TOVAR BAHAMÓN SAMUEL DAVID', 'TRUJILLO TORREJANO LENIN SANTIAGO', 'VERGARA MOLANO JUAN FELIPE', 'VILLARREAL BASTIDAS IANN SANTIAGO', 'ZORRO FERNÁNDEZ SALOMÉ'],
+        'Group 5C': ['CABREJO GONZÁLEZ SAMUEL', 'CARDENAS RODIGUEZ EDUARD SANTIAGO', 'CHINCHILLA RÍOS VIOLETTA', 'CLAVIJO PERDOMO EMMA', 'CORREDOR AROCA MATÍAS', 'CUBILLOS CAMACHO VALERIA', 'DÍAZ SONS ANGEL MARTÍN', 'DUSSAN LEMUS JULIETA', 'GAITÁN VARGAS ANA LUCÍA', 'ICOPO MELENDEZ LUCAS ANDRÉS', 'JARA ALDANA MARTÍN', 'MEDINA OBANDO DAVID ESTEBAN', 'MOLINA LOZADA SAMANTHA', 'ORTIGOZA GÓMEZ MIA SALOMÉ', 'PACHECO PEREZ GABRIEL ALEJANDRO', 'PALOMINO HERNÁNDEZ MARTÍN', 'PÉREZ NIÑO ABRIL', 'PINEDA UNÍ EMMANUEL', 'PRECIADO CUERVO ISABELLA', 'PUENTES SUAREZ GINA MARCELA', 'RAMÍREZ SALCEDO JUAN ANDRÉS', 'RAMIREZ YEPEZ LUCIA', 'RENGIFO OTALORA JUANA VALERIA', 'RINCÓN MEDINA SAMUEL NICOLÁS', 'ROMERO TAMAYO EMILY LUCIANA', 'VALENCIA PACHECO JORGE MARÍO', 'VELEZ GOMEZ MIGUEL ANGEL', 'ZAPATA SALAZAR JUAN ANDRÉS'],
+        'Group 5D': ['ALMARIO GAMBOA DANTE', 'ALVARADO GÓMEZ JERÓNIMO', 'ALVIRA CHARRY JUAN SEBASTIÁN', 'ÁNGEL PERDOMO THIAGO EMMANUEL', 'CAMACHO GARCÍA DIEGO ANDRÉS', 'CARVAJAL PLAZA LUCIANA', 'CONTRERAS GARCÍA ANALUCIA', 'CORTES TRUJILLO JERONIMO', 'DÍAZ POLANIA GABRIELA', 'FAJARDO CASTAÑEDA MARÍA PAZ', 'FORTALECHE POLANIA SARA DAILY', 'GUTIERREZ DUSSÁN SARA VALENTINA', 'HERRERA LEÓN AMÉRICA ISABELA', 'MAYOR MOTTA JERÓNIMO', 'MENESES TEJADA JULIETA MARÍA', 'ORDOÑEZ GÓMEZ JUAN JOSÉ', 'OYOLA CUTIVA JOSE ALEJANDRO', 'PERALTA MEDINA SALOME', 'PINO ALARCÓN SANTIAGO', 'PUENTES DÍAZ ADRIAN FELIPE', 'PULIDO LOSADA JUAN JOSE', 'RIVERA DÍAZ ANA SOFIA', 'RUBIANO ORTIZ DANTE', 'SÁNCHEZ HERNÁNDEZ SALOMÉ', 'SUAZA FAJARDO ISABELLA', 'TAMAYO ALVARADO EMILIANO', 'TRUJILLO MONTEALEGRE ISABELLA', 'VARGAS ZAPATA ADRIAN EDUARDO']
+    };
+
     // ===== STATE =====
     let testData = null;
     let testCode = '';
@@ -18,6 +32,9 @@ const TakeTest = (function () {
     let timerInterval = null;
     let timeRemaining = 0;
     let lastGraded = null; // store graded results for review
+    let selectedStudents = []; // array of selected student names
+    let selectedGroup = '';    // currently selected group
+    let isRetake = false;      // whether any selected student already submitted
 
     // Theme state
     let currentTheme = 'default';
@@ -326,7 +343,6 @@ const TakeTest = (function () {
         document.getElementById('test-title-display').textContent = testData.title || 'Test';
         document.getElementById('test-desc-display').textContent = testData.description || '';
 
-        // Show/hide name/group fields
         const nameField = document.getElementById('name-field-container');
         const groupField = document.getElementById('group-field-container');
         const settings = testData.settings || {};
@@ -334,16 +350,89 @@ const TakeTest = (function () {
         nameField.style.display = settings.collectName !== false ? 'block' : 'none';
         groupField.style.display = settings.collectGroup !== false ? 'block' : 'none';
 
-        // Populate groups
-        const groupSelect = document.getElementById('student-group');
-        groupSelect.innerHTML = '<option value="">Select your group...</option>';
-        (settings.groupOptions || []).forEach(g => {
-            const opt = document.createElement('option');
-            opt.value = g;
-            opt.textContent = g;
-            groupSelect.appendChild(opt);
+        // Reset state
+        selectedStudents = [];
+        selectedGroup = '';
+        isRetake = false;
+
+        // ===== Build group pill buttons =====
+        const groupSelector = document.getElementById('group-selector');
+        groupSelector.innerHTML = '';
+        const groups = settings.groupOptions || [];
+
+        // Map group option values to STUDENT_DATA keys
+        // settings.groupOptions stores values like "3A", "4B" etc.
+        // STUDENT_DATA uses keys like "Group 3A", "Group 4B"
+        groups.forEach(g => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'tt-group-pill';
+            btn.textContent = g;
+            btn.dataset.group = g;
+            btn.addEventListener('click', () => selectGroupPill(btn, g));
+            groupSelector.appendChild(btn);
         });
-        console.log('[TakeTest] Groups populated');
+
+        // ===== Name search + autocomplete =====
+        const searchInput = document.getElementById('student-name-search');
+        const dropdown = document.getElementById('student-autocomplete');
+        const chipsContainer = document.getElementById('selected-students');
+        chipsContainer.innerHTML = '';
+        searchInput.value = '';
+        dropdown.className = 'tt-autocomplete-dropdown';
+
+        // Disable name field if no group selected and group collection is on
+        if (settings.collectGroup !== false) {
+            searchInput.disabled = true;
+            searchInput.placeholder = 'First select your group above...';
+        } else {
+            searchInput.disabled = false;
+            searchInput.placeholder = 'Type to search your name...';
+        }
+
+        let highlightedIdx = -1;
+
+        searchInput.addEventListener('input', () => {
+            const query = searchInput.value.trim().toLowerCase();
+            if (query.length < 1) {
+                dropdown.className = 'tt-autocomplete-dropdown';
+                dropdown.innerHTML = '';
+                return;
+            }
+            const candidates = getFilteredStudents(selectedGroup);
+            // Exclude already-selected students
+            const available = candidates.filter(n => !selectedStudents.includes(n));
+            const matches = available.filter(n => n.toLowerCase().includes(query));
+            highlightedIdx = -1;
+            renderAutocomplete(matches, query);
+        });
+
+        searchInput.addEventListener('keydown', (e) => {
+            const items = dropdown.querySelectorAll('.tt-autocomplete-item');
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                highlightedIdx = Math.min(highlightedIdx + 1, items.length - 1);
+                updateHighlight(items, highlightedIdx);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                highlightedIdx = Math.max(highlightedIdx - 1, 0);
+                updateHighlight(items, highlightedIdx);
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                if (highlightedIdx >= 0 && items[highlightedIdx]) {
+                    items[highlightedIdx].click();
+                }
+            } else if (e.key === 'Escape') {
+                dropdown.className = 'tt-autocomplete-dropdown';
+            }
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.tt-name-search-wrap')) {
+                dropdown.className = 'tt-autocomplete-dropdown';
+            }
+        });
 
         // Test info
         document.getElementById('info-questions').innerHTML = `<i class="fa-solid fa-list"></i> ${testData.questions.length} questions`;
@@ -353,7 +442,7 @@ const TakeTest = (function () {
             : `<i class="fa-solid fa-clock"></i> No time limit`;
 
         // Start button
-        document.getElementById('btn-start-test').addEventListener('click', startTest);
+        document.getElementById('btn-start-test').addEventListener('click', handleStartClick);
 
         // Show theme FAB if allowed
         if (settings.allowThemes) {
@@ -363,25 +452,209 @@ const TakeTest = (function () {
         showScreen('student');
     }
 
-    // ===== START TEST =====
-    function startTest() {
-        console.log('[TakeTest] startTest initiating...');
+    function selectGroupPill(btn, groupValue) {
+        // Toggle active pill
+        document.querySelectorAll('.tt-group-pill').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        selectedGroup = groupValue;
+
+        // Enable search, clear selection
+        const searchInput = document.getElementById('student-name-search');
+        searchInput.disabled = false;
+        searchInput.placeholder = 'Type to search your name...';
+        searchInput.value = '';
+        searchInput.focus();
+
+        // Clear selected students when group changes
+        selectedStudents = [];
+        document.getElementById('selected-students').innerHTML = '';
+        document.getElementById('student-autocomplete').className = 'tt-autocomplete-dropdown';
+    }
+
+    function getFilteredStudents(groupValue) {
+        // groupValue is like "3A", STUDENT_DATA key is "Group 3A"
+        const key = 'Group ' + groupValue;
+        if (STUDENT_DATA[key]) return STUDENT_DATA[key];
+
+        // If no exact match, try matching the raw value
+        if (STUDENT_DATA[groupValue]) return STUDENT_DATA[groupValue];
+
+        // If group collection is off, return all students from all groups
         const settings = testData.settings || {};
-        const name = document.getElementById('student-name').value.trim();
-        const group = document.getElementById('student-group').value;
-
-        if (settings.collectName !== false && !name) {
-            document.getElementById('student-name').style.borderColor = '#e74c3c';
-            return;
-        }
-        if (settings.collectGroup !== false && !group) {
-            document.getElementById('student-group').style.borderColor = '#e74c3c';
-            return;
+        if (settings.collectGroup === false) {
+            return Object.values(STUDENT_DATA).flat();
         }
 
-        // Save student info
-        testData._studentName = name;
-        testData._studentGroup = group;
+        return [];
+    }
+
+    function renderAutocomplete(matches, query) {
+        const dropdown = document.getElementById('student-autocomplete');
+        if (matches.length === 0) {
+            dropdown.innerHTML = '<div class="tt-autocomplete-empty">No students found</div>';
+            dropdown.className = 'tt-autocomplete-dropdown open';
+            return;
+        }
+
+        dropdown.innerHTML = matches.slice(0, 20).map((name, i) => {
+            // Highlight the matching portion
+            const lowerName = name.toLowerCase();
+            const idx = lowerName.indexOf(query);
+            let display = '';
+            if (idx >= 0) {
+                display = escapeHtml(name.substring(0, idx))
+                    + '<span class="tt-match">' + escapeHtml(name.substring(idx, idx + query.length)) + '</span>'
+                    + escapeHtml(name.substring(idx + query.length));
+            } else {
+                display = escapeHtml(name);
+            }
+            return `<div class="tt-autocomplete-item" data-name="${escapeHtml(name)}" data-index="${i}">${display}</div>`;
+        }).join('');
+
+        dropdown.className = 'tt-autocomplete-dropdown open';
+
+        // Click handlers
+        dropdown.querySelectorAll('.tt-autocomplete-item').forEach(item => {
+            item.addEventListener('click', () => {
+                addSelectedStudent(item.dataset.name);
+                document.getElementById('student-name-search').value = '';
+                dropdown.className = 'tt-autocomplete-dropdown';
+            });
+        });
+    }
+
+    function updateHighlight(items, idx) {
+        items.forEach((item, i) => {
+            item.classList.toggle('highlighted', i === idx);
+        });
+        if (items[idx]) items[idx].scrollIntoView({ block: 'nearest' });
+    }
+
+    function addSelectedStudent(name) {
+        const settings = testData.settings || {};
+        const maxStudents = settings.allowMultiStudent ? 3 : 1;
+
+        if (selectedStudents.length >= maxStudents) {
+            if (maxStudents === 1) {
+                // Replace the single student
+                selectedStudents = [];
+            } else {
+                return; // can't add more
+            }
+        }
+
+        if (!selectedStudents.includes(name)) {
+            selectedStudents.push(name);
+        }
+
+        renderSelectedChips();
+
+        // If single mode, disable search after selecting
+        if (!settings.allowMultiStudent) {
+            document.getElementById('student-name-search').disabled = true;
+            document.getElementById('student-name-search').placeholder = name;
+        } else {
+            document.getElementById('student-name-search').focus();
+        }
+    }
+
+    function removeSelectedStudent(name) {
+        selectedStudents = selectedStudents.filter(n => n !== name);
+        renderSelectedChips();
+        const searchInput = document.getElementById('student-name-search');
+        searchInput.disabled = false;
+        searchInput.placeholder = 'Type to search your name...';
+    }
+
+    function renderSelectedChips() {
+        const container = document.getElementById('selected-students');
+        container.innerHTML = selectedStudents.map(name => {
+            return `<span class="tt-selected-chip">
+                <span>${escapeHtml(name)}</span>
+                <button type="button" class="tt-chip-remove" data-name="${escapeHtml(name)}" title="Remove">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </span>`;
+        }).join('');
+
+        container.querySelectorAll('.tt-chip-remove').forEach(btn => {
+            btn.addEventListener('click', () => removeSelectedStudent(btn.dataset.name));
+        });
+    }
+
+    function escapeHtml(text) {
+        const d = document.createElement('div');
+        d.textContent = text;
+        return d.innerHTML;
+    }
+
+    // ===== START TEST (with retake check) =====
+    async function handleStartClick() {
+        console.log('[TakeTest] handleStartClick...');
+        const settings = testData.settings || {};
+
+        // Validate selection
+        if (settings.collectGroup !== false && !selectedGroup) {
+            // Flash group selector
+            document.getElementById('group-selector').style.outline = '2px solid #e74c3c';
+            setTimeout(() => document.getElementById('group-selector').style.outline = '', 1500);
+            return;
+        }
+        if (settings.collectName !== false && selectedStudents.length === 0) {
+            document.getElementById('student-name-search').style.borderColor = '#e74c3c';
+            setTimeout(() => document.getElementById('student-name-search').style.borderColor = '', 1500);
+            return;
+        }
+
+        // Check for retakes
+        try {
+            const submittedNames = await FirebaseService.getSubmittedNames(testCode);
+            const retakeNames = selectedStudents.filter(name => {
+                // Check if any submitted name contains this student (handles joined names)
+                return submittedNames.some(sn => sn.includes(name) || name.includes(sn));
+            });
+
+            if (retakeNames.length > 0) {
+                isRetake = true;
+                const retakeText = retakeNames.length === 1
+                    ? `"${retakeNames[0]}" has already submitted this test.`
+                    : `${retakeNames.map(n => '"' + n + '"').join(' and ')} have already submitted this test.`;
+                document.getElementById('retake-warn-text').textContent = retakeText + ' Do you want to continue anyway?';
+                document.getElementById('retake-warning').style.display = 'flex';
+
+                // Wire buttons
+                document.getElementById('btn-retake-cancel').onclick = () => {
+                    document.getElementById('retake-warning').style.display = 'none';
+                    isRetake = false;
+                };
+                document.getElementById('btn-retake-continue').onclick = () => {
+                    document.getElementById('retake-warning').style.display = 'none';
+                    proceedToStart();
+                };
+                return;
+            }
+        } catch (e) {
+            console.warn('[TakeTest] Could not check retakes:', e);
+        }
+
+        proceedToStart();
+    }
+
+    function proceedToStart() {
+        console.log('[TakeTest] proceedToStart...');
+        const settings = testData.settings || {};
+
+        // Build student name (join with " / " for pairs/trios)
+        const joinedName = selectedStudents.join(' / ');
+        testData._studentName = joinedName;
+        testData._studentGroup = selectedGroup;
+        testData._coStudents = [...selectedStudents];
+        testData._isRetake = isRetake;
+
+        // Also set hidden fields for backward compat
+        document.getElementById('student-name').value = joinedName;
+        document.getElementById('student-group').value = selectedGroup;
+
         startedAt = Date.now();
 
         // Shuffle questions if enabled
@@ -1324,6 +1597,8 @@ const TakeTest = (function () {
         const response = {
             studentName: testData._studentName || '',
             studentGroup: testData._studentGroup || '',
+            coStudents: testData._coStudents || [],
+            isRetake: testData._isRetake || false,
             score: earnedPoints,
             totalPoints: totalPoints,
             percentage: totalPoints > 0 ? Math.round((earnedPoints / totalPoints) * 100) : 0,

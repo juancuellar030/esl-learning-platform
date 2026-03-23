@@ -80,6 +80,7 @@ const TestBuilder = (function () {
         dom.allowThemesToggle = document.getElementById('setting-allow-themes');
         dom.showAnswerReviewToggle = document.getElementById('setting-show-answer-review');
         dom.partialGradingToggle = document.getElementById('setting-partial-grading');
+        dom.allowMultiStudentToggle = document.getElementById('setting-allow-multi-student');
         dom.groupPills = document.getElementById('group-pills');
         dom.addGroupInput = document.getElementById('add-group-input');
         dom.btnAddGroup = document.getElementById('btn-add-group');
@@ -115,6 +116,7 @@ const TestBuilder = (function () {
                 if (testData.settings.showAnswerReview === undefined) testData.settings.showAnswerReview = true;
                 if (testData.settings.partialGradingDragDrop === undefined) testData.settings.partialGradingDragDrop = false;
                 if (testData.settings.autoSaveResponses === undefined) testData.settings.autoSaveResponses = false;
+                if (testData.settings.allowMultiStudent === undefined) testData.settings.allowMultiStudent = false;
             } catch (e) {
                 testData = createEmptyTest();
             }
@@ -143,7 +145,8 @@ const TestBuilder = (function () {
                 allowThemes: true,
                 showAnswerReview: true,
                 partialGradingDragDrop: false,
-                autoSaveResponses: false
+                autoSaveResponses: false,
+                allowMultiStudent: false
             },
             questions: []
         };
@@ -388,6 +391,12 @@ const TestBuilder = (function () {
             testData.settings.showAnswerReview = e.target.checked;
             autoSave();
         });
+        if (dom.allowMultiStudentToggle) {
+            dom.allowMultiStudentToggle.addEventListener('change', (e) => {
+                testData.settings.allowMultiStudent = e.target.checked;
+                autoSave();
+            });
+        }
         if (dom.partialGradingToggle) {
             dom.partialGradingToggle.addEventListener('change', (e) => {
                 testData.settings.partialGradingDragDrop = e.target.checked;
@@ -1737,6 +1746,7 @@ const TestBuilder = (function () {
         dom.allowThemesToggle.checked = s.allowThemes;
         dom.showAnswerReviewToggle.checked = s.showAnswerReview;
         if (dom.partialGradingToggle) dom.partialGradingToggle.checked = s.partialGradingDragDrop;
+        if (dom.allowMultiStudentToggle) dom.allowMultiStudentToggle.checked = s.allowMultiStudent;
         renderGroupPills();
         dom.settingsOverlay.classList.add('active');
     }
@@ -2259,6 +2269,9 @@ const TestBuilder = (function () {
                 const violClass = vc === 0 ? 'viol-0' : vc <= 2 ? `viol-${vc}` : 'viol-high';
                 const dur = r.durationSeconds ? formatDuration(r.durationSeconds) : '—';
                 const submitted = r.submittedAt ? new Date(r.submittedAt).toLocaleString() : '—';
+                const retakeBadge = r.isRetake
+                    ? '<span class="retake-badge retake-yes"><i class="fa-solid fa-triangle-exclamation"></i> Yes</span>'
+                    : '<span class="retake-badge retake-no">—</span>';
 
                 return `<tr>
                     <td>${responses.length - i}</td>
@@ -2267,6 +2280,7 @@ const TestBuilder = (function () {
                     <td class="score-cell ${scoreClass}">${r.score ?? 0}/${r.totalPoints ?? 0} (${pct}%)</td>
                     <td>${dur}</td>
                     <td><span class="viol-badge ${violClass}">${vc}</span></td>
+                    <td>${retakeBadge}</td>
                     <td style="font-size:0.8rem;color:#888;">${submitted}</td>
                 </tr>`;
             }).join('');
@@ -2356,7 +2370,7 @@ const TestBuilder = (function () {
 
         const headers = [
             'Name', 'Group', 'Score', 'Max Score', 'Percentage',
-            'Time (s)', 'Started At', 'Completed At', 'Violations', 'Submitted At'
+            'Time (s)', 'Started At', 'Completed At', 'Violations', 'Retake', 'Submitted At'
         ];
 
         // Add per-question headers
@@ -2376,6 +2390,7 @@ const TestBuilder = (function () {
                 r.startedAt ? new Date(r.startedAt).toISOString() : '',
                 r.completedAt ? new Date(r.completedAt).toISOString() : '',
                 r.violationCount ?? 0,
+                r.isRetake ? 'Yes' : 'No',
                 r.submittedAt ? new Date(r.submittedAt).toISOString() : ''
             ];
 
