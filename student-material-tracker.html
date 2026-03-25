@@ -879,7 +879,7 @@
                 th.addEventListener('dragenter', handleDragEnter);
                 th.addEventListener('dragleave', handleDragLeave);
                 th.addEventListener('dragend', handleDragEnd);
-                th.addEventListener('contextmenu', (e) => showColorMenu(e, 'col', null, material));
+                attachColorMenuListeners(th, 'col', null, material);
 
                 headerRow.appendChild(th);
             });
@@ -914,7 +914,7 @@
                     renderTable();
                 };
                 nameTd.appendChild(toggleBtn);
-                nameTd.addEventListener('contextmenu', (e) => showColorMenu(e, 'row', student, null));
+                attachColorMenuListeners(nameTd, 'row', student, null);
 
                 tr.appendChild(nameTd);
 
@@ -927,7 +927,7 @@
                     if (cellColor) {
                         td.classList.add(`cc-${cellColor}`);
                     }
-                    td.addEventListener('contextmenu', (e) => showColorMenu(e, 'cell', student, material));
+                    attachColorMenuListeners(td, 'cell', student, material);
 
                     const contentDiv = document.createElement('div');
 
@@ -1192,17 +1192,50 @@
 
         // Color Context Menu Logic
         let contextMenuTarget = null;
+        let touchTimer = null;
+
         function showColorMenu(e, type, student, material) {
-            e.preventDefault();
+            if (e && e.preventDefault) e.preventDefault();
             contextMenuTarget = { type, student, material };
             const menu = document.getElementById('colorContextMenu');
             menu.style.display = 'flex';
             let x = e.pageX;
             let y = e.pageY;
+
+            if (e.touches && e.touches.length > 0) {
+                x = e.touches[0].pageX;
+                y = e.touches[0].pageY;
+            }
+
             if (x + 240 > window.innerWidth) x = window.innerWidth - 240;
             if (y + 50 > window.innerHeight) y = window.innerHeight - 50;
             menu.style.left = x + 'px';
             menu.style.top = y + 'px';
+        }
+
+        function attachColorMenuListeners(el, type, student, material) {
+            el.addEventListener('contextmenu', (e) => showColorMenu(e, type, student, material));
+
+            el.addEventListener('touchstart', (e) => {
+                if (e.touches.length > 1) return;
+                const touch = e.touches[0];
+                const pageX = touch.pageX;
+                const pageY = touch.pageY;
+
+                touchTimer = setTimeout(() => {
+                    touchTimer = null;
+                    if (navigator.vibrate) navigator.vibrate(50);
+                    showColorMenu({ pageX, pageY, preventDefault: () => { if (e.cancelable) e.preventDefault(); } }, type, student, material);
+                }, 500);
+            }, { passive: true });
+
+            const cancelTouch = () => {
+                if (touchTimer) clearTimeout(touchTimer);
+            };
+
+            el.addEventListener('touchend', cancelTouch);
+            el.addEventListener('touchmove', cancelTouch);
+            el.addEventListener('touchcancel', cancelTouch);
         }
 
         document.addEventListener('click', (e) => {
