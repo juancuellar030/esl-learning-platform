@@ -10,6 +10,124 @@
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/google-drive.css">
     <style>
+        :root {
+            --cc-red: #ffadad;
+            --cc-orange: #ffd6a5;
+            --cc-yellow: #fdffb6;
+            --cc-green: #caffbf;
+            --cc-blue: #9bf6ff;
+            --cc-purple: #bdb2ff;
+        }
+
+        body.dark-mode {
+            --cc-red: #5c2b2b;
+            --cc-orange: #5c3f2b;
+            --cc-yellow: #5c592b;
+            --cc-green: #2b5c2b;
+            --cc-blue: #2b4f5c;
+            --cc-purple: #3c2b5c;
+        }
+
+        /* Color Coding Utility Classes */
+        th.cc-red,
+        td.cc-red,
+        .student-name-cell.cc-red,
+        tr.cc-red td {
+            background-color: var(--cc-red) !important;
+        }
+
+        th.cc-orange,
+        td.cc-orange,
+        .student-name-cell.cc-orange,
+        tr.cc-orange td {
+            background-color: var(--cc-orange) !important;
+        }
+
+        th.cc-yellow,
+        td.cc-yellow,
+        .student-name-cell.cc-yellow,
+        tr.cc-yellow td {
+            background-color: var(--cc-yellow) !important;
+        }
+
+        th.cc-green,
+        td.cc-green,
+        .student-name-cell.cc-green,
+        tr.cc-green td {
+            background-color: var(--cc-green) !important;
+        }
+
+        th.cc-blue,
+        td.cc-blue,
+        .student-name-cell.cc-blue,
+        tr.cc-blue td {
+            background-color: var(--cc-blue) !important;
+        }
+
+        th.cc-purple,
+        td.cc-purple,
+        .student-name-cell.cc-purple,
+        tr.cc-purple td {
+            background-color: var(--cc-purple) !important;
+        }
+
+        td[class*="cc-"] .cell-content.text-mode {
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        body.dark-mode td[class*="cc-"] .cell-content.text-mode {
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .color-context-menu {
+            position: absolute;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            padding: 8px;
+            display: flex;
+            gap: 8px;
+            z-index: 10000;
+        }
+
+        body.dark-mode .color-context-menu {
+            background: #2a2a2a;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .color-option {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .color-option:hover {
+            transform: scale(1.2);
+            border-color: rgba(0, 0, 0, 0.2);
+        }
+
+        body.dark-mode .color-option:hover {
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .color-option.none {
+            background: transparent;
+            border: 1px dashed #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ff7675;
+            font-size: 14px;
+        }
+
+        body.dark-mode .color-option.none {
+            border-color: #555;
+        }
+
         body {
             font-family: 'Reddit Sans', 'Google Sans Flex', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: var(--medium-slate-blue, #7b68ee);
@@ -662,6 +780,19 @@
         </div>
     </div>
 
+    <!-- Context Menu -->
+    <div id="colorContextMenu" class="color-context-menu" style="display: none;">
+        <div class="color-option none" data-color="none" title="Clear Color">
+            <i class="fa-solid fa-ban"></i>
+        </div>
+        <div class="color-option" data-color="red" style="background: var(--cc-red);" title="Red"></div>
+        <div class="color-option" data-color="orange" style="background: var(--cc-orange);" title="Orange"></div>
+        <div class="color-option" data-color="yellow" style="background: var(--cc-yellow);" title="Yellow"></div>
+        <div class="color-option" data-color="green" style="background: var(--cc-green);" title="Green"></div>
+        <div class="color-option" data-color="blue" style="background: var(--cc-blue);" title="Blue"></div>
+        <div class="color-option" data-color="purple" style="background: var(--cc-purple);" title="Purple"></div>
+    </div>
+
     <!-- Notification Container -->
     <div id="notificationContainer" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
 
@@ -675,7 +806,8 @@
             title: 'Student Material Tracker',
             materials: [], // Array of material names
             tracking: {},   // Object: { StudentName: { MaterialName: 'brought' | 'missing' | null } }
-            inactiveStudents: {} // Object: { StudentName: boolean }
+            inactiveStudents: {}, // Object: { StudentName: boolean }
+            colors: { row: {}, col: {}, cell: {} }
         };
 
         // Load Data
@@ -685,6 +817,7 @@
                 appData = JSON.parse(saved);
                 if (!appData.title) appData.title = 'Student Material Tracker';
                 if (!appData.inactiveStudents) appData.inactiveStudents = {};
+                if (!appData.colors) appData.colors = { row: {}, col: {}, cell: {} };
                 document.getElementById('trackerTitleInput').value = appData.title;
             } else {
                 // Initialize empty tracking for all students
@@ -725,6 +858,10 @@
             appData.materials.forEach((material, index) => {
                 const th = document.createElement('th');
                 th.className = 'material-header';
+
+                const colColor = appData.colors?.col?.[material];
+                if (colColor) th.classList.add(`cc-${colColor}`);
+
                 th.draggable = true;
                 th.dataset.index = index;
                 th.innerHTML = `
@@ -742,6 +879,7 @@
                 th.addEventListener('dragenter', handleDragEnter);
                 th.addEventListener('dragleave', handleDragLeave);
                 th.addEventListener('dragend', handleDragEnd);
+                th.addEventListener('contextmenu', (e) => showColorMenu(e, 'col', null, material));
 
                 headerRow.appendChild(th);
             });
@@ -752,9 +890,13 @@
                 const tr = document.createElement('tr');
                 if (isInactive) tr.className = 'inactive-row';
 
+                const rowColor = appData.colors?.row?.[student];
+                if (rowColor) tr.classList.add(`cc-${rowColor}`);
+
                 // Name Cell
                 const nameTd = document.createElement('td');
                 nameTd.className = 'student-name-cell';
+                if (rowColor) nameTd.classList.add(`cc-${rowColor}`);
 
                 const nameSpan = document.createElement('span');
                 nameSpan.textContent = student;
@@ -772,6 +914,7 @@
                     renderTable();
                 };
                 nameTd.appendChild(toggleBtn);
+                nameTd.addEventListener('contextmenu', (e) => showColorMenu(e, 'row', student, null));
 
                 tr.appendChild(nameTd);
 
@@ -779,6 +922,12 @@
                 appData.materials.forEach(material => {
                     const status = getStudentStatus(student, material);
                     const td = document.createElement('td');
+
+                    const cellColor = appData.colors?.cell?.[student]?.[material];
+                    if (cellColor) {
+                        td.classList.add(`cc-${cellColor}`);
+                    }
+                    td.addEventListener('contextmenu', (e) => showColorMenu(e, 'cell', student, material));
 
                     const contentDiv = document.createElement('div');
 
@@ -1039,6 +1188,69 @@
             reader.readAsText(file);
             // Reset input so the same file could be loaded again if needed
             this.value = '';
+        });
+
+        // Color Context Menu Logic
+        let contextMenuTarget = null;
+        function showColorMenu(e, type, student, material) {
+            e.preventDefault();
+            contextMenuTarget = { type, student, material };
+            const menu = document.getElementById('colorContextMenu');
+            menu.style.display = 'flex';
+            let x = e.pageX;
+            let y = e.pageY;
+            if (x + 240 > window.innerWidth) x = window.innerWidth - 240;
+            if (y + 50 > window.innerHeight) y = window.innerHeight - 50;
+            menu.style.left = x + 'px';
+            menu.style.top = y + 'px';
+        }
+
+        document.addEventListener('click', (e) => {
+            const menu = document.getElementById('colorContextMenu');
+            if (menu && menu.style.display === 'flex' && !menu.closest('.color-context-menu') && !e.target.closest('.color-context-menu')) {
+                menu.style.display = 'none';
+                contextMenuTarget = null;
+            }
+        });
+
+        document.querySelectorAll('.color-option').forEach(opt => {
+            opt.addEventListener('click', (e) => {
+                if (!contextMenuTarget) return;
+                const color = opt.dataset.color;
+                const { type, student, material } = contextMenuTarget;
+
+                if (!appData.colors) appData.colors = { row: {}, col: {}, cell: {} };
+                if (type === 'row') {
+                    if (color === 'none') {
+                        delete appData.colors.row[student];
+                    } else {
+                        appData.colors.row[student] = color;
+                    }
+                } else if (type === 'col') {
+                    if (color === 'none') {
+                        delete appData.colors.col[material];
+                    } else {
+                        appData.colors.col[material] = color;
+                    }
+                } else if (type === 'cell') {
+                    if (!appData.colors.cell[student]) appData.colors.cell[student] = {};
+                    if (color === 'none') {
+                        delete appData.colors.cell[student][material];
+                        if (Object.keys(appData.colors.cell[student]).length === 0) {
+                            delete appData.colors.cell[student];
+                        }
+                    } else {
+                        appData.colors.cell[student][material] = color;
+                    }
+                }
+
+                saveData();
+                renderTable();
+
+                const menu = document.getElementById('colorContextMenu');
+                menu.style.display = 'none';
+                contextMenuTarget = null;
+            });
         });
 
         // Initialize
