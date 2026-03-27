@@ -17,6 +17,12 @@
             --cc-green: #caffbf;
             --cc-blue: #9bf6ff;
             --cc-purple: #bdb2ff;
+            --cc-pink: #ffb3de;
+            --cc-teal: #96f2d7;
+            --cc-coral: #ffb5a0;
+            --cc-indigo: #a3b8f5;
+            --cc-lime: #d8f5a2;
+            --cc-peach: #ffd8b1;
         }
 
         body.dark-mode {
@@ -26,6 +32,12 @@
             --cc-green: #2b5c2b;
             --cc-blue: #2b4f5c;
             --cc-purple: #3c2b5c;
+            --cc-pink: #5c2b44;
+            --cc-teal: #1e4d3d;
+            --cc-coral: #5c3028;
+            --cc-indigo: #2b3561;
+            --cc-lime: #3d4f1e;
+            --cc-peach: #5c4030;
         }
 
         /* Color Coding Utility Classes */
@@ -71,6 +83,48 @@
             background-color: var(--cc-purple) !important;
         }
 
+        th.cc-pink,
+        td.cc-pink,
+        .student-name-cell.cc-pink,
+        tr.cc-pink td {
+            background-color: var(--cc-pink) !important;
+        }
+
+        th.cc-teal,
+        td.cc-teal,
+        .student-name-cell.cc-teal,
+        tr.cc-teal td {
+            background-color: var(--cc-teal) !important;
+        }
+
+        th.cc-coral,
+        td.cc-coral,
+        .student-name-cell.cc-coral,
+        tr.cc-coral td {
+            background-color: var(--cc-coral) !important;
+        }
+
+        th.cc-indigo,
+        td.cc-indigo,
+        .student-name-cell.cc-indigo,
+        tr.cc-indigo td {
+            background-color: var(--cc-indigo) !important;
+        }
+
+        th.cc-lime,
+        td.cc-lime,
+        .student-name-cell.cc-lime,
+        tr.cc-lime td {
+            background-color: var(--cc-lime) !important;
+        }
+
+        th.cc-peach,
+        td.cc-peach,
+        .student-name-cell.cc-peach,
+        tr.cc-peach td {
+            background-color: var(--cc-peach) !important;
+        }
+
         td[class*="cc-"] .cell-content.text-mode {
             background: rgba(255, 255, 255, 0.4);
         }
@@ -82,12 +136,15 @@
         .color-context-menu {
             position: absolute;
             background: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-            padding: 8px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+            padding: 10px;
             display: flex;
+            flex-wrap: wrap;
             gap: 8px;
             z-index: 10000;
+            width: 204px;
+            /* 6 swatches × 24px + 5 gaps × 8px + 2×10px padding */
         }
 
         body.dark-mode .color-context-menu {
@@ -782,15 +839,19 @@
 
     <!-- Context Menu -->
     <div id="colorContextMenu" class="color-context-menu" style="display: none;">
-        <div class="color-option none" data-color="none" title="Clear Color">
-            <i class="fa-solid fa-ban"></i>
-        </div>
+        <div class="color-option none" data-color="none" title="Clear Color"><i class="fa-solid fa-ban"></i></div>
         <div class="color-option" data-color="red" style="background: var(--cc-red);" title="Red"></div>
         <div class="color-option" data-color="orange" style="background: var(--cc-orange);" title="Orange"></div>
         <div class="color-option" data-color="yellow" style="background: var(--cc-yellow);" title="Yellow"></div>
         <div class="color-option" data-color="green" style="background: var(--cc-green);" title="Green"></div>
         <div class="color-option" data-color="blue" style="background: var(--cc-blue);" title="Blue"></div>
         <div class="color-option" data-color="purple" style="background: var(--cc-purple);" title="Purple"></div>
+        <div class="color-option" data-color="pink" style="background: var(--cc-pink);" title="Pink"></div>
+        <div class="color-option" data-color="teal" style="background: var(--cc-teal);" title="Teal"></div>
+        <div class="color-option" data-color="coral" style="background: var(--cc-coral);" title="Coral"></div>
+        <div class="color-option" data-color="indigo" style="background: var(--cc-indigo);" title="Indigo"></div>
+        <div class="color-option" data-color="lime" style="background: var(--cc-lime);" title="Lime"></div>
+        <div class="color-option" data-color="peach" style="background: var(--cc-peach);" title="Peach"></div>
     </div>
 
     <!-- Notification Container -->
@@ -1218,14 +1279,16 @@
 
             el.addEventListener('touchstart', (e) => {
                 if (e.touches.length > 1) return;
-                const touch = e.touches[0];
-                const pageX = touch.pageX;
-                const pageY = touch.pageY;
+
+                // Capture element position at touchstart for accurate anchoring
+                const rect = el.getBoundingClientRect();
+                const anchorX = rect.left + window.scrollX;
+                const anchorY = rect.bottom + window.scrollY + 6; // 6px gap below element
 
                 touchTimer = setTimeout(() => {
                     touchTimer = null;
                     if (navigator.vibrate) navigator.vibrate(50);
-                    showColorMenu({ pageX, pageY, preventDefault: () => { if (e.cancelable) e.preventDefault(); } }, type, student, material);
+                    showColorMenu({ pageX: anchorX, pageY: anchorY, preventDefault: () => { } }, type, student, material);
                 }, 500);
             }, { passive: true });
 
