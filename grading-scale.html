@@ -6,7 +6,8 @@
     <link rel="icon" type="image/png" href="assets/graduation-cap-icon.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Grading Scale Generator - ESL Learning Platform</title>
-    <meta name="description" content="Generate custom grading scales and calculate student grades from CSV uploads.">
+    <meta name="description"
+        content="Generate custom grading scales and calculate student grades from CSV uploads with multi-column support.">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/grading-scale.css">
@@ -75,23 +76,39 @@
                                 <span class="gs-hint">Score step between each row</span>
                             </div>
                         </div>
-                        <div style="display: flex; gap: 10px; margin-top: 10px;">
-                            <button id="gs-generate-btn" class="gs-generate-btn" style="margin-top: 0;">
+                        <div class="gs-action-row">
+                            <button id="gs-generate-btn" class="gs-generate-btn">
                                 <i class="fa-solid fa-wand-magic-sparkles"></i> Generate Scale
                             </button>
-                            <button id="gs-drive-btn" class="gs-generate-btn"
-                                style="margin-top: 0; background: linear-gradient(135deg, #4285F4, #0F9D58);">
+                            <button id="gs-save-scale-btn" class="gs-generate-btn gs-save-scale-btn-style">
+                                <i class="fa-solid fa-bookmark"></i> Save as Named Scale
+                            </button>
+                            <button id="gs-drive-btn" class="gs-generate-btn gs-drive-btn-style">
                                 <i class="fa-brands fa-google-drive"></i> Save/Load to Drive
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <!-- ==================== SECTION 2: SCALE TABLE ==================== -->
+                <!-- ==================== SECTION 1.5: SAVED SCALES ==================== -->
+                <div class="gs-section">
+                    <div class="gs-section-header">
+                        <i class="fa-solid fa-bookmark"></i>
+                        <h2>Named Scales</h2>
+                        <span class="gs-section-header-hint">Save different scales to assign per column</span>
+                    </div>
+                    <div class="gs-section-body">
+                        <div id="gs-saved-scales-list">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ==================== SECTION 2: SCALE PREVIEW TABLE ==================== -->
                 <div class="gs-section">
                     <div class="gs-section-header">
                         <i class="fa-solid fa-table-list"></i>
-                        <h2>Generated Scale</h2>
+                        <h2>Generated Scale Preview</h2>
                     </div>
                     <div class="gs-section-body" id="gs-scale-body">
                         <!-- Populated by JS -->
@@ -117,6 +134,20 @@
                                 <i class="fa-solid fa-download"></i> Export CSV
                             </button>
                             <span id="gs-file-info" class="gs-file-info"></span>
+                        </div>
+
+                        <!-- ============ COLUMN SCALE ASSIGNMENT (multi-column only) ============ -->
+                        <div id="gs-col-assignment-section" class="gs-section gs-col-assignment-section"
+                            style="display:none;">
+                            <div class="gs-section-header">
+                                <i class="fa-solid fa-table-columns"></i>
+                                <h2>Column Scale Assignment</h2>
+                                <span class="gs-section-header-hint">Choose which scale to apply to each score
+                                    column</span>
+                            </div>
+                            <div class="gs-section-body" id="gs-col-assignment-body">
+                                <!-- Populated by JS -->
+                            </div>
                         </div>
 
                         <!-- Summary stats -->

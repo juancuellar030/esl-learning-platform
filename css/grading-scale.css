@@ -895,3 +895,308 @@ body.dark-mode .gs-scale-wrapper::-webkit-scrollbar-track,
 body.dark-mode .gs-students-wrapper::-webkit-scrollbar-track {
     background: #1a1a2e;
 }
+
+/* ============================================================
+   MULTI-COLUMN ENHANCEMENTS (Named Scales & Column Assignment)
+   ============================================================ */
+
+/* Action Row */
+.gs-action-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.gs-action-row button {
+    margin-top: 0;
+}
+
+.gs-save-scale-btn-style {
+    background: linear-gradient(135deg, #16a085, #1abc9c);
+}
+
+.gs-drive-btn-style {
+    background: linear-gradient(135deg, #4285F4, #0F9D58);
+}
+
+.gs-section-header-hint {
+    font-size: 0.85rem;
+    color: #777;
+    margin-left: auto;
+    font-weight: 500;
+}
+
+body.dark-mode .gs-section-header-hint {
+    color: #888;
+}
+
+/* Saved Scales List */
+#gs-saved-scales-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.gs-saved-scales-empty {
+    width: 100%;
+    padding: 20px;
+    text-align: center;
+    color: #888;
+    background: rgba(0, 0, 0, 0.02);
+    border-radius: 8px;
+    font-style: italic;
+    border: 1px dashed #ccc;
+}
+
+body.dark-mode .gs-saved-scales-empty {
+    background: rgba(255, 255, 255, 0.02);
+    border-color: #444;
+    color: #bbb;
+}
+
+.gs-scale-card {
+    background: white;
+    border: 1px solid #e0e0e8;
+    border-radius: 10px;
+    padding: 14px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    min-width: 280px;
+    flex: 1 1 auto;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+    transition: all 0.2s;
+}
+
+.gs-scale-card:hover {
+    border-color: var(--medium-slate-blue);
+    box-shadow: 0 6px 16px rgba(118, 120, 237, 0.1);
+}
+
+body.dark-mode .gs-scale-card {
+    background: #2a2a44;
+    border-color: #3a3a5c;
+}
+
+body.dark-mode .gs-scale-card:hover {
+    border-color: var(--medium-slate-blue);
+}
+
+.gs-scale-card-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.gs-scale-card-name {
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: var(--indigo-velvet);
+}
+
+body.dark-mode .gs-scale-card-name {
+    color: #a8a8e0;
+}
+
+.gs-scale-card-params {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    font-size: 0.8rem;
+    color: #666;
+}
+
+body.dark-mode .gs-scale-card-params {
+    color: #aaa;
+}
+
+.gs-scale-card-params span {
+    background: rgba(0, 0, 0, 0.04);
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+body.dark-mode .gs-scale-card-params span {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.gs-scale-card-delete {
+    background: none;
+    border: none;
+    color: #e74c3c;
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.gs-scale-card-delete:hover {
+    background: rgba(231, 76, 60, 0.1);
+    transform: scale(1.1);
+}
+
+/* Column Scale Assignment Panel */
+.gs-col-assignment-section {
+    border: 2px dashed #d0d0e0;
+    background: #fafaff;
+    margin-bottom: 24px;
+}
+
+body.dark-mode .gs-col-assignment-section {
+    border-color: #444;
+    background: #252538;
+}
+
+.gs-col-assignment-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.gs-col-assignment-header {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 16px;
+    padding: 0 16px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: #777;
+    text-transform: uppercase;
+}
+
+.gs-col-assignment-row {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 16px;
+    align-items: center;
+    background: white;
+    padding: 12px 16px;
+    border-radius: 10px;
+    border: 1px solid #e0e0e8;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+}
+
+body.dark-mode .gs-col-assignment-row {
+    background: #2a2a44;
+    border-color: #3a3a5c;
+}
+
+.gs-col-name-badge {
+    font-weight: 700;
+    color: var(--indigo-velvet);
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+body.dark-mode .gs-col-name-badge {
+    color: #a8a8e0;
+}
+
+.gs-col-scale-select {
+    padding: 10px 14px;
+    border: 2px solid #d0d0e0;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    font-family: inherit;
+    background: #fff;
+    color: #333;
+    width: 100%;
+    max-width: 400px;
+    cursor: pointer;
+}
+
+.gs-col-scale-select:focus {
+    border-color: var(--medium-slate-blue);
+    outline: none;
+}
+
+body.dark-mode .gs-col-scale-select {
+    background: #1e1e32;
+    border-color: #444;
+    color: #eee;
+}
+
+body.dark-mode .gs-col-scale-select:focus {
+    border-color: var(--medium-slate-blue);
+}
+
+/* Multi-column Student Table Extensions */
+.gs-col-score-header,
+.gs-col-grade-header {
+    text-align: center !important;
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.gs-col-score-header {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.gs-col-score-header small,
+.gs-col-grade-header small {
+    font-size: 0.7rem;
+    opacity: 0.8;
+    font-weight: 500;
+}
+
+td .gs-score-input[data-col] {
+    width: 70px;
+    /* Slightly narrower for multi-column */
+    padding: 6px 8px;
+    margin: 0 auto;
+    display: block;
+}
+
+/* Per-column stat groups */
+.gs-col-stat-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px;
+    border: 1px solid #d0d0e0;
+    border-radius: 10px;
+    background: white;
+}
+
+body.dark-mode .gs-col-stat-group {
+    background: #25253a;
+    border-color: #3a3a5c;
+}
+
+.gs-col-stat-label {
+    font-weight: 700;
+    color: var(--indigo-velvet);
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+body.dark-mode .gs-col-stat-label {
+    color: #a8a8e0;
+}
+
+.gs-col-stat-cards {
+    display: flex;
+    gap: 10px;
+}
+
+.gs-col-stat-cards .gs-stat-card {
+    min-width: 90px;
+    padding: 8px 12px;
+}
+
+.gs-col-stat-cards .gs-stat-card i {
+    font-size: 1.1rem;
+    width: 28px;
+    height: 28px;
+}
+
+.gs-col-stat-cards .gs-stat-value {
+    font-size: 1.1rem;
+}
