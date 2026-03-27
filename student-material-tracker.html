@@ -1304,7 +1304,11 @@
             appData.materials.forEach(m => csvContent += `,"${m.replace(/"/g, '""')}"`);
             csvContent += "\n";
 
-            students.forEach(student => {
+            const activeStudents = getActiveStudents();
+            activeStudents.forEach(student => {
+                // Skip exporting inactive students so the CSV closely matches the UI
+                if (appData.inactiveStudents && appData.inactiveStudents[student]) return;
+
                 let row = `"${student}"`;
                 appData.materials.forEach(material => {
                     const status = getStudentStatus(student, material);
