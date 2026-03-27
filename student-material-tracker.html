@@ -185,6 +185,54 @@
             border-color: #555;
         }
 
+        /* Group Selector */
+        .group-select-btn {
+            padding: 10px 14px;
+            border-radius: 12px;
+            border: none;
+            outline: none;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            backdrop-filter: blur(5px);
+            transition: all 0.2s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            min-width: 120px;
+        }
+
+        .group-select-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .group-select-btn option {
+            background: #2c1f56;
+            color: white;
+        }
+
+        .group-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        body.dark-mode .group-select-btn {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        body.dark-mode .group-select-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
         body {
             font-family: 'Reddit Sans', 'Google Sans Flex', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: var(--medium-slate-blue, #7b68ee);
@@ -807,6 +855,14 @@
                 <button class="btn btn-secondary" id="open-drive-btn" title="Google Drive">
                     <i class="fa-brands fa-google-drive"></i> Drive
                 </button>
+                <!-- Group Selector -->
+                <div class="group-badge" id="groupBadge" style="display:none;">
+                    <i class="fa-solid fa-users"></i>
+                    <span id="groupBadgeLabel"></span>
+                </div>
+                <select id="groupSelect" class="group-select-btn" title="Select student group">
+                    <option value="">👥 All Students</option>
+                </select>
                 <input type="text" id="newItemInput" class="new-item-input"
                     placeholder="Enter item name (e.g. Lunch Money)...">
                 <button class="btn btn-add" id="addItemBtn">
@@ -858,6 +914,7 @@
     <div id="notificationContainer" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
 
     <script src="js/students-data.js"></script>
+    <script src="js/student-groups-data.js"></script>
     <script>
         // Data Handling
         const STORAGE_KEY = 'esl_material_tracker_data';
@@ -868,8 +925,17 @@
             materials: [], // Array of material names
             tracking: {},   // Object: { StudentName: { MaterialName: 'brought' | 'missing' | null } }
             inactiveStudents: {}, // Object: { StudentName: boolean }
-            colors: { row: {}, col: {}, cell: {} }
+            colors: { row: {}, col: {}, cell: {} },
+            activeGroup: '' // '' = all students from students-data.js, or a group key like '3A'
         };
+
+        // Returns the active student list based on the selected group
+        function getActiveStudents() {
+            if (appData.activeGroup && STUDENT_GROUPS && STUDENT_GROUPS[appData.activeGroup]) {
+                return STUDENT_GROUPS[appData.activeGroup];
+            }
+            return studentNames; // default: students-data.js list
+        }
 
         // Load Data
         function loadData() {
@@ -879,11 +945,13 @@
                 if (!appData.title) appData.title = 'Student Material Tracker';
                 if (!appData.inactiveStudents) appData.inactiveStudents = {};
                 if (!appData.colors) appData.colors = { row: {}, col: {}, cell: {} };
+                if (appData.activeGroup === undefined) appData.activeGroup = '';
                 document.getElementById('trackerTitleInput').value = appData.title;
             } else {
                 // Initialize empty tracking for all students
-                students.forEach(s => appData.tracking[s] = {});
+                getActiveStudents().forEach(s => appData.tracking[s] = {});
             }
+            populateGroupSelector();
             renderTable();
         }
 
@@ -900,9 +968,9 @@
 
         // Render Table
         function renderTable() {
+            const activeStudents = getActiveStudents();
             const headerRow = document.getElementById('headerRow');
             const tableBody = document.getElementById('tableBody');
-            const emptyState = document.getElementById('emptyState');
 
             // Clear current (keep first th)
             headerRow.innerHTML = '<th class="student-name-header">Student Name</th>';
@@ -946,7 +1014,7 @@
             });
 
             // Render Rows
-            students.forEach(student => {
+            activeStudents.forEach(student => {
                 const isInactive = appData.inactiveStudents && appData.inactiveStudents[student];
                 const tr = document.createElement('tr');
                 if (isInactive) tr.className = 'inactive-row';
@@ -1129,6 +1197,44 @@
             appData.tracking[student][material] = next;
             saveData();
             renderTable();
+        }
+
+        // Group Selector Init
+        function populateGroupSelector() {
+            const sel = document.getElementById('groupSelect');
+            if (!sel || typeof STUDENT_GROUPS === 'undefined') return;
+
+            // Clear old options (keep first)
+            sel.innerHTML = `<option value="">👥 All Students (${studentNames.length})</option>`;
+            Object.keys(STUDENT_GROUPS).forEach(key => {
+                const count = STUDENT_GROUPS[key].length;
+                const opt = document.createElement('option');
+                opt.value = key;
+                opt.textContent = `Group ${key} (${count})`;
+                if (appData.activeGroup === key) opt.selected = true;
+                sel.appendChild(opt);
+            });
+
+            updateGroupBadge();
+
+            sel.addEventListener('change', () => {
+                appData.activeGroup = sel.value;
+                saveData();
+                updateGroupBadge();
+                renderTable();
+            });
+        }
+
+        function updateGroupBadge() {
+            const badge = document.getElementById('groupBadge');
+            const label = document.getElementById('groupBadgeLabel');
+            if (!badge || !label) return;
+            if (appData.activeGroup && STUDENT_GROUPS && STUDENT_GROUPS[appData.activeGroup]) {
+                label.textContent = `Group ${appData.activeGroup} — ${STUDENT_GROUPS[appData.activeGroup].length} students`;
+                badge.style.display = 'flex';
+            } else {
+                badge.style.display = 'none';
+            }
         }
 
         // Add Material
