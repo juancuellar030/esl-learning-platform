@@ -13,8 +13,48 @@
     let scaleGenerated = false;
     let currentSort = { column: null, direction: 'asc' };
 
+    const STORAGE_KEY = 'esl_grading_scale_data';
+
     // ===== DOM REFS =====
     const $ = id => document.getElementById(id);
+
+    // ===== LOCAL STORAGE =====
+    function saveData() {
+        const data = {
+            pmax: parseFloat($('gs-pmax').value) || 100,
+            exig: parseFloat($('gs-exig').value) || 60,
+            nmin: parseFloat($('gs-nmin').value) || 1.0,
+            nmax: parseFloat($('gs-nmax').value) || 7.0,
+            napr: parseFloat($('gs-napr').value) || 4.0,
+            increment: parseFloat($('gs-increment').value) || 1.0,
+            savedScales,
+            exportWholeNumbers: $('gs-export-whole-numbers') ? $('gs-export-whole-numbers').checked : false
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+
+    function loadData() {
+        try {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (!saved) return;
+            const data = JSON.parse(saved);
+
+            if (data.pmax !== undefined) $('gs-pmax').value = data.pmax;
+            if (data.exig !== undefined) $('gs-exig').value = data.exig;
+            if (data.nmin !== undefined) $('gs-nmin').value = data.nmin;
+            if (data.nmax !== undefined) $('gs-nmax').value = data.nmax;
+            if (data.napr !== undefined) $('gs-napr').value = data.napr;
+            if (data.increment !== undefined) $('gs-increment').value = data.increment;
+            if (data.exportWholeNumbers !== undefined && $('gs-export-whole-numbers')) {
+                $('gs-export-whole-numbers').checked = data.exportWholeNumbers;
+            }
+            if (Array.isArray(data.savedScales)) {
+                savedScales = data.savedScales;
+            }
+        } catch (e) {
+            console.error('Failed to parse scale data from local storage', e);
+        }
+    }
 
     // ===== HELPERS =====
     function uid() { return 'scale_' + Math.random().toString(36).substr(2, 9); }
@@ -111,6 +151,7 @@
         savedScales.push({ id: uid(), name: name.trim(), pmax, exig, nmin, nmax, napr, increment });
         renderSavedScales();
         renderColumnAssignment();
+        saveData();
         showToast(`Scale "${name.trim()}" saved!`, 'success');
     }
 
@@ -121,6 +162,7 @@
         renderSavedScales();
         renderColumnAssignment();
         updateStudentGrades();
+        saveData();
         showToast('Scale deleted', 'info');
     }
 
@@ -178,6 +220,7 @@
         renderScaleTable(napr);
         scaleGenerated = true;
         updateStudentGrades();
+        saveData();
         showToast('Scale generated successfully!', 'success');
     }
 
@@ -698,6 +741,8 @@
             return;
         }
 
+        const exportWholeNumbers = $('gs-export-whole-numbers') && $('gs-export-whole-numbers').checked;
+
         const colHeaders = columnConfigs.flatMap(cfg => [`"${cfg.label} Score"`, `"${cfg.label} Grade"`]);
         let csv = `Name,${colHeaders.join(',')},Status\n`;
 
@@ -705,9 +750,18 @@
             const cols = columnConfigs.flatMap(cfg => {
                 const score = s.rawScores[cfg.label];
                 const grade = s.grades[cfg.label];
+
+                let gradeStr = '';
+                if (grade !== undefined && grade !== null) {
+                    gradeStr = grade.toFixed(1);
+                    if (exportWholeNumbers) {
+                        gradeStr = gradeStr.replace('.', '');
+                    }
+                }
+
                 return [
                     (score !== null && score !== undefined) ? score : '',
-                    (grade !== undefined && grade !== null) ? grade.toFixed(1) : ''
+                    gradeStr
                 ];
             });
 
@@ -755,6 +809,8 @@
 
     // ===== INIT =====
     function init() {
+        loadData();
+
         $('gs-generate-btn').addEventListener('click', generateScale);
         $('gs-save-scale-btn').addEventListener('click', saveNamedScale);
         $('gs-drive-btn').addEventListener('click', () => driveService.openModal());
@@ -763,7 +819,11 @@
         $('gs-calc-btn').addEventListener('click', calculateAllGrades);
         $('gs-export-btn').addEventListener('click', exportCSV);
 
-        renderScaleTable(4.0);
+        if ($('gs-export-whole-numbers')) {
+            $('gs-export-whole-numbers').addEventListener('change', saveData);
+        }
+
+        renderScaleTable(parseFloat($('gs-napr').value) || 4.0);
         renderStudentsTable();
         renderSavedScales();
     }
