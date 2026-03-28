@@ -623,5 +623,212 @@ body.dark-mode .birthday-panel-empty i {
 }
 
 body.dark-mode .celebration-overlay {
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    background: rgba(18, 18, 18, 0.95);
+}
+
+/* ===== CELEBRATION BACKGROUND THEMES ===== */
+.celebration-overlay.bg-ocean {
+    background: linear-gradient(135deg, #00b4db, #0083b0);
+}
+
+.celebration-overlay.bg-sunset {
+    background: linear-gradient(135deg, #ff7e5f, #feb47b);
+}
+
+.celebration-overlay.bg-purple {
+    background: linear-gradient(135deg, #654ea3, #eaafc8);
+}
+
+.celebration-overlay.bg-forest {
+    background: linear-gradient(135deg, #11998e, #38ef7d);
+}
+
+/* Share Modal Elements */
+.bday-share-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.9);
+    background: var(--surface, #ffffff);
+    border: 1px solid var(--border, #e0e0e0);
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    padding: 24px;
+    z-index: 10005;
+    width: 340px;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.bday-share-modal.active {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.bday-share-content h4 {
+    margin: 0 0 12px 0;
+    color: var(--text, #333333);
+    font-size: 1.1rem;
+}
+
+.bday-share-content p {
+    margin: 0 0 12px 0;
+    font-size: 0.9rem;
+    color: var(--text-muted, #777777);
+}
+
+.bday-bg-options {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+    justify-content: center;
+}
+
+.bday-bg-option {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 3px solid transparent;
+    transition: transform 0.2s;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.bday-bg-option:hover {
+    transform: scale(1.1);
+}
+
+.bday-bg-option.active {
+    border-color: var(--text, #333);
+    transform: scale(1.15);
+    box-shadow: 0 0 0 2px var(--surface, #fff), 0 0 0 4px var(--primary, #4a6cfa);
+}
+
+.bday-share-link-group {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.bday-share-link-group input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid var(--border, #e0e0e0);
+    border-radius: 6px;
+    background: var(--bg, #f5f6fa);
+    color: var(--text, #333);
+    font-size: 0.85rem;
+}
+
+.bday-share-link-group button {
+    background: var(--primary, #4a6cfa);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 0 16px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.bday-share-link-group button:hover {
+    background: var(--hover, #3a5ce0);
+}
+
+.bday-share-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.bday-close-share {
+    padding: 10px 20px;
+    border: 1px solid var(--border, #e0e0e0);
+    border-radius: 6px;
+    background: var(--surface, #fff);
+    color: var(--text, #333);
+    cursor: pointer;
+    flex: 1;
+    font-weight: bold;
+    transition: background 0.2s;
+}
+
+.bday-close-share:hover {
+    background: var(--bg, #f5f6fa);
+}
+
+.bday-preview-btn {
+    padding: 10px 20px;
+    background: var(--success, #00b894);
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-weight: bold;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    transition: background 0.2s;
+}
+
+.bday-preview-btn:hover {
+    background: #00a383;
+}
+
+.birthday-item {
+    position: relative;
+    padding-right: 45px;
+    /* Give room to share button */
+}
+
+.bday-share-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted, #777);
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 6px;
+    opacity: 0;
+    transition: all 0.2s;
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.1rem;
+}
+
+.birthday-item:hover .bday-share-btn {
+    opacity: 0.6;
+}
+
+.birthday-item:hover .bday-share-btn:hover {
+    opacity: 1;
+    color: var(--primary, #4a6cfa);
+    background: var(--hover, rgba(0, 0, 0, 0.05));
+    transform: translateY(-50%) scale(1.1);
+}
+
+.birthday-item:hover .birthday-item-days {
+    opacity: 0.3;
+    transform: translateX(-35px);
+}
+
+.birthday-item-days {
+    transition: all 0.3s ease;
+}
+
+body.dark-mode .bday-share-modal {
+    background: var(--surface);
+    border-color: var(--border);
+}
+
+body.dark-mode .bday-bg-option.active {
+    box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--primary);
+    border-color: white;
+}
+
+body.dark-mode .bday-share-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
 }

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="assets/graduation-cap-icon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday! - ESL Learning Platform</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/birthday-notifications.css">
+    <style>
+        /* Standalone page adjustments */
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: var(--bg);
+        }
+
+        /* Hide the close button in standalone mode */
+        .celebration-close-btn {
+            display: none !important;
+        }
+
+        .celebration-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Script will automatically hook into URL params and show the overlay -->
+    <script src="js/darkmode.js"></script>
+    <script src="js/birthday-notifications.js"></script>
+</body>
+
+</html>

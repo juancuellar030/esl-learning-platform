@@ -137,6 +137,48 @@
         overlay.id = 'birthdayPanelOverlay';
         document.body.appendChild(overlay);
 
+        // Share Modal
+        const shareModal = document.createElement('div');
+        shareModal.className = 'bday-share-modal';
+        shareModal.id = 'bdayShareModal';
+        shareModal.innerHTML = `
+            <div class="bday-share-content">
+                <h4>Share Birthday Link</h4>
+                <p>Choose a background effect:</p>
+                <div class="bday-bg-options">
+                    <div class="bday-bg-option active" data-bg="bg-default" style="background: var(--surface, #fff);"></div>
+                    <div class="bday-bg-option" data-bg="bg-ocean" style="background: linear-gradient(135deg, #00b4db, #0083b0);"></div>
+                    <div class="bday-bg-option" data-bg="bg-sunset" style="background: linear-gradient(135deg, #ff7e5f, #feb47b);"></div>
+                    <div class="bday-bg-option" data-bg="bg-purple" style="background: linear-gradient(135deg, #654ea3, #eaafc8);"></div>
+                    <div class="bday-bg-option" data-bg="bg-forest" style="background: linear-gradient(135deg, #11998e, #38ef7d);"></div>
+                </div>
+                <div class="bday-share-link-group">
+                    <input type="text" id="bdayShareInput" readonly>
+                    <button id="bdayCopyBtn" title="Copy Link"><i class="fa-solid fa-copy"></i></button>
+                </div>
+                <div class="bday-share-actions">
+                    <button class="bday-close-share" onclick="window._birthdaySystem.closeShareModal()">Close</button>
+                    <a id="bdayPreviewLink" href="#" target="_blank" class="bday-preview-btn">Preview</a>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(shareModal);
+
+        // set up bg option clicks
+        const bgOptions = shareModal.querySelectorAll('.bday-bg-option');
+        bgOptions.forEach(opt => {
+            opt.addEventListener('click', (e) => {
+                bgOptions.forEach(o => o.classList.remove('active'));
+                const target = e.target.closest('.bday-bg-option');
+                target.classList.add('active');
+                if (window._birthdaySystem && window._birthdaySystem.generateLink) {
+                    window._birthdaySystem.generateLink();
+                } else {
+                    generateLink();
+                }
+            });
+        });
+
         // Panel
         const panel = document.createElement('div');
         panel.className = 'birthday-panel';
@@ -255,6 +297,9 @@
                         <div class="birthday-item-date">${formatBirthdate(s.birthdate)}${weekendNote}</div>
                     </div>
                     <span class="birthday-item-days ${daysClass}">${daysLabel}</span>
+                    <button class="bday-share-btn" title="Share Birthday Link" onclick="event.stopPropagation(); window._birthdaySystem.openShareModal('${s.name.replace(/'/g, "\\'")}', '${s.birthdate}')">
+                        <i class="fa-solid fa-share-nodes"></i>
+                    </button>
                 </div>
             `;
         }).join('');
@@ -282,8 +327,8 @@
     function closePanel() {
         const panel = document.getElementById('birthdayPanel');
         const overlay = document.getElementById('birthdayPanelOverlay');
-        panel.classList.remove('active');
-        overlay.classList.remove('active');
+        if (panel) panel.classList.remove('active');
+        if (overlay) overlay.classList.remove('active');
     }
 
 
@@ -292,7 +337,7 @@
     let confettiInterval = null;
     let birthdayAudio = null;
 
-    function openCelebration(name, birthdate) {
+    function openCelebration(name, birthdate, bgStyle = 'bg-default') {
         closePanel();
 
         const overlay = document.getElementById('celebrationOverlay');
@@ -307,6 +352,10 @@
         nameEl.style.animation = 'none';
         nameEl.offsetHeight; // trigger reflow
         nameEl.style.animation = '';
+
+        // Reset previous bg classes
+        overlay.classList.remove('bg-default', 'bg-ocean', 'bg-sunset', 'bg-purple', 'bg-forest');
+        if (bgStyle) overlay.classList.add(bgStyle);
 
         overlay.classList.add('active');
 
@@ -326,14 +375,16 @@
 
     function closeCelebration() {
         const overlay = document.getElementById('celebrationOverlay');
-        overlay.classList.remove('active');
+        if (overlay) overlay.classList.remove('active');
         stopConfetti();
         clearBalloons();
         stopBirthdayMusic();
 
         // Refresh panel data after dismissing
-        renderPanelWithState();
-        updateBellBadge(getUpcomingBirthdays());
+        if (document.getElementById('birthdayPanel')) {
+            renderPanelWithState();
+            updateBellBadge(getUpcomingBirthdays());
+        }
     }
 
     function updateBellBadge(upcoming) {
@@ -510,15 +561,100 @@
     }
 
 
+    // ─── Share UI & Standalone Support ───────────────────────
+    let currentShareName = '';
+    let currentShareDate = '';
+
+    function openShareModal(name, birthdate) {
+        closePanel();
+        currentShareName = name;
+        currentShareDate = birthdate;
+        const modal = document.getElementById('bdayShareModal');
+        if (!modal) return;
+
+        // Reset defaults
+        const bgOptions = modal.querySelectorAll('.bday-bg-option');
+        bgOptions.forEach(o => o.classList.remove('active'));
+        if (bgOptions.length > 0) bgOptions[0].classList.add('active');
+
+        generateLink();
+        modal.classList.add('active');
+    }
+
+    function closeShareModal() {
+        const modal = document.getElementById('bdayShareModal');
+        if (modal) modal.classList.remove('active');
+        const btn = document.getElementById('bdayCopyBtn');
+        if (btn) btn.innerHTML = '<i class="fa-solid fa-copy"></i>';
+    }
+
+    function generateLink() {
+        const modal = document.getElementById('bdayShareModal');
+        if (!modal) return;
+        const activeBgOpt = modal.querySelector('.bday-bg-option.active');
+        const activeBg = activeBgOpt ? activeBgOpt.dataset.bg : 'bg-default';
+
+        const urlArgs = new URLSearchParams();
+        urlArgs.set('n', currentShareName);
+        urlArgs.set('d', currentShareDate);
+        urlArgs.set('bg', activeBg);
+
+        const baseUrl = window.location.href.split('/').slice(0, -1).join('/');
+        const finalUrl = baseUrl + '/birthday.html?' + urlArgs.toString();
+
+        document.getElementById('bdayShareInput').value = finalUrl;
+        document.getElementById('bdayPreviewLink').href = finalUrl;
+
+        const btn = document.getElementById('bdayCopyBtn');
+        btn.innerHTML = '<i class="fa-solid fa-copy"></i>';
+        btn.onclick = () => {
+            navigator.clipboard.writeText(finalUrl);
+            btn.innerHTML = '<i class="fa-solid fa-check"></i>';
+        };
+    }
+
+    function injectStandaloneOverlay() {
+        const celeb = document.createElement('div');
+        celeb.className = 'celebration-overlay';
+        celeb.id = 'celebrationOverlay';
+        celeb.innerHTML = `
+            <canvas class="confetti-canvas" id="confettiCanvas"></canvas>
+            <div class="balloon-container" id="balloonContainer"></div>
+            <div class="celebration-glow"></div>
+            <div class="celebration-content">
+                <div class="celebration-emoji">🎂</div>
+                <div class="celebration-title">Happy Birthday!</div>
+                <div class="celebration-name" id="celebrationName"></div>
+                <div class="celebration-date" id="celebrationDate"></div>
+            </div>
+        `;
+        document.body.appendChild(celeb);
+    }
+
     // ─── Init ───────────────────────────────────────────────
     document.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const bdayName = urlParams.get('n');
+        const bdayDate = urlParams.get('d');
+        const bdayBg = urlParams.get('bg');
+
+        if (bdayName && bdayDate) {
+            // Standalone mode explicitly
+            injectStandaloneOverlay();
+            openCelebration(bdayName, bdayDate, bdayBg || 'bg-default');
+            return;
+        }
+
         if (typeof STUDENTS_DATA === 'undefined') return;
         injectBirthdayUI();
     });
 
     // Expose for inline onclick
     window._birthdaySystem = {
-        openCelebration: openCelebration
+        openCelebration: openCelebration,
+        openShareModal: openShareModal,
+        closeShareModal: closeShareModal,
+        generateLink: generateLink
     };
 
 })();
