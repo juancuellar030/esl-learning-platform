@@ -460,20 +460,9 @@ function handleChoiceAnswer(chosen, correct, btn, grid) {
     if (wg.currentGame.answered) return;
     wg.currentGame.answered = true;
 
-    // Disable all
-    grid.querySelectorAll('.wg-choice-btn').forEach(b => b.disabled = true);
-
     const isCorrect = normalise(chosen) === normalise(correct);
     btn.classList.add(isCorrect ? 'correct' : 'wrong');
-
-    // If wrong, also highlight the correct one
-    if (!isCorrect) {
-        grid.querySelectorAll('.wg-choice-btn').forEach(b => {
-            if (normalise(b.textContent.replace(/^[A-F]/, '').trim()) === normalise(correct)) {
-                b.classList.add('correct');
-            }
-        });
-    }
+    if (!isCorrect) btn.disabled = true; // freeze this wrong choice so it can't be picked again
 
     showFeedback(isCorrect, correct);
 }
@@ -592,8 +581,7 @@ function showFeedback(isCorrect, word) {
     dom.feedbackBadge.className = 'wg-feedback-badge ' + (isCorrect ? 'correct' : 'wrong');
     dom.feedbackBadge.innerHTML = `
         <span class="wg-feedback-icon">${isCorrect ? '🎉' : '❌'}</span>
-        <span class="wg-feedback-label">${isCorrect ? 'Correct!' : 'Not quite!'}</span>
-        ${!isCorrect ? `<span class="wg-feedback-word">Answer: <strong>${escHtml(word)}</strong></span>` : ''}
+        <span class="wg-feedback-label">${isCorrect ? 'Correct!' : 'Not quite! Try again.'}</span>
     `;
     dom.feedbackOverlay.classList.add('active');
 
@@ -604,8 +592,29 @@ function showFeedback(isCorrect, word) {
         dom.feedbackOverlay.classList.remove('active');
         if (isCorrect) {
             advanceSession();
+        } else {
+            resetAnswerAreaForRetry();
         }
     }, FEEDBACK_DURATION);
+}
+
+function resetAnswerAreaForRetry() {
+    wg.currentGame.answered = false;
+
+    // Remove 'wrong' classes and re-enable inputs (except choice buttons that are already marked wrong)
+    const inputs = dom.answerArea.querySelectorAll('input, button:not(.wg-choice-btn.wrong)');
+    inputs.forEach(el => {
+        el.classList.remove('wrong', 'correct');
+        el.disabled = false;
+    });
+
+    // Handle reveal button if needed
+    const s = wg.sessions[wg.currentGame.sessionIdx];
+    if (s && s.revealMode === 'manual') updateRevealBtn(s);
+
+    // Focus the first text input/box if present
+    const firstInput = dom.answerArea.querySelector('input');
+    if (firstInput) setTimeout(() => firstInput.focus(), 100);
 }
 
 function advanceSession() {

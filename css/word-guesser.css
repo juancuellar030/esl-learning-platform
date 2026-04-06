@@ -480,6 +480,15 @@ body.dark-mode {
     border-radius: 50%;
 }
 
+.wg-settings-layout.sidebar-collapsed #wg-drive-sync-btn span {
+    display: none;
+}
+
+.wg-settings-layout.sidebar-collapsed #wg-drive-sync-btn i {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
 .wg-settings-layout.sidebar-collapsed #wg-start-game span.wg-btn-text {
     display: none;
 }
@@ -1024,7 +1033,7 @@ body.dark-mode .wg-btn-danger:hover:not(:disabled) {
     flex-direction: column;
     align-items: center;
     gap: 6px;
-    mx: auto;
+    margin: 0 auto;
 }
 
 .wg-game-progress span {
