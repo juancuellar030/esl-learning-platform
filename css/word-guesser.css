@@ -1,0 +1,1511 @@
+/* ============================================================
+   WORD GUESSER STYLES
+   ESL Learning Platform
+   Namespace: .wg-*
+   ============================================================ */
+
+/* ===== THEME VARIABLES ===== */
+:root {
+    --wg-bg-from: var(--indigo-velvet);
+    --wg-bg-to: var(--medium-slate-blue);
+    --wg-accent: var(--amber-flame);
+    --wg-accent-dark: var(--tiger-orange);
+    --wg-correct: #22c55e;
+    --wg-wrong: var(--cayenne-red);
+    --wg-panel-bg: rgba(255, 255, 255, 0.97);
+    --wg-panel-text: #222;
+    --wg-panel-muted: #777;
+    --wg-border: #e2e5ef;
+    --wg-input-bg: #f8f9fc;
+    --wg-shadow: 0 20px 60px rgba(0, 0, 0, 0.28);
+    --wg-radius: 24px;
+    --wg-radius-sm: 12px;
+}
+
+/* Theme overrides — matches quiz-game themes */
+body.theme-nature {
+    --wg-bg-from: #1b4332;
+    --wg-bg-to: #2d6a4f;
+    --wg-accent: #95d5b2;
+}
+
+body.theme-sunset {
+    --wg-bg-from: #7b2d8b;
+    --wg-bg-to: #b56576;
+    --wg-accent: #f9c74f;
+}
+
+body.theme-ocean {
+    --wg-bg-from: #03045e;
+    --wg-bg-to: #0077b6;
+    --wg-accent: #90e0ef;
+}
+
+body.theme-amber {
+    --wg-bg-from: #7b5800;
+    --wg-bg-to: #c77c00;
+    --wg-accent: #fff3b0;
+}
+
+/* Dark mode panel overrides */
+body.dark-mode {
+    --wg-panel-bg: rgba(30, 30, 45, 0.97);
+    --wg-panel-text: #e8e8f0;
+    --wg-panel-muted: #9090aa;
+    --wg-border: #3a3a55;
+    --wg-input-bg: #25253a;
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes wgFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(18px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes wgSlideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-16px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes wgPopIn {
+    0% {
+        transform: scale(0.25);
+        opacity: 0;
+    }
+
+    65% {
+        transform: scale(1.12);
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes wgShake {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    20% {
+        transform: translateX(-8px);
+    }
+
+    40% {
+        transform: translateX(8px);
+    }
+
+    60% {
+        transform: translateX(-5px);
+    }
+
+    80% {
+        transform: translateX(5px);
+    }
+}
+
+@keyframes wgGlow {
+
+    0%,
+    100% {
+        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+    }
+
+    50% {
+        box-shadow: 0 0 30px 8px rgba(34, 197, 94, 0.55);
+    }
+}
+
+@keyframes wgRevealClue {
+    from {
+        opacity: 0;
+        transform: translateY(-12px) scale(0.96);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes wgPulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+        box-shadow: 0 4px 20px rgba(247, 184, 1, 0.25);
+    }
+
+    50% {
+        transform: scale(1.04);
+        box-shadow: 0 8px 32px rgba(247, 184, 1, 0.55);
+    }
+}
+
+@keyframes wgFloat {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes wgFeedbackPop {
+    0% {
+        transform: scale(0.4) translateY(20px);
+        opacity: 0;
+    }
+
+    60% {
+        transform: scale(1.15) translateY(-4px);
+    }
+
+    100% {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes wgProgressGrow {
+    from {
+        width: 0;
+    }
+}
+
+@keyframes wgSidebarItemIn {
+    from {
+        opacity: 0;
+        transform: translateX(-14px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* ===== APP SHELL ===== */
+.wg-app {
+    position: fixed;
+    inset: 0;
+    font-family: 'Reddit Sans', 'Google Sans Flex', 'Inter', sans-serif;
+    background: linear-gradient(135deg, var(--wg-bg-from), var(--wg-bg-to));
+    color: white;
+    overflow: hidden;
+    transition: background 0.6s ease;
+}
+
+/* ===== SCREENS ===== */
+.wg-screen {
+    display: none;
+    position: absolute;
+    inset: 0;
+    overflow-y: auto;
+}
+
+.wg-screen.active {
+    display: block;
+    animation: wgFadeIn 0.4s ease;
+}
+
+/* ===== SETTINGS SCREEN LAYOUT ===== */
+.wg-settings-layout {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* ===== SESSION SIDEBAR ===== */
+.wg-session-sidebar {
+    background: rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.wg-sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 28px 24px 16px;
+    transition: padding 0.3s ease;
+}
+
+.wg-sidebar-toggle {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1.25rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 4px;
+    margin-right: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.wg-sidebar-toggle:hover {
+    color: white;
+    transform: scale(1.1);
+}
+
+.wg-sidebar-header h2 {
+    font-size: 1.15rem;
+    font-weight: 800;
+    letter-spacing: 0.3px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: white;
+}
+
+.wg-add-session-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    background: transparent;
+    color: white;
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.25s ease;
+}
+
+.wg-add-session-btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.7);
+    transform: rotate(90deg) scale(1.1);
+}
+
+.wg-add-session-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+.wg-session-list {
+    flex: 1;
+    overflow-y: auto;
+    list-style: none;
+    padding: 8px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+.wg-session-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+.wg-session-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+}
+
+.wg-session-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    border-radius: var(--wg-radius-sm);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1.5px solid transparent;
+    animation: wgSidebarItemIn 0.3s ease backwards;
+}
+
+.wg-session-item:hover {
+    background: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+.wg-session-item.active {
+    background: rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.35);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.wg-session-item-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: var(--wg-accent);
+    color: var(--indigo-velvet, #3d348b);
+    font-size: 0.8rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.wg-session-item-word {
+    flex: 1;
+    font-size: 0.95rem;
+    font-weight: 600;
+    opacity: 0.9;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.wg-session-item-delete {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.4);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.wg-session-item-delete:hover {
+    background: rgba(243, 91, 4, 0.25);
+    color: #ff8a65;
+}
+
+.wg-session-cap-hint {
+    padding: 0 16px 8px;
+    font-size: 0.8rem;
+    opacity: 0.65;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    justify-content: center;
+}
+
+.wg-sidebar-footer {
+    padding: 16px 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.wg-back-link {
+    color: rgba(255, 255, 255, 0.5);
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    justify-content: center;
+    transition: color 0.2s;
+}
+
+.wg-back-link:hover {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+/* ===== COLLAPSED SIDEBAR STATE ===== */
+.wg-settings-layout.sidebar-collapsed {
+    grid-template-columns: 80px 1fr;
+}
+
+.wg-settings-layout.sidebar-collapsed .wg-sidebar-header {
+    flex-direction: column;
+    padding: 28px 0 16px;
+    justify-content: center;
+    gap: 16px;
+}
+
+.wg-settings-layout.sidebar-collapsed .wg-sidebar-toggle {
+    margin-right: 0;
+}
+
+.wg-settings-layout.sidebar-collapsed .wg-sidebar-header h2,
+.wg-settings-layout.sidebar-collapsed .wg-add-session-btn {
+    display: none;
+}
+
+.wg-settings-layout.sidebar-collapsed .wg-session-item {
+    justify-content: center;
+    padding: 12px 0;
+}
+
+.wg-settings-layout.sidebar-collapsed .wg-session-item-word,
+.wg-settings-layout.sidebar-collapsed .wg-session-item-delete {
+    display: none;
+}
+
+.wg-settings-layout.sidebar-collapsed .wg-sidebar-footer {
+    align-items: center;
+    padding: 16px 0 24px;
+}
+
+.wg-settings-layout.sidebar-collapsed #wg-start-game {
+    width: 46px;
+    height: 46px;
+    padding: 0;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.wg-settings-layout.sidebar-collapsed #wg-start-game span.wg-btn-text {
+    display: none;
+}
+
+.wg-settings-layout.sidebar-collapsed #wg-start-game i {
+    margin: 0;
+    font-size: 1.1rem;
+    padding-left: 3px;
+    /* visual center for play icon */
+}
+
+.wg-settings-layout.sidebar-collapsed .wg-back-link span {
+    display: none;
+}
+
+.wg-settings-layout.sidebar-collapsed .wg-editor-form,
+.wg-settings-layout.sidebar-collapsed .wg-editor-empty {
+    display: none !important;
+}
+
+.wg-settings-layout.sidebar-collapsed #wg-editor-collapsed-state {
+    display: flex !important;
+}
+
+/* ===== SESSION EDITOR ===== */
+.wg-session-editor {
+    overflow-y: auto;
+    padding: 40px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+
+.wg-session-editor::-webkit-scrollbar {
+    width: 5px;
+}
+
+.wg-session-editor::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 5px;
+}
+
+/* Empty state */
+.wg-editor-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    min-height: 60vh;
+    text-align: center;
+    opacity: 0.65;
+    animation: wgFadeIn 0.4s ease;
+}
+
+.wg-editor-empty-icon {
+    font-size: 4.5rem;
+    margin-bottom: 20px;
+    animation: wgFloat 3.5s ease-in-out infinite;
+    color: var(--wg-accent);
+}
+
+.wg-editor-empty h3 {
+    font-size: 1.6rem;
+    font-weight: 800;
+    margin-bottom: 10px;
+}
+
+.wg-editor-empty p {
+    font-size: 1rem;
+    opacity: 0.8;
+}
+
+/* Editor form */
+.wg-editor-form {
+    background: var(--wg-panel-bg);
+    color: var(--wg-panel-text);
+    border-radius: var(--wg-radius);
+    padding: 36px;
+    max-width: 780px;
+    box-shadow: var(--wg-shadow);
+    animation: wgFadeIn 0.35s ease;
+    transition: background 0.3s, color 0.3s;
+}
+
+.wg-editor-header {
+    margin-bottom: 28px;
+    border-bottom: 2px solid var(--wg-border);
+    padding-bottom: 16px;
+}
+
+.wg-editor-header h3 {
+    font-size: 1.45rem;
+    font-weight: 800;
+    color: var(--indigo-velvet, #3d348b);
+}
+
+body.dark-mode .wg-editor-header h3 {
+    color: var(--medium-slate-blue, #7678ed);
+}
+
+/* Field groups */
+.wg-field-group {
+    margin-bottom: 24px;
+}
+
+.wg-field-label {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.9px;
+    color: var(--wg-panel-muted);
+    margin-bottom: 10px;
+}
+
+.wg-field-hint-inline {
+    font-size: 0.75rem;
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+    opacity: 0.75;
+    margin-left: 4px;
+}
+
+.wg-field-hint {
+    font-size: 0.8rem;
+    color: var(--wg-panel-muted);
+    margin-top: 7px;
+    display: flex;
+    align-items: flex-start;
+    gap: 5px;
+    line-height: 1.4;
+}
+
+/* Inputs */
+.wg-text-input,
+.wg-textarea {
+    width: 100%;
+    padding: 13px 18px;
+    border: 2px solid var(--wg-border);
+    border-radius: var(--wg-radius-sm);
+    font-size: 1rem;
+    font-family: inherit;
+    background: var(--wg-input-bg);
+    color: var(--wg-panel-text);
+    outline: none;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
+    box-sizing: border-box;
+    resize: vertical;
+}
+
+.wg-text-input:focus,
+.wg-textarea:focus {
+    border-color: var(--medium-slate-blue, #7678ed);
+    box-shadow: 0 0 0 3px rgba(118, 120, 237, 0.18);
+}
+
+.wg-textarea {
+    min-height: 130px;
+    line-height: 1.6;
+}
+
+/* Image upload */
+.wg-image-upload-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: var(--indigo-velvet, #3d348b);
+    color: white;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    margin-bottom: 14px;
+}
+
+.wg-image-upload-btn:hover {
+    background: var(--medium-slate-blue, #7678ed);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(118, 120, 237, 0.4);
+}
+
+body.dark-mode .wg-image-upload-btn {
+    background: var(--medium-slate-blue, #7678ed);
+}
+
+.wg-image-previews {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.wg-image-thumb {
+    position: relative;
+    width: 90px;
+    height: 90px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 2px solid var(--wg-border);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    animation: wgPopIn 0.3s ease;
+}
+
+.wg-image-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.wg-image-thumb-remove {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    border: none;
+    font-size: 0.7rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.wg-image-thumb-remove:hover {
+    background: rgba(243, 91, 4, 0.85);
+}
+
+/* Toggle switch */
+.wg-toggle-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.wg-toggle-option-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--wg-panel-muted);
+}
+
+.wg-toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 26px;
+    cursor: pointer;
+}
+
+.wg-toggle-switch input {
+    display: none;
+}
+
+.wg-toggle-knob {
+    position: absolute;
+    inset: 0;
+    background: #d0d5e8;
+    border-radius: 13px;
+    transition: background 0.3s ease;
+}
+
+.wg-toggle-knob::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 20px;
+    height: 20px;
+    background: white;
+    border-radius: 50%;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.wg-toggle-switch input:checked+.wg-toggle-knob {
+    background: var(--medium-slate-blue, #7678ed);
+}
+
+.wg-toggle-switch input:checked+.wg-toggle-knob::after {
+    transform: translateX(24px);
+}
+
+body.dark-mode .wg-toggle-knob {
+    background: #444466;
+}
+
+/* Answer mode tabs */
+.wg-answer-mode-tabs {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.wg-mode-tab {
+    padding: 9px 18px;
+    border: 2px solid var(--wg-border);
+    border-radius: 50px;
+    background: var(--wg-input-bg);
+    color: var(--wg-panel-muted);
+    font-size: 0.875rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    transition: all 0.2s ease;
+}
+
+.wg-mode-tab:hover {
+    border-color: var(--medium-slate-blue, #7678ed);
+    color: var(--medium-slate-blue, #7678ed);
+}
+
+.wg-mode-tab.active {
+    background: var(--medium-slate-blue, #7678ed);
+    border-color: var(--medium-slate-blue, #7678ed);
+    color: white;
+    box-shadow: 0 4px 14px rgba(118, 120, 237, 0.35);
+}
+
+body.dark-mode .wg-mode-tab {
+    background: #1e1e30;
+    border-color: #3a3a55;
+    color: #9090aa;
+}
+
+body.dark-mode .wg-mode-tab.active {
+    background: var(--medium-slate-blue);
+    border-color: var(--medium-slate-blue);
+    color: white;
+}
+
+/* Choice options container */
+.wg-choice-options {
+    background: var(--wg-input-bg);
+    border-radius: var(--wg-radius-sm);
+    padding: 20px;
+    border: 2px solid var(--wg-border);
+    margin-top: -8px;
+    animation: wgFadeIn 0.3s ease;
+}
+
+/* Distractor inputs */
+.wg-distractor-inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.wg-distractor-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.wg-distractor-row input {
+    flex: 1;
+    padding: 10px 14px;
+    border: 2px solid var(--wg-border);
+    border-radius: var(--wg-radius-sm);
+    font-size: 0.95rem;
+    font-family: inherit;
+    background: var(--wg-panel-bg);
+    color: var(--wg-panel-text);
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.wg-distractor-row input:focus {
+    border-color: var(--medium-slate-blue, #7678ed);
+}
+
+.wg-distractor-row-num {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--cayenne-red, #f35b04);
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    opacity: 0.7;
+}
+
+/* Editor actions */
+.wg-editor-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-start;
+    padding-top: 24px;
+    border-top: 2px solid var(--wg-border);
+    margin-top: 8px;
+}
+
+/* ===== SHARED BUTTONS ===== */
+.wg-btn {
+    padding: 13px 26px;
+    border: none;
+    border-radius: 14px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    white-space: nowrap;
+}
+
+.wg-btn:active {
+    transform: scale(0.95);
+}
+
+.wg-btn:disabled {
+    opacity: 0.38;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.wg-btn-primary {
+    background: var(--indigo-velvet, #3d348b);
+    color: white;
+}
+
+.wg-btn-primary:hover:not(:disabled) {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 28px rgba(61, 52, 139, 0.4);
+    background: var(--medium-slate-blue, #7678ed);
+}
+
+.wg-btn-accent {
+    background: var(--amber-flame, #f7b801);
+    color: var(--indigo-velvet, #3d348b);
+}
+
+.wg-btn-accent:hover:not(:disabled) {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 28px rgba(247, 184, 1, 0.45);
+    background: var(--tiger-orange, #f18701);
+}
+
+.wg-btn-ghost {
+    background: rgba(255, 255, 255, 0.12);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.wg-btn-ghost:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.22);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.wg-btn-danger {
+    background: rgba(243, 91, 4, 0.1);
+    color: var(--cayenne-red, #f35b04);
+    border: 2px solid rgba(243, 91, 4, 0.25);
+}
+
+.wg-btn-danger:hover:not(:disabled) {
+    background: var(--cayenne-red, #f35b04);
+    color: white;
+    border-color: var(--cayenne-red);
+}
+
+body.dark-mode .wg-btn-danger {
+    background: rgba(243, 91, 4, 0.15);
+    border-color: rgba(243, 91, 4, 0.35);
+    color: #ff9a74;
+}
+
+body.dark-mode .wg-btn-danger:hover:not(:disabled) {
+    background: var(--cayenne-red);
+    color: white;
+}
+
+.wg-btn-lg {
+    padding: 16px 34px;
+    font-size: 1.05rem;
+    border-radius: 18px;
+    width: 100%;
+    justify-content: center;
+}
+
+.wg-btn-sm {
+    padding: 8px 14px;
+    font-size: 0.85rem;
+    border-radius: 10px;
+}
+
+.wg-btn-reveal {
+    background: var(--amber-flame, #f7b801);
+    color: var(--indigo-velvet, #3d348b);
+    font-size: 1rem;
+    padding: 14px 30px;
+    border-radius: 50px;
+    border: none;
+    margin-top: 20px;
+}
+
+.wg-btn-reveal:hover:not(:disabled) {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 28px rgba(247, 184, 1, 0.5);
+}
+
+.wg-pulse {
+    animation: wgPulse 2.2s ease-in-out infinite;
+}
+
+/* ===== GAME SCREEN ===== */
+.wg-game-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 28px;
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.wg-game-progress {
+    flex: 1;
+    max-width: 320px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    mx: auto;
+}
+
+.wg-game-progress span {
+    font-size: 0.85rem;
+    font-weight: 700;
+    opacity: 0.75;
+    letter-spacing: 0.5px;
+}
+
+.wg-progress-bar-track {
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.18);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.wg-progress-bar-fill {
+    height: 100%;
+    background: var(--wg-accent);
+    border-radius: 3px;
+    transition: width 0.5s ease;
+    animation: wgProgressGrow 0.5s ease;
+}
+
+.wg-game-nav {
+    display: flex;
+    gap: 8px;
+}
+
+/* Game body */
+.wg-game-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 24px 60px;
+    min-height: calc(100vh - 70px);
+    gap: 28px;
+}
+
+/* Game images strip */
+.wg-game-images {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 900px;
+    width: 100%;
+}
+
+.wg-game-image-item {
+    width: 180px;
+    height: 140px;
+    border-radius: 18px;
+    overflow: hidden;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    animation: wgPopIn 0.4s ease;
+}
+
+.wg-game-image-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Clue area */
+.wg-game-clues-area {
+    width: 100%;
+    max-width: 720px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.wg-clues-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+}
+
+.wg-clue-item {
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1.5px solid rgba(255, 255, 255, 0.18);
+    border-radius: 18px;
+    padding: 18px 26px;
+    font-size: 1.15rem;
+    font-weight: 600;
+    line-height: 1.55;
+    animation: wgRevealClue 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) backwards;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.wg-clue-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: var(--wg-accent);
+    color: var(--indigo-velvet, #3d348b);
+    font-size: 0.78rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+/* Answer area */
+.wg-answer-area {
+    width: 100%;
+    max-width: 720px;
+    animation: wgFadeIn 0.4s ease;
+}
+
+/* --- Multiple choice buttons --- */
+.wg-choices-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.wg-choice-btn {
+    padding: 18px 20px;
+    border-radius: 18px;
+    border: 2.5px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    color: white;
+    font-size: 1.05rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.wg-choice-btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.22);
+    border-color: rgba(255, 255, 255, 0.45);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+.wg-choice-btn:disabled {
+    cursor: not-allowed;
+}
+
+.wg-choice-letter {
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
+    background: rgba(255, 255, 255, 0.18);
+    font-size: 0.85rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.wg-choice-btn.correct {
+    background: rgba(34, 197, 94, 0.25);
+    border-color: var(--wg-correct);
+    animation: wgGlow 0.7s ease;
+}
+
+.wg-choice-btn.correct .wg-choice-letter {
+    background: var(--wg-correct);
+}
+
+.wg-choice-btn.wrong {
+    background: rgba(243, 91, 4, 0.2);
+    border-color: var(--wg-wrong);
+    animation: wgShake 0.45s ease;
+}
+
+/* --- Text input bar --- */
+.wg-input-bar-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.wg-input-bar {
+    width: 100%;
+    max-width: 560px;
+    padding: 18px 24px;
+    border: 3px solid rgba(255, 255, 255, 0.25);
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    font-size: 1.4rem;
+    font-weight: 700;
+    font-family: inherit;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
+    backdrop-filter: blur(8px);
+}
+
+.wg-input-bar::placeholder {
+    color: rgba(255, 255, 255, 0.35);
+}
+
+.wg-input-bar:focus {
+    border-color: var(--wg-accent);
+    box-shadow: 0 0 0 4px rgba(247, 184, 1, 0.2);
+}
+
+.wg-input-bar.correct {
+    border-color: var(--wg-correct);
+    background: rgba(34, 197, 94, 0.2);
+    animation: wgGlow 0.7s ease;
+}
+
+.wg-input-bar.wrong {
+    border-color: var(--wg-wrong);
+    background: rgba(243, 91, 4, 0.15);
+    animation: wgShake 0.45s ease;
+}
+
+/* --- Letter boxes --- */
+.wg-letter-boxes-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.wg-letter-boxes {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.wg-letter-box {
+    width: 52px;
+    height: 62px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(8px);
+    color: white;
+    font-size: 1.6rem;
+    font-weight: 800;
+    font-family: inherit;
+    text-align: center;
+    outline: none;
+    text-transform: uppercase;
+    caret-color: var(--wg-accent);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+}
+
+.wg-letter-box:focus {
+    border-color: var(--wg-accent);
+    box-shadow: 0 0 0 3px rgba(247, 184, 1, 0.28);
+    transform: scale(1.06);
+}
+
+.wg-letter-box.filled {
+    border-color: rgba(255, 255, 255, 0.55);
+    background: rgba(255, 255, 255, 0.18);
+}
+
+.wg-letter-box.correct {
+    border-color: var(--wg-correct);
+    background: rgba(34, 197, 94, 0.25);
+    animation: wgGlow 0.7s ease;
+}
+
+.wg-letter-box.wrong {
+    border-color: var(--wg-wrong);
+    background: rgba(243, 91, 4, 0.2);
+    animation: wgShake 0.45s ease;
+}
+
+/* Check button common */
+.wg-check-btn {
+    background: var(--amber-flame, #f7b801);
+    color: var(--indigo-velvet, #3d348b);
+    border: none;
+    border-radius: 50px;
+    padding: 14px 38px;
+    font-size: 1.05rem;
+    font-weight: 800;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.wg-check-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(247, 184, 1, 0.45);
+    background: var(--tiger-orange, #f18701);
+}
+
+/* ===== FEEDBACK OVERLAY ===== */
+.wg-feedback-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+.wg-feedback-overlay.active {
+    display: flex;
+}
+
+.wg-feedback-badge {
+    padding: 22px 44px;
+    border-radius: 24px;
+    font-size: 2rem;
+    font-weight: 900;
+    text-align: center;
+    animation: wgFeedbackPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    pointer-events: none;
+}
+
+.wg-feedback-badge.correct {
+    background: linear-gradient(135deg, #16a34a, #22c55e);
+    color: white;
+}
+
+.wg-feedback-badge.wrong {
+    background: linear-gradient(135deg, #c2410c, #f35b04);
+    color: white;
+}
+
+.wg-feedback-badge .wg-feedback-icon {
+    font-size: 2.5rem;
+}
+
+.wg-feedback-badge .wg-feedback-label {
+    font-size: 1.4rem;
+    font-weight: 800;
+}
+
+.wg-feedback-badge .wg-feedback-word {
+    font-size: 0.9rem;
+    font-weight: 600;
+    opacity: 0.85;
+}
+
+/* ===== CONFETTI CANVAS ===== */
+.wg-confetti-canvas {
+    position: fixed;
+    inset: 0;
+    z-index: 49;
+    pointer-events: none;
+}
+
+/* ===== END SCREEN ===== */
+.wg-end-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
+    animation: wgFadeIn 0.4s ease;
+}
+
+.wg-end-card {
+    background: var(--wg-panel-bg);
+    color: var(--wg-panel-text);
+    border-radius: var(--wg-radius);
+    padding: 52px 60px;
+    text-align: center;
+    box-shadow: var(--wg-shadow);
+    max-width: 460px;
+    width: 90%;
+    animation: wgPopIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.wg-end-icon {
+    font-size: 4.5rem;
+    color: var(--amber-flame, #f7b801);
+    margin-bottom: 20px;
+    animation: wgFloat 3s ease-in-out infinite;
+}
+
+.wg-end-card h2 {
+    font-size: 1.9rem;
+    font-weight: 800;
+    color: var(--indigo-velvet, #3d348b);
+    margin-bottom: 10px;
+}
+
+body.dark-mode .wg-end-card h2 {
+    color: var(--medium-slate-blue);
+}
+
+.wg-end-card p {
+    font-size: 1rem;
+    opacity: 0.7;
+    margin-bottom: 32px;
+}
+
+.wg-end-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+}
+
+.wg-end-actions .wg-btn-ghost {
+    background: transparent;
+    color: var(--wg-panel-muted);
+    border: 2px solid var(--wg-border);
+    font-size: 0.9rem;
+    padding: 10px 20px;
+}
+
+.wg-end-actions .wg-btn-ghost:hover {
+    background: var(--wg-input-bg);
+    color: var(--wg-panel-text);
+}
+
+.wg-end-actions .wg-btn-accent {
+    width: 100%;
+    justify-content: center;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .wg-settings-layout {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr;
+    }
+
+    .wg-session-sidebar {
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        max-height: 240px;
+    }
+
+    .wg-session-editor {
+        padding: 24px 16px;
+    }
+
+    .wg-editor-form {
+        padding: 24px 20px;
+        border-radius: 18px;
+    }
+
+    .wg-choices-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .wg-letter-box {
+        width: 44px;
+        height: 54px;
+        font-size: 1.3rem;
+    }
+
+    .wg-game-header {
+        padding: 12px 16px;
+    }
+
+    .wg-game-body {
+        padding: 24px 16px 48px;
+    }
+}

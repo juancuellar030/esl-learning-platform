@@ -116,7 +116,7 @@ body {
 
 .gs-btn-secondary {
     background: rgba(255, 255, 255, 0.15);
-    color: #fff;
+    color: #363636;
     backdrop-filter: blur(5px);
 }
 
@@ -585,8 +585,8 @@ body {
 }
 
 .gs-cat-laboral {
-    background: #e0f7fa;
-    color: #0097a7;
+    background: #fce7f3;
+    color: #db2777;
 }
 
 .gs-cat-ciudadana {
@@ -685,8 +685,8 @@ body {
 }
 
 .gs-cat-group-th.laboral {
-    background: #e0f7fa;
-    color: #0097a7;
+    background: #fce7f3;
+    color: #db2777;
 }
 
 .gs-cat-group-th.ciudadana {
@@ -933,31 +933,37 @@ body {
 }
 
 /* Color-coded grade cells */
-.gs-grade-cell.gs-pass {
-    background: #d4f5e9;
+.gs-grade-cell.gs-pass,
+.gs-avg-cell.gs-pass {
+    background: #d4f5e9 !important;
 }
 
-.gs-grade-cell.gs-fail {
-    background: #ffe0e0;
+.gs-grade-cell.gs-fail,
+.gs-avg-cell.gs-fail {
+    background: #ffe0e0 !important;
 }
 
-.gs-grade-cell.gs-border {
-    background: #fff8d6;
+.gs-grade-cell.gs-border,
+.gs-avg-cell.gs-border {
+    background: #fff8d6 !important;
 }
 
 .gs-grade-cell.gs-pass .gs-grade-input,
-.gs-grade-cell.gs-pass .gs-grade-display {
-    color: #0a8f50;
+.gs-grade-cell.gs-pass .gs-grade-display,
+.gs-avg-cell.gs-pass {
+    color: #0a8f50 !important;
 }
 
 .gs-grade-cell.gs-fail .gs-grade-input,
-.gs-grade-cell.gs-fail .gs-grade-display {
-    color: #d63031;
+.gs-grade-cell.gs-fail .gs-grade-display,
+.gs-avg-cell.gs-fail {
+    color: #d32f2f !important;
 }
 
 .gs-grade-cell.gs-border .gs-grade-input,
-.gs-grade-cell.gs-border .gs-grade-display {
-    color: #c27b1a;
+.gs-grade-cell.gs-border .gs-grade-display,
+.gs-avg-cell.gs-border {
+    color: #e1b12c !important;
 }
 
 /* Cell pulse animation on input */
@@ -1233,6 +1239,22 @@ body {
 }
 
 /* =====================================================
+   DECIMAL FORMATTING
+   ===================================================== */
+.gs-grade-input,
+.gs-grade-display {
+    -moz-appearance: textfield;
+}
+
+.gs-grade-input::-webkit-outer-spin-button,
+.gs-grade-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+
+
+/* =====================================================
    ANIMATIONS
    ===================================================== */
 @keyframes gsPopIn {
@@ -1435,8 +1457,8 @@ body.dark-mode .gs-cat-cognitiva {
 }
 
 body.dark-mode .gs-cat-laboral {
-    background: #1e3d2a;
-    color: #5dd39e;
+    background: #4a154b;
+    color: #f472b6;
 }
 
 body.dark-mode .gs-cat-ciudadana {
@@ -1463,8 +1485,8 @@ body.dark-mode .gs-cat-group-th.cognitiva {
 }
 
 body.dark-mode .gs-cat-group-th.laboral {
-    background: #1e3d2a;
-    color: #5dd39e;
+    background: #4a154b;
+    color: #f472b6;
 }
 
 body.dark-mode .gs-cat-group-th.ciudadana {
@@ -1542,27 +1564,27 @@ body.dark-mode .gs-grade-input:focus {
 }
 
 body.dark-mode .gs-grade-cell.gs-pass {
-    background: #1e3d2a;
+    background: #1a3a28 !important;
 }
 
 body.dark-mode .gs-grade-cell.gs-fail {
-    background: #3d1e1e;
+    background: #3a1a1a !important;
 }
 
 body.dark-mode .gs-grade-cell.gs-border {
-    background: #3d351e;
+    background: #3a3218 !important;
 }
 
 body.dark-mode .gs-grade-cell.gs-pass .gs-grade-input {
-    color: #5dd39e;
+    color: #55efc4 !important;
 }
 
 body.dark-mode .gs-grade-cell.gs-fail .gs-grade-input {
-    color: #ff8787;
+    color: #ff7675 !important;
 }
 
 body.dark-mode .gs-grade-cell.gs-border .gs-grade-input {
-    color: #f0b860;
+    color: #ffc048 !important;
 }
 
 body.dark-mode .gs-descriptions-panel {
@@ -1583,7 +1605,7 @@ body.dark-mode .gs-desc-item.cognitiva {
 }
 
 body.dark-mode .gs-desc-item.laboral {
-    background: #1a2f35;
+    background: #4a154b;
 }
 
 body.dark-mode .gs-desc-item.ciudadana {
@@ -1614,38 +1636,7 @@ body.dark-mode .gs-show-col-btn:hover {
     border-color: #c27b1a;
 }
 
-/* Dark mode grade cell colors */
-body.dark-mode .gs-grade-cell.gs-pass {
-    background: #1a3a28;
-}
-
-body.dark-mode .gs-grade-cell.gs-pass .gs-grade-input,
-body.dark-mode .gs-grade-cell.gs-pass .gs-grade-display {
-    color: #55efc4;
-}
-
-body.dark-mode .gs-grade-cell.gs-fail {
-    background: #3a1a1a;
-}
-
-body.dark-mode .gs-grade-cell.gs-fail .gs-grade-input,
-body.dark-mode .gs-grade-cell.gs-fail .gs-grade-display {
-    color: #ff7675;
-}
-
-body.dark-mode .gs-grade-cell.gs-border {
-    background: #3a3218;
-}
-
-body.dark-mode .gs-grade-cell.gs-border .gs-grade-input,
-body.dark-mode .gs-grade-cell.gs-border .gs-grade-display {
-    color: #ffc048;
-}
-
-body.dark-mode .gs-avg-cell.gs-pass {
-    background: #1a3a28;
-    color: #55efc4;
-}
+/* Dark mode grade cell colors updated above */
 
 body.dark-mode .gs-avg-cell.gs-fail {
     background: #3a1a1a;
@@ -1657,13 +1648,92 @@ body.dark-mode .gs-avg-cell.gs-border {
     color: #ffc048;
 }
 
-body.dark-mode .gs-cat-group-th.laboral {
-    background: #1a2f35;
-    color: #4dd0e1;
-}
-
 body.dark-mode .gs-footer {
     color: rgba(255, 255, 255, 0.25);
+}
+
+body.dark-mode .gs-btn-secondary {
+    color: #e0e0e0;
+}
+
+/* =====================================================
+   TOGGLE SWITCH (NOTE DECIMALS)
+   ===================================================== */
+.gs-toggle-switch-wrapper {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #fff;
+    padding: 8px 14px;
+    border-radius: 20px;
+    border: 1px solid #dfe6e9;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+}
+
+body.dark-mode .gs-toggle-switch-wrapper {
+    background: #363636;
+    border-color: #555;
+    box-shadow: none;
+}
+
+.gs-toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 36px;
+    height: 20px;
+}
+
+.gs-toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.gs-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #b2bec3;
+    transition: .3s;
+    border-radius: 34px;
+}
+
+.gs-slider:before {
+    position: absolute;
+    content: "";
+    height: 14px;
+    width: 14px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .3s;
+    border-radius: 50%;
+}
+
+input:checked+.gs-slider {
+    background-color: #a29bfe;
+}
+
+input:focus+.gs-slider {
+    box-shadow: 0 0 1px #a29bfe;
+}
+
+input:checked+.gs-slider:before {
+    transform: translateX(16px);
+}
+
+.gs-toggle-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #636e72;
+    user-select: none;
+}
+
+body.dark-mode .gs-toggle-label {
+    color: #e0e0e0;
 }
 
 /* =====================================================

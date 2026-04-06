@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="assets/graduation-cap-icon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Guesser – ESL Learning Platform</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/word-guesser.css">
+
+    <!-- Google Drive API -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://apis.google.com/js/api.js" async defer></script>
+</head>
+
+<body>
+    <!-- ============================================================
+         WORD GUESSER APP SHELL
+         Two screens: #wg-screen-settings and #wg-screen-game
+    ============================================================ -->
+    <div class="wg-app" id="wg-app">
+
+        <!-- ========== SETTINGS SCREEN ========== -->
+        <div class="wg-screen active" id="wg-screen-settings">
+            <div class="wg-settings-layout">
+
+                <!-- Left: Session Sidebar -->
+                <aside class="wg-session-sidebar">
+                    <div class="wg-sidebar-header">
+                        <button class="wg-sidebar-toggle" id="wg-sidebar-toggle" title="Toggle Sidebar">
+                            <i class="fa-solid fa-bars-staggered"></i>
+                        </button>
+                        <h2><i class="fa-solid fa-list-check"></i> Sessions</h2>
+                        <button class="wg-add-session-btn" id="wg-add-session" title="Add session (max 10)">
+                            <i class="fa-solid fa-plus"></i>
+                        </button>
+                    </div>
+                    <ul class="wg-session-list" id="wg-session-list">
+                        <!-- Populated by JS -->
+                    </ul>
+                    <p class="wg-session-cap-hint" id="wg-session-cap-hint" style="display:none;">
+                        <i class="fa-solid fa-circle-info"></i> Maximum 10 sessions reached.
+                    </p>
+                    <div class="wg-sidebar-footer">
+                        <button class="wg-btn wg-btn-accent wg-btn-lg" id="wg-start-game" disabled>
+                            <i class="fa-solid fa-play"></i> Start Game
+                        </button>
+                        <a href="tools.html" class="wg-back-link">
+                            <i class="fa-solid fa-arrow-left"></i> Back to Tools
+                        </a>
+                    </div>
+                </aside>
+
+                <!-- Right: Session Editor -->
+                <main class="wg-session-editor" id="wg-session-editor">
+                    <!-- Empty state -->
+                    <div class="wg-editor-empty" id="wg-editor-empty">
+                        <div class="wg-editor-empty-icon">
+                            <i class="fa-solid fa-lightbulb"></i>
+                        </div>
+                        <h3>No Session Selected</h3>
+                        <p>Click <strong>+</strong> to add a new guessing session, or select one from the list.</p>
+                    </div>
+
+                    <!-- Collapsed editor state -->
+                    <div class="wg-editor-empty" id="wg-editor-collapsed-state" style="display: none;">
+                        <i class="fa-solid fa-gamepad"
+                            style="font-size: 4rem; margin-bottom: 1rem; color: var(--medium-slate-blue);"></i>
+                        <h3>Ready to Play</h3>
+                        <p>The editor is hidden. Click the Play button in the sidebar to start the game.</p>
+                    </div>
+
+                    <!-- Editor form (shown when a session is active) -->
+                    <form class="wg-editor-form" id="wg-editor-form" style="display:none;" onsubmit="return false;">
+
+                        <div class="wg-editor-header">
+                            <h3 id="wg-editor-session-title">Session 1</h3>
+                            <button id="wg-drive-sync-btn" class="wg-btn wg-btn-ghost wg-btn-sm"
+                                title="Save/Load from Google Drive">
+                                <i class="fa-brands fa-google-drive"></i> Drive Sync
+                            </button>
+                        </div>
+
+                        <!-- Answer Word -->
+                        <div class="wg-field-group">
+                            <label class="wg-field-label">
+                                <i class="fa-solid fa-key"></i> Answer Word
+                            </label>
+                            <input type="text" class="wg-text-input" id="wg-answer-word" placeholder="e.g. elephant"
+                                autocomplete="off" spellcheck="false">
+                            <p class="wg-field-hint">The word students will guess. Keep it
+                                case-insensitive.</p>
+                        </div>
+
+                        <!-- Clues -->
+                        <div class="wg-field-group">
+                            <label class="wg-field-label">
+                                <i class="fa-solid fa-comment-dots"></i> Clues
+                                <span class="wg-field-hint-inline">One per line — or use bullet points (• )</span>
+                            </label>
+                            <textarea class="wg-textarea" id="wg-clues-textarea" rows="5"
+                                placeholder="• It has four legs&#10;• It lives in Africa&#10;• It is the largest land animal"></textarea>
+                        </div>
+
+                        <!-- Clue Images -->
+                        <div class="wg-field-group">
+                            <label class="wg-field-label">
+                                <i class="fa-solid fa-image"></i> Clue Images
+                                <span class="wg-field-hint-inline">Optional — max 6 images</span>
+                            </label>
+                            <label class="wg-image-upload-btn" for="wg-image-upload-input">
+                                <i class="fa-solid fa-cloud-arrow-up"></i> Upload Images
+                            </label>
+                            <input type="file" id="wg-image-upload-input" accept="image/*" multiple
+                                style="display:none;">
+                            <div class="wg-image-previews" id="wg-image-previews"></div>
+                        </div>
+
+                        <!-- Clue Reveal Mode -->
+                        <div class="wg-field-group">
+                            <label class="wg-field-label">
+                                <i class="fa-solid fa-eye"></i> Clue Reveal
+                            </label>
+                            <div class="wg-toggle-row">
+                                <span class="wg-toggle-option-label">All at once</span>
+                                <label class="wg-toggle-switch">
+                                    <input type="checkbox" id="wg-reveal-toggle">
+                                    <span class="wg-toggle-knob"></span>
+                                </label>
+                                <span class="wg-toggle-option-label">One by one</span>
+                            </div>
+                        </div>
+
+                        <!-- Answer Mode -->
+                        <div class="wg-field-group">
+                            <label class="wg-field-label">
+                                <i class="fa-solid fa-circle-dot"></i> Answer Mode
+                            </label>
+                            <div class="wg-answer-mode-tabs" id="wg-answer-mode-tabs">
+                                <button type="button" class="wg-mode-tab active" data-mode="choice">
+                                    <i class="fa-solid fa-list"></i> Multiple Choice
+                                </button>
+                                <button type="button" class="wg-mode-tab" data-mode="input-bar">
+                                    <i class="fa-solid fa-minus"></i> Text Input
+                                </button>
+                                <button type="button" class="wg-mode-tab" data-mode="input-boxes">
+                                    <i class="fa-solid fa-table-cells-large"></i> Letter Boxes
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Multiple Choice Options (shown when choice mode is active) -->
+                        <div class="wg-choice-options" id="wg-choice-options">
+                            <!-- Distractor Source Toggle -->
+                            <div class="wg-field-group">
+                                <label class="wg-field-label">
+                                    <i class="fa-solid fa-shuffle"></i> Wrong Options Source
+                                </label>
+                                <div class="wg-toggle-row">
+                                    <span class="wg-toggle-option-label">Manual</span>
+                                    <label class="wg-toggle-switch">
+                                        <input type="checkbox" id="wg-distractor-auto-toggle">
+                                        <span class="wg-toggle-knob"></span>
+                                    </label>
+                                    <span class="wg-toggle-option-label">Auto (from other sessions)</span>
+                                </div>
+                                <p class="wg-field-hint" id="wg-auto-hint" style="display:none;">
+                                    <i class="fa-solid fa-circle-info"></i> Wrong options will be taken from the
+                                    answer words of other sessions. Add more sessions to get better options.
+                                </p>
+                            </div>
+
+                            <!-- Manual distractor inputs (visible when NOT auto) -->
+                            <div id="wg-manual-distractors">
+                                <label class="wg-field-label">
+                                    <i class="fa-regular fa-circle-xmark"></i> Wrong Options
+                                    <span class="wg-field-hint-inline">Up to 5</span>
+                                </label>
+                                <div class="wg-distractor-inputs" id="wg-distractor-inputs">
+                                    <!-- 5 input rows injected by JS -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Save Session button -->
+                        <div class="wg-editor-actions">
+                            <button type="button" class="wg-btn wg-btn-primary" id="wg-save-session">
+                                <i class="fa-solid fa-floppy-disk"></i> Save Session
+                            </button>
+                            <button type="button" class="wg-btn wg-btn-danger" id="wg-delete-session">
+                                <i class="fa-solid fa-trash"></i> Delete
+                            </button>
+                        </div>
+                    </form>
+                </main>
+
+            </div>
+        </div>
+
+        <!-- ========== GAME SCREEN ========== -->
+        <div class="wg-screen" id="wg-screen-game">
+
+            <!-- Game header bar -->
+            <header class="wg-game-header">
+                <button class="wg-btn wg-btn-ghost wg-btn-sm" id="wg-back-to-settings">
+                    <i class="fa-solid fa-gear"></i> Settings
+                </button>
+                <div class="wg-game-progress">
+                    <span id="wg-session-counter">Session 1 / 1</span>
+                    <div class="wg-progress-bar-track">
+                        <div class="wg-progress-bar-fill" id="wg-progress-bar-fill"></div>
+                    </div>
+                </div>
+                <div class="wg-game-nav">
+                    <button class="wg-btn wg-btn-ghost wg-btn-sm" id="wg-prev-session" title="Previous session">
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+                    <button class="wg-btn wg-btn-ghost wg-btn-sm" id="wg-next-session" title="Next session">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Game main area -->
+            <div class="wg-game-body">
+
+                <!-- Clue images strip -->
+                <div class="wg-game-images" id="wg-game-images"></div>
+
+                <!-- Clue display area -->
+                <div class="wg-game-clues-area">
+                    <div class="wg-clues-list" id="wg-clues-list">
+                        <!-- Clue items injected by JS -->
+                    </div>
+                    <!-- Reveal next clue button (one-by-one mode only) -->
+                    <button class="wg-btn wg-btn-reveal wg-pulse" id="wg-reveal-btn" style="display:none;">
+                        <i class="fa-solid fa-eye"></i> Reveal Next Clue
+                    </button>
+                </div>
+
+                <!-- Answer area -->
+                <div class="wg-answer-area" id="wg-answer-area">
+                    <!-- Populated by JS based on answerMode -->
+                </div>
+
+            </div>
+
+            <!-- Feedback overlay (correct / wrong) -->
+            <div class="wg-feedback-overlay" id="wg-feedback-overlay">
+                <div class="wg-feedback-badge" id="wg-feedback-badge"></div>
+            </div>
+
+            <!-- Confetti canvas -->
+            <canvas class="wg-confetti-canvas" id="wg-confetti-canvas"></canvas>
+
+            <!-- End of sessions screen (shown after last session answered) -->
+            <div class="wg-end-screen" id="wg-end-screen" style="display:none;">
+                <div class="wg-end-card">
+                    <div class="wg-end-icon"><i class="fa-solid fa-trophy"></i></div>
+                    <h2>All Sessions Complete!</h2>
+                    <p>Great job! Every word has been guessed.</p>
+                    <div class="wg-end-actions">
+                        <button class="wg-btn wg-btn-accent wg-btn-lg" id="wg-restart-game">
+                            <i class="fa-solid fa-rotate-right"></i> Play Again
+                        </button>
+                        <button class="wg-btn wg-btn-ghost" id="wg-end-back-settings">
+                            <i class="fa-solid fa-gear"></i> Back to Settings
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div><!-- /.wg-app -->
+
+    <script src="js/themes.js"></script>
+    <script src="js/darkmode.js"></script>
+    <script src="js/google-drive-service.js"></script>
+    <script src="js/word-guesser.js"></script>
+</body>
+
+</html>

@@ -85,8 +85,34 @@
     const $actScalePreview = $('gs-act-scale-preview');
     const $actSettingsLabel = $('gs-act-settings-label');
 
+    // ── DOM refs – Phase 7 ─────────────────────────────────
+    const $removeDecimalToggle = $('gs-remove-decimal-toggle');
+    const $clearGradesBtn = $('gs-clear-grades-btn');
+    const $editSheetInfoBtn = $('gs-edit-sheet-info-btn');
+
+    // ── DOM refs – Phase 7 (Edit Sheet Info) ───────────────
+    const $editInfoOverlay = $('gs-edit-info-overlay');
+    const $editInfoClose = document.querySelectorAll('.gs-edit-info-close');
+    const $editInfoSave = $('gs-edit-info-save');
+    const $editInfoTeacher = $('gs-edit-info-teacher');
+    const $editInfoSubject = $('gs-edit-info-subject');
+    const $editInfoGroup = $('gs-edit-info-group');
+    const $editInfoTerm = $('gs-edit-info-term');
+
+    // ── DOM refs – Phase 8 (Import Sheet Data) ────────────
+    const $importSheetDataBtn = $('gs-import-sheet-data-btn');
+    const $importOverlay = $('gs-import-overlay');
+    const $importCloseBtn = $('gs-import-close-btn');
+    const $importCancelBtn = $('gs-import-cancel-btn');
+    const $importExecuteBtn = $('gs-import-execute-btn');
+    const $importSourceSelect = $('gs-import-source-select');
+    const $importActivityContainer = $('gs-import-activity-container');
+    const $importActivitySelect = $('gs-import-activity-select');
+    const $importModeRadios = document.getElementsByName('gs-import-mode');
+
     let editingActId = null;
     let isGradesView = false;
+    let removeDecimal = false;
 
     // ══════════════════════════════════════════════════════
     //                    STORAGE
@@ -158,6 +184,20 @@
             grade = ((nmax - napr) / (pmax - eScore)) * (score - eScore) + napr;
         }
         return grade;
+    }
+
+    function inverseCalculateGrade(grade, pmax, exig, nmin, nmax, napr) {
+        if (grade <= nmin) return 0;
+        if (grade >= nmax) return pmax;
+        const eScore = pmax * (exig / 100);
+
+        let score = 0;
+        if (grade < napr) {
+            score = (grade - nmin) * eScore / (napr - nmin);
+        } else {
+            score = (grade - napr) * (pmax - eScore) / (nmax - napr) + eScore;
+        }
+        return score;
     }
 
     function gradeColorFromGrade(grade, sheet) {
@@ -538,26 +578,28 @@
                 const val = (sheet.grades[name] || {})[act.id];
                 const cc = gradeColor(val, sheet, act);
                 if (cc) td.classList.add(cc);
+                const sc = getScaleForActivity(act, sheet);
+
+                let displayVal = '';
+                if (val != null && val !== '') {
+                    if (isGradesView) {
+                        const grade = calculateGrade(parseFloat(val), sc.pmax, sc.exig, sc.nmin, sc.nmax, sc.napr);
+                        const rounded = (Math.round(grade * 10) / 10).toFixed(1);
+                        displayVal = removeDecimal ? rounded.replace('.', '') : rounded;
+                    } else {
+                        displayVal = val;
+                    }
+                }
+
                 const input = document.createElement('input');
                 input.type = 'text'; input.inputMode = 'numeric'; input.className = 'gs-grade-input';
-                input.value = (val != null && val !== '') ? val : '';
+                input.value = displayVal;
                 input.dataset.student = name; input.dataset.actId = act.id;
+
                 input.addEventListener('change', onGradeChange);
                 input.addEventListener('keydown', onGradeKeydown);
 
-                const display = document.createElement('span');
-                display.className = 'gs-grade-display';
-                if (val != null && val !== '') {
-                    const parsed = parseFloat(val);
-                    if (!isNaN(parsed)) {
-                        const sc = getScaleForActivity(act, sheet);
-                        const g = calculateGrade(parsed, sc.pmax, sc.exig, sc.nmin, sc.nmax, sc.napr);
-                        display.innerText = (Math.round(g * 10) / 10).toFixed(1);
-                    } else { display.innerText = '-'; }
-                } else { display.innerText = '-'; }
-
                 td.appendChild(input);
-                td.appendChild(display);
                 tr.appendChild(td);
             });
 
@@ -613,46 +655,37 @@
         const sheet = getSheet();
         if (!sheet) return;
         const name = input.dataset.student, actId = input.dataset.actId;
-        let val = input.value.trim();
-        if (val === '') {
+
+        let actObj = null;
+        CATEGORIES.forEach(cat => {
+            const f = (sheet.categories[cat] || []).find(a => a.id === actId);
+            if (f) actObj = f;
+        });
+
+        let valStr = input.value.trim().replace(',', '.');
+        if (valStr === '') {
             if (!sheet.grades[name]) sheet.grades[name] = {};
             delete sheet.grades[name][actId];
         } else {
-            let num = parseFloat(val);
-            let actObj = null;
-            CATEGORIES.forEach(cat => {
-                const f = (sheet.categories[cat] || []).find(a => a.id === actId);
-                if (f) actObj = f;
-            });
+            let num = parseFloat(valStr);
             if (!isNaN(num)) {
-                const max = actObj && actObj.maxScore ? actObj.maxScore : (sheet.pmax || 50);
+                const sc = getScaleForActivity(actObj, sheet);
+
+                if (isGradesView) {
+                    if (removeDecimal && !valStr.includes('.')) num = num / 10;
+                    num = inverseCalculateGrade(num, sc.pmax, sc.exig, sc.nmin, sc.nmax, sc.napr);
+                    num = Math.round(num * 100) / 100;
+                }
+
                 if (num < 0) num = 0;
-                if (num > max) num = max;
-                val = num;
-                input.value = num; // update DOM as well
+                if (num > sc.pmax) num = sc.pmax;
+
+                if (!sheet.grades[name]) sheet.grades[name] = {};
+                sheet.grades[name][actId] = num;
             }
-            if (!sheet.grades[name]) sheet.grades[name] = {};
-            sheet.grades[name][actId] = val;
         }
         sheet.updatedAt = Date.now();
         saveToStorage();
-
-        // Update cell color + pulse
-        const td = input.closest('.gs-grade-cell');
-        td.classList.remove('gs-pass', 'gs-fail', 'gs-border', 'gs-pulse');
-
-        let actObjColors = null;
-        CATEGORIES.forEach(cat => {
-            const f = (sheet.categories[cat] || []).find(a => a.id === actId);
-            if (f) actObjColors = f;
-        });
-
-        const cc = gradeColor(val, sheet, actObjColors);
-        if (cc) td.classList.add(cc);
-        void td.offsetWidth;
-        td.classList.add('gs-pulse');
-
-        // Re-render the avg cell for this row
         renderGrid();
     }
 
@@ -698,15 +731,39 @@
         saveToStorage(); renderGrid();
     }
 
+    function toggleRemoveDecimal() {
+        if (!currentSheetId) return;
+        removeDecimal = $removeDecimalToggle.checked;
+        renderGrid();
+    }
+
     function toggleViewMode() {
+        if (!currentSheetId) return;
         isGradesView = !isGradesView;
-        const table = $('gs-grade-table');
         if (isGradesView) {
-            table.classList.add('show-grades');
-            if ($toggleViewBtn) $toggleViewBtn.innerHTML = '<i class="fa-solid fa-exchange-alt"></i> Show Scores';
+            if ($toggleViewBtn) {
+                $toggleViewBtn.innerHTML = '<i class="fa-solid fa-exchange-alt"></i> Show Scores';
+                $toggleViewBtn.classList.remove('gs-btn-secondary');
+                $toggleViewBtn.classList.add('gs-btn-primary');
+            }
         } else {
-            table.classList.remove('show-grades');
-            if ($toggleViewBtn) $toggleViewBtn.innerHTML = '<i class="fa-solid fa-exchange-alt"></i> Show Grades';
+            if ($toggleViewBtn) {
+                $toggleViewBtn.innerHTML = '<i class="fa-solid fa-exchange-alt"></i> Show Grades';
+                $toggleViewBtn.classList.remove('gs-btn-primary');
+                $toggleViewBtn.classList.add('gs-btn-secondary');
+            }
+        }
+        renderGrid();
+    }
+
+    function clearAllGrades() {
+        const sheet = getSheet();
+        if (!sheet) return;
+        if (confirm('Are you sure you want to clear ALL grades in this sheet? This action cannot be undone.')) {
+            sheet.grades = {};
+            sheet.updatedAt = Date.now();
+            saveToStorage();
+            renderGrid();
         }
     }
 
@@ -781,6 +838,59 @@
     }
 
     // ══════════════════════════════════════════════════════
+    //     Phase 7: EDIT SHEET INFO MODAL
+    // ══════════════════════════════════════════════════════
+    function openEditSheetInfo() {
+        const sheet = getSheet();
+        if (!sheet) return;
+
+        if ($editInfoGroup && $editInfoGroup.children.length === 0 && typeof STUDENT_GROUPS !== 'undefined') {
+            Object.keys(STUDENT_GROUPS).forEach(g => {
+                const opt = document.createElement('option');
+                opt.value = g; opt.textContent = g;
+                $editInfoGroup.appendChild(opt);
+            });
+        }
+
+        if ($editInfoTeacher) $editInfoTeacher.value = sheet.teacherName || '';
+        if ($editInfoSubject) $editInfoSubject.value = sheet.subject || '';
+        if ($editInfoGroup) $editInfoGroup.value = sheet.group || '';
+        if ($editInfoTerm) $editInfoTerm.value = sheet.term || 'First';
+
+        if ($editInfoOverlay) $editInfoOverlay.style.display = '';
+    }
+
+    function closeEditSheetInfo() {
+        if ($editInfoOverlay) $editInfoOverlay.style.display = 'none';
+    }
+
+    function saveEditSheetInfo() {
+        const sheet = getSheet();
+        if (!sheet) return;
+
+        const newTeacher = $editInfoTeacher.value.trim();
+        const newSubject = $editInfoSubject.value.trim();
+        const newGroup = $editInfoGroup.value;
+        const newTerm = $editInfoTerm.value;
+
+        if (!newTeacher || !newSubject || !newGroup) {
+            showToast('Please fill in all sheet details.', 'error');
+            return;
+        }
+
+        sheet.teacherName = newTeacher;
+        sheet.subject = newSubject;
+        sheet.group = newGroup;
+        sheet.term = newTerm;
+
+        sheet.updatedAt = Date.now();
+        saveToStorage();
+        closeEditSheetInfo();
+
+        openEditor(currentSheetId);
+    }
+
+    // ══════════════════════════════════════════════════════
     //              DRAG-TO-REORDER COLUMNS
     // ══════════════════════════════════════════════════════
     function onDragStart(e) { dragSrcColId = e.currentTarget.dataset.id; e.currentTarget.style.opacity = '0.5'; e.dataTransfer.effectAllowed = 'move'; }
@@ -814,12 +924,29 @@
             (sheet.categories[cat] || []).forEach(act => {
                 const div = document.createElement('div');
                 div.className = 'gs-desc-item ' + cat;
-                div.innerHTML = `<span class="gs-desc-num">${num}.</span> ${escHtml(act.label)}`;
+                div.innerHTML = `<span class="gs-desc-num">${num}.</span> <span class="gs-act-label-text">${escHtml(act.label)}</span><i class="fa-solid fa-pen gs-edit-act-btn" data-id="${act.id}" data-cat="${cat}" title="Edit description"></i>`;
                 $descriptionsList.appendChild(div);
                 num++;
             });
         });
         if (num === 1) $descriptionsList.innerHTML = '<p style="color:#b2bec3;font-size:0.85rem;font-weight:600;">No activities added yet.</p>';
+
+        $descriptionsList.querySelectorAll('.gs-edit-act-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const actId = e.target.dataset.id;
+                const cat = e.target.dataset.cat;
+                const act = (sheet.categories[cat] || []).find(a => a.id === actId);
+                if (!act) return;
+                const newLabel = prompt(`Edit activity description:`, act.label);
+                if (newLabel !== null && newLabel.trim() !== '') {
+                    act.label = newLabel.trim();
+                    sheet.updatedAt = Date.now();
+                    saveToStorage();
+                    renderGrid();
+                    renderDescriptions();
+                }
+            });
+        });
     }
 
     // ══════════════════════════════════════════════════════
@@ -931,6 +1058,137 @@
     }
 
     function closeMissingReport() { $missingOverlay.style.display = 'none'; }
+
+    // ══════════════════════════════════════════════════════
+    //              PHASE 8: IMPORT DATA
+    // ══════════════════════════════════════════════════════
+    function openImportModal() {
+        if (!currentSheetId) return;
+        $importSourceSelect.innerHTML = '<option value="">-- Choose a sheet --</option>';
+        sheets.forEach(s => {
+            if (s.id !== currentSheetId) {
+                const opt = document.createElement('option');
+                opt.value = s.id;
+                opt.textContent = s.subject + ' - ' + s.group + ' (' + s.term + ' Term)';
+                $importSourceSelect.appendChild(opt);
+            }
+        });
+
+        $importSourceSelect.value = '';
+        $importActivityContainer.style.display = 'none';
+        $importActivitySelect.innerHTML = '';
+        $importExecuteBtn.disabled = true;
+
+        // Reset radios to description only
+        $importModeRadios.forEach(r => { if (r.value === 'desc_only') r.checked = true; });
+
+        $importOverlay.style.display = 'flex';
+    }
+
+    function closeImportModal() {
+        $importOverlay.style.display = 'none';
+    }
+
+    function onImportSourceChange() {
+        const sourceId = $importSourceSelect.value;
+        if (!sourceId) {
+            $importActivityContainer.style.display = 'none';
+            $importExecuteBtn.disabled = true;
+            return;
+        }
+
+        const srcSheet = sheets.find(s => s.id === sourceId);
+        if (!srcSheet) return;
+
+        const activities = getAllActivities(srcSheet);
+        if (activities.length === 0) {
+            $importActivitySelect.innerHTML = '<option value="">(No activities in this sheet)</option>';
+            $importActivityContainer.style.display = 'block';
+            $importExecuteBtn.disabled = true;
+            return;
+        }
+
+        $importActivitySelect.innerHTML = '<option value="">-- Choose activity --</option>';
+        activities.forEach(act => {
+            const opt = document.createElement('option');
+            opt.value = act.id;
+            opt.dataset.cat = act.category;
+            opt.textContent = CAT_LABELS[act.category] + ': ' + act.label;
+            $importActivitySelect.appendChild(opt);
+        });
+
+        $importActivityContainer.style.display = 'block';
+        $importExecuteBtn.disabled = true;
+    }
+
+    function onImportActivityChange() {
+        $importExecuteBtn.disabled = !$importActivitySelect.value;
+    }
+
+    function executeImport() {
+        const srcSheetId = $importSourceSelect.value;
+        const srcActId = $importActivitySelect.value;
+        if (!srcSheetId || !srcActId) return;
+
+        const srcSheet = sheets.find(s => s.id === srcSheetId);
+        const currSheet = getSheet();
+        if (!srcSheet || !currSheet) return;
+
+        const opt = $importActivitySelect.options[$importActivitySelect.selectedIndex];
+        const category = opt.dataset.cat;
+
+        // Find activity object in source
+        let srcAct = null;
+        if (srcSheet.categories && srcSheet.categories[category]) {
+            srcAct = srcSheet.categories[category].find(a => a.id === srcActId);
+        }
+        if (!srcAct) return;
+
+        let importMode = 'desc_only';
+        $importModeRadios.forEach(r => { if (r.checked) importMode = r.value; });
+
+        // Import description & settings
+        const newActId = 'act_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 6);
+        const newAct = {
+            id: newActId,
+            label: srcAct.label,
+            scaleId: srcAct.scaleId || null,
+            maxScore: srcAct.maxScore || null,
+            hidden: false
+        };
+
+        if (!currSheet.categories) currSheet.categories = {};
+        if (!currSheet.categories[category]) currSheet.categories[category] = [];
+        currSheet.categories[category].push(newAct);
+
+        // Import grades if requested
+        let importedCount = 0;
+        if (importMode === 'full_column') {
+            const srcGrades = srcSheet.grades || {};
+            if (!currSheet.grades) currSheet.grades = {};
+
+            const currStudents = getStudentNames(currSheet.group);
+            currStudents.forEach(student => {
+                if (srcGrades[student] && srcGrades[student][srcActId] !== undefined && srcGrades[student][srcActId] !== null && srcGrades[student][srcActId] !== '') {
+                    if (!currSheet.grades[student]) currSheet.grades[student] = {};
+                    currSheet.grades[student][newActId] = srcGrades[student][srcActId];
+                    importedCount++;
+                }
+            });
+        }
+
+        currSheet.updatedAt = Date.now();
+        saveToStorage();
+        closeImportModal();
+        renderGrid();
+        renderDescriptions();
+
+        if (importMode === 'full_column') {
+            showToast(`Activity imported! Copied grades for ${importedCount} identical students.`, 'success');
+        } else {
+            showToast('Activity description & scale settings imported correctly.', 'success');
+        }
+    }
 
     // ══════════════════════════════════════════════════════
     //              CSV EXPORT (Phase 4)
@@ -1064,12 +1322,30 @@
         // Editor – Add activity
         document.querySelectorAll('.gs-add-activity-bar .gs-btn-sm').forEach(btn => btn.addEventListener('click', () => addActivity(btn.dataset.cat)));
 
-        // Phase 6 - Buttons
+        // Phase 6 & 7 - Buttons
         if ($toggleViewBtn) $toggleViewBtn.addEventListener('click', toggleViewMode);
+        if ($removeDecimalToggle) $removeDecimalToggle.addEventListener('change', toggleRemoveDecimal);
+        if ($clearGradesBtn) $clearGradesBtn.addEventListener('click', clearAllGrades);
+        if ($editSheetInfoBtn) $editSheetInfoBtn.addEventListener('click', openEditSheetInfo);
+
         if ($actSettingsClose) $actSettingsClose.forEach(b => b.addEventListener('click', closeActivitySettings));
         if ($actSettingsSave) $actSettingsSave.addEventListener('click', saveActivitySettings);
         if ($actScaleSelect) $actScaleSelect.addEventListener('change', updateActScalePreview);
         if ($actSettingsOverlay) $actSettingsOverlay.addEventListener('click', e => { if (e.target === $actSettingsOverlay) closeActivitySettings(); });
+
+        if ($editInfoClose) $editInfoClose.forEach(b => b.addEventListener('click', closeEditSheetInfo));
+        if ($editInfoSave) $editInfoSave.addEventListener('click', saveEditSheetInfo);
+        if ($editInfoOverlay) $editInfoOverlay.addEventListener('click', e => { if (e.target === $editInfoOverlay) closeEditSheetInfo(); });
+
+        // Phase 8 – Import Component
+        if ($importSheetDataBtn) $importSheetDataBtn.addEventListener('click', openImportModal);
+        if ($importCloseBtn) $importCloseBtn.addEventListener('click', closeImportModal);
+        if ($importCancelBtn) $importCancelBtn.addEventListener('click', closeImportModal);
+        if ($importSourceSelect) $importSourceSelect.addEventListener('change', onImportSourceChange);
+        if ($importActivitySelect) $importActivitySelect.addEventListener('change', onImportActivityChange);
+        if ($importExecuteBtn) $importExecuteBtn.addEventListener('click', executeImport);
+        if ($importOverlay) $importOverlay.addEventListener('click', e => { if (e.target === $importOverlay) closeImportModal(); });
+
         CATEGORIES.forEach(cat => {
             const inp = $('gs-add-' + cat + '-input');
             if (inp) inp.addEventListener('keydown', e => { if (e.key === 'Enter') addActivity(cat); });
@@ -1097,6 +1373,7 @@
                 if ($deleteOverlay.style.display !== 'none') closeDeleteConfirm();
                 if ($scaleOverlay.style.display !== 'none') closeScaleConfig();
                 if ($missingOverlay.style.display !== 'none') closeMissingReport();
+                if ($importOverlay && $importOverlay.style.display !== 'none') closeImportModal();
             }
             if (e.key === 'Enter' && $modalOverlay.style.display !== 'none') {
                 if (!document.activeElement || !document.activeElement.classList.contains('gs-add-input')) createSheet();
