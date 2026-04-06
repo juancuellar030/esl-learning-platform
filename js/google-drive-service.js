@@ -34,7 +34,91 @@ class GoogleDriveService {
         this.folderId = null;
         this.modalEl = null;
         this._initialized = false;
+
+        this._injectStyles();
     }
+
+    _injectStyles() {
+        if (document.getElementById('gds-styles')) return;
+        const css = `
+            .gds-modal-overlay {
+                position: fixed; inset: 0; z-index: 99999;
+                background: rgba(0,0,0,0.65); backdrop-filter: blur(6px);
+                display: flex; align-items: center; justify-content: center;
+                padding: 16px;
+            }
+            .gds-modal-card {
+                background: #1e1e2e; color: #e0e0e0;
+                border-radius: 18px; width: 100%; max-width: 500px;
+                box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+                font-family: inherit; overflow: hidden;
+            }
+            .gds-modal-header {
+                display: flex; justify-content: space-between; align-items: flex-start;
+                padding: 20px 20px 12px; border-bottom: 1px solid rgba(255,255,255,0.08);
+            }
+            .gds-modal-header h3 { margin: 0 0 4px; font-size: 1.1rem; color: #fff; display: flex; gap: 8px; align-items: center; }
+            .gds-folder-label { margin: 0; font-size: 0.8rem; opacity: 0.55; }
+            .gds-close-btn {
+                background: none; border: none; color: #aaa; cursor: pointer;
+                font-size: 1.2rem; padding: 4px 8px; border-radius: 8px; transition: background 0.2s;
+            }
+            .gds-close-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+            .gds-auth-section { padding: 20px; }
+            .gds-signed-out {
+                display: flex; flex-direction: column; align-items: center;
+                gap: 10px; text-align: center; padding: 20px 0;
+            }
+            .gds-signed-out p { margin: 0; opacity: 0.7; font-size: 0.9rem; }
+            .gds-user-bar {
+                display: flex; justify-content: space-between; align-items: center;
+                margin-bottom: 14px; padding-bottom: 12px;
+                border-bottom: 1px solid rgba(255,255,255,0.08);
+                font-size: 0.85rem; color: #aaa;
+            }
+            .gds-save-section { margin-bottom: 16px; }
+            .gds-save-row { display: flex; gap: 8px; }
+            .gds-filename-input {
+                flex: 1; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12);
+                border-radius: 10px; padding: 9px 14px; color: #e0e0e0;
+                font-size: 0.9rem; outline: none;
+            }
+            .gds-filename-input:focus { border-color: #4285F4; }
+            .gds-file-section-header {
+                display: flex; justify-content: space-between; align-items: center;
+                font-size: 0.8rem; color: #888; margin-bottom: 8px;
+            }
+            .gds-file-list { max-height: 220px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+            .gds-file-item {
+                display: flex; justify-content: space-between; align-items: center;
+                padding: 10px 12px; border-radius: 10px;
+                background: rgba(255,255,255,0.05);
+            }
+            .gds-file-name { font-size: 0.9rem; font-weight: 600; color: #ddd; }
+            .gds-file-meta { font-size: 0.75rem; color: #888; margin-top: 2px; }
+            .gds-file-actions { display: flex; gap: 6px; flex-shrink: 0; }
+            .gds-empty { text-align: center; padding: 20px; opacity: 0.4; font-size: 0.9rem; }
+            .gds-btn {
+                display: inline-flex; align-items: center; gap: 6px;
+                border: none; border-radius: 8px; padding: 8px 14px;
+                font-size: 0.85rem; cursor: pointer; font-weight: 600; transition: opacity 0.2s;
+            }
+            .gds-btn:hover { opacity: 0.85; }
+            .gds-btn-signin { background: #4285F4; color: #fff; padding: 10px 22px; }
+            .gds-btn-save { background: #34a853; color: #fff; white-space: nowrap; }
+            .gds-btn-load { background: rgba(66,133,244,0.2); color: #7ab3ff; }
+            .gds-btn-del { background: rgba(234,67,53,0.15); color: #f08080; padding: 8px; }
+            .gds-btn-link {
+                background: none; border: none; color: #7ab3ff;
+                cursor: pointer; font-size: 0.8rem; padding: 2px;
+            }
+        `;
+        const style = document.createElement('style');
+        style.id = 'gds-styles';
+        style.textContent = css;
+        document.head.appendChild(style);
+    }
+
 
     // ── Initialization ─────────────────────────────────────────
     async init() {
