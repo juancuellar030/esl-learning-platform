@@ -1,0 +1,89 @@
+- generic [ref=e2]:
+  - generic [ref=e4]:
+    - complementary [ref=e5]:
+      - generic [ref=e6]:
+        - button "" [ref=e7] [cursor=pointer]:
+          - generic [ref=e8]: 
+        - heading " Pictures" [level=2] [ref=e9]:
+          - generic [ref=e10]: 
+          - text: Pictures
+        - button "+" [ref=e11] [cursor=pointer]:
+          - generic [ref=e12]: +
+      - list [ref=e13]:
+        - listitem [ref=e14] [cursor=pointer]:
+          - generic [ref=e15]:
+            - generic [ref=e16]: Picture 1
+            - generic [ref=e17]: Untitled
+          - button "" [ref=e18]:
+            - generic [ref=e19]: 
+      - text: 
+      - generic [ref=e20]:
+        - button " Drive Sync" [ref=e21] [cursor=pointer]:
+          - generic [ref=e22]: 
+          - generic [ref=e23]: Drive Sync
+        - button " Start Game" [disabled] [ref=e24]:
+          - generic [ref=e25]: 
+          - generic [ref=e26]: Start Game
+        - generic [ref=e27]:
+          - button " Themes" [ref=e28] [cursor=pointer]:
+            - generic [ref=e29]: 
+            - generic [ref=e30]: Themes
+          - button "" [ref=e31] [cursor=pointer]:
+            - generic [ref=e32]: 
+        - link " Back to Tools" [ref=e33] [cursor=pointer]:
+          - /url: tools.html
+          - generic [ref=e34]: 
+          - generic [ref=e35]: Back to Tools
+    - main [ref=e36]:
+      - text:  
+      - generic [ref=e37]:
+        - generic [ref=e38]:
+          - heading "Picture 1" [level=3] [ref=e39]
+          - generic [ref=e40]:
+            - generic [ref=e41]:
+              - generic [ref=e42]: 
+              - text: "Settings:"
+            - combobox [ref=e43]:
+              - 'option "Mode: Side Options" [selected]'
+              - 'option "Mode: Stop Button"'
+            - combobox [ref=e44]:
+              - option "15 Seconds"
+              - option "30 Seconds" [selected]
+              - option "45 Seconds"
+              - option "60 Seconds"
+            - combobox [ref=e45]:
+              - option "3x3 Grid"
+              - option "4x4 Grid" [selected]
+              - option "5x5 Grid"
+              - option "6x6 Grid"
+        - generic [ref=e46]:
+          - generic [ref=e47]:
+            - generic [ref=e48]: 
+            - text: Correct Answer
+          - textbox "e.g. elephant" [ref=e49]
+          - paragraph [ref=e50]: The word students must guess when they see the picture.
+        - generic [ref=e51]:
+          - generic [ref=e52]:
+            - generic [ref=e53]: 
+            - text: The Picture
+          - generic [ref=e54] [cursor=pointer]:
+            - generic [ref=e55]:
+              - generic [ref=e56]: 
+              - generic [ref=e57]: Click to upload an image
+            - text: 
+        - generic [ref=e58]:
+          - generic [ref=e59]:
+            - generic [ref=e60]: 
+            - text: Wrong Options (Distractors)
+          - generic [ref=e61]:
+            - generic [ref=e62]:
+              - radio "Auto (use answers from other pictures)" [checked] [ref=e63]
+              - text: Auto (use answers from other pictures)
+            - generic [ref=e64]:
+              - radio "Manual (custom wrong options)" [ref=e65]
+              - text: Manual (custom wrong options)
+          - text: +
+          - paragraph [ref=e67]:
+            - generic [ref=e68]: 
+            - text: The game will automatically select wrong answers by pulling the correct answers from your other created pictures in this game.
+  - text:      

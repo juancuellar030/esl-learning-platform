@@ -1,0 +1,19 @@
+{
+  "rules": {
+    "sessions": {
+      "$code": {
+        ".read": "auth != null",
+        ".write": "auth != null"
+      }
+    },
+    "tests": {
+      "$code": {
+        ".read": true,
+        ".write": "auth != null",
+        "responses": {
+          ".write": true
+        }
+      }
+    }
+  }
+}

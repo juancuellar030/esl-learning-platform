@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="assets/graduation-cap-icon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Picture Reveal – ESL Learning Platform</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/picture-reveal.css">
+
+    <!-- Google Drive API -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://apis.google.com/js/api.js" async defer></script>
+</head>
+
+<body>
+    <!-- BACKGROUND ANIMATION LAYER (Ported from Live Quiz) -->
+    <canvas id="pr-bg-canvas" aria-hidden="true"></canvas>
+
+    <div class="pr-app" id="pr-app" data-theme="default">
+
+        <!-- ========== SETTINGS SCREEN ========== -->
+        <div class="pr-screen active" id="pr-screen-settings">
+            <div class="pr-settings-layout">
+
+                <!-- Left: Session Sidebar -->
+                <aside class="pr-session-sidebar">
+                    <div class="pr-sidebar-header">
+                        <button class="pr-sidebar-toggle" id="pr-sidebar-toggle" title="Toggle Sidebar">
+                            <i class="fa-solid fa-bars-staggered"></i>
+                        </button>
+                        <h2><i class="fa-solid fa-images"></i> Pictures</h2>
+                        <button class="pr-add-session-btn" id="pr-add-session" title="Add picture (max 10)">
+                            <i class="fa-solid fa-plus"></i>
+                        </button>
+                    </div>
+                    <ul class="pr-session-list" id="pr-session-list">
+                        <!-- Populated by JS -->
+                    </ul>
+                    <p class="pr-session-cap-hint" id="pr-session-cap-hint" style="display:none;">
+                        <i class="fa-solid fa-circle-info"></i> Maximum 10 pictures reached.
+                    </p>
+                    <div class="pr-sidebar-footer">
+                        <!-- Drive Sync Button -->
+                        <button class="pr-btn pr-btn-ghost" id="pr-drive-sync-btn"
+                            style="border: 1px solid rgba(255,255,255,0.2); padding: 10px; border-radius: 12px; margin-bottom: 10px;">
+                            <i class="fa-brands fa-google-drive"></i> <span>Drive Sync</span>
+                        </button>
+
+                        <button class="pr-btn pr-btn-accent pr-btn-lg" id="pr-start-game" disabled>
+                            <i class="fa-solid fa-play"></i> <span class="pr-btn-text">Start Game</span>
+                        </button>
+
+                        <div class="pr-theme-controls" style="display: flex; gap: 10px; margin-top: 10px;">
+                            <button class="pr-btn pr-btn-ghost" id="btn-change-theme" title="Change Theme"
+                                style="flex: 1;">
+                                <i class="fa-solid fa-palette"></i> <span>Themes</span>
+                            </button>
+                            <button class="pr-dark-toggle" id="pr-dark-toggle" title="Toggle Dark Mode">
+                                <i class="fa-solid fa-moon" id="pr-dark-icon"></i>
+                            </button>
+                        </div>
+
+                        <a href="tools.html" class="pr-back-link">
+                            <i class="fa-solid fa-arrow-left"></i> <span>Back to Tools</span>
+                        </a>
+                    </div>
+                </aside>
+
+                <!-- Right: Session Editor -->
+                <main class="pr-session-editor" id="pr-session-editor">
+                    <!-- Global Settings (always visible at top of editor area if we wanted, or separate tab) 
+                         For simplicity, we inject it into the editor or keep it accessible. -->
+
+                    <!-- Empty state -->
+                    <div class="pr-editor-empty" id="pr-editor-empty">
+                        <div class="pr-editor-empty-icon">
+                            <i class="fa-solid fa-image"></i>
+                        </div>
+                        <h3>No Picture Selected</h3>
+                        <p>Click <strong>+</strong> to add a new picture, or select one from the list on the left.</p>
+                    </div>
+
+                    <!-- Collapsed state -->
+                    <div class="pr-editor-empty" id="pr-editor-collapsed-state" style="display: none;">
+                        <i class="fa-solid fa-gamepad"
+                            style="font-size: 4rem; margin-bottom: 1rem; color: var(--medium-slate-blue);"></i>
+                        <h3>Ready to Play</h3>
+                        <p>The editor is hidden. Click the Play button in the sidebar to start the game.</p>
+                    </div>
+
+                    <!-- Editor form (shown when a session is active) -->
+                    <form class="pr-editor-form" id="pr-editor-form" style="display:none;" onsubmit="return false;">
+
+                        <div class="pr-editor-header">
+                            <h3 id="pr-editor-session-title">Picture 1</h3>
+
+                            <!-- Global Settings inline for easy access -->
+                            <div class="pr-global-settings-pill">
+                                <span><i class="fa-solid fa-gear"></i> Settings:</span>
+                                <select id="pr-global-mode" class="pr-select">
+                                    <option value="side-options">Mode: Side Options</option>
+                                    <option value="stop-button">Mode: Stop Button</option>
+                                </select>
+                                <select id="pr-global-time" class="pr-select">
+                                    <option value="15">15 Seconds</option>
+                                    <option value="30" selected>30 Seconds</option>
+                                    <option value="45">45 Seconds</option>
+                                    <option value="60">60 Seconds</option>
+                                </select>
+                                <select id="pr-global-grid" class="pr-select">
+                                    <option value="3">3x3 Grid</option>
+                                    <option value="4" selected>4x4 Grid</option>
+                                    <option value="5">5x5 Grid</option>
+                                    <option value="6">6x6 Grid</option>
+                                </select>
+                                <select id="pr-global-sound" class="pr-select">
+                                    <option value="on" selected>Sound: On</option>
+                                    <option value="off">Sound: Off</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Answer Word -->
+                        <div class="pr-field-group">
+                            <label class="pr-field-label">
+                                <i class="fa-solid fa-key"></i> Correct Answer
+                            </label>
+                            <input type="text" class="pr-text-input" id="pr-answer-word" placeholder="e.g. elephant"
+                                autocomplete="off" spellcheck="false">
+                            <p class="pr-field-hint">The word students must guess when they see the picture.</p>
+                        </div>
+
+                        <!-- The Image -->
+                        <div class="pr-field-group">
+                            <label class="pr-field-label">
+                                <i class="fa-solid fa-image"></i> The Picture
+                            </label>
+                            <div class="pr-image-upload-area" id="pr-image-upload-area">
+                                <input type="file" id="pr-image-input"
+                                    accept="image/png, image/jpeg, image/gif, image/webp" style="display:none;">
+                                <div class="pr-upload-placeholder" id="pr-upload-placeholder">
+                                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                                    <span>Click to upload an image</span>
+                                </div>
+                                <div class="pr-image-preview-container" id="pr-image-preview-container"
+                                    style="display:none;">
+                                    <img id="pr-image-preview" src="" alt="Preview">
+                                    <button class="pr-remove-image-btn" id="pr-remove-image" title="Remove image">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Wrong Options (Distractors) -->
+                        <div class="pr-field-group" id="pr-wrong-options-group">
+                            <label class="pr-field-label">
+                                <i class="fa-solid fa-list"></i> Wrong Options (Distractors)
+                            </label>
+
+                            <div class="pr-distractor-mode-toggle">
+                                <label class="pr-radio-label">
+                                    <input type="radio" name="distractor_mode" value="auto" checked>
+                                    <span>Auto (use answers from other pictures)</span>
+                                </label>
+                                <label class="pr-radio-label">
+                                    <input type="radio" name="distractor_mode" value="manual">
+                                    <span>Manual (custom wrong options)</span>
+                                </label>
+                            </div>
+
+                            <div class="pr-manual-distractors" id="pr-manual-distractors" style="display:none;">
+                                <p class="pr-field-hint">Add up to 5 wrong options for the game. (3-4 recommended)</p>
+                                <ul class="pr-distractor-list" id="pr-distractor-list">
+                                    <!-- Populated by JS -->
+                                </ul>
+                                <button class="pr-btn pr-btn-ghost pr-btn-sm" id="pr-add-distractor">
+                                    <i class="fa-solid fa-plus"></i> Add Wrong Option
+                                </button>
+                            </div>
+
+                            <div class="pr-auto-distractors-hint" id="pr-auto-distractors-hint">
+                                <p class="pr-field-hint"><i class="fa-solid fa-robot"></i> The game will automatically
+                                    select
+                                    wrong answers by pulling the correct answers from your other created pictures in
+                                    this game.</p>
+                            </div>
+                        </div>
+
+                    </form>
+                </main>
+            </div>
+        </div>
+
+        <!-- ========== GAME SCREEN ========== -->
+        <div class="pr-screen" id="pr-screen-game" style="display:none;">
+            <!-- Top bar -->
+            <div class="pr-game-header">
+                <div class="pr-game-progress" id="pr-game-progress">Picture 1 / 5</div>
+
+                <div class="pr-game-timer-container">
+                    <div class="pr-timer-bar" id="pr-timer-bar"></div>
+                    <div class="pr-timer-text" id="pr-timer-text">30</div>
+                </div>
+
+                <div class="pr-game-actions">
+                    <button class="pr-btn pr-btn-ghost pr-btn-sm" id="btn-end-game">
+                        <i class="fa-solid fa-power-off"></i> Quit
+                    </button>
+                </div>
+            </div>
+
+            <!-- Main Play Area -->
+            <div class="pr-game-body" id="pr-game-body">
+                <!-- Left/Center: The Image & Grid -->
+                <div class="pr-image-stage">
+                    <div class="pr-grid-container" id="pr-grid-container">
+                        <img id="pr-game-image" src="" alt="Mystery Image">
+                        <div class="pr-grid-overlay" id="pr-grid-overlay">
+                            <!-- Divs injected by JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right/Bottom: Controls (Changes based on mode) -->
+                <div class="pr-game-controls" id="pr-game-controls">
+                    <!-- MODE 1: Side Options -->
+                    <div id="pr-mc-container" style="display:none;">
+                        <h3 class="pr-mc-title">What is it?</h3>
+                        <div class="pr-mc-options" id="pr-mc-options">
+                            <!-- Buttons injected by JS -->
+                        </div>
+                    </div>
+
+                    <!-- MODE 2: Stop Button -->
+                    <div id="pr-stop-container" style="display:none;">
+                        <button class="pr-btn-stop" id="btn-stop-reveal">STOP!</button>
+                        <p class="pr-stop-hint">Hit stop to guess the image before it's fully revealed.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Result Overlay (Win/Loss feedback after guessing) -->
+            <div class="pr-overlay pr-game-feedback" id="pr-game-feedback" style="display:none;">
+                <div class="pr-feedback-content">
+                    <div class="pr-feedback-icon" id="pr-feedback-icon"></div>
+                    <h2 class="pr-feedback-title" id="pr-feedback-title"></h2>
+                    <p class="pr-feedback-message" id="pr-feedback-message"></p>
+
+                    <div class="pr-feedback-actions">
+                        <button class="pr-btn pr-btn-ghost" id="btn-try-again" style="display:none;">
+                            <i class="fa-solid fa-rotate-right"></i> Try Again
+                        </button>
+                        <button class="pr-btn pr-btn-accent pr-btn-lg" id="btn-next-picture" style="display:none;">
+                            Next Picture <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                        <button class="pr-btn pr-btn-accent pr-btn-lg" id="btn-finish-game" style="display:none;">
+                            <i class="fa-solid fa-check-double"></i> Finish Game
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== OVERLAY: Change Theme Modal ===== -->
+        <div class="pr-overlay" id="overlay-theme-modal"
+            style="display:none; align-items: center; justify-content: center; padding: 20px;">
+            <div class="pr-modal-panel"
+                style="position: relative; max-width: 500px; padding: 30px; margin: 0 auto; text-align: center; background: var(--bg-card); border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
+                <button class="pr-modal-close" id="btn-close-theme-modal"
+                    style="position: absolute; top: 15px; right: 20px; border: none; background: transparent; font-size: 1.8rem; color: #888; cursor: pointer; transition: color 0.2s;">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+                <h2
+                    style="margin-bottom: 25px; color: var(--text-main); display: flex; align-items: center; justify-content: center; gap: 10px;">
+                    <i class="fa-solid fa-palette"></i> Select Theme
+                </h2>
+                <div class="pr-theme-swatches"
+                    style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; width: 100%;">
+                    <button class="pr-theme-swatch active" data-theme="default" title="Default"
+                        style="background: linear-gradient(135deg,#3d348b,#7678ed);">Default</button>
+                    <button class="pr-theme-swatch" data-theme="neon" title="Neon"
+                        style="background: linear-gradient(135deg,#0a0a1a,#00f5ff);">Neon</button>
+                    <button class="pr-theme-swatch" data-theme="forest" title="Forest"
+                        style="background: linear-gradient(135deg,#1a3d2b,#52b788);">Forest</button>
+                    <button class="pr-theme-swatch" data-theme="winter" title="Winter"
+                        style="background: linear-gradient(135deg,#a8d8ea,#48cae4);">Winter</button>
+                    <button class="pr-theme-swatch" data-theme="candy" title="Candy"
+                        style="background: linear-gradient(135deg,#f72585,#c77dff);">Candy</button>
+                    <button class="pr-theme-swatch" data-theme="pastel" title="Pastel"
+                        style="background: linear-gradient(135deg,#ffd6e7,#c77dff);">Pastel</button>
+                    <button class="pr-theme-swatch" data-theme="ocean" title="Ocean"
+                        style="background: linear-gradient(135deg,#023e8a,#90e0ef);">Ocean</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Confetti layer -->
+    <canvas id="confetti-canvas" style="position:fixed; inset:0; pointer-events:none; z-index:9999;"></canvas>
+
+    <!-- Google Drive generic Service -->
+    <script src="js/google-drive-service.js"></script>
+    <script src="js/picture-reveal.js"></script>
+</body>
+
+</html>
