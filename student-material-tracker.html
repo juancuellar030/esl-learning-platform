@@ -819,6 +819,81 @@
             transform: scale(1.15);
         }
 
+        /* Wrap toggle button on text cells */
+        .cell-wrap-btn {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            background: #74b9ff;
+            color: white;
+            border: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            opacity: 0;
+            transition: opacity 0.2s, transform 0.2s;
+            transform: scale(0.7);
+        }
+
+        .cell-content.text-mode:hover .cell-wrap-btn {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .cell-wrap-btn:hover {
+            background: #0984e3;
+            transform: scale(1.15);
+        }
+
+        .cell-wrap-btn.active {
+            background: #0984e3;
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* Wrapped text cell: expands to show all content */
+        .cell-content.text-mode.text-wrapped {
+            height: auto;
+            min-height: 60px;
+            align-items: flex-start;
+            padding: 22px 6px 6px;
+        }
+
+        .cell-content.text-mode.text-wrapped .cell-text-input {
+            display: none;
+            /* hidden in wrap mode */
+        }
+
+        .cell-text-textarea {
+            width: 100%;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-size: 14px;
+            font-weight: 600;
+            color: #5a3e99;
+            font-family: inherit;
+            resize: none;
+            overflow: hidden;
+            line-height: 1.4;
+            padding: 0 4px;
+            display: none;
+            /* shown only in wrap mode */
+        }
+
+        body.dark-mode .cell-text-textarea {
+            color: #c9b8ff;
+        }
+
+        .cell-content.text-mode.text-wrapped .cell-text-textarea {
+            display: block;
+        }
+
         /* Hint on empty hover */
         body.dark-mode .cell-content.empty::after {
             color: #555;
@@ -1063,28 +1138,73 @@
                     const isText = status && typeof status === 'object' && 'text' in status;
 
                     if (isText) {
-                        contentDiv.className = 'cell-content text-mode';
+                        const isWrapped = !!status.wrap;
+                        contentDiv.className = 'cell-content text-mode' + (isWrapped ? ' text-wrapped' : '');
 
+                        // --- Single-line INPUT (visible when NOT wrapped) ---
                         const inp = document.createElement('input');
                         inp.type = 'text';
                         inp.className = 'cell-text-input';
                         inp.placeholder = 'Type note…';
                         inp.value = status.text || '';
-                        inp.title = 'Click to edit. Single-click the ✖ badge to clear.';
+                        inp.title = 'Click to edit. Toggle ↕ to wrap long text.';
                         inp.dataset.student = student;
                         inp.dataset.material = material;
 
                         inp.addEventListener('input', () => {
-                            appData.tracking[student][material] = { text: inp.value };
+                            appData.tracking[student][material] = { text: inp.value, wrap: appData.tracking[student][material]?.wrap };
                             saveData();
                         });
-
-                        // Clicking into input should NOT bubble and accidentally toggle
                         inp.addEventListener('click', e => e.stopPropagation());
-
                         contentDiv.appendChild(inp);
 
-                        // Small clear badge on top-right of text cell
+                        // --- Multi-line TEXTAREA (visible when wrapped) ---
+                        const ta = document.createElement('textarea');
+                        ta.className = 'cell-text-textarea';
+                        ta.placeholder = 'Type note…';
+                        ta.value = status.text || '';
+                        ta.rows = 1;
+                        ta.dataset.student = student;
+                        ta.dataset.material = material;
+
+                        // Auto-resize textarea height to fit content
+                        function autoResizeTa() {
+                            ta.style.height = 'auto';
+                            ta.style.height = ta.scrollHeight + 'px';
+                        }
+                        ta.addEventListener('input', () => {
+                            appData.tracking[student][material] = { text: ta.value, wrap: true };
+                            saveData();
+                            autoResizeTa();
+                        });
+                        ta.addEventListener('click', e => e.stopPropagation());
+                        contentDiv.appendChild(ta);
+                        if (isWrapped) setTimeout(autoResizeTa, 10);
+
+                        // --- Wrap toggle button (top-left) ---
+                        const wrapBtn = document.createElement('button');
+                        wrapBtn.className = 'cell-wrap-btn' + (isWrapped ? ' active' : '');
+                        wrapBtn.title = isWrapped ? 'Single-line mode' : 'Wrap text (expand row)';
+                        wrapBtn.innerHTML = '<i class="fa-solid fa-text-width"></i>';
+                        wrapBtn.addEventListener('click', e => {
+                            e.stopPropagation();
+                            const cur = appData.tracking[student][material];
+                            const curText = cur?.text ?? '';
+                            const newWrap = !cur?.wrap;
+                            appData.tracking[student][material] = { text: curText, wrap: newWrap };
+                            saveData();
+                            renderTable();
+                            // Re-focus appropriate element
+                            setTimeout(() => {
+                                const sel = newWrap
+                                    ? document.querySelector(`.cell-text-textarea[data-student="${CSS.escape(student)}"][data-material="${CSS.escape(material)}"]`)
+                                    : document.querySelector(`.cell-text-input[data-student="${CSS.escape(student)}"][data-material="${CSS.escape(material)}"]`);
+                                if (sel) sel.focus();
+                            }, 50);
+                        });
+                        contentDiv.appendChild(wrapBtn);
+
+                        // --- Clear button (top-right) ---
                         const clearBtn = document.createElement('button');
                         clearBtn.className = 'cell-clear-btn';
                         clearBtn.title = 'Clear (back to empty)';

@@ -18,6 +18,29 @@
 }
 
 /* Base Layout */
+:root {
+    --pr-bg-from: var(--indigo-velvet);
+    --pr-bg-to: var(--medium-slate-blue);
+    --pr-accent: var(--amber-flame);
+    --pr-accent-dark: var(--tiger-orange);
+    --pr-panel-bg: rgba(255, 255, 255, 0.97);
+    --pr-panel-text: #222;
+    --pr-panel-muted: #777;
+    --pr-border: #e2e5ef;
+    --pr-input-bg: #f8f9fc;
+    --pr-shadow: 0 20px 60px rgba(0, 0, 0, 0.28);
+    --pr-radius: 24px;
+    --pr-radius-sm: 12px;
+}
+
+body.dark-mode {
+    --pr-panel-bg: rgba(30, 30, 45, 0.97);
+    --pr-panel-text: #e8e8f0;
+    --pr-panel-muted: #9090aa;
+    --pr-border: #3a3a55;
+    --pr-input-bg: #25253a;
+}
+
 .pr-app {
     min-height: 100vh;
     font-family: 'Nunito', 'Segoe UI', sans-serif;
@@ -104,12 +127,14 @@
 }
 
 .pr-btn-ghost {
-    background: transparent;
-    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.12);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.2);
 }
 
 .pr-btn-ghost:hover:not(:disabled) {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.22);
+    border-color: rgba(255, 255, 255, 0.4);
 }
 
 .pr-btn-lg {
@@ -126,26 +151,25 @@
 
 /* Global Form Elements */
 .pr-field-group {
-    background: rgba(255, 255, 255, 0.12);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: var(--pr-panel-bg);
+    border: 1px solid var(--pr-border);
     border-radius: 16px;
     padding: 25px;
     margin-bottom: 20px;
-    backdrop-filter: blur(8px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
     transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .pr-field-group:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
 }
 
 .pr-field-label {
     display: block;
     font-weight: 700;
     font-size: 1.1rem;
-    color: var(--text-main);
+    color: var(--pr-panel-text);
     margin-bottom: 10px;
 }
 
@@ -156,19 +180,19 @@
 
 .pr-field-hint {
     font-size: 0.85rem;
-    color: var(--text-muted);
+    color: var(--pr-panel-muted);
     margin-top: 6px;
 }
 
 .pr-text-input {
     width: 100%;
-    background: rgba(255, 255, 255, 0.9);
-    border: 2px solid transparent;
+    background: var(--pr-input-bg);
+    border: 2px solid var(--pr-border);
     border-radius: 10px;
     padding: 12px 16px;
     font-family: inherit;
     font-size: 1rem;
-    color: #333;
+    color: var(--pr-panel-text);
     transition: all 0.2s;
 }
 
@@ -188,7 +212,9 @@
 /* Sidebar */
 .pr-session-sidebar {
     width: 250px;
-    background: var(--bg-card);
+    background: rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border-right: 1px solid rgba(255, 255, 255, 0.1);
     display: flex;
     flex-direction: column;
@@ -211,12 +237,13 @@
     gap: 8px;
     align-items: center;
     white-space: nowrap;
+    color: white;
 }
 
 .pr-sidebar-toggle {
-    background: none;
+    background: transparent;
     border: none;
-    color: var(--text-muted);
+    color: rgba(255, 255, 255, 0.7);
     font-size: 1.2rem;
     cursor: pointer;
     padding: 4px;
@@ -224,7 +251,7 @@
 }
 
 .pr-sidebar-toggle:hover {
-    color: var(--text-main);
+    color: white;
 }
 
 .pr-add-session-btn {
@@ -264,8 +291,8 @@
 }
 
 .pr-session-item {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.06);
+    border: 1.5px solid transparent;
     border-radius: 12px;
     padding: 12px 15px;
     cursor: pointer;
@@ -276,12 +303,14 @@
 }
 
 .pr-session-item:hover {
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.15);
 }
 
 .pr-session-item.active {
-    background: rgba(118, 120, 237, 0.2);
-    border-color: var(--primary-color);
+    background: rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.35);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .pr-session-item-info {
@@ -303,16 +332,16 @@
 .pr-session-preview {
     font-size: 0.95rem;
     font-weight: 600;
-    color: var(--text-main);
+    color: white;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
 .pr-session-delete {
-    background: none;
+    background: transparent;
     border: none;
-    color: var(--text-muted);
+    color: rgba(255, 255, 255, 0.4);
     cursor: pointer;
     padding: 5px;
     margin-left: 5px;
@@ -342,23 +371,24 @@
     align-items: center;
     justify-content: center;
     gap: 8px;
-    color: var(--text-muted);
+    color: rgba(255, 255, 255, 0.5);
     text-decoration: none;
     font-size: 0.9rem;
     padding: 10px;
     border-radius: 8px;
     transition: all 0.2s;
+    font-weight: 600;
 }
 
 .pr-back-link:hover {
     background: rgba(255, 255, 255, 0.05);
-    color: var(--text-main);
+    color: rgba(255, 255, 255, 0.85);
 }
 
 .pr-dark-toggle {
-    background: rgba(255, 255, 255, 0.1);
-    color: var(--text-main);
-    border: none;
+    background: rgba(255, 255, 255, 0.12);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.2);
     border-radius: 12px;
     width: 44px;
     display: flex;
@@ -381,14 +411,14 @@
 }
 
 .pr-editor-form {
-    max-width: 800px;
+    max-width: 900px;
     margin: 0 auto;
-    background: var(--bg-white, #ffffff);
-    color: var(--text-main, #333333);
+    background: var(--pr-panel-bg);
+    color: var(--pr-panel-text);
     border-radius: 20px;
     padding: 30px 40px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: var(--pr-shadow);
+    border: 1px solid var(--pr-border);
 }
 
 .pr-editor-empty {
@@ -432,19 +462,21 @@
 }
 
 .pr-global-settings-pill {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--pr-input-bg);
+    border: 1px solid var(--pr-border);
     padding: 10px 15px;
     border-radius: 20px;
     display: flex;
     gap: 10px;
     align-items: center;
     font-size: 0.85rem;
+    color: var(--pr-panel-text);
 }
 
 .pr-select {
-    background: rgba(0, 0, 0, 0.2);
-    color: white;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: var(--pr-panel-bg);
+    color: var(--pr-panel-text);
+    border: 1px solid var(--pr-border);
     border-radius: 6px;
     padding: 4px 8px;
     font-family: inherit;
@@ -453,10 +485,10 @@
 
 /* Image Upload Area */
 .pr-image-upload-area {
-    border: 2px dashed rgba(255, 255, 255, 0.2);
+    border: 2px dashed var(--pr-border);
     border-radius: 12px;
-    background: rgba(0, 0, 0, 0.1);
-    min-height: 150px;
+    background: var(--pr-input-bg);
+    min-height: 120px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -527,9 +559,11 @@
     display: flex;
     gap: 20px;
     margin-bottom: 15px;
-    background: rgba(0, 0, 0, 0.2);
+    background: var(--pr-input-bg);
+    border: 1px solid var(--pr-border);
     padding: 12px 20px;
     border-radius: 12px;
+    color: var(--pr-panel-text);
 }
 
 .pr-distractor-list {
@@ -626,19 +660,19 @@
 
 /* ========== GAME SCREEN ========== */
 .pr-game-header {
-    background: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(10px);
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(12px);
     padding: 15px 30px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .pr-game-progress {
     font-size: 1.1rem;
     font-weight: 700;
-    color: var(--primary-color);
+    color: var(--pr-accent, var(--primary-color));
 }
 
 .pr-game-timer-container {
