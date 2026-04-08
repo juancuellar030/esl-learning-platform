@@ -1220,12 +1220,20 @@
                     } else {
                         contentDiv.className = `cell-content ${status || 'empty'}`;
 
-                        // Single click: cycle brought → missing → empty
-                        contentDiv.addEventListener('click', () => toggleStatus(student, material));
+                        // We use a timer to prevent `click` from firing if it's a `dblclick`
+                        let clickTimer = null;
 
-                        // Double click: enter text mode immediately
+                        contentDiv.addEventListener('click', (e) => {
+                            if (e.detail === 1) { // Normal click
+                                clickTimer = setTimeout(() => {
+                                    toggleStatus(student, material);
+                                }, 250);
+                            }
+                        });
+
                         contentDiv.addEventListener('dblclick', (e) => {
                             e.stopPropagation();
+                            clearTimeout(clickTimer); // Prevent the single click action
                             appData.tracking[student][material] = { text: '' };
                             saveData();
                             renderTable();
