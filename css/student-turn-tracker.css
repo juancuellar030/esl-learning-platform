@@ -848,3 +848,82 @@ body.dark-mode .tt-student-card.hop-highlight {
     background: #2e2a1a !important;
     border-color: var(--amber-flame) !important;
 }
+
+/* ── Group Selector ──────────────────────────── */
+.tt-group-selector {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+}
+
+.tt-group-label {
+    font-weight: 700;
+    font-size: 0.88rem;
+    color: rgba(255, 255, 255, 0.85);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+.tt-group-tabs {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.tt-group-tab {
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.85);
+    border-radius: 12px;
+    padding: 9px 20px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-family: inherit;
+    letter-spacing: 0.02em;
+}
+
+.tt-group-tab:hover {
+    background: rgba(255, 255, 255, 0.22);
+    border-color: rgba(255, 255, 255, 0.55);
+    transform: translateY(-2px);
+}
+
+.tt-group-tab.active {
+    background: white;
+    color: var(--indigo-velvet);
+    border-color: white;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+}
+
+/* ── Dark Mode – Group Selector ──────────────── */
+body.dark-mode .tt-group-label {
+    color: rgba(195, 195, 255, 0.8);
+}
+
+body.dark-mode .tt-group-tab {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: #444;
+    color: #aaa;
+}
+
+body.dark-mode .tt-group-tab:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: var(--medium-slate-blue);
+    color: #c3c3ff;
+}
+
+body.dark-mode .tt-group-tab.active {
+    background: var(--indigo-velvet);
+    color: white;
+    border-color: var(--indigo-velvet);
+    box-shadow: 0 4px 14px rgba(61, 52, 139, 0.4);
+}
