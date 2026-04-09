@@ -2,7 +2,12 @@
  * Shared Student Data Module
  * Central source of truth for student names and birthdates.
  * Birthdate format: 'MM-DD'
+ *
+ * Note: Full grade-level rosters live in student-groups-data.js (STUDENT_GROUPS).
+ * CLASS_GROUPS below is used by the Turn Tracker for multi-group switching.
  */
+
+// ── Legacy 4C / current shortlist (kept for birthday planner etc.) ──
 const STUDENTS_DATA = [
     { name: 'ALEJANDRA H.', birthdate: '01-20' },  // HUERTAS JAIMES ALEJANDRA
     { name: 'ALEJANDRO C.', birthdate: '12-17' },  // CARRILLO GOMEZ ALEJANDRO
@@ -41,37 +46,31 @@ const studentNames = STUDENTS_DATA.map(s => s.name);
 
 /**
  * CLASS_GROUPS – used by the Turn Tracker for multi-group support.
- * Each entry: { id, label, students: [{ name, birthdate }] }
+ * Each entry: { id, label, students: [string] }
  *
- * To add a new group: duplicate one of the objects below, give it a
- * unique `id`, update `label`, and fill in the `students` array.
+ * Pulls from STUDENT_GROUPS (student-groups-data.js) so names are
+ * always in sync with the Grade Sheets tool.
+ *
+ * To add more groups: add entries here following the same pattern.
  */
-const CLASS_GROUPS = [
-    {
-        id: '5B',
-        label: '5° B',
-        students: STUDENTS_DATA,
-    },
-    {
-        id: '5C',
-        label: '5° C',
-        students: [
-            { name: 'SAMUEL C.', birthdate: '01-01' },  // CABREJO SAMUEL
-            { name: 'JORGE MARIO', birthdate: '01-01' },
-            { name: 'VALERIA R.', birthdate: '01-01' },
-            { name: 'ANDRES F.', birthdate: '01-01' },
-            { name: 'MARIANA G.', birthdate: '01-01' },
-            { name: 'NICOLAS A.', birthdate: '01-01' },
-            { name: 'SARA M.', birthdate: '01-01' },
-            { name: 'CAMILA B.', birthdate: '01-01' },
-            { name: 'JUAN P. L.', birthdate: '01-01' },
-            { name: 'ISABELLA P.', birthdate: '01-01' },
-            { name: 'DANIEL R.', birthdate: '01-01' },
-            { name: 'SOFIA L.', birthdate: '01-01' },
-            { name: 'SANTIAGO M.', birthdate: '01-01' },
-            { name: 'VALENTINA C.', birthdate: '01-01' },
-            { name: 'DAVID O.', birthdate: '01-01' },
-            { name: 'ANA PAULA V.', birthdate: '01-01' },
-        ],
-    },
-];
+function _buildClassGroups() {
+    // STUDENT_GROUPS is defined in student-groups-data.js (loaded before this file)
+    if (typeof STUDENT_GROUPS === 'undefined') {
+        // Fallback: single group using legacy short names
+        return [{ id: 'My Class', label: 'My Class', students: studentNames }];
+    }
+    return [
+        { id: '3A', label: '3° A', students: STUDENT_GROUPS['3A'] || [] },
+        { id: '3B', label: '3° B', students: STUDENT_GROUPS['3B'] || [] },
+        { id: '3C', label: '3° C', students: STUDENT_GROUPS['3C'] || [] },
+        { id: '4A', label: '4° A', students: STUDENT_GROUPS['4A'] || [] },
+        { id: '4B', label: '4° B', students: STUDENT_GROUPS['4B'] || [] },
+        { id: '4C', label: '4° C', students: STUDENT_GROUPS['4C'] || [] },
+        { id: '5A', label: '5° A', students: STUDENT_GROUPS['5A'] || [] },
+        { id: '5B', label: '5° B', students: STUDENT_GROUPS['5B'] || [] },
+        { id: '5C', label: '5° C', students: STUDENT_GROUPS['5C'] || [] },
+        { id: '5D', label: '5° D', students: STUDENT_GROUPS['5D'] || [] },
+    ];
+}
+
+const CLASS_GROUPS = _buildClassGroups();

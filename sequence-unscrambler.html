@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="assets/graduation-cap-icon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sequence Unscrambler – ESL Learning Platform</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/sequence-unscrambler.css">
+</head>
+
+<body>
+    <!-- Background canvas -->
+    <canvas id="su-bg-canvas" aria-hidden="true"></canvas>
+
+    <div class="su-app" id="su-app">
+
+        <!-- ========== SETTINGS SCREEN ========== -->
+        <div class="su-screen active" id="su-screen-settings">
+            <div class="su-settings-layout">
+
+                <!-- Left: Session Sidebar -->
+                <aside class="su-session-sidebar" id="su-session-sidebar">
+                    <div class="su-sidebar-header">
+                        <button class="su-sidebar-toggle" id="su-sidebar-toggle" title="Toggle Sidebar">
+                            <i class="fa-solid fa-bars-staggered"></i>
+                        </button>
+                        <h2><i class="fa-solid fa-arrow-down-wide-short"></i> <span>Sessions</span></h2>
+                        <button class="su-add-session-btn" id="su-add-session" title="Add session (max 10)">
+                            <i class="fa-solid fa-plus"></i>
+                        </button>
+                    </div>
+                    <ul class="su-session-list" id="su-session-list">
+                        <!-- Populated by JS -->
+                    </ul>
+                    <p class="su-session-cap-hint" id="su-session-cap-hint" style="display:none;">
+                        <i class="fa-solid fa-circle-info"></i> Maximum 10 sessions reached.
+                    </p>
+                    <div class="su-sidebar-footer">
+                        <button class="su-btn su-btn-accent su-btn-lg" id="su-start-game" disabled>
+                            <i class="fa-solid fa-play"></i> <span class="su-btn-text">Start Game</span>
+                        </button>
+                        <a href="tools.html" class="su-back-link">
+                            <i class="fa-solid fa-arrow-left"></i> <span>Back to Tools</span>
+                        </a>
+                    </div>
+                </aside>
+
+                <!-- Right: Session Editor -->
+                <main class="su-session-editor" id="su-session-editor">
+
+                    <!-- Empty state -->
+                    <div class="su-editor-empty" id="su-editor-empty">
+                        <div class="su-editor-empty-icon">
+                            <i class="fa-solid fa-arrow-down-wide-short"></i>
+                        </div>
+                        <h3>No Session Selected</h3>
+                        <p>Click <strong>+</strong> to create a new unscrambling session, or select one from the list.
+                        </p>
+                    </div>
+
+                    <!-- Collapsed sidebar state -->
+                    <div class="su-editor-empty" id="su-editor-collapsed-state" style="display:none;">
+                        <i class="fa-solid fa-gamepad"
+                            style="font-size:4rem;margin-bottom:1rem;color:var(--medium-slate-blue);"></i>
+                        <h3>Ready to Play</h3>
+                        <p>Click the Play button in the sidebar to start the game.</p>
+                    </div>
+
+                    <!-- Editor form -->
+                    <form class="su-editor-form" id="su-editor-form" style="display:none;" onsubmit="return false;">
+
+                        <div class="su-editor-header">
+                            <h3 id="su-editor-session-title">Session 1</h3>
+                            <!-- Global settings pill -->
+                            <div class="su-global-settings-pill">
+                                <span><i class="fa-solid fa-gear"></i> Settings:</span>
+                                <label class="su-pill-label">
+                                    <i class="fa-solid fa-volume-high"></i>
+                                    <select id="su-global-sound" class="su-select">
+                                        <option value="on" selected>Sound: On</option>
+                                        <option value="off">Sound: Off</option>
+                                    </select>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Session Label -->
+                        <div class="su-field-group">
+                            <label class="su-field-label" for="su-session-label">
+                                <i class="fa-solid fa-tag"></i> Session Title
+                            </label>
+                            <input type="text" class="su-text-input" id="su-session-label"
+                                placeholder="e.g. Food Chain Sequence" autocomplete="off">
+                            <p class="su-field-hint">Shown in the sidebar and as a heading during the game.</p>
+                        </div>
+
+                        <!-- Mode Toggle -->
+                        <div class="su-field-group">
+                            <label class="su-field-label">
+                                <i class="fa-solid fa-sliders"></i> Content Mode
+                            </label>
+                            <div class="su-mode-tabs" id="su-mode-tabs">
+                                <button type="button" class="su-mode-tab active" data-mode="words">
+                                    <i class="fa-solid fa-font"></i> Words / Text
+                                </button>
+                                <button type="button" class="su-mode-tab" data-mode="images">
+                                    <i class="fa-solid fa-image"></i> Images
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Image aspect ratio (images mode only) -->
+                        <div class="su-field-group su-images-only" id="su-aspect-ratio-group" style="display:none;">
+                            <label class="su-field-label" for="su-aspect-ratio">
+                                <i class="fa-solid fa-crop"></i> Image Aspect Ratio
+                            </label>
+                            <div class="su-aspect-grid" id="su-aspect-grid">
+                                <button type="button" class="su-aspect-btn active" data-ratio="1:1">
+                                    <span class="su-aspect-preview su-aspect-1-1"></span>
+                                    <span>Square<br><small>1:1</small></span>
+                                </button>
+                                <button type="button" class="su-aspect-btn" data-ratio="4:3">
+                                    <span class="su-aspect-preview su-aspect-4-3"></span>
+                                    <span>Landscape<br><small>4:3</small></span>
+                                </button>
+                                <button type="button" class="su-aspect-btn" data-ratio="16:9">
+                                    <span class="su-aspect-preview su-aspect-16-9"></span>
+                                    <span>Wide<br><small>16:9</small></span>
+                                </button>
+                                <button type="button" class="su-aspect-btn" data-ratio="3:4">
+                                    <span class="su-aspect-preview su-aspect-3-4"></span>
+                                    <span>Portrait<br><small>3:4</small></span>
+                                </button>
+                                <button type="button" class="su-aspect-btn" data-ratio="9:16">
+                                    <span class="su-aspect-preview su-aspect-9-16"></span>
+                                    <span>Tall<br><small>9:16</small></span>
+                                </button>
+                            </div>
+                            <p class="su-field-hint">Uploaded images will be automatically cropped to this ratio.</p>
+                        </div>
+
+                        <!-- Layout option -->
+                        <div class="su-field-group">
+                            <label class="su-field-label">
+                                <i class="fa-solid fa-table-columns"></i> Layout
+                            </label>
+                            <div class="su-toggle-row">
+                                <span class="su-toggle-option-label">Auto (inverted-S wrap)</span>
+                                <label class="su-toggle-switch">
+                                    <input type="checkbox" id="su-force-single-row">
+                                    <span class="su-toggle-knob"></span>
+                                </label>
+                                <span class="su-toggle-option-label">Force single row</span>
+                            </div>
+                            <p class="su-field-hint">In Auto mode, sequences with more than 6 items wrap into multiple
+                                rows connected by inverted-S arrows.</p>
+                        </div>
+
+                        <!-- Show Labels toggle (images mode only) -->
+                        <div class="su-field-group su-images-only" id="su-labels-group" style="display:none;">
+                            <label class="su-field-label">
+                                <i class="fa-solid fa-closed-captioning"></i> Show Labels Under Images
+                            </label>
+                            <div class="su-toggle-row">
+                                <span class="su-toggle-option-label">Hidden</span>
+                                <label class="su-toggle-switch">
+                                    <input type="checkbox" id="su-show-labels" checked>
+                                    <span class="su-toggle-knob"></span>
+                                </label>
+                                <span class="su-toggle-option-label">Visible</span>
+                            </div>
+                        </div>
+
+                        <!-- Sequence Items -->
+                        <div class="su-field-group">
+                            <label class="su-field-label">
+                                <i class="fa-solid fa-list-ol"></i> Sequence Items
+                                <span class="su-field-hint-inline">Drag to reorder — top = first in correct
+                                    sequence</span>
+                            </label>
+                            <ul class="su-items-list" id="su-items-list">
+                                <!-- Populated by JS -->
+                            </ul>
+                            <button type="button" class="su-btn su-btn-ghost su-btn-sm" id="su-add-item">
+                                <i class="fa-solid fa-plus"></i> Add Item
+                            </button>
+                            <p class="su-field-hint" id="su-items-hint">Add at least 2 items.</p>
+                        </div>
+
+                        <!-- Save / Delete -->
+                        <div class="su-editor-actions">
+                            <button type="button" class="su-btn su-btn-primary" id="su-save-session">
+                                <i class="fa-solid fa-floppy-disk"></i> Save Session
+                            </button>
+                            <button type="button" class="su-btn su-btn-danger" id="su-delete-session">
+                                <i class="fa-solid fa-trash"></i> Delete
+                            </button>
+                        </div>
+                    </form>
+                </main>
+            </div>
+        </div><!-- /settings screen -->
+
+        <!-- ========== GAME SCREEN ========== -->
+        <div class="su-screen" id="su-screen-game">
+
+            <!-- Game header -->
+            <header class="su-game-header">
+                <button class="su-btn su-btn-ghost su-btn-sm" id="su-back-to-settings">
+                    <i class="fa-solid fa-gear"></i> Settings
+                </button>
+                <div class="su-game-progress">
+                    <span id="su-session-counter">Session 1 / 1</span>
+                    <div class="su-progress-bar-track">
+                        <div class="su-progress-bar-fill" id="su-progress-bar-fill"></div>
+                    </div>
+                </div>
+                <div class="su-game-nav">
+                    <button class="su-btn su-btn-ghost su-btn-sm" id="su-prev-session" title="Previous session">
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+                    <button class="su-btn su-btn-ghost su-btn-sm" id="su-next-session" title="Next session">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Game body -->
+            <div class="su-game-body" id="su-game-body">
+
+                <!-- Session title display -->
+                <div class="su-game-title" id="su-game-title"></div>
+
+                <!-- Source bank (scrambled tiles) -->
+                <div class="su-source-section">
+                    <div class="su-section-label"><i class="fa-solid fa-shuffle"></i> Scrambled Items</div>
+                    <div class="su-source-bank" id="su-source-bank">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Drop zone area (inverted-S rows) -->
+                <div class="su-drop-section">
+                    <div class="su-section-label"><i class="fa-solid fa-arrow-down-wide-short"></i> Place in Correct
+                        Order</div>
+                    <div class="su-drop-zone-container" id="su-drop-zone-container">
+                        <!-- Rows + SVG arrows injected by JS -->
+                    </div>
+                </div>
+
+                <!-- Check answer button -->
+                <div class="su-check-section">
+                    <button class="su-btn su-btn-accent su-btn-lg su-check-btn" id="su-check-answer">
+                        <i class="fa-solid fa-check-double"></i> Check Answer
+                    </button>
+                    <button class="su-btn su-btn-ghost su-btn-sm su-shuffle-btn" id="su-shuffle-again">
+                        <i class="fa-solid fa-rotate"></i> Reshuffle
+                    </button>
+                </div>
+            </div>
+
+            <!-- Feedback overlay -->
+            <div class="su-feedback-overlay" id="su-feedback-overlay" style="display:none;">
+                <div class="su-feedback-card" id="su-feedback-card">
+                    <div class="su-feedback-icon" id="su-feedback-icon"></div>
+                    <h2 id="su-feedback-title"></h2>
+                    <p id="su-feedback-msg"></p>
+                    <div class="su-feedback-actions">
+                        <button class="su-btn su-btn-ghost" id="su-try-again" style="display:none;">
+                            <i class="fa-solid fa-rotate-right"></i> Try Again
+                        </button>
+                        <button class="su-btn su-btn-accent su-btn-lg" id="su-next-after-correct" style="display:none;">
+                            Next <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                        <button class="su-btn su-btn-accent su-btn-lg" id="su-finish-game" style="display:none;">
+                            <i class="fa-solid fa-check-double"></i> Finish
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Confetti canvas -->
+            <canvas class="su-confetti-canvas" id="su-confetti-canvas"></canvas>
+
+            <!-- End screen -->
+            <div class="su-end-screen" id="su-end-screen" style="display:none;">
+                <div class="su-end-card">
+                    <div class="su-end-icon"><i class="fa-solid fa-trophy"></i></div>
+                    <h2>All Sequences Complete!</h2>
+                    <p>Outstanding work! Every sequence was unscrambled.</p>
+                    <div class="su-end-actions">
+                        <button class="su-btn su-btn-accent su-btn-lg" id="su-restart-game">
+                            <i class="fa-solid fa-rotate-right"></i> Play Again
+                        </button>
+                        <button class="su-btn su-btn-ghost" id="su-end-back-settings">
+                            <i class="fa-solid fa-gear"></i> Back to Settings
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /game screen -->
+
+    </div><!-- /.su-app -->
+
+    <!-- Hidden canvas for image cropping -->
+    <canvas id="su-crop-canvas" style="display:none;"></canvas>
+
+    <script src="js/themes.js"></script>
+    <script src="js/darkmode.js"></script>
+    <script src="js/sequence-unscrambler.js"></script>
+</body>
+
+</html>
