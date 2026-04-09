@@ -28,8 +28,13 @@
                             <i class="fa-solid fa-bars-staggered"></i>
                         </button>
                         <h2><i class="fa-solid fa-arrow-down-wide-short"></i> <span>Sessions</span></h2>
-                        <button class="su-add-session-btn" id="su-add-session" title="Add session (max 10)">
-                            <i class="fa-solid fa-plus"></i>
+                    </div>
+                    <div class="su-sidebar-actions">
+                        <button id="su-add-session" class="su-btn-primary" title="Add New Sequence">
+                            <i class="fa-solid fa-plus"></i> Add New
+                        </button>
+                        <button id="su-drive-sync-btn" class="su-drive-sync-btn" title="Sync with Google Drive">
+                            <i class="fa-brands fa-google-drive"></i> Drive Sync
                         </button>
                     </div>
                     <ul class="su-session-list" id="su-session-list">
@@ -309,8 +314,13 @@
     <!-- Hidden canvas for image cropping -->
     <canvas id="su-crop-canvas" style="display:none;"></canvas>
 
+    <!-- Scripts -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://apis.google.com/js/api.js" async defer></script>
+    <script src="js/students-data.js"></script>
     <script src="js/themes.js"></script>
     <script src="js/darkmode.js"></script>
+    <script src="js/google-drive-service.js"></script>
     <script src="js/sequence-unscrambler.js"></script>
 </body>
 

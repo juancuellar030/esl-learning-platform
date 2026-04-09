@@ -20,6 +20,7 @@ const ITEMS_PER_ROW = 6; // threshold for wrapping to next row
 let sessions = [];
 let currentSessionIdx = null;   // which session is being edited in settings
 let globalSettings = { sound: 'on' };
+let driveService = null;
 
 // Game runtime state
 let gameSessionIdx = 0;         // which session we're currently playing
@@ -96,6 +97,7 @@ const addItemBtn = $('su-add-item');
 const saveSessionBtn = $('su-save-session');
 const deleteSessionBtn = $('su-delete-session');
 const globalSoundSel = $('su-global-sound');
+const driveSyncBtn = $('su-drive-sync-btn');
 
 // Game elements
 const sessionCounter = $('su-session-counter');
@@ -1010,9 +1012,50 @@ function escHtml(str) {
     return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
-/* ═══════════════════════════════════════════════════════
-   INIT
-═══════════════════════════════════════════════════════ */
-loadFromStorage();
-renderSessionList();
-renderEditorForm();
+// ═══════════════════════════════════════════════════════
+// INITIALIZATION
+// ═══════════════════════════════════════════════════════
+function init() {
+    loadFromStorage();
+
+    // Initialize Drive Sync
+    if (typeof window.GoogleDriveService === 'function') {
+        driveService = new window.GoogleDriveService({
+            folderName: 'ESL Learning - Sequence Unscrambler',
+            fileExtension: '.json',
+            onSave: () => ({
+                version: 1,
+                settings: globalSettings,
+                sessions: sessions
+            }),
+            onLoad: (data) => {
+                if (data.sessions && Array.isArray(data.sessions)) {
+                    sessions = data.sessions;
+                    if (data.settings) {
+                        globalSettings = { ...globalSettings, ...data.settings };
+                        globalSoundSel.value = globalSettings.sound;
+                    }
+                    renderSessionList();
+                    if (sessions.length > 0) {
+                        selectSession(0);
+                    } else {
+                        currentSessionIdx = null;
+                        renderEditorForm();
+                    }
+                    saveToStorage();
+                }
+            }
+        });
+    }
+
+    if (driveSyncBtn) {
+        driveSyncBtn.addEventListener('click', () => {
+            if (driveService) driveService.openModal();
+        });
+    }
+
+    renderSessionList();
+    renderEditorForm();
+}
+
+init();
