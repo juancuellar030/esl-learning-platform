@@ -1,63 +1,116 @@
 /**
  * Student Turn Tracker – Logic
  * Manages student turns, random pickers, filtering, and persistence.
+ * Supports multiple class groups via CLASS_GROUPS (students-data.js).
  */
 
 (function () {
     'use strict';
 
     // ── State ─────────────────────────────────────────────
-    const LOCAL_STORAGE_KEY = 'esl_turn_tracker_state';
+    const LS_KEY = 'esl_turn_tracker_v2';   // versioned key (multi-group)
 
-    let state = {
-        turns: {},       // { "STUDENT NAME": { count: 0, status: "none"|"correct"|"participated" } }
-        absent: {},      // { "STUDENT NAME": true/false }
-    };
+    // activeGroupId holds the currently displayed group
+    let activeGroupId = null;
 
-    let activeFilter = 'all';  // 'all', 'correct', 'participated', 'unselected'
-    let selectedWinner = null;
+    // state is now keyed by group id:
+    // { "5B": { turns: {...}, absent: {...} }, "5C": { ... } }
+    let allState = {};
+
+    function getGroups() {
+        return (typeof CLASS_GROUPS !== 'undefined' && CLASS_GROUPS.length)
+            ? CLASS_GROUPS
+            : [{ id: '__default', label: 'Class', students: (typeof STUDENTS_DATA !== 'undefined' ? STUDENTS_DATA : []) }];
+    }
+
+    function getActiveGroup() {
+        const groups = getGroups();
+        return groups.find(g => g.id === activeGroupId) || groups[0];
+    }
+
+    function getGroupState(groupId) {
+        if (!allState[groupId]) {
+            allState[groupId] = { turns: {}, absent: {} };
+        }
+        return allState[groupId];
+    }
+
+    function currentState() {
+        return getGroupState(activeGroupId);
+    }
 
     // ── Helpers ───────────────────────────────────────────
     function getStudents() {
-        return typeof studentNames !== 'undefined' ? studentNames : [];
+        const group = getActiveGroup();
+        return group ? group.students.map(s => (typeof s === 'string' ? s : s.name)) : [];
     }
 
     function getAvailableStudents() {
-        return getStudents().filter(s => !state.absent[s] && getStudentStatus(s) === 'none');
+        const st = currentState();
+        return getStudents().filter(s => !st.absent[s] && getStudentStatus(s) === 'none');
     }
 
     function getStudentStatus(name) {
-        return (state.turns[name] && state.turns[name].status) || 'none';
+        const st = currentState();
+        return (st.turns[name] && st.turns[name].status) || 'none';
     }
 
     function getStudentTurns(name) {
-        return (state.turns[name] && state.turns[name].count) || 0;
+        const st = currentState();
+        return (st.turns[name] && st.turns[name].count) || 0;
     }
 
     // ── Persistence ───────────────────────────────────────
     function saveToLocalStorage() {
         try {
-            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state));
+            localStorage.setItem(LS_KEY, JSON.stringify({ allState, activeGroupId }));
         } catch (e) { console.warn('Could not save to localStorage', e); }
     }
 
     function loadFromLocalStorage() {
         try {
-            const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
+            const raw = localStorage.getItem(LS_KEY);
             if (raw) {
                 const parsed = JSON.parse(raw);
-                state.turns = parsed.turns || {};
-                state.absent = parsed.absent || {};
+                allState = parsed.allState || {};
+                // Restore last active group only if it still exists
+                const groups = getGroups();
+                const savedId = parsed.activeGroupId;
+                if (savedId && groups.find(g => g.id === savedId)) {
+                    activeGroupId = savedId;
+                } else {
+                    activeGroupId = groups[0].id;
+                }
+            } else {
+                activeGroupId = getGroups()[0].id;
             }
-        } catch (e) { console.warn('Could not load from localStorage', e); }
+
+            // Legacy migration: if old single-group key exists, absorb into first group
+            const legacyRaw = localStorage.getItem('esl_turn_tracker_state');
+            if (legacyRaw && !allState[getGroups()[0].id]) {
+                try {
+                    const legacy = JSON.parse(legacyRaw);
+                    allState[getGroups()[0].id] = {
+                        turns: legacy.turns || {},
+                        absent: legacy.absent || {},
+                    };
+                } catch (_) { }
+            }
+        } catch (e) {
+            console.warn('Could not load from localStorage', e);
+            activeGroupId = getGroups()[0].id;
+        }
     }
 
     function getExportData() {
+        const group = getActiveGroup();
         return {
             tool: 'student-turn-tracker',
+            groupId: activeGroupId,
+            groupLabel: group ? group.label : '',
             savedDate: new Date().toISOString(),
-            turns: state.turns,
-            absent: state.absent,
+            turns: currentState().turns,
+            absent: currentState().absent,
         };
     }
 
@@ -66,8 +119,17 @@
             showNotification('Invalid file format', 'error');
             return;
         }
-        state.turns = data.turns || {};
-        state.absent = data.absent || {};
+        // If the file carries a groupId, switch to that group (if it exists)
+        if (data.groupId) {
+            const groups = getGroups();
+            const target = groups.find(g => g.id === data.groupId);
+            if (target) {
+                activeGroupId = target.id;
+                renderGroupTabs();
+            }
+        }
+        getGroupState(activeGroupId).turns = data.turns || {};
+        getGroupState(activeGroupId).absent = data.absent || {};
         saveToLocalStorage();
         renderGrid();
         updateFilterCounts();
@@ -88,7 +150,37 @@
         }, 3500);
     }
 
+    // ── Group Tabs ────────────────────────────────────────
+    function renderGroupTabs() {
+        const container = document.getElementById('ttGroupTabs');
+        if (!container) return;
+        container.innerHTML = '';
+
+        getGroups().forEach(group => {
+            const btn = document.createElement('button');
+            btn.className = 'tt-group-tab' + (group.id === activeGroupId ? ' active' : '');
+            btn.dataset.groupId = group.id;
+            btn.innerHTML = `<i class="fa-solid fa-users"></i> ${group.label}`;
+            btn.addEventListener('click', () => switchGroup(group.id));
+            container.appendChild(btn);
+        });
+    }
+
+    function switchGroup(groupId) {
+        if (groupId === activeGroupId) return;
+        activeGroupId = groupId;
+        saveToLocalStorage();
+        renderGroupTabs();
+        renderGrid();
+        updateFilterCounts();
+        const group = getActiveGroup();
+        showNotification(`Switched to ${group ? group.label : groupId}`, 'info');
+    }
+
     // ── Grid Rendering ────────────────────────────────────
+    let activeFilter = 'all';
+    let selectedWinner = null;
+
     function renderGrid() {
         const grid = document.getElementById('ttStudentGrid');
         grid.innerHTML = '';
@@ -97,7 +189,7 @@
         students.forEach(name => {
             const status = getStudentStatus(name);
             const turns = getStudentTurns(name);
-            const isAbsent = !!state.absent[name];
+            const isAbsent = !!currentState().absent[name];
 
             // Apply filter
             if (activeFilter === 'correct' && status !== 'correct') return;
@@ -139,7 +231,7 @@
             const absentBtn = card.querySelector('.tt-absent-toggle');
             absentBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                state.absent[name] = !state.absent[name];
+                currentState().absent[name] = !currentState().absent[name];
                 saveToLocalStorage();
                 renderGrid();
                 updateFilterCounts();
@@ -186,9 +278,10 @@
     function applyTurn(type) {
         if (!selectedWinner) return;
         const name = selectedWinner;
-        if (!state.turns[name]) state.turns[name] = { count: 0, status: 'none' };
-        state.turns[name].count++;
-        state.turns[name].status = type; // 'correct' or 'participated'
+        const st = currentState();
+        if (!st.turns[name]) st.turns[name] = { count: 0, status: 'none' };
+        st.turns[name].count++;
+        st.turns[name].status = type; // 'correct' or 'participated'
         saveToLocalStorage();
         hideWinner();
         renderGrid();
@@ -597,10 +690,11 @@
 
     // ── Reset Categories ──────────────────────────────────
     function resetCategories() {
+        const st = currentState();
         getStudents().forEach(name => {
-            if (state.turns[name]) {
-                state.turns[name].status = 'none';
-                state.turns[name].count = 0;
+            if (st.turns[name]) {
+                st.turns[name].status = 'none';
+                st.turns[name].count = 0;
             }
         });
         saveToLocalStorage();
@@ -610,12 +704,12 @@
     }
 
     function resetAll() {
-        state.turns = {};
-        state.absent = {};
+        const group = getActiveGroup();
+        allState[activeGroupId] = { turns: {}, absent: {} };
         saveToLocalStorage();
         renderGrid();
         updateFilterCounts();
-        showNotification('All data cleared.', 'success');
+        showNotification(`All data cleared for ${group ? group.label : 'this group'}.`, 'success');
     }
 
     // ── Google Drive Integration ──────────────────────────
@@ -638,7 +732,8 @@
             setTimeout(() => {
                 const inp = document.getElementById('gds-filename');
                 if (inp && !inp.value) {
-                    inp.value = `turns-${new Date().toISOString().slice(0, 10)}`;
+                    const group = getActiveGroup();
+                    inp.value = `turns-${(group ? group.id : 'class').toLowerCase()}-${new Date().toISOString().slice(0, 10)}`;
                 }
             }, 400);
         });
@@ -647,6 +742,7 @@
     // ── Init ──────────────────────────────────────────────
     function init() {
         loadFromLocalStorage();
+        renderGroupTabs();
         renderGrid();
         updateFilterCounts();
         setupDrive();
@@ -680,13 +776,15 @@
 
         // Reset
         document.getElementById('ttResetCategories').addEventListener('click', () => {
-            if (confirm('Reset all turn categories? Students will be available for selection again.')) {
+            const group = getActiveGroup();
+            if (confirm(`Reset turn categories for ${group ? group.label : 'this group'}? Students will be available for selection again.`)) {
                 resetCategories();
             }
         });
 
         document.getElementById('ttResetAll').addEventListener('click', () => {
-            if (confirm('Clear ALL data including absences? This cannot be undone.')) {
+            const group = getActiveGroup();
+            if (confirm(`Clear ALL data for ${group ? group.label : 'this group'} including absences? This cannot be undone.`)) {
                 resetAll();
             }
         });

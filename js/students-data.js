@@ -36,5 +36,42 @@ const STUDENTS_DATA = [
     { name: 'VALERIA P.', birthdate: '04-21' },  // PEÑA OSORIO VALERIA
 ];
 
-// Backward-compatible flat array of names for existing trackers
+// Backward-compatible flat array of names for existing tools (birthday planner, etc.)
 const studentNames = STUDENTS_DATA.map(s => s.name);
+
+/**
+ * CLASS_GROUPS – used by the Turn Tracker for multi-group support.
+ * Each entry: { id, label, students: [{ name, birthdate }] }
+ *
+ * To add a new group: duplicate one of the objects below, give it a
+ * unique `id`, update `label`, and fill in the `students` array.
+ */
+const CLASS_GROUPS = [
+    {
+        id: '5B',
+        label: '5° B',
+        students: STUDENTS_DATA,
+    },
+    {
+        id: '5C',
+        label: '5° C',
+        students: [
+            { name: 'SAMUEL C.', birthdate: '01-01' },  // CABREJO SAMUEL
+            { name: 'JORGE MARIO', birthdate: '01-01' },
+            { name: 'VALERIA R.', birthdate: '01-01' },
+            { name: 'ANDRES F.', birthdate: '01-01' },
+            { name: 'MARIANA G.', birthdate: '01-01' },
+            { name: 'NICOLAS A.', birthdate: '01-01' },
+            { name: 'SARA M.', birthdate: '01-01' },
+            { name: 'CAMILA B.', birthdate: '01-01' },
+            { name: 'JUAN P. L.', birthdate: '01-01' },
+            { name: 'ISABELLA P.', birthdate: '01-01' },
+            { name: 'DANIEL R.', birthdate: '01-01' },
+            { name: 'SOFIA L.', birthdate: '01-01' },
+            { name: 'SANTIAGO M.', birthdate: '01-01' },
+            { name: 'VALENTINA C.', birthdate: '01-01' },
+            { name: 'DAVID O.', birthdate: '01-01' },
+            { name: 'ANA PAULA V.', birthdate: '01-01' },
+        ],
+    },
+];
