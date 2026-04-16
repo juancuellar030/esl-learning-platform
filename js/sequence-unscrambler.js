@@ -31,6 +31,7 @@ let gameMode = 'words';         // 'words' | 'images'
 let aspectRatio = '1:1';
 let showLabels = true;
 let forceSingleRow = false;
+let playState = { baseW: null };
 
 /* ═══════════════════════════════════════════════════════
    PERSISTENCE
@@ -781,7 +782,8 @@ function placeTileInSlot(tile, slot, startRect) {
                 existingTile.dataset.slotIdx = prevSlot;
                 placedItems[prevSlot] = parseInt(existingTile.dataset.itemIdx);
                 oldSlot.classList.add('occupied');
-                animateTileTo(existingTile, extRect, oldSlot, false);
+                oldSlot.appendChild(existingTile);
+                animateTileTo(existingTile, extRect, false);
             } else {
                 placedItems[parseInt(existingTile.dataset.slotIdx)] = null;
                 returnTileToSource(existingTile, extRect);
@@ -802,7 +804,8 @@ function placeTileInSlot(tile, slot, startRect) {
     placedItems[slotIdx] = itemIdx;
     slot.classList.add('occupied');
 
-    animateTileTo(tile, startRect, slot, false);
+    slot.appendChild(tile);
+    animateTileTo(tile, startRect, false);
 }
 
 function returnTileToSource(tile, startRect) {
@@ -818,11 +821,11 @@ function returnTileToSource(tile, startRect) {
 
     if (!startRect) startRect = tile.getBoundingClientRect();
 
-    animateTileTo(tile, startRect, sourceBank, true);
+    sourceBank.appendChild(tile);
+    animateTileTo(tile, startRect, true);
 }
 
-function animateTileTo(tile, startRect, targetParent, isReturn) {
-    targetParent.appendChild(tile);
+function animateTileTo(tile, startRect, isReturn) {
     tile.style.opacity = '1';
 
     const endRect = tile.getBoundingClientRect();
@@ -867,22 +870,36 @@ function initDropSlot(slot) {
 checkBtn.addEventListener('click', checkAnswer);
 
 shuffleBtn.addEventListener('click', () => {
-    // Return all placed tiles to the source bank, then reshuffle
-    dropContainer.querySelectorAll('.su-tile').forEach(t => {
-        const rect = t.getBoundingClientRect();
-        returnTileToSource(t, rect);
+    const allTiles = Array.from(document.querySelectorAll('.su-tile'));
+    const startRects = new Map();
+
+    // 1. Record starting properties & clear slots
+    allTiles.forEach(t => {
+        startRects.set(t, t.getBoundingClientRect());
+
+        if (t.dataset.location === 'slot') {
+            const slotIdx = t.dataset.slotIdx;
+            const slot = dropContainer.querySelector(`[data-slot-idx="${slotIdx}"]`);
+            if (slot) slot.classList.remove('occupied');
+            t.removeAttribute('data-slot-idx');
+            t.dataset.location = 'source';
+        }
+        t.classList.remove('correct', 'wrong');
+        // Briefly append to source bank so it is removed from drop slot
+        sourceBank.appendChild(t);
     });
+
     placedItems.fill(null);
-    dropContainer.querySelectorAll('.su-drop-slot').forEach(s => {
-        s.classList.remove('occupied');
-        // remove feedback classes
-        s.querySelectorAll('.su-tile').forEach(t => {
-            t.classList.remove('correct', 'wrong');
-        });
+
+    // 2. Shuffle order
+    const shuffled = shuffle(allTiles);
+    shuffled.forEach(t => sourceBank.appendChild(t));
+
+    // 3. FLIP animate from tracked starting positions
+    shuffled.forEach(t => {
+        animateTileTo(t, startRects.get(t), true);
     });
-    // Reshuffle source bank
-    const tiles = Array.from(sourceBank.querySelectorAll('.su-tile'));
-    shuffle(tiles).forEach(t => sourceBank.appendChild(t));
+
     checkBtn.disabled = false;
     hideFeedback();
 });
