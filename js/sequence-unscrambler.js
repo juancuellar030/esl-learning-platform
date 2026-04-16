@@ -516,6 +516,15 @@ function loadGameSession() {
     // Apply mode class
     document.querySelector('.su-game-body').className = `su-game-body su-mode-${gameMode}`;
 
+    // Smart Sizing Calculation
+    const perRow = (forceSingleRow || n <= ITEMS_PER_ROW) ? n : ITEMS_PER_ROW;
+    if (gameMode === 'images') {
+        const maxW = Math.floor((820 - (perRow - 1) * 10) / Math.max(1, perRow));
+        playState.baseW = Math.max(60, Math.min(160, maxW));
+    } else {
+        playState.baseW = null;
+    }
+
     buildSourceBank(s);
     buildDropZones(s);
     hideFeedback();
@@ -589,7 +598,7 @@ function buildDropZones(s) {
 function sizeDragSlot(slot, s) {
     if (s.mode === 'images') {
         const { w, h } = ratioToNumbers(s.aspectRatio || '1:1');
-        const baseW = 100;
+        const baseW = playState.baseW || 100;
         const baseH = Math.round(baseW * h / w);
         slot.style.width = baseW + 'px';
         slot.style.height = (baseH + (s.showLabels !== false ? 28 : 0)) + 'px';
@@ -629,7 +638,7 @@ function makeTile(item, itemIdx, s) {
         tile.classList.add('su-tile-image');
         if (!s.showLabels) tile.classList.add('no-label');
         const { w, h } = ratioToNumbers(s.aspectRatio || '1:1');
-        const baseW = 100;
+        const baseW = playState.baseW || 100;
         const baseH = Math.round(baseW * h / w);
         tile.style.width = baseW + 'px';
 
@@ -657,6 +666,10 @@ function makeTile(item, itemIdx, s) {
     } else {
         tile.classList.add('su-tile-word');
         tile.textContent = item.text || '(empty)';
+        if ((s.items && s.items.length > 6) || s.forceSingleRow) {
+            tile.style.fontSize = '0.9rem';
+            tile.style.padding = '8px 12px';
+        }
     }
 
     return tile;
@@ -729,24 +742,28 @@ function onPointerUp(e) {
     if (hoverSlot) hoverSlot.classList.remove('drag-over');
     sourceBank.classList.remove('drag-over');
 
-    if (ghost) { ghost.remove(); ghost = null; }
-    if (!activeTile) return;
+    if (!activeTile) {
+        if (ghost) { ghost.remove(); ghost = null; }
+        return;
+    }
 
-    activeTile.style.opacity = '';
+    const startRect = ghost ? ghost.getBoundingClientRect() : activeTile.getBoundingClientRect();
+    if (ghost) { ghost.remove(); ghost = null; }
+
     activeTile.classList.remove('is-dragging');
 
     if (hoverSlot) {
-        placeTileInSlot(activeTile, hoverSlot);
+        placeTileInSlot(activeTile, hoverSlot, startRect);
     } else {
         // Return to source bank if dropped outside a slot
-        returnTileToSource(activeTile);
+        returnTileToSource(activeTile, startRect);
     }
 
     hoverSlot = null;
     activeTile = null;
 }
 
-function placeTileInSlot(tile, slot) {
+function placeTileInSlot(tile, slot, startRect) {
     const slotIdx = parseInt(slot.dataset.slotIdx);
     const itemIdx = parseInt(tile.dataset.itemIdx);
     const prevLoc = tile.dataset.location;
@@ -755,22 +772,23 @@ function placeTileInSlot(tile, slot) {
     // If slot already has a tile, swap or return it to source
     const existingTile = slot.querySelector('.su-tile');
     if (existingTile) {
+        const extRect = existingTile.getBoundingClientRect();
         if (prevSlot !== null) {
             // Move existing tile to the old slot
             const oldSlot = dropContainer.querySelector(`[data-slot-idx="${prevSlot}"]`);
             if (oldSlot) {
-                oldSlot.appendChild(existingTile);
                 existingTile.dataset.location = 'slot';
                 existingTile.dataset.slotIdx = prevSlot;
                 placedItems[prevSlot] = parseInt(existingTile.dataset.itemIdx);
                 oldSlot.classList.add('occupied');
+                animateTileTo(existingTile, extRect, oldSlot, false);
             } else {
-                returnTileToSource(existingTile);
                 placedItems[parseInt(existingTile.dataset.slotIdx)] = null;
+                returnTileToSource(existingTile, extRect);
             }
         } else {
-            returnTileToSource(existingTile);
             placedItems[parseInt(existingTile.dataset.slotIdx)] = null;
+            returnTileToSource(existingTile, extRect);
         }
     } else if (prevSlot !== null) {
         placedItems[prevSlot] = null;
@@ -779,19 +797,15 @@ function placeTileInSlot(tile, slot) {
     }
 
     // Place in new slot
-    slot.appendChild(tile);
     tile.dataset.location = 'slot';
     tile.dataset.slotIdx = slotIdx;
     placedItems[slotIdx] = itemIdx;
     slot.classList.add('occupied');
 
-    // Remove from source bank if it came from there
-    if (prevLoc === 'source') {
-        // tile was already removed from source bank by being appended elsewhere
-    }
+    animateTileTo(tile, startRect, slot, false);
 }
 
-function returnTileToSource(tile) {
+function returnTileToSource(tile, startRect) {
     const prevLoc = tile.dataset.location;
     const prevSlot = prevLoc === 'slot' ? parseInt(tile.dataset.slotIdx) : null;
     if (prevSlot !== null) {
@@ -801,7 +815,38 @@ function returnTileToSource(tile) {
     }
     tile.dataset.location = 'source';
     tile.removeAttribute('data-slot-idx');
-    sourceBank.appendChild(tile);
+
+    if (!startRect) startRect = tile.getBoundingClientRect();
+
+    animateTileTo(tile, startRect, sourceBank, true);
+}
+
+function animateTileTo(tile, startRect, targetParent, isReturn) {
+    targetParent.appendChild(tile);
+    tile.style.opacity = '1';
+
+    const endRect = tile.getBoundingClientRect();
+
+    tile.classList.add(isReturn ? 'snap-return' : 'snap-animating');
+    tile.style.left = startRect.left + 'px';
+    tile.style.top = startRect.top + 'px';
+    tile.style.width = startRect.width + 'px';
+    tile.style.height = startRect.height + 'px';
+
+    void tile.offsetHeight; // force reflow
+
+    tile.style.left = endRect.left + 'px';
+    tile.style.top = endRect.top + 'px';
+    tile.style.width = endRect.width + 'px';
+    tile.style.height = endRect.height + 'px';
+
+    setTimeout(() => {
+        tile.classList.remove('snap-animating', 'snap-return');
+        tile.style.left = '';
+        tile.style.top = '';
+        tile.style.width = '';
+        tile.style.height = '';
+    }, 360);
 }
 
 function initDropSlot(slot) {
@@ -809,7 +854,10 @@ function initDropSlot(slot) {
     // Extra: allow clicking an occupied slot to return tile to source
     slot.addEventListener('click', () => {
         const tile = slot.querySelector('.su-tile');
-        if (tile && !ghost) returnTileToSource(tile);
+        if (tile && !ghost) {
+            const rect = tile.getBoundingClientRect();
+            returnTileToSource(tile, rect);
+        }
     });
 }
 
@@ -820,7 +868,10 @@ checkBtn.addEventListener('click', checkAnswer);
 
 shuffleBtn.addEventListener('click', () => {
     // Return all placed tiles to the source bank, then reshuffle
-    dropContainer.querySelectorAll('.su-tile').forEach(t => returnTileToSource(t));
+    dropContainer.querySelectorAll('.su-tile').forEach(t => {
+        const rect = t.getBoundingClientRect();
+        returnTileToSource(t, rect);
+    });
     placedItems.fill(null);
     dropContainer.querySelectorAll('.su-drop-slot').forEach(s => {
         s.classList.remove('occupied');
