@@ -519,6 +519,98 @@ const funCategories = {
             { word: 'Duck', spanish: 'Pato' },
             { word: 'Goat', spanish: 'Cabra' },
         ]
+    },
+    'anime-characters': {
+        label: 'Anime Characters',
+        labelEs: 'Personajes de Anime',
+        icon: 'fa-solid fa-user-ninja',
+        color: '#E91E63',
+        words: [
+            { word: 'Goku', spanish: 'Gokú' },
+            { word: 'Naruto', spanish: 'Naruto' },
+            { word: 'Luffy', spanish: 'Luffy' },
+            { word: 'Sailor Moon', spanish: 'Sailor Moon' },
+            { word: 'Pikachu', spanish: 'Pikachu' },
+            { word: 'Totoro', spanish: 'Totoro' },
+            { word: 'Eren Yeager', spanish: 'Eren Yeager' },
+            { word: 'Tanjiro', spanish: 'Tanjiro' },
+            { word: 'Nezuko', spanish: 'Nezuko' },
+            { word: 'Levi Ackerman', spanish: 'Levi Ackerman' },
+            { word: 'Vegeta', spanish: 'Vegeta' },
+            { word: 'Satoru Gojo', spanish: 'Satoru Gojo' },
+            { word: 'Saitama', spanish: 'Saitama' },
+            { word: 'Light Yagami', spanish: 'Light Yagami' },
+            { word: 'Deku', spanish: 'Deku' }
+        ]
+    },
+    'wild-animals': {
+        label: 'Wild Animals',
+        labelEs: 'Animales Salvajes',
+        icon: 'fa-solid fa-hippo',
+        color: '#33691E',
+        words: [
+            { word: 'Lion', spanish: 'León' },
+            { word: 'Tiger', spanish: 'Tigre' },
+            { word: 'Elephant', spanish: 'Elefante' },
+            { word: 'Giraffe', spanish: 'Jirafa' },
+            { word: 'Zebra', spanish: 'Cebra' },
+            { word: 'Monkey', spanish: 'Mono' },
+            { word: 'Gorilla', spanish: 'Gorila' },
+            { word: 'Kangaroo', spanish: 'Canguro' },
+            { word: 'Panda', spanish: 'Panda' },
+            { word: 'Hippo', spanish: 'Hipopótamo' },
+            { word: 'Rhino', spanish: 'Rinoceronte' },
+            { word: 'Crocodile', spanish: 'Cocodrilo' },
+            { word: 'Snake', spanish: 'Serpiente' },
+            { word: 'Bear', spanish: 'Oso' },
+            { word: 'Wolf', spanish: 'Lobo' }
+        ]
+    },
+    'monuments-landmarks': {
+        label: 'Monuments & Landmarks',
+        labelEs: 'Monumentos y Lugares Emblemáticos',
+        icon: 'fa-solid fa-monument',
+        color: '#607D8B',
+        words: [
+            { word: 'Eiffel Tower', spanish: 'Torre Eiffel' },
+            { word: 'Statue of Liberty', spanish: 'Estatua de la Libertad' },
+            { word: 'Great Wall of China', spanish: 'Gran Muralla China' },
+            { word: 'Colosseum', spanish: 'Coliseo' },
+            { word: 'Taj Mahal', spanish: 'Taj Mahal' },
+            { word: 'Machu Picchu', spanish: 'Machu Picchu' },
+            { word: 'Christ the Redeemer', spanish: 'Cristo Redentor' },
+            { word: 'Pyramids of Giza', spanish: 'Pirámides de Giza' },
+            { word: 'Big Ben', spanish: 'Big Ben' },
+            { word: 'Leaning Tower of Pisa', spanish: 'Torre Inclinada de Pisa' },
+            { word: 'Sydney Opera House', spanish: 'Ópera de Sídney' },
+            { word: 'Mount Rushmore', spanish: 'Monte Rushmore' },
+            { word: 'Stonehenge', spanish: 'Stonehenge' },
+            { word: 'Golden Gate Bridge', spanish: 'Puente Golden Gate' },
+            { word: 'Burj Khalifa', spanish: 'Burj Khalifa' }
+        ]
+    },
+    'fruits': {
+        label: 'Fruits',
+        labelEs: 'Frutas',
+        icon: 'fa-solid fa-apple-whole',
+        color: '#E53935',
+        words: [
+            { word: 'Apple', spanish: 'Manzana' },
+            { word: 'Banana', spanish: 'Banana / Plátano' },
+            { word: 'Orange', spanish: 'Naranja' },
+            { word: 'Grapes', spanish: 'Uvas' },
+            { word: 'Strawberry', spanish: 'Fresa' },
+            { word: 'Watermelon', spanish: 'Sandía' },
+            { word: 'Pineapple', spanish: 'Piña' },
+            { word: 'Mango', spanish: 'Mango' },
+            { word: 'Lemon', spanish: 'Limón' },
+            { word: 'Cherry', spanish: 'Cereza' },
+            { word: 'Peach', spanish: 'Durazno' },
+            { word: 'Pear', spanish: 'Pera' },
+            { word: 'Kiwi', spanish: 'Kiwi' },
+            { word: 'Blueberry', spanish: 'Arándano' },
+            { word: 'Coconut', spanish: 'Coco' }
+        ]
     }
 };
 

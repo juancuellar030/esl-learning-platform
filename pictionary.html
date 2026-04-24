@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pictionary Word Picker - ESL Learning Platform</title>
+    <link rel="icon" type="image/png" href="assets/graduation-cap-icon.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/pictionary.css">
+</head>
+
+<body>
+    <header class="main-header">
+        <div class="container">
+            <h1><i class="fa-solid fa-pen-clip"></i> Pictionary Word Picker</h1>
+            <p class="tagline">Generate random drawing prompts by topic and difficulty</p>
+        </div>
+    </header>
+
+    <nav class="main-nav">
+        <div class="container">
+            <a href="tools.html" class="nav-btn" style="text-decoration: none;">
+                <i class="fa-solid fa-arrow-left"></i> Back to Tools
+            </a>
+        </div>
+    </nav>
+
+    <main class="main-content pictionary-content">
+        <div class="container">
+            <section class="content-section active">
+                <!-- Controls Panel -->
+                <div class="pictionary-controls">
+                    <div class="control-group">
+                        <label for="category-filter"><i class="fa-solid fa-layer-group"></i> Category</label>
+                        <select id="category-filter">
+                            <option value="all">All Categories</option>
+                            <!-- Options injected dynamically by JS -->
+                        </select>
+                    </div>
+
+                    <div class="control-group">
+                        <label for="difficulty-filter"><i class="fa-solid fa-gauge-high"></i> Difficulty</label>
+                        <select id="difficulty-filter">
+                            <option value="all">All Difficulties</option>
+                            <option value="easy">Easy (Fácil)</option>
+                            <option value="medium">Medium (Medio)</option>
+                            <option value="hard">Hard (Difícil)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Display Screen -->
+                <div class="pictionary-screen">
+                    <div class="slot-machine-container">
+                        <div id="slot-machine-text" class="slot-text">Ready to draw?</div>
+                        <div id="slot-machine-sub" class="slot-subtext">Click underneath to start picking</div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="pictionary-actions">
+                    <button id="btn-draw" class="primary-btn"><i class="fa-solid fa-shuffle"></i> Random Word</button>
+                    <button id="btn-used" class="secondary-btn" disabled><i class="fa-solid fa-check"></i> Mark as
+                        Used</button>
+                    <button id="btn-dismiss" class="tertiary-btn" disabled><i class="fa-solid fa-xmark"></i>
+                        Dismiss</button>
+                </div>
+
+                <!-- Stats and History Actions -->
+                <div class="pictionary-footer-actions">
+                    <p class="words-stats">Available words: <span id="words-count">0</span> | Used: <span
+                            id="used-count">0</span></p>
+                    <div class="button-row">
+                        <button id="btn-reset" class="danger-btn"><i class="fa-solid fa-trash-can"></i> Clear
+                            History</button>
+                        <button id="btn-excalidraw" class="draw-btn"><i class="fa-solid fa-palette"></i> Open
+                            Excalidraw</button>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="main-footer">
+        <div class="container">
+            <p>ESL Learning Platform © 2025 | Made for Teachers, by Teachers</p>
+        </div>
+    </footer>
+
+    <script src="js/pictionary-data.js"></script>
+    <script src="js/pictionary.js"></script>
+    <script src="js/darkmode.js"></script>
+</body>
+
+</html>

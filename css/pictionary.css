@@ -1,0 +1,248 @@
+/* Pictionary Style Modifications */
+
+.pictionary-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.content-section {
+    background: var(--surface-color);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    max-width: 800px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.pictionary-controls {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 30px;
+    justify-content: center;
+}
+
+.control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+    min-width: 200px;
+}
+
+.control-group label {
+    font-weight: bold;
+    color: var(--text-color);
+}
+
+.control-group select {
+    padding: 10px 15px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 16px;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.control-group select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+/* Slot Machine Screen */
+.pictionary-screen {
+    background: #111;
+    border-radius: 16px;
+    padding: 40px;
+    margin-bottom: 30px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: inset 0 6px 16px rgba(0, 0, 0, 0.6);
+    text-align: center;
+    min-height: 250px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.slot-machine-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    position: relative;
+}
+
+.slot-text {
+    font-size: clamp(32px, 5vw, 64px);
+    font-weight: 800;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+    text-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    transition: transform 0.1s ease;
+    word-wrap: break-word;
+}
+
+.slot-subtext {
+    font-size: clamp(16px, 2vw, 24px);
+    color: #4CAF50;
+    font-weight: bold;
+}
+
+/* Slot Animation Classes */
+.slot-rolling {
+    animation: slotBlur 0.1s infinite alternate linear;
+}
+
+@keyframes slotBlur {
+    0% {
+        transform: translateY(-5px);
+        filter: blur(2px) brightness(1.2);
+    }
+
+    100% {
+        transform: translateY(5px);
+        filter: blur(2px) brightness(1.2);
+    }
+}
+
+.slot-landing {
+    animation: slotLand 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes slotLand {
+    0% {
+        transform: scale(1.1);
+        filter: blur(0) brightness(1.5);
+    }
+
+    100% {
+        transform: scale(1);
+        filter: blur(0) brightness(1);
+    }
+}
+
+
+/* Actions */
+.pictionary-actions {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+.pictionary-actions button {
+    padding: 15px 25px;
+    border: none;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2);
+}
+
+.pictionary-actions button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 0 rgba(0, 0, 0, 0.2);
+}
+
+.pictionary-actions button:active:not(:disabled) {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 rgba(0, 0, 0, 0.2);
+}
+
+.pictionary-actions button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: #ccc;
+    color: #666;
+    box-shadow: 0 2px 0 rgba(0, 0, 0, 0.1);
+    transform: translateY(2px);
+}
+
+.primary-btn {
+    background: var(--primary-color);
+    color: white;
+}
+
+.secondary-btn {
+    background: #4CAF50;
+    color: white;
+}
+
+.tertiary-btn {
+    background: #FF9800;
+    color: white;
+}
+
+/* Footer & Stats */
+.pictionary-footer-actions {
+    border-top: 2px solid var(--border-color);
+    padding-top: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.words-stats {
+    font-size: 16px;
+    color: var(--text-color);
+    font-weight: bold;
+    margin: 0;
+}
+
+.button-row {
+    display: flex;
+    gap: 10px;
+}
+
+.button-row button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.button-row button:hover {
+    filter: brightness(0.9);
+}
+
+.danger-btn {
+    background: #f44336;
+    color: white;
+}
+
+.draw-btn {
+    background: #673AB7;
+    color: white;
+}
+
+/* Dark mode tweaks */
+body.dark-theme .pictionary-screen {
+    background: #000;
+    box-shadow: inset 0 6px 20px rgba(0, 0, 0, 0.8), 0 0 10px rgba(255, 255, 255, 0.05);
+}
+
+body.dark-theme .slot-text {
+    text-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+}

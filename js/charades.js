@@ -137,7 +137,8 @@
         const funKeys = [
             'movies-characters', 'countries', 'food-snacks',
             'superheroes-villains', 'sports-activities', 'cartoons',
-            'video-game-characters', 'silly-actions', 'emojis-emotions'
+            'video-game-characters', 'silly-actions', 'emojis-emotions',
+            'anime-characters', 'wild-animals', 'monuments-landmarks', 'fruits'
         ];
 
         for (const key of vocabKeys) {
