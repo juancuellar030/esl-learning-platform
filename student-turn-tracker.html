@@ -65,6 +65,9 @@
                 <button class="tt-picker-btn" id="ttPickerHop" title="Hopping Name Picker">
                     <i class="fa-solid fa-shuffle"></i> Hop
                 </button>
+                <button class="tt-picker-btn" id="ttPickerSlot" title="Slot Machine">
+                    <i class="fa-solid fa-arrows-spin"></i> Slot
+                </button>
             </div>
 
             <!-- Filter Buttons -->
@@ -143,6 +146,27 @@
             <i class="fa-solid fa-xmark"></i>
         </button>
         <div class="tt-balloon-hint">🎈 Tap a balloon to pop it!</div>
+    </div>
+
+    <!-- ── Slot Machine Overlay ───────────────────────── -->
+    <div class="tt-slot-overlay" id="ttSlotOverlay">
+        <div class="tt-slot-container">
+            <button class="tt-slot-close" id="slotCloseBtn" title="Close">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="tt-slot-machine">
+                <div class="tt-slot-window">
+                    <div class="tt-slot-track" id="slotTrack">
+                        <!-- Names will be dynamically added here -->
+                    </div>
+                </div>
+                <div class="tt-slot-pointer-left"></div>
+                <div class="tt-slot-pointer-right"></div>
+            </div>
+            <button class="tt-slot-btn" id="slotActionBtn">
+                <i class="fa-solid fa-play"></i> SPIN!
+            </button>
+        </div>
     </div>
 
     <!-- ── Footer ──────────────────────────────────────── -->

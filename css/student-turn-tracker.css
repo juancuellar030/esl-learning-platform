@@ -628,6 +628,166 @@
     }
 }
 
+/* ── Slot Machine Overlay ──────────────────────── */
+.tt-slot-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 8500;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.tt-slot-overlay.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.tt-slot-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+    background: white;
+    padding: 50px;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    min-width: 400px;
+    max-width: 90%;
+}
+
+.tt-slot-close {
+    position: absolute;
+    top: -20px;
+    right: -20px;
+    background: rgba(255, 255, 255, 0.9);
+    color: #333;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    font-size: 1.3rem;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s ease;
+    z-index: 10;
+}
+
+.tt-slot-close:hover {
+    background: white;
+    transform: scale(1.1);
+}
+
+.tt-slot-machine {
+    position: relative;
+    width: 100%;
+    height: 120px;
+    background: #f8f9fa;
+    border: 4px solid var(--indigo-velvet);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: inset 0 8px 16px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.tt-slot-window {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    display: flex;
+    justify-content: center;
+}
+
+.tt-slot-track {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    transition: transform 0s linear;
+    will-change: transform;
+}
+
+.tt-slot-item {
+    height: 120px;
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--indigo-velvet);
+    width: 100%;
+    text-align: center;
+    user-select: none;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.tt-slot-item.blur {
+    filter: blur(2px);
+    opacity: 0.8;
+}
+
+.tt-slot-pointer-left,
+.tt-slot-pointer-right {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-top: 15px solid transparent;
+    border-bottom: 15px solid transparent;
+    z-index: 5;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.tt-slot-pointer-left {
+    left: 0;
+    border-left: 20px solid var(--cayenne-red);
+}
+
+.tt-slot-pointer-right {
+    right: 0;
+    border-right: 20px solid var(--cayenne-red);
+}
+
+.tt-slot-btn {
+    background: var(--cayenne-red);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    padding: 16px 40px;
+    font-size: 1.2rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+    box-shadow: 0 4px 16px rgba(243, 91, 4, 0.35);
+    width: 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.tt-slot-btn:hover {
+    transform: scale(1.03);
+    box-shadow: 0 6px 22px rgba(243, 91, 4, 0.45);
+}
+
+.tt-slot-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
 /* ── Notification ────────────────────────────── */
 .tt-notification-container {
     position: fixed;
@@ -803,6 +963,29 @@ body.dark-mode .tt-turn-badge {
 body.dark-mode .tt-turn-badge.has-turns {
     background: var(--medium-slate-blue);
     color: white;
+}
+
+body.dark-mode .tt-slot-container {
+    background: #1e1e2e;
+}
+
+body.dark-mode .tt-slot-machine {
+    background: #161622;
+    border-color: var(--medium-slate-blue);
+}
+
+body.dark-mode .tt-slot-item {
+    color: #c3c3ff;
+}
+
+body.dark-mode .tt-slot-close {
+    background: #333;
+    color: #ccc;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .tt-slot-close:hover {
+    background: #444;
 }
 
 body.dark-mode .tt-absent-toggle {

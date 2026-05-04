@@ -688,6 +688,209 @@
         document.getElementById('ttBalloonOverlay').classList.remove('visible');
     }
 
+    // ── Slot Machine ──────────────────────────────────────
+    let slotSpinning = false;
+    let slotAnimFrame = null;
+    let slotSpeed = 0;
+    let slotPosition = 0;
+    const ITEM_HEIGHT = 120; // Must match CSS
+
+    function openSlotMachine() {
+        const pool = getAvailableStudents();
+        if (pool.length === 0) {
+            showNotification('All students have had turns! Reset categories to continue.', 'info');
+            return;
+        }
+
+        const overlay = document.getElementById('ttSlotOverlay');
+        overlay.classList.add('visible');
+
+        const track = document.getElementById('slotTrack');
+        track.innerHTML = '';
+
+        // Shuffle pool
+        const shuffled = [...pool].sort(() => Math.random() - 0.5);
+
+        // Add an extra clone at the end to make it seamless
+        const reel = [...shuffled, shuffled[0]];
+
+        reel.forEach(name => {
+            const div = document.createElement('div');
+            div.className = 'tt-slot-item';
+
+            const displayName = name.length > 18 ? name.slice(0, 16) + '…' : name;
+            div.textContent = displayName;
+            div.dataset.fullName = name;
+
+            track.appendChild(div);
+        });
+
+        slotPosition = 0;
+        track.style.transform = `translateY(0px)`;
+        const btn = document.getElementById('slotActionBtn');
+        btn.innerHTML = '<i class="fa-solid fa-play"></i> SPIN!';
+        btn.disabled = false;
+        btn.dataset.action = 'spin';
+        track.dataset.poolSize = shuffled.length;
+
+        track.querySelectorAll('.tt-slot-item').forEach(el => el.classList.remove('blur'));
+    }
+
+    function closeSlotMachine() {
+        document.getElementById('ttSlotOverlay').classList.remove('visible');
+        if (slotSpinning) {
+            cancelAnimationFrame(slotAnimFrame);
+            slotSpinning = false;
+        }
+    }
+
+    function handleSlotAction() {
+        const btn = document.getElementById('slotActionBtn');
+        if (btn.dataset.action === 'spin') {
+            startSlotSpin(btn);
+        } else if (btn.dataset.action === 'stop') {
+            stopSlotMachine(btn);
+        }
+    }
+
+    function startSlotSpin(btn) {
+        if (slotSpinning) return;
+        slotSpinning = true;
+
+        btn.innerHTML = '<i class="fa-solid fa-stop"></i> STOP!';
+        btn.dataset.action = 'stop';
+
+        const track = document.getElementById('slotTrack');
+        track.querySelectorAll('.tt-slot-item').forEach(el => el.classList.add('blur'));
+
+        const poolSize = parseInt(track.dataset.poolSize);
+        const maxScroll = poolSize * ITEM_HEIGHT;
+        slotSpeed = 40;
+
+        let audioCtx;
+        try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { }
+
+        function playTick() {
+            if (!audioCtx) return;
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.frequency.value = 600;
+                osc.type = 'triangle';
+                gain.gain.value = 0.05;
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.02);
+            } catch (e) { }
+        }
+
+        let lastIndexRendered = -1;
+
+        function animate() {
+            if (!slotSpinning) return;
+
+            slotPosition -= slotSpeed;
+            if (slotPosition <= -maxScroll) {
+                slotPosition = slotPosition % maxScroll;
+            }
+
+            track.style.transform = `translateY(${slotPosition}px)`;
+
+            const currIndex = Math.floor(Math.abs(slotPosition) / ITEM_HEIGHT);
+            if (currIndex !== lastIndexRendered) {
+                playTick();
+                lastIndexRendered = currIndex;
+            }
+
+            slotAnimFrame = requestAnimationFrame(animate);
+        }
+
+        slotAnimFrame = requestAnimationFrame(animate);
+    }
+
+    function stopSlotMachine(btn) {
+        if (!slotSpinning) return;
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> STOPPING...';
+
+        const track = document.getElementById('slotTrack');
+        const poolSize = parseInt(track.dataset.poolSize);
+        const maxScroll = poolSize * ITEM_HEIGHT;
+
+        const currIndex = Math.floor(Math.abs(slotPosition) / ITEM_HEIGHT);
+        const targetIndex = (currIndex + 3 + Math.floor(Math.random() * poolSize / 2)) % poolSize;
+        const targetPosition = -(targetIndex * ITEM_HEIGHT);
+
+        let distanceToGo = targetPosition - slotPosition;
+        if (distanceToGo >= 0) {
+            distanceToGo -= maxScroll;
+        }
+
+        const startPos = slotPosition;
+        const duration = 1200;
+        const startTime = performance.now();
+
+        cancelAnimationFrame(slotAnimFrame);
+
+        let audioCtx;
+        try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { }
+        function playSuccess() {
+            if (!audioCtx) return;
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.3);
+            } catch (e) { }
+        }
+
+        function easeOutCubic(t) {
+            return 1 - Math.pow(1 - t, 3);
+        }
+
+        function finishAnim(now) {
+            const elapsed = Math.min(now - startTime, duration);
+            const progress = elapsed / duration;
+            const easeProgress = easeOutCubic(progress);
+
+            slotPosition = startPos + distanceToGo * easeProgress;
+
+            let displayPos = slotPosition;
+            if (displayPos <= -maxScroll) {
+                displayPos = displayPos % maxScroll;
+            }
+            track.style.transform = `translateY(${displayPos}px)`;
+
+            if (progress < 1) {
+                slotAnimFrame = requestAnimationFrame(finishAnim);
+            } else {
+                slotSpinning = false;
+                track.style.transform = `translateY(${targetPosition}px)`;
+
+                track.querySelectorAll('.tt-slot-item').forEach(el => el.classList.remove('blur'));
+
+                playSuccess();
+
+                const winnerName = track.children[targetIndex].dataset.fullName;
+
+                setTimeout(() => {
+                    closeSlotMachine();
+                    showWinner(winnerName);
+                }, 800);
+            }
+        }
+
+        slotAnimFrame = requestAnimationFrame(finishAnim);
+    }
+
     // ── Reset Categories ──────────────────────────────────
     function resetCategories() {
         const st = currentState();
@@ -760,6 +963,11 @@
         document.getElementById('ttPickerHop').addEventListener('click', startHop);
         document.getElementById('ttPickerRoulette').addEventListener('click', openRoulette);
         document.getElementById('ttPickerBalloon').addEventListener('click', openBalloons);
+        document.getElementById('ttPickerSlot').addEventListener('click', openSlotMachine);
+
+        // Slot action
+        document.getElementById('slotActionBtn').addEventListener('click', handleSlotAction);
+        document.getElementById('slotCloseBtn').addEventListener('click', closeSlotMachine);
 
         // Winner actions
         document.getElementById('ttWinnerCorrect').addEventListener('click', () => applyTurn('correct'));
@@ -798,6 +1006,9 @@
         });
         document.getElementById('ttBalloonOverlay').addEventListener('click', (e) => {
             if (e.target === e.currentTarget) closeBalloons();
+        });
+        document.getElementById('ttSlotOverlay').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) closeSlotMachine();
         });
     }
 
