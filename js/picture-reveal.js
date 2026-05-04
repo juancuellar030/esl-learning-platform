@@ -637,11 +637,14 @@ const PictureReveal = (() => {
         blocks: [],
         scheduledTimes: [], // pre-calculated removal times
         blocksRemoved: 0,
-        isPaused: false
+        isPaused: false,
+        score: 1000,
+        totalScore: 0
     };
 
     function startGame() {
         if (sessions.length === 0) return;
+        playState.totalScore = 0;
 
         // Transition UI
         dom.screenSettings.style.display = 'none';
@@ -699,13 +702,19 @@ const PictureReveal = (() => {
 
         // Setup Options if Side-Options mode
         if (globalSettings.mode === 'side-options') {
-            setupOptions(session);
+            setupOptions(session, document.getElementById('pr-mc-options'));
+            document.getElementById('pr-stop-options-grid').style.display = 'none';
         } else {
             // Stop button mode resets
             document.getElementById('btn-stop-reveal').style.display = 'block';
             document.getElementById('pr-mc-container').style.display = 'none';
+            document.getElementById('pr-game-controls').style.display = 'flex';
             document.getElementById('pr-grid-container').style.display = 'inline-block'; // show image
+            document.getElementById('pr-stop-options-grid').style.display = 'none';
         }
+
+        playState.score = 1000;
+        document.getElementById('pr-score-value').textContent = playState.score;
 
         // Start Timer
         startTimer();
@@ -750,8 +759,8 @@ const PictureReveal = (() => {
         playState.blocksRemoved = 0;
     }
 
-    function setupOptions(session) {
-        const mcContainer = document.getElementById('pr-mc-options');
+    function setupOptions(session, targetContainer = null) {
+        const mcContainer = targetContainer || document.getElementById('pr-mc-options');
         mcContainer.innerHTML = '';
 
         let allOptions = [];
@@ -819,6 +828,10 @@ const PictureReveal = (() => {
 
         let remaining = Math.max(0, duration - elapsed);
 
+        // Update score
+        playState.score = Math.max(0, Math.round(1000 * (remaining / duration)));
+        document.getElementById('pr-score-value').textContent = playState.score;
+
         // Update bar
         const fraction = remaining / duration;
         document.getElementById('pr-timer-bar').style.transform = `scaleX(${fraction})`;
@@ -872,9 +885,13 @@ const PictureReveal = (() => {
         // Hide image entirely
         document.getElementById('pr-grid-container').style.display = 'none';
 
+        // Display 3x2 grid correctly right in the image area
+        document.getElementById('pr-stop-options-grid').style.display = 'grid';
+        document.getElementById('pr-game-controls').style.display = 'none'; // hide the right panel entirely
+
         // Show options
-        document.getElementById('pr-mc-container').style.display = 'block';
-        setupOptions(sessions[playState.sessionIndex]);
+        const stopContainer = document.getElementById('pr-stop-options-grid');
+        setupOptions(sessions[playState.sessionIndex], stopContainer);
     }
 
     function handleGuess(guessedWord, btnElement) {
@@ -882,6 +899,7 @@ const PictureReveal = (() => {
         const isCorrect = guessedWord.trim().toLowerCase() === session.answer.trim().toLowerCase();
 
         if (isCorrect) {
+            playState.totalScore += playState.score;
             btnElement.classList.add('correct');
             stopTimer();
             playSound('correct');
@@ -901,6 +919,7 @@ const PictureReveal = (() => {
 
             if (globalSettings.mode === 'stop-button') {
                 document.getElementById('pr-mc-container').style.display = 'none';
+                document.getElementById('pr-stop-options-grid').style.display = 'none';
                 showFeedback(false, "Oops! That's not it.");
             } else {
                 pauseTimer();
@@ -927,7 +946,7 @@ const PictureReveal = (() => {
 
         if (isWin) {
             icon.innerHTML = '<i class="fa-solid fa-star" style="color:var(--lemon-yellow);"></i>';
-            msg.textContent = "You guessed the picture! " + sessions[playState.sessionIndex].answer;
+            msg.textContent = `You guessed the picture: ${sessions[playState.sessionIndex].answer}. You earned ${playState.score} points! Total Score: ${playState.totalScore}`;
 
             btnTryAgain.style.display = 'none';
             if (playState.sessionIndex < sessions.length - 1) {

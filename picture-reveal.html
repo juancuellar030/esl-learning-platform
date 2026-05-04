@@ -115,6 +115,9 @@
                                     <option value="4" selected>4x4 Grid</option>
                                     <option value="5">5x5 Grid</option>
                                     <option value="6">6x6 Grid</option>
+                                    <option value="8">8x8 Grid</option>
+                                    <option value="10">10x10 Grid</option>
+                                    <option value="20">20x20 Grid</option>
                                 </select>
                                 <select id="pr-global-sound" class="pr-select">
                                     <option value="on" selected>Sound: On</option>
@@ -201,6 +204,10 @@
             <div class="pr-game-header">
                 <div class="pr-game-progress" id="pr-game-progress">Picture 1 / 5</div>
 
+                <div class="pr-score-display" id="pr-score-display">
+                    <i class="fa-solid fa-star"></i> <span id="pr-score-value">1000</span>
+                </div>
+
                 <div class="pr-game-timer-container">
                     <div class="pr-timer-bar" id="pr-timer-bar"></div>
                     <div class="pr-timer-text" id="pr-timer-text">30</div>
@@ -222,6 +229,11 @@
                         <div class="pr-grid-overlay" id="pr-grid-overlay">
                             <!-- Divs injected by JS -->
                         </div>
+                    </div>
+
+                    <!-- Stop Mode Options Grid (Hidden by default) -->
+                    <div class="pr-stop-options-grid" id="pr-stop-options-grid" style="display:none;">
+                        <!-- Large buttons injected by JS -->
                     </div>
                 </div>
 

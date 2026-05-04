@@ -739,7 +739,6 @@ body.dark-mode {
     max-width: 100%;
     max-height: 70vh;
     object-fit: contain;
-    border-radius: 12px;
 }
 
 .pr-grid-overlay {
@@ -747,8 +746,8 @@ body.dark-mode {
     inset: 0;
     display: grid;
     /* grid-template-columns and rows injected dynamically by JS */
-    gap: 1px;
-    /* tiny gap so it looks like a grid */
+    gap: 0;
+    /* no gap to hide image fully */
 }
 
 .pr-grid-cell {
@@ -860,7 +859,8 @@ body.dark-mode {
 }
 
 .pr-feedback-content {
-    background: var(--bg-card);
+    background: var(--pr-panel-bg, rgba(255, 255, 255, 0.97));
+    color: var(--pr-panel-text);
     padding: 50px;
     border-radius: 20px;
     text-align: center;
@@ -928,4 +928,39 @@ body.dark-mode {
         font-size: 3rem;
         padding: 20px;
     }
+}
+
+/* Score Display */
+.pr-score-display {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--pr-accent, var(--amber-flame));
+    background: rgba(0, 0, 0, 0.3);
+    padding: 6px 15px;
+    border-radius: 20px;
+    margin-left: 15px;
+}
+
+/* Stop Mode Options 3x2 Grid */
+.pr-stop-options-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    width: 100%;
+    max-width: 800px;
+    height: 100%;
+    align-content: center;
+}
+
+.pr-stop-options-grid .pr-mc-btn {
+    padding: 30px;
+    font-size: 1.8rem;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
 }
