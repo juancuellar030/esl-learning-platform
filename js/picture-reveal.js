@@ -18,7 +18,10 @@ const PictureReveal = (() => {
         mode: 'side-options', // 'side-options' or 'stop-button'
         time: 30, // seconds
         gridSize: 4, // 4x4
-        sound: true
+        sound: true,
+        shufflePics: false,
+        shuffleOpts: true,
+        autoNext: false
     };
 
     // Sound engine state
@@ -88,6 +91,9 @@ const PictureReveal = (() => {
         globalTime: document.getElementById('pr-global-time'),
         globalGrid: document.getElementById('pr-global-grid'),
         globalSound: document.getElementById('pr-global-sound'),
+        globalShufflePics: document.getElementById('pr-global-shuffle-pics'),
+        globalShuffleOpts: document.getElementById('pr-global-shuffle-opts'),
+        globalAutoNext: document.getElementById('pr-global-auto-next'),
 
         // Image Upload
         uploadArea: document.getElementById('pr-image-upload-area'),
@@ -131,6 +137,10 @@ const PictureReveal = (() => {
                             dom.globalMode.value = globalSettings.mode;
                             dom.globalTime.value = globalSettings.time.toString();
                             dom.globalGrid.value = globalSettings.gridSize.toString();
+                            dom.globalSound.value = globalSettings.sound ? 'on' : 'off';
+                            if (dom.globalShufflePics) dom.globalShufflePics.value = globalSettings.shufflePics ? 'on' : 'off';
+                            if (dom.globalShuffleOpts) dom.globalShuffleOpts.value = globalSettings.shuffleOpts ? 'on' : 'off';
+                            if (dom.globalAutoNext) dom.globalAutoNext.value = globalSettings.autoNext ? 'on' : 'off';
                         }
                         renderSessionList();
                         if (sessions.length > 0) {
@@ -170,6 +180,9 @@ const PictureReveal = (() => {
             soundEnabled = globalSettings.sound;
             if (soundEnabled) playSound('click');
         });
+        dom.globalShufflePics.addEventListener('change', (e) => globalSettings.shufflePics = e.target.value === 'on');
+        dom.globalShuffleOpts.addEventListener('change', (e) => globalSettings.shuffleOpts = e.target.value === 'on');
+        dom.globalAutoNext.addEventListener('change', (e) => globalSettings.autoNext = e.target.value === 'on');
 
         // Editor Form
         dom.answerInput.addEventListener('input', (e) => {
@@ -639,8 +652,10 @@ const PictureReveal = (() => {
         scheduledTimes: [], // pre-calculated removal times
         blocksRemoved: 0,
         isPaused: false,
-        score: 1000,
-        totalScore: 0
+        score: 100,
+        totalScore: 0,
+        playQueue: [],
+        queueIndex: 0
     };
 
     function startGame() {
@@ -672,14 +687,21 @@ const PictureReveal = (() => {
         };
         document.getElementById('btn-next-picture').onclick = () => {
             document.getElementById('pr-game-feedback').style.display = 'none';
-            startSession(playState.sessionIndex + 1);
+            playState.queueIndex++;
+            startSession(playState.playQueue[playState.queueIndex]);
         };
         document.getElementById('btn-finish-game').onclick = () => {
             document.getElementById('pr-game-feedback').style.display = 'none';
             endGame();
         };
 
-        startSession(0);
+        playState.playQueue = sessions.map((_, i) => i);
+        if (globalSettings.shufflePics) {
+            shuffleArray(playState.playQueue);
+        }
+        playState.queueIndex = 0;
+
+        startSession(playState.playQueue[playState.queueIndex]);
     }
 
     function endGame() {
@@ -714,7 +736,7 @@ const PictureReveal = (() => {
             document.getElementById('pr-stop-options-grid').style.display = 'none';
         }
 
-        playState.score = 1000;
+        playState.score = 100;
         document.getElementById('pr-score-value').textContent = playState.score;
 
         // Start Timer
@@ -780,7 +802,17 @@ const PictureReveal = (() => {
             allOptions = [session.answer, ...uniqueDistractors];
         }
 
-        shuffleArray(allOptions);
+        if (globalSettings.shuffleOpts) {
+            shuffleArray(allOptions);
+        }
+
+        if (targetContainer && targetContainer.id === 'pr-stop-options-grid') {
+            if (allOptions.length <= 4) {
+                targetContainer.style.gridTemplateColumns = 'repeat(2, 1fr)';
+            } else {
+                targetContainer.style.gridTemplateColumns = 'repeat(3, 1fr)';
+            }
+        }
 
         allOptions.forEach(opt => {
             const btn = document.createElement('button');
@@ -831,7 +863,7 @@ const PictureReveal = (() => {
         let remaining = Math.max(0, duration - elapsed);
 
         // Update score
-        playState.score = Math.max(0, Math.round(1000 * (remaining / duration)));
+        playState.score = Math.max(0, Math.round(100 * (remaining / duration)));
         document.getElementById('pr-score-value').textContent = playState.score;
 
         // Update bar
@@ -951,9 +983,19 @@ const PictureReveal = (() => {
             msg.textContent = `You guessed the picture: ${sessions[playState.sessionIndex].answer}. You earned ${playState.score} points! Total Score: ${playState.totalScore}`;
 
             btnTryAgain.style.display = 'none';
-            if (playState.sessionIndex < sessions.length - 1) {
+            if (playState.queueIndex < playState.playQueue.length - 1) {
                 btnNext.style.display = 'inline-flex';
                 btnFinish.style.display = 'none';
+
+                if (globalSettings.autoNext) {
+                    btnNext.style.display = 'none';
+                    setTimeout(() => {
+                        const feedback = document.getElementById('pr-game-feedback');
+                        if (feedback.style.display !== 'none') {
+                            document.getElementById('btn-next-picture').click();
+                        }
+                    }, 3000);
+                }
             } else {
                 btnNext.style.display = 'none';
                 btnFinish.style.display = 'inline-flex';
