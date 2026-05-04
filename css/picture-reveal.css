@@ -863,13 +863,14 @@ body.dark-mode {
 }
 
 /* Feedback Overlay */
-.pr-game-feedback {
+.pr-overlay.pr-game-feedback {
     position: absolute;
+    top: auto;
     bottom: 40px;
     left: 0;
     right: 0;
-    background: transparent;
-    backdrop-filter: none;
+    background: transparent !important;
+    backdrop-filter: none !important;
     display: flex;
     justify-content: center;
     align-items: flex-end;
@@ -877,7 +878,7 @@ body.dark-mode {
     pointer-events: none;
 }
 
-.pr-feedback-card {
+.pr-feedback-content {
     background: var(--pr-panel-bg, rgba(255, 255, 255, 0.97));
     padding: 25px 40px;
     border-radius: 20px;
@@ -907,13 +908,13 @@ body.dark-mode {
     font-size: 3rem;
 }
 
-.pr-feedback-card h2 {
+.pr-feedback-title {
     font-size: 1.8rem;
     margin: 15px 0 10px 0;
     font-weight: 800;
 }
 
-.pr-feedback-card p {
+.pr-feedback-message {
     font-size: 1.1rem;
     margin-bottom: 20px;
     opacity: 0.9;
