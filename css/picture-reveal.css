@@ -115,15 +115,26 @@ body.dark-mode {
 }
 
 .pr-btn-accent {
-    background: var(--coral-pink);
+    background: var(--primary-color, #3d348b);
     color: white;
-    box-shadow: 0 4px 15px rgba(247, 37, 133, 0.3);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .pr-btn-accent:hover:not(:disabled) {
-    background: var(--hot-pink);
+    background: var(--medium-slate-blue, #7678ed);
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(247, 37, 133, 0.4);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+#pr-add-distractor {
+    background: transparent;
+    color: var(--primary-color, #3d348b);
+    border: 2px solid var(--primary-color, #3d348b);
+}
+
+#pr-add-distractor:hover {
+    background: rgba(118, 120, 237, 0.1);
+    color: var(--primary-color, #3d348b);
 }
 
 .pr-btn-ghost {

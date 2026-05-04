@@ -117,6 +117,7 @@
                                     <option value="6">6x6 Grid</option>
                                     <option value="8">8x8 Grid</option>
                                     <option value="10">10x10 Grid</option>
+                                    <option value="16">16x16 Grid</option>
                                     <option value="20">20x20 Grid</option>
                                 </select>
                                 <select id="pr-global-sound" class="pr-select">
@@ -151,7 +152,8 @@
                                 <div class="pr-image-preview-container" id="pr-image-preview-container"
                                     style="display:none;">
                                     <img id="pr-image-preview" src="" alt="Preview">
-                                    <button class="pr-remove-image-btn" id="pr-remove-image" title="Remove image">
+                                    <button type="button" class="pr-remove-image-btn" id="pr-remove-image"
+                                        title="Remove image">
                                         <i class="fa-solid fa-trash"></i>
                                     </button>
                                 </div>
@@ -180,7 +182,7 @@
                                 <ul class="pr-distractor-list" id="pr-distractor-list">
                                     <!-- Populated by JS -->
                                 </ul>
-                                <button class="pr-btn pr-btn-ghost pr-btn-sm" id="pr-add-distractor">
+                                <button type="button" class="pr-btn pr-btn-ghost pr-btn-sm" id="pr-add-distractor">
                                     <i class="fa-solid fa-plus"></i> Add Wrong Option
                                 </button>
                             </div>

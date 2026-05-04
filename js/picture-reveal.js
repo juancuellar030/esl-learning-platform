@@ -200,7 +200,8 @@ const PictureReveal = (() => {
                 validateState();
             });
         });
-        dom.addDistractorBtn.addEventListener('click', () => {
+        dom.addDistractorBtn.addEventListener('click', (e) => {
+            e.preventDefault();
             if (currentSessionIndex === -1) return;
             if (sessions[currentSessionIndex].distractors.length >= 5) return;
             sessions[currentSessionIndex].distractors.push('');
@@ -751,8 +752,9 @@ const PictureReveal = (() => {
         for (let i = 0; i < totalBlocks; i++) {
             // We want the last block to disappear exactly at T, or slightly before.
             // i goes from 0 to totalBlocks - 1.
+            // Power 0.5 curve mapping logic to start slow and accelerate
             const fraction = i / (totalBlocks - 1);
-            const timeMs = T * (1 - Math.pow(1 - fraction, 2));
+            const timeMs = T * Math.pow(fraction, 0.5);
             playState.scheduledTimes.push(timeMs);
         }
 
