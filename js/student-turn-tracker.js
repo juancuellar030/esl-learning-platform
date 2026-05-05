@@ -17,6 +17,92 @@
     // { "5B": { turns: {...}, absent: {...} }, "5C": { ... } }
     let allState = {};
 
+    // View preferences
+    let nameMode = 'full'; // 'full' or 'first'
+    let sortMode = 'first'; // 'first' or 'last'
+
+    // ── Custom Audio Preloading & Setup ────────────────────
+    const globalAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    let balloonPopBuffer = null;
+    let cardFlipBuffer = null;
+    let slotSpinBuffer = null;
+    let balloonInflateBuffer = null;
+    let studentSelectedBuffer = null;
+
+    function playAudioBuffer(buffer) {
+        if (!buffer) return;
+        try {
+            if (globalAudioCtx.state === 'suspended') globalAudioCtx.resume();
+            const source = globalAudioCtx.createBufferSource();
+            source.buffer = buffer;
+            source.connect(globalAudioCtx.destination);
+            source.start(0);
+        } catch (e) { }
+    }
+
+    async function preloadSounds() {
+        try {
+            const popRes = await fetch('assets/sounds/balloon-pop.ogg');
+            balloonPopBuffer = await globalAudioCtx.decodeAudioData(await popRes.arrayBuffer());
+
+            const flipRes = await fetch('assets/sounds/card-flip.ogg');
+            cardFlipBuffer = await globalAudioCtx.decodeAudioData(await flipRes.arrayBuffer());
+
+            const spinRes = await fetch('assets/sounds/slot-machine-spin.ogg');
+            slotSpinBuffer = await globalAudioCtx.decodeAudioData(await spinRes.arrayBuffer());
+
+            const inflateRes = await fetch('assets/sounds/balloon-inflate.ogg');
+            balloonInflateBuffer = await globalAudioCtx.decodeAudioData(await inflateRes.arrayBuffer());
+
+            const selectedRes = await fetch('assets/sounds/student-selected.ogg');
+            studentSelectedBuffer = await globalAudioCtx.decodeAudioData(await selectedRes.arrayBuffer());
+        } catch (e) {
+            console.warn("Custom sound files (.ogg) not found or failed to load. Will fail gracefully.");
+        }
+    }
+    // Initialize buffers immediately
+    preloadSounds();
+
+    /**
+     * Parses a Hispanic/LATAM full name.
+     * Assumes format: FirstSurname SecondSurname FirstName1 FirstName2...
+     * If 3+ words: index 0 and 1 are surnames. rest are first names.
+     */
+    function parseName(fullName) {
+        const parts = fullName.trim().split(/\s+/);
+        let lastNames = [];
+        let firstNames = [];
+        let firstSurname = "";
+
+        if (parts.length >= 3) {
+            lastNames = [parts[0], parts[1]];
+            firstNames = parts.slice(2);
+            firstSurname = parts[0];
+        } else if (parts.length === 2) {
+            lastNames = [parts[0]];
+            firstNames = [parts[1]];
+            firstSurname = parts[0];
+        } else {
+            firstNames = parts;
+            lastNames = [];
+            firstSurname = fullName;
+        }
+
+        const firstNamesStr = firstNames.join(' ');
+        const lastNamesStr = lastNames.join(' ');
+
+        return {
+            original: fullName,
+            firstNamesStr,
+            lastNamesStr,
+            firstSurname,
+            rearrangedFull: (firstNamesStr + ' ' + lastNamesStr).trim(),
+            firstPlusFirstLast: (firstNamesStr + ' ' + firstSurname).trim(),
+            sortByLast: (lastNamesStr + ' ' + firstNamesStr).trim(),
+            sortByFirst: (firstNamesStr + ' ' + lastNamesStr).trim()
+        };
+    }
+
     function getGroups() {
         return (typeof CLASS_GROUPS !== 'undefined' && CLASS_GROUPS.length)
             ? CLASS_GROUPS
@@ -63,7 +149,7 @@
     // ── Persistence ───────────────────────────────────────
     function saveToLocalStorage() {
         try {
-            localStorage.setItem(LS_KEY, JSON.stringify({ allState, activeGroupId }));
+            localStorage.setItem(LS_KEY, JSON.stringify({ allState, activeGroupId, nameMode, sortMode }));
         } catch (e) { console.warn('Could not save to localStorage', e); }
     }
 
@@ -73,6 +159,10 @@
             if (raw) {
                 const parsed = JSON.parse(raw);
                 allState = parsed.allState || {};
+
+                if (parsed.nameMode) nameMode = parsed.nameMode;
+                if (parsed.sortMode) sortMode = parsed.sortMode;
+
                 // Restore last active group only if it still exists
                 const groups = getGroups();
                 const savedId = parsed.activeGroupId;
@@ -185,7 +275,19 @@
         const grid = document.getElementById('ttStudentGrid');
         grid.innerHTML = '';
 
-        const students = getStudents();
+        let students = getStudents();
+
+        // Sort students based on sortMode
+        students.sort((a, b) => {
+            const pa = parseName(a);
+            const pb = parseName(b);
+            if (sortMode === 'last') {
+                return pa.sortByLast.localeCompare(pb.sortByLast);
+            } else {
+                return pa.sortByFirst.localeCompare(pb.sortByFirst);
+            }
+        });
+
         students.forEach(name => {
             const status = getStudentStatus(name);
             const turns = getStudentTurns(name);
@@ -212,13 +314,18 @@
             // Turn badge
             const badgeClass = turns > 0 ? 'tt-turn-badge has-turns' : 'tt-turn-badge';
 
+            const parsed = parseName(name);
+            const displayName = nameMode === 'first' ? parsed.firstNamesStr : parsed.rearrangedFull;
+
             card.innerHTML = `
-                <button class="tt-absent-toggle" data-student="${name}" title="${isAbsent ? 'Mark present' : 'Mark absent'}">
-                    <i class="fa-solid ${isAbsent ? 'fa-user-slash' : 'fa-user-check'}"></i>
-                </button>
                 ${statusIcon}
-                <div class="tt-student-name">${name}</div>
-                <div class="${badgeClass}"><i class="fa-solid fa-rotate"></i> ${turns}</div>
+                <div class="tt-student-name">${displayName}</div>
+                <div class="tt-card-footer" style="display:flex; justify-content:center; align-items:center; gap:8px; margin-top:4px;">
+                    <button class="tt-absent-toggle" data-student="${name}" title="${isAbsent ? 'Mark present' : 'Mark absent'}">
+                        <i class="fa-solid ${isAbsent ? 'fa-user-slash' : 'fa-user-check'}"></i>
+                    </button>
+                    <div class="${badgeClass}"><i class="fa-solid fa-rotate"></i> ${turns}</div>
+                </div>
             `;
 
             // Click handlers
@@ -265,8 +372,13 @@
     // ── Winner Display ────────────────────────────────────
     function showWinner(name) {
         selectedWinner = name;
+        const parsed = parseName(name);
+        const displayName = parsed.rearrangedFull;
+
+        playAudioBuffer(studentSelectedBuffer);
+
         const overlay = document.getElementById('ttWinnerOverlay');
-        document.getElementById('ttWinnerName').textContent = name;
+        document.getElementById('ttWinnerName').textContent = displayName;
         overlay.classList.add('visible');
     }
 
@@ -314,6 +426,26 @@
         let currentIdx = -1;
         let speed = 80;
 
+        // Setup simple audio
+        let audioCtx;
+        try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { }
+
+        function playHopSound() {
+            if (!audioCtx) return;
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.frequency.setValueAtTime(500, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(300, audioCtx.currentTime + 0.05);
+                gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+                osc.start(audioCtx.currentTime);
+                osc.stop(audioCtx.currentTime + 0.05);
+            } catch (e) { }
+        }
+
         function hop() {
             // Remove old highlight
             if (currentIdx >= 0 && allCards[currentIdx]) {
@@ -322,6 +454,8 @@
 
             currentIdx = Math.floor(Math.random() * allCards.length);
             allCards[currentIdx].classList.add('hop-highlight');
+
+            playHopSound();
 
             // Scroll into view gently
             allCards[currentIdx].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -415,7 +549,9 @@
                 ctx.font = `bold ${Math.max(11, Math.min(16, 600 / names.length))}px 'Reddit Sans', sans-serif`;
                 ctx.shadowColor = 'rgba(0,0,0,0.4)';
                 ctx.shadowBlur = 3;
-                const displayName = name.length > 14 ? name.slice(0, 12) + '…' : name;
+                const parsed = parseName(name);
+                const displayFull = parsed.firstPlusFirstLast || name;
+                const displayName = displayFull.length > 16 ? displayFull.slice(0, 14) + '…' : displayFull;
                 ctx.fillText(displayName, radius - 14, 5);
                 ctx.restore();
             });
@@ -524,6 +660,7 @@
             showNotification('All students have had turns! Reset categories to continue.', 'info');
             return;
         }
+        playAudioBuffer(balloonInflateBuffer);
 
         const overlay = document.getElementById('ttBalloonOverlay');
         overlay.classList.add('visible');
@@ -592,54 +729,28 @@
         }
     }
 
-    // ── Pop Sound Effect (synthesized) ────────────────────
+    // ── Pop Sound Effect (.ogg asset playback) ────────────────────
     function playPopSound() {
+        if (!balloonPopBuffer) return;
         try {
-            const ctx = new (window.AudioContext || window.webkitAudioContext)();
-            const now = ctx.currentTime;
+            if (globalAudioCtx.state === 'suspended') globalAudioCtx.resume();
+            const source = globalAudioCtx.createBufferSource();
+            source.buffer = balloonPopBuffer;
+            source.connect(globalAudioCtx.destination);
+            source.start(0);
+        } catch (e) { }
+    }
 
-            // Noise burst for the "pop"
-            const bufferSize = ctx.sampleRate * 0.15;
-            const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-            const data = buffer.getChannelData(0);
-            for (let i = 0; i < bufferSize; i++) {
-                data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufferSize, 2);
-            }
-            const noise = ctx.createBufferSource();
-            noise.buffer = buffer;
-
-            // Bandpass filter to shape the pop
-            const filter = ctx.createBiquadFilter();
-            filter.type = 'bandpass';
-            filter.frequency.value = 1200;
-            filter.Q.value = 0.7;
-
-            const gain = ctx.createGain();
-            gain.gain.setValueAtTime(0.35, now);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
-
-            noise.connect(filter);
-            filter.connect(gain);
-            gain.connect(ctx.destination);
-            noise.start(now);
-            noise.stop(now + 0.15);
-
-            // Thump for body
-            const osc = ctx.createOscillator();
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(300, now);
-            osc.frequency.exponentialRampToValueAtTime(60, now + 0.1);
-            const oscGain = ctx.createGain();
-            oscGain.gain.setValueAtTime(0.3, now);
-            oscGain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
-            osc.connect(oscGain);
-            oscGain.connect(ctx.destination);
-            osc.start(now);
-            osc.stop(now + 0.12);
-
-            // Cleanup
-            setTimeout(() => ctx.close(), 300);
-        } catch (e) { /* Audio not available */ }
+    // ── Slot Spin Sound Effect (.ogg asset playback) ────────
+    function playSlotTickSound() {
+        if (!slotSpinBuffer) return;
+        try {
+            if (globalAudioCtx.state === 'suspended') globalAudioCtx.resume();
+            const source = globalAudioCtx.createBufferSource();
+            source.buffer = slotSpinBuffer;
+            source.connect(globalAudioCtx.destination);
+            source.start(0);
+        } catch (e) { }
     }
 
     function popBalloon(balloon, name, overlay) {
@@ -670,9 +781,11 @@
             }
 
             // Show name
+            const parsed = parseName(name);
+            const displayName = nameMode === 'first' ? parsed.firstNamesStr : parsed.rearrangedFull;
             const nameEl = document.createElement('div');
             nameEl.className = 'tt-balloon-pop';
-            nameEl.textContent = name;
+            nameEl.textContent = displayName;
             nameEl.style.left = (cx - 50) + 'px';
             nameEl.style.top = (cy - 15) + 'px';
             overlay.appendChild(nameEl);
@@ -714,12 +827,23 @@
         // Add an extra clone at the end to make it seamless
         const reel = [...shuffled, shuffled[0]];
 
-        reel.forEach(name => {
+        const slotColors = [
+            'rgba(255, 107, 107, 0.1)', 'rgba(255, 217, 61, 0.1)',
+            'rgba(107, 203, 119, 0.1)', 'rgba(77, 150, 255, 0.1)',
+            'rgba(196, 90, 179, 0.1)'
+        ];
+
+        reel.forEach((name, idx) => {
             const div = document.createElement('div');
             div.className = 'tt-slot-item';
+            div.style.backgroundColor = slotColors[idx % slotColors.length];
 
-            const displayName = name.length > 18 ? name.slice(0, 16) + '…' : name;
-            div.textContent = displayName;
+            const parsed = parseName(name);
+            const displayFull = parsed.firstPlusFirstLast || name;
+            const displayName = displayFull.length > 20 ? displayFull.slice(0, 18) + '…' : displayFull;
+
+            div.textContent = "• • •";
+            div.dataset.displayLabel = displayName;
             div.dataset.fullName = name;
 
             track.appendChild(div);
@@ -761,46 +885,38 @@
         btn.dataset.action = 'stop';
 
         const track = document.getElementById('slotTrack');
-        track.querySelectorAll('.tt-slot-item').forEach(el => el.classList.add('blur'));
+        track.querySelectorAll('.tt-slot-item').forEach(el => {
+            el.classList.add('blur');
+            if (el.dataset.displayLabel) {
+                el.textContent = el.dataset.displayLabel;
+            }
+        });
 
         const poolSize = parseInt(track.dataset.poolSize);
         const maxScroll = poolSize * ITEM_HEIGHT;
         slotSpeed = 40;
 
-        let audioCtx;
-        try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { }
-
-        function playTick() {
-            if (!audioCtx) return;
-            try {
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.frequency.value = 600;
-                osc.type = 'triangle';
-                gain.gain.value = 0.05;
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.02);
-            } catch (e) { }
-        }
-
-        let lastIndexRendered = -1;
+        let distanceAccumulator = 0;
+        const TICK_DISTANCE = ITEM_HEIGHT * 3; // Space the sounds out every 3 blocks
 
         function animate() {
             if (!slotSpinning) return;
 
+            // Move physically and register absolute distance traveled
             slotPosition -= slotSpeed;
+            distanceAccumulator += slotSpeed;
+
+            // Visual boundary wrapper
             if (slotPosition <= -maxScroll) {
                 slotPosition = slotPosition % maxScroll;
             }
 
             track.style.transform = `translateY(${slotPosition}px)`;
 
-            const currIndex = Math.floor(Math.abs(slotPosition) / ITEM_HEIGHT);
-            if (currIndex !== lastIndexRendered) {
-                playTick();
-                lastIndexRendered = currIndex;
+            // Fire sound evenly regardless of wrapper
+            if (distanceAccumulator >= TICK_DISTANCE) {
+                playSlotTickSound();
+                distanceAccumulator %= TICK_DISTANCE;
             }
 
             slotAnimFrame = requestAnimationFrame(animate);
@@ -833,6 +949,9 @@
         const startTime = performance.now();
 
         cancelAnimationFrame(slotAnimFrame);
+
+        // Ensure deceleration also follows the * 3 grouping distance
+        let lastIndexRendered = Math.floor(Math.abs(startPos) / (ITEM_HEIGHT * 3));
 
         let audioCtx;
         try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { }
@@ -869,6 +988,12 @@
             }
             track.style.transform = `translateY(${displayPos}px)`;
 
+            const absoluteIndex = Math.floor(Math.abs(slotPosition) / (ITEM_HEIGHT * 3));
+            if (absoluteIndex !== lastIndexRendered) {
+                playSlotTickSound();
+                lastIndexRendered = absoluteIndex;
+            }
+
             if (progress < 1) {
                 slotAnimFrame = requestAnimationFrame(finishAnim);
             } else {
@@ -889,6 +1014,203 @@
         }
 
         slotAnimFrame = requestAnimationFrame(finishAnim);
+    }
+
+    // ── Poker Cards ───────────────────────────────────────
+    let cardsShuffling = false;
+
+    function playCardShuffleSound() {
+        for (let i = 0; i < 6; i++) {
+            setTimeout(() => {
+                try {
+                    if (globalAudioCtx.state === 'suspended') globalAudioCtx.resume();
+                    const osc = globalAudioCtx.createOscillator();
+                    const gain = globalAudioCtx.createGain();
+                    osc.connect(gain);
+                    gain.connect(globalAudioCtx.destination);
+                    osc.frequency.setValueAtTime(800 - i * 50, globalAudioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(100, globalAudioCtx.currentTime + 0.05);
+                    gain.gain.setValueAtTime(0.05, globalAudioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, globalAudioCtx.currentTime + 0.05);
+                    osc.start(globalAudioCtx.currentTime);
+                    osc.stop(globalAudioCtx.currentTime + 0.05);
+                } catch (e) { }
+            }, i * 40);
+        }
+    }
+
+    // ── Card Flip Sound (.ogg asset playback) ────────────────────
+    function playCardFlipSound() {
+        if (!cardFlipBuffer) return;
+        try {
+            if (globalAudioCtx.state === 'suspended') globalAudioCtx.resume();
+            const source = globalAudioCtx.createBufferSource();
+            source.buffer = cardFlipBuffer;
+            source.connect(globalAudioCtx.destination);
+            source.start(0);
+        } catch (e) { }
+    }
+
+
+    function openCards() {
+        const pool = getAvailableStudents();
+        if (pool.length === 0) {
+            showNotification('All students have had turns! Reset categories to continue.', 'info');
+            return;
+        }
+
+        const overlay = document.getElementById('ttCardsOverlay');
+        overlay.classList.add('visible');
+
+        const grid = document.getElementById('cardsGrid');
+        grid.innerHTML = '';
+
+        const baseIcons = [
+            'fa-ghost', 'fa-crown', 'fa-gem', 'fa-hat-wizard', 'fa-dragon', 'fa-music',
+            'fa-bolt', 'fa-star', 'fa-moon', 'fa-clover', 'fa-fire', 'fa-chess-rook',
+            'fa-meteor', 'fa-leaf', 'fa-chess-knight', 'fa-house', 'fa-gamepad',
+            'fa-cat', 'fa-dog', 'fa-fish', 'fa-frog', 'fa-burger', 'fa-spider', 'fa-mug-saucer',
+            'fa-bug', 'fa-horse', 'fa-dove', 'fa-trophy', 'fa-computer', 'fa-pencil',
+            'fa-apple-whole', 'fa-lemon', 'fa-carrot', 'fa-pepper-hot', 'fa-cake-candles',
+            'fa-sun', 'fa-cloud', 'fa-snowflake', 'fa-tree', 'fa-ice-cream',
+            'fa-mountain', 'fa-water', 'fa-wind', 'fa-rocket', 'fa-robot',
+            'fa-user-astronaut', 'fa-paper-plane', 'fa-anchor', 'fa-bomb'
+        ];
+
+        let deckIcons = [...baseIcons].sort(() => Math.random() - 0.5);
+
+        const shuffled = [...pool].sort(() => Math.random() - 0.5);
+
+        shuffled.forEach((name, i) => {
+            const parsed = parseName(name);
+            const displayName = parsed.firstPlusFirstLast || name;
+
+            const card = document.createElement('div');
+            card.className = 'tt-card-item';
+            card.dataset.fullName = name;
+
+            const randomIcon = deckIcons[i % deckIcons.length];
+
+            card.innerHTML = `
+                <div class="tt-card-front">
+                    <i class="fa-solid ${randomIcon}"></i>
+                </div>
+                <div class="tt-card-back">
+                    ${displayName}
+                </div>
+            `;
+
+            card.addEventListener('click', function () {
+                if (cardsShuffling || this.classList.contains('flipped')) return;
+
+                this.classList.add('flipped');
+                document.getElementById('cardsShuffleBtn').disabled = true;
+                grid.style.pointerEvents = 'none';
+
+                playCardFlipSound();
+
+                setTimeout(() => {
+                    closeCards();
+                    showWinner(this.dataset.fullName);
+                }, 1200);
+            });
+
+            grid.appendChild(card);
+        });
+
+        document.getElementById('cardsShuffleBtn').disabled = false;
+        grid.style.pointerEvents = 'auto';
+
+        // Initial deal animation
+        setTimeout(() => {
+            shuffleCardsLogic(true);
+        }, 50);
+    }
+
+    function closeCards() {
+        const overlay = document.getElementById('ttCardsOverlay');
+        const grid = document.getElementById('cardsGrid');
+        overlay.classList.remove('visible');
+        grid.style.pointerEvents = 'none';
+
+        // Clear DOM after CSS fade-out completes
+        setTimeout(() => {
+            if (!overlay.classList.contains('visible')) {
+                grid.innerHTML = '';
+            }
+        }, 350);
+    }
+
+    function shuffleCards() {
+        if (cardsShuffling) return;
+        shuffleCardsLogic(false);
+    }
+
+    function shuffleCardsLogic(isInitialDeal = false) {
+        cardsShuffling = true;
+        const grid = document.getElementById('cardsGrid');
+        const cards = Array.from(grid.children);
+        const btn = document.getElementById('cardsShuffleBtn');
+        btn.disabled = true;
+
+        const gridRect = grid.getBoundingClientRect();
+        const centerX = gridRect.left + gridRect.width / 2;
+        const centerY = gridRect.top + gridRect.height / 2;
+
+        playCardShuffleSound();
+
+        // Gather to center
+        cards.forEach(card => {
+            const rect = card.getBoundingClientRect();
+            const tx = centerX - (rect.left + rect.width / 2);
+            const ty = centerY - (rect.top + rect.height / 2);
+
+            if (isInitialDeal) {
+                card.style.transition = 'none';
+                card.style.transform = `translate(${tx}px, ${ty}px) scale(0)`;
+            } else {
+                const rot = (Math.random() - 0.5) * 60;
+                card.style.transition = 'transform 0.4s cubic-bezier(0.4, 0.0, 0.2, 1)';
+                card.style.transform = `translate(${tx}px, ${ty}px) rotate(${rot}deg) scale(0.9)`;
+            }
+        });
+
+        setTimeout(() => {
+            // Reorder DOM
+            cards.sort(() => Math.random() - 0.5);
+
+            // Clear transforms to reset them to pure CSS positions across flex grid
+            cards.forEach(c => {
+                c.style.transition = 'none';
+                c.style.transform = 'none';
+                grid.appendChild(c);
+            });
+
+            // Force reflow to calculate proper physical rect coordinates
+            void grid.offsetHeight;
+
+            // Compute correct offset vectors relative to center, given their new layout anchors
+            cards.forEach(card => {
+                const rect = card.getBoundingClientRect();
+                const tx = centerX - (rect.left + rect.width / 2);
+                const ty = centerY - (rect.top + rect.height / 2);
+                card.style.transform = `translate(${tx}px, ${ty}px) scale(0.9)`;
+            });
+
+            // Second reflow commits the transform override prior to kicking off sliding animation
+            void grid.offsetHeight;
+
+            // Animate outwards from center stack to new natural positions
+            cards.forEach((card, idx) => {
+                card.style.transition = `transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) ${idx * 0.02}s`;
+                card.style.transform = '';
+            });
+
+            setTimeout(() => {
+                cardsShuffling = false;
+                btn.disabled = false;
+            }, 400 + cards.length * 20);
+        }, isInitialDeal ? 50 : 450);
     }
 
     // ── Reset Categories ──────────────────────────────────
@@ -964,6 +1286,11 @@
         document.getElementById('ttPickerRoulette').addEventListener('click', openRoulette);
         document.getElementById('ttPickerBalloon').addEventListener('click', openBalloons);
         document.getElementById('ttPickerSlot').addEventListener('click', openSlotMachine);
+        document.getElementById('ttPickerCards').addEventListener('click', openCards);
+
+        // Cards action
+        document.getElementById('cardsCloseBtn').addEventListener('click', closeCards);
+        document.getElementById('cardsShuffleBtn').addEventListener('click', shuffleCards);
 
         // Slot action
         document.getElementById('slotActionBtn').addEventListener('click', handleSlotAction);
@@ -1010,6 +1337,48 @@
         document.getElementById('ttSlotOverlay').addEventListener('click', (e) => {
             if (e.target === e.currentTarget) closeSlotMachine();
         });
+        document.getElementById('ttCardsOverlay').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) closeCards();
+        });
+
+        // Setup View Toggles
+        const toggleNameModeBtn = document.getElementById('ttToggleNameMode');
+        const toggleSortBtn = document.getElementById('ttToggleSort');
+
+        function updateToggleUI() {
+            if (nameMode === 'first') {
+                toggleNameModeBtn.innerHTML = '<i class="fa-solid fa-id-badge"></i> First Name';
+                toggleNameModeBtn.classList.remove('active');
+            } else {
+                toggleNameModeBtn.innerHTML = '<i class="fa-solid fa-id-card"></i> Full Name';
+                toggleNameModeBtn.classList.add('active');
+            }
+            if (sortMode === 'last') {
+                toggleSortBtn.innerHTML = '<i class="fa-solid fa-arrow-down-a-z"></i> Sort: Last';
+                toggleSortBtn.classList.remove('active');
+            } else {
+                toggleSortBtn.innerHTML = '<i class="fa-solid fa-arrow-down-z-a"></i> Sort: First';
+                toggleSortBtn.classList.add('active');
+            }
+        }
+
+        if (toggleNameModeBtn && toggleSortBtn) {
+            updateToggleUI();
+
+            toggleNameModeBtn.addEventListener('click', () => {
+                nameMode = nameMode === 'full' ? 'first' : 'full';
+                saveToLocalStorage();
+                updateToggleUI();
+                renderGrid();
+            });
+
+            toggleSortBtn.addEventListener('click', () => {
+                sortMode = sortMode === 'first' ? 'last' : 'first';
+                saveToLocalStorage();
+                updateToggleUI();
+                renderGrid();
+            });
+        }
     }
 
     if (document.readyState === 'loading') {

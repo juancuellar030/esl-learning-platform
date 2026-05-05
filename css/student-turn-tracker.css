@@ -199,7 +199,9 @@
     background: white;
     border: 3px solid #e0e0e0;
     border-radius: 14px;
-    padding: 16px 12px;
+    padding: 10px;
+    padding-top: 8px;
+    padding-bottom: 10px;
     text-align: center;
     cursor: pointer;
     transition: all 0.25s ease;
@@ -280,9 +282,6 @@
 }
 
 .tt-absent-toggle {
-    position: absolute;
-    top: 5px;
-    left: 5px;
     background: none;
     border: none;
     font-size: 0.75rem;
@@ -1109,4 +1108,181 @@ body.dark-mode .tt-group-tab.active {
     color: white;
     border-color: var(--indigo-velvet);
     box-shadow: 0 4px 14px rgba(61, 52, 139, 0.4);
+}
+
+/* ── Cards Overlay ───────────────────────────── */
+.tt-cards-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 8500;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    overflow: hidden;
+}
+
+.tt-cards-overlay.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.tt-cards-container {
+    width: 95vw;
+    max-width: 1200px;
+    height: 90vh;
+    background: transparent;
+    border-radius: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    box-shadow: none;
+    animation: ttPopIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+body.dark-mode .tt-cards-container {
+    background: transparent;
+}
+
+.tt-cards-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    color: #333;
+    font-size: 1.2rem;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+    z-index: 10;
+}
+
+body.dark-mode .tt-cards-close {
+    color: #f0f0f0;
+}
+
+.tt-cards-close:hover {
+    opacity: 1;
+}
+
+.tt-cards-grid {
+    flex: 1;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-content: center;
+    gap: 15px;
+    perspective: 1000px;
+    overflow: visible;
+    padding: 20px;
+    position: relative;
+    width: 100%;
+}
+
+.tt-card-item {
+    width: 100px;
+    height: 140px;
+    position: relative;
+    cursor: pointer;
+    transform-style: preserve-3d;
+    transition: transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+.tt-card-item:hover {
+    transform: translateY(-5px);
+}
+
+.tt-card-item.flipped {
+    transform: rotateY(180deg) scale(1.1);
+    z-index: 20;
+    pointer-events: none;
+}
+
+.tt-card-front,
+.tt-card-back {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.tt-card-front {
+    background: linear-gradient(135deg, var(--medium-slate-blue), var(--indigo-velvet));
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    font-size: 2.5rem;
+}
+
+.tt-card-front::after {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    border: 2px dashed rgba(255, 255, 255, 0.4);
+    border-radius: 8px;
+    pointer-events: none;
+}
+
+.tt-card-back {
+    background: white;
+    color: var(--indigo-velvet);
+    transform: rotateY(180deg);
+    border: 3px solid var(--medium-slate-blue);
+    padding: 10px;
+    text-align: center;
+    font-weight: 700;
+    font-size: 0.9rem;
+    line-height: 1.2;
+    word-break: break-word;
+}
+
+body.dark-mode .tt-card-back {
+    background: #1a1a24;
+    color: white;
+    border-color: var(--medium-slate-blue);
+}
+
+.tt-cards-shuffle-btn {
+    align-self: center;
+    margin-top: 20px;
+    background: var(--cayenne-red);
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    font-size: 1.1rem;
+    border-radius: 30px;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.2s;
+    box-shadow: 0 4px 16px rgba(243, 91, 4, 0.35);
+}
+
+.tt-cards-shuffle-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 22px rgba(243, 91, 4, 0.45);
+}
+
+.tt-cards-shuffle-btn:disabled {
+    background: #ccc;
+    box-shadow: none;
+    cursor: not-allowed;
+    transform: none;
+}
+
+body.dark-mode .tt-cards-shuffle-btn:disabled {
+    background: #444;
+    color: #888;
 }

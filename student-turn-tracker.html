@@ -68,6 +68,9 @@
                 <button class="tt-picker-btn" id="ttPickerSlot" title="Slot Machine">
                     <i class="fa-solid fa-arrows-spin"></i> Slot
                 </button>
+                <button class="tt-picker-btn" id="ttPickerCards" title="Card Draw">
+                    <i class="fa-solid fa-layer-group"></i> Cards
+                </button>
             </div>
 
             <!-- Filter Buttons -->
@@ -91,6 +94,17 @@
                     style="background:#ecf0f1; color:#555; font-size:0.82rem; padding:7px 12px;"
                     title="Reset turn categories for a new activity">
                     <i class="fa-solid fa-rotate-left"></i> Reset Turns
+                </button>
+            </div>
+
+            <!-- View & Sort Toggles -->
+            <div class="tt-view-group"
+                style="display:flex; gap: 8px; align-items: center; border-left: 2px solid #eee; padding-left: 10px; margin-left: 4px;">
+                <button class="tt-filter-btn active" id="ttToggleNameMode" data-mode="full" title="Toggle Name Display">
+                    <i class="fa-solid fa-id-card"></i> Full Name
+                </button>
+                <button class="tt-filter-btn active" id="ttToggleSort" data-sort="first" title="Toggle Sort Order">
+                    <i class="fa-solid fa-arrow-down-z-a"></i> Sort: First
                 </button>
             </div>
         </div>
@@ -165,6 +179,21 @@
             </div>
             <button class="tt-slot-btn" id="slotActionBtn">
                 <i class="fa-solid fa-play"></i> SPIN!
+            </button>
+        </div>
+    </div>
+
+    <!-- ── Cards Overlay ────────────────────────────────── -->
+    <div class="tt-cards-overlay" id="ttCardsOverlay">
+        <div class="tt-cards-container">
+            <button class="tt-cards-close" id="cardsCloseBtn" title="Close">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="tt-cards-grid" id="cardsGrid">
+                <!-- Cards injected here -->
+            </div>
+            <button class="tt-cards-shuffle-btn" id="cardsShuffleBtn">
+                <i class="fa-solid fa-shuffle"></i> SHUFFLE
             </button>
         </div>
     </div>

@@ -37,7 +37,7 @@ const STUDENTS_DATA = [
     { name: 'SAMUEL G.', birthdate: '08-09' },  // GUTIERREZ HUELGO SAMUEL
     { name: 'SANTIAGO O.', birthdate: '02-11' },  // OTALORA BARBOSA SANTIAGO ANDRÉS
     { name: 'SARA LUCÍA V.', birthdate: '04-19' },  // VANEGAS TORRES SARA LUCÍA
-    { name: 'THOMAS C.', birthdate: '04-11' },  // CERQUERA MONTEALEGRE THOMAS
+    { name: 'TOMÁS C.', birthdate: '04-11' },  // CERQUERA MONTEALEGRE TOMÁS
     { name: 'VALERIA P.', birthdate: '04-21' },  // PEÑA OSORIO VALERIA
 ];
 
