@@ -28,6 +28,9 @@
     let slotSpinBuffer = null;
     let balloonInflateBuffer = null;
     let studentSelectedBuffer = null;
+    let pinataHit1Buffer = null;
+    let pinataHit2Buffer = null;
+    let pinataExplosionBuffer = null;
 
     function playAudioBuffer(buffer) {
         if (!buffer) return;
@@ -56,6 +59,15 @@
 
             const selectedRes = await fetch('assets/sounds/student-selected.ogg');
             studentSelectedBuffer = await globalAudioCtx.decodeAudioData(await selectedRes.arrayBuffer());
+
+            const hit1Res = await fetch('assets/sounds/piñata-hit-1.ogg');
+            pinataHit1Buffer = await globalAudioCtx.decodeAudioData(await hit1Res.arrayBuffer());
+
+            const hit2Res = await fetch('assets/sounds/piñata-hit-2.ogg');
+            pinataHit2Buffer = await globalAudioCtx.decodeAudioData(await hit2Res.arrayBuffer());
+
+            const explosionRes = await fetch('assets/sounds/piñata-explosion.ogg');
+            pinataExplosionBuffer = await globalAudioCtx.decodeAudioData(await explosionRes.arrayBuffer());
         } catch (e) {
             console.warn("Custom sound files (.ogg) not found or failed to load. Will fail gracefully.");
         }
@@ -576,7 +588,46 @@
         return getComputedStyle(document.documentElement).getPropertyValue('--indigo-velvet').trim() || '#3d348b';
     }
 
-    function spinRoulette() {
+    let chargeInterval = null;
+    let chargeValue = 0;
+    let chargeDirection = 1;
+
+    function startChargeRoulette(e) {
+        if (e && e.type === 'mousedown' && e.button !== 0) return; // Only left click
+        if (rouletteSpinning) return;
+
+        chargeValue = 0;
+        chargeDirection = 1;
+
+        const fill = document.getElementById('rouletteChargeFill');
+        if (fill) fill.style.width = '0%';
+
+        const spinBtn = document.getElementById('rouletteSpinBtn');
+        spinBtn.innerHTML = '<i class="fa-solid fa-bolt"></i> CHARGING...';
+
+        if (chargeInterval) clearInterval(chargeInterval);
+        chargeInterval = setInterval(() => {
+            chargeValue += chargeDirection * 4;
+            if (chargeValue >= 100) {
+                chargeValue = 100;
+                chargeDirection = -1;
+            } else if (chargeValue <= 0) {
+                chargeValue = 0;
+                chargeDirection = 1;
+            }
+            if (fill) fill.style.width = `${chargeValue}%`;
+        }, 30);
+    }
+
+    function releaseChargeRoulette(e) {
+        if (!chargeInterval) return;
+        clearInterval(chargeInterval);
+        chargeInterval = null;
+        if (chargeValue < 5) chargeValue = 5;
+        spinRoulette(chargeValue);
+    }
+
+    function spinRoulette(charge = 50) {
         if (rouletteSpinning) return;
         rouletteSpinning = true;
 
@@ -586,9 +637,14 @@
         const draw = canvas._drawFunc;
         const spinBtn = document.getElementById('rouletteSpinBtn');
         spinBtn.disabled = true;
+        spinBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> SPINNING...';
 
-        const spinAmount = Math.PI * (8 + Math.random() * 6); // 4-7 full rotations
-        const duration = 4000;
+        const minRotations = 2; // base spin
+        const maxRotations = 15; // max charge spin
+        const baseSpin = minRotations + (maxRotations - minRotations) * (charge / 100);
+        const spinAmount = Math.PI * 2 * (baseSpin + Math.random() * 2);
+
+        const duration = 2000 + (charge / 100) * 4000;
         const startTime = performance.now();
         let startRotation = canvas._rotation || 0;
 
@@ -635,6 +691,9 @@
                 canvas._rotation = currentRotation;
                 rouletteSpinning = false;
                 spinBtn.disabled = false;
+                spinBtn.innerHTML = '<i class="fa-solid fa-play"></i> HOLD TO SPIN!';
+                const fill = document.getElementById('rouletteChargeFill');
+                if (fill) fill.style.width = '0%';
 
                 // Find winner: pointer is at top (angle -PI/2 from rightward axis)
                 const pointerAngle = -Math.PI / 2;
@@ -1213,6 +1272,282 @@
         }, isInitialDeal ? 50 : 450);
     }
 
+    // ── Piñata ────────────────────────────────────────────
+    let pinataActive = false;
+    let pinataTapCount = 0;
+    let pinataRequiredTaps = 0;
+    let pinataWinner = null;
+    let pinataColors = [];
+
+    // Color palettes per piñata image (from SVG gradient stop-colors)
+    const PINATA_PALETTES = [
+        // piñata-1: llama — greens, purples, pinks, yellows, blues
+        ['#62d202', '#6d4fff', '#ff519f', '#ffc40b', '#4a98ff', '#d10038', '#8b33f2', '#ff7c27'],
+        // piñata-2: star — oranges, purples, blues, greens, pinks
+        ['#ffaa00', '#b009ff', '#4a98ff', '#82d900', '#ff519f', '#d64a1a', '#72ffff', '#ffc40b'],
+        // piñata-3: sun/star — pinks, yellows, oranges, greens, purples
+        ['#ec2c85', '#ffd93d', '#ff6b6b', '#6bcb77', '#9b59b6', '#f39c12', '#3498db', '#e74c3c'],
+        // piñata-4: donut — pinks, purples, yellows, oranges, blues
+        ['#ff69b4', '#c45ab3', '#ffd93d', '#ff9f43', '#4d96ff', '#ff6b6b', '#a29bfe', '#1dd1a1'],
+        // piñata-5: horse — yellows, oranges, greens, blues, pinks
+        ['#fce938', '#f18701', '#27ae60', '#3498db', '#e74c3c', '#9b59b6', '#1abc9c', '#f39c12'],
+    ];
+
+    const PINATA_IMAGES = [
+        'assets/images/student-turn-tracker/piñata-1.svg',
+        'assets/images/student-turn-tracker/piñata-2.svg',
+        'assets/images/student-turn-tracker/piñata-3.svg',
+        'assets/images/student-turn-tracker/piñata-4.svg',
+        'assets/images/student-turn-tracker/piñata-5.svg',
+    ];
+
+    const CANDY_IMAGES = [
+        'assets/images/student-turn-tracker/candy-1.svg',
+        'assets/images/student-turn-tracker/candy-2.svg',
+        'assets/images/student-turn-tracker/candy-3.svg',
+        'assets/images/student-turn-tracker/candy-4.svg',
+        'assets/images/student-turn-tracker/candy-5.svg',
+        'assets/images/student-turn-tracker/candy-6.svg',
+        'assets/images/student-turn-tracker/candy-7.svg',
+    ];
+
+    function playPinataHitSound() {
+        // Randomly pick one of the two real hit sound files
+        const buf = Math.random() < 0.5 ? pinataHit1Buffer : pinataHit2Buffer;
+        playAudioBuffer(buf);
+    }
+
+    function openPinata() {
+        const pool = getAvailableStudents();
+        if (pool.length === 0) {
+            showNotification('All students have had turns! Reset categories to continue.', 'info');
+            return;
+        }
+
+        // Pick random winner upfront
+        const shuffled = [...pool].sort(() => Math.random() - 0.5);
+        pinataWinner = shuffled[0];
+
+        // Pick random piñata image and colours
+        const piIdx = Math.floor(Math.random() * PINATA_IMAGES.length);
+        pinataColors = PINATA_PALETTES[piIdx];
+
+        // Setup
+        pinataTapCount = 0;
+        pinataRequiredTaps = 5 + Math.floor(Math.random() * 6); // 5-10 taps
+        pinataActive = true;
+
+        const overlay = document.getElementById('ttPinataOverlay');
+        const body = document.getElementById('pinataBody');
+
+        // Clean up previous run
+        overlay.querySelectorAll('.tt-pinata-piece, .tt-pinata-name-reveal').forEach(el => el.remove());
+        body.classList.remove('pinata-hit', 'pinata-exploding');
+        body.style.animation = '';
+
+        // Inject image
+        body.innerHTML = `<img src="${PINATA_IMAGES[piIdx]}" alt="Piñata" draggable="false">`;
+
+        // Reset idle swing
+        requestAnimationFrame(() => {
+            body.style.animation = 'pinataIdleSwing 3s ease-in-out infinite alternate';
+        });
+
+        // Show hint
+        const hint = overlay.querySelector('.tt-pinata-hint');
+        if (hint) hint.style.display = '';
+
+        overlay.classList.add('visible');
+    }
+
+    function closePinata() {
+        document.getElementById('ttPinataOverlay').classList.remove('visible');
+        pinataActive = false;
+    }
+
+    function spawnPinataPieces(bodyEl) {
+        const overlay = document.getElementById('ttPinataOverlay');
+        const scene = overlay.querySelector('.tt-pinata-scene');
+        const rect = bodyEl.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+
+        const count = 3 + Math.floor(Math.random() * 4); // 3-6 pieces
+        for (let i = 0; i < count; i++) {
+            const piece = document.createElement('div');
+            piece.className = 'tt-pinata-piece';
+
+            const size = 6 + Math.random() * 10;
+            const color = pinataColors[Math.floor(Math.random() * pinataColors.length)];
+            const driftX = (Math.random() - 0.5) * 200;
+            const fallY = 200 + Math.random() * 250;
+            const spin = 180 + Math.random() * 720;
+            const duration = 0.8 + Math.random() * 0.6;
+            const isCircle = Math.random() > 0.5;
+
+            piece.style.width = size + 'px';
+            piece.style.height = size * (isCircle ? 1 : 0.6) + 'px';
+            piece.style.backgroundColor = color;
+            piece.style.left = (cx - size / 2 + (Math.random() - 0.5) * 40) + 'px';
+            piece.style.top = (cy - size / 2 + (Math.random() - 0.5) * 30) + 'px';
+            piece.style.borderRadius = isCircle ? '50%' : '3px';
+            piece.style.setProperty('--drift-x', driftX + 'px');
+            piece.style.setProperty('--fall-y', fallY + 'px');
+            piece.style.setProperty('--spin', spin + 'deg');
+            piece.style.setProperty('--fall-duration', duration + 's');
+            piece.style.boxShadow = `0 2px 4px rgba(0,0,0,0.2)`;
+
+            overlay.insertBefore(piece, scene); // Insert before scene for background layering
+
+            // Remove after animation
+            setTimeout(() => piece.remove(), duration * 1000 + 100);
+        }
+    }
+
+    function spawnPinataCandies(bodyEl, amount = 20) {
+        const overlay = document.getElementById('ttPinataOverlay');
+        const scene = overlay.querySelector('.tt-pinata-scene');
+        const rect = bodyEl.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+
+        // Target floor: roughly 82% from the TOP of the viewport
+        const floorY = window.innerHeight * 0.82;
+
+        for (let i = 0; i < amount; i++) {
+            const candy = document.createElement('img');
+            candy.src = CANDY_IMAGES[Math.floor(Math.random() * CANDY_IMAGES.length)];
+            candy.className = 'tt-pinata-piece tt-pinata-candy';
+
+            const size = 30 + Math.random() * 25;
+            const driftX = (Math.random() - 0.5) * 600; // Wider spread
+
+            // Calculate distance to land on floor
+            const spawnY = cy - size / 2 + (Math.random() - 0.5) * 40;
+            const distanceToFloor = floorY - spawnY;
+            const fallY = distanceToFloor + (Math.random() - 0.5) * 30; // some variation on floor height
+
+            const spin = 360 + Math.random() * 1080;
+            const duration = 0.8 + Math.random() * 0.8;
+
+            candy.style.width = size + 'px';
+            candy.style.height = 'auto';
+            candy.style.left = (cx - size / 2 + (Math.random() - 0.5) * 60) + 'px';
+            candy.style.top = spawnY + 'px';
+            candy.style.setProperty('--drift-x', driftX + 'px');
+            candy.style.setProperty('--fall-y', fallY + 'px');
+            candy.style.setProperty('--spin', spin + 'deg');
+            candy.style.setProperty('--fall-duration', duration + 's');
+            candy.style.filter = `drop-shadow(0 4px 8px rgba(0,0,0,0.25))`;
+
+            overlay.insertBefore(candy, scene);
+            // No removal: stay on floor until overlay closes/resets
+        }
+    }
+
+    function handlePinataTap() {
+        if (!pinataActive) return;
+        const body = document.getElementById('pinataBody');
+
+        pinataTapCount++;
+
+        // Hit animation: remove then re-add class
+        body.classList.remove('pinata-hit');
+        body.style.animation = 'none';
+        void body.offsetWidth; // force reflow
+        body.classList.add('pinata-hit');
+        body.style.animation = '';
+
+        // Play hit sound
+        playPinataHitSound();
+
+        // Spawn pieces
+        spawnPinataPieces(body);
+
+        // Remove hit class after animation
+        setTimeout(() => {
+            body.classList.remove('pinata-hit');
+            if (pinataActive && pinataTapCount < pinataRequiredTaps) {
+                body.style.animation = 'pinataIdleSwing 3s ease-in-out infinite alternate';
+            }
+        }, 400);
+
+        // Check if enough taps
+        if (pinataTapCount >= pinataRequiredTaps) {
+            pinataActive = false;
+            triggerPinataExplosion();
+        }
+    }
+
+    function triggerPinataExplosion() {
+        const body = document.getElementById('pinataBody');
+        const overlay = document.getElementById('ttPinataOverlay');
+        const hint = overlay.querySelector('.tt-pinata-hint');
+        if (hint) hint.style.display = 'none';
+
+        // Big burst of pieces and CANDY!
+        for (let wave = 0; wave < 3; wave++) {
+            setTimeout(() => {
+                spawnPinataPieces(body);
+                if (wave === 1) spawnPinataCandies(body, 18);
+            }, wave * 100);
+        }
+
+        // Explosion animation + sound
+        body.classList.remove('pinata-hit');
+        body.style.animation = 'none';
+        void body.offsetWidth;
+        body.classList.add('pinata-exploding');
+        playAudioBuffer(pinataExplosionBuffer);
+
+        // Confetti
+        setTimeout(() => {
+            if (typeof confetti === 'function') {
+                // Center burst
+                confetti({
+                    particleCount: 120,
+                    spread: 100,
+                    origin: { x: 0.5, y: 0.45 },
+                    colors: pinataColors.slice(0, 6),
+                    zIndex: 9999,
+                });
+                // Side cannons
+                confetti({
+                    particleCount: 60,
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0, y: 0.5 },
+                    colors: pinataColors.slice(0, 6),
+                    zIndex: 9999,
+                });
+                confetti({
+                    particleCount: 60,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1, y: 0.5 },
+                    colors: pinataColors.slice(0, 6),
+                    zIndex: 9999,
+                });
+            }
+        }, 400);
+
+        // Show name
+        setTimeout(() => {
+            const parsed = parseName(pinataWinner);
+            const displayName = nameMode === 'first' ? parsed.firstNamesStr : parsed.rearrangedFull;
+            const nameEl = document.createElement('div');
+            nameEl.className = 'tt-pinata-name-reveal';
+            nameEl.textContent = displayName;
+            overlay.appendChild(nameEl);
+        }, 600);
+
+        // Close and show winner
+        setTimeout(() => {
+            closePinata();
+            showWinner(pinataWinner);
+        }, 2200);
+    }
+
     // ── Reset Categories ──────────────────────────────────
     function resetCategories() {
         const st = currentState();
@@ -1287,10 +1622,15 @@
         document.getElementById('ttPickerBalloon').addEventListener('click', openBalloons);
         document.getElementById('ttPickerSlot').addEventListener('click', openSlotMachine);
         document.getElementById('ttPickerCards').addEventListener('click', openCards);
+        document.getElementById('ttPickerPinata').addEventListener('click', openPinata);
 
         // Cards action
         document.getElementById('cardsCloseBtn').addEventListener('click', closeCards);
         document.getElementById('cardsShuffleBtn').addEventListener('click', shuffleCards);
+
+        // Piñata
+        document.getElementById('pinataCloseBtn').addEventListener('click', closePinata);
+        document.getElementById('pinataBody').addEventListener('click', handlePinataTap);
 
         // Slot action
         document.getElementById('slotActionBtn').addEventListener('click', handleSlotAction);
@@ -1303,7 +1643,13 @@
         document.getElementById('ttWinnerClose').addEventListener('click', hideWinner);
 
         // Roulette
-        document.getElementById('rouletteSpinBtn').addEventListener('click', spinRoulette);
+        const rouletteSpinBtn = document.getElementById('rouletteSpinBtn');
+        rouletteSpinBtn.addEventListener('mousedown', startChargeRoulette);
+        rouletteSpinBtn.addEventListener('touchstart', startChargeRoulette, { passive: true });
+        const stopChargeHandler = (e) => releaseChargeRoulette(e);
+        window.addEventListener('mouseup', stopChargeHandler);
+        window.addEventListener('touchend', stopChargeHandler);
+
         document.getElementById('rouletteCloseBtn').addEventListener('click', closeRoulette);
 
         // Balloons
@@ -1339,6 +1685,9 @@
         });
         document.getElementById('ttCardsOverlay').addEventListener('click', (e) => {
             if (e.target === e.currentTarget) closeCards();
+        });
+        document.getElementById('ttPinataOverlay').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) closePinata();
         });
 
         // Setup View Toggles

@@ -71,6 +71,9 @@
                 <button class="tt-picker-btn" id="ttPickerCards" title="Card Draw">
                     <i class="fa-solid fa-layer-group"></i> Cards
                 </button>
+                <button class="tt-picker-btn" id="ttPickerPinata" title="Piñata Smash">
+                    <i class="fa-solid fa-candy-cane"></i> Piñata
+                </button>
             </div>
 
             <!-- Filter Buttons -->
@@ -148,8 +151,13 @@
             </button>
             <div class="tt-roulette-pointer"></div>
             <canvas id="rouletteCanvas" width="420" height="420"></canvas>
+
+            <div class="tt-roulette-charge-wrapper">
+                <div class="tt-roulette-charge-fill" id="rouletteChargeFill"></div>
+            </div>
+
             <button class="tt-roulette-spin-btn" id="rouletteSpinBtn">
-                <i class="fa-solid fa-play"></i> SPIN!
+                <i class="fa-solid fa-play"></i> HOLD TO SPIN!
             </button>
         </div>
     </div>
@@ -195,6 +203,20 @@
             <button class="tt-cards-shuffle-btn" id="cardsShuffleBtn">
                 <i class="fa-solid fa-shuffle"></i> SHUFFLE
             </button>
+        </div>
+    </div>
+
+    <!-- ── Piñata Overlay ──────────────────────────── -->
+    <div class="tt-pinata-overlay" id="ttPinataOverlay">
+        <button class="tt-pinata-close" id="pinataCloseBtn" title="Close">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+        <div class="tt-pinata-hint">🪅 Tap the piñata to smash it!</div>
+        <div class="tt-pinata-scene">
+            <div class="tt-pinata-cord"></div>
+            <div class="tt-pinata-body" id="pinataBody">
+                <!-- SVG image injected by JS -->
+            </div>
         </div>
     </div>
 
