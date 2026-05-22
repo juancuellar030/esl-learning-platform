@@ -880,6 +880,52 @@
         const track = document.getElementById('slotTrack');
         track.innerHTML = '';
 
+        // Setup lights
+        const lightsContainer = document.getElementById('slotLights');
+        if (lightsContainer && !lightsContainer.dataset.initialized) {
+            lightsContainer.dataset.initialized = 'true';
+            lightsContainer.innerHTML = '';
+
+            const topEdge = createEdge('row', ['top', '0'], ['left', '12px'], ['right', '12px']);
+            const rightEdge = createEdge('column', ['right', '0'], ['top', '12px'], ['bottom', '12px']);
+            const bottomEdge = createEdge('row', ['bottom', '0'], ['left', '12px'], ['right', '12px']);
+            bottomEdge.style.flexDirection = 'row-reverse';
+            const leftEdge = createEdge('column', ['left', '0'], ['top', '12px'], ['bottom', '12px']);
+            leftEdge.style.flexDirection = 'column-reverse';
+
+            lightsContainer.append(topEdge, rightEdge, bottomEdge, leftEdge);
+
+            let count = 0;
+            for (let i = 0; i < 8; i++) topEdge.appendChild(createLight(count++));
+            for (let i = 0; i < 2; i++) rightEdge.appendChild(createLight(count++));
+            for (let i = 0; i < 8; i++) bottomEdge.appendChild(createLight(count++));
+            for (let i = 0; i < 2; i++) leftEdge.appendChild(createLight(count++));
+
+            function createEdge(dir, ...positions) {
+                const el = document.createElement('div');
+                el.style.position = 'absolute';
+                el.style.display = 'flex';
+                el.style.justifyContent = 'space-evenly';
+                el.style.alignItems = 'center';
+                if (dir.includes('column')) {
+                    el.style.flexDirection = dir;
+                    el.style.width = '0px';
+                } else {
+                    el.style.flexDirection = dir;
+                    el.style.height = '0px';
+                }
+                for (let pos of positions) el.style[pos[0]] = pos[1];
+                return el;
+            }
+
+            function createLight(idx) {
+                const l = document.createElement('div');
+                l.className = 'slot-light';
+                l.style.animationDelay = `${idx * -0.05}s`;
+                return l;
+            }
+        }
+
         // Shuffle pool
         const shuffled = [...pool].sort(() => Math.random() - 0.5);
 
@@ -942,6 +988,15 @@
 
         btn.innerHTML = '<i class="fa-solid fa-stop"></i> STOP!';
         btn.dataset.action = 'stop';
+
+        const wrapper = document.querySelector('.tt-slot-machine-wrapper');
+        if (wrapper) wrapper.classList.add('fast-spin');
+
+        const lever = document.getElementById('slotLeverArm');
+        if (lever) {
+            lever.classList.add('pulled');
+            setTimeout(() => lever.classList.remove('pulled'), 300);
+        }
 
         const track = document.getElementById('slotTrack');
         track.querySelectorAll('.tt-slot-item').forEach(el => {
@@ -1059,6 +1114,9 @@
                 slotSpinning = false;
                 track.style.transform = `translateY(${targetPosition}px)`;
 
+                const wrapper = document.querySelector('.tt-slot-machine-wrapper');
+                if (wrapper) wrapper.classList.remove('fast-spin');
+
                 track.querySelectorAll('.tt-slot-item').forEach(el => el.classList.remove('blur'));
 
                 playSuccess();
@@ -1162,7 +1220,12 @@
             card.addEventListener('click', function () {
                 if (cardsShuffling || this.classList.contains('flipped')) return;
 
-                this.classList.add('flipped');
+                const allCards = grid.querySelectorAll('.tt-card-item');
+                allCards.forEach(c => {
+                    c.classList.add('flipped');
+                    if (c !== this) c.classList.add('unselected');
+                });
+
                 document.getElementById('cardsShuffleBtn').disabled = true;
                 grid.style.pointerEvents = 'none';
 
@@ -1171,7 +1234,7 @@
                 setTimeout(() => {
                     closeCards();
                     showWinner(this.dataset.fullName);
-                }, 1200);
+                }, 2000);
             });
 
             grid.appendChild(card);
@@ -1616,13 +1679,42 @@
             });
         });
 
-        // Picker buttons
-        document.getElementById('ttPickerHop').addEventListener('click', startHop);
-        document.getElementById('ttPickerRoulette').addEventListener('click', openRoulette);
-        document.getElementById('ttPickerBalloon').addEventListener('click', openBalloons);
-        document.getElementById('ttPickerSlot').addEventListener('click', openSlotMachine);
-        document.getElementById('ttPickerCards').addEventListener('click', openCards);
-        document.getElementById('ttPickerPinata').addEventListener('click', openPinata);
+        // Modes Overlay
+        const modesOverlay = document.getElementById('ttModesOverlay');
+        const openModesBtn = document.getElementById('ttOpenModesBtn');
+        const closeModesBtn = document.getElementById('modesCloseBtn');
+
+        if (openModesBtn) {
+            openModesBtn.addEventListener('click', () => {
+                modesOverlay.classList.add('visible');
+            });
+        }
+
+        if (closeModesBtn) {
+            closeModesBtn.addEventListener('click', () => {
+                modesOverlay.classList.remove('visible');
+            });
+        }
+
+        if (modesOverlay) {
+            modesOverlay.addEventListener('click', (e) => {
+                if (e.target === modesOverlay) {
+                    modesOverlay.classList.remove('visible');
+                }
+            });
+        }
+
+        const closeModes = () => {
+            if (modesOverlay) modesOverlay.classList.remove('visible');
+        };
+
+        // Mode cards
+        document.getElementById('ttModeCardHop')?.addEventListener('click', () => { closeModes(); startHop(); });
+        document.getElementById('ttModeCardRoulette')?.addEventListener('click', () => { closeModes(); openRoulette(); });
+        document.getElementById('ttModeCardBalloons')?.addEventListener('click', () => { closeModes(); openBalloons(); });
+        document.getElementById('ttModeCardSlot')?.addEventListener('click', () => { closeModes(); openSlotMachine(); });
+        document.getElementById('ttModeCardCards')?.addEventListener('click', () => { closeModes(); openCards(); });
+        document.getElementById('ttModeCardPinata')?.addEventListener('click', () => { closeModes(); openPinata(); });
 
         // Cards action
         document.getElementById('cardsCloseBtn').addEventListener('click', closeCards);

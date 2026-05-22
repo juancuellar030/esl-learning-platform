@@ -51,28 +51,12 @@
 
         <!-- ── Controls Bar ────────────────────────────────── -->
         <div class="tt-controls-bar">
-            <!-- Picker Buttons -->
+            <!-- Picker Modes Button -->
             <div class="tt-picker-group">
-                <span style="font-weight:700; color:var(--indigo-velvet); font-size:0.85rem; margin-right:4px;">
-                    <i class="fa-solid fa-wand-magic-sparkles"></i> Pick:
-                </span>
-                <button class="tt-picker-btn" id="ttPickerRoulette" title="Spinning Roulette Wheel">
-                    <i class="fa-solid fa-dharmachakra"></i> Roulette
-                </button>
-                <button class="tt-picker-btn" id="ttPickerBalloon" title="Balloon Pop">
-                    <i class="fa-solid fa-burst"></i> Balloons
-                </button>
-                <button class="tt-picker-btn" id="ttPickerHop" title="Hopping Name Picker">
-                    <i class="fa-solid fa-shuffle"></i> Hop
-                </button>
-                <button class="tt-picker-btn" id="ttPickerSlot" title="Slot Machine">
-                    <i class="fa-solid fa-arrows-spin"></i> Slot
-                </button>
-                <button class="tt-picker-btn" id="ttPickerCards" title="Card Draw">
-                    <i class="fa-solid fa-layer-group"></i> Cards
-                </button>
-                <button class="tt-picker-btn" id="ttPickerPinata" title="Piñata Smash">
-                    <i class="fa-solid fa-candy-cane"></i> Piñata
+                <button class="tt-picker-btn tt-picker-main-btn" id="ttOpenModesBtn"
+                    title="Choose a random selection mode"
+                    style="padding: 12px 24px; font-size: 1rem; border-color: var(--amber-flame); box-shadow: 0 4px 12px rgba(247, 184, 1, 0.2);">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Select Picker Mode
                 </button>
             </div>
 
@@ -143,6 +127,75 @@
         </div>
     </div>
 
+    <!-- ── Modes Overlay ─────────────────────────────── -->
+    <div class="tt-modes-overlay" id="ttModesOverlay">
+        <div class="tt-modes-container">
+            <button class="tt-modes-close" id="modesCloseBtn" title="Close">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h2 class="tt-modes-title"><i class="fa-solid fa-wand-magic-sparkles"></i> Select Picker Mode</h2>
+            <div class="tt-modes-grid">
+                <div class="tt-mode-card" id="ttModeCardRoulette">
+                    <div class="tt-mode-thumbnail">
+                        <div class="mini-roulette-wheel"></div>
+                    </div>
+                    <h3>Roulette</h3>
+                    <p>Classic spinning wheel</p>
+                </div>
+                <div class="tt-mode-card" id="ttModeCardBalloons">
+                    <div class="tt-mode-thumbnail">
+                        <div class="mini-balloons">
+                            <div class="m-balloon m-balloon-1"></div>
+                            <div class="m-balloon m-balloon-2"></div>
+                        </div>
+                    </div>
+                    <h3>Balloons</h3>
+                    <p>Pop a random balloon</p>
+                </div>
+                <div class="tt-mode-card" id="ttModeCardHop">
+                    <div class="tt-mode-thumbnail">
+                        <div class="mini-hop">
+                            <div class="m-hop-sq"></div>
+                            <div class="m-hop-sq active"></div>
+                            <div class="m-hop-sq"></div>
+                        </div>
+                    </div>
+                    <h3>Hop</h3>
+                    <p>Bouncing tile selector</p>
+                </div>
+                <div class="tt-mode-card" id="ttModeCardSlot">
+                    <div class="tt-mode-thumbnail">
+                        <div class="mini-slot">
+                            <div class="m-slot-col">7</div>
+                            <div class="m-slot-col">7</div>
+                            <div class="m-slot-col">7</div>
+                        </div>
+                    </div>
+                    <h3>Slot Machine</h3>
+                    <p>Fast-spinning reels</p>
+                </div>
+                <div class="tt-mode-card" id="ttModeCardCards">
+                    <div class="tt-mode-thumbnail">
+                        <div class="mini-cards">
+                            <div class="m-card m-card-back"></div>
+                            <div class="m-card m-card-mid"></div>
+                            <div class="m-card m-card-front"></div>
+                        </div>
+                    </div>
+                    <h3>Cards</h3>
+                    <p>Draw from a deck</p>
+                </div>
+                <div class="tt-mode-card" id="ttModeCardPinata">
+                    <div class="tt-mode-thumbnail">
+                        <div class="mini-pinata"></div>
+                    </div>
+                    <h3>Piñata</h3>
+                    <p>Smash to reveal a student</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- ── Roulette Overlay ────────────────────────────── -->
     <div class="tt-roulette-overlay" id="ttRouletteOverlay">
         <div class="tt-roulette-container">
@@ -176,15 +229,31 @@
             <button class="tt-slot-close" id="slotCloseBtn" title="Close">
                 <i class="fa-solid fa-xmark"></i>
             </button>
-            <div class="tt-slot-machine">
-                <div class="tt-slot-window">
-                    <div class="tt-slot-track" id="slotTrack">
-                        <!-- Names will be dynamically added here -->
+
+            <div class="tt-slot-machine-wrapper">
+                <!-- Chaser Lights Border -->
+                <div class="tt-slot-lights" id="slotLights"></div>
+
+                <div class="tt-slot-machine">
+
+                    <div class="tt-slot-window">
+                        <div class="tt-slot-track" id="slotTrack">
+                            <!-- Names will be dynamically added here -->
+                        </div>
+                    </div>
+                    <div class="tt-slot-pointer-left"></div>
+                    <div class="tt-slot-pointer-right"></div>
+                </div>
+
+                <!-- Slot Lever -->
+                <div class="tt-slot-lever-container">
+                    <div class="tt-slot-lever-base"></div>
+                    <div class="tt-slot-lever-arm" id="slotLeverArm">
+                        <div class="tt-slot-lever-knob"></div>
                     </div>
                 </div>
-                <div class="tt-slot-pointer-left"></div>
-                <div class="tt-slot-pointer-right"></div>
             </div>
+
             <button class="tt-slot-btn" id="slotActionBtn">
                 <i class="fa-solid fa-play"></i> SPIN!
             </button>

@@ -676,7 +676,7 @@
     padding: 50px;
     border-radius: 20px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-    min-width: 400px;
+    min-width: 500px;
     max-width: 90%;
 }
 
@@ -704,7 +704,8 @@
 
 .tt-slot-machine {
     position: relative;
-    width: 100%;
+    width: 480px;
+    max-width: 100%;
     height: 120px;
     background: #f8f9fa;
     border: 4px solid var(--indigo-velvet);
@@ -743,9 +744,14 @@
     font-weight: 800;
     color: var(--indigo-velvet);
     width: 100%;
+    box-sizing: border-box;
+    padding: 0 16px;
     text-align: center;
     user-select: none;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .tt-slot-item.blur {
@@ -1223,6 +1229,25 @@ body.dark-mode .tt-cards-close {
     pointer-events: none;
 }
 
+/* Unselected card: fade via pseudo-overlay on front face, preserve 3D intact */
+.tt-card-item.unselected .tt-card-front::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    border-radius: 12px;
+    z-index: 2;
+}
+
+.tt-card-item.unselected .tt-card-back::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    border-radius: 9px;
+    z-index: 2;
+}
+
 .tt-card-front,
 .tt-card-back {
     position: absolute;
@@ -1578,4 +1603,518 @@ body.dark-mode .tt-cards-shuffle-btn:disabled {
 /* ── Dark mode for piñata ── */
 body.dark-mode .tt-pinata-overlay {
     background: radial-gradient(ellipse at 50% 30%, rgba(15, 5, 30, 0.92), rgba(0, 0, 0, 0.95));
+}
+
+/* ── Modes Overlay ───────────────────────────── */
+.tt-modes-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 10, 30, 0.85);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.tt-modes-overlay.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.tt-modes-container {
+    position: relative;
+    background: white;
+    padding: 40px;
+    border-radius: 24px;
+    box-shadow: 0 20px 80px rgba(0, 0, 0, 0.4);
+    max-width: 800px;
+    width: 90%;
+    text-align: center;
+    animation: ttModesPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes ttModesPop {
+    0% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.tt-modes-close {
+    position: absolute;
+    top: 20px;
+    right: 24px;
+    background: #f1f3f5;
+    color: #555;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tt-modes-close:hover {
+    background: #e2e6ea;
+    color: #e74c3c;
+    transform: rotate(90deg);
+}
+
+.tt-modes-title {
+    font-size: 1.8rem;
+    color: var(--indigo-velvet);
+    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.tt-modes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.tt-mode-card {
+    background: #f8f9fa;
+    border: 3px solid transparent;
+    border-radius: 16px;
+    padding: 24px 16px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.tt-mode-card:hover {
+    background: white;
+    border-color: var(--medium-slate-blue);
+    transform: translateY(-6px);
+    box-shadow: 0 12px 24px rgba(118, 120, 237, 0.15);
+}
+
+.tt-mode-thumbnail {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: var(--medium-slate-blue);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    margin-bottom: 8px;
+    transition: transform 0.3s ease;
+}
+
+.tt-mode-card:hover .tt-mode-thumbnail {
+    transform: scale(1.1) rotate(5deg);
+    background: var(--indigo-velvet);
+}
+
+.tt-mode-card h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: var(--indigo-velvet);
+}
+
+.tt-mode-card p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #666;
+}
+
+body.dark-mode .tt-modes-container {
+    background: #1a1a2e;
+}
+
+body.dark-mode .tt-modes-title {
+    color: #fff;
+}
+
+body.dark-mode .tt-mode-card {
+    background: #2a2a4a;
+}
+
+body.dark-mode .tt-mode-card h3 {
+    color: #fff;
+}
+
+body.dark-mode .tt-mode-card p {
+    color: #aaa;
+}
+
+body.dark-mode .tt-modes-close {
+    background: #2a2a4a;
+    color: #fff;
+}
+
+/* ── Mode Thumbnails Animated CSS ──────────────────────── */
+.tt-mode-thumbnail * {
+    pointer-events: none;
+}
+
+/* Mini Roulette */
+.mini-roulette-wheel {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 4px solid white;
+    position: relative;
+    background: conic-gradient(#f1c40f 0 25%, #e74c3c 25% 50%, #3498db 50% 75%, #2ecc71 75% 100%);
+    transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.mini-roulette-wheel::after {
+    content: '';
+    position: absolute;
+    top: -6px;
+    left: 12px;
+    width: 0;
+    height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 8px solid white;
+}
+
+.tt-mode-card:hover .mini-roulette-wheel {
+    transform: rotate(360deg);
+}
+
+/* Mini Balloons */
+.mini-balloons {
+    position: relative;
+    width: 40px;
+    height: 40px;
+}
+
+.m-balloon {
+    position: absolute;
+    width: 16px;
+    height: 20px;
+    border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
+}
+
+.m-balloon::after {
+    content: '';
+    position: absolute;
+    bottom: -3px;
+    left: 7px;
+    width: 0;
+    height: 0;
+    border-left: 1px solid transparent;
+    border-right: 1px solid transparent;
+    border-bottom: 4px solid inherit;
+}
+
+.m-balloon-1 {
+    background: #e74c3c;
+    left: 6px;
+    top: 10px;
+}
+
+.m-balloon-2 {
+    background: #3498db;
+    left: 18px;
+    top: 16px;
+}
+
+.tt-mode-card:hover .m-balloon-1 {
+    animation: mFloat 1s ease-in-out infinite alternate;
+}
+
+.tt-mode-card:hover .m-balloon-2 {
+    animation: mFloat 0.8s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes mFloat {
+    0% {
+        transform: translateY(0);
+    }
+
+    100% {
+        transform: translateY(-6px);
+    }
+}
+
+/* Mini Hop */
+.mini-hop {
+    display: flex;
+    gap: 4px;
+}
+
+.m-hop-sq {
+    width: 12px;
+    height: 12px;
+    background: rgba(255, 255, 255, 0.4);
+    border-radius: 3px;
+}
+
+.m-hop-sq.active {
+    background: white;
+}
+
+.tt-mode-card:hover .m-hop-sq {
+    animation: mHop 0.6s infinite alternate;
+}
+
+.tt-mode-card:hover .m-hop-sq:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.tt-mode-card:hover .m-hop-sq:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes mHop {
+    0% {
+        background: rgba(255, 255, 255, 0.4);
+        transform: translateY(0);
+    }
+
+    100% {
+        background: white;
+        transform: translateY(-4px);
+    }
+}
+
+/* Mini Slot */
+.mini-slot {
+    display: flex;
+    gap: 2px;
+    background: white;
+    padding: 2px;
+    border-radius: 4px;
+    border: 2px solid #ccc;
+}
+
+.m-slot-col {
+    background: #f1f3f5;
+    width: 10px;
+    height: 14px;
+    font-size: 10px;
+    color: var(--cayenne-red);
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    line-height: 1;
+}
+
+.tt-mode-card:hover .m-slot-col {
+    animation: mSlot 0.2s linear infinite;
+}
+
+@keyframes mSlot {
+    0% {
+        transform: translateY(-30%);
+    }
+
+    100% {
+        transform: translateY(30%);
+    }
+}
+
+/* Mini Cards */
+.mini-cards {
+    position: relative;
+    width: 30px;
+    height: 40px;
+}
+
+.m-card {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: white;
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+    transition: transform 0.3s;
+}
+
+.m-card-back {
+    transform: rotate(-10deg) translate(-4px, 4px);
+}
+
+.m-card-mid {
+    transform: rotate(5deg) translate(2px, 2px);
+}
+
+.m-card-front {
+    transform: rotate(0deg);
+    border-color: var(--cayenne-red);
+}
+
+.tt-mode-card:hover .m-card-back {
+    transform: rotate(-20deg) translate(-8px, 8px);
+}
+
+.tt-mode-card:hover .m-card-front {
+    transform: rotate(10deg) translate(8px, -4px);
+}
+
+/* Mini Piñata */
+.mini-pinata {
+    width: 24px;
+    height: 26px;
+    background: #e67e22;
+    position: relative;
+    border-radius: 4px;
+    transform-origin: top center;
+}
+
+.mini-pinata::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 11px;
+    width: 2px;
+    height: 10px;
+    background: white;
+}
+
+.tt-mode-card:hover .mini-pinata {
+    animation: mSwing 0.6s ease-in-out infinite alternate;
+}
+
+@keyframes mSwing {
+    0% {
+        transform: rotate(-15deg);
+    }
+
+    100% {
+        transform: rotate(15deg);
+    }
+}
+
+/* ── Slots Visuals ────────────────────────────── */
+.tt-slot-machine-wrapper {
+    position: relative;
+    padding: 18px;
+    background: #2c3e50;
+    border-radius: 20px;
+    border: 4px solid #1a252f;
+    display: inline-block;
+}
+
+.tt-slot-machine {
+    margin: 0;
+}
+
+/* Chaser Lights — inside .tt-slot-machine-wrapper */
+.tt-slot-lights {
+    position: absolute;
+    inset: 15px;
+    pointer-events: none;
+    border-radius: 18px;
+    z-index: 10;
+    overflow: visible;
+}
+
+.slot-light {
+    position: relative;
+    width: 12px;
+    height: 12px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.5) inset;
+    animation: slotChaser 1s linear infinite;
+}
+
+.tt-slot-machine-wrapper.fast-spin .slot-light {
+    animation-duration: 0.3s;
+}
+
+@keyframes slotChaser {
+
+    0%,
+    20% {
+        background: #f1c40f;
+        box-shadow: 0 0 10px #f1c40f, 0 0 20px #f1c40f;
+        border-color: #fff;
+    }
+
+    21%,
+    100% {
+        background: rgba(255, 255, 255, 0.2);
+        box-shadow: 0 0 4px rgba(0, 0, 0, 0.5) inset;
+        border-color: rgba(255, 255, 255, 0.4);
+    }
+}
+
+/* Slot Lever */
+.tt-slot-lever-container {
+    position: absolute;
+    right: -40px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 120px;
+    pointer-events: none;
+}
+
+.tt-slot-lever-base {
+    position: absolute;
+    left: 0;
+    top: 40px;
+    width: 14px;
+    height: 40px;
+    background: #7f8c8d;
+    border-radius: 0 8px 8px 0;
+    border: 2px solid #2c3e50;
+    border-left: none;
+}
+
+.tt-slot-lever-arm {
+    position: absolute;
+    left: 8px;
+    bottom: 40px;
+    /* origin is base of arm */
+    width: 8px;
+    height: 80px;
+    background: #bdc3c7;
+    border: 1px solid #7f8c8d;
+    border-radius: 4px;
+    transform-origin: bottom center;
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.tt-slot-lever-knob {
+    position: absolute;
+    top: -16px;
+    left: -8px;
+    width: 24px;
+    height: 24px;
+    background: var(--cayenne-red);
+    border-radius: 50%;
+    box-shadow: inset -2px -2px 6px rgba(0, 0, 0, 0.4);
+}
+
+.tt-slot-lever-arm.pulled {
+    transform: rotate(140deg);
+}
+
+
+/* ── Roulette Touch Highlight Fix ────────────────── */
+#rouletteSpinBtn,
+#rouletteCanvas,
+.tt-roulette-container {
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
 }
