@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/google-drive.css">
-    <link rel="stylesheet" href="css/student-self-assessment.css">
+    <link rel="stylesheet" href="css/student-self-assessment.css?v=wizard6">
 </head>
 
 <body>
@@ -74,48 +74,59 @@
         <!-- ═══════════════════════════════════════════════════════
              SCREEN 2 — SURVEY
         ═══════════════════════════════════════════════════════ -->
-        <div id="sa-screen-survey" class="sa-screen">
-            <div class="sa-card">
+        <div id="sa-screen-survey" class="sa-screen sa-screen-survey">
+            <div class="sa-card sa-survey-card">
 
-                <!-- Survey header -->
-                <div class="sa-survey-header">
-                    <div>
-                        <div class="sa-survey-title">
-                            <i class="fa-solid fa-clipboard-list" style="color:var(--sa-accent);"></i>
-                            Mi autoevaluación
+                <div class="sa-survey-top">
+                    <div class="sa-survey-header">
+                        <div>
+                            <div class="sa-survey-title">
+                                <i class="fa-solid fa-clipboard-list" style="color:var(--sa-accent);"></i>
+                                Mi autoevaluación
+                            </div>
+                            <div class="sa-survey-subtitle">
+                                Responde una pregunta a la vez. Elige la opción que mejor te describe.
+                            </div>
                         </div>
-                        <div class="sa-survey-subtitle">
-                            Elige la respuesta que mejor describe tu comportamiento este período.
+                        <div class="sa-student-badge">
+                            <i class="fa-solid fa-user-check"></i>
+                            <span id="sa-student-badge-name">Estudiante</span>
                         </div>
                     </div>
-                    <div class="sa-student-badge">
-                        <i class="fa-solid fa-user-check"></i>
-                        <span id="sa-student-badge-name">Estudiante</span>
+
+                    <div class="sa-progress-wrap">
+                        <div class="sa-progress-label">
+                            <span id="sa-progress-step">Pregunta 1 de 9</span>
+                            <span id="sa-progress-pct">0%</span>
+                        </div>
+                        <div class="sa-progress-track">
+                            <div class="sa-progress-fill" id="sa-progress-fill" style="width:0%;"></div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Progress -->
-                <div class="sa-progress-wrap">
-                    <div class="sa-progress-label">
-                        <span id="sa-progress-count">0 de 9 preguntas respondidas</span>
-                        <span id="sa-progress-pct">0%</span>
-                    </div>
-                    <div class="sa-progress-track">
-                        <div class="sa-progress-fill" id="sa-progress-fill" style="width:0%;"></div>
+                <div class="sa-question-stage">
+                    <div class="sa-question-viewport" id="sa-question-viewport">
+                        <div class="sa-criteria-list" id="sa-criteria-list"></div>
                     </div>
                 </div>
 
-                <!-- Criteria cards (rendered by JS) -->
-                <div class="sa-criteria-list" id="sa-criteria-list"></div>
-
-                <!-- Warning + Calculate button -->
-                <div class="sa-calculate-wrap">
-                    <p class="sa-unanswered-warning" id="sa-unanswered-warn"></p>
-                    <button id="sa-calc-btn" class="sa-btn sa-btn-primary sa-btn-full">
+                <div class="sa-question-nav">
+                    <button type="button" id="sa-prev-btn" class="sa-btn sa-btn-secondary sa-nav-btn" disabled>
+                        <i class="fa-solid fa-arrow-left"></i>
+                        Anterior
+                    </button>
+                    <div class="sa-step-dots" id="sa-step-dots" aria-hidden="true"></div>
+                    <button type="button" id="sa-next-btn" class="sa-btn sa-btn-primary sa-nav-btn" disabled>
+                        Siguiente
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                    <button type="button" id="sa-calc-btn" class="sa-btn sa-btn-primary sa-nav-btn sa-nav-calc" hidden>
                         <i class="fa-solid fa-calculator"></i>
                         Calcular mi nota
                     </button>
                 </div>
+                <p class="sa-unanswered-warning" id="sa-unanswered-warn"></p>
 
             </div>
         </div>
@@ -272,7 +283,7 @@
     </div>
 
     <!-- Platform JS -->
-    <script src="js/student-self-assessment.js"></script>
+    <script src="js/student-self-assessment.js?v=wizard6"></script>
 
 </body>
 

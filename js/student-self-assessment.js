@@ -15,7 +15,7 @@
     const CRITERIA = [
         {
             statement: "Evito distraerme y participo de los aprendizajes de la clase",
-            explanation: "Esto significa que le prestas atención al profesor y a la clase en lugar de ponerte a hacer otras cosas. Por ejemplo, evitas ponerte a jugar con tu regla, usar marcadores, pegar stickers, pintar, recortar, usar pegante o escribir cartas cuando no te lo han pedido. En cambio, escuchas con cuidado cuando el profesor explica o cuando otros compañeros están participando."
+            explanation: "Esto significa que le prestas atención al profesor y a las actividades de la clase, tanto en el salón como en la sala de sistemas. En el salón, evitas ponerte a jugar con tu regla, usar marcadores, pegar stickers, pintar, recortar, usar pegante o escribir cartas cuando no te lo han pedido. En la sala de sistemas, esto también significa que no abres páginas web, juegos, videos ni redes sociales que no tengan que ver con la clase mientras el profesor no lo haya autorizado. En ambos espacios, escuchas con cuidado cuando el profesor explica o cuando algún compañero está participando."
         },
         {
             statement: "Soy responsable y me preparo a tiempo para las actividades evaluativas",
@@ -35,7 +35,7 @@
         },
         {
             statement: "Soy responsable y desarrollo a tiempo las actividades diarias de la clase",
-            explanation: "Esto significa que aprovechas el tiempo para terminar tus trabajos completos en el tiempo indicado. Por ejemplo, te concentras en terminar tus proyectos en el salón o en la sala de sistemas, en lugar de ponerte a jugar cuando aún no has terminado de cumplir con los deberes que pidió el profesor."
+            explanation: "Esto significa que aprovechas cada minuto de clase para avanzar y terminar tus actividades en el tiempo indicado. En la sala de sistemas, esto es especialmente importante: usas el computador únicamente para lo que el profesor asignó. Si todavía no has terminado tu proyecto o actividad, no abres páginas, juegos ni videos que no tengan que ver con la clase. El tiempo en la sala es valioso y no se puede recuperar, así que lo aprovechas trabajando con concentración desde el primer momento."
         },
         {
             statement: "Soy solidario con todos los que lo necesitan",
@@ -43,11 +43,11 @@
         },
         {
             statement: "Demuestro hábitos de cortesía, respeto por mí y por los demás",
-            explanation: "Esto significa que eres amable y te pones en los zapatos de los demás. Por ejemplo, tratas a todos con respeto y eres considerado cuando das tu opinión sobre las tareas y trabajos de tus compañeros, usando palabras amables en lugar de hacer comentarios que los puedan hacer sentir mal."
+            explanation: "Esto significa que eres amable y respetuoso con todos en cualquier espacio de la clase. En el salón, tratas a todos con respeto y usas palabras amables cuando opinas sobre el trabajo de tus compañeros. En la sala de sistemas, el respeto también significa que no interrumpes a quienes están trabajando en su computador: no les hablas sin razón, no te acercas a mirar su pantalla sin permiso, y no haces ruidos ni comentarios que los distraigan. Cuando alguien está concentrado trabajando, respetar su espacio es una forma muy importante de ser considerado."
         },
         {
-            statement: "Cuido el medio ambiente y promuevo el orden y la limpieza",
-            explanation: "Esto significa que ayudas a cuidar tu entorno escolar para que se vea siempre bonito. Por ejemplo, botas la basura en su lugar, no dejas cosas tiradas y te aseguras de dejar tu pupitre limpio y ordenado incluso cuando ya se han terminado las clases."
+            statement: "Cuido los espacios del colegio y promuevo el orden, la limpieza y la seguridad",
+            explanation: "Esto significa que cuidas todos los espacios del colegio para que se vean bien y sean seguros para todos. En el salón, botas la basura en su lugar y dejas tu pupitre limpio y ordenado al terminar. En la sala de sistemas, además del orden y la limpieza, también cuidas la seguridad: recuerdas no correr dentro de la sala, ya que los equipos son frágiles y una caída puede dañarlos o hacerte daño a ti o a un compañero. Cuidas el computador que tienes asignado, lo tratas con cuidado y lo dejas en las mismas condiciones en que lo encontraste."
         }
     ];
 
@@ -68,6 +68,7 @@
     let adjustedScore = null;
     let decision = null; // 'agree' | 'disagree'
     let currentRadialScore = 3.5;
+    let currentQuestionIndex = 0;
 
     // ── DOM helpers ──────────────────────────────────────────────
     const $ = id => document.getElementById(id);
@@ -87,12 +88,18 @@
             groupSelect.appendChild(opt);
         });
 
-        // Render survey criteria
+        // Render survey criteria (one question per step)
         renderCriteria();
 
         // Setup screen 1 (entry)
         $('sa-start-btn').addEventListener('click', startSurvey);
+        $('sa-prev-btn').addEventListener('click', goToPreviousQuestion);
+        $('sa-next-btn').addEventListener('click', goToNextQuestion);
         $('sa-calc-btn').addEventListener('click', calculateScore);
+
+        // Keep the floating explanation aligned / dismissed as the layout moves
+        window.addEventListener('scroll', hideFloatingTip, true);
+        window.addEventListener('resize', hideFloatingTip);
 
         // Cache screen refs
         ['entry', 'survey', 'result', 'agree', 'disagree'].forEach(id => {
@@ -133,22 +140,25 @@
         $('sa-student-badge-name').textContent = `${studentName} · ${studentGroup}`;
 
         answers = {};
+        currentQuestionIndex = 0;
+        renderStepDots();
+        showQuestion(0, 'none');
         updateProgress();
         showScreen('survey');
     }
 
-    // ── Render criteria ──────────────────────────────────────────
+    // ── Render criteria (wizard: one per screen) ─────────────────
     function renderCriteria() {
         const list = $('sa-criteria-list');
         list.innerHTML = '';
 
         CRITERIA.forEach((crit, idx) => {
             const card = document.createElement('div');
-            card.className = 'sa-criterion-card';
+            card.className = 'sa-criterion-card sa-question-slide';
             card.setAttribute('data-index', idx);
+            if (idx === 0) card.classList.add('active');
 
-            // Build likert options
-            const likertHTML = LIKERT_OPTIONS.map((opt, oi) => `
+            const likertHTML = LIKERT_OPTIONS.map(opt => `
                 <label class="sa-likert-option">
                     <input type="radio" name="crit-${idx}" value="${opt.value}" data-index="${idx}" />
                     <span class="sa-likert-label">${opt.label}</span>
@@ -156,86 +166,252 @@
             `).join('');
 
             card.innerHTML = `
-                <div class="sa-criterion-header">
-                    <span class="sa-criterion-number">${idx + 1}</span>
-                    <p class="sa-criterion-text">${crit.statement}</p>
-                    <div class="sa-info-wrap">
-                        <button class="sa-info-btn" type="button" aria-label="Ver explicación">
-                            <i class="fa-solid fa-circle-info"></i>
-                        </button>
-                        <div class="sa-tooltip">${crit.explanation}</div>
+                <div class="sa-question-inner">
+                    <div class="sa-criterion-header">
+                        <p class="sa-criterion-text">${crit.statement}</p>
+                        <div class="sa-info-wrap">
+                            <button class="sa-info-btn" type="button" aria-label="Ver explicación">
+                                <i class="fa-solid fa-circle-info"></i>
+                            </button>
+                            <div class="sa-tooltip">${crit.explanation}</div>
+                        </div>
                     </div>
-                </div>
-                <div class="sa-likert" role="radiogroup" aria-label="Escala para criterio ${idx + 1}">
-                    ${likertHTML}
+                    <p class="sa-likert-prompt">¿Con qué frecuencia lo haces?</p>
+                    <div class="sa-likert sa-likert-step" role="radiogroup" aria-label="Escala para criterio ${idx + 1}">
+                        ${likertHTML}
+                    </div>
                 </div>
             `;
 
             list.appendChild(card);
         });
 
-        // Delegate change events
+        renderStepDots();
+
         $('sa-criteria-list').addEventListener('change', e => {
             if (e.target.type === 'radio') {
-                const idx = parseInt(e.target.dataset.index);
-                answers[`c${idx}`] = parseInt(e.target.value);
-                // Mark card as answered
-                const card = e.target.closest('.sa-criterion-card');
-                card.classList.add('answered');
+                const idx = parseInt(e.target.dataset.index, 10);
+                answers[`c${idx}`] = parseInt(e.target.value, 10);
+                e.target.closest('.sa-criterion-card')?.classList.add('answered');
                 updateProgress();
+                updateQuestionNav();
+                hideUnansweredWarning();
             }
         });
 
-        // Tooltip: mobile tap toggle
-        $('sa-criteria-list').addEventListener('click', e => {
-            const btn = e.target.closest('.sa-info-btn');
-            if (btn) {
-                const wrap = btn.closest('.sa-info-wrap');
-                // Close others
-                document.querySelectorAll('.sa-info-wrap.tooltip-active').forEach(w => {
-                    if (w !== wrap) w.classList.remove('tooltip-active');
-                });
-                wrap.classList.toggle('tooltip-active');
+        // Explanations render in a body-level layer so they escape the
+        // question slide's overflow/transform clipping.
+        const floatingTip = ensureFloatingTip();
+        list.querySelectorAll('.sa-info-btn').forEach(btn => {
+            const src = btn.parentElement.querySelector('.sa-tooltip');
+            const html = src ? src.innerHTML : '';
+            btn.addEventListener('mouseenter', () => showFloatingTip(btn, html));
+            btn.addEventListener('mouseleave', hideFloatingTip);
+            btn.addEventListener('focus', () => showFloatingTip(btn, html));
+            btn.addEventListener('blur', hideFloatingTip);
+            btn.addEventListener('click', e => {
                 e.stopPropagation();
-            }
+                if (floatingTip.classList.contains('visible') && floatingTip._owner === btn) {
+                    hideFloatingTip();
+                } else {
+                    showFloatingTip(btn, html);
+                }
+            });
         });
 
-        document.addEventListener('click', () => {
-            document.querySelectorAll('.sa-info-wrap.tooltip-active').forEach(w => w.classList.remove('tooltip-active'));
+        document.addEventListener('click', hideFloatingTip);
+
+        updateQuestionNav();
+    }
+
+    // ── Floating explanation tooltip (body-level, never clipped) ──
+    function ensureFloatingTip() {
+        let tip = $('sa-floating-tip');
+        if (!tip) {
+            tip = document.createElement('div');
+            tip.id = 'sa-floating-tip';
+            tip.setAttribute('role', 'tooltip');
+            document.body.appendChild(tip);
+        }
+        return tip;
+    }
+
+    function showFloatingTip(btn, html) {
+        const tip = ensureFloatingTip();
+        tip.innerHTML = html;
+        tip._owner = btn;
+        tip.style.visibility = 'hidden';
+        tip.classList.add('visible');
+
+        const tw = tip.offsetWidth;
+        const th = tip.offsetHeight;
+        const r = btn.getBoundingClientRect();
+        const m = 10;
+
+        let left = r.left + r.width / 2 - tw / 2;
+        left = Math.max(m, Math.min(left, window.innerWidth - tw - m));
+
+        let top = r.bottom + 10;
+        if (top + th > window.innerHeight - m) {
+            const above = r.top - th - 10;
+            top = above >= m ? above : Math.max(m, window.innerHeight - th - m);
+        }
+
+        tip.style.left = `${Math.round(left)}px`;
+        tip.style.top = `${Math.round(top)}px`;
+        tip.style.visibility = '';
+    }
+
+    function hideFloatingTip() {
+        const tip = $('sa-floating-tip');
+        if (tip) {
+            tip.classList.remove('visible');
+            tip._owner = null;
+        }
+    }
+
+    function renderStepDots() {
+        const dots = $('sa-step-dots');
+        if (!dots) return;
+        dots.innerHTML = '';
+        CRITERIA.forEach((_, idx) => {
+            const dot = document.createElement('span');
+            dot.className = 'sa-step-dot';
+            dot.dataset.index = idx;
+            dots.appendChild(dot);
         });
+    }
+
+    function isQuestionAnswered(idx) {
+        return answers[`c${idx}`] !== undefined;
+    }
+
+    function hideUnansweredWarning() {
+        const warn = $('sa-unanswered-warn');
+        if (warn) warn.classList.remove('visible');
+    }
+
+    function showUnansweredWarning() {
+        const warn = $('sa-unanswered-warn');
+        if (!warn) return;
+        warn.textContent = 'Selecciona una respuesta antes de continuar.';
+        warn.classList.add('visible');
+        const card = document.querySelector(`.sa-question-slide[data-index="${currentQuestionIndex}"]`);
+        card?.classList.add('needs-answer');
+        setTimeout(() => card?.classList.remove('needs-answer'), 600);
+        setTimeout(() => warn.classList.remove('visible'), 3200);
+    }
+
+    function restoreAnswersOnSlide(idx) {
+        const card = document.querySelector(`.sa-question-slide[data-index="${idx}"]`);
+        if (!card) return;
+        const val = answers[`c${idx}`];
+        if (val === undefined) return;
+        const radio = card.querySelector(`input[type="radio"][value="${val}"]`);
+        if (radio) radio.checked = true;
+        card.classList.add('answered');
+    }
+
+    function showQuestion(index, direction) {
+        currentQuestionIndex = index;
+        const slides = document.querySelectorAll('.sa-question-slide');
+
+        slides.forEach(slide => {
+            slide.classList.remove('active', 'enter-forward', 'enter-back');
+        });
+
+        const target = slides[index];
+        if (target) {
+            target.classList.add('active');
+            if (direction === 'forward') target.classList.add('enter-forward');
+            if (direction === 'back') target.classList.add('enter-back');
+            restoreAnswersOnSlide(index);
+        }
+
+        updateProgress();
+        updateQuestionNav();
+        updateStepDots();
+        hideUnansweredWarning();
+        hideFloatingTip();
+    }
+
+    function updateStepDots() {
+        document.querySelectorAll('.sa-step-dot').forEach((dot, idx) => {
+            dot.classList.toggle('current', idx === currentQuestionIndex);
+            dot.classList.toggle('done', isQuestionAnswered(idx));
+        });
+    }
+
+    function updateQuestionNav() {
+        const total = CRITERIA.length;
+        const isLast = currentQuestionIndex === total - 1;
+        const answered = isQuestionAnswered(currentQuestionIndex);
+
+        const prevBtn = $('sa-prev-btn');
+        const nextBtn = $('sa-next-btn');
+        const calcBtn = $('sa-calc-btn');
+
+        if (prevBtn) prevBtn.disabled = currentQuestionIndex === 0;
+
+        if (nextBtn) {
+            nextBtn.hidden = isLast;
+            nextBtn.disabled = !answered;
+        }
+
+        if (calcBtn) {
+            calcBtn.hidden = !isLast;
+            calcBtn.disabled = !answered;
+        }
+    }
+
+    function goToPreviousQuestion() {
+        if (currentQuestionIndex <= 0) return;
+        showQuestion(currentQuestionIndex - 1, 'back');
+    }
+
+    function goToNextQuestion() {
+        if (!isQuestionAnswered(currentQuestionIndex)) {
+            showUnansweredWarning();
+            return;
+        }
+
+        if (currentQuestionIndex >= CRITERIA.length - 1) return;
+        showQuestion(currentQuestionIndex + 1, 'forward');
     }
 
     // ── Progress bar ──────────────────────────────────────────────
     function updateProgress() {
-        const answered = Object.keys(answers).length;
         const total = CRITERIA.length;
-        const pct = Math.round((answered / total) * 100);
-        $('sa-progress-fill').style.width = pct + '%';
-        $('sa-progress-count').textContent = `${answered} de ${total} preguntas respondidas`;
+        const answered = Object.keys(answers).length;
+        const stepPct = Math.round(((currentQuestionIndex + 1) / total) * 100);
+
+        $('sa-progress-fill').style.width = stepPct + '%';
+
+        const stepEl = $('sa-progress-step');
+        if (stepEl) {
+            stepEl.textContent = `Pregunta ${currentQuestionIndex + 1} de ${total}`;
+        }
+
         const pctEl = $('sa-progress-pct');
-        if (pctEl) pctEl.textContent = pct + '%';
+        if (pctEl) pctEl.textContent = `${answered}/${total}`;
     }
 
     // ── Score calculation ─────────────────────────────────────────
     function calculateScore() {
-        // Check all answered
+        if (!isQuestionAnswered(currentQuestionIndex)) {
+            showUnansweredWarning();
+            return;
+        }
+
         const answered = Object.keys(answers).length;
         if (answered < CRITERIA.length) {
-            const warn = $('sa-unanswered-warn');
-            warn.textContent = `Por favor responde todas las preguntas (${CRITERIA.length - answered} sin responder).`;
-            warn.classList.add('visible');
-            // Scroll to first unanswered
             for (let i = 0; i < CRITERIA.length; i++) {
-                if (answers[`c${i}`] === undefined) {
-                    const card = document.querySelector(`[data-index="${i}"]`);
-                    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    card.style.borderColor = '#ef4444';
-                    setTimeout(() => { card.style.borderColor = ''; }, 2000);
-                    break;
+                if (!isQuestionAnswered(i)) {
+                    showQuestion(i, i < currentQuestionIndex ? 'back' : 'forward');
+                    showUnansweredWarning();
+                    return;
                 }
             }
-            setTimeout(() => warn.classList.remove('visible'), 4000);
-            return;
         }
 
         // Map answers (1–4 scale) to score (3.0–5.0)

@@ -1611,6 +1611,1069 @@
         }, 2200);
     }
 
+    // ── Plinko ──────────────────────────────────────────────
+    const PLINKO_H = 520;
+    const PLINKO_MIN_W = 480;
+    const PLINKO_MAX_W = 760;
+    const PLINKO_WALL = 16;
+    const PLINKO_TUBE_H = 52;
+    const PLINKO_SLOT_H = 80;
+    const PLINKO_PEG_ROWS = 10;
+    const PLINKO_PEG_R = 5;
+    const PLINKO_BOOST_PEG_R = 6;
+    const PLINKO_BALL_R = 9;
+    const PLINKO_TUBE_W = 34;
+    const PLINKO_MIN_SLOT_W = PLINKO_BALL_R * 2 + 12;
+    const PLINKO_BOOST_PEG_COUNT_MIN = 4;
+    const PLINKO_BOOST_PEG_COUNT_MAX = 8;
+
+    let plinkoBoardW = PLINKO_MIN_W;
+    let plinkoEngine = null;
+    let plinkoWorld = null;
+    let plinkoBall = null;
+    let plinkoAnimId = null;
+    let plinkoStudents = [];
+    let plinkoSlotMeta = [];
+    let plinkoTubeX = PLINKO_MIN_W / 2;
+    let plinkoDragging = false;
+    let plinkoActive = false;
+    let plinkoSettled = false;
+    let plinkoWinIdx = -1;
+    let plinkoSettleFrames = 0;
+    let plinkoPulsePhase = 0;
+    let plinkoCanvas = null;
+    let plinkoCtx = null;
+    let plinkoDpr = 1;
+
+    function plinkoComputeBoardWidth(studentCount) {
+        return Math.max(
+            PLINKO_MIN_W,
+            Math.min(PLINKO_MAX_W, PLINKO_WALL * 2 + studentCount * PLINKO_MIN_SLOT_W + 32)
+        );
+    }
+
+    function plinkoPegMargin() {
+        return PLINKO_BALL_R + PLINKO_PEG_R + 14;
+    }
+
+    function plinkoDisplayLabel(name) {
+        const parsed = parseName(name);
+        const displayFull = parsed.firstPlusFirstLast || name;
+        const maxChars = Math.max(4, Math.floor((PLINKO_SLOT_H - 12) / 7));
+        return displayFull.length > maxChars
+            ? displayFull.slice(0, Math.max(3, maxChars - 1)) + '…'
+            : displayFull;
+    }
+
+    function plinkoPegX(row, col, pegLeft, pegSpan, pegCols) {
+        const step = pegCols > 1 ? pegSpan / (pegCols - 1) : 0;
+        const stagger = (row % 2) * (step / 2);
+        return pegLeft + col * step + stagger;
+    }
+
+    function plinkoSpawnBoostPegs(pegLeft, pegSpan, pegCols, pegTop, rowGap, pegOptsBase) {
+        const { Bodies, Composite } = Matter;
+        const boostCount = PLINKO_BOOST_PEG_COUNT_MIN
+            + Math.floor(Math.random() * (PLINKO_BOOST_PEG_COUNT_MAX - PLINKO_BOOST_PEG_COUNT_MIN + 1));
+        const minSep = (PLINKO_PEG_R + PLINKO_BOOST_PEG_R) * 2.2;
+        const placed = [];
+
+        const tryPlace = (x, y) => {
+            const bodies = Matter.Composite.allBodies(plinkoWorld);
+            for (const p of placed) {
+                if (Math.hypot(p.x - x, p.y - y) < minSep) return false;
+            }
+            for (const body of bodies) {
+                if (body.label !== 'peg' && body.label !== 'boost-peg') continue;
+                if (Math.hypot(body.position.x - x, body.position.y - y) < minSep) return false;
+            }
+            placed.push({ x, y });
+            Composite.add(plinkoWorld, Bodies.circle(x, y, PLINKO_BOOST_PEG_R, {
+                ...pegOptsBase,
+                restitution: 0.92,
+                label: 'boost-peg',
+            }));
+            return true;
+        };
+
+        for (let attempt = 0; attempt < 120 && placed.length < boostCount; attempt++) {
+            const row = Math.floor(Math.random() * PLINKO_PEG_ROWS);
+            const col = Math.floor(Math.random() * pegCols);
+            const y = pegTop + row * rowGap;
+            const x = plinkoPegX(row, col, pegLeft, pegSpan, pegCols);
+            tryPlace(x, y);
+        }
+    }
+
+    function openPlinko() {
+        if (typeof Matter === 'undefined') {
+            showNotification('Plinko physics failed to load. Check your connection.', 'error');
+            return;
+        }
+
+        const pool = getAvailableStudents();
+        if (pool.length === 0) {
+            showNotification('All students have had turns! Reset categories to continue.', 'info');
+            return;
+        }
+
+        plinkoStudents = [...pool];
+        plinkoBoardW = plinkoComputeBoardWidth(plinkoStudents.length);
+        plinkoTubeX = plinkoBoardW / 2;
+        plinkoSettled = false;
+        plinkoWinIdx = -1;
+        plinkoSettleFrames = 0;
+        plinkoBall = null;
+        plinkoActive = true;
+
+        document.getElementById('ttPlinkoOverlay').classList.add('visible');
+        const wrap = document.getElementById('plinkoBoardWrap');
+        if (wrap) wrap.style.aspectRatio = `${plinkoBoardW} / ${PLINKO_H}`;
+        plinkoSetupCanvas();
+        plinkoBuildWorld();
+        plinkoUpdateButtons();
+        plinkoStartLoop();
+    }
+
+    function closePlinko() {
+        plinkoActive = false;
+        plinkoSettled = false;
+        plinkoStopLoop();
+        plinkoDestroyWorld();
+        document.getElementById('ttPlinkoOverlay').classList.remove('visible');
+        plinkoDragging = false;
+        if (plinkoCanvas) plinkoCanvas.classList.remove('plinko-dragging');
+    }
+
+    function plinkoSetupCanvas() {
+        plinkoCanvas = document.getElementById('plinkoCanvas');
+        plinkoCtx = plinkoCanvas.getContext('2d');
+        plinkoDpr = Math.min(window.devicePixelRatio || 1, 2);
+        plinkoCanvas.width = plinkoBoardW * plinkoDpr;
+        plinkoCanvas.height = PLINKO_H * plinkoDpr;
+    }
+
+    function plinkoInnerLeft() {
+        return PLINKO_WALL;
+    }
+
+    function plinkoInnerRight() {
+        return plinkoBoardW - PLINKO_WALL;
+    }
+
+    function plinkoInnerWidth() {
+        return plinkoInnerRight() - plinkoInnerLeft();
+    }
+
+    function plinkoSlotTopY() {
+        return PLINKO_H - PLINKO_SLOT_H;
+    }
+
+    function plinkoPegAreaTop() {
+        return PLINKO_TUBE_H + 8;
+    }
+
+    function plinkoPegAreaBottom() {
+        return plinkoSlotTopY() - 10;
+    }
+
+    function plinkoTubeMinX() {
+        return plinkoInnerLeft() + PLINKO_TUBE_W / 2 + 4;
+    }
+
+    function plinkoTubeMaxX() {
+        return plinkoInnerRight() - PLINKO_TUBE_W / 2 - 4;
+    }
+
+    function plinkoClampTubeX(x) {
+        return Math.max(plinkoTubeMinX(), Math.min(plinkoTubeMaxX(), x));
+    }
+
+    function plinkoBuildWorld() {
+        plinkoDestroyWorld();
+
+        const { Engine, World, Bodies, Composite } = Matter;
+        plinkoEngine = Engine.create({ gravity: { x: 0, y: 1.15 } });
+        plinkoWorld = plinkoEngine.world;
+
+        const wallOpts = { isStatic: true, friction: 0.2, restitution: 0.35, label: 'wall' };
+        const innerW = plinkoInnerWidth();
+        const innerL = plinkoInnerLeft();
+        const slotTop = plinkoSlotTopY();
+
+        // Floor
+        Composite.add(plinkoWorld, Bodies.rectangle(
+            plinkoBoardW / 2, PLINKO_H - PLINKO_WALL / 2,
+            innerW + 4, PLINKO_WALL, wallOpts
+        ));
+
+        // Side walls
+        Composite.add(plinkoWorld, Bodies.rectangle(
+            PLINKO_WALL / 2, PLINKO_H / 2,
+            PLINKO_WALL, PLINKO_H, wallOpts
+        ));
+        Composite.add(plinkoWorld, Bodies.rectangle(
+            plinkoBoardW - PLINKO_WALL / 2, PLINKO_H / 2,
+            PLINKO_WALL, PLINKO_H, wallOpts
+        ));
+
+        // Slot dividers (only in slot zone — keeps peg channels open)
+        const n = plinkoStudents.length;
+        const slotW = innerW / n;
+        const divH = PLINKO_SLOT_H - 6;
+        const divOpts = { isStatic: true, friction: 0.1, restitution: 0.2, label: 'divider' };
+
+        plinkoSlotMeta = plinkoStudents.map((name, i) => ({
+            name,
+            label: plinkoDisplayLabel(name),
+            x: innerL + i * slotW,
+            width: slotW,
+            centerX: innerL + i * slotW + slotW / 2,
+        }));
+
+        for (let i = 1; i < n; i++) {
+            const x = innerL + i * slotW;
+            Composite.add(plinkoWorld, Bodies.rectangle(
+                x, slotTop + divH / 2 + 4,
+                2, divH, divOpts
+            ));
+        }
+
+        // Peg grid (staggered), inset from walls so ball can pass
+        const pegTop = plinkoPegAreaTop();
+        const pegBottom = plinkoPegAreaBottom();
+        const rowGap = (pegBottom - pegTop) / (PLINKO_PEG_ROWS - 1);
+        const pegMargin = plinkoPegMargin();
+        const pegLeft = innerL + pegMargin;
+        const pegRight = plinkoInnerRight() - pegMargin;
+        const pegSpan = pegRight - pegLeft;
+        const pegCols = Math.max(7, Math.min(12, Math.floor(pegSpan / 42)));
+        const pegOpts = { isStatic: true, friction: 0.05, restitution: 0.55, label: 'peg' };
+
+        for (let row = 0; row < PLINKO_PEG_ROWS; row++) {
+            const y = pegTop + row * rowGap;
+            for (let col = 0; col < pegCols; col++) {
+                const x = plinkoPegX(row, col, pegLeft, pegSpan, pegCols);
+                Composite.add(plinkoWorld, Bodies.circle(x, y, PLINKO_PEG_R, pegOpts));
+            }
+        }
+
+        plinkoSpawnBoostPegs(pegLeft, pegSpan, pegCols, pegTop, rowGap, pegOpts);
+    }
+
+    function plinkoDestroyWorld() {
+        if (plinkoEngine) {
+            Matter.World.clear(plinkoWorld);
+            Matter.Engine.clear(plinkoEngine);
+            plinkoEngine = null;
+            plinkoWorld = null;
+        }
+        plinkoBall = null;
+    }
+
+    function plinkoIsFalling() {
+        return plinkoBall && !plinkoSettled;
+    }
+
+    function plinkoUpdateButtons() {
+        const dropBtn = document.getElementById('plinkoDropBtn');
+        const resetBtn = document.getElementById('plinkoResetBtn');
+        const busy = plinkoIsFalling();
+        if (dropBtn) {
+            dropBtn.disabled = busy || plinkoSettled;
+        }
+        if (resetBtn) {
+            resetBtn.disabled = busy;
+        }
+    }
+
+    function plinkoDropBall() {
+        if (!plinkoActive || plinkoBall || plinkoSettled) return;
+
+        const { Bodies, Composite } = Matter;
+        const spawnY = PLINKO_TUBE_H * 0.55;
+        const nudge = (Math.random() - 0.5) * 3.5;
+
+        plinkoBall = Bodies.circle(plinkoTubeX, spawnY, PLINKO_BALL_R, {
+            restitution: 0.5,
+            friction: 0.08,
+            frictionAir: 0.012,
+            density: 0.004,
+            label: 'ball',
+        });
+
+        Matter.Body.setVelocity(plinkoBall, { x: nudge, y: 0 });
+        Composite.add(plinkoWorld, plinkoBall);
+        plinkoSettleFrames = 0;
+        plinkoUpdateButtons();
+    }
+
+    function plinkoReset() {
+        if (plinkoIsFalling()) return;
+
+        if (plinkoBall && plinkoWorld) {
+            Matter.Composite.remove(plinkoWorld, plinkoBall);
+        }
+        plinkoBall = null;
+        plinkoSettled = false;
+        plinkoWinIdx = -1;
+        plinkoSettleFrames = 0;
+        plinkoUpdateButtons();
+    }
+
+    function plinkoSlotIndexFromX(x) {
+        const innerL = plinkoInnerLeft();
+        const slotW = plinkoInnerWidth() / plinkoStudents.length;
+        let idx = Math.floor((x - innerL) / slotW);
+        idx = Math.max(0, Math.min(plinkoStudents.length - 1, idx));
+        return idx;
+    }
+
+    function plinkoCheckSettlement() {
+        if (!plinkoBall || plinkoSettled) return;
+
+        const speed = Matter.Vector.magnitude(plinkoBall.velocity);
+        const ang = Math.abs(plinkoBall.angularVelocity);
+        const inSlotZone = plinkoBall.position.y >= plinkoSlotTopY() - PLINKO_BALL_R;
+
+        if (speed < 0.25 && ang < 0.12 && inSlotZone) {
+            plinkoSettleFrames++;
+        } else {
+            plinkoSettleFrames = 0;
+        }
+
+        if (plinkoSettleFrames >= 45) {
+            plinkoSettled = true;
+            plinkoWinIdx = plinkoSlotIndexFromX(plinkoBall.position.x);
+            plinkoUpdateButtons();
+            playAudioBuffer(studentSelectedBuffer);
+
+            setTimeout(() => {
+                const winner = plinkoStudents[plinkoWinIdx];
+                closePlinko();
+                showWinner(winner);
+            }, 1400);
+        }
+    }
+
+    function plinkoDrawChevronWall(ctx, side) {
+        const zigW = 6;
+        const zigH = 14;
+        const x = side === 'left' ? plinkoInnerLeft() + 2 : plinkoInnerRight() - 2;
+        const dir = side === 'left' ? 1 : -1;
+        const steps = Math.ceil(PLINKO_H / zigH);
+
+        ctx.strokeStyle = '#ff2d9b';
+        ctx.lineWidth = 2;
+        ctx.shadowColor = '#ff2d9b';
+        ctx.shadowBlur = 8;
+        ctx.beginPath();
+        for (let i = 0; i <= steps; i++) {
+            const y = i * zigH;
+            const px = x + (i % 2 === 0 ? 0 : dir * zigW);
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(px, y);
+            ctx.lineTo(x, y + zigH);
+        }
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+    }
+
+    function plinkoRoundRectPath(ctx, x, y, w, h, r) {
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.lineTo(x + w - r, y);
+        ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+        ctx.lineTo(x + w, y + h - r);
+        ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+        ctx.lineTo(x + r, y + h);
+        ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+        ctx.lineTo(x, y + r);
+        ctx.quadraticCurveTo(x, y, x + r, y);
+        ctx.closePath();
+    }
+
+    function plinkoDrawTube(ctx) {
+        const tw = PLINKO_TUBE_W;
+        const th = PLINKO_TUBE_H - 6;
+        const x = plinkoTubeX;
+        const top = 6;
+        const left = x - tw / 2;
+
+        ctx.save();
+        ctx.shadowColor = '#00e5ff';
+        ctx.shadowBlur = 14;
+
+        const grad = ctx.createLinearGradient(left, top, left + tw, top + th);
+        grad.addColorStop(0, 'rgba(0, 229, 255, 0.35)');
+        grad.addColorStop(0.5, 'rgba(255, 45, 155, 0.25)');
+        grad.addColorStop(1, 'rgba(0, 229, 255, 0.15)');
+
+        ctx.fillStyle = grad;
+        ctx.strokeStyle = 'rgba(0, 229, 255, 0.85)';
+        ctx.lineWidth = 2;
+        plinkoRoundRectPath(ctx, left, top, tw, th, 6);
+        ctx.fill();
+        ctx.stroke();
+
+        // Drop indicator
+        ctx.shadowBlur = 10;
+        ctx.strokeStyle = '#ff6ec7';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(x, top + th);
+        ctx.lineTo(x, top + th + 22);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Arrow head
+        ctx.fillStyle = '#ff6ec7';
+        ctx.beginPath();
+        ctx.moveTo(x, top + th + 26);
+        ctx.lineTo(x - 6, top + th + 18);
+        ctx.lineTo(x + 6, top + th + 18);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.restore();
+    }
+
+    function plinkoRender() {
+        if (!plinkoCtx || !plinkoActive) return;
+
+        const ctx = plinkoCtx;
+        ctx.setTransform(plinkoDpr, 0, 0, plinkoDpr, 0, 0);
+        ctx.clearRect(0, 0, plinkoBoardW, PLINKO_H);
+
+        // Background
+        const bg = ctx.createLinearGradient(0, 0, 0, PLINKO_H);
+        bg.addColorStop(0, '#0a0e2e');
+        bg.addColorStop(0.5, '#12153a');
+        bg.addColorStop(1, '#0d0828');
+        ctx.fillStyle = bg;
+        ctx.fillRect(0, 0, plinkoBoardW, PLINKO_H);
+
+        plinkoDrawChevronWall(ctx, 'left');
+        plinkoDrawChevronWall(ctx, 'right');
+
+        // Slot labels & highlights
+        const slotTop = plinkoSlotTopY();
+        plinkoPulsePhase += 0.08;
+
+        plinkoSlotMeta.forEach((slot, i) => {
+            const isWin = plinkoSettled && i === plinkoWinIdx;
+            if (isWin) {
+                const pulse = 0.35 + Math.sin(plinkoPulsePhase) * 0.15;
+                ctx.fillStyle = `rgba(255, 45, 155, ${pulse})`;
+                ctx.shadowColor = '#ff2d9b';
+                ctx.shadowBlur = 20;
+                ctx.fillRect(slot.x + 2, slotTop + 2, slot.width - 4, PLINKO_SLOT_H - 4);
+                ctx.shadowBlur = 0;
+            }
+
+            const fontSize = Math.max(8, Math.min(11, Math.floor(slot.width / 4)));
+            ctx.fillStyle = isWin ? '#fff' : 'rgba(168, 230, 255, 0.9)';
+            ctx.font = isWin
+                ? `bold ${fontSize + 1}px 'Reddit Sans', sans-serif`
+                : `600 ${fontSize}px 'Reddit Sans', sans-serif`;
+
+            const drawVerticalLabel = () => {
+                ctx.save();
+                ctx.translate(slot.centerX, slotTop + PLINKO_SLOT_H / 2);
+                if (isWin) {
+                    const scale = 1 + Math.sin(plinkoPulsePhase) * 0.08;
+                    ctx.scale(scale, scale);
+                    ctx.shadowColor = '#00e5ff';
+                    ctx.shadowBlur = 12;
+                }
+                ctx.rotate(-Math.PI / 2);
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(slot.label, 0, 0);
+                ctx.restore();
+            };
+
+            drawVerticalLabel();
+        });
+
+        // Slot divider lines (visual)
+        ctx.strokeStyle = 'rgba(255, 45, 155, 0.35)';
+        ctx.lineWidth = 1;
+        for (let i = 1; i < plinkoSlotMeta.length; i++) {
+            const x = plinkoSlotMeta[i].x;
+            ctx.beginPath();
+            ctx.moveTo(x, slotTop);
+            ctx.lineTo(x, PLINKO_H - PLINKO_WALL);
+            ctx.stroke();
+        }
+
+        plinkoDrawTube(ctx);
+
+        // Pegs
+        if (plinkoWorld) {
+            const bodies = Matter.Composite.allBodies(plinkoWorld);
+            bodies.forEach(body => {
+                if (body.label !== 'peg' && body.label !== 'boost-peg') return;
+                const isBoost = body.label === 'boost-peg';
+                const r = isBoost ? PLINKO_BOOST_PEG_R : PLINKO_PEG_R;
+                ctx.beginPath();
+                ctx.arc(body.position.x, body.position.y, r, 0, Math.PI * 2);
+                if (isBoost) {
+                    ctx.fillStyle = '#ffd93d';
+                    ctx.shadowColor = '#ffaa00';
+                    ctx.shadowBlur = 16;
+                } else {
+                    ctx.fillStyle = '#00d4ff';
+                    ctx.shadowColor = '#00e5ff';
+                    ctx.shadowBlur = 10;
+                }
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            });
+
+            if (plinkoBall) {
+                ctx.beginPath();
+                ctx.arc(plinkoBall.position.x, plinkoBall.position.y, PLINKO_BALL_R, 0, Math.PI * 2);
+                const ballGrad = ctx.createRadialGradient(
+                    plinkoBall.position.x - 3, plinkoBall.position.y - 3, 1,
+                    plinkoBall.position.x, plinkoBall.position.y, PLINKO_BALL_R
+                );
+                ballGrad.addColorStop(0, '#ff8ed4');
+                ballGrad.addColorStop(1, '#ff2d9b');
+                ctx.fillStyle = ballGrad;
+                ctx.shadowColor = '#ff2d9b';
+                ctx.shadowBlur = 14;
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+        }
+    }
+
+    function plinkoLoop() {
+        if (!plinkoActive) return;
+
+        if (plinkoEngine) {
+            Matter.Engine.update(plinkoEngine, 1000 / 60);
+            plinkoCheckSettlement();
+        }
+
+        plinkoRender();
+        plinkoAnimId = requestAnimationFrame(plinkoLoop);
+    }
+
+    function plinkoStartLoop() {
+        plinkoStopLoop();
+        plinkoAnimId = requestAnimationFrame(plinkoLoop);
+    }
+
+    function plinkoStopLoop() {
+        if (plinkoAnimId) {
+            cancelAnimationFrame(plinkoAnimId);
+            plinkoAnimId = null;
+        }
+    }
+
+    function plinkoPointerPos(e) {
+        const rect = plinkoCanvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const scaleX = plinkoBoardW / rect.width;
+        return (clientX - rect.left) * scaleX;
+    }
+
+    function plinkoOnPointerDown(e) {
+        if (!plinkoActive || plinkoBall) return;
+        const x = plinkoPointerPos(e);
+        const y = (e.touches ? e.touches[0].clientY : e.clientY) - plinkoCanvas.getBoundingClientRect().top;
+        const scaleY = PLINKO_H / plinkoCanvas.getBoundingClientRect().height;
+        const logicalY = y * scaleY;
+
+        if (logicalY <= PLINKO_TUBE_H + 12 && Math.abs(x - plinkoTubeX) < PLINKO_TUBE_W) {
+            plinkoDragging = true;
+            plinkoCanvas.classList.add('plinko-dragging');
+            e.preventDefault();
+        }
+    }
+
+    function plinkoOnPointerMove(e) {
+        if (!plinkoDragging) return;
+        plinkoTubeX = plinkoClampTubeX(plinkoPointerPos(e));
+        e.preventDefault();
+    }
+
+    function plinkoOnPointerUp() {
+        plinkoDragging = false;
+        if (plinkoCanvas) plinkoCanvas.classList.remove('plinko-dragging');
+    }
+
+    // ── Flying Fruit ──────────────────────────────────────
+    const FRUIT_HINT_KEY = 'esl_fruit_hint_seen';
+    const FRUIT_TYPES = ['mango', 'watermelon', 'orange', 'strawberry', 'pineapple'];
+    // slow = former Normal, normal = former Fast, fast = new top tier
+    const FRUIT_SPEED_MULT = { slow: 1, normal: 1.55, fast: 2.35 };
+    const FRUIT_BASE_DURATION = { min: 2200, max: 4200 };
+
+    let fruitActive = false;
+    let fruitPicking = false;
+    let fruitPool = [];
+    let fruitNameIndex = 0;
+    let fruitRespawnQueue = [];
+    let fruitActiveMap = new Map();
+    let fruitNextId = 0;
+    let fruitSpeedMode = 'normal';
+    let fruitSpawnTimer = null;
+    let fruitAutoTimer = null;
+    let fruitRafId = null;
+
+    const FRUIT_SVG = {
+        mango: '<ellipse cx="50" cy="52" rx="38" ry="32" fill="#f5a623"/><ellipse cx="42" cy="48" rx="8" ry="12" fill="#e86a17" opacity="0.5"/><path d="M50 18 Q58 8 68 14 Q55 22 50 28Z" fill="#4a8f29"/>',
+        watermelon: '<path d="M10 55 Q50 15 90 55 Q50 95 10 55Z" fill="#2d8a3e"/><path d="M18 55 Q50 28 82 55" fill="#e74c3c"/><circle cx="35" cy="50" r="2" fill="#1a1a1a"/><circle cx="50" cy="58" r="2" fill="#1a1a1a"/><circle cx="65" cy="48" r="2" fill="#1a1a1a"/>',
+        orange: '<circle cx="50" cy="52" r="36" fill="#ff8c00"/><circle cx="50" cy="52" r="30" fill="#ffa726"/><circle cx="42" cy="44" r="6" fill="rgba(255,255,255,0.25)"/>',
+        strawberry: '<path d="M50 88 Q20 55 35 35 Q50 48 65 35 Q80 55 50 88Z" fill="#e74c3c"/><circle cx="40" cy="58" r="2.5" fill="#ffd700"/><circle cx="52" cy="62" r="2.5" fill="#ffd700"/><circle cx="62" cy="52" r="2.5" fill="#ffd700"/><path d="M35 32 Q50 18 65 32 L58 38 Q50 30 42 38Z" fill="#27ae60"/>',
+        pineapple: '<ellipse cx="50" cy="58" rx="32" ry="36" fill="#f1c40f"/><path d="M22 58 L78 58" stroke="#d4a017" stroke-width="2" opacity="0.5"/><path d="M50 20 L42 38 L50 32 L58 38Z" fill="#27ae60"/><path d="M38 24 L50 18 L62 24 L50 30Z" fill="#2ecc71"/>',
+    };
+
+    const FRUIT_CHUNK_COLORS = {
+        mango: ['#f5a623', '#e86a17', '#ffd56a'],
+        watermelon: ['#e74c3c', '#2d8a3e', '#ff6b6b'],
+        orange: ['#ff8c00', '#ffa726', '#ffb74d'],
+        strawberry: ['#e74c3c', '#c0392b', '#ff6b81'],
+        pineapple: ['#f1c40f', '#d4a017', '#ffe066'],
+    };
+
+    function fruitDisplayName(name) {
+        const parsed = parseName(name);
+        const display = parsed.firstPlusFirstLast || name;
+        return display.length > 18 ? display.slice(0, 16) + '…' : display;
+    }
+
+    function fruitSpeedMultiplier() {
+        return FRUIT_SPEED_MULT[fruitSpeedMode] || 1;
+    }
+
+    function fruitNextStudentName() {
+        if (!fruitPool.length) return null;
+        if (fruitRespawnQueue.length) return fruitRespawnQueue.shift();
+        const name = fruitPool[fruitNameIndex % fruitPool.length];
+        fruitNameIndex++;
+        return name;
+    }
+
+    function fruitGetStageSize() {
+        const stage = document.getElementById('fruitStage');
+        if (!stage) return { w: window.innerWidth, h: window.innerHeight };
+        const r = stage.getBoundingClientRect();
+        return { w: r.width || window.innerWidth, h: r.height || window.innerHeight };
+    }
+
+    function fruitCreateElement(studentName, typeKey) {
+        const type = typeKey || FRUIT_TYPES[Math.floor(Math.random() * FRUIT_TYPES.length)];
+        const el = document.createElement('div');
+        el.className = 'tt-flying-fruit tt-flying-fruit-spin';
+        el.innerHTML = `
+            <div class="tt-flying-fruit-body">
+                <svg viewBox="0 0 100 100" aria-hidden="true">${FRUIT_SVG[type]}</svg>
+            </div>
+            <span class="tt-flying-fruit-name">${fruitDisplayName(studentName)}</span>
+        `;
+        el.dataset.student = studentName;
+        el.dataset.fruitType = type;
+        return el;
+    }
+
+    function fruitBuildTrajectory() {
+        const { w, h } = fruitGetStageSize();
+        const mult = fruitSpeedMultiplier();
+        const duration = (FRUIT_BASE_DURATION.min + Math.random() * (FRUIT_BASE_DURATION.max - FRUIT_BASE_DURATION.min)) / mult;
+        const kind = Math.random() < 0.5 ? 'horizontal' : 'arc';
+
+        if (kind === 'horizontal') {
+            const ltr = Math.random() < 0.5;
+            const yBase = h * (0.12 + Math.random() * 0.68);
+            const drift = (Math.random() - 0.5) * h * 0.08;
+            return {
+                kind: 'horizontal',
+                duration,
+                computePos(t) {
+                    const x = ltr ? -100 + (w + 200) * t : w + 100 - (w + 200) * t;
+                    const y = yBase + Math.sin(t * Math.PI * 2) * drift * 0.35;
+                    return { x, y };
+                },
+            };
+        }
+
+        const fromLeft = Math.random() < 0.5;
+        const startX = fromLeft ? -80 : w + 80;
+        const endX = fromLeft ? w + 80 : -80;
+        const startY = h + 50;
+        const peakY = h * (0.08 + Math.random() * 0.35);
+        return {
+            kind: 'arc',
+            duration,
+            computePos(t) {
+                const x = startX + (endX - startX) * t;
+                const y = startY + (peakY - startY) * (4 * t * (1 - t));
+                return { x, y };
+            },
+        };
+    }
+
+    function fruitRemove(id, requeueName) {
+        const entry = fruitActiveMap.get(id);
+        if (!entry) return;
+        if (entry.el.parentNode) entry.el.remove();
+        fruitActiveMap.delete(id);
+        if (requeueName && fruitActive && !fruitPicking) {
+            fruitRespawnQueue.push(entry.studentName);
+        }
+    }
+
+    function fruitRemoveAll() {
+        fruitActiveMap.forEach((_, id) => fruitRemove(id, false));
+    }
+
+    function fruitAnimateLoop(timestamp) {
+        if (!fruitActive || fruitPicking) {
+            fruitRafId = null;
+            return;
+        }
+
+        fruitActiveMap.forEach((entry, id) => {
+            const elapsed = timestamp - entry.startTime;
+            const t = elapsed / entry.duration;
+            if (t >= 1) {
+                fruitRemove(id, true);
+                return;
+            }
+            const pos = entry.trajectory.computePos(t);
+            const wobble = Math.sin(elapsed * 0.004) * 8;
+            entry.el.style.transform = `translate(${pos.x}px, ${pos.y}px) rotate(${wobble}deg)`;
+        });
+
+        fruitRafId = requestAnimationFrame(fruitAnimateLoop);
+    }
+
+    function fruitSpawnOne() {
+        if (!fruitActive || fruitPicking) return;
+        if (fruitActiveMap.size >= 9) {
+            fruitScheduleSpawn();
+            return;
+        }
+
+        const name = fruitNextStudentName();
+        if (!name) return;
+
+        const stage = document.getElementById('fruitStage');
+        if (!stage) return;
+
+        const type = FRUIT_TYPES[Math.floor(Math.random() * FRUIT_TYPES.length)];
+        const el = fruitCreateElement(name, type);
+        const trajectory = fruitBuildTrajectory();
+        const id = fruitNextId++;
+        const startPos = trajectory.computePos(0);
+
+        el.style.transform = `translate(${startPos.x}px, ${startPos.y}px)`;
+        el.addEventListener('click', (e) => {
+            e.stopPropagation();
+            fruitPick(id, name, el);
+        });
+
+        stage.appendChild(el);
+        fruitActiveMap.set(id, {
+            el,
+            studentName: name,
+            trajectory,
+            duration: trajectory.duration,
+            startTime: performance.now(),
+        });
+
+        fruitScheduleSpawn();
+    }
+
+    function fruitScheduleSpawn() {
+        if (fruitSpawnTimer) clearTimeout(fruitSpawnTimer);
+        if (!fruitActive || fruitPicking) return;
+        const delay = 400 + Math.random() * 500;
+        fruitSpawnTimer = setTimeout(fruitSpawnOne, delay);
+    }
+
+    function fruitPlaySplat() {
+        playAudioBuffer(balloonPopBuffer);
+    }
+
+    function fruitExplode(fruitEl, typeKey, onDone) {
+        const stage = document.getElementById('fruitStage');
+        const rect = fruitEl.getBoundingClientRect();
+        const stageRect = stage.getBoundingClientRect();
+        const cx = rect.left - stageRect.left + rect.width / 2;
+        const cy = rect.top - stageRect.top + rect.height / 2;
+        const colors = FRUIT_CHUNK_COLORS[typeKey] || FRUIT_CHUNK_COLORS.mango;
+        const chunkCount = 5 + Math.floor(Math.random() * 4);
+
+        fruitPlaySplat();
+        fruitEl.style.visibility = 'hidden';
+        fruitEl.style.pointerEvents = 'none';
+
+        for (let i = 0; i < chunkCount; i++) {
+            const chunk = document.createElement('div');
+            chunk.className = 'tt-fruit-chunk';
+            chunk.style.left = (cx - 11) + 'px';
+            chunk.style.top = (cy - 11) + 'px';
+            chunk.style.background = colors[i % colors.length];
+            const angle = (Math.PI * 2 * i) / chunkCount + Math.random() * 0.5;
+            const dist = 50 + Math.random() * 90;
+            chunk.style.setProperty('--fx', Math.cos(angle) * dist + 'px');
+            chunk.style.setProperty('--fy', Math.sin(angle) * dist + 'px');
+            chunk.style.setProperty('--fr', (Math.random() * 540 - 270) + 'deg');
+            stage.appendChild(chunk);
+            setTimeout(() => chunk.remove(), 650);
+        }
+
+        setTimeout(onDone, 620);
+    }
+
+    function fruitPick(id, name, el) {
+        if (fruitPicking || !fruitActive) return;
+        fruitPicking = true;
+
+        if (fruitSpawnTimer) clearTimeout(fruitSpawnTimer);
+        if (fruitAutoTimer) clearTimeout(fruitAutoTimer);
+        fruitSpawnTimer = null;
+        fruitAutoTimer = null;
+
+        const typeKey = el.dataset.fruitType || 'mango';
+        fruitActiveMap.forEach((entry, fid) => {
+            if (fid !== id) fruitRemove(fid, false);
+        });
+
+        fruitExplode(el, typeKey, () => {
+            fruitRemove(id, false);
+            closeFlyingFruit();
+            showWinner(name);
+        });
+    }
+
+    function fruitAutoPick() {
+        if (!fruitActive || fruitPicking) return;
+        const entries = Array.from(fruitActiveMap.entries());
+        if (!entries.length) {
+            fruitSpawnOne();
+            setTimeout(fruitAutoPick, 200);
+            return;
+        }
+        const pick = entries[Math.floor(Math.random() * entries.length)];
+        fruitPick(pick[0], pick[1].studentName, pick[1].el);
+    }
+
+    function fruitStartSpawning() {
+        fruitScheduleSpawn();
+        for (let i = 0; i < 3; i++) setTimeout(fruitSpawnOne, i * 180);
+
+        fruitAutoTimer = setTimeout(fruitAutoPick, 15000);
+
+        const hint = document.getElementById('fruitHint');
+        if (hint && !localStorage.getItem(FRUIT_HINT_KEY)) {
+            hint.classList.remove('hidden');
+            localStorage.setItem(FRUIT_HINT_KEY, '1');
+            setTimeout(() => hint.classList.add('hidden'), 5000);
+        } else if (hint) {
+            hint.classList.add('hidden');
+        }
+
+        if (!fruitRafId) fruitRafId = requestAnimationFrame(fruitAnimateLoop);
+    }
+
+    function fruitRunCountdown(done) {
+        const el = document.getElementById('fruitCountdown');
+        if (!el) {
+            done();
+            return;
+        }
+        el.hidden = false;
+        const steps = ['3', '2', '1', 'Go!'];
+        let i = 0;
+        el.textContent = steps[0];
+
+        const tick = () => {
+            i++;
+            if (i >= steps.length) {
+                el.hidden = true;
+                done();
+                return;
+            }
+            el.textContent = steps[i];
+            setTimeout(tick, i === steps.length - 1 ? 450 : 850);
+        };
+        setTimeout(tick, 850);
+    }
+
+    function openFlyingFruit() {
+        const pool = getAvailableStudents();
+        if (pool.length === 0) {
+            showNotification('All students have had turns! Reset categories to continue.', 'info');
+            return;
+        }
+
+        fruitPool = [...pool];
+        fruitNameIndex = 0;
+        fruitRespawnQueue = [];
+        fruitActive = true;
+        fruitPicking = false;
+        fruitActiveMap.clear();
+        fruitNextId = 0;
+
+        const overlay = document.getElementById('ttFruitOverlay');
+        const stage = document.getElementById('fruitStage');
+        if (stage) stage.innerHTML = '';
+
+        overlay.classList.add('visible');
+
+        document.querySelectorAll('.tt-fruit-speed-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.speed === fruitSpeedMode);
+        });
+
+        fruitRunCountdown(() => {
+            if (fruitActive) fruitStartSpawning();
+        });
+    }
+
+    function closeFlyingFruit() {
+        fruitActive = false;
+        fruitPicking = false;
+
+        if (fruitSpawnTimer) clearTimeout(fruitSpawnTimer);
+        if (fruitAutoTimer) clearTimeout(fruitAutoTimer);
+        fruitSpawnTimer = null;
+        fruitAutoTimer = null;
+
+        if (fruitRafId) {
+            cancelAnimationFrame(fruitRafId);
+            fruitRafId = null;
+        }
+
+        fruitRemoveAll();
+        const stage = document.getElementById('fruitStage');
+        if (stage) stage.innerHTML = '';
+
+        const countdown = document.getElementById('fruitCountdown');
+        if (countdown) countdown.hidden = true;
+
+        document.getElementById('ttFruitOverlay')?.classList.remove('visible');
+    }
+
+    function fruitBindSpeedControls() {
+        const group = document.getElementById('fruitSpeedGroup');
+        if (!group || group.dataset.fruitBound) return;
+        group.dataset.fruitBound = 'true';
+
+        group.querySelectorAll('.tt-fruit-speed-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                fruitSpeedMode = btn.dataset.speed || 'normal';
+                group.querySelectorAll('.tt-fruit-speed-btn').forEach(b => {
+                    b.classList.toggle('active', b === btn);
+                });
+            });
+        });
+    }
+
+    function ensurePlinkoModeCard() {
+        let card = document.getElementById('ttModeCardPlinko');
+
+        if (!card) {
+            const grid = document.querySelector('.tt-modes-grid');
+            if (!grid) return null;
+
+            card = document.createElement('div');
+            card.className = 'tt-mode-card';
+            card.id = 'ttModeCardPlinko';
+            card.innerHTML = `
+                <div class="tt-mode-thumbnail tt-mode-thumbnail-plinko">
+                    <div class="mini-plinko">
+                        <div class="m-plinko-peg"></div>
+                        <div class="m-plinko-peg"></div>
+                        <div class="m-plinko-peg"></div>
+                        <div class="m-plinko-ball"></div>
+                    </div>
+                </div>
+                <h3>Plinko</h3>
+                <p>Drop the ball, land a name.</p>
+            `;
+
+            const hopCard = document.getElementById('ttModeCardHop');
+            const slotCard = document.getElementById('ttModeCardSlot');
+            if (hopCard) hopCard.insertAdjacentElement('afterend', card);
+            else if (slotCard) slotCard.insertAdjacentElement('beforebegin', card);
+            else grid.appendChild(card);
+        }
+
+        if (!card.dataset.plinkoBound) {
+            card.dataset.plinkoBound = 'true';
+            card.addEventListener('click', () => {
+                document.getElementById('ttModesOverlay')?.classList.remove('visible');
+                openPlinko();
+            });
+        }
+
+        return card;
+    }
+
+    function ensurePlinkoOverlay() {
+        if (document.getElementById('ttPlinkoOverlay')) return false;
+
+        const pinataOverlay = document.getElementById('ttPinataOverlay');
+        const overlay = document.createElement('div');
+        overlay.className = 'tt-plinko-overlay';
+        overlay.id = 'ttPlinkoOverlay';
+        overlay.innerHTML = `
+            <div class="tt-plinko-container">
+                <button class="tt-plinko-close" id="plinkoCloseBtn" title="Close" type="button">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+                <div class="tt-plinko-board-wrap" id="plinkoBoardWrap">
+                    <canvas id="plinkoCanvas" aria-label="Plinko board"></canvas>
+                </div>
+                <div class="tt-plinko-controls">
+                    <button class="tt-plinko-btn tt-plinko-drop-btn" id="plinkoDropBtn" type="button">
+                        <i class="fa-solid fa-circle-down"></i> Drop
+                    </button>
+                    <button class="tt-plinko-btn tt-plinko-reset-btn" id="plinkoResetBtn" type="button">
+                        <i class="fa-solid fa-rotate-left"></i> Reset
+                    </button>
+                </div>
+            </div>
+        `;
+
+        if (pinataOverlay) pinataOverlay.insertAdjacentElement('beforebegin', overlay);
+        else document.body.appendChild(overlay);
+
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) closePlinko();
+        });
+        document.getElementById('plinkoCloseBtn')?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            closePlinko();
+        });
+        document.getElementById('plinkoDropBtn')?.addEventListener('click', plinkoDropBall);
+        document.getElementById('plinkoResetBtn')?.addEventListener('click', plinkoReset);
+        plinkoBindPointerEvents();
+
+        return true;
+    }
+
+    function plinkoBindPointerEvents() {
+        const canvas = document.getElementById('plinkoCanvas');
+        if (!canvas || canvas.dataset.plinkoBound) return;
+        canvas.dataset.plinkoBound = 'true';
+
+        canvas.addEventListener('mousedown', plinkoOnPointerDown);
+        canvas.addEventListener('mousemove', plinkoOnPointerMove);
+        window.addEventListener('mouseup', plinkoOnPointerUp);
+
+        canvas.addEventListener('touchstart', plinkoOnPointerDown, { passive: false });
+        canvas.addEventListener('touchmove', plinkoOnPointerMove, { passive: false });
+        window.addEventListener('touchend', plinkoOnPointerUp);
+    }
+
     // ── Reset Categories ──────────────────────────────────
     function resetCategories() {
         const st = currentState();
@@ -1708,6 +2771,10 @@
             if (modesOverlay) modesOverlay.classList.remove('visible');
         };
 
+        // Plinko UI (inject if cached HTML is missing the card/overlay)
+        ensurePlinkoOverlay();
+        ensurePlinkoModeCard();
+
         // Mode cards
         document.getElementById('ttModeCardHop')?.addEventListener('click', () => { closeModes(); startHop(); });
         document.getElementById('ttModeCardRoulette')?.addEventListener('click', () => { closeModes(); openRoulette(); });
@@ -1715,6 +2782,34 @@
         document.getElementById('ttModeCardSlot')?.addEventListener('click', () => { closeModes(); openSlotMachine(); });
         document.getElementById('ttModeCardCards')?.addEventListener('click', () => { closeModes(); openCards(); });
         document.getElementById('ttModeCardPinata')?.addEventListener('click', () => { closeModes(); openPinata(); });
+        document.getElementById('ttModeCardFruit')?.addEventListener('click', () => { closeModes(); openFlyingFruit(); });
+
+        fruitBindSpeedControls();
+        document.getElementById('fruitCloseBtn')?.addEventListener('click', closeFlyingFruit);
+        document.getElementById('ttFruitOverlay')?.addEventListener('click', (e) => {
+            if (e.target === e.currentTarget && !fruitPicking) closeFlyingFruit();
+        });
+
+        // Plinko overlay controls (when overlay is in HTML)
+        plinkoBindPointerEvents();
+        const plinkoCloseBtn = document.getElementById('plinkoCloseBtn');
+        if (plinkoCloseBtn && !plinkoCloseBtn.dataset.plinkoBound) {
+            plinkoCloseBtn.dataset.plinkoBound = 'true';
+            plinkoCloseBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                closePlinko();
+            });
+        }
+        const plinkoDropBtn = document.getElementById('plinkoDropBtn');
+        if (plinkoDropBtn && !plinkoDropBtn.dataset.plinkoBound) {
+            plinkoDropBtn.dataset.plinkoBound = 'true';
+            plinkoDropBtn.addEventListener('click', plinkoDropBall);
+        }
+        const plinkoResetBtn = document.getElementById('plinkoResetBtn');
+        if (plinkoResetBtn && !plinkoResetBtn.dataset.plinkoBound) {
+            plinkoResetBtn.dataset.plinkoBound = 'true';
+            plinkoResetBtn.addEventListener('click', plinkoReset);
+        }
 
         // Cards action
         document.getElementById('cardsCloseBtn').addEventListener('click', closeCards);
@@ -1780,6 +2875,9 @@
         });
         document.getElementById('ttPinataOverlay').addEventListener('click', (e) => {
             if (e.target === e.currentTarget) closePinata();
+        });
+        document.getElementById('ttPlinkoOverlay')?.addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) closePlinko();
         });
 
         // Setup View Toggles

@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modificaciones — Autoevaluación Sala de Sistemas</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #0f0f1a;
+    color: #e8e8f0;
+    padding: 32px 20px 60px;
+    line-height: 1.6;
+  }
+  h1 {
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 6px;
+  }
+  .subtitle {
+    text-align: center;
+    color: #9ca3af;
+    font-size: 0.95rem;
+    margin-bottom: 36px;
+  }
+  .legend {
+    display: flex;
+    gap: 24px;
+    justify-content: center;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: #9ca3af;
+  }
+  .dot {
+    width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0;
+  }
+  .dot-old { background: #ef4444; }
+  .dot-new { background: #10b981; }
+  .dot-same { background: #7b68ee; }
+
+  .mod-card {
+    background: #1a1a2e;
+    border: 1.5px solid rgba(118,120,237,0.25);
+    border-radius: 20px;
+    padding: 28px 32px;
+    max-width: 820px;
+    margin: 0 auto 28px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.45);
+  }
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 22px;
+  }
+  .q-number {
+    background: linear-gradient(135deg, #3d348b, #7678ed);
+    color: #fff;
+    font-weight: 800;
+    font-size: 1rem;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .q-label { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #7678ed; }
+  .rule-tag {
+    margin-left: auto;
+    background: rgba(118,120,237,0.15);
+    border: 1px solid rgba(118,120,237,0.35);
+    color: #a89cf7;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 50px;
+    white-space: nowrap;
+  }
+
+  .section-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .section-label.old { color: #ef4444; }
+  .section-label.new { color: #10b981; }
+  .section-label.same { color: #7678ed; }
+
+  .text-block {
+    border-radius: 12px;
+    padding: 14px 18px;
+    font-size: 0.93rem;
+    margin-bottom: 18px;
+    position: relative;
+  }
+  .text-block.old {
+    background: rgba(239,68,68,0.07);
+    border: 1px solid rgba(239,68,68,0.25);
+    color: #fca5a5;
+    text-decoration: line-through;
+    text-decoration-color: rgba(239,68,68,0.5);
+  }
+  .text-block.new {
+    background: rgba(16,185,129,0.07);
+    border: 1px solid rgba(16,185,129,0.25);
+    color: #6ee7b7;
+  }
+  .text-block.same {
+    background: rgba(118,120,237,0.07);
+    border: 1px solid rgba(118,120,237,0.25);
+    color: #c4b5fd;
+  }
+  .highlight {
+    background: rgba(16,185,129,0.2);
+    border-radius: 3px;
+    padding: 1px 3px;
+    color: #34d399;
+    font-weight: 600;
+  }
+  .divider {
+    border: none;
+    border-top: 1px solid rgba(118,120,237,0.15);
+    margin: 22px 0;
+  }
+  .statement-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  @media (max-width: 600px) {
+    .statement-row { grid-template-columns: 1fr; }
+    .mod-card { padding: 20px 16px; }
+    .rule-tag { display: none; }
+  }
+  .field-title {
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    opacity: 0.7;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .field-title.old { color: #ef4444; }
+  .field-title.new { color: #10b981; }
+  .tip-box {
+    background: rgba(247,184,1,0.08);
+    border: 1px solid rgba(247,184,1,0.25);
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-size: 0.83rem;
+    color: #fde68a;
+    margin-top: 6px;
+  }
+  .tip-box strong { color: #fbbf24; }
+  footer {
+    text-align: center;
+    color: #4b5563;
+    font-size: 0.8rem;
+    margin-top: 48px;
+  }
+</style>
+</head>
+<body>
+
+<h1>🖥️ Modificaciones — Autoevaluación</h1>
+<p class="subtitle">4 preguntas modificadas para incluir comportamiento en la Sala de Sistemas</p>
+
+<div class="legend">
+  <div class="legend-item"><div class="dot dot-old"></div> Texto original (eliminar)</div>
+  <div class="legend-item"><div class="dot dot-new"></div> Texto nuevo (reemplazar con este)</div>
+  <div class="legend-item"><div class="dot dot-same"></div> Sin cambios</div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PREGUNTA 1
+══════════════════════════════════════════ -->
+<div class="mod-card">
+  <div class="card-header">
+    <div class="q-number">1</div>
+    <div>
+      <div class="q-label">Criterio 1 — crit-0</div>
+      <div style="font-weight:700; font-size:1rem; color:#e8e8f0;">Evito distraerme y participo de los aprendizajes de la clase</div>
+    </div>
+    <div class="rule-tag">🚫 Sitios no autorizados</div>
+  </div>
+
+  <div class="section-label same">● Enunciado — sin cambios</div>
+  <div class="text-block same">Evito distraerme y participo de los aprendizajes de la clase</div>
+
+  <hr class="divider">
+
+  <div class="section-label old">● Tooltip actual (reemplazar)</div>
+  <div class="text-block old">
+    Esto significa que le prestas atención al profesor y a la clase en lugar de ponerte a hacer otras cosas. Por ejemplo, evitas ponerte a jugar con tu regla, usar marcadores, pegar stickers, pintar, recortar, usar pegante o escribir cartas cuando no te lo han pedido. En cambio, escuchas con cuidado cuando el profesor explica o cuando otros compañeros están participando.
+  </div>
+
+  <div class="section-label new">● Tooltip nuevo (usar este)</div>
+  <div class="text-block new">
+    Esto significa que le prestas atención al profesor y a las actividades de la clase, <span class="highlight">tanto en el salón como en la sala de sistemas</span>. En el salón, evitas ponerte a jugar con tu regla, usar marcadores, pegar stickers, pintar, recortar, usar pegante o escribir cartas cuando no te lo han pedido. <span class="highlight">En la sala de sistemas, esto también significa que no abres páginas web, juegos, videos ni redes sociales que no tengan que ver con la clase mientras el profesor no lo haya autorizado.</span> En ambos espacios, escuchas con cuidado cuando el profesor explica o cuando algún compañero está participando.
+  </div>
+
+  <div class="tip-box">
+    <strong>⚠️ Por qué funciona:</strong> El enunciado ya es lo suficientemente amplio ("la clase" no implica solo el salón). Solo se amplía el tooltip para que el estudiante entienda que "distraerse" en la sala de sistemas significa abrir sitios no autorizados.
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PREGUNTA 6
+══════════════════════════════════════════ -->
+<div class="mod-card">
+  <div class="card-header">
+    <div class="q-number">6</div>
+    <div>
+      <div class="q-label">Criterio 6 — crit-5</div>
+      <div style="font-weight:700; font-size:1rem; color:#e8e8f0;">Soy responsable y desarrollo a tiempo las actividades diarias de la clase</div>
+    </div>
+    <div class="rule-tag">🚫 Sitios no autorizados</div>
+  </div>
+
+  <div class="section-label same">● Enunciado — sin cambios</div>
+  <div class="text-block same">Soy responsable y desarrollo a tiempo las actividades diarias de la clase</div>
+
+  <hr class="divider">
+
+  <div class="section-label old">● Tooltip actual (reemplazar)</div>
+  <div class="text-block old">
+    Esto significa que aprovechas el tiempo para terminar tus trabajos completos en el tiempo indicado. Por ejemplo, te concentras en terminar tus proyectos en el salón o en la sala de sistemas, en lugar de ponerte a jugar cuando aún no has terminado de cumplir con los deberes que pidió el profesor.
+  </div>
+
+  <div class="section-label new">● Tooltip nuevo (usar este)</div>
+  <div class="text-block new">
+    Esto significa que aprovechas cada minuto de clase para avanzar y terminar tus actividades en el tiempo indicado. <span class="highlight">En la sala de sistemas, esto es especialmente importante: usas el computador únicamente para lo que el profesor asignó.</span> Si todavía no has terminado tu proyecto o actividad, no abres páginas, juegos ni videos que no tengan que ver con la clase. <span class="highlight">El tiempo en la sala es valioso y no se puede recuperar, así que lo aprovechas trabajando con concentración desde el primer momento.</span>
+  </div>
+
+  <div class="tip-box">
+    <strong>⚠️ Por qué funciona:</strong> Este tooltip ya mencionaba "sala de sistemas" pero como ejemplo secundario. Ahora la sala es el contexto principal, y el vínculo entre "no abrir sitios" y "no terminar el trabajo a tiempo" queda explícito — reforzando ambas normas a la vez.
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PREGUNTA 8
+══════════════════════════════════════════ -->
+<div class="mod-card">
+  <div class="card-header">
+    <div class="q-number">8</div>
+    <div>
+      <div class="q-label">Criterio 8 — crit-7</div>
+      <div style="font-weight:700; font-size:1rem; color:#e8e8f0;">Demuestro hábitos de cortesía, respeto por mí y por los demás</div>
+    </div>
+    <div class="rule-tag">🚫 Distraer compañeros</div>
+  </div>
+
+  <div class="section-label same">● Enunciado — sin cambios</div>
+  <div class="text-block same">Demuestro hábitos de cortesía, respeto por mí y por los demás</div>
+
+  <hr class="divider">
+
+  <div class="section-label old">● Tooltip actual (reemplazar)</div>
+  <div class="text-block old">
+    Esto significa que eres amable y te pones en los zapatos de los demás. Por ejemplo, tratas a todos con respeto y eres considerado cuando das tu opinión sobre las tareas y trabajos de tus compañeros, usando palabras amables en lugar de hacer comentarios que los puedan hacer sentir mal.
+  </div>
+
+  <div class="section-label new">● Tooltip nuevo (usar este)</div>
+  <div class="text-block new">
+    Esto significa que eres amable y respetuoso con todos en cualquier espacio de la clase. En el salón, tratas a todos con respeto y usas palabras amables cuando opinas sobre el trabajo de tus compañeros. <span class="highlight">En la sala de sistemas, el respeto también significa que no interrumpes a quienes están trabajando en su computador: no les hablas sin razón, no te acercas a mirar su pantalla sin permiso, y no haces ruidos ni comentarios que los distraigan.</span> Cuando alguien está concentrado trabajando, respetar su espacio es una forma muy importante de ser considerado.
+  </div>
+
+  <div class="tip-box">
+    <strong>⚠️ Por qué funciona:</strong> "Respeto por los demás" ya es la categoría correcta. Distraer a un compañero en su PC es exactamente una falta de respeto hacia su concentración y su trabajo — no es necesario crear un criterio nuevo.
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PREGUNTA 9
+══════════════════════════════════════════ -->
+<div class="mod-card">
+  <div class="card-header">
+    <div class="q-number">9</div>
+    <div>
+      <div class="q-label">Criterio 9 — crit-8</div>
+      <div style="font-weight:700; font-size:1rem; color:#e8e8f0;">Cuido el medio ambiente y promuevo el orden y la limpieza</div>
+    </div>
+    <div class="rule-tag">🚫 Correr en la sala</div>
+  </div>
+
+  <div class="statement-row">
+    <div>
+      <div class="field-title old">Enunciado actual</div>
+      <div class="text-block old" style="margin-bottom:0;">
+        Cuido el medio ambiente y promuevo el orden y la limpieza
+      </div>
+    </div>
+    <div>
+      <div class="field-title new">Enunciado nuevo</div>
+      <div class="text-block new" style="margin-bottom:0;">
+        Cuido los espacios del colegio y promuevo el orden, la limpieza <span class="highlight">y la seguridad</span>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <div class="section-label old">● Tooltip actual (reemplazar)</div>
+  <div class="text-block old">
+    Esto significa que ayudas a cuidar tu entorno escolar para que se vea siempre bonito. Por ejemplo, botas la basura en su lugar, no dejas cosas tiradas y te aseguras de dejar tu pupitre limpio y ordenado incluso cuando ya se han terminado las clases.
+  </div>
+
+  <div class="section-label new">● Tooltip nuevo (usar este)</div>
+  <div class="text-block new">
+    Esto significa que cuidas todos los espacios del colegio para que se vean bien y sean seguros para todos. En el salón, botas la basura en su lugar y dejas tu pupitre limpio y ordenado al terminar. <span class="highlight">En la sala de sistemas, además del orden y la limpieza, también cuidas la seguridad: recuerdas no correr dentro de la sala, ya que los equipos son frágiles y una caída puede dañarlos o hacerte daño a ti o a un compañero.</span> Cuidas el computador que tienes asignado, lo tratas con cuidado y lo dejas en las mismas condiciones en que lo encontraste.
+  </div>
+
+  <div class="tip-box">
+    <strong>⚠️ Por qué se cambia el enunciado:</strong> "Medio ambiente" apunta a naturaleza/ecología, no a espacios físicos del colegio. El cambio a "espacios del colegio" y agregar "seguridad" hace que correr en la sala quede cubierto de manera lógica y honesta — sin forzar el vínculo. Es el único enunciado que se modifica.
+  </div>
+</div>
+
+<footer>
+  Modificaciones sugeridas · Autoevaluación Estudiantil ESL Learning Platform<br>
+  Preguntas 2, 3, 4, 5 y 7 no requieren cambios.
+</footer>
+
+</body>
+</html>

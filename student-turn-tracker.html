@@ -7,13 +7,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Turn Tracker - ESL Learning Platform</title>
     <meta name="description"
-        content="Track student participation with fun random pickers — roulette wheel, balloon pop, and hopping selector.">
+        content="Track student participation with fun random pickers — roulette wheel, balloon pop, Plinko, and more.">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="css/student-turn-tracker.css">
+    <link rel="stylesheet" href="css/student-turn-tracker.css?v=fruit2">
     <link rel="stylesheet" href="css/google-drive.css">
     <!-- canvas-confetti for balloon pop effect -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+    <!-- Matter.js for Plinko physics -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
 </head>
 
 <body class="turn-tracker-page">
@@ -163,6 +165,18 @@
                     <h3>Hop</h3>
                     <p>Bouncing tile selector</p>
                 </div>
+                <div class="tt-mode-card" id="ttModeCardPlinko">
+                    <div class="tt-mode-thumbnail tt-mode-thumbnail-plinko">
+                        <div class="mini-plinko">
+                            <div class="m-plinko-peg"></div>
+                            <div class="m-plinko-peg"></div>
+                            <div class="m-plinko-peg"></div>
+                            <div class="m-plinko-ball"></div>
+                        </div>
+                    </div>
+                    <h3>Plinko</h3>
+                    <p>Drop the ball, land a name.</p>
+                </div>
                 <div class="tt-mode-card" id="ttModeCardSlot">
                     <div class="tt-mode-thumbnail">
                         <div class="mini-slot">
@@ -191,6 +205,16 @@
                     </div>
                     <h3>Piñata</h3>
                     <p>Smash to reveal a student</p>
+                </div>
+                <div class="tt-mode-card" id="ttModeCardFruit">
+                    <div class="tt-mode-thumbnail tt-mode-thumbnail-fruit">
+                        <div class="mini-fruit">
+                            <span class="m-fruit m-fruit-mango"></span>
+                            <span class="m-fruit m-fruit-orange"></span>
+                        </div>
+                    </div>
+                    <h3>Flying Fruit</h3>
+                    <p>Catch a flying fruit to pick a student.</p>
                 </div>
             </div>
         </div>
@@ -275,6 +299,47 @@
         </div>
     </div>
 
+    <!-- ── Plinko Overlay ──────────────────────────── -->
+    <div class="tt-plinko-overlay" id="ttPlinkoOverlay">
+        <div class="tt-plinko-container">
+            <button class="tt-plinko-close" id="plinkoCloseBtn" title="Close">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="tt-plinko-board-wrap" id="plinkoBoardWrap">
+                <canvas id="plinkoCanvas" aria-label="Plinko board"></canvas>
+            </div>
+            <div class="tt-plinko-controls">
+                <button class="tt-plinko-btn tt-plinko-drop-btn" id="plinkoDropBtn" type="button">
+                    <i class="fa-solid fa-circle-down"></i> Drop
+                </button>
+                <button class="tt-plinko-btn tt-plinko-reset-btn" id="plinkoResetBtn" type="button">
+                    <i class="fa-solid fa-rotate-left"></i> Reset
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Flying Fruit Overlay ─────────────────────── -->
+    <div class="tt-fruit-overlay" id="ttFruitOverlay">
+        <div class="tt-fruit-jungle" aria-hidden="true">
+            <div class="tt-fruit-jungle-sky"></div>
+            <div class="tt-fruit-jungle-mid"></div>
+            <div class="tt-fruit-jungle-front"></div>
+        </div>
+        <button class="tt-fruit-close" id="fruitCloseBtn" title="Close" type="button">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+        <p class="tt-fruit-hint" id="fruitHint">Click a fruit!</p>
+        <div class="tt-fruit-speed" id="fruitSpeedGroup" role="group" aria-label="Fruit speed">
+            <span class="tt-fruit-speed-label">Speed</span>
+            <button type="button" class="tt-fruit-speed-btn" data-speed="slow">Slow</button>
+            <button type="button" class="tt-fruit-speed-btn active" data-speed="normal">Normal</button>
+            <button type="button" class="tt-fruit-speed-btn" data-speed="fast">Fast</button>
+        </div>
+        <div class="tt-fruit-countdown" id="fruitCountdown" hidden></div>
+        <div class="tt-fruit-stage" id="fruitStage"></div>
+    </div>
+
     <!-- ── Piñata Overlay ──────────────────────────── -->
     <div class="tt-pinata-overlay" id="ttPinataOverlay">
         <button class="tt-pinata-close" id="pinataCloseBtn" title="Close">
@@ -302,7 +367,7 @@
     <script src="js/student-groups-data.js"></script>
     <script src="js/students-data.js"></script>
     <script src="js/google-drive-service.js"></script>
-    <script src="js/student-turn-tracker.js"></script>
+    <script src="js/student-turn-tracker.js?v=fruit2"></script>
     <script src="js/darkmode.js"></script>
 </body>
 

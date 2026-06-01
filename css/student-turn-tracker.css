@@ -1628,11 +1628,13 @@ body.dark-mode .tt-pinata-overlay {
 .tt-modes-container {
     position: relative;
     background: white;
-    padding: 40px;
+    padding: 40px 32px 32px;
     border-radius: 24px;
     box-shadow: 0 20px 80px rgba(0, 0, 0, 0.4);
-    max-width: 800px;
-    width: 90%;
+    max-width: 920px;
+    width: min(94vw, 920px);
+    max-height: min(90vh, 640px);
+    overflow-y: auto;
     text-align: center;
     animation: ttModesPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
@@ -1682,8 +1684,20 @@ body.dark-mode .tt-pinata-overlay {
 
 .tt-modes-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
+@media (min-width: 560px) {
+    .tt-modes-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (min-width: 820px) {
+    .tt-modes-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
 }
 
 .tt-mode-card {
@@ -2117,4 +2131,512 @@ body.dark-mode .tt-modes-close {
     user-select: none;
     -webkit-user-select: none;
     -webkit-touch-callout: none;
+}
+
+/* ── Plinko Overlay ─────────────────────────────── */
+.tt-plinko-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(5, 8, 28, 0.88);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 8500;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.tt-plinko-overlay.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.tt-plinko-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    width: min(94vw, 780px);
+    padding: 12px 8px 20px;
+    animation: ttModesPop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.tt-plinko-close {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: rgba(255, 255, 255, 0.12);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    z-index: 20;
+    transition: all 0.2s ease;
+}
+
+.tt-plinko-close:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+.tt-plinko-board-wrap {
+    width: 100%;
+    max-width: 100%;
+    aspect-ratio: 480 / 520;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow:
+        0 0 0 3px rgba(255, 0, 200, 0.35),
+        0 0 30px rgba(0, 220, 255, 0.2),
+        0 16px 48px rgba(0, 0, 0, 0.5);
+}
+
+#plinkoCanvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    touch-action: none;
+    cursor: grab;
+}
+
+#plinkoCanvas.plinko-dragging {
+    cursor: grabbing;
+}
+
+.tt-plinko-controls {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+    max-width: 100%;
+}
+
+.tt-plinko-btn {
+    flex: 1;
+    border: none;
+    border-radius: 14px;
+    padding: 14px 20px;
+    font-size: 1rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.tt-plinko-drop-btn {
+    background: linear-gradient(135deg, #ff2d9b, #c026d3);
+    color: white;
+    box-shadow: 0 4px 20px rgba(255, 45, 155, 0.45);
+}
+
+.tt-plinko-drop-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 28px rgba(255, 45, 155, 0.55);
+}
+
+.tt-plinko-reset-btn {
+    background: rgba(255, 255, 255, 0.1);
+    color: #a8e6ff;
+    border: 2px solid rgba(0, 220, 255, 0.35);
+}
+
+.tt-plinko-reset-btn:hover:not(:disabled) {
+    background: rgba(0, 220, 255, 0.15);
+    border-color: rgba(0, 220, 255, 0.6);
+}
+
+.tt-plinko-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Mini Plinko thumbnail */
+.tt-mode-thumbnail-plinko {
+    background: linear-gradient(180deg, #0d1033 0%, #1a1040 100%) !important;
+}
+
+.mini-plinko {
+    position: relative;
+    width: 44px;
+    height: 44px;
+}
+
+.m-plinko-peg {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #00e5ff;
+    box-shadow: 0 0 6px #00e5ff;
+}
+
+.m-plinko-peg:nth-child(1) {
+    left: 10px;
+    top: 14px;
+}
+
+.m-plinko-peg:nth-child(2) {
+    left: 22px;
+    top: 22px;
+}
+
+.m-plinko-peg:nth-child(3) {
+    left: 14px;
+    top: 30px;
+}
+
+.m-plinko-ball {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #ff2d9b;
+    left: 18px;
+    top: 4px;
+    box-shadow: 0 0 8px #ff2d9b;
+}
+
+.tt-mode-card:hover .m-plinko-ball {
+    animation: mPlinkoDrop 1s ease-in infinite;
+}
+
+@keyframes mPlinkoDrop {
+    0% {
+        transform: translateY(0);
+    }
+
+    70% {
+        transform: translateY(28px);
+    }
+
+    100% {
+        transform: translateY(28px);
+        opacity: 0.6;
+    }
+}
+
+body.dark-mode .tt-plinko-reset-btn {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+#plinkoCanvas,
+.tt-plinko-container {
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+}
+
+/* ── Flying Fruit Overlay ─────────────────────── */
+.tt-fruit-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 8500;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s ease;
+    overflow: hidden;
+}
+
+.tt-fruit-overlay.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.tt-fruit-jungle {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.tt-fruit-jungle-sky {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, #0a1f14 0%, #0f2e1c 35%, #143824 100%);
+}
+
+.tt-fruit-jungle-mid {
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(ellipse 80% 40% at 20% 80%, rgba(20, 80, 40, 0.5) 0%, transparent 70%),
+        radial-gradient(ellipse 70% 35% at 80% 75%, rgba(15, 70, 35, 0.45) 0%, transparent 65%);
+    opacity: 0.9;
+}
+
+.tt-fruit-jungle-mid::before,
+.tt-fruit-jungle-mid::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    width: 55%;
+    height: 45%;
+    background: radial-gradient(ellipse at center bottom, #1a5c32 0%, transparent 72%);
+}
+
+.tt-fruit-jungle-mid::before {
+    left: -10%;
+}
+
+.tt-fruit-jungle-mid::after {
+    right: -10%;
+}
+
+.tt-fruit-jungle-front {
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(0deg, rgba(8, 35, 18, 0.95) 0%, transparent 28%),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 120'%3E%3Cpath fill='%23124728' d='M0 120 Q50 60 100 90 T200 120 V120 H0Z'/%3E%3C/svg%3E") repeat-x bottom / 50% auto;
+    opacity: 0.85;
+}
+
+.tt-fruit-close {
+    position: absolute;
+    top: 18px;
+    right: 22px;
+    z-index: 12;
+    background: rgba(255, 255, 255, 0.12);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 42px;
+    height: 42px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.tt-fruit-close:hover {
+    background: rgba(255, 255, 255, 0.28);
+}
+
+.tt-fruit-hint {
+    position: absolute;
+    top: 22px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 11;
+    margin: 0;
+    padding: 10px 22px;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 24px;
+    color: #e8ffe8;
+    font-size: 1.05rem;
+    font-weight: 700;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+}
+
+.tt-fruit-hint.hidden {
+    opacity: 0;
+}
+
+.tt-fruit-speed {
+    position: absolute;
+    top: 18px;
+    left: 18px;
+    z-index: 12;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.tt-fruit-speed-label {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-right: 4px;
+}
+
+.tt-fruit-speed-btn {
+    border: none;
+    background: rgba(255, 255, 255, 0.1);
+    color: #cdeccd;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 5px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s ease;
+}
+
+.tt-fruit-speed-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.tt-fruit-speed-btn.active {
+    background: #3d9e4a;
+    color: white;
+}
+
+.tt-fruit-countdown {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: clamp(4rem, 18vw, 9rem);
+    font-weight: 900;
+    color: white;
+    text-shadow: 0 4px 30px rgba(0, 0, 0, 0.6), 0 0 40px rgba(120, 255, 150, 0.4);
+    pointer-events: none;
+}
+
+.tt-fruit-countdown[hidden] {
+    display: none !important;
+}
+
+.tt-fruit-stage {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    overflow: hidden;
+}
+
+.tt-flying-fruit {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 170px;
+    height: 170px;
+    margin-left: -75px;
+    margin-top: -75px;
+    cursor: pointer;
+    will-change: transform;
+    z-index: 6;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.tt-flying-fruit.tt-flying-fruit-spin .tt-flying-fruit-body {
+    animation: fruitSpin 2.5s linear infinite;
+}
+
+.tt-flying-fruit-body {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.45));
+}
+
+.tt-flying-fruit-body svg {
+    width: 88%;
+    height: 88%;
+}
+
+.tt-flying-fruit-name {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    max-width: 92%;
+    text-align: center;
+    font-size: 0.88rem;
+    font-weight: 800;
+    line-height: 1.1;
+    color: #fff;
+    text-shadow:
+        -1px -1px 0 #1a1a1a,
+        1px -1px 0 #1a1a1a,
+        -1px 1px 0 #1a1a1a,
+        1px 1px 0 #1a1a1a,
+        0 2px 6px rgba(0, 0, 0, 0.6);
+    pointer-events: none;
+    word-break: break-word;
+}
+
+.tt-fruit-chunk {
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    border-radius: 4px;
+    pointer-events: none;
+    z-index: 15;
+    animation: fruitChunkFly 0.6s ease-out forwards;
+}
+
+@keyframes fruitSpin {
+    from { transform: rotate(-12deg); }
+    to { transform: rotate(12deg); }
+}
+
+@keyframes fruitChunkFly {
+    0% {
+        opacity: 1;
+        transform: translate(0, 0) rotate(0deg) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(var(--fx), var(--fy)) rotate(var(--fr)) scale(0.4);
+    }
+}
+
+/* Mini Flying Fruit thumbnail */
+.tt-mode-thumbnail-fruit {
+    background: linear-gradient(160deg, #1a4d2e 0%, #0d2818 100%) !important;
+}
+
+.mini-fruit {
+    position: relative;
+    width: 44px;
+    height: 44px;
+}
+
+.m-fruit {
+    position: absolute;
+    border-radius: 50%;
+}
+
+.m-fruit-mango {
+    width: 22px;
+    height: 22px;
+    background: linear-gradient(135deg, #ffb347, #e86a17);
+    left: 4px;
+    top: 12px;
+}
+
+.m-fruit-orange {
+    width: 18px;
+    height: 18px;
+    background: #ff8c00;
+    right: 6px;
+    top: 8px;
+    box-shadow: inset -3px -3px 0 rgba(0, 0, 0, 0.15);
+}
+
+.tt-mode-card:hover .m-fruit-mango {
+    animation: mFruitFly1 0.9s ease-in-out infinite alternate;
+}
+
+.tt-mode-card:hover .m-fruit-orange {
+    animation: mFruitFly2 0.8s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes mFruitFly1 {
+    from { transform: translate(0, 0); }
+    to { transform: translate(8px, -6px); }
+}
+
+@keyframes mFruitFly2 {
+    from { transform: translate(0, 0); }
+    to { transform: translate(-10px, 4px); }
 }
