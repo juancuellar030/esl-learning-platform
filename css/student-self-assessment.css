@@ -208,6 +208,13 @@ body.dark-mode .sa-entry-title {
     background: var(--sa-card);
 }
 
+.sa-select:disabled {
+    cursor: not-allowed;
+    opacity: 0.78;
+    background: rgba(118, 120, 237, 0.08);
+    color: var(--sa-text-muted);
+}
+
 body.dark-mode .sa-input,
 body.dark-mode .sa-select {
     background: #12122a;
@@ -217,6 +224,88 @@ body.dark-mode .sa-select {
 body.dark-mode .sa-input:focus,
 body.dark-mode .sa-select:focus {
     background: #1a1a40;
+}
+
+body.dark-mode .sa-select:disabled {
+    background: rgba(118, 120, 237, 0.12);
+    color: var(--sa-text-muted);
+}
+
+.sa-autocomplete-wrap {
+    position: relative;
+}
+
+.sa-name-suggestions {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    z-index: 30;
+    display: none;
+    max-height: 260px;
+    margin: 0;
+    padding: 8px;
+    list-style: none;
+    background: var(--sa-card);
+    border: 1.5px solid var(--sa-card-border);
+    border-radius: 16px;
+    box-shadow: var(--sa-shadow-lg);
+    overflow-y: auto;
+}
+
+.sa-name-suggestions.visible {
+    display: block;
+    animation: saFadeSlideIn 0.18s ease both;
+}
+
+.sa-name-suggestion {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    color: var(--sa-text);
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.sa-name-suggestion:hover {
+    background: rgba(118, 120, 237, 0.12);
+    color: var(--sa-accent-dark);
+}
+
+.sa-name-suggestion strong {
+    flex-shrink: 0;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, var(--sa-accent-dark), var(--sa-accent));
+    color: #fff;
+    font-size: 0.75rem;
+}
+
+.sa-field-hint {
+    margin-top: 8px;
+    color: var(--sa-text-muted);
+    font-size: 0.82rem;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.sa-field-error {
+    animation: saShake 0.4s ease;
+}
+
+body.dark-mode .sa-name-suggestions {
+    background: #1a1a2e;
+    border-color: rgba(118, 120, 237, 0.32);
+}
+
+body.dark-mode .sa-name-suggestion:hover {
+    background: rgba(118, 120, 237, 0.2);
+    color: var(--sa-accent);
 }
 
 /* Custom select arrow */

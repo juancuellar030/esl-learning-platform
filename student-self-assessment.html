@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/google-drive.css">
-    <link rel="stylesheet" href="css/student-self-assessment.css?v=wizard6">
+    <link rel="stylesheet" href="css/student-self-assessment.css?v=roster1">
 </head>
 
 <body>
@@ -40,7 +40,7 @@
                     ¡Hola! ¿Cómo te llamas?
                 </h2>
                 <p class="sa-entry-subtitle">
-                    Escribe tu nombre y selecciona tu grupo para comenzar la autoevaluación.
+                    Busca tu nombre en la lista, escribe tu clave y comienza la autoevaluación.
                 </p>
 
                 <div class="sa-form-group">
@@ -48,8 +48,12 @@
                         <i class="fa-solid fa-signature" style="color:var(--sa-accent);"></i>
                         Tu nombre completo
                     </label>
-                    <input type="text" id="sa-name" class="sa-input" placeholder="Ej: María García..."
-                        autocomplete="off" spellcheck="false" autofocus />
+                    <div class="sa-autocomplete-wrap">
+                        <input type="text" id="sa-name" class="sa-input" placeholder="Escribe tu nombre o apellido..."
+                            autocomplete="off" spellcheck="false" autofocus aria-autocomplete="list"
+                            aria-controls="sa-name-suggestions" />
+                        <ul id="sa-name-suggestions" class="sa-name-suggestions" role="listbox"></ul>
+                    </div>
                 </div>
 
                 <div class="sa-form-group">
@@ -58,10 +62,20 @@
                         Tu grupo
                     </label>
                     <div class="sa-select-wrapper">
-                        <select id="sa-group" class="sa-select">
-                            <option value="" disabled selected>Selecciona tu grupo...</option>
+                        <select id="sa-group" class="sa-select" disabled>
+                            <option value="" disabled selected>Se completa automáticamente...</option>
                         </select>
                     </div>
+                </div>
+
+                <div class="sa-form-group sa-password-group" id="sa-password-group" hidden>
+                    <label for="sa-pass">
+                        <i class="fa-solid fa-key" style="color:var(--sa-accent);"></i>
+                        Tu clave personal
+                    </label>
+                    <input type="password" id="sa-pass" class="sa-input" placeholder="Escribe tu clave..."
+                        autocomplete="off" spellcheck="false" />
+                    <p class="sa-field-hint">Selecciona tu nombre de la lista y escribe la clave que te dio el profesor.</p>
                 </div>
 
                 <button id="sa-start-btn" class="sa-btn sa-btn-primary sa-btn-full" style="margin-top:8px;">
@@ -283,7 +297,9 @@
     </div>
 
     <!-- Platform JS -->
-    <script src="js/student-self-assessment.js?v=wizard6"></script>
+    <script src="js/student-groups-data.js"></script>
+    <script src="js/student-passwords-data.js"></script>
+    <script src="js/student-self-assessment.js?v=roster1"></script>
 
 </body>
 

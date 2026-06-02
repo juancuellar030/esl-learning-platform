@@ -9,7 +9,7 @@
 
     // ── Configuration ────────────────────────────────────────────
     // PEGA AQUÍ LA URL DE TU APLICACIÓN WEB DE GOOGLE APPS SCRIPT
-    const APPS_SCRIPT_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbz6QrPtwr6dkF04DgFfnXiQLR1mmRaOGx9fmY1D6G64aLnpZPb4o74hwkL40VE7CMDlDQ/exec";
+    const APPS_SCRIPT_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbzKDCuaQYP4BzFtuHm9WE1Xs-XxW333P10z9ptQpMU5GIk5__lpLweQqBgUdKn1Msnolg/exec";
 
     // ── Criteria Data ────────────────────────────────────────────
     const CRITERIA = [
@@ -58,11 +58,15 @@
         { value: 4, label: 'Siempre' }
     ];
 
-    const GROUPS = ['3A', '3B', '3C', '4A', '4B', '4C', '5A', '5B', '5C', '5D'];
+    const ROSTER = typeof STUDENT_GROUPS !== 'undefined' ? STUDENT_GROUPS : {};
+    const PASSWORDS = typeof STUDENT_PASSWORDS !== 'undefined' ? STUDENT_PASSWORDS : {};
+    const GROUPS = Object.keys(ROSTER);
+    const ALL_STUDENTS = GROUPS.flatMap(group => (ROSTER[group] || []).map(name => ({ name, group })));
 
     // ── State ────────────────────────────────────────────────────
     let studentName = '';
     let studentGroup = '';
+    let selectedRosterStudent = null;
     let answers = {}; // { c0: value, c1: value, ... }
     let generatedScore = null;
     let adjustedScore = null;
@@ -79,7 +83,7 @@
         // Init Themes
         setupThemes();
 
-        // Populate group dropdown
+        // Populate group dropdown from shared roster
         const groupSelect = $('sa-group');
         GROUPS.forEach(g => {
             const opt = document.createElement('option');
@@ -87,6 +91,7 @@
             opt.textContent = g;
             groupSelect.appendChild(opt);
         });
+        setupEntryAutocomplete();
 
         // Render survey criteria (one question per step)
         renderCriteria();
@@ -117,24 +122,160 @@
     }
 
     // ── Start survey ─────────────────────────────────────────────
+    function normalizeLookup(value) {
+        return String(value || '')
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase()
+            .replace(/\s+/g, ' ')
+            .trim();
+    }
+
+    function getRosterMatches(query, group) {
+        const q = normalizeLookup(query);
+        if (q.length < 2) return [];
+        return ALL_STUDENTS
+            .filter(student => !group || student.group === group)
+            .filter(student => normalizeLookup(student.name).includes(q))
+            .slice(0, 8);
+    }
+
+    function findRosterStudent(name, group) {
+        const normalized = normalizeLookup(name);
+        return ALL_STUDENTS.find(student => {
+            if (group && student.group !== group) return false;
+            return normalizeLookup(student.name) === normalized;
+        }) || null;
+    }
+
+    function setPasswordVisibility(visible) {
+        const group = $('sa-password-group');
+        if (!group) return;
+        group.hidden = !visible;
+        if (!visible && $('sa-pass')) $('sa-pass').value = '';
+    }
+
+    function selectRosterStudent(student) {
+        selectedRosterStudent = student;
+        $('sa-name').value = student.name;
+        $('sa-group').value = student.group;
+        setPasswordVisibility(true);
+        hideNameSuggestions();
+        setTimeout(() => $('sa-pass')?.focus(), 80);
+    }
+
+    function hideNameSuggestions() {
+        const list = $('sa-name-suggestions');
+        if (!list) return;
+        list.innerHTML = '';
+        list.classList.remove('visible');
+    }
+
+    function renderNameSuggestions(matches) {
+        const list = $('sa-name-suggestions');
+        if (!list) return;
+        list.innerHTML = '';
+        if (!matches.length) {
+            list.classList.remove('visible');
+            return;
+        }
+
+        matches.forEach(student => {
+            const item = document.createElement('li');
+            item.className = 'sa-name-suggestion';
+            item.setAttribute('role', 'option');
+            item.innerHTML = `
+                <span>${student.name}</span>
+                <strong>${student.group}</strong>
+            `;
+            item.addEventListener('mousedown', e => {
+                e.preventDefault();
+                selectRosterStudent(student);
+            });
+            list.appendChild(item);
+        });
+        list.classList.add('visible');
+    }
+
+    function updateNameMatches() {
+        const nameInput = $('sa-name');
+        const groupInput = $('sa-group');
+        const match = findRosterStudent(nameInput.value, groupInput.value);
+        selectedRosterStudent = match;
+        setPasswordVisibility(!!match);
+        renderNameSuggestions(match ? [] : getRosterMatches(nameInput.value, groupInput.value));
+    }
+
+    function setupEntryAutocomplete() {
+        const nameInput = $('sa-name');
+        const groupInput = $('sa-group');
+        if (!nameInput || !groupInput) return;
+
+        nameInput.addEventListener('input', () => {
+            selectedRosterStudent = null;
+            setPasswordVisibility(false);
+            renderNameSuggestions(getRosterMatches(nameInput.value, groupInput.value));
+        });
+        nameInput.addEventListener('focus', () => renderNameSuggestions(getRosterMatches(nameInput.value, groupInput.value)));
+        nameInput.addEventListener('keydown', e => {
+            if (e.key === 'Escape') hideNameSuggestions();
+        });
+        groupInput.addEventListener('change', () => {
+            updateNameMatches();
+            if (nameInput.value.trim()) renderNameSuggestions(getRosterMatches(nameInput.value, groupInput.value));
+        });
+        $('sa-pass')?.addEventListener('keydown', e => {
+            if (e.key === 'Enter') startSurvey();
+        });
+        document.addEventListener('click', e => {
+            if (!e.target.closest('.sa-autocomplete-wrap')) hideNameSuggestions();
+        });
+    }
+
+    function markEntryError(input, message) {
+        if (input) {
+            input.focus();
+            input.style.borderColor = '#ef4444';
+            input.closest('.sa-form-group')?.classList.add('sa-field-error');
+            setTimeout(() => {
+                input.style.borderColor = '';
+                input.closest('.sa-form-group')?.classList.remove('sa-field-error');
+            }, 1500);
+        }
+        showToast(message, 'error');
+    }
+
     function startSurvey() {
         const nameInput = $('sa-name');
         const groupInput = $('sa-group');
+        const passInput = $('sa-pass');
 
-        studentName = nameInput.value.trim();
-        studentGroup = groupInput.value;
+        const rosterStudent = selectedRosterStudent || findRosterStudent(nameInput.value, groupInput.value);
 
-        if (!studentName) {
-            nameInput.focus();
-            nameInput.style.borderColor = '#ef4444';
-            setTimeout(() => { nameInput.style.borderColor = ''; }, 1500);
-            showToast('Por favor escribe tu nombre', 'error');
+        if (!nameInput.value.trim()) {
+            markEntryError(nameInput, 'Por favor busca y selecciona tu nombre');
             return;
         }
-        if (!studentGroup) {
-            showToast('Por favor selecciona tu grupo', 'error');
+        if (!groupInput.value) {
+            markEntryError(groupInput, 'Por favor selecciona tu grupo');
             return;
         }
+        if (!rosterStudent) {
+            markEntryError(nameInput, 'Selecciona tu nombre exacto de la lista');
+            return;
+        }
+        const expectedPassword = PASSWORDS[rosterStudent.name];
+        if (!expectedPassword || passInput.value.trim() !== expectedPassword) {
+            setPasswordVisibility(true);
+            markEntryError(passInput, 'Clave incorrecta. Revisa tu clave personal.');
+            return;
+        }
+
+        studentName = rosterStudent.name;
+        studentGroup = rosterStudent.group;
+        nameInput.value = studentName;
+        groupInput.value = studentGroup;
+        hideNameSuggestions();
 
         // Update badge
         $('sa-student-badge-name').textContent = `${studentName} · ${studentGroup}`;
