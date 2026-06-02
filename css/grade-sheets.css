@@ -158,6 +158,119 @@ body {
 }
 
 /* ---- Dashboard Grid ---- */
+.gs-dashboard-filters {
+    background: #fff;
+    border-radius: 16px;
+    padding: 18px 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+}
+
+.gs-filter-search-wrap {
+    position: relative;
+    margin-bottom: 14px;
+}
+
+.gs-filter-search-wrap i {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #a29bfe;
+    font-size: 0.9rem;
+}
+
+.gs-filter-search {
+    width: 100%;
+    padding: 12px 14px 12px 40px;
+    border: 2px solid #dfe6e9;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    font-family: inherit;
+    color: #2d3436;
+    background: #fff;
+    box-sizing: border-box;
+    transition: all 0.2s;
+}
+
+.gs-filter-search:focus {
+    outline: none;
+    border-color: #a29bfe;
+    box-shadow: 0 0 0 4px rgba(162, 155, 254, 0.15);
+}
+
+.gs-filter-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: flex-end;
+}
+
+.gs-filter-field {
+    flex: 1;
+    min-width: 150px;
+}
+
+.gs-filter-field label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: #636e72;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.gs-filter-field select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 2px solid #dfe6e9;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    font-family: inherit;
+    color: #2d3436;
+    background: #fff;
+    box-sizing: border-box;
+}
+
+.gs-filter-field select:focus {
+    outline: none;
+    border-color: #a29bfe;
+    box-shadow: 0 0 0 4px rgba(162, 155, 254, 0.12);
+}
+
+.gs-filter-clear-btn {
+    color: #636e72 !important;
+    border-color: #dfe6e9 !important;
+    box-shadow: none;
+    white-space: nowrap;
+}
+
+.gs-filter-clear-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.gs-filter-summary {
+    margin-top: 12px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #636e72;
+}
+
+.gs-link-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    color: #fff;
+    font: inherit;
+    font-weight: 800;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
 .gs-dashboard-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -1549,6 +1662,33 @@ body.dark-mode .gs-card:hover {
     box-shadow: 0 14px 35px rgba(0, 0, 0, 0.3);
 }
 
+body.dark-mode .gs-dashboard-filters {
+    background: #313131;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+body.dark-mode .gs-filter-search,
+body.dark-mode .gs-filter-field select {
+    background: #363636;
+    color: #e0e0e0;
+    border-color: #555;
+}
+
+body.dark-mode .gs-filter-search:focus,
+body.dark-mode .gs-filter-field select:focus {
+    border-color: #a29bfe;
+}
+
+body.dark-mode .gs-filter-field label,
+body.dark-mode .gs-filter-summary {
+    color: #aaa;
+}
+
+body.dark-mode .gs-filter-clear-btn {
+    color: #e0e0e0 !important;
+    border-color: #555 !important;
+}
+
 body.dark-mode .gs-card.selected {
     border-color: #00b894;
     box-shadow: 0 0 0 3px rgba(0, 184, 148, 0.12), 0 10px 30px rgba(0, 0, 0, 0.3);
@@ -2011,6 +2151,20 @@ body.dark-mode .gs-toggle-label {
 
     .gs-dashboard-grid {
         grid-template-columns: 1fr;
+    }
+
+    .gs-filter-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .gs-filter-field {
+        min-width: auto;
+    }
+
+    .gs-filter-clear-btn {
+        width: 100%;
+        justify-content: center;
     }
 
     .gs-page-container {

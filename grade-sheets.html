@@ -41,6 +41,48 @@
                 </div>
             </div>
 
+            <!-- Dashboard Filters -->
+            <div id="gs-dashboard-filters" class="gs-dashboard-filters" style="display:none;">
+                <div class="gs-filter-search-wrap">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="search" id="gs-filter-search" class="gs-filter-search"
+                        placeholder="Search by subject, course, term or teacher...">
+                </div>
+                <div class="gs-filter-controls">
+                    <div class="gs-filter-field">
+                        <label for="gs-filter-subject">Subject</label>
+                        <select id="gs-filter-subject">
+                            <option value="">All subjects</option>
+                        </select>
+                    </div>
+                    <div class="gs-filter-field">
+                        <label for="gs-filter-course">Course</label>
+                        <select id="gs-filter-course">
+                            <option value="">All courses</option>
+                        </select>
+                    </div>
+                    <div class="gs-filter-field">
+                        <label for="gs-filter-term">Term</label>
+                        <select id="gs-filter-term">
+                            <option value="">All terms</option>
+                        </select>
+                    </div>
+                    <div class="gs-filter-field">
+                        <label for="gs-filter-sort">Sort by</label>
+                        <select id="gs-filter-sort">
+                            <option value="recent">Recently updated</option>
+                            <option value="completion-desc">Most complete first</option>
+                            <option value="completion-asc">Least complete first</option>
+                        </select>
+                    </div>
+                    <button id="gs-filter-clear-btn" class="gs-btn gs-btn-ghost gs-filter-clear-btn" type="button"
+                        title="Clear all filters">
+                        <i class="fa-solid fa-filter-circle-xmark"></i> Clear
+                    </button>
+                </div>
+                <div id="gs-filter-summary" class="gs-filter-summary"></div>
+            </div>
+
             <!-- Dashboard Grid -->
             <div id="gs-dashboard-grid" class="gs-dashboard-grid">
                 <!-- Cards rendered by JS -->
@@ -51,6 +93,14 @@
                 <i class="fa-solid fa-folder-open"></i>
                 <h2>No Grade Sheets Yet</h2>
                 <p>Click <strong>"New Sheet"</strong> to create your first grading sheet.</p>
+            </div>
+
+            <!-- Filter Empty State -->
+            <div id="gs-filter-empty-state" class="gs-empty-state gs-filter-empty-state" style="display:none;">
+                <i class="fa-solid fa-filter"></i>
+                <h2>No Matching Sheets</h2>
+                <p>Try adjusting your search or filters, or <button id="gs-filter-empty-clear" type="button"
+                        class="gs-link-btn">clear all filters</button>.</p>
             </div>
         </div>
     </div>

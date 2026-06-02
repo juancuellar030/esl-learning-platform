@@ -9,6 +9,7 @@
     'use strict';
 
     const STORAGE_KEY = 'gradeSheets';
+    const FILTER_STORAGE_KEY = 'gradeSheetsDashboardFilters';
     const CATEGORIES = ['cognitiva', 'laboral', 'ciudadana'];
     const CAT_LABELS = { cognitiva: 'Cognitiva', laboral: 'Laboral', ciudadana: 'Ciudadana' };
     const CAT_WEIGHTS = { cognitiva: 0.35, laboral: 0.35, ciudadana: 0.30 };
@@ -25,7 +26,17 @@
     const $dashboardView = $('gs-dashboard-view');
     const $editorView = $('gs-editor-view');
     const $dashboardGrid = $('gs-dashboard-grid');
+    const $dashboardFilters = $('gs-dashboard-filters');
+    const $filterSearch = $('gs-filter-search');
+    const $filterSubject = $('gs-filter-subject');
+    const $filterCourse = $('gs-filter-course');
+    const $filterTerm = $('gs-filter-term');
+    const $filterSort = $('gs-filter-sort');
+    const $filterClearBtn = $('gs-filter-clear-btn');
+    const $filterSummary = $('gs-filter-summary');
     const $emptyState = $('gs-empty-state');
+    const $filterEmptyState = $('gs-filter-empty-state');
+    const $filterEmptyClear = $('gs-filter-empty-clear');
     const $newSheetBtn = $('gs-new-sheet-btn');
     const $exportSelectedBtn = $('gs-export-selected-btn');
     const $driveBtn = $('gs-btn-drive');
@@ -130,6 +141,13 @@
     let isGradesView = false;
     let removeDecimal = false;
     let pendingCsvImport = null;
+    let dashboardFilters = {
+        search: '',
+        subject: '',
+        course: '',
+        term: '',
+        sort: 'recent'
+    };
 
     // ══════════════════════════════════════════════════════
     //                    STORAGE
@@ -390,19 +408,159 @@
     // ══════════════════════════════════════════════════════
     //                DASHBOARD RENDERING
     // ══════════════════════════════════════════════════════
+    function loadDashboardFilters() {
+        try {
+            const saved = JSON.parse(localStorage.getItem(FILTER_STORAGE_KEY));
+            if (saved && typeof saved === 'object') {
+                dashboardFilters = {
+                    search: saved.search || '',
+                    subject: saved.subject || '',
+                    course: saved.course || '',
+                    term: saved.term || '',
+                    sort: saved.sort || 'recent'
+                };
+            }
+        } catch (e) { }
+    }
+
+    function saveDashboardFilters() {
+        localStorage.setItem(FILTER_STORAGE_KEY, JSON.stringify(dashboardFilters));
+    }
+
+    function syncDashboardFilterControls() {
+        if ($filterSearch) $filterSearch.value = dashboardFilters.search;
+        if ($filterSubject) $filterSubject.value = dashboardFilters.subject;
+        if ($filterCourse) $filterCourse.value = dashboardFilters.course;
+        if ($filterTerm) $filterTerm.value = dashboardFilters.term;
+        if ($filterSort) $filterSort.value = dashboardFilters.sort;
+        if ($filterClearBtn) $filterClearBtn.disabled = !hasActiveDashboardFilters();
+    }
+
+    function hasActiveDashboardFilters() {
+        return !!(dashboardFilters.search.trim() || dashboardFilters.subject || dashboardFilters.course || dashboardFilters.term || dashboardFilters.sort !== 'recent');
+    }
+
+    function populateDashboardFilterOptions() {
+        const subjects = [...new Set(sheets.map(s => s.subject).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+        const courses = [...new Set(sheets.map(s => s.group).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+        const terms = [...new Set(sheets.map(s => s.term).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+
+        const fillSelect = ($el, values, allLabel) => {
+            if (!$el) return;
+            const current = $el.value;
+            $el.innerHTML = `<option value="">${allLabel}</option>`;
+            values.forEach(value => {
+                const opt = document.createElement('option');
+                opt.value = value;
+                opt.textContent = value;
+                $el.appendChild(opt);
+            });
+            if (values.includes(current)) $el.value = current;
+            else $el.value = '';
+        };
+
+        fillSelect($filterSubject, subjects, 'All subjects');
+        fillSelect($filterCourse, courses, 'All courses');
+        fillSelect($filterTerm, terms, 'All terms');
+
+        if (dashboardFilters.subject && !subjects.includes(dashboardFilters.subject)) dashboardFilters.subject = '';
+        if (dashboardFilters.course && !courses.includes(dashboardFilters.course)) dashboardFilters.course = '';
+        if (dashboardFilters.term && !terms.includes(dashboardFilters.term)) dashboardFilters.term = '';
+    }
+
+    function getFilteredSortedSheets() {
+        const query = normalizeText(dashboardFilters.search);
+        let list = sheets.filter(sheet => {
+            if (dashboardFilters.subject && sheet.subject !== dashboardFilters.subject) return false;
+            if (dashboardFilters.course && sheet.group !== dashboardFilters.course) return false;
+            if (dashboardFilters.term && sheet.term !== dashboardFilters.term) return false;
+            if (!query) return true;
+            const haystack = normalizeText([
+                sheet.subject,
+                sheet.group,
+                sheet.term,
+                sheet.teacherName,
+                sheet.subject + ' ' + sheet.group
+            ].join(' '));
+            return haystack.includes(query);
+        });
+
+        list = list.map(sheet => ({ sheet, pct: getCompletionPercent(sheet) }));
+
+        if (dashboardFilters.sort === 'completion-desc') {
+            list.sort((a, b) => b.pct - a.pct || (b.sheet.updatedAt || 0) - (a.sheet.updatedAt || 0));
+        } else if (dashboardFilters.sort === 'completion-asc') {
+            list.sort((a, b) => a.pct - b.pct || (b.sheet.updatedAt || 0) - (a.sheet.updatedAt || 0));
+        } else {
+            list.sort((a, b) => (b.sheet.updatedAt || b.sheet.createdAt || 0) - (a.sheet.updatedAt || a.sheet.createdAt || 0));
+        }
+
+        return list;
+    }
+
+    function updateDashboardFilterSummary(visibleCount, totalCount) {
+        if (!$filterSummary) return;
+        if (totalCount === 0) {
+            $filterSummary.textContent = '';
+            return;
+        }
+        if (hasActiveDashboardFilters()) {
+            $filterSummary.textContent = `Showing ${visibleCount} of ${totalCount} sheet${totalCount === 1 ? '' : 's'}`;
+        } else {
+            $filterSummary.textContent = `${totalCount} sheet${totalCount === 1 ? '' : 's'}`;
+        }
+    }
+
+    function clearDashboardFilters() {
+        dashboardFilters = { search: '', subject: '', course: '', term: '', sort: 'recent' };
+        saveDashboardFilters();
+        syncDashboardFilterControls();
+        renderDashboard();
+    }
+
+    function onDashboardFilterChange() {
+        dashboardFilters.search = $filterSearch ? $filterSearch.value : '';
+        dashboardFilters.subject = $filterSubject ? $filterSubject.value : '';
+        dashboardFilters.course = $filterCourse ? $filterCourse.value : '';
+        dashboardFilters.term = $filterTerm ? $filterTerm.value : '';
+        dashboardFilters.sort = $filterSort ? $filterSort.value : 'recent';
+        saveDashboardFilters();
+        syncDashboardFilterControls();
+        renderDashboard();
+    }
+
     function renderDashboard() {
         $dashboardGrid.innerHTML = '';
+
         if (!sheets.length) {
+            if ($dashboardFilters) $dashboardFilters.style.display = 'none';
             $emptyState.style.display = '';
+            if ($filterEmptyState) $filterEmptyState.style.display = 'none';
             $dashboardGrid.style.display = 'none';
             $exportSelectedBtn.disabled = true;
             return;
         }
+
+        populateDashboardFilterOptions();
+        syncDashboardFilterControls();
+        if ($dashboardFilters) $dashboardFilters.style.display = '';
+
+        const filtered = getFilteredSortedSheets();
+        updateDashboardFilterSummary(filtered.length, sheets.length);
+
+        if (!filtered.length) {
+            $emptyState.style.display = 'none';
+            if ($filterEmptyState) $filterEmptyState.style.display = '';
+            $dashboardGrid.style.display = 'none';
+            updateExportBtn();
+            return;
+        }
+
         $emptyState.style.display = 'none';
+        if ($filterEmptyState) $filterEmptyState.style.display = 'none';
         $dashboardGrid.style.display = '';
 
-        sheets.forEach((sheet, idx) => {
-            const pct = getCompletionPercent(sheet);
+        filtered.forEach(({ sheet, pct }, idx) => {
             const sc = getStudentCount(sheet.group);
             const ac = getAllActivityIds(sheet).length;
             const sel = selectedIds.has(sheet.id);
@@ -1667,6 +1825,14 @@
         $backToDashboard.addEventListener('click', backToDashboard);
         $exportSelectedBtn.addEventListener('click', exportSelected);
 
+        if ($filterSearch) $filterSearch.addEventListener('input', onDashboardFilterChange);
+        if ($filterSubject) $filterSubject.addEventListener('change', onDashboardFilterChange);
+        if ($filterCourse) $filterCourse.addEventListener('change', onDashboardFilterChange);
+        if ($filterTerm) $filterTerm.addEventListener('change', onDashboardFilterChange);
+        if ($filterSort) $filterSort.addEventListener('change', onDashboardFilterChange);
+        if ($filterClearBtn) $filterClearBtn.addEventListener('click', clearDashboardFilters);
+        if ($filterEmptyClear) $filterEmptyClear.addEventListener('click', clearDashboardFilters);
+
         document.querySelectorAll('.gs-icon-picker').forEach(picker => {
             const target = $(picker.dataset.target);
             picker.querySelectorAll('.gs-icon-option').forEach(btn => {
@@ -1758,6 +1924,12 @@
     // ══════════════════════════════════════════════════════
     //                      INIT
     // ══════════════════════════════════════════════════════
-    function init() { populateGroupDropdown(); loadFromStorage(); renderDashboard(); bindEvents(); }
+    function init() {
+        populateGroupDropdown();
+        loadDashboardFilters();
+        loadFromStorage();
+        renderDashboard();
+        bindEvents();
+    }
     document.addEventListener('DOMContentLoaded', init);
 })();
