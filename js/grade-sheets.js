@@ -37,14 +37,10 @@
     const $modalCreate = $('gs-modal-create');
     const $fieldTeacher = $('gs-field-teacher');
     const $fieldSubject = $('gs-field-subject');
+    const $fieldIcon = $('gs-field-icon');
+    const $fieldHeaderColor = $('gs-field-header-color');
     const $fieldGroup = $('gs-field-group');
     const $fieldTerm = $('gs-field-term');
-    const $fieldPmax = $('gs-field-pmax');
-    const $fieldExig = $('gs-field-exig');
-    const $fieldNmin = $('gs-field-nmin');
-    const $fieldNmax = $('gs-field-nmax');
-    const $fieldNapr = $('gs-field-napr');
-    const $fieldImportScale = $('gs-field-import-scale');
     const $deleteOverlay = $('gs-delete-overlay');
     const $deleteName = $('gs-delete-name');
     const $deleteConfirm = $('gs-delete-confirm');
@@ -96,8 +92,17 @@
     const $editInfoSave = $('gs-edit-info-save');
     const $editInfoTeacher = $('gs-edit-info-teacher');
     const $editInfoSubject = $('gs-edit-info-subject');
+    const $editInfoIcon = $('gs-edit-info-icon');
+    const $editInfoHeaderColor = $('gs-edit-info-header-color');
     const $editInfoGroup = $('gs-edit-info-group');
     const $editInfoTerm = $('gs-edit-info-term');
+
+    // ── DOM refs – Edit Description ───────────────────────
+    const $editDescOverlay = $('gs-edit-desc-overlay');
+    const $editDescClose = document.querySelectorAll('.gs-edit-desc-close');
+    const $editDescSave = $('gs-edit-desc-save');
+    const $editDescLabel = $('gs-edit-desc-label');
+    const $editDescCategory = $('gs-edit-desc-category');
 
     // ── DOM refs – Phase 8 (Import Sheet Data) ────────────
     const $importSheetDataBtn = $('gs-import-sheet-data-btn');
@@ -110,9 +115,21 @@
     const $importActivitySelect = $('gs-import-activity-select');
     const $importModeRadios = document.getElementsByName('gs-import-mode');
 
+    // ── DOM refs – Upload CSV Grades ──────────────────────
+    const $uploadGradesBtn = $('gs-upload-grades-btn');
+    const $uploadOverlay = $('gs-upload-overlay');
+    const $uploadClose = document.querySelectorAll('.gs-upload-close');
+    const $uploadFileInput = $('gs-upload-file-input');
+    const $uploadFileName = $('gs-upload-file-name');
+    const $uploadPreview = $('gs-upload-preview');
+    const $uploadImportBtn = $('gs-upload-import-btn');
+    const $uploadValueTypeRadios = document.getElementsByName('gs-upload-value-type');
+
     let editingActId = null;
+    let editingActCat = null;
     let isGradesView = false;
     let removeDecimal = false;
+    let pendingCsvImport = null;
 
     // ══════════════════════════════════════════════════════
     //                    STORAGE
@@ -171,6 +188,46 @@
     }) : null;
 
     function escHtml(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+
+    function showToast(msg, type = 'info') {
+        const existing = document.querySelector('.gs-toast');
+        if (existing) existing.remove();
+        const toast = document.createElement('div');
+        toast.className = `gs-toast ${type}`;
+        const icon = type === 'success' ? 'fa-circle-check' : type === 'error' ? 'fa-circle-xmark' : 'fa-circle-info';
+        toast.innerHTML = `<i class="fa-solid ${icon}"></i> ${escHtml(msg)}`;
+        document.body.appendChild(toast);
+        requestAnimationFrame(() => requestAnimationFrame(() => toast.classList.add('show')));
+        setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 3500);
+    }
+
+    function normalizeHeaderColor(color) {
+        return /^#[0-9a-f]{6}$/i.test(color || '') ? color : '#2c1f56';
+    }
+
+    function normalizeIcon(icon) {
+        const allowed = ['fa-microchip', 'fa-flask', 'fa-book-open', 'fa-language', 'fa-pen-nib', 'fa-table-columns'];
+        return allowed.includes(icon) ? icon : 'fa-table-columns';
+    }
+
+    function setIconPickerValue(hiddenInput, icon) {
+        if (!hiddenInput) return;
+        hiddenInput.value = normalizeIcon(icon);
+        const picker = document.querySelector(`.gs-icon-picker[data-target="${hiddenInput.id}"]`);
+        if (!picker) return;
+        picker.querySelectorAll('.gs-icon-option').forEach(btn => {
+            btn.classList.toggle('selected', btn.dataset.icon === hiddenInput.value);
+        });
+    }
+
+    function setColorPickerValue(input, color) {
+        if (!input) return;
+        input.value = normalizeHeaderColor(color);
+    }
+
+    function normalizeText(value) {
+        return String(value || '').trim().toLowerCase().replace(/\s+/g, ' ');
+    }
 
     function calculateGrade(score, pmax, exig, nmin, nmax, napr) {
         if (score < 0) return nmin;
@@ -349,6 +406,8 @@
             const sc = getStudentCount(sheet.group);
             const ac = getAllActivityIds(sheet).length;
             const sel = selectedIds.has(sheet.id);
+            const headerColor = normalizeHeaderColor(sheet.headerColor);
+            const icon = normalizeIcon(sheet.icon);
 
             const card = document.createElement('div');
             card.className = 'gs-card' + (sel ? ' selected' : '');
@@ -365,8 +424,8 @@
                 <div class="gs-card-actions">
                     <button class="gs-card-action-btn delete" data-id="${sheet.id}" title="Delete sheet"><i class="fa-solid fa-trash-can"></i></button>
                 </div>
-                <div class="gs-card-top">
-                    <h3>${escHtml(sheet.subject)} — ${escHtml(sheet.group)}</h3>
+                <div class="gs-card-top" style="background:${headerColor};">
+                    <h3><i class="fa-solid ${icon}"></i> ${escHtml(sheet.subject)} — ${escHtml(sheet.group)}</h3>
                     <div class="gs-card-meta">
                         <span><i class="fa-solid fa-calendar-alt"></i> ${escHtml(sheet.term)} Term</span>
                         <span><i class="fa-solid fa-users"></i> ${sc} students</span>
@@ -407,8 +466,8 @@
     function openNewSheetModal() {
         $fieldTeacher.value = sheets.length ? (sheets[sheets.length - 1].teacherName || '') : '';
         $fieldSubject.value = '';
-        $fieldPmax.value = 50; $fieldExig.value = 60; $fieldNmin.value = 1.0; $fieldNmax.value = 5.0; $fieldNapr.value = 3.0;
-        loadSavedScales($fieldImportScale);
+        setIconPickerValue($fieldIcon, 'fa-microchip');
+        setColorPickerValue($fieldHeaderColor, '#2c1f56');
         $modalOverlay.style.display = '';
         setTimeout(() => $fieldSubject.focus(), 200);
     }
@@ -421,11 +480,13 @@
             id: generateId(),
             teacherName: $fieldTeacher.value.trim() || 'Teacher',
             subject, group: $fieldGroup.value, term: $fieldTerm.value,
-            pmax: parseFloat($fieldPmax.value) || 50,
-            exig: parseFloat($fieldExig.value) || 60,
-            nmin: parseFloat($fieldNmin.value) || 1.0,
-            nmax: parseFloat($fieldNmax.value) || 5.0,
-            napr: parseFloat($fieldNapr.value) || 3.0,
+            icon: normalizeIcon($fieldIcon ? $fieldIcon.value : ''),
+            headerColor: normalizeHeaderColor($fieldHeaderColor ? $fieldHeaderColor.value : ''),
+            pmax: 50,
+            exig: 60,
+            nmin: 1.0,
+            nmax: 5.0,
+            napr: 3.0,
             categories: { cognitiva: [], laboral: [], ciudadana: [] },
             grades: {}, createdAt: Date.now(), updatedAt: Date.now()
         });
@@ -854,6 +915,8 @@
 
         if ($editInfoTeacher) $editInfoTeacher.value = sheet.teacherName || '';
         if ($editInfoSubject) $editInfoSubject.value = sheet.subject || '';
+        setIconPickerValue($editInfoIcon, sheet.icon || 'fa-table-columns');
+        setColorPickerValue($editInfoHeaderColor, sheet.headerColor || '#2c1f56');
         if ($editInfoGroup) $editInfoGroup.value = sheet.group || '';
         if ($editInfoTerm) $editInfoTerm.value = sheet.term || 'First';
 
@@ -882,6 +945,8 @@
         sheet.subject = newSubject;
         sheet.group = newGroup;
         sheet.term = newTerm;
+        sheet.icon = normalizeIcon($editInfoIcon ? $editInfoIcon.value : '');
+        sheet.headerColor = normalizeHeaderColor($editInfoHeaderColor ? $editInfoHeaderColor.value : '');
 
         sheet.updatedAt = Date.now();
         saveToStorage();
@@ -935,18 +1000,59 @@
             btn.addEventListener('click', (e) => {
                 const actId = e.target.dataset.id;
                 const cat = e.target.dataset.cat;
-                const act = (sheet.categories[cat] || []).find(a => a.id === actId);
-                if (!act) return;
-                const newLabel = prompt(`Edit activity description:`, act.label);
-                if (newLabel !== null && newLabel.trim() !== '') {
-                    act.label = newLabel.trim();
-                    sheet.updatedAt = Date.now();
-                    saveToStorage();
-                    renderGrid();
-                    renderDescriptions();
-                }
+                openEditDescription(actId, cat);
             });
         });
+    }
+
+    function openEditDescription(actId, cat) {
+        const sheet = getSheet();
+        if (!sheet || !$editDescOverlay) return;
+        const act = (sheet.categories[cat] || []).find(a => a.id === actId);
+        if (!act) return;
+        editingActId = actId;
+        editingActCat = cat;
+        if ($editDescLabel) $editDescLabel.value = act.label || '';
+        if ($editDescCategory) $editDescCategory.value = cat;
+        $editDescOverlay.style.display = '';
+        setTimeout(() => $editDescLabel && $editDescLabel.focus(), 100);
+    }
+
+    function closeEditDescription() {
+        if ($editDescOverlay) $editDescOverlay.style.display = 'none';
+        editingActId = null;
+        editingActCat = null;
+    }
+
+    function saveEditDescription() {
+        const sheet = getSheet();
+        if (!sheet || !editingActId || !editingActCat) return;
+        const newLabel = ($editDescLabel.value || '').trim();
+        const newCat = $editDescCategory.value;
+        if (!newLabel) {
+            showToast('Activity description cannot be empty.', 'error');
+            return;
+        }
+        if (!CATEGORIES.includes(newCat)) {
+            showToast('Choose a valid category.', 'error');
+            return;
+        }
+
+        const oldList = sheet.categories[editingActCat] || [];
+        const idx = oldList.findIndex(a => a.id === editingActId);
+        if (idx === -1) return;
+        const act = oldList[idx];
+        act.label = newLabel;
+        if (newCat !== editingActCat) {
+            oldList.splice(idx, 1);
+            if (!sheet.categories[newCat]) sheet.categories[newCat] = [];
+            sheet.categories[newCat].push(act);
+        }
+        sheet.updatedAt = Date.now();
+        saveToStorage();
+        closeEditDescription();
+        renderGrid();
+        renderDescriptions();
     }
 
     // ══════════════════════════════════════════════════════
@@ -1006,7 +1112,6 @@
         } catch (e) { }
     }
 
-    $fieldImportScale.addEventListener('change', () => applySavedScale($fieldImportScale, 'gs-field'));
     $editImportScale.addEventListener('change', () => applySavedScale($editImportScale, 'gs-edit'));
 
     // ══════════════════════════════════════════════════════
@@ -1191,6 +1296,249 @@
     }
 
     // ══════════════════════════════════════════════════════
+    //              UPLOAD CSV GRADES
+    // ══════════════════════════════════════════════════════
+    function openUploadModal() {
+        pendingCsvImport = null;
+        if ($uploadFileInput) $uploadFileInput.value = '';
+        if ($uploadFileName) $uploadFileName.textContent = 'No file chosen';
+        if ($uploadPreview) $uploadPreview.textContent = 'Choose a CSV file to preview matching students and activities.';
+        if ($uploadImportBtn) $uploadImportBtn.disabled = true;
+        if ($uploadOverlay) $uploadOverlay.style.display = 'flex';
+    }
+
+    function closeUploadModal() {
+        if ($uploadOverlay) $uploadOverlay.style.display = 'none';
+        pendingCsvImport = null;
+    }
+
+    function parseCsv(text) {
+        const rows = [];
+        let row = [];
+        let cell = '';
+        let inQuotes = false;
+
+        for (let i = 0; i < text.length; i++) {
+            const ch = text[i];
+            const next = text[i + 1];
+            if (ch === '"') {
+                if (inQuotes && next === '"') {
+                    cell += '"';
+                    i++;
+                } else {
+                    inQuotes = !inQuotes;
+                }
+            } else if (ch === ',' && !inQuotes) {
+                row.push(cell);
+                cell = '';
+            } else if ((ch === '\n' || ch === '\r') && !inQuotes) {
+                if (ch === '\r' && next === '\n') i++;
+                row.push(cell);
+                if (row.some(v => String(v).trim() !== '')) rows.push(row);
+                row = [];
+                cell = '';
+            } else {
+                cell += ch;
+            }
+        }
+        row.push(cell);
+        if (row.some(v => String(v).trim() !== '')) rows.push(row);
+        return rows;
+    }
+
+    function getActivityById(sheet, actId) {
+        let match = null;
+        CATEGORIES.forEach(cat => {
+            const found = (sheet.categories[cat] || []).find(a => a.id === actId);
+            if (found) match = found;
+        });
+        return match;
+    }
+
+    function getUploadValueType() {
+        let type = 'scores';
+        $uploadValueTypeRadios.forEach(r => { if (r.checked) type = r.value; });
+        return type;
+    }
+
+    function getParsedUploadRows() {
+        return pendingCsvImport ? pendingCsvImport.rows : null;
+    }
+
+    function previewUploadRows(rows) {
+        const sheet = getSheet();
+        if (!sheet) return null;
+        const students = getStudentNames(sheet.group);
+        const studentLookup = new Map(students.map(name => [normalizeText(name), name]));
+        const allActs = getAllActivities(sheet);
+        const activityLookup = new Map(allActs.map(act => [normalizeText(act.label), act]));
+
+        const result = {
+            rows,
+            format: 'simple',
+            mappings: [],
+            matchedStudents: new Set(),
+            skippedStudents: new Set(),
+            matchedActivities: new Set(),
+            skippedActivities: [],
+            cells: 0
+        };
+
+        const firstCell = normalizeText((rows[0] || [])[0]);
+        const activityHeaderRowIndex = rows.findIndex(row => row.some(cell => / score$/i.test(String(cell || '').trim())));
+        if (firstCell === 'grade sheet report' || activityHeaderRowIndex !== -1) {
+            result.format = 'roundtrip';
+            const labelRowIndex = activityHeaderRowIndex !== -1 ? activityHeaderRowIndex : rows.findIndex(row => row.some(cell => / score$/i.test(String(cell || '').trim())));
+            const labelRow = rows[labelRowIndex] || [];
+            const dataRows = rows.slice(labelRowIndex + 1);
+            const valueSuffix = getUploadValueType() === 'grades' ? ' grade' : ' score';
+            const valueSuffixRegex = new RegExp(`${valueSuffix}$`, 'i');
+            let actIdx = 0;
+            labelRow.forEach((cell, colIndex) => {
+                if (!valueSuffixRegex.test(String(cell || '').trim())) return;
+                const act = allActs[actIdx];
+                if (act) {
+                    result.mappings.push({ colIndex, act });
+                    result.matchedActivities.add(act.id);
+                } else {
+                    result.skippedActivities.push(String(cell || '').replace(valueSuffixRegex, '').trim() || `Column ${colIndex + 1}`);
+                }
+                actIdx++;
+            });
+            dataRows.forEach(row => collectUploadRowStats(row, 1, studentLookup, result));
+        } else {
+            const header = rows[0] || [];
+            const dataRows = rows.slice(1);
+            header.forEach((cell, colIndex) => {
+                if (colIndex === 0) return;
+                const label = String(cell || '').trim();
+                if (!label) return;
+                const act = activityLookup.get(normalizeText(label));
+                if (act) {
+                    result.mappings.push({ colIndex, act });
+                    result.matchedActivities.add(act.id);
+                } else {
+                    result.skippedActivities.push(label);
+                }
+            });
+            dataRows.forEach(row => collectUploadRowStats(row, 0, studentLookup, result));
+        }
+
+        return result;
+    }
+
+    function collectUploadRowStats(row, studentColIndex, studentLookup, result) {
+        const student = studentLookup.get(normalizeText(row[studentColIndex]));
+        if (!student) {
+            const rawName = String(row[studentColIndex] || '').trim();
+            if (rawName) result.skippedStudents.add(rawName);
+            return;
+        }
+        result.matchedStudents.add(student);
+        result.mappings.forEach(({ colIndex }) => {
+            const raw = String(row[colIndex] || '').trim();
+            if (raw !== '' && !isNaN(parseFloat(raw.replace(',', '.')))) result.cells++;
+        });
+    }
+
+    function renderUploadPreview() {
+        if (!$uploadPreview || !$uploadImportBtn) return;
+        const rows = getParsedUploadRows();
+        if (!rows || rows.length < 2) {
+            $uploadPreview.textContent = 'Choose a CSV file to preview matching students and activities.';
+            $uploadImportBtn.disabled = true;
+            return;
+        }
+
+        const preview = previewUploadRows(rows);
+        if (!preview || !preview.mappings.length || preview.cells === 0) {
+            $uploadPreview.innerHTML = '<strong>No importable data found.</strong><br>Check that student names and activity columns match this sheet.';
+            $uploadImportBtn.disabled = true;
+            pendingCsvImport.preview = preview;
+            return;
+        }
+
+        pendingCsvImport.preview = preview;
+        const skippedActivities = preview.skippedActivities.length
+            ? `<br><span>Skipped activity columns: ${escHtml(preview.skippedActivities.slice(0, 5).join(', '))}${preview.skippedActivities.length > 5 ? '...' : ''}</span>`
+            : '';
+        const skippedStudents = preview.skippedStudents.size
+            ? `<br><span>Skipped students: ${escHtml(Array.from(preview.skippedStudents).slice(0, 5).join(', '))}${preview.skippedStudents.size > 5 ? '...' : ''}</span>`
+            : '';
+        $uploadPreview.innerHTML = `
+            <strong>${preview.format === 'roundtrip' ? 'Exported Grade Sheet CSV' : 'Simple Student/Activity CSV'} detected.</strong><br>
+            <span>${preview.matchedStudents.size} student(s) matched.</span><br>
+            <span>${preview.matchedActivities.size} activity column(s) matched.</span><br>
+            <span>${preview.cells} grade cell(s) ready to import as ${getUploadValueType() === 'grades' ? 'final grades' : 'raw scores'}.</span>
+            ${skippedActivities}${skippedStudents}
+        `;
+        $uploadImportBtn.disabled = false;
+    }
+
+    function handleUploadFileChange() {
+        const file = $uploadFileInput && $uploadFileInput.files ? $uploadFileInput.files[0] : null;
+        pendingCsvImport = null;
+        if ($uploadImportBtn) $uploadImportBtn.disabled = true;
+        if (!file) {
+            if ($uploadFileName) $uploadFileName.textContent = 'No file chosen';
+            renderUploadPreview();
+            return;
+        }
+        if ($uploadFileName) $uploadFileName.textContent = file.name;
+        const reader = new FileReader();
+        reader.onload = () => {
+            const rows = parseCsv(String(reader.result || ''));
+            pendingCsvImport = { rows, preview: null };
+            renderUploadPreview();
+        };
+        reader.onerror = () => showToast('Could not read the CSV file.', 'error');
+        reader.readAsText(file);
+    }
+
+    function executeCsvUpload() {
+        const sheet = getSheet();
+        if (!sheet || !pendingCsvImport) return;
+        const preview = pendingCsvImport.preview || previewUploadRows(pendingCsvImport.rows);
+        if (!preview || !preview.mappings.length) return;
+
+        const valueType = getUploadValueType();
+        const studentColIndex = preview.format === 'roundtrip' ? 1 : 0;
+        const labelRowIndex = preview.format === 'roundtrip'
+            ? pendingCsvImport.rows.findIndex(row => row.some(cell => / score$/i.test(String(cell || '').trim())))
+            : 0;
+        const dataRows = pendingCsvImport.rows.slice(labelRowIndex + 1);
+        const studentLookup = new Map(getStudentNames(sheet.group).map(name => [normalizeText(name), name]));
+        let imported = 0;
+
+        dataRows.forEach(row => {
+            const student = studentLookup.get(normalizeText(row[studentColIndex]));
+            if (!student) return;
+            if (!sheet.grades[student]) sheet.grades[student] = {};
+            preview.mappings.forEach(({ colIndex, act }) => {
+                const raw = String(row[colIndex] || '').trim().replace(',', '.');
+                if (raw === '') return;
+                let num = parseFloat(raw);
+                if (isNaN(num)) return;
+                const sc = getScaleForActivity(getActivityById(sheet, act.id) || act, sheet);
+                if (valueType === 'grades') {
+                    num = inverseCalculateGrade(num, sc.pmax, sc.exig, sc.nmin, sc.nmax, sc.napr);
+                    num = Math.round(num * 100) / 100;
+                }
+                if (num < 0) num = 0;
+                if (num > sc.pmax) num = sc.pmax;
+                sheet.grades[student][act.id] = num;
+                imported++;
+            });
+        });
+
+        sheet.updatedAt = Date.now();
+        saveToStorage();
+        closeUploadModal();
+        renderGrid();
+        showToast(`Imported ${imported} grade cell${imported === 1 ? '' : 's'} from CSV.`, 'success');
+    }
+
+    // ══════════════════════════════════════════════════════
     //              CSV EXPORT (Phase 4)
     // ══════════════════════════════════════════════════════
     function csvEscape(val) {
@@ -1319,6 +1667,19 @@
         $backToDashboard.addEventListener('click', backToDashboard);
         $exportSelectedBtn.addEventListener('click', exportSelected);
 
+        document.querySelectorAll('.gs-icon-picker').forEach(picker => {
+            const target = $(picker.dataset.target);
+            picker.querySelectorAll('.gs-icon-option').forEach(btn => {
+                btn.addEventListener('click', () => setIconPickerValue(target, btn.dataset.icon));
+            });
+        });
+        document.querySelectorAll('.gs-color-swatches').forEach(group => {
+            const target = $(group.dataset.target);
+            group.querySelectorAll('.gs-color-swatch').forEach(btn => {
+                btn.addEventListener('click', () => setColorPickerValue(target, btn.dataset.color));
+            });
+        });
+
         // Editor – Add activity
         document.querySelectorAll('.gs-add-activity-bar .gs-btn-sm').forEach(btn => btn.addEventListener('click', () => addActivity(btn.dataset.cat)));
 
@@ -1337,6 +1698,10 @@
         if ($editInfoSave) $editInfoSave.addEventListener('click', saveEditSheetInfo);
         if ($editInfoOverlay) $editInfoOverlay.addEventListener('click', e => { if (e.target === $editInfoOverlay) closeEditSheetInfo(); });
 
+        if ($editDescClose) $editDescClose.forEach(b => b.addEventListener('click', closeEditDescription));
+        if ($editDescSave) $editDescSave.addEventListener('click', saveEditDescription);
+        if ($editDescOverlay) $editDescOverlay.addEventListener('click', e => { if (e.target === $editDescOverlay) closeEditDescription(); });
+
         // Phase 8 – Import Component
         if ($importSheetDataBtn) $importSheetDataBtn.addEventListener('click', openImportModal);
         if ($importCloseBtn) $importCloseBtn.addEventListener('click', closeImportModal);
@@ -1345,6 +1710,13 @@
         if ($importActivitySelect) $importActivitySelect.addEventListener('change', onImportActivityChange);
         if ($importExecuteBtn) $importExecuteBtn.addEventListener('click', executeImport);
         if ($importOverlay) $importOverlay.addEventListener('click', e => { if (e.target === $importOverlay) closeImportModal(); });
+
+        if ($uploadGradesBtn) $uploadGradesBtn.addEventListener('click', openUploadModal);
+        if ($uploadClose) $uploadClose.forEach(b => b.addEventListener('click', closeUploadModal));
+        if ($uploadFileInput) $uploadFileInput.addEventListener('change', handleUploadFileChange);
+        if ($uploadImportBtn) $uploadImportBtn.addEventListener('click', executeCsvUpload);
+        if ($uploadOverlay) $uploadOverlay.addEventListener('click', e => { if (e.target === $uploadOverlay) closeUploadModal(); });
+        if ($uploadValueTypeRadios) $uploadValueTypeRadios.forEach(r => r.addEventListener('change', renderUploadPreview));
 
         CATEGORIES.forEach(cat => {
             const inp = $('gs-add-' + cat + '-input');
@@ -1374,6 +1746,8 @@
                 if ($scaleOverlay.style.display !== 'none') closeScaleConfig();
                 if ($missingOverlay.style.display !== 'none') closeMissingReport();
                 if ($importOverlay && $importOverlay.style.display !== 'none') closeImportModal();
+                if ($editDescOverlay && $editDescOverlay.style.display !== 'none') closeEditDescription();
+                if ($uploadOverlay && $uploadOverlay.style.display !== 'none') closeUploadModal();
             }
             if (e.key === 'Enter' && $modalOverlay.style.display !== 'none') {
                 if (!document.activeElement || !document.activeElement.classList.contains('gs-add-input')) createSheet();

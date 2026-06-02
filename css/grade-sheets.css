@@ -120,6 +120,10 @@ body {
     backdrop-filter: blur(5px);
 }
 
+.gs-header-right .gs-btn-secondary {
+    color: #fff;
+}
+
 .gs-btn-secondary:hover {
     background: rgba(255, 255, 255, 0.25);
     transform: translateY(-2px);
@@ -208,6 +212,14 @@ body {
     font-size: 1.15rem;
     font-weight: 800;
     letter-spacing: -0.3px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.gs-card-top h3 i {
+    font-size: 1rem;
+    opacity: 0.85;
 }
 
 .gs-card-top .gs-card-meta {
@@ -391,7 +403,8 @@ body {
     border-bottom: 1px solid #f1f2f6;
 }
 
-.gs-modal-header h2 {
+.gs-modal-header h2,
+.gs-modal-header h3 {
     margin: 0;
     font-size: 1.2rem;
     font-weight: 800;
@@ -399,6 +412,10 @@ body {
     align-items: center;
     gap: 10px;
     color: #2d3436;
+}
+
+.gs-modal-header h3 i {
+    color: #6c5ce7;
 }
 
 .gs-modal-close {
@@ -455,7 +472,8 @@ body {
 }
 
 .gs-field input,
-.gs-field select {
+.gs-field select,
+.gs-field textarea {
     width: 100%;
     padding: 11px 14px;
     border: 2px solid #dfe6e9;
@@ -470,10 +488,168 @@ body {
 }
 
 .gs-field input:focus,
-.gs-field select:focus {
+.gs-field select:focus,
+.gs-field textarea:focus {
     outline: none;
     border-color: #a29bfe;
     box-shadow: 0 0 0 4px rgba(162, 155, 254, 0.15);
+}
+
+.gs-textarea {
+    resize: vertical;
+    min-height: 86px;
+}
+
+.gs-icon-picker {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.gs-icon-option {
+    width: 42px;
+    height: 42px;
+    border: 2px solid #dfe6e9;
+    border-radius: 12px;
+    background: #fff;
+    color: #636e72;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    transition: all 0.2s;
+}
+
+.gs-icon-option:hover,
+.gs-icon-option.selected {
+    border-color: #a29bfe;
+    color: #5b4dc7;
+    background: #f0edff;
+    transform: translateY(-1px);
+}
+
+.gs-color-picker-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.gs-color-picker-row input[type="color"] {
+    width: 54px;
+    height: 42px;
+    padding: 4px;
+    cursor: pointer;
+}
+
+.gs-color-swatches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.gs-color-swatch {
+    width: 28px;
+    height: 28px;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    box-shadow: 0 0 0 1px #dfe6e9;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.gs-color-swatch:hover {
+    transform: scale(1.12);
+    box-shadow: 0 0 0 2px #a29bfe;
+}
+
+.gs-radio-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-top: 8px;
+}
+
+.gs-radio-row label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #2d3436;
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-transform: none;
+    letter-spacing: 0;
+    cursor: pointer;
+}
+
+.gs-radio-row input {
+    width: auto;
+    padding: 0;
+    border: 0;
+    accent-color: #6c5ce7;
+}
+
+.gs-file-upload {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    border: 2px solid #dfe6e9;
+    border-radius: 12px;
+    background: #fff;
+}
+
+.gs-file-upload input[type="file"] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.gs-file-upload-btn {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 8px;
+    margin: 0 !important;
+    padding: 9px 14px;
+    border-radius: 10px;
+    background: #6c5ce7;
+    color: #fff !important;
+    font-size: 0.85rem !important;
+    font-weight: 800 !important;
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+}
+
+.gs-file-upload-btn:hover {
+    background: #7b68ee;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(108, 92, 231, 0.25);
+}
+
+.gs-file-upload-name {
+    min-width: 0;
+    color: #636e72;
+    font-size: 0.9rem;
+    font-weight: 700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.gs-upload-preview {
+    padding: 14px 16px;
+    border-radius: 12px;
+    background: #f8f9fa;
+    border-left: 3px solid #a29bfe;
+    color: #636e72;
+    font-size: 0.9rem;
+    font-weight: 600;
+    line-height: 1.55;
 }
 
 /* Scale config in modal */
@@ -521,6 +697,45 @@ body {
     color: rgba(255, 255, 255, 0.45);
     font-size: 0.85rem;
     font-weight: 600;
+}
+
+/* ---- Toast ---- */
+.gs-toast {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    z-index: 6000;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    max-width: 360px;
+    padding: 13px 16px;
+    border-radius: 14px;
+    background: #2d3436;
+    color: #fff;
+    font-weight: 800;
+    font-size: 0.9rem;
+    box-shadow: 0 14px 35px rgba(0, 0, 0, 0.22);
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.gs-toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.gs-toast.success {
+    background: #00b894;
+}
+
+.gs-toast.error {
+    background: #d63031;
+}
+
+.gs-toast.info {
+    background: #3d348b;
 }
 
 /* ---- Editor Layout ---- */
@@ -1383,7 +1598,8 @@ body.dark-mode .gs-modal-header {
     border-bottom-color: #444;
 }
 
-body.dark-mode .gs-modal-header h2 {
+body.dark-mode .gs-modal-header h2,
+body.dark-mode .gs-modal-header h3 {
     color: #e0e0e0;
 }
 
@@ -1406,6 +1622,7 @@ body.dark-mode .gs-field label {
 
 body.dark-mode .gs-field input,
 body.dark-mode .gs-field select,
+body.dark-mode .gs-field textarea,
 body.dark-mode .gs-grade-table .gs-avg-cell {
     background: #363636;
     color: #e0e0e0;
@@ -1413,7 +1630,8 @@ body.dark-mode .gs-grade-table .gs-avg-cell {
 }
 
 body.dark-mode .gs-field input:focus,
-body.dark-mode .gs-field select:focus {
+body.dark-mode .gs-field select:focus,
+body.dark-mode .gs-field textarea:focus {
     border-color: #a29bfe;
     box-shadow: 0 0 0 4px rgba(162, 155, 254, 0.1);
 }
@@ -1421,6 +1639,42 @@ body.dark-mode .gs-field select:focus {
 body.dark-mode .gs-field select option {
     background: #2a2a2a;
     color: #e0e0e0;
+}
+
+body.dark-mode .gs-icon-option {
+    background: #363636;
+    color: #e0e0e0;
+    border-color: #555;
+}
+
+body.dark-mode .gs-icon-option:hover,
+body.dark-mode .gs-icon-option.selected {
+    background: #2e2a50;
+    color: #b0a8f0;
+    border-color: #a29bfe;
+}
+
+body.dark-mode .gs-color-swatch {
+    border-color: #2a2a2a;
+    box-shadow: 0 0 0 1px #555;
+}
+
+body.dark-mode .gs-radio-row label {
+    color: #e0e0e0;
+}
+
+body.dark-mode .gs-file-upload {
+    background: #363636;
+    border-color: #555;
+}
+
+body.dark-mode .gs-file-upload-name {
+    color: #b0b0b0;
+}
+
+body.dark-mode .gs-upload-preview {
+    background: #313131;
+    color: #b0b0b0;
 }
 
 body.dark-mode .gs-scale-config {
