@@ -1,641 +1,1306 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <link
+            rel="icon"
+            type="image/png"
+            href="assets/graduation-cap-icon.png"
+        />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Grade Sheets - ESL Learning Platform</title>
+        <meta
+            name="description"
+            content="Create, manage and export grade sheets for your student groups with weighted competency grading."
+        />
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        />
+        <link rel="stylesheet" href="css/styles.css" />
+        <link rel="stylesheet" href="css/grade-sheets.css" />
+    </head>
 
-<head>
-    <meta charset="UTF-8">
-    <link rel="icon" type="image/png" href="assets/graduation-cap-icon.png">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grade Sheets - ESL Learning Platform</title>
-    <meta name="description"
-        content="Create, manage and export grade sheets for your student groups with weighted competency grading.">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="css/grade-sheets.css">
-</head>
-
-<body>
-
-    <!-- ===================== DASHBOARD VIEW ===================== -->
-    <div id="gs-dashboard-view" class="gs-view">
-        <div class="gs-page-container">
-            <!-- Header -->
-            <div class="gs-page-header">
-                <div class="gs-header-left">
-                    <h1><i class="fa-solid fa-table-columns"></i> Grade Sheets</h1>
-                    <p class="gs-subtitle">Manage your term grading sheets</p>
-                </div>
-                <div class="gs-header-right">
-                    <a href="tools.html" class="gs-btn gs-btn-ghost">
-                        <i class="fa-solid fa-arrow-left"></i> Tools
-                    </a>
-                    <button id="gs-export-selected-btn" class="gs-btn gs-btn-secondary" disabled
-                        title="Export selected sheets as CSV">
-                        <i class="fa-solid fa-file-export"></i> Export Selected
-                    </button>
-                    <button id="gs-btn-drive" class="gs-btn gs-btn-ghost">
-                        <i class="fa-brands fa-google-drive"></i> Google Drive
-                    </button>
-                    <button id="gs-new-sheet-btn" class="gs-btn gs-btn-primary">
-                        <i class="fa-solid fa-plus"></i> New Sheet
-                    </button>
-                </div>
-            </div>
-
-            <!-- Dashboard Filters -->
-            <div id="gs-dashboard-filters" class="gs-dashboard-filters" style="display:none;">
-                <div class="gs-filter-search-wrap">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                    <input type="search" id="gs-filter-search" class="gs-filter-search"
-                        placeholder="Search by subject, course, term or teacher...">
-                </div>
-                <div class="gs-filter-controls">
-                    <div class="gs-filter-field">
-                        <label for="gs-filter-subject">Subject</label>
-                        <select id="gs-filter-subject">
-                            <option value="">All subjects</option>
-                        </select>
+    <body>
+        <!-- ===================== DASHBOARD VIEW ===================== -->
+        <div id="gs-dashboard-view" class="gs-view">
+            <div class="gs-page-container">
+                <!-- Header -->
+                <div class="gs-page-header">
+                    <div class="gs-header-left">
+                        <h1>
+                            <i class="fa-solid fa-table-columns"></i> Grade
+                            Sheets
+                        </h1>
+                        <p class="gs-subtitle">
+                            Manage your term grading sheets
+                        </p>
                     </div>
-                    <div class="gs-filter-field">
-                        <label for="gs-filter-course">Course</label>
-                        <select id="gs-filter-course">
-                            <option value="">All courses</option>
-                        </select>
+                    <div class="gs-header-right">
+                        <a href="tools.html" class="gs-btn gs-btn-ghost">
+                            <i class="fa-solid fa-arrow-left"></i> Tools
+                        </a>
+                        <button
+                            id="gs-export-selected-btn"
+                            class="gs-btn gs-btn-secondary"
+                            disabled
+                            title="Export selected sheets as CSV"
+                        >
+                            <i class="fa-solid fa-file-export"></i> Export
+                            Selected
+                        </button>
+                        <button id="gs-btn-drive" class="gs-btn gs-btn-ghost">
+                            <i class="fa-brands fa-google-drive"></i> Google
+                            Drive
+                        </button>
+                        <button
+                            id="gs-new-sheet-btn"
+                            class="gs-btn gs-btn-primary"
+                        >
+                            <i class="fa-solid fa-plus"></i> New Sheet
+                        </button>
                     </div>
-                    <div class="gs-filter-field">
-                        <label for="gs-filter-term">Term</label>
-                        <select id="gs-filter-term">
-                            <option value="">All terms</option>
-                        </select>
-                    </div>
-                    <div class="gs-filter-field">
-                        <label for="gs-filter-sort">Sort by</label>
-                        <select id="gs-filter-sort">
-                            <option value="recent">Recently updated</option>
-                            <option value="completion-desc">Most complete first</option>
-                            <option value="completion-asc">Least complete first</option>
-                        </select>
-                    </div>
-                    <button id="gs-filter-clear-btn" class="gs-btn gs-btn-ghost gs-filter-clear-btn" type="button"
-                        title="Clear all filters">
-                        <i class="fa-solid fa-filter-circle-xmark"></i> Clear
-                    </button>
                 </div>
-                <div id="gs-filter-summary" class="gs-filter-summary"></div>
-            </div>
 
-            <!-- Dashboard Grid -->
-            <div id="gs-dashboard-grid" class="gs-dashboard-grid">
-                <!-- Cards rendered by JS -->
-            </div>
+                <!-- Dashboard Filters -->
+                <div
+                    id="gs-dashboard-filters"
+                    class="gs-dashboard-filters"
+                    style="display: none"
+                >
+                    <div class="gs-filter-search-wrap">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input
+                            type="search"
+                            id="gs-filter-search"
+                            class="gs-filter-search"
+                            placeholder="Search by subject, course, term or teacher..."
+                        />
+                    </div>
+                    <div class="gs-filter-controls">
+                        <div class="gs-filter-field">
+                            <label for="gs-filter-subject">Subject</label>
+                            <select id="gs-filter-subject">
+                                <option value="">All subjects</option>
+                            </select>
+                        </div>
+                        <div class="gs-filter-field">
+                            <label for="gs-filter-course">Course</label>
+                            <select id="gs-filter-course">
+                                <option value="">All courses</option>
+                            </select>
+                        </div>
+                        <div class="gs-filter-field">
+                            <label for="gs-filter-term">Term</label>
+                            <select id="gs-filter-term">
+                                <option value="">All terms</option>
+                            </select>
+                        </div>
+                        <div class="gs-filter-field">
+                            <label for="gs-filter-sort">Sort by</label>
+                            <select id="gs-filter-sort">
+                                <option value="recent">Recently updated</option>
+                                <option value="completion-desc">
+                                    Most complete first
+                                </option>
+                                <option value="completion-asc">
+                                    Least complete first
+                                </option>
+                            </select>
+                        </div>
+                        <button
+                            id="gs-filter-clear-btn"
+                            class="gs-btn gs-btn-ghost gs-filter-clear-btn"
+                            type="button"
+                            title="Clear all filters"
+                        >
+                            <i class="fa-solid fa-filter-circle-xmark"></i>
+                            Clear
+                        </button>
+                    </div>
+                    <div id="gs-filter-summary" class="gs-filter-summary"></div>
+                </div>
 
-            <!-- Empty State -->
-            <div id="gs-empty-state" class="gs-empty-state" style="display:none;">
-                <i class="fa-solid fa-folder-open"></i>
-                <h2>No Grade Sheets Yet</h2>
-                <p>Click <strong>"New Sheet"</strong> to create your first grading sheet.</p>
-            </div>
+                <!-- Dashboard Grid -->
+                <div id="gs-dashboard-grid" class="gs-dashboard-grid">
+                    <!-- Cards rendered by JS -->
+                </div>
 
-            <!-- Filter Empty State -->
-            <div id="gs-filter-empty-state" class="gs-empty-state gs-filter-empty-state" style="display:none;">
-                <i class="fa-solid fa-filter"></i>
-                <h2>No Matching Sheets</h2>
-                <p>Try adjusting your search or filters, or <button id="gs-filter-empty-clear" type="button"
-                        class="gs-link-btn">clear all filters</button>.</p>
+                <!-- Empty State -->
+                <div
+                    id="gs-empty-state"
+                    class="gs-empty-state"
+                    style="display: none"
+                >
+                    <i class="fa-solid fa-folder-open"></i>
+                    <h2>No Grade Sheets Yet</h2>
+                    <p>
+                        Click <strong>"New Sheet"</strong> to create your first
+                        grading sheet.
+                    </p>
+                </div>
+
+                <!-- Filter Empty State -->
+                <div
+                    id="gs-filter-empty-state"
+                    class="gs-empty-state gs-filter-empty-state"
+                    style="display: none"
+                >
+                    <i class="fa-solid fa-filter"></i>
+                    <h2>No Matching Sheets</h2>
+                    <p>
+                        Try adjusting your search or filters, or
+                        <button
+                            id="gs-filter-empty-clear"
+                            type="button"
+                            class="gs-link-btn"
+                        >
+                            clear all filters</button
+                        >.
+                    </p>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- ===================== SHEET EDITOR VIEW ===================== -->
-    <div id="gs-editor-view" class="gs-view" style="display:none;">
-        <div class="gs-page-container gs-editor-container">
-            <!-- Editor Header -->
-            <div class="gs-page-header">
-                <div class="gs-header-left">
-                    <button id="gs-back-to-dashboard" class="gs-btn gs-btn-ghost">
-                        <i class="fa-solid fa-arrow-left"></i> Back to Sheets
-                    </button>
-                    <h1 id="gs-editor-title"></h1>
-                </div>
-                <div class="gs-header-right">
-                    <button id="gs-export-csv-btn" class="gs-btn gs-btn-primary" title="Export this sheet as CSV">
-                        <i class="fa-solid fa-file-csv"></i> Export CSV
-                    </button>
-                    <button id="gs-missing-report-btn" class="gs-btn gs-btn-secondary"
-                        title="Show missing grades report">
-                        <i class="fa-solid fa-clipboard-question"></i> Missing Grades
-                    </button>
-                    <button id="gs-scale-config-btn" class="gs-btn gs-btn-secondary"
-                        title="Edit grading scale for this sheet">
-                        <i class="fa-solid fa-sliders"></i> Scale
-                    </button>
-
-                    <button id="gs-import-sheet-data-btn" class="gs-btn gs-btn-secondary"
-                        title="Import activities or grades from another sheet">
-                        <i class="fa-solid fa-file-import"></i> Import
-                    </button>
-                    <button id="gs-upload-grades-btn" class="gs-btn gs-btn-secondary"
-                        title="Upload grades or scores from a CSV file">
-                        <i class="fa-solid fa-file-arrow-up"></i> Upload Grades
-                    </button>
-
-                    <div class="gs-toggle-switch-wrapper"
-                        title="Remove the decimal point from grades (e.g., 4.5 becomes 45)">
-                        <label class="gs-toggle-switch">
-                            <input type="checkbox" id="gs-remove-decimal-toggle">
-                            <span class="gs-slider round"></span>
-                        </label>
-                        <span class="gs-toggle-label">Note Decimals</span>
+        <!-- ===================== SHEET EDITOR VIEW ===================== -->
+        <div id="gs-editor-view" class="gs-view" style="display: none">
+            <div class="gs-page-container gs-editor-container">
+                <!-- Editor Header -->
+                <div class="gs-page-header">
+                    <div class="gs-header-left">
+                        <button
+                            id="gs-back-to-dashboard"
+                            class="gs-btn gs-btn-ghost"
+                        >
+                            <i class="fa-solid fa-arrow-left"></i> Back to
+                            Sheets
+                        </button>
+                        <h1 id="gs-editor-title"></h1>
                     </div>
+                    <div class="gs-header-right">
+                        <button
+                            id="gs-export-csv-btn"
+                            class="gs-btn gs-btn-primary"
+                            title="Export this sheet as CSV"
+                        >
+                            <i class="fa-solid fa-file-csv"></i> Export CSV
+                        </button>
+                        <button
+                            id="gs-missing-report-btn"
+                            class="gs-btn gs-btn-secondary"
+                            title="Show missing grades report"
+                        >
+                            <i class="fa-solid fa-clipboard-question"></i>
+                            Missing Grades
+                        </button>
+                        <button
+                            id="gs-scale-config-btn"
+                            class="gs-btn gs-btn-secondary"
+                            title="Edit grading scale for this sheet"
+                        >
+                            <i class="fa-solid fa-sliders"></i> Scale
+                        </button>
 
-                    <button id="gs-toggle-view" class="gs-btn gs-btn-secondary"
-                        title="Switch between Scores and Grades views">
-                        <i class="fa-solid fa-exchange-alt"></i> Show Grades
-                    </button>
-                    <button id="gs-clear-grades-btn" class="gs-btn gs-btn-secondary gs-fail"
-                        title="Clear all input grades in this sheet">
-                        <i class="fa-solid fa-trash-can"></i> Clear Grades
-                    </button>
-                    <button id="gs-toggle-descriptions" class="gs-btn gs-btn-secondary"
-                        title="Toggle activity descriptions panel">
-                        <i class="fa-solid fa-align-left"></i> Descriptions
-                    </button>
-                </div>
-            </div>
+                        <button
+                            id="gs-import-sheet-data-btn"
+                            class="gs-btn gs-btn-secondary"
+                            title="Import activities or grades from another sheet"
+                        >
+                            <i class="fa-solid fa-file-import"></i> Import
+                        </button>
+                        <button
+                            id="gs-upload-grades-btn"
+                            class="gs-btn gs-btn-secondary"
+                            title="Upload grades or scores from a CSV file"
+                        >
+                            <i class="fa-solid fa-file-arrow-up"></i> Upload
+                            Grades
+                        </button>
 
-            <!-- Sheet Info Bar -->
-            <div id="gs-sheet-info" class="gs-sheet-info">
-                <div class="gs-info-item"><i class="fa-solid fa-chalkboard-user"></i> <span id="gs-info-teacher"></span>
-                </div>
-                <div class="gs-info-item"><i class="fa-solid fa-book"></i> <span id="gs-info-subject"></span></div>
-                <div class="gs-info-item"><i class="fa-solid fa-users"></i> <span id="gs-info-group"></span></div>
-                <div class="gs-info-item"><i class="fa-solid fa-calendar-alt"></i> <span id="gs-info-term"></span></div>
-                <button id="gs-edit-sheet-info-btn" class="gs-btn gs-btn-sm gs-btn-secondary" title="Edit sheet info"><i
-                        class="fa-solid fa-pen"></i> Edit</button>
-            </div>
+                        <div
+                            class="gs-toggle-switch-wrapper"
+                            title="Remove the decimal point from grades (e.g., 4.5 becomes 45)"
+                        >
+                            <label class="gs-toggle-switch">
+                                <input
+                                    type="checkbox"
+                                    id="gs-remove-decimal-toggle"
+                                />
+                                <span class="gs-slider round"></span>
+                            </label>
+                            <span class="gs-toggle-label">Note Decimals</span>
+                        </div>
 
-            <!-- Add Activity Controls -->
-            <div class="gs-add-activity-bar">
-                <div class="gs-add-group">
-                    <span class="gs-cat-label gs-cat-cognitiva">Cognitiva (35%)</span>
-                    <input type="text" id="gs-add-cognitiva-input" class="gs-add-input"
-                        placeholder="Activity description...">
-                    <button class="gs-btn gs-btn-primary gs-btn-sm" data-cat="cognitiva"><i
-                            class="fa-solid fa-plus"></i></button>
-                </div>
-                <div class="gs-add-group">
-                    <span class="gs-cat-label gs-cat-laboral">Laboral (35%)</span>
-                    <input type="text" id="gs-add-laboral-input" class="gs-add-input"
-                        placeholder="Activity description...">
-                    <button class="gs-btn gs-btn-primary gs-btn-sm" data-cat="laboral"><i
-                            class="fa-solid fa-plus"></i></button>
-                </div>
-                <div class="gs-add-group">
-                    <span class="gs-cat-label gs-cat-ciudadana">Ciudadana (30%)</span>
-                    <input type="text" id="gs-add-ciudadana-input" class="gs-add-input"
-                        placeholder="Activity description...">
-                    <button class="gs-btn gs-btn-primary gs-btn-sm" data-cat="ciudadana"><i
-                            class="fa-solid fa-plus"></i></button>
-                </div>
-            </div>
-
-            <!-- Main Content Area -->
-            <div class="gs-editor-body">
-                <!-- Grade Table -->
-                <div class="gs-table-wrap">
-                    <table id="gs-grade-table" class="gs-grade-table">
-                        <thead id="gs-grade-thead"></thead>
-                        <tbody id="gs-grade-tbody"></tbody>
-                    </table>
-                    <div id="gs-grid-empty" class="gs-grid-empty" style="display:none;">
-                        <i class="fa-solid fa-table-columns"></i>
-                        <p>Add activities above to start grading</p>
+                        <button
+                            id="gs-toggle-view"
+                            class="gs-btn gs-btn-secondary"
+                            title="Switch between Scores and Grades views"
+                        >
+                            <i class="fa-solid fa-exchange-alt"></i> Show Grades
+                        </button>
+                        <button
+                            id="gs-clear-grades-btn"
+                            class="gs-btn gs-btn-secondary gs-fail"
+                            title="Clear all input grades in this sheet"
+                        >
+                            <i class="fa-solid fa-trash-can"></i> Clear Grades
+                        </button>
+                        <button
+                            id="gs-toggle-descriptions"
+                            class="gs-btn gs-btn-secondary"
+                            title="Toggle activity descriptions panel"
+                        >
+                            <i class="fa-solid fa-align-left"></i> Descriptions
+                        </button>
                     </div>
                 </div>
 
-                <!-- Activity Descriptions Panel -->
-                <div id="gs-descriptions-panel" class="gs-descriptions-panel">
-                    <h3><i class="fa-solid fa-align-left"></i> Activity Descriptions</h3>
-                    <div id="gs-descriptions-list" class="gs-descriptions-list">
+                <!-- Sheet Info Bar -->
+                <div id="gs-sheet-info" class="gs-sheet-info">
+                    <div class="gs-info-item">
+                        <i class="fa-solid fa-chalkboard-user"></i>
+                        <span id="gs-info-teacher"></span>
+                    </div>
+                    <div class="gs-info-item">
+                        <i class="fa-solid fa-book"></i>
+                        <span id="gs-info-subject"></span>
+                    </div>
+                    <div class="gs-info-item">
+                        <i class="fa-solid fa-users"></i>
+                        <span id="gs-info-group"></span>
+                    </div>
+                    <div class="gs-info-item">
+                        <i class="fa-solid fa-calendar-alt"></i>
+                        <span id="gs-info-term"></span>
+                    </div>
+                    <button
+                        id="gs-edit-sheet-info-btn"
+                        class="gs-btn gs-btn-sm gs-btn-secondary"
+                        title="Edit sheet info"
+                    >
+                        <i class="fa-solid fa-pen"></i> Edit
+                    </button>
+                </div>
+
+                <!-- Add Activity Controls -->
+                <div class="gs-add-activity-bar">
+                    <div class="gs-add-group">
+                        <span class="gs-cat-label gs-cat-cognitiva"
+                            >Cognitiva (35%)</span
+                        >
+                        <input
+                            type="text"
+                            id="gs-add-cognitiva-input"
+                            class="gs-add-input"
+                            placeholder="Activity description..."
+                        />
+                        <button
+                            class="gs-btn gs-btn-primary gs-btn-sm"
+                            data-cat="cognitiva"
+                        >
+                            <i class="fa-solid fa-plus"></i>
+                        </button>
+                    </div>
+                    <div class="gs-add-group">
+                        <span class="gs-cat-label gs-cat-laboral"
+                            >Laboral (35%)</span
+                        >
+                        <input
+                            type="text"
+                            id="gs-add-laboral-input"
+                            class="gs-add-input"
+                            placeholder="Activity description..."
+                        />
+                        <button
+                            class="gs-btn gs-btn-primary gs-btn-sm"
+                            data-cat="laboral"
+                        >
+                            <i class="fa-solid fa-plus"></i>
+                        </button>
+                    </div>
+                    <div class="gs-add-group">
+                        <span class="gs-cat-label gs-cat-ciudadana"
+                            >Ciudadana (30%)</span
+                        >
+                        <input
+                            type="text"
+                            id="gs-add-ciudadana-input"
+                            class="gs-add-input"
+                            placeholder="Activity description..."
+                        />
+                        <button
+                            class="gs-btn gs-btn-primary gs-btn-sm"
+                            data-cat="ciudadana"
+                        >
+                            <i class="fa-solid fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Main Content Area -->
+                <div class="gs-editor-body">
+                    <!-- Grade Table -->
+                    <div class="gs-table-wrap">
+                        <table id="gs-grade-table" class="gs-grade-table">
+                            <thead id="gs-grade-thead"></thead>
+                            <tbody id="gs-grade-tbody"></tbody>
+                        </table>
+                        <div
+                            id="gs-grid-empty"
+                            class="gs-grid-empty"
+                            style="display: none"
+                        >
+                            <i class="fa-solid fa-table-columns"></i>
+                            <p>Add activities above to start grading</p>
+                        </div>
+                    </div>
+
+                    <!-- Activity Descriptions Panel -->
+                    <div
+                        id="gs-descriptions-panel"
+                        class="gs-descriptions-panel"
+                    >
+                        <h3>
+                            <i class="fa-solid fa-align-left"></i> Activity
+                            Descriptions
+                        </h3>
+                        <div
+                            id="gs-descriptions-list"
+                            class="gs-descriptions-list"
+                        >
+                            <!-- Rendered by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===================== NEW SHEET MODAL ===================== -->
+        <div
+            id="gs-modal-overlay"
+            class="gs-modal-overlay"
+            style="display: none"
+        >
+            <div class="gs-modal">
+                <div class="gs-modal-header">
+                    <h2>
+                        <i class="fa-solid fa-file-circle-plus"></i> New Grade
+                        Sheet
+                    </h2>
+                    <button id="gs-modal-close" class="gs-modal-close">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+                <div class="gs-modal-body">
+                    <div class="gs-field">
+                        <label for="gs-field-teacher">Teacher Name</label>
+                        <input
+                            type="text"
+                            id="gs-field-teacher"
+                            placeholder="e.g. Juan Diego Cuellar Mazabel"
+                        />
+                    </div>
+                    <div class="gs-field">
+                        <label for="gs-field-subject">Subject</label>
+                        <input
+                            type="text"
+                            id="gs-field-subject"
+                            placeholder="e.g. Technology"
+                        />
+                    </div>
+                    <div class="gs-field">
+                        <label>Subject Icon</label>
+                        <input
+                            type="hidden"
+                            id="gs-field-icon"
+                            value="fa-table-columns"
+                        />
+                        <div class="gs-icon-picker" data-target="gs-field-icon">
+                            <button
+                                type="button"
+                                class="gs-icon-option selected"
+                                data-icon="fa-microchip"
+                                title="Technology / IT"
+                            >
+                                <i class="fa-solid fa-microchip"></i>
+                            </button>
+                            <button
+                                type="button"
+                                class="gs-icon-option"
+                                data-icon="fa-flask"
+                                title="Science"
+                            >
+                                <i class="fa-solid fa-flask"></i>
+                            </button>
+                            <button
+                                type="button"
+                                class="gs-icon-option"
+                                data-icon="fa-book-open"
+                                title="English"
+                            >
+                                <i class="fa-solid fa-book-open"></i>
+                            </button>
+                            <button
+                                type="button"
+                                class="gs-icon-option"
+                                data-icon="fa-language"
+                                title="Language"
+                            >
+                                <i class="fa-solid fa-language"></i>
+                            </button>
+                            <button
+                                type="button"
+                                class="gs-icon-option"
+                                data-icon="fa-pen-nib"
+                                title="Writing"
+                            >
+                                <i class="fa-solid fa-pen-nib"></i>
+                            </button>
+                            <button
+                                type="button"
+                                class="gs-icon-option"
+                                data-icon="fa-table-columns"
+                                title="General"
+                            >
+                                <i class="fa-solid fa-table-columns"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="gs-field">
+                        <label for="gs-field-header-color"
+                            >Card Header Color</label
+                        >
+                        <div class="gs-color-picker-row">
+                            <input
+                                type="color"
+                                id="gs-field-header-color"
+                                value="#2c1f56"
+                            />
+                            <div
+                                class="gs-color-swatches"
+                                data-target="gs-field-header-color"
+                            >
+                                <button
+                                    type="button"
+                                    class="gs-color-swatch"
+                                    data-color="#2c1f56"
+                                    style="background: #2c1f56"
+                                    title="Indigo"
+                                ></button>
+                                <button
+                                    type="button"
+                                    class="gs-color-swatch"
+                                    data-color="#3d348b"
+                                    style="background: #3d348b"
+                                    title="Purple"
+                                ></button>
+                                <button
+                                    type="button"
+                                    class="gs-color-swatch"
+                                    data-color="#0077b6"
+                                    style="background: #0077b6"
+                                    title="Blue"
+                                ></button>
+                                <button
+                                    type="button"
+                                    class="gs-color-swatch"
+                                    data-color="#00897b"
+                                    style="background: #00897b"
+                                    title="Teal"
+                                ></button>
+                                <button
+                                    type="button"
+                                    class="gs-color-swatch"
+                                    data-color="#5f6f52"
+                                    style="background: #5f6f52"
+                                    title="Green"
+                                ></button>
+                                <button
+                                    type="button"
+                                    class="gs-color-swatch"
+                                    data-color="#9d4edd"
+                                    style="background: #9d4edd"
+                                    title="Violet"
+                                ></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="gs-field">
+                        <label for="gs-field-group">Group / Course</label>
+                        <select id="gs-field-group">
+                            <!-- Populated by JS from STUDENT_GROUPS -->
+                        </select>
+                    </div>
+                    <div class="gs-field">
+                        <label for="gs-field-term">School Term</label>
+                        <select id="gs-field-term">
+                            <option value="First">First</option>
+                            <option value="Second">Second</option>
+                            <option value="Third">Third</option>
+                            <option value="Fourth">Fourth</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="gs-modal-footer">
+                    <button id="gs-modal-cancel" class="gs-btn gs-btn-ghost">
+                        Cancel
+                    </button>
+                    <button id="gs-modal-create" class="gs-btn gs-btn-primary">
+                        <i class="fa-solid fa-check"></i> Create Sheet
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===================== DELETE CONFIRM MODAL ===================== -->
+        <div
+            id="gs-delete-overlay"
+            class="gs-modal-overlay"
+            style="display: none"
+        >
+            <div class="gs-modal gs-modal-sm">
+                <div class="gs-modal-header">
+                    <h2><i class="fa-solid fa-trash-can"></i> Delete Sheet</h2>
+                    <button class="gs-modal-close gs-delete-cancel-btn">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+                <div class="gs-modal-body">
+                    <p>
+                        Are you sure you want to delete
+                        <strong id="gs-delete-name"></strong>?
+                    </p>
+                    <p class="gs-hint">This action cannot be undone.</p>
+                </div>
+                <div class="gs-modal-footer">
+                    <button class="gs-btn gs-btn-ghost gs-delete-cancel-btn">
+                        Cancel
+                    </button>
+                    <button id="gs-delete-confirm" class="gs-btn gs-btn-danger">
+                        <i class="fa-solid fa-trash"></i> Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===================== MISSING GRADES REPORT MODAL ===================== -->
+        <div
+            id="gs-missing-overlay"
+            class="gs-modal-overlay"
+            style="display: none"
+        >
+            <div class="gs-modal" style="max-width: 640px">
+                <div class="gs-modal-header">
+                    <h2>
+                        <i class="fa-solid fa-clipboard-question"></i> Missing
+                        Grades Report
+                    </h2>
+                    <button class="gs-modal-close gs-missing-close">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+                <div
+                    class="gs-modal-body"
+                    style="max-height: 50vh; overflow-y: auto"
+                >
+                    <div id="gs-missing-content">
                         <!-- Rendered by JS -->
                     </div>
                 </div>
+                <div class="gs-modal-footer">
+                    <button class="gs-btn gs-btn-ghost gs-missing-close">
+                        Close
+                    </button>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- ===================== NEW SHEET MODAL ===================== -->
-    <div id="gs-modal-overlay" class="gs-modal-overlay" style="display:none;">
-        <div class="gs-modal">
-            <div class="gs-modal-header">
-                <h2><i class="fa-solid fa-file-circle-plus"></i> New Grade Sheet</h2>
-                <button id="gs-modal-close" class="gs-modal-close"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="gs-modal-body">
-                <div class="gs-field">
-                    <label for="gs-field-teacher">Teacher Name</label>
-                    <input type="text" id="gs-field-teacher" placeholder="e.g. Juan Diego Cuellar Mazabel">
+        <!-- ===================== SCALE CONFIG MODAL ===================== -->
+        <div
+            id="gs-scale-overlay"
+            class="gs-modal-overlay"
+            style="display: none"
+        >
+            <div class="gs-modal gs-modal-sm">
+                <div class="gs-modal-header">
+                    <h2><i class="fa-solid fa-sliders"></i> Grading Scale</h2>
+                    <button class="gs-modal-close gs-scale-close">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
                 </div>
-                <div class="gs-field">
-                    <label for="gs-field-subject">Subject</label>
-                    <input type="text" id="gs-field-subject" placeholder="e.g. Technology">
-                </div>
-                <div class="gs-field">
-                    <label>Subject Icon</label>
-                    <input type="hidden" id="gs-field-icon" value="fa-table-columns">
-                    <div class="gs-icon-picker" data-target="gs-field-icon">
-                        <button type="button" class="gs-icon-option selected" data-icon="fa-microchip"
-                            title="Technology / IT"><i class="fa-solid fa-microchip"></i></button>
-                        <button type="button" class="gs-icon-option" data-icon="fa-flask" title="Science"><i
-                                class="fa-solid fa-flask"></i></button>
-                        <button type="button" class="gs-icon-option" data-icon="fa-book-open" title="English"><i
-                                class="fa-solid fa-book-open"></i></button>
-                        <button type="button" class="gs-icon-option" data-icon="fa-language" title="Language"><i
-                                class="fa-solid fa-language"></i></button>
-                        <button type="button" class="gs-icon-option" data-icon="fa-pen-nib" title="Writing"><i
-                                class="fa-solid fa-pen-nib"></i></button>
-                        <button type="button" class="gs-icon-option" data-icon="fa-table-columns" title="General"><i
-                                class="fa-solid fa-table-columns"></i></button>
-                    </div>
-                </div>
-                <div class="gs-field">
-                    <label for="gs-field-header-color">Card Header Color</label>
-                    <div class="gs-color-picker-row">
-                        <input type="color" id="gs-field-header-color" value="#2c1f56">
-                        <div class="gs-color-swatches" data-target="gs-field-header-color">
-                            <button type="button" class="gs-color-swatch" data-color="#2c1f56"
-                                style="background:#2c1f56;" title="Indigo"></button>
-                            <button type="button" class="gs-color-swatch" data-color="#3d348b"
-                                style="background:#3d348b;" title="Purple"></button>
-                            <button type="button" class="gs-color-swatch" data-color="#0077b6"
-                                style="background:#0077b6;" title="Blue"></button>
-                            <button type="button" class="gs-color-swatch" data-color="#00897b"
-                                style="background:#00897b;" title="Teal"></button>
-                            <button type="button" class="gs-color-swatch" data-color="#5f6f52"
-                                style="background:#5f6f52;" title="Green"></button>
-                            <button type="button" class="gs-color-swatch" data-color="#9d4edd"
-                                style="background:#9d4edd;" title="Violet"></button>
-                        </div>
-                    </div>
-                </div>
-                <div class="gs-field">
-                    <label for="gs-field-group">Group / Course</label>
-                    <select id="gs-field-group">
-                        <!-- Populated by JS from STUDENT_GROUPS -->
-                    </select>
-                </div>
-                <div class="gs-field">
-                    <label for="gs-field-term">School Term</label>
-                    <select id="gs-field-term">
-                        <option value="First">First</option>
-                        <option value="Second">Second</option>
-                        <option value="Third">Third</option>
-                        <option value="Fourth">Fourth</option>
-                    </select>
-                </div>
-
-            </div>
-            <div class="gs-modal-footer">
-                <button id="gs-modal-cancel" class="gs-btn gs-btn-ghost">Cancel</button>
-                <button id="gs-modal-create" class="gs-btn gs-btn-primary">
-                    <i class="fa-solid fa-check"></i> Create Sheet
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ===================== DELETE CONFIRM MODAL ===================== -->
-    <div id="gs-delete-overlay" class="gs-modal-overlay" style="display:none;">
-        <div class="gs-modal gs-modal-sm">
-            <div class="gs-modal-header">
-                <h2><i class="fa-solid fa-trash-can"></i> Delete Sheet</h2>
-                <button class="gs-modal-close gs-delete-cancel-btn"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="gs-modal-body">
-                <p>Are you sure you want to delete <strong id="gs-delete-name"></strong>?</p>
-                <p class="gs-hint">This action cannot be undone.</p>
-            </div>
-            <div class="gs-modal-footer">
-                <button class="gs-btn gs-btn-ghost gs-delete-cancel-btn">Cancel</button>
-                <button id="gs-delete-confirm" class="gs-btn gs-btn-danger">
-                    <i class="fa-solid fa-trash"></i> Delete
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ===================== MISSING GRADES REPORT MODAL ===================== -->
-    <div id="gs-missing-overlay" class="gs-modal-overlay" style="display:none;">
-        <div class="gs-modal" style="max-width:640px;">
-            <div class="gs-modal-header">
-                <h2><i class="fa-solid fa-clipboard-question"></i> Missing Grades Report</h2>
-                <button class="gs-modal-close gs-missing-close"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="gs-modal-body" style="max-height:50vh;overflow-y:auto;">
-                <div id="gs-missing-content">
-                    <!-- Rendered by JS -->
-                </div>
-            </div>
-            <div class="gs-modal-footer">
-                <button class="gs-btn gs-btn-ghost gs-missing-close">Close</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ===================== SCALE CONFIG MODAL ===================== -->
-    <div id="gs-scale-overlay" class="gs-modal-overlay" style="display:none;">
-        <div class="gs-modal gs-modal-sm">
-            <div class="gs-modal-header">
-                <h2><i class="fa-solid fa-sliders"></i> Grading Scale</h2>
-                <button class="gs-modal-close gs-scale-close"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="gs-modal-body">
-                <div class="gs-field">
-                    <label for="gs-edit-import-scale">Import Saved Scale (Optional)</label>
-                    <select id="gs-edit-import-scale">
-                        <option value="">-- Custom --</option>
-                    </select>
-                </div>
-                <div class="gs-scale-row">
-                    <div class="gs-field gs-field-sm">
-                        <label for="gs-edit-pmax">Max Score</label>
-                        <input type="number" id="gs-edit-pmax" min="1">
-                    </div>
-                    <div class="gs-field gs-field-sm">
-                        <label for="gs-edit-exig">Exigency %</label>
-                        <input type="number" id="gs-edit-exig" min="1" max="100">
-                    </div>
-                </div>
-                <div class="gs-scale-row">
-                    <div class="gs-field gs-field-sm">
-                        <label for="gs-edit-nmin">Min Grade</label>
-                        <input type="number" id="gs-edit-nmin" min="0" step="0.1">
-                    </div>
-                    <div class="gs-field gs-field-sm">
-                        <label for="gs-edit-nmax">Max Grade</label>
-                        <input type="number" id="gs-edit-nmax" min="1" step="0.1">
-                    </div>
-                    <div class="gs-field gs-field-sm">
-                        <label for="gs-edit-napr">Passing Grade</label>
-                        <input type="number" id="gs-edit-napr" min="0" step="0.1">
-                    </div>
-                </div>
-                <div style="margin-top:15px; text-align:center;">
-                    <a href="grading-scale.html" target="_blank"
-                        style="color:#a29bfe;font-size:0.8rem;text-decoration:none;"><i
-                            class="fa-solid fa-arrow-up-right-from-square"></i> Open Grading Scale Tool</a>
-                </div>
-            </div>
-            <div class="gs-modal-footer">
-                <button class="gs-btn gs-btn-ghost gs-scale-close">Cancel</button>
-                <button id="gs-scale-save" class="gs-btn gs-btn-primary">
-                    <i class="fa-solid fa-check"></i> Save Scale
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Phase 6: Activity Settings Modal -->
-    <div id="gs-activity-settings-overlay" class="gs-modal-overlay" style="display: none;">
-        <div class="gs-modal">
-            <div class="gs-modal-header">
-                <h3>Activity Settings</h3>
-                <button class="gs-modal-close gs-act-settings-close"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="gs-modal-body">
-                <p style="margin-bottom:15px; color:var(--text-color);">Set the grading scale for: <strong
-                        id="gs-act-settings-label" style="color:var(--primary-color);"></strong></p>
-                <div class="gs-field">
-                    <label for="gs-act-scale-select">Custom Grading Scale</label>
-                    <select id="gs-act-scale-select" class="gs-add-input">
-                        <option value="global">Default Sheet Scale</option>
-                    </select>
-                </div>
-                <div id="gs-act-scale-preview"
-                    style="display:none; margin-top:15px; padding:12px; background:var(--bg-lighter); border-left:3px solid var(--primary-color); font-size:0.9rem; line-height:1.6;">
-                    <!-- Preview filled by JS -->
-                </div>
-            </div>
-            <div class="gs-modal-footer">
-                <button class="gs-btn gs-btn-ghost gs-act-settings-close">Cancel</button>
-                <button id="gs-act-settings-save" class="gs-btn gs-btn-primary">
-                    <i class="fa-solid fa-check"></i> Save Settings
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Phase 7: Edit Sheet Info Modal -->
-    <div id="gs-edit-info-overlay" class="gs-modal-overlay" style="display: none;">
-        <div class="gs-modal">
-            <div class="gs-modal-header">
-                <h3>Edit Sheet Details</h3>
-                <button class="gs-modal-close gs-edit-info-close"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="gs-modal-body">
-                <div class="gs-field">
-                    <label for="gs-edit-info-teacher">Teacher Name</label>
-                    <input type="text" id="gs-edit-info-teacher" placeholder="e.g. Juan Diego Cuellar Mazabel">
-                </div>
-                <div class="gs-field">
-                    <label for="gs-edit-info-subject">Subject</label>
-                    <input type="text" id="gs-edit-info-subject" placeholder="e.g. Technology">
-                </div>
-                <div class="gs-field">
-                    <label>Subject Icon</label>
-                    <input type="hidden" id="gs-edit-info-icon" value="fa-table-columns">
-                    <div class="gs-icon-picker" data-target="gs-edit-info-icon">
-                        <button type="button" class="gs-icon-option" data-icon="fa-microchip"
-                            title="Technology / IT"><i class="fa-solid fa-microchip"></i></button>
-                        <button type="button" class="gs-icon-option" data-icon="fa-flask" title="Science"><i
-                                class="fa-solid fa-flask"></i></button>
-                        <button type="button" class="gs-icon-option" data-icon="fa-book-open" title="English"><i
-                                class="fa-solid fa-book-open"></i></button>
-                        <button type="button" class="gs-icon-option" data-icon="fa-language" title="Language"><i
-                                class="fa-solid fa-language"></i></button>
-                        <button type="button" class="gs-icon-option" data-icon="fa-pen-nib" title="Writing"><i
-                                class="fa-solid fa-pen-nib"></i></button>
-                        <button type="button" class="gs-icon-option" data-icon="fa-table-columns" title="General"><i
-                                class="fa-solid fa-table-columns"></i></button>
-                    </div>
-                </div>
-                <div class="gs-field">
-                    <label for="gs-edit-info-header-color">Card Header Color</label>
-                    <div class="gs-color-picker-row">
-                        <input type="color" id="gs-edit-info-header-color" value="#2c1f56">
-                        <div class="gs-color-swatches" data-target="gs-edit-info-header-color">
-                            <button type="button" class="gs-color-swatch" data-color="#2c1f56"
-                                style="background:#2c1f56;" title="Indigo"></button>
-                            <button type="button" class="gs-color-swatch" data-color="#3d348b"
-                                style="background:#3d348b;" title="Purple"></button>
-                            <button type="button" class="gs-color-swatch" data-color="#0077b6"
-                                style="background:#0077b6;" title="Blue"></button>
-                            <button type="button" class="gs-color-swatch" data-color="#00897b"
-                                style="background:#00897b;" title="Teal"></button>
-                            <button type="button" class="gs-color-swatch" data-color="#5f6f52"
-                                style="background:#5f6f52;" title="Green"></button>
-                            <button type="button" class="gs-color-swatch" data-color="#9d4edd"
-                                style="background:#9d4edd;" title="Violet"></button>
-                        </div>
-                    </div>
-                </div>
-                <div class="gs-field">
-                    <label for="gs-edit-info-group">Group / Course</label>
-                    <select id="gs-edit-info-group">
-                        <!-- Populated by JS -->
-                    </select>
-                </div>
-                <div class="gs-field">
-                    <label for="gs-edit-info-term">School Term</label>
-                    <select id="gs-edit-info-term">
-                        <option value="First">First</option>
-                        <option value="Second">Second</option>
-                        <option value="Third">Third</option>
-                        <option value="Fourth">Fourth</option>
-                    </select>
-                </div>
-            </div>
-            <div class="gs-modal-footer">
-                <button class="gs-btn gs-btn-ghost gs-edit-info-close">Cancel</button>
-                <button id="gs-edit-info-save" class="gs-btn gs-btn-primary">
-                    <i class="fa-solid fa-check"></i> Save Details
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ===================== EDIT ACTIVITY DESCRIPTION MODAL ===================== -->
-    <div id="gs-edit-desc-overlay" class="gs-modal-overlay" style="display: none;">
-        <div class="gs-modal gs-modal-sm">
-            <div class="gs-modal-header">
-                <h3><i class="fa-solid fa-pen"></i> Edit Activity</h3>
-                <button class="gs-modal-close gs-edit-desc-close"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="gs-modal-body">
-                <div class="gs-field">
-                    <label for="gs-edit-desc-label">Description</label>
-                    <textarea id="gs-edit-desc-label" class="gs-textarea" rows="3"
-                        placeholder="Activity description..."></textarea>
-                </div>
-                <div class="gs-field">
-                    <label for="gs-edit-desc-category">Category</label>
-                    <select id="gs-edit-desc-category">
-                        <option value="cognitiva">Cognitiva</option>
-                        <option value="laboral">Laboral</option>
-                        <option value="ciudadana">Ciudadana</option>
-                    </select>
-                </div>
-            </div>
-            <div class="gs-modal-footer">
-                <button class="gs-btn gs-btn-ghost gs-edit-desc-close">Cancel</button>
-                <button id="gs-edit-desc-save" class="gs-btn gs-btn-primary">
-                    <i class="fa-solid fa-check"></i> Save Activity
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Phase 8: Import Sheet Data Modal -->
-    <div id="gs-import-overlay" class="gs-modal-overlay" style="display: none;">
-        <div class="gs-modal">
-            <div class="gs-modal-header">
-                <h3><i class="fa-solid fa-file-import"></i> Import Sheet Data</h3>
-                <button class="gs-modal-close" id="gs-import-close-btn"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="gs-modal-body">
-                <div class="gs-field">
-                    <label for="gs-import-source-select">1. Select Source Sheet</label>
-                    <select id="gs-import-source-select">
-                        <option value="">-- Choose a sheet --</option>
-                        <!-- Populated by JS -->
-                    </select>
-                </div>
-
-                <div id="gs-import-activity-container" style="display: none;">
+                <div class="gs-modal-body">
                     <div class="gs-field">
-                        <label for="gs-import-activity-select">2. Select Activity to Import</label>
-                        <select id="gs-import-activity-select">
+                        <label for="gs-edit-import-scale"
+                            >Import Saved Scale (Optional)</label
+                        >
+                        <select id="gs-edit-import-scale">
+                            <option value="">-- Custom --</option>
+                        </select>
+                    </div>
+                    <div class="gs-scale-row">
+                        <div class="gs-field gs-field-sm">
+                            <label for="gs-edit-pmax">Max Score</label>
+                            <input type="number" id="gs-edit-pmax" min="1" />
+                        </div>
+                        <div class="gs-field gs-field-sm">
+                            <label for="gs-edit-exig">Exigency %</label>
+                            <input
+                                type="number"
+                                id="gs-edit-exig"
+                                min="1"
+                                max="100"
+                            />
+                        </div>
+                    </div>
+                    <div class="gs-scale-row">
+                        <div class="gs-field gs-field-sm">
+                            <label for="gs-edit-nmin">Min Grade</label>
+                            <input
+                                type="number"
+                                id="gs-edit-nmin"
+                                min="0"
+                                step="0.1"
+                            />
+                        </div>
+                        <div class="gs-field gs-field-sm">
+                            <label for="gs-edit-nmax">Max Grade</label>
+                            <input
+                                type="number"
+                                id="gs-edit-nmax"
+                                min="1"
+                                step="0.1"
+                            />
+                        </div>
+                        <div class="gs-field gs-field-sm">
+                            <label for="gs-edit-napr">Passing Grade</label>
+                            <input
+                                type="number"
+                                id="gs-edit-napr"
+                                min="0"
+                                step="0.1"
+                            />
+                        </div>
+                    </div>
+                    <div style="margin-top: 15px; text-align: center">
+                        <a
+                            href="grading-scale.html"
+                            target="_blank"
+                            style="
+                                color: #a29bfe;
+                                font-size: 0.8rem;
+                                text-decoration: none;
+                            "
+                            ><i
+                                class="fa-solid fa-arrow-up-right-from-square"
+                            ></i>
+                            Open Grading Scale Tool</a
+                        >
+                    </div>
+                </div>
+                <div class="gs-modal-footer">
+                    <button class="gs-btn gs-btn-ghost gs-scale-close">
+                        Cancel
+                    </button>
+                    <button id="gs-scale-save" class="gs-btn gs-btn-primary">
+                        <i class="fa-solid fa-check"></i> Save Scale
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Phase 6: Activity Settings Modal -->
+        <div
+            id="gs-activity-settings-overlay"
+            class="gs-modal-overlay"
+            style="display: none"
+        >
+            <div class="gs-modal">
+                <div class="gs-modal-header">
+                    <h3>Activity Settings</h3>
+                    <button class="gs-modal-close gs-act-settings-close">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+                <div class="gs-modal-body">
+                    <p style="margin-bottom: 15px; color: var(--text-color)">
+                        Set the grading scale for:
+                        <strong
+                            id="gs-act-settings-label"
+                            style="color: var(--primary-color)"
+                        ></strong>
+                    </p>
+                    <div class="gs-field">
+                        <label for="gs-act-scale-select"
+                            >Custom Grading Scale</label
+                        >
+                        <select id="gs-act-scale-select" class="gs-add-input">
+                            <option value="global">Default Sheet Scale</option>
+                        </select>
+                    </div>
+                    <div
+                        id="gs-act-scale-preview"
+                        style="
+                            display: none;
+                            margin-top: 15px;
+                            padding: 12px;
+                            background: var(--bg-lighter);
+                            border-left: 3px solid var(--primary-color);
+                            font-size: 0.9rem;
+                            line-height: 1.6;
+                        "
+                    >
+                        <!-- Preview filled by JS -->
+                    </div>
+                </div>
+                <div class="gs-modal-footer">
+                    <button class="gs-btn gs-btn-ghost gs-act-settings-close">
+                        Cancel
+                    </button>
+                    <button
+                        id="gs-act-settings-save"
+                        class="gs-btn gs-btn-primary"
+                    >
+                        <i class="fa-solid fa-check"></i> Save Settings
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Phase 7: Edit Sheet Info Modal -->
+        <div
+            id="gs-edit-info-overlay"
+            class="gs-modal-overlay"
+            style="display: none"
+        >
+            <div class="gs-modal">
+                <div class="gs-modal-header">
+                    <h3>Edit Sheet Details</h3>
+                    <button class="gs-modal-close gs-edit-info-close">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+                <div class="gs-modal-body">
+                    <div class="gs-field">
+                        <label for="gs-edit-info-teacher">Teacher Name</label>
+                        <input
+                            type="text"
+                            id="gs-edit-info-teacher"
+                            placeholder="e.g. Juan Diego Cuellar Mazabel"
+                        />
+                    </div>
+                    <div class="gs-field">
+                        <label for="gs-edit-info-subject">Subject</label>
+                        <input
+                            type="text"
+                            id="gs-edit-info-subject"
+                            placeholder="e.g. Technology"
+                        />
+                    </div>
+                    <div class="gs-field">
+                        <label>Subject Icon</label>
+                        <input
+                            type="hidden"
+                            id="gs-edit-info-icon"
+                            value="fa-table-columns"
+                        />
+                        <div
+                            class="gs-icon-picker"
+                            data-target="gs-edit-info-icon"
+                        >
+                            <button
+                                type="button"
+                                class="gs-icon-option"
+                                data-icon="fa-microchip"
+                                title="Technology / IT"
+                            >
+                                <i class="fa-solid fa-microchip"></i>
+                            </button>
+                            <button
+                                type="button"
+                                class="gs-icon-option"
+                                data-icon="fa-flask"
+                                title="Science"
+                            >
+                                <i class="fa-solid fa-flask"></i>
+                            </button>
+                            <button
+                                type="button"
+                                class="gs-icon-option"
+                                data-icon="fa-book-open"
+                                title="English"
+                            >
+                                <i class="fa-solid fa-book-open"></i>
+                            </button>
+                            <button
+                                type="button"
+                                class="gs-icon-option"
+                                data-icon="fa-language"
+                                title="Language"
+                            >
+                                <i class="fa-solid fa-language"></i>
+                            </button>
+                            <button
+                                type="button"
+                                class="gs-icon-option"
+                                data-icon="fa-pen-nib"
+                                title="Writing"
+                            >
+                                <i class="fa-solid fa-pen-nib"></i>
+                            </button>
+                            <button
+                                type="button"
+                                class="gs-icon-option"
+                                data-icon="fa-table-columns"
+                                title="General"
+                            >
+                                <i class="fa-solid fa-table-columns"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="gs-field">
+                        <label for="gs-edit-info-header-color"
+                            >Card Header Color</label
+                        >
+                        <div class="gs-color-picker-row">
+                            <input
+                                type="color"
+                                id="gs-edit-info-header-color"
+                                value="#2c1f56"
+                            />
+                            <div
+                                class="gs-color-swatches"
+                                data-target="gs-edit-info-header-color"
+                            >
+                                <button
+                                    type="button"
+                                    class="gs-color-swatch"
+                                    data-color="#2c1f56"
+                                    style="background: #2c1f56"
+                                    title="Indigo"
+                                ></button>
+                                <button
+                                    type="button"
+                                    class="gs-color-swatch"
+                                    data-color="#3d348b"
+                                    style="background: #3d348b"
+                                    title="Purple"
+                                ></button>
+                                <button
+                                    type="button"
+                                    class="gs-color-swatch"
+                                    data-color="#0077b6"
+                                    style="background: #0077b6"
+                                    title="Blue"
+                                ></button>
+                                <button
+                                    type="button"
+                                    class="gs-color-swatch"
+                                    data-color="#00897b"
+                                    style="background: #00897b"
+                                    title="Teal"
+                                ></button>
+                                <button
+                                    type="button"
+                                    class="gs-color-swatch"
+                                    data-color="#5f6f52"
+                                    style="background: #5f6f52"
+                                    title="Green"
+                                ></button>
+                                <button
+                                    type="button"
+                                    class="gs-color-swatch"
+                                    data-color="#9d4edd"
+                                    style="background: #9d4edd"
+                                    title="Violet"
+                                ></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="gs-field">
+                        <label for="gs-edit-info-group">Group / Course</label>
+                        <select id="gs-edit-info-group">
+                            <!-- Populated by JS -->
+                        </select>
+                    </div>
+                    <div class="gs-field">
+                        <label for="gs-edit-info-term">School Term</label>
+                        <select id="gs-edit-info-term">
+                            <option value="First">First</option>
+                            <option value="Second">Second</option>
+                            <option value="Third">Third</option>
+                            <option value="Fourth">Fourth</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="gs-modal-footer">
+                    <button class="gs-btn gs-btn-ghost gs-edit-info-close">
+                        Cancel
+                    </button>
+                    <button
+                        id="gs-edit-info-save"
+                        class="gs-btn gs-btn-primary"
+                    >
+                        <i class="fa-solid fa-check"></i> Save Details
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===================== EDIT ACTIVITY DESCRIPTION MODAL ===================== -->
+        <div
+            id="gs-edit-desc-overlay"
+            class="gs-modal-overlay"
+            style="display: none"
+        >
+            <div class="gs-modal gs-modal-sm">
+                <div class="gs-modal-header">
+                    <h3><i class="fa-solid fa-pen"></i> Edit Activity</h3>
+                    <button class="gs-modal-close gs-edit-desc-close">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+                <div class="gs-modal-body">
+                    <div class="gs-field">
+                        <label for="gs-edit-desc-label">Description</label>
+                        <textarea
+                            id="gs-edit-desc-label"
+                            class="gs-textarea"
+                            rows="3"
+                            placeholder="Activity description..."
+                        ></textarea>
+                    </div>
+                    <div class="gs-field">
+                        <label for="gs-edit-desc-category">Category</label>
+                        <select id="gs-edit-desc-category">
+                            <option value="cognitiva">Cognitiva</option>
+                            <option value="laboral">Laboral</option>
+                            <option value="ciudadana">Ciudadana</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="gs-modal-footer">
+                    <button class="gs-btn gs-btn-ghost gs-edit-desc-close">
+                        Cancel
+                    </button>
+                    <button
+                        id="gs-edit-desc-save"
+                        class="gs-btn gs-btn-primary"
+                    >
+                        <i class="fa-solid fa-check"></i> Save Activity
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Phase 8: Import Sheet Data Modal -->
+        <div
+            id="gs-import-overlay"
+            class="gs-modal-overlay"
+            style="display: none"
+        >
+            <div class="gs-modal">
+                <div class="gs-modal-header">
+                    <h3>
+                        <i class="fa-solid fa-file-import"></i> Import Sheet
+                        Data
+                    </h3>
+                    <button class="gs-modal-close" id="gs-import-close-btn">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+                <div class="gs-modal-body">
+                    <div class="gs-field">
+                        <label for="gs-import-source-select"
+                            >1. Select Source Sheet</label
+                        >
+                        <select id="gs-import-source-select">
+                            <option value="">-- Choose a sheet --</option>
                             <!-- Populated by JS -->
                         </select>
                     </div>
 
+                    <div
+                        id="gs-import-activity-container"
+                        style="display: none"
+                    >
+                        <div class="gs-field">
+                            <label for="gs-import-activity-select"
+                                >2. Select Activity to Import</label
+                            >
+                            <select id="gs-import-activity-select">
+                                <!-- Populated by JS -->
+                            </select>
+                        </div>
+
+                        <div class="gs-field">
+                            <label>3. Import Mode</label>
+                            <div
+                                style="
+                                    display: flex;
+                                    gap: 15px;
+                                    margin-top: 8px;
+                                "
+                            >
+                                <label
+                                    style="
+                                        display: flex;
+                                        align-items: center;
+                                        gap: 6px;
+                                        cursor: pointer;
+                                        color: inherit;
+                                    "
+                                >
+                                    <input
+                                        type="radio"
+                                        name="gs-import-mode"
+                                        value="desc_only"
+                                        checked
+                                        style="width: auto"
+                                    />
+                                    Description & Settings Only
+                                </label>
+                                <label
+                                    style="
+                                        display: flex;
+                                        align-items: center;
+                                        gap: 6px;
+                                        cursor: pointer;
+                                        color: inherit;
+                                    "
+                                >
+                                    <input
+                                        type="radio"
+                                        name="gs-import-mode"
+                                        value="full_column"
+                                        style="width: auto"
+                                    />
+                                    Full Column (with Grades)
+                                </label>
+                            </div>
+                        </div>
+                        <p
+                            class="gs-hint"
+                            style="
+                                margin-top: 10px;
+                                font-size: 0.8rem;
+                                line-height: 1.4;
+                            "
+                        >
+                            <strong>Note:</strong> When importing full columns,
+                            grades are copied over only for students whose exact
+                            names appear in both the source and current sheets.
+                        </p>
+                    </div>
+                </div>
+                <div class="gs-modal-footer">
+                    <button
+                        class="gs-btn gs-btn-ghost"
+                        id="gs-import-cancel-btn"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        id="gs-import-execute-btn"
+                        class="gs-btn gs-btn-primary"
+                        disabled
+                    >
+                        <i class="fa-solid fa-cloud-arrow-down"></i> Import
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===================== EXPORT OPTIONS MODAL ===================== -->
+        <div
+            id="gs-export-overlay"
+            class="gs-modal-overlay"
+            style="display: none"
+        >
+            <div class="gs-modal gs-modal-sm">
+                <div class="gs-modal-header">
+                    <h3>
+                        <i class="fa-solid fa-file-export"></i> Export Settings
+                    </h3>
+                    <button class="gs-modal-close" id="gs-export-close">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+                <div class="gs-modal-body">
                     <div class="gs-field">
-                        <label>3. Import Mode</label>
-                        <div style="display: flex; gap: 15px; margin-top: 8px;">
+                        <label>Header Information</label>
+                        <label
+                            style="
+                                display: flex;
+                                align-items: center;
+                                gap: 8px;
+                                cursor: pointer;
+                            "
+                        >
+                            <input
+                                type="checkbox"
+                                id="gs-export-inc-headers"
+                                checked
+                                style="width: auto"
+                            />
+                            Include Sheet Details (Teacher, Subject, etc.)
+                        </label>
+                    </div>
+                    <div class="gs-field">
+                        <label>Columns to Include</label>
+                        <label
+                            style="
+                                display: flex;
+                                align-items: center;
+                                gap: 8px;
+                                cursor: pointer;
+                            "
+                        >
+                            <input
+                                type="checkbox"
+                                id="gs-export-inc-scores"
+                                checked
+                                style="width: auto"
+                            />
+                            Include Raw Scores
+                        </label>
+                        <label
+                            style="
+                                display: flex;
+                                align-items: center;
+                                gap: 8px;
+                                cursor: pointer;
+                                margin-top: 5px;
+                            "
+                        >
+                            <input
+                                type="checkbox"
+                                id="gs-export-inc-grades"
+                                checked
+                                style="width: auto"
+                            />
+                            Include Grades
+                        </label>
+                    </div>
+                    <div class="gs-field">
+                        <label for="gs-export-decimals"
+                            >Decimals (Grades/Averages)</label
+                        >
+                        <select id="gs-export-decimals">
+                            <option value="1">
+                                1 Decimal Place (e.g., 4.5)
+                            </option>
+                            <option value="0">Whole Numbers (e.g., 5)</option>
+                            <option value="2">
+                                2 Decimal Places (e.g., 4.50)
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                <div class="gs-modal-footer">
+                    <button class="gs-btn gs-btn-ghost" id="gs-export-cancel">
+                        Cancel
+                    </button>
+                    <button
+                        id="gs-export-execute-btn"
+                        class="gs-btn gs-btn-primary"
+                    >
+                        <i class="fa-solid fa-download"></i> Download CSV
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===================== UPLOAD CSV GRADES MODAL ===================== -->
+        <div
+            id="gs-upload-overlay"
+            class="gs-modal-overlay"
+            style="display: none"
+        >
+            <div class="gs-modal">
+                <div class="gs-modal-header">
+                    <h3>
+                        <i class="fa-solid fa-file-arrow-up"></i> Upload Grades
+                        CSV
+                    </h3>
+                    <button class="gs-modal-close gs-upload-close">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+                <div class="gs-modal-body">
+                    <div class="gs-field">
+                        <label for="gs-upload-file-input">CSV File</label>
+                        <div class="gs-file-upload">
+                            <input
+                                type="file"
+                                id="gs-upload-file-input"
+                                accept=".csv,text/csv"
+                            />
                             <label
-                                style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: inherit;">
-                                <input type="radio" name="gs-import-mode" value="desc_only" checked
-                                    style="width: auto;"> Description & Settings Only
+                                for="gs-upload-file-input"
+                                class="gs-file-upload-btn"
+                            >
+                                <i class="fa-solid fa-file-csv"></i> Choose CSV
                             </label>
-                            <label
-                                style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: inherit;">
-                                <input type="radio" name="gs-import-mode" value="full_column" style="width: auto;"> Full
-                                Column (with Grades)
-                            </label>
+                            <span
+                                id="gs-upload-file-name"
+                                class="gs-file-upload-name"
+                                >No file chosen</span
+                            >
                         </div>
                     </div>
-                    <p class="gs-hint" style="margin-top: 10px; font-size: 0.8rem; line-height: 1.4;">
-                        <strong>Note:</strong> When importing full columns, grades are copied over only for students
-                        whose exact names appear in both the source and current sheets.
+                    <div class="gs-field">
+                        <label>Uploaded Numbers Are</label>
+                        <div class="gs-radio-row">
+                            <label
+                                ><input
+                                    type="radio"
+                                    name="gs-upload-value-type"
+                                    value="scores"
+                                    checked
+                                />
+                                Raw scores</label
+                            >
+                            <label
+                                ><input
+                                    type="radio"
+                                    name="gs-upload-value-type"
+                                    value="grades"
+                                />
+                                Final grades</label
+                            >
+                        </div>
+                    </div>
+                    <div id="gs-upload-preview" class="gs-upload-preview">
+                        Choose a CSV file to preview matching students and
+                        activities.
+                    </div>
+                    <p class="gs-hint">
+                        Importing writes only score values into matched activity
+                        columns. Activity descriptions and categories are not
+                        changed.
                     </p>
                 </div>
-            </div>
-            <div class="gs-modal-footer">
-                <button class="gs-btn gs-btn-ghost" id="gs-import-cancel-btn">Cancel</button>
-                <button id="gs-import-execute-btn" class="gs-btn gs-btn-primary" disabled>
-                    <i class="fa-solid fa-cloud-arrow-down"></i> Import
-                </button>
+                <div class="gs-modal-footer">
+                    <button class="gs-btn gs-btn-ghost gs-upload-close">
+                        Cancel
+                    </button>
+                    <button
+                        id="gs-upload-import-btn"
+                        class="gs-btn gs-btn-primary"
+                        disabled
+                    >
+                        <i class="fa-solid fa-cloud-arrow-up"></i> Import Grades
+                    </button>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- ===================== UPLOAD CSV GRADES MODAL ===================== -->
-    <div id="gs-upload-overlay" class="gs-modal-overlay" style="display: none;">
-        <div class="gs-modal">
-            <div class="gs-modal-header">
-                <h3><i class="fa-solid fa-file-arrow-up"></i> Upload Grades CSV</h3>
-                <button class="gs-modal-close gs-upload-close"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="gs-modal-body">
-                <div class="gs-field">
-                    <label for="gs-upload-file-input">CSV File</label>
-                    <div class="gs-file-upload">
-                        <input type="file" id="gs-upload-file-input" accept=".csv,text/csv">
-                        <label for="gs-upload-file-input" class="gs-file-upload-btn">
-                            <i class="fa-solid fa-file-csv"></i> Choose CSV
-                        </label>
-                        <span id="gs-upload-file-name" class="gs-file-upload-name">No file chosen</span>
-                    </div>
-                </div>
-                <div class="gs-field">
-                    <label>Uploaded Numbers Are</label>
-                    <div class="gs-radio-row">
-                        <label><input type="radio" name="gs-upload-value-type" value="scores" checked> Raw
-                            scores</label>
-                        <label><input type="radio" name="gs-upload-value-type" value="grades"> Final grades</label>
-                    </div>
-                </div>
-                <div id="gs-upload-preview" class="gs-upload-preview">
-                    Choose a CSV file to preview matching students and activities.
-                </div>
-                <p class="gs-hint">Importing writes only score values into matched activity columns. Activity
-                    descriptions and categories are not changed.</p>
-            </div>
-            <div class="gs-modal-footer">
-                <button class="gs-btn gs-btn-ghost gs-upload-close">Cancel</button>
-                <button id="gs-upload-import-btn" class="gs-btn gs-btn-primary" disabled>
-                    <i class="fa-solid fa-cloud-arrow-up"></i> Import Grades
-                </button>
-            </div>
+        <div class="gs-footer">
+            ESL Learning Platform © 2025 | Made for Teachers, by Teachers
         </div>
-    </div>
 
-    <div class="gs-footer">
-        ESL Learning Platform © 2025 | Made for Teachers, by Teachers
-    </div>
-
-    <script src="js/student-groups-data.js"></script>
-    <script src="js/darkmode.js"></script>
-    <script src="js/grade-sheets.js"></script>
-</body>
-
+        <script src="js/student-groups-data.js"></script>
+        <script src="js/darkmode.js"></script>
+        <script src="js/grade-sheets.js"></script>
+    </body>
 </html>

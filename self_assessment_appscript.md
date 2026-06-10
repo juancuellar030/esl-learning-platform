@@ -25,7 +25,9 @@ const ROSTER_HEADERS = [
   'Generated Score',
   'Decision',
   'Adjusted Score',
-  'Submitted At'
+  'Submitted At',
+  'Attempts',
+  'Last Submitted At'
 ];
 
 const ROSTER = {
@@ -64,11 +66,15 @@ function doPost(e) {
 
     const groupSheet = getOrCreateGroupSheet(ss, data.group);
     const row = findStudentRow(groupSheet, data.name);
-    groupSheet.getRange(row, 2, 1, 5).setValues([[
+    const currentAttempts = Number(groupSheet.getRange(row, 7).getValue()) || 0;
+    const attempts = currentAttempts + 1;
+    groupSheet.getRange(row, 2, 1, 7).setValues([[
       finalScore,
       data.generatedScore || '',
       decision,
       data.adjustedScore !== null && data.adjustedScore !== undefined ? data.adjustedScore : '',
+      timestamp,
+      attempts,
       timestamp
     ]]);
 
@@ -149,6 +155,8 @@ function setupGroupSheet(sheet, group) {
     return;
   }
 
+  ensureRosterHeaders(sheet);
+
   const existingNames = sheet.getLastRow() > 1
     ? sheet.getRange(2, 1, sheet.getLastRow() - 1, 1).getValues().flat()
     : [];
@@ -156,6 +164,22 @@ function setupGroupSheet(sheet, group) {
   if (missing.length) {
     sheet.getRange(sheet.getLastRow() + 1, 1, missing.length, 1).setValues(missing.map(name => [name]));
   }
+}
+
+function ensureRosterHeaders(sheet) {
+  const existingHeaderCount = Math.max(sheet.getLastColumn(), 1);
+  const headers = sheet.getRange(1, 1, 1, existingHeaderCount).getValues()[0];
+
+  ROSTER_HEADERS.forEach((header, index) => {
+    if (headers[index] !== header) {
+      sheet.getRange(1, index + 1).setValue(header);
+    }
+  });
+
+  formatHeader(sheet, ROSTER_HEADERS.length);
+  sheet.setFrozenRows(1);
+  sheet.setColumnWidth(1, 280);
+  for (let col = 2; col <= ROSTER_HEADERS.length; col++) sheet.setColumnWidth(col, 120);
 }
 
 function findStudentRow(sheet, studentName) {
