@@ -2215,12 +2215,16 @@
                 );
 
                 let gradeStr = "";
-                if (decimals === 0) {
+                if (decimals === "0") {
                   gradeStr = Math.round(g).toString();
-                } else if (decimals === 1) {
-                  gradeStr = (Math.round(g * 10) / 10).toFixed(1);
-                } else {
+                } else if (decimals === "remove") {
+                  gradeStr = (Math.round(g * 10) / 10)
+                    .toFixed(1)
+                    .replace(".", "");
+                } else if (decimals === "2") {
                   gradeStr = (Math.round(g * 100) / 100).toFixed(2);
+                } else {
+                  gradeStr = (Math.round(g * 10) / 10).toFixed(1);
                 }
 
                 row.push(gradeStr);
@@ -2235,12 +2239,14 @@
       const { avg } = calcWeightedAvg(name, sheet);
       if (avg !== null) {
         let avgStr = "";
-        if (decimals === 0) {
+        if (decimals === "0") {
           avgStr = Math.round(avg).toString();
-        } else if (decimals === 1) {
-          avgStr = (Math.round(avg * 10) / 10).toFixed(1);
-        } else {
+        } else if (decimals === "remove") {
+          avgStr = (Math.round(avg * 10) / 10).toFixed(1).replace(".", "");
+        } else if (decimals === "2") {
           avgStr = (Math.round(avg * 100) / 100).toFixed(2);
+        } else {
+          avgStr = (Math.round(avg * 10) / 10).toFixed(1);
         }
         row.push(avgStr);
       } else {
@@ -2292,7 +2298,7 @@
       includeHeaders: $exportIncHeaders.checked,
       includeScores: $exportIncScores.checked,
       includeGrades: $exportIncGrades.checked,
-      decimals: parseInt($exportDecimals.value, 10),
+      decimals: $exportDecimals.value,
     };
 
     if (pendingExportType === "current") {
