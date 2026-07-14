@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="assets/graduation-cap-icon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PC Assignment Viewer - ESL Learning Platform</title>
+    <meta name="description"
+        content="View and search student PC assignments by term, group, and room layout.">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/pc-assignment-viewer.css?v=room3">
+</head>
+
+<body>
+    <header class="main-header">
+        <div class="container">
+            <h1><i class="fa-solid fa-desktop"></i> ESL Learning Platform</h1>
+            <p class="tagline">PC Assignment Viewer</p>
+        </div>
+    </header>
+
+    <nav class="main-nav">
+        <div class="container">
+            <a href="tools.html" class="nav-btn" style="text-decoration: none;">
+                <i class="fa-solid fa-arrow-left"></i> Back to Tools
+            </a>
+        </div>
+    </nav>
+
+    <main class="main-content pc-page">
+        <div class="container">
+            <div class="pc-controls">
+                <div class="pc-field">
+                    <label for="pc-term">Term</label>
+                    <select id="pc-term">
+                        <option value="term1">Term 1</option>
+                        <option value="term2">Term 2</option>
+                        <option value="term3" selected>Term 3</option>
+                        <option value="term4">Term 4</option>
+                    </select>
+                </div>
+                <div class="pc-field">
+                    <label for="pc-group">Group</label>
+                    <select id="pc-group"></select>
+                </div>
+                <div class="pc-field">
+                    <label for="pc-view">View mode</label>
+                    <select id="pc-view">
+                        <option value="single" selected>Single Table</option>
+                        <option value="split">Split Table (3 columns)</option>
+                        <option value="room">Room Diagram</option>
+                    </select>
+                </div>
+                <div class="pc-field pc-field-search">
+                    <label for="pc-search">Search students (all groups)</label>
+                    <div class="pc-search-row">
+                        <input type="text" id="pc-search" placeholder="Type a student name…" autocomplete="off">
+                        <button type="button" class="pc-search-btn" id="pc-search-btn" title="Search">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="pc-search-results" class="pc-search-results" hidden></div>
+
+            <h2 id="pc-view-title" class="pc-view-title"></h2>
+            <div id="pc-view-area" class="pc-view-area"></div>
+        </div>
+    </main>
+
+    <footer class="main-footer">
+        <div class="container">
+            <p>ESL Learning Platform © 2025 | Made for Teachers, by Teachers</p>
+        </div>
+    </footer>
+
+    <script src="js/pc-data.js"></script>
+    <script src="js/pc-assignment-viewer.js?v=room3"></script>
+    <script src="js/darkmode.js"></script>
+</body>
+
+</html>

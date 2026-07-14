@@ -1,0 +1,91 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - heading " ESL Learning Platform" [level=1] [ref=e4]:
+        - generic [ref=e5]: 
+        - text: ESL Learning Platform
+      - paragraph [ref=e6]: PC Assignment Viewer
+  - navigation [ref=e7]:
+    - link " Back to Tools" [ref=e9] [cursor=pointer]:
+      - /url: tools.html
+      - generic [ref=e10]: 
+      - text: Back to Tools
+  - main [ref=e11]:
+    - generic [ref=e12]:
+      - generic [ref=e13]:
+        - generic [ref=e14]:
+          - generic [ref=e15]: Term
+          - combobox "Term" [ref=e16]:
+            - option "Term 1"
+            - option "Term 2"
+            - option "Term 3" [selected]
+            - option "Term 4"
+        - generic [ref=e17]:
+          - generic [ref=e18]: Group
+          - combobox "Group" [ref=e19]:
+            - option "3A"
+            - option "3B"
+            - option "3C"
+            - option "4A"
+            - option "4B"
+            - option "4C"
+            - option "5A"
+            - option "5B"
+            - option "5C" [selected]
+            - option "5D"
+        - generic [ref=e20]:
+          - generic [ref=e21]: View mode
+          - combobox "View mode" [ref=e22]:
+            - option "Single Table" [selected]
+            - option "Split Table (3 columns)"
+            - option "Room Diagram"
+        - generic [ref=e23]:
+          - generic [ref=e24]: Search students (all groups)
+          - generic [ref=e25]:
+            - textbox "Search students (all groups)" [ref=e26]:
+              - /placeholder: Type a student name…
+            - button "" [ref=e27] [cursor=pointer]
+      - heading "5C — Term 3 (0 assigned, 28 unassigned)" [level=2] [ref=e205]
+      - generic [ref=e30]:
+        - table [ref=e206]:
+          - rowgroup [ref=e207]:
+            - row [ref=e208]:
+              - columnheader "PC" [ref=e209]
+              - columnheader "Student's Name" [ref=e210]
+          - rowgroup [ref=e211]:
+            - row [ref=e212]:
+              - cell "No assigned PCs" [ref=e213]
+        - generic [ref=e214]:
+          - heading "PC not yet assigned" [level=3] [ref=e215]
+          - list [ref=e216]:
+            - listitem [ref=e217]: CABREJO GONZÁLEZ SAMUEL
+            - listitem [ref=e218]: CARDENAS RODRIGUEZ EDUARD SANTIAGO
+            - listitem [ref=e219]: CHINCHILLA RÍOS VIOLETTA
+            - listitem [ref=e220]: CLAVIJO PERDOMO EMMA
+            - listitem [ref=e221]: CORREDOR AROCA MATÍAS
+            - listitem [ref=e222]: CUBILLOS CAMACHO VALERIA
+            - listitem [ref=e223]: DÍAZ SONS ANGEL MARTÍN
+            - listitem [ref=e224]: DUSSAN LEMUS JULIETA
+            - listitem [ref=e225]: GAITÁN VARGAS ANA LUCÍA
+            - listitem [ref=e226]: ICOPO MELENDEZ LUCAS ANDRÉS
+            - listitem [ref=e227]: JARA ALDANA MARTÍN
+            - listitem [ref=e228]: MEDINA OBANDO DAVID ESTEBAN
+            - listitem [ref=e229]: MOLINA LOZADA SAMANTHA
+            - listitem [ref=e230]: ORTIGOZA GÓMEZ MIA SALOMÉ
+            - listitem [ref=e231]: PACHECO PEREZ GABRIEL ALEJANDRO
+            - listitem [ref=e232]: PALOMINO HERNÁNDEZ MARTÍN
+            - listitem [ref=e233]: PÉREZ NIÑO ABRIL
+            - listitem [ref=e234]: PINEDA UNÍ EMMANUEL
+            - listitem [ref=e235]: PRECIADO CUERVO ISABELLA
+            - listitem [ref=e236]: PUENTES SUAREZ GINA MARCELA
+            - listitem [ref=e237]: RAMÍREZ SALCEDO JUAN ANDRÉS
+            - listitem [ref=e238]: RAMIREZ YEPES LUCIA
+            - listitem [ref=e239]: RENGIFO OTALORA JUANA VALERIA
+            - listitem [ref=e240]: RINCÓN MEDINA SAMUEL NICOLÁS
+            - listitem [ref=e241]: ROMERO TAMAYO EMILY LUCIANA
+            - listitem [ref=e242]: VALENCIA PACHECO JORGE MARÍO
+            - listitem [ref=e243]: VELEZ GOMEZ MIGUEL ANGEL
+            - listitem [ref=e244]: ZAPATA SALAZAR JUAN ANDRÉS
+  - contentinfo [ref=e115]:
+    - paragraph [ref=e117]: ESL Learning Platform © 2025 | Made for Teachers, by Teachers
+  - button "" [ref=e118] [cursor=pointer]

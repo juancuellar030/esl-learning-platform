@@ -1,0 +1,10 @@
+[     360ms] [LOG] https://vk.com/away.php?el=snippet&to=https://posicionamientoweb.club?random @ https://acortalink.net/:4022
+[     810ms] [ERROR] Failed to load resource: net::ERR_NAME_NOT_RESOLVED @ https://acorta-link.com/assets/images/icon.png:0
+[    1000ms] [ERROR] Failed to load resource: net::ERR_NAME_NOT_RESOLVED @ https://acorta-link.com/assets/images/icon.png:0
+[    2329ms] [ERROR] Failed to load resource: net::ERR_NAME_NOT_RESOLVED @ https://acorta-link.com/assets/images/icon.png:0
+[    5455ms] [LOG] JQMIGRATE: Migrate is installed, version 3.4.1 @ https://posicionamientoweb.club/wp-includes/js/jquery/jquery-migrate.min.js?ver=3.4.1:1
+[    7042ms] [ERROR] Attestation check for Shared Storage on https://www.googleadservices.com failed. @ https://www.googleadservices.com/pagead/managed/js/activeview/current/reach_worklet.html:0
+[    7042ms] [ERROR] Attestation check for Shared Storage on https://www.googleadservices.com failed. @ https://www.googleadservices.com/pagead/managed/js/activeview/current/reach_worklet.html:0
+[    7203ms] [ERROR] Attestation check for Shared Storage on https://www.googleadservices.com failed. @ https://www.googleadservices.com/pagead/managed/js/activeview/current/reach_worklet.html:0
+[    7955ms] [DIR] SyntaxError @ https://js.ad-score.com/score.min.js?pid=1000925&tt=g:1
+[    8273ms] [WARNING] The powerPreference option is currently ignored when calling requestAdapter() on Windows. See https://crbug.com/369219127 @ https://js.ad-score.com/score.min.js?pid=1000925&tt=g:1

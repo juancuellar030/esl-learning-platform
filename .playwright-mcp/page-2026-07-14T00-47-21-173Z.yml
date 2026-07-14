@@ -1,0 +1,135 @@
+- generic [active] [ref=f1e1]:
+  - banner [ref=f1e2]:
+    - generic [ref=f1e3]:
+      - heading " ESL Learning Platform" [level=1] [ref=f1e4]:
+        - generic [ref=f1e5]: 
+        - text: ESL Learning Platform
+      - paragraph [ref=f1e6]: PC Assignment Viewer
+  - navigation [ref=f1e7]:
+    - link " Back to Tools" [ref=f1e9] [cursor=pointer]:
+      - /url: tools.html
+      - generic [ref=f1e10]: 
+      - text: Back to Tools
+  - main [ref=f1e11]:
+    - generic [ref=f1e12]:
+      - generic [ref=f1e13]:
+        - generic [ref=f1e14]:
+          - generic [ref=f1e15]: Term
+          - combobox "Term" [ref=f1e16]:
+            - option "Term 1"
+            - option "Term 2"
+            - option "Term 3" [selected]
+            - option "Term 4"
+        - generic [ref=f1e17]:
+          - generic [ref=f1e18]: Group
+          - combobox "Group" [ref=f1e19]:
+            - option "3A" [selected]
+            - option "3B"
+            - option "3C"
+            - option "4A"
+            - option "4B"
+            - option "4C"
+            - option "5A"
+            - option "5B"
+            - option "5C"
+            - option "5D"
+        - generic [ref=f1e20]:
+          - generic [ref=f1e21]: View mode
+          - combobox "View mode" [ref=f1e22]:
+            - option "Single Table" [selected]
+            - option "Split Table (3 columns)"
+            - option "Room Diagram"
+        - generic [ref=f1e23]:
+          - generic [ref=f1e24]: Search students (all groups)
+          - generic [ref=f1e25]:
+            - textbox "Search students (all groups)" [ref=f1e26]:
+              - /placeholder: Type a student name…
+            - button "" [ref=f1e27] [cursor=pointer]
+      - heading "3A — Term 3 (26 assigned, 0 unassigned)" [level=2] [ref=f1e29]
+      - table [ref=f1e31]:
+        - rowgroup [ref=f1e32]:
+          - row [ref=f1e33]:
+            - columnheader "PC" [ref=f1e34]
+            - columnheader "Student's Name" [ref=f1e35]
+        - rowgroup [ref=f1e36]:
+          - row [ref=f1e37]:
+            - cell "1" [ref=f1e38]
+            - cell "TORRES SARRIA ANTONELLA" [ref=f1e39]
+          - row [ref=f1e40]:
+            - cell "2" [ref=f1e41]
+            - cell "GUEVARA ORTIZ JUAN ÁLVARO" [ref=f1e42]
+          - row [ref=f1e43]:
+            - cell "3" [ref=f1e44]
+            - cell "CAMACHO SALAZAR JULIANA" [ref=f1e45]
+          - row [ref=f1e46]:
+            - cell "4" [ref=f1e47]
+            - cell "ANDRADE RODRIGUEZ SILVANA" [ref=f1e48]
+          - row [ref=f1e49]:
+            - cell "5" [ref=f1e50]
+            - cell "HERNANDEZ CELEITA MARIA ANTONIA" [ref=f1e51]
+          - row [ref=f1e52]:
+            - cell "6" [ref=f1e53]
+            - cell "MACIAS IBÁÑEZ SAMUEL ANDRÉS" [ref=f1e54]
+          - row [ref=f1e55]:
+            - cell "7" [ref=f1e56]
+            - cell "GRANJA PABÓN THIAGO" [ref=f1e57]
+          - row [ref=f1e58]:
+            - cell "8" [ref=f1e59]
+            - cell "NIÑO GALINDO SAMANTHA VICTORIA" [ref=f1e60]
+          - row [ref=f1e61]:
+            - cell "9" [ref=f1e62]
+            - cell "CAMERO PERDOMO JOSÉ MIGUEL" [ref=f1e63]
+          - row [ref=f1e64]:
+            - cell "10" [ref=f1e65]
+            - cell "RAMOS MORA VALENTINA ESTRELLITA" [ref=f1e66]
+          - row [ref=f1e67]:
+            - cell "11" [ref=f1e68]
+            - cell "CORTES LOSADA ARIADNA VALENTINA" [ref=f1e69]
+          - row [ref=f1e70]:
+            - cell "12" [ref=f1e71]
+            - cell "CHACÓN RAMÍREZ THOMAS" [ref=f1e72]
+          - row [ref=f1e73]:
+            - cell "13" [ref=f1e74]
+            - cell "MOGOLLÓN RODRÍGUEZ MELISSA" [ref=f1e75]
+          - row [ref=f1e76]:
+            - cell "14" [ref=f1e77]
+            - cell "BUITRAGO MÉNDEZ JUAN ANDRÉS" [ref=f1e78]
+          - row [ref=f1e79]:
+            - cell "15" [ref=f1e80]
+            - cell "SÁNCHEZ LUCUARA CELESTE" [ref=f1e81]
+          - row [ref=f1e82]:
+            - cell "16" [ref=f1e83]
+            - cell "PATIÑO CLAROS GABRIELA" [ref=f1e84]
+          - row [ref=f1e85]:
+            - cell "17" [ref=f1e86]
+            - cell "GOMEZ GONZALEZ AARON" [ref=f1e87]
+          - row [ref=f1e88]:
+            - cell "18" [ref=f1e89]
+            - cell "TAMAYO CASTAÑEDA SAMUEL" [ref=f1e90]
+          - row [ref=f1e91]:
+            - cell "19" [ref=f1e92]
+            - cell "SAAVEDRA OYOLA EIDER IVAN" [ref=f1e93]
+          - row [ref=f1e94]:
+            - cell "20" [ref=f1e95]
+            - cell "RIVERA HERRERA MAYTE" [ref=f1e96]
+          - row [ref=f1e97]:
+            - cell "21" [ref=f1e98]
+            - cell "RUGELES CASTAÑEDA DYLAN THOMAS" [ref=f1e99]
+          - row [ref=f1e100]:
+            - cell "22" [ref=f1e101]
+            - cell "VÁSQUEZ PEREZ EMILIANO" [ref=f1e102]
+          - row [ref=f1e103]:
+            - cell "23" [ref=f1e104]
+            - cell "CABRERA BARRERO JULIETA" [ref=f1e105]
+          - row [ref=f1e106]:
+            - cell "24" [ref=f1e107]
+            - cell "YASNO ÁVILA MATIAS" [ref=f1e108]
+          - row [ref=f1e109]:
+            - cell "25" [ref=f1e110]
+            - cell "SERRATO MORENO EMILIANO" [ref=f1e111]
+          - row [ref=f1e112]:
+            - cell "26" [ref=f1e113]
+            - cell "CASTAÑEDA RENGIFO ISABELLA" [ref=f1e114]
+  - contentinfo [ref=f1e115]:
+    - paragraph [ref=f1e117]: ESL Learning Platform © 2025 | Made for Teachers, by Teachers
+  - button "" [ref=f1e118] [cursor=pointer]

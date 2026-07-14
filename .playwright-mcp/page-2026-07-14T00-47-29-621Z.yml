@@ -1,0 +1,156 @@
+- generic [active] [ref=f2e1]:
+  - banner [ref=f2e2]:
+    - generic [ref=f2e3]:
+      - heading " ESL Learning Platform" [level=1] [ref=f2e4]:
+        - generic [ref=f2e5]: 
+        - text: ESL Learning Platform
+      - paragraph [ref=f2e6]: Teacher's Teaching Tools
+  - navigation [ref=f2e7]:
+    - link " Back to Dashboard" [ref=f2e9] [cursor=pointer]:
+      - /url: index.html
+      - generic [ref=f2e10]: 
+      - text: Back to Dashboard
+  - main [ref=f2e11]:
+    - generic [ref=f2e13]:
+      - heading "Welcome to Your Teaching Tools" [level=2] [ref=f2e14]
+      - generic [ref=f2e15]:
+        - link " Clock & Timer Real-time clock and classroom timer with visual alerts" [ref=f2e16] [cursor=pointer]:
+          - /url: clock-timer.html
+          - generic [ref=f2e17]: 
+          - heading "Clock & Timer" [level=3] [ref=f2e19]
+          - paragraph [ref=f2e20]: Real-time clock and classroom timer with visual alerts
+        - link " Weekly Lesson Planner Plan and organize your weekly class activities" [ref=f2e21] [cursor=pointer]:
+          - /url: lesson-planner.html
+          - generic [ref=f2e22]: 
+          - heading "Weekly Lesson Planner" [level=3] [ref=f2e24]
+          - paragraph [ref=f2e25]: Plan and organize your weekly class activities
+        - link " Student Behavior Tracker Track and manage student behavior with weekly reports" [ref=f2e26] [cursor=pointer]:
+          - /url: student-behavior-tracker.html
+          - generic [ref=f2e27]: 
+          - heading "Student Behavior Tracker" [level=3] [ref=f2e29]
+          - paragraph [ref=f2e30]: Track and manage student behavior with weekly reports
+        - link " PDF Book Library Store and annotate your teaching materials with drawing tools" [ref=f2e31] [cursor=pointer]:
+          - /url: pdf-library.html
+          - generic [ref=f2e32]: 
+          - heading "PDF Book Library" [level=3] [ref=f2e34]
+          - paragraph [ref=f2e35]: Store and annotate your teaching materials with drawing tools
+        - link " Student Material Tracker Track materials and supplies brought by students" [ref=f2e36] [cursor=pointer]:
+          - /url: student-material-tracker.html
+          - generic [ref=f2e37]: 
+          - heading "Student Material Tracker" [level=3] [ref=f2e39]
+          - paragraph [ref=f2e40]: Track materials and supplies brought by students
+        - link " Classroom Layout Tool Arrange student desks in a 7x7 grid with drag-and-drop" [ref=f2e41] [cursor=pointer]:
+          - /url: classroom-distribution.html
+          - generic [ref=f2e42]: 
+          - heading "Classroom Layout Tool" [level=3] [ref=f2e44]
+          - paragraph [ref=f2e45]: Arrange student desks in a 7x7 grid with drag-and-drop
+        - link " Charades Game Play charades with vocabulary categories and a 60-second timer" [ref=f2e46] [cursor=pointer]:
+          - /url: charades.html
+          - generic [ref=f2e47]: 
+          - heading "Charades Game" [level=3] [ref=f2e49]
+          - paragraph [ref=f2e50]: Play charades with vocabulary categories and a 60-second timer
+        - link " Bingo Generator Create custom bingo cards with words or pictures and generate PDFs" [ref=f2e51] [cursor=pointer]:
+          - /url: bingo-generator.html
+          - generic [ref=f2e52]: 
+          - heading "Bingo Generator" [level=3] [ref=f2e54]
+          - paragraph [ref=f2e55]: Create custom bingo cards with words or pictures and generate PDFs
+        - link " Live Quiz Game Real-time multiplayer quiz — host or join a live session with your class" [ref=f2e56] [cursor=pointer]:
+          - /url: quiz-game.html
+          - generic [ref=f2e57]: 
+          - heading "Live Quiz Game" [level=3] [ref=f2e59]
+          - paragraph [ref=f2e60]: Real-time multiplayer quiz — host or join a live session with your class
+        - link " Grading Scale Generator Generate custom grading scales, upload student lists, and export grades as CSV" [ref=f2e61] [cursor=pointer]:
+          - /url: grading-scale.html
+          - generic [ref=f2e62]: 
+          - heading "Grading Scale Generator" [level=3] [ref=f2e64]
+          - paragraph [ref=f2e65]: Generate custom grading scales, upload student lists, and export grades as CSV
+        - link " Grade Sheets Create and manage term grade sheets with weighted competencies and CSV export" [ref=f2e66] [cursor=pointer]:
+          - /url: grade-sheets.html
+          - generic [ref=f2e67]: 
+          - heading "Grade Sheets" [level=3] [ref=f2e69]
+          - paragraph [ref=f2e70]: Create and manage term grade sheets with weighted competencies and CSV export
+        - link " Quiz Builder Design custom tests with multiple question types and share them with students" [ref=f2e71] [cursor=pointer]:
+          - /url: test-builder.html
+          - generic [ref=f2e72]: 
+          - heading "Quiz Builder" [level=3] [ref=f2e74]
+          - paragraph [ref=f2e75]: Design custom tests with multiple question types and share them with students
+        - link " Student Turn Tracker Track participation with fun random pickers — roulette, balloons, and more" [ref=f2e76] [cursor=pointer]:
+          - /url: student-turn-tracker.html
+          - generic [ref=f2e77]: 
+          - heading "Student Turn Tracker" [level=3] [ref=f2e79]
+          - paragraph [ref=f2e80]: Track participation with fun random pickers — roulette, balloons, and more
+        - link " Student Self-Assessment Guía a los estudiantes en su autoevaluación de período con escala Likert y nota automática" [ref=f2e81] [cursor=pointer]:
+          - /url: student-self-assessment.html
+          - generic [ref=f2e82]: 
+          - heading "Student Self-Assessment" [level=3] [ref=f2e84]
+          - paragraph [ref=f2e85]: Guía a los estudiantes en su autoevaluación de período con escala Likert y nota automática
+        - link " Word Guesser Set up clue-based word guessing sessions with multiple-choice or typed answers" [ref=f2e86] [cursor=pointer]:
+          - /url: word-guesser.html
+          - generic [ref=f2e87]: 
+          - heading "Word Guesser" [level=3] [ref=f2e89]
+          - paragraph [ref=f2e90]: Set up clue-based word guessing sessions with multiple-choice or typed answers
+        - link " Picture Reveal Turn any image into a fun hidden picture game with your class" [ref=f2e91] [cursor=pointer]:
+          - /url: picture-reveal.html
+          - generic [ref=f2e92]: 
+          - heading "Picture Reveal" [level=3] [ref=f2e94]
+          - paragraph [ref=f2e95]: Turn any image into a fun hidden picture game with your class
+        - link " Sequence Unscrambler Drag and drop words or images to reconstruct sequences — food chains, life cycles, and more" [ref=f2e96] [cursor=pointer]:
+          - /url: sequence-unscrambler.html
+          - generic [ref=f2e97]: 
+          - heading "Sequence Unscrambler" [level=3] [ref=f2e99]
+          - paragraph [ref=f2e100]: Drag and drop words or images to reconstruct sequences — food chains, life cycles, and more
+        - link " Pictionary Word Picker Generate random words categorized by topic and difficulty for your drawing games" [ref=f2e101] [cursor=pointer]:
+          - /url: pictionary.html
+          - generic [ref=f2e102]: 
+          - heading "Pictionary Word Picker" [level=3] [ref=f2e104]
+          - paragraph [ref=f2e105]: Generate random words categorized by topic and difficulty for your drawing games
+        - link " PC Assignment Viewer View and search student PC assignments by term, group, and layout" [ref=f2e106] [cursor=pointer]:
+          - /url: pc-assignment-viewer.html
+          - generic [ref=f2e107]: 
+          - heading "PC Assignment Viewer" [level=3] [ref=f2e109]
+          - paragraph [ref=f2e110]: View and search student PC assignments by term, group, and layout
+  - contentinfo [ref=f2e111]:
+    - paragraph [ref=f2e113]: ESL Learning Platform © 2025 | Made for Teachers, by Teachers
+  - button "" [ref=f2e114] [cursor=pointer]
+  - button " 3" [ref=f2e116] [cursor=pointer]:
+    - generic [ref=f2e117]: 
+    - generic [ref=f2e118]: "3"
+  - generic:
+    - generic:
+      - heading "Share Birthday Link" [level=4]
+      - paragraph: "Choose a background effect:"
+      - generic:
+        - textbox
+        - button ""
+      - generic:
+        - button "Close"
+        - link "Preview":
+          - /url: "#"
+  - generic:
+    - generic:
+      - button ""
+      - heading " Jul 2026" [level=3]:
+        - generic: 
+        - text: Jul 2026
+      - button ""
+      - button ""
+    - generic:
+      - generic:
+        - generic: 
+        - generic:
+          - generic: KESHIA C.
+          - generic: Jul 21
+        - generic: In 8 days
+        - button ""
+      - generic:
+        - generic: 
+        - generic:
+          - generic: JUANA LUNA
+          - generic: Jul 23
+        - generic: In 10 days
+        - button ""
+  - generic:
+    - button ""
+    - generic:
+      - generic: 🎂
+      - generic: Happy Birthday!

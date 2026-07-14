@@ -1,0 +1,120 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - heading " ESL Learning Platform" [level=1] [ref=e4]:
+        - generic [ref=e5]: 
+        - text: ESL Learning Platform
+      - paragraph [ref=e6]: PC Assignment Viewer
+  - navigation [ref=e7]:
+    - link " Back to Tools" [ref=e9] [cursor=pointer]:
+      - /url: tools.html
+      - generic [ref=e10]: 
+      - text: Back to Tools
+  - main [ref=e11]:
+    - generic [ref=e12]:
+      - generic [ref=e13]:
+        - generic [ref=e14]:
+          - generic [ref=e15]: Term
+          - combobox "Term" [ref=e16]:
+            - option "Term 1"
+            - option "Term 2"
+            - option "Term 3" [selected]
+            - option "Term 4"
+        - generic [ref=e17]:
+          - generic [ref=e18]: Group
+          - combobox "Group" [ref=e19]:
+            - option "3A"
+            - option "3B"
+            - option "3C"
+            - option "4A"
+            - option "4B"
+            - option "4C"
+            - option "5A"
+            - option "5B"
+            - option "5C" [selected]
+            - option "5D"
+        - generic [ref=e20]:
+          - generic [ref=e21]: View mode
+          - combobox "View mode" [ref=e22]:
+            - option "Single Table"
+            - option "Split Table (3 columns)"
+            - option "Room Diagram" [selected]
+        - generic [ref=e23]:
+          - generic [ref=e24]: Search students (all groups)
+          - generic [ref=e25]:
+            - textbox "Search students (all groups)" [ref=e26]:
+              - /placeholder: Type a student name…
+            - button "" [ref=e27] [cursor=pointer]
+      - heading "5C — Term 3 (0 assigned, 28 unassigned)" [level=2] [ref=e205]
+      - generic [ref=e30]:
+        - generic [ref=e245]:
+          - generic [ref=e246]: "1"
+          - generic [ref=e248]: "2"
+          - generic [ref=e250]: "3"
+          - generic [ref=e252]: "4"
+          - generic [ref=e254]: "5"
+          - generic [ref=e256]: "6"
+          - generic [ref=e258]: "7"
+          - generic [ref=e260]: "8"
+          - generic [ref=e262]: "9"
+          - generic [ref=e264]: "10"
+          - generic [ref=e266]: "11"
+          - generic [ref=e268]: "12"
+          - generic [ref=e270]: "13"
+          - generic [ref=e272]: "14"
+          - generic [ref=e274]: "15"
+          - generic [ref=e276]: "16"
+          - generic [ref=e278]: "17"
+          - generic [ref=e280]: "18"
+          - generic [ref=e282]: "19"
+          - generic [ref=e284]: "20"
+          - generic [ref=e286]: "21"
+          - generic [ref=e288]: "22"
+          - generic [ref=e290]: "23"
+          - generic [ref=e292]: "24"
+          - generic [ref=e294]: "25"
+          - generic [ref=e296]: "26"
+          - generic [ref=e298]: "27"
+          - generic [ref=e300]: "28"
+          - generic [ref=e302]: "29"
+          - generic [ref=e304]: "30"
+          - generic [ref=e306]: school bags area
+          - generic [ref=e307]: Teacher's Desk
+          - generic [ref=e308]:
+            - generic [ref=e309]: Board
+            - generic [ref=e310]: Board
+          - generic [ref=e311]: Exit
+        - generic [ref=e312]:
+          - heading "PC not yet assigned" [level=3] [ref=e313]
+          - list [ref=e314]:
+            - listitem [ref=e315]: CABREJO GONZÁLEZ SAMUEL
+            - listitem [ref=e316]: CARDENAS RODRIGUEZ EDUARD SANTIAGO
+            - listitem [ref=e317]: CHINCHILLA RÍOS VIOLETTA
+            - listitem [ref=e318]: CLAVIJO PERDOMO EMMA
+            - listitem [ref=e319]: CORREDOR AROCA MATÍAS
+            - listitem [ref=e320]: CUBILLOS CAMACHO VALERIA
+            - listitem [ref=e321]: DÍAZ SONS ANGEL MARTÍN
+            - listitem [ref=e322]: DUSSAN LEMUS JULIETA
+            - listitem [ref=e323]: GAITÁN VARGAS ANA LUCÍA
+            - listitem [ref=e324]: ICOPO MELENDEZ LUCAS ANDRÉS
+            - listitem [ref=e325]: JARA ALDANA MARTÍN
+            - listitem [ref=e326]: MEDINA OBANDO DAVID ESTEBAN
+            - listitem [ref=e327]: MOLINA LOZADA SAMANTHA
+            - listitem [ref=e328]: ORTIGOZA GÓMEZ MIA SALOMÉ
+            - listitem [ref=e329]: PACHECO PEREZ GABRIEL ALEJANDRO
+            - listitem [ref=e330]: PALOMINO HERNÁNDEZ MARTÍN
+            - listitem [ref=e331]: PÉREZ NIÑO ABRIL
+            - listitem [ref=e332]: PINEDA UNÍ EMMANUEL
+            - listitem [ref=e333]: PRECIADO CUERVO ISABELLA
+            - listitem [ref=e334]: PUENTES SUAREZ GINA MARCELA
+            - listitem [ref=e335]: RAMÍREZ SALCEDO JUAN ANDRÉS
+            - listitem [ref=e336]: RAMIREZ YEPES LUCIA
+            - listitem [ref=e337]: RENGIFO OTALORA JUANA VALERIA
+            - listitem [ref=e338]: RINCÓN MEDINA SAMUEL NICOLÁS
+            - listitem [ref=e339]: ROMERO TAMAYO EMILY LUCIANA
+            - listitem [ref=e340]: VALENCIA PACHECO JORGE MARÍO
+            - listitem [ref=e341]: VELEZ GOMEZ MIGUEL ANGEL
+            - listitem [ref=e342]: ZAPATA SALAZAR JUAN ANDRÉS
+  - contentinfo [ref=e115]:
+    - paragraph [ref=e117]: ESL Learning Platform © 2025 | Made for Teachers, by Teachers
+  - button "" [ref=e118] [cursor=pointer]

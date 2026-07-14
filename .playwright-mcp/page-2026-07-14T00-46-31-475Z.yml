@@ -1,0 +1,140 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - heading " ESL Learning Platform" [level=1] [ref=e4]:
+        - generic [ref=e5]: 
+        - text: ESL Learning Platform
+      - paragraph [ref=e6]: PC Assignment Viewer
+  - navigation [ref=e7]:
+    - link " Back to Tools" [ref=e9] [cursor=pointer]:
+      - /url: tools.html
+      - generic [ref=e10]: 
+      - text: Back to Tools
+  - main [ref=e11]:
+    - generic [ref=e12]:
+      - generic [ref=e13]:
+        - generic [ref=e14]:
+          - generic [ref=e15]: Term
+          - combobox "Term" [ref=e16]:
+            - option "Term 1"
+            - option "Term 2"
+            - option "Term 3" [selected]
+            - option "Term 4"
+        - generic [ref=e17]:
+          - generic [ref=e18]: Group
+          - combobox "Group" [ref=e19]:
+            - option "3A" [selected]
+            - option "3B"
+            - option "3C"
+            - option "4A"
+            - option "4B"
+            - option "4C"
+            - option "5A"
+            - option "5B"
+            - option "5C"
+            - option "5D"
+        - generic [ref=e20]:
+          - generic [ref=e21]: View mode
+          - combobox "View mode" [ref=e22]:
+            - option "Single Table"
+            - option "Split Table (3 columns)"
+            - option "Room Diagram" [selected]
+        - generic [ref=e23]:
+          - generic [ref=e24]: Search students (all groups)
+          - generic [ref=e25]:
+            - textbox "Search students (all groups)" [ref=e26]:
+              - /placeholder: Type a student name…
+            - button "" [ref=e27] [cursor=pointer]
+      - heading "3A — Term 3 (26 assigned, 0 unassigned)" [level=2] [ref=e343]
+      - generic [ref=e344]:
+        - generic [ref=e345]:
+          - generic [ref=e346]: "1"
+          - generic [ref=e347]: TORRES SARRIA ANTONELLA
+        - generic [ref=e348]:
+          - generic [ref=e349]: "2"
+          - generic [ref=e350]: GUEVARA ORTIZ JUAN ÁLVARO
+        - generic [ref=e351]:
+          - generic [ref=e352]: "3"
+          - generic [ref=e353]: CAMACHO SALAZAR JULIANA
+        - generic [ref=e354]:
+          - generic [ref=e355]: "4"
+          - generic [ref=e356]: ANDRADE RODRIGUEZ SILVANA
+        - generic [ref=e357]:
+          - generic [ref=e358]: "5"
+          - generic [ref=e359]: HERNANDEZ CELEITA MARIA ANTONIA
+        - generic [ref=e360]:
+          - generic [ref=e361]: "6"
+          - generic [ref=e362]: MACIAS IBÁÑEZ SAMUEL ANDRÉS
+        - generic [ref=e363]:
+          - generic [ref=e364]: "7"
+          - generic [ref=e365]: GRANJA PABÓN THIAGO
+        - generic [ref=e366]:
+          - generic [ref=e367]: "8"
+          - generic [ref=e368]: NIÑO GALINDO SAMANTHA VICTORIA
+        - generic [ref=e369]:
+          - generic [ref=e370]: "9"
+          - generic [ref=e371]: CAMERO PERDOMO JOSÉ MIGUEL
+        - generic [ref=e372]:
+          - generic [ref=e373]: "10"
+          - generic [ref=e374]: RAMOS MORA VALENTINA ESTRELLITA
+        - generic [ref=e375]:
+          - generic [ref=e376]: "11"
+          - generic [ref=e377]: CORTES LOSADA ARIADNA VALENTINA
+        - generic [ref=e378]:
+          - generic [ref=e379]: "12"
+          - generic [ref=e380]: CHACÓN RAMÍREZ THOMAS
+        - generic [ref=e381]:
+          - generic [ref=e382]: "13"
+          - generic [ref=e383]: MOGOLLÓN RODRÍGUEZ MELISSA
+        - generic [ref=e384]:
+          - generic [ref=e385]: "14"
+          - generic [ref=e386]: BUITRAGO MÉNDEZ JUAN ANDRÉS
+        - generic [ref=e387]:
+          - generic [ref=e388]: "15"
+          - generic [ref=e389]: SÁNCHEZ LUCUARA CELESTE
+        - generic [ref=e390]:
+          - generic [ref=e391]: "16"
+          - generic [ref=e392]: PATIÑO CLAROS GABRIELA
+        - generic [ref=e393]:
+          - generic [ref=e394]: "17"
+          - generic [ref=e395]: GOMEZ GONZALEZ AARON
+        - generic [ref=e396]:
+          - generic [ref=e397]: "18"
+          - generic [ref=e398]: TAMAYO CASTAÑEDA SAMUEL
+        - generic [ref=e399]:
+          - generic [ref=e400]: "19"
+          - generic [ref=e401]: SAAVEDRA OYOLA EIDER IVAN
+        - generic [ref=e402]:
+          - generic [ref=e403]: "20"
+          - generic [ref=e404]: RIVERA HERRERA MAYTE
+        - generic [ref=e405]:
+          - generic [ref=e406]: "21"
+          - generic [ref=e407]: RUGELES CASTAÑEDA DYLAN THOMAS
+        - generic [ref=e408]:
+          - generic [ref=e409]: "22"
+          - generic [ref=e410]: VÁSQUEZ PEREZ EMILIANO
+        - generic [ref=e411]:
+          - generic [ref=e412]: "23"
+          - generic [ref=e413]: CABRERA BARRERO JULIETA
+        - generic [ref=e414]:
+          - generic [ref=e415]: "24"
+          - generic [ref=e416]: YASNO ÁVILA MATIAS
+        - generic [ref=e417]:
+          - generic [ref=e418]: "25"
+          - generic [ref=e419]: SERRATO MORENO EMILIANO
+        - generic [ref=e420]:
+          - generic [ref=e421]: "26"
+          - generic [ref=e422]: CASTAÑEDA RENGIFO ISABELLA
+        - generic [ref=e423]: "27"
+        - generic [ref=e425]: "28"
+        - generic [ref=e427]: "29"
+        - generic [ref=e429]: "30"
+        - generic [ref=e431]: school bags area
+        - generic [ref=e432]: Teacher's Desk
+        - generic [ref=e433]:
+          - generic [ref=e434]: Board
+          - generic [ref=e435]: Board
+        - generic [ref=e436]: Exit
+  - contentinfo [ref=e115]:
+    - paragraph [ref=e117]: ESL Learning Platform © 2025 | Made for Teachers, by Teachers
+  - button "" [ref=e118] [cursor=pointer]
