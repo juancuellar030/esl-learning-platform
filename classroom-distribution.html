@@ -8,7 +8,7 @@
     <title>Classroom Student Distribution - ESL Learning Platform</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="css/classroom-distribution.css">
+    <link rel="stylesheet" href="css/classroom-distribution-v2.css">
     <link rel="stylesheet" href="css/google-drive.css">
 </head>
 
@@ -41,6 +41,23 @@
 
             <!-- Toolbar -->
             <div class="toolbar">
+                <div class="layout-picker">
+                    <span><i class="fa-solid fa-table-cells-large"></i> Layout</span>
+                    <select id="layout-preset" class="layout-picker-native" aria-hidden="true" tabindex="-1">
+                        <option value="banks-1-2-2">1–2–2 Banks</option>
+                        <option value="banks-2-2-1">2–2–1 Banks</option>
+                        <option value="banks-2-1-2">2–1–2 Banks</option>
+                        <option value="banks-1-3-1">1–3–1 Banks</option>
+                        <option value="tapered-center">Tapered Center</option>
+                    </select>
+                    <button type="button" class="layout-picker-trigger" id="layout-preset-trigger"
+                        aria-haspopup="listbox" aria-expanded="false">
+                        <span class="layout-picker-preview" aria-hidden="true"></span>
+                        <span class="layout-picker-label">1–2–2 Banks</span>
+                        <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+                    </button>
+                    <div class="layout-picker-menu" id="layout-preset-menu" role="listbox" hidden></div>
+                </div>
                 <button class="btn-primary" id="save-layout-btn">
                     <i class="fa-solid fa-floppy-disk"></i> Save Layout
                 </button>
@@ -73,14 +90,8 @@
 
             <!-- Classroom Grid -->
             <div class="classroom-grid-wrapper">
-                <!-- Column Resizers Container (dynamic) -->
-                <div id="column-resizers"
-                    style="display: grid; grid-template-columns: repeat(7, 100px); gap: 10px; margin-bottom: 10px;">
-                    <!-- Resizers injected by JS -->
-                </div>
-
-                <div id="classroom-grid" class="classroom-grid">
-                    <!-- Grid cells injected by JS -->
+                <div id="classroom-grid" class="classroom-stage" aria-label="Classroom layout">
+                    <!-- Board, teacher desk, and 30 numbered zones injected by JS -->
                 </div>
             </div>
 
@@ -102,7 +113,7 @@
     <script src="https://apis.google.com/js/api.js"></script>
     <script src="https://accounts.google.com/gsi/client"></script>
     <script src="js/students-data.js"></script>
-    <script src="js/classroom-distribution.js"></script>
+    <script src="js/classroom-distribution-v2.js"></script>
     <script src="js/google-drive-service.js"></script>
     <script src="js/darkmode.js"></script>
     <script>

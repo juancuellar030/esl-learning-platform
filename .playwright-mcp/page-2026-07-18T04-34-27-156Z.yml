@@ -1,0 +1,237 @@
+- generic [active] [ref=f1e1]:
+  - banner [ref=f1e2]:
+    - generic [ref=f1e3]:
+      - heading " ESL Learning Platform" [level=1] [ref=f1e4]:
+        - generic [ref=f1e5]: 
+        - text: ESL Learning Platform
+      - paragraph [ref=f1e6]: Classroom Layout Planner
+  - navigation [ref=f1e7]:
+    - generic [ref=f1e8]:
+      - link " Back to Tools" [ref=f1e9] [cursor=pointer]:
+        - /url: tools.html
+        - generic [ref=f1e10]: 
+        - text: Back to Tools
+      - button " Hide Names" [ref=f1e12] [cursor=pointer]:
+        - generic [ref=f1e13]: 
+        - text: Hide Names
+  - main [ref=f1e14]:
+    - generic [ref=f1e15]:
+      - generic [ref=f1e16]:
+        - generic [ref=f1e17]:
+          - generic [ref=f1e18]:
+            - generic [ref=f1e19]: 
+            - text: Layout
+          - combobox
+          - button "1–3–1 Banks" [ref=f1e20] [cursor=pointer]:
+            - generic [ref=f1e53]: 
+        - button " Save Layout" [ref=f1e54] [cursor=pointer]:
+          - generic [ref=f1e55]: 
+          - text: Save Layout
+        - button " Load Layout" [ref=f1e56] [cursor=pointer]:
+          - generic [ref=f1e57]: 
+          - text: Load Layout
+        - button " Export JSON" [ref=f1e58] [cursor=pointer]:
+          - generic [ref=f1e59]: 
+          - text: Export JSON
+        - generic [ref=f1e60] [cursor=pointer]:
+          - generic [ref=f1e61]: 
+          - text: Import JSON
+        - button " Drive" [ref=f1e62] [cursor=pointer]:
+          - generic [ref=f1e63]: 
+          - text: Drive
+        - button " Add Student" [ref=f1e64] [cursor=pointer]:
+          - generic [ref=f1e65]: 
+          - text: Add Student
+        - button " Random Relocation" [ref=f1e66] [cursor=pointer]:
+          - generic [ref=f1e67]: 
+          - text: Random Relocation
+        - button " Reset" [ref=f1e68] [cursor=pointer]:
+          - generic [ref=f1e69]: 
+          - text: Reset
+      - generic "Classroom layout" [ref=f1e71]:
+        - generic [ref=f1e72]: Board
+        - generic: TEACHER
+        - generic [ref=f1e73]:
+          - generic: "1"
+          - generic [ref=f1e74]:
+            - generic: ALEJANDRA H.
+            - button "Move ALEJANDRA H. to waiting area" [ref=f1e76] [cursor=pointer]:
+              - generic [ref=f1e77]: 
+        - generic [ref=f1e78]:
+          - generic: "2"
+          - generic [ref=f1e79]:
+            - generic: ALEJANDRO C.
+            - button "Move ALEJANDRO C. to waiting area" [ref=f1e81] [cursor=pointer]:
+              - generic [ref=f1e82]: 
+        - generic [ref=f1e83]:
+          - generic: "3"
+          - generic [ref=f1e84]:
+            - generic: ANAMARIA C.
+            - button "Move ANAMARIA C. to waiting area" [ref=f1e86] [cursor=pointer]:
+              - generic [ref=f1e87]: 
+        - generic [ref=f1e88]:
+          - generic: "4"
+          - generic [ref=f1e89]:
+            - generic: ANTONELLA P.
+            - button "Move ANTONELLA P. to waiting area" [ref=f1e91] [cursor=pointer]:
+              - generic [ref=f1e92]: 
+        - generic [ref=f1e93]:
+          - generic: "5"
+          - generic [ref=f1e94]:
+            - generic: BRIANA C.
+            - button "Move BRIANA C. to waiting area" [ref=f1e96] [cursor=pointer]:
+              - generic [ref=f1e97]: 
+        - generic [ref=f1e98]:
+          - generic: "6"
+          - generic [ref=f1e99]:
+            - generic: DANIEL P.
+            - button "Move DANIEL P. to waiting area" [ref=f1e101] [cursor=pointer]:
+              - generic [ref=f1e102]: 
+        - generic [ref=f1e103]:
+          - generic: "7"
+          - generic [ref=f1e104]:
+            - generic: DANNA P.
+            - button "Move DANNA P. to waiting area" [ref=f1e106] [cursor=pointer]:
+              - generic [ref=f1e107]: 
+        - generic [ref=f1e108]:
+          - generic: "8"
+          - generic [ref=f1e109]:
+            - generic: EMILIANO Q.
+            - button "Move EMILIANO Q. to waiting area" [ref=f1e111] [cursor=pointer]:
+              - generic [ref=f1e112]: 
+        - generic [ref=f1e113]:
+          - generic: "9"
+          - generic [ref=f1e114]:
+            - generic: EMILIANO T.
+            - button "Move EMILIANO T. to waiting area" [ref=f1e116] [cursor=pointer]:
+              - generic [ref=f1e117]: 
+        - generic [ref=f1e118]:
+          - generic: "10"
+          - generic [ref=f1e119]:
+            - generic: EMILIO R.
+            - button "Move EMILIO R. to waiting area" [ref=f1e121] [cursor=pointer]:
+              - generic [ref=f1e122]: 
+        - generic [ref=f1e123]:
+          - generic: "11"
+          - generic [ref=f1e124]:
+            - generic: ERMES V.
+            - button "Move ERMES V. to waiting area" [ref=f1e126] [cursor=pointer]:
+              - generic [ref=f1e127]: 
+        - generic [ref=f1e128]:
+          - generic: "12"
+          - generic [ref=f1e129]:
+            - generic: EVA MARIA P.
+            - button "Move EVA MARIA P. to waiting area" [ref=f1e131] [cursor=pointer]:
+              - generic [ref=f1e132]: 
+        - generic [ref=f1e133]:
+          - generic: "13"
+          - generic [ref=f1e134]:
+            - generic: JUAN J. RÍOS
+            - button "Move JUAN J. RÍOS to waiting area" [ref=f1e136] [cursor=pointer]:
+              - generic [ref=f1e137]: 
+        - generic [ref=f1e138]:
+          - generic: "14"
+          - generic [ref=f1e139]:
+            - generic: JUAN J. SARRIAS
+            - button "Move JUAN J. SARRIAS to waiting area" [ref=f1e141] [cursor=pointer]:
+              - generic [ref=f1e142]: 
+        - generic [ref=f1e143]:
+          - generic: "15"
+          - generic [ref=f1e144]:
+            - generic: JUANA LUNA
+            - button "Move JUANA LUNA to waiting area" [ref=f1e146] [cursor=pointer]:
+              - generic [ref=f1e147]: 
+        - generic [ref=f1e148]:
+          - generic: "16"
+          - generic [ref=f1e149]:
+            - generic: KESHIA C.
+            - button "Move KESHIA C. to waiting area" [ref=f1e151] [cursor=pointer]:
+              - generic [ref=f1e152]: 
+        - generic [ref=f1e153]:
+          - generic: "17"
+          - generic [ref=f1e154]:
+            - generic: LAURA BERNAL
+            - button "Move LAURA BERNAL to waiting area" [ref=f1e156] [cursor=pointer]:
+              - generic [ref=f1e157]: 
+        - generic [ref=f1e158]:
+          - generic: "18"
+          - generic [ref=f1e159]:
+            - generic: LAURA S.
+            - button "Move LAURA S. to waiting area" [ref=f1e161] [cursor=pointer]:
+              - generic [ref=f1e162]: 
+        - generic [ref=f1e163]:
+          - generic: "19"
+          - generic [ref=f1e164]:
+            - generic: LORENZO R.
+            - button "Move LORENZO R. to waiting area" [ref=f1e166] [cursor=pointer]:
+              - generic [ref=f1e167]: 
+        - generic [ref=f1e168]:
+          - generic: "20"
+          - generic [ref=f1e169]:
+            - generic: LUCIANO M.
+            - button "Move LUCIANO M. to waiting area" [ref=f1e171] [cursor=pointer]:
+              - generic [ref=f1e172]: 
+        - generic [ref=f1e173]:
+          - generic: "21"
+          - generic [ref=f1e174]:
+            - generic: MATIAS F.
+            - button "Move MATIAS F. to waiting area" [ref=f1e176] [cursor=pointer]:
+              - generic [ref=f1e177]: 
+        - generic [ref=f1e178]:
+          - generic: "22"
+          - generic [ref=f1e179]:
+            - generic: MIA H.
+            - button "Move MIA H. to waiting area" [ref=f1e181] [cursor=pointer]:
+              - generic [ref=f1e182]: 
+        - generic [ref=f1e183]:
+          - generic: "23"
+          - generic [ref=f1e184]:
+            - generic: PABLO A.
+            - button "Move PABLO A. to waiting area" [ref=f1e186] [cursor=pointer]:
+              - generic [ref=f1e187]: 
+        - generic [ref=f1e188]:
+          - generic: "24"
+          - generic [ref=f1e189]:
+            - generic: PAULA V.
+            - button "Move PAULA V. to waiting area" [ref=f1e191] [cursor=pointer]:
+              - generic [ref=f1e192]: 
+        - generic [ref=f1e193]:
+          - generic: "25"
+          - generic [ref=f1e194]:
+            - generic: SAMANTHA C
+            - button "Move SAMANTHA C to waiting area" [ref=f1e196] [cursor=pointer]:
+              - generic [ref=f1e197]: 
+        - generic [ref=f1e198]:
+          - generic: "26"
+          - generic [ref=f1e199]:
+            - generic: SAMUEL G.
+            - button "Move SAMUEL G. to waiting area" [ref=f1e201] [cursor=pointer]:
+              - generic [ref=f1e202]: 
+        - generic [ref=f1e203]:
+          - generic: "27"
+          - generic [ref=f1e204]:
+            - generic: SANTIAGO O.
+            - button "Move SANTIAGO O. to waiting area" [ref=f1e206] [cursor=pointer]:
+              - generic [ref=f1e207]: 
+        - generic [ref=f1e208]:
+          - generic: "28"
+          - generic [ref=f1e209]:
+            - generic: SARA LUCÍA V.
+            - button "Move SARA LUCÍA V. to waiting area" [ref=f1e211] [cursor=pointer]:
+              - generic [ref=f1e212]: 
+        - generic [ref=f1e213]:
+          - generic: "29"
+          - generic [ref=f1e214]:
+            - generic: TOMÁS C.
+            - button "Move TOMÁS C. to waiting area" [ref=f1e216] [cursor=pointer]:
+              - generic [ref=f1e217]: 
+        - generic [ref=f1e218]:
+          - generic: "30"
+          - generic [ref=f1e219]:
+            - generic: VALERIA P.
+            - button "Move VALERIA P. to waiting area" [ref=f1e221] [cursor=pointer]:
+              - generic [ref=f1e222]: 
+      - generic [ref=f1e223]: Waiting Area
+  - contentinfo [ref=f1e225]:
+    - paragraph [ref=f1e227]: ESL Learning Platform © 2025 | Made for Teachers, by Teachers
+  - button "" [ref=f1e228] [cursor=pointer]

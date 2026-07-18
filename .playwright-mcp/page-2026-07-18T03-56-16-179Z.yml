@@ -1,0 +1,147 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - heading " ESL Learning Platform" [level=1] [ref=e4]:
+        - generic [ref=e5]: 
+        - text: ESL Learning Platform
+      - paragraph [ref=e6]: Classroom Layout Planner
+  - navigation [ref=e7]:
+    - generic [ref=e8]:
+      - link " Back to Tools" [ref=e9] [cursor=pointer]:
+        - /url: tools.html
+        - generic [ref=e10]: 
+        - text: Back to Tools
+      - button " Hide Names" [ref=e12] [cursor=pointer]:
+        - generic [ref=e13]: 
+        - text: Hide Names
+  - main [ref=e14]:
+    - generic [ref=e15]:
+      - generic [ref=e16]:
+        - generic [ref=e17]:
+          - generic [ref=e18]:
+            - generic [ref=e19]: 
+            - text: Layout
+          - combobox
+          - button "1–2–2 Banks" [ref=e430] [cursor=pointer]:
+            - generic [ref=e53]: 
+        - button " Save Layout" [ref=e54] [cursor=pointer]:
+          - generic [ref=e55]: 
+          - text: Save Layout
+        - button " Load Layout" [ref=e56] [cursor=pointer]:
+          - generic [ref=e57]: 
+          - text: Load Layout
+        - button " Export JSON" [ref=e58] [cursor=pointer]:
+          - generic [ref=e59]: 
+          - text: Export JSON
+        - generic [ref=e60] [cursor=pointer]:
+          - generic [ref=e61]: 
+          - text: Import JSON
+        - button " Drive" [ref=e62] [cursor=pointer]:
+          - generic [ref=e63]: 
+          - text: Drive
+        - button " Add Student" [ref=e64] [cursor=pointer]:
+          - generic [ref=e65]: 
+          - text: Add Student
+        - button " Random Relocation" [ref=e66] [cursor=pointer]:
+          - generic [ref=e67]: 
+          - text: Random Relocation
+        - button " Reset" [ref=e68] [cursor=pointer]:
+          - generic [ref=e69]: 
+          - text: Reset
+      - generic "Classroom layout" [ref=e71]:
+        - generic [ref=e72]: Board
+        - generic: Teacher
+        - generic [ref=e73]:
+          - generic: "1"
+          - generic [ref=e461]: ALEJANDRA H.
+        - generic [ref=e75]:
+          - generic: "2"
+          - generic [ref=e462]: ALEJANDRO C.
+        - generic [ref=e77]:
+          - generic: "3"
+          - generic [ref=e463]: ANAMARIA C.
+        - generic [ref=e79]:
+          - generic: "4"
+          - generic [ref=e464]: ANTONELLA P.
+        - generic [ref=e81]:
+          - generic: "5"
+          - generic [ref=e465]: BRIANA C.
+        - generic [ref=e83]:
+          - generic: "6"
+          - generic [ref=e466]: DANIEL P.
+        - generic [ref=e85]:
+          - generic: "7"
+          - generic [ref=e467]: DANNA P.
+        - generic [ref=e87]:
+          - generic: "8"
+          - generic [ref=e468]: EMILIANO Q.
+        - generic [ref=e89]:
+          - generic: "9"
+          - generic [ref=e469]: EMILIANO T.
+        - generic [ref=e91]:
+          - generic: "10"
+          - generic [ref=e470]: EMILIO R.
+        - generic [ref=e93]:
+          - generic: "11"
+          - generic [ref=e471]: ERMES V.
+        - generic [ref=e95]:
+          - generic: "12"
+          - generic [ref=e472]: EVA MARIA P.
+        - generic [ref=e97]:
+          - generic: "13"
+          - generic [ref=e473]: JUAN J. RÍOS
+        - generic [ref=e99]:
+          - generic: "14"
+          - generic [ref=e474]: JUAN J. SARRIAS
+        - generic [ref=e101]:
+          - generic: "15"
+          - generic [ref=e475]: JUANA LUNA
+        - generic [ref=e103]:
+          - generic: "16"
+          - generic [ref=e476]: KESHIA C.
+        - generic [ref=e105]:
+          - generic: "17"
+          - generic [ref=e477]: LAURA BERNAL
+        - generic [ref=e107]:
+          - generic: "18"
+          - generic [ref=e478]: LAURA S.
+        - generic [ref=e109]:
+          - generic: "19"
+          - generic [ref=e479]: LORENZO R.
+        - generic [ref=e111]:
+          - generic: "20"
+          - generic [ref=e480]: LUCIANO M.
+        - generic [ref=e113]:
+          - generic: "21"
+          - generic [ref=e481]: MATIAS F.
+        - generic [ref=e115]:
+          - generic: "22"
+          - generic [ref=e482]: MIA H.
+        - generic [ref=e117]:
+          - generic: "23"
+          - generic [ref=e483]: PABLO A.
+        - generic [ref=e119]:
+          - generic: "24"
+          - generic [ref=e484]: PAULA V.
+        - generic [ref=e121]:
+          - generic: "25"
+          - generic [ref=e485]: SAMANTHA C
+        - generic [ref=e123]:
+          - generic: "26"
+          - generic [ref=e486]: SAMUEL G.
+        - generic [ref=e125]:
+          - generic: "27"
+          - generic [ref=e487]: SANTIAGO O.
+        - generic [ref=e127]:
+          - generic: "28"
+          - generic [ref=e488]: SARA LUCÍA V.
+        - generic [ref=e129]:
+          - generic: "29"
+          - generic [ref=e489]: TOMÁS C.
+        - generic [ref=e131]:
+          - generic: "30"
+          - generic [ref=e490]: VALERIA P.
+      - generic [ref=e133]: Waiting Area
+  - contentinfo [ref=e135]:
+    - paragraph [ref=e137]: ESL Learning Platform © 2025 | Made for Teachers, by Teachers
+  - button "" [ref=e138] [cursor=pointer]

@@ -1,0 +1,500 @@
+/* Classroom Layout Tool — preset stage */
+
+:root {
+    --classroom-girl: #d8b4e2;
+    --classroom-boy: #a8d0e6;
+    --classroom-teacher: #f7b801;
+    --stage-bg: #ffffff;
+    --stage-line: #3d348b;
+    --zone-bg: rgba(255, 255, 255, 0.72);
+    --zone-number-bg: rgba(247, 184, 1, 0.5);
+}
+
+body.dark-mode {
+    --classroom-girl: #593867;
+    --classroom-boy: #29485c;
+    --classroom-teacher: #f7b801;
+    --stage-bg: #1e1e1e;
+    --stage-line: #7678ed;
+    --zone-bg: #292929;
+    --zone-number-bg: rgba(247, 184, 1, 0.22);
+}
+
+.distribution-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    padding: 20px;
+}
+
+.toolbar {
+    width: min(100%, 1300px);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+body.dark-mode .toolbar {
+    background: #313131;
+}
+
+.layout-picker {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    color: var(--indigo-velvet);
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.layout-picker-native {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.layout-picker-trigger {
+    min-width: 270px;
+    display: grid;
+    grid-template-columns: 64px 1fr auto;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 9px;
+    color: #333;
+    background: #fff;
+    border: 2px solid var(--medium-slate-blue);
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: left;
+}
+
+.layout-picker-preview,
+.layout-thumbnail {
+    --mini-zone: #7678ed;
+    position: relative;
+    display: block;
+    height: 38px;
+    overflow: hidden;
+    background: #f2f3f9;
+    border: 1px solid #b7b9d8;
+    border-radius: 1px;
+}
+
+.layout-thumbnail {
+    width: 96px;
+    height: 58px;
+}
+
+.layout-picker-preview::before,
+.layout-thumbnail::before {
+    content: '';
+    position: absolute;
+    top: 5%;
+    left: 22%;
+    width: 56%;
+    height: 5%;
+    background: #2d3436;
+    border-radius: 2px;
+}
+
+.layout-mini-zone {
+    position: absolute;
+    width: 10%;
+    height: var(--mini-zone-height, 10%);
+    background: var(--mini-zone);
+    border-radius: 1px;
+}
+
+.layout-picker-menu {
+    position: absolute;
+    z-index: 200;
+    top: calc(100% + 7px);
+    left: 0;
+    width: min(380px, calc(100vw - 24px));
+    padding: 7px;
+    background: #fff;
+    border: 2px solid var(--medium-slate-blue);
+    border-radius: 10px;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2);
+}
+
+.layout-picker-menu[hidden] {
+    display: none;
+}
+
+.layout-picker-option {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 96px 1fr;
+    align-items: center;
+    gap: 10px;
+    padding: 7px;
+    color: #333;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 7px;
+    cursor: pointer;
+    text-align: left;
+}
+
+.layout-picker-option:hover,
+.layout-picker-option[aria-selected="true"] {
+    background: rgba(118, 120, 237, 0.12);
+    border-color: var(--medium-slate-blue);
+}
+
+.layout-picker-option-label {
+    font-size: 0.88rem;
+    font-weight: 700;
+}
+
+body.dark-mode .layout-picker {
+    color: #f5f5f5;
+}
+
+body.dark-mode .layout-picker-trigger,
+body.dark-mode .layout-picker-menu {
+    color: #f5f5f5;
+    background: #363636;
+    border-color: #555;
+}
+
+body.dark-mode .layout-picker-preview,
+body.dark-mode .layout-thumbnail {
+    --mini-zone: #7678ed;
+    background: #242424;
+    border-color: #555;
+}
+
+body.dark-mode .layout-picker-option {
+    color: #f5f5f5;
+}
+
+.classroom-grid-wrapper {
+    width: min(100%, 1320px);
+    overflow-x: auto;
+    padding: 14px;
+    background: rgba(240, 242, 245, 0.9);
+    border-radius: 16px;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.12);
+}
+
+body.dark-mode .classroom-grid-wrapper {
+    background: #2d2d2d;
+}
+
+.classroom-stage {
+    position: relative;
+    width: 100%;
+    min-width: 850px;
+    aspect-ratio: 1.25 / 1;
+    overflow: hidden;
+    background: var(--stage-bg);
+    border: 3px solid var(--stage-line);
+    border-radius: 18px;
+    user-select: none;
+}
+
+.classroom-board {
+    position: absolute;
+    top: 2%;
+    left: 22%;
+    width: 56%;
+    height: 3%;
+    min-height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    background: #2d3436;
+    border-radius: 5px;
+    font-weight: 700;
+    font-size: clamp(0.7rem, 1.1vw, 1.1rem);
+    letter-spacing: 0.05em;
+}
+
+.classroom-teacher {
+    position: absolute;
+    top: 7%;
+    right: 3%;
+    width: 15%;
+    height: 10%;
+    min-width: 105px;
+    min-height: 58px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #333;
+    background: var(--classroom-teacher);
+    border: 2px solid var(--tiger-orange);
+    border-radius: 10px;
+    font-size: clamp(0.72rem, 1.1vw, 1.1rem);
+    font-weight: 700;
+    pointer-events: none;
+}
+
+.layout-zone {
+    position: absolute;
+    left: var(--zone-x);
+    top: var(--zone-y);
+    width: var(--zone-w, 14.3%);
+    height: var(--zone-h, 10%);
+    min-width: 70px;
+    min-height: 54px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--zone-bg);
+    border: 2px dashed color-mix(in srgb, var(--stage-line) 55%, transparent);
+    border-radius: 10px;
+    will-change: left, top, width, height;
+    transition:
+        left 560ms cubic-bezier(0.22, 1, 0.36, 1),
+        top 560ms cubic-bezier(0.22, 1, 0.36, 1),
+        width 560ms cubic-bezier(0.22, 1, 0.36, 1),
+        height 560ms cubic-bezier(0.22, 1, 0.36, 1),
+        transform 160ms ease,
+        border-color 160ms ease,
+        background 160ms ease,
+        box-shadow 160ms ease;
+}
+
+.layout-zone::after {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    border-radius: 7px;
+    pointer-events: none;
+}
+
+.layout-zone.snap-target {
+    z-index: 8;
+    border-color: var(--amber-flame);
+    background: color-mix(in srgb, var(--amber-flame) 18%, var(--zone-bg));
+    box-shadow: 0 0 0 5px rgba(247, 184, 1, 0.2);
+}
+
+.zone-number {
+    position: absolute;
+    z-index: 5;
+    top: 6px;
+    left: 6px;
+    min-width: 21px;
+    padding: 1px 5px;
+    color: var(--indigo-velvet);
+    background: var(--zone-number-bg);
+    border-radius: 5px;
+    font-size: clamp(0.62rem, 0.85vw, 1rem);
+    font-weight: 800;
+    line-height: 1.25;
+    pointer-events: none;
+}
+
+body.dark-mode .zone-number {
+    color: var(--amber-flame);
+}
+
+.desk {
+    position: absolute;
+    inset: 3px;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 7px 6px;
+    border-radius: 8px;
+    box-shadow: 0 3px 7px rgba(0, 0, 0, 0.18);
+    color: #1a3a4a;
+    cursor: grab;
+    font-size: clamp(0.62rem, 1vw, 1.1rem);
+    font-weight: 700;
+    line-height: 1.15;
+    text-align: center;
+    touch-action: none;
+    transition: box-shadow 160ms ease, outline-color 160ms ease;
+}
+
+.desk:active,
+.desk.dragging {
+    cursor: grabbing;
+}
+
+.desk.student-boy {
+    background: var(--classroom-boy);
+}
+
+.desk.student-girl {
+    color: #3a1a3a;
+    background: var(--classroom-girl);
+}
+
+body.dark-mode .desk.student-boy,
+body.dark-mode .desk.student-girl {
+    color: #f5f5f5;
+}
+
+.desk.dragging {
+    opacity: 0.55;
+}
+
+.desk-selected {
+    z-index: 9;
+    outline: 3px solid var(--amber-flame);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 6px rgba(247, 184, 1, 0.22), 0 5px 12px rgba(0, 0, 0, 0.25);
+}
+
+.desk-placement-enter {
+    animation: desk-place 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.desk-returning {
+    pointer-events: none;
+    animation: desk-return 180ms ease-in forwards;
+}
+
+@keyframes desk-place {
+    from {
+        opacity: 0;
+        transform: translateY(16px) scale(0.92);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes desk-return {
+    to {
+        opacity: 0;
+        transform: scale(0.65);
+    }
+}
+
+.desk-name {
+    pointer-events: none;
+    overflow-wrap: anywhere;
+}
+
+.desk-controls {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    z-index: 7;
+    display: flex;
+    gap: 3px;
+    opacity: 0;
+    transition: opacity 160ms ease;
+}
+
+@media (hover: hover) {
+    .desk:hover .desk-controls,
+    .desk:focus-within .desk-controls {
+        opacity: 1;
+    }
+}
+
+.desk-btn {
+    width: 20px;
+    height: 20px;
+    display: grid;
+    place-items: center;
+    border: 0;
+    border-radius: 50%;
+    color: #333;
+    background: rgba(255, 255, 255, 0.82);
+    cursor: pointer;
+}
+
+.desk-return-btn {
+    color: var(--cayenne-red);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .desk-placement-enter,
+    .desk-returning {
+        animation: none;
+    }
+}
+
+.relocation-area {
+    position: relative;
+    width: min(100%, 1320px);
+    min-height: 126px;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    gap: 10px;
+    padding: 28px 16px 16px;
+    background: var(--stage-bg);
+    border: 2px dashed #888;
+    border-radius: 14px;
+    transition: border-color 160ms ease, background 160ms ease;
+}
+
+.relocation-area .desk {
+    position: relative;
+    inset: auto;
+    width: 150px;
+    height: 74px;
+    padding-top: 8px;
+}
+
+.relocation-area.drag-over {
+    border-color: var(--amber-flame);
+    background: color-mix(in srgb, var(--amber-flame) 12%, var(--stage-bg));
+}
+
+.relocation-title {
+    position: absolute;
+    top: -13px;
+    left: 18px;
+    padding: 3px 12px;
+    color: #fff;
+    background: var(--indigo-velvet);
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.classroom-toast {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 9999;
+    padding: 10px 18px;
+    color: #fff;
+    background: #333;
+    border-radius: 8px;
+    box-shadow: 0 5px 16px rgba(0, 0, 0, 0.25);
+}
+
+@media (max-width: 900px) {
+    .distribution-container {
+        padding: 12px;
+    }
+
+    .toolbar {
+        justify-content: flex-start;
+    }
+
+    .classroom-grid-wrapper {
+        width: 100%;
+        padding: 8px;
+    }
+
+    .classroom-stage {
+        min-width: 760px;
+    }
+}
