@@ -1612,20 +1612,21 @@
     }
 
     // ── Plinko ──────────────────────────────────────────────
-    const PLINKO_H = 520;
-    const PLINKO_MIN_W = 480;
-    const PLINKO_MAX_W = 760;
-    const PLINKO_WALL = 16;
-    const PLINKO_TUBE_H = 52;
-    const PLINKO_SLOT_H = 80;
+    const PLINKO_H = 620;
+    const PLINKO_MIN_W = 560;
+    const PLINKO_MAX_W = 1080;
+    const PLINKO_WALL = 18;
+    const PLINKO_TUBE_H = 64;
+    const PLINKO_SLOT_H = 118;
     const PLINKO_PEG_ROWS = 10;
-    const PLINKO_PEG_R = 5;
-    const PLINKO_BOOST_PEG_R = 6;
-    const PLINKO_BALL_R = 9;
-    const PLINKO_TUBE_W = 34;
-    const PLINKO_MIN_SLOT_W = PLINKO_BALL_R * 2 + 12;
+    const PLINKO_PEG_R = 6;
+    const PLINKO_BOOST_PEG_R = 7;
+    const PLINKO_BALL_R = 11;
+    const PLINKO_TUBE_W = 40;
+    const PLINKO_MIN_SLOT_W = PLINKO_BALL_R * 2 + 14;
     const PLINKO_BOOST_PEG_COUNT_MIN = 4;
     const PLINKO_BOOST_PEG_COUNT_MAX = 8;
+    const PLINKO_PEG_SOUND_COOLDOWN_MS = 55;
 
     let plinkoBoardW = PLINKO_MIN_W;
     let plinkoEngine = null;
@@ -1644,6 +1645,9 @@
     let plinkoCanvas = null;
     let plinkoCtx = null;
     let plinkoDpr = 1;
+    let plinkoLastPegSoundAt = 0;
+    let plinkoCollisionBound = false;
+    let plinkoSettleToken = 0;
 
     function plinkoComputeBoardWidth(studentCount) {
         return Math.max(
@@ -1659,10 +1663,63 @@
     function plinkoDisplayLabel(name) {
         const parsed = parseName(name);
         const displayFull = parsed.firstPlusFirstLast || name;
-        const maxChars = Math.max(4, Math.floor((PLINKO_SLOT_H - 12) / 7));
+        const maxChars = Math.max(6, Math.floor((PLINKO_SLOT_H - 16) / 8));
         return displayFull.length > maxChars
-            ? displayFull.slice(0, Math.max(3, maxChars - 1)) + '…'
+            ? displayFull.slice(0, Math.max(4, maxChars - 1)) + '…'
             : displayFull;
+    }
+
+    function playPlinkoPegTick() {
+        const now = performance.now();
+        if (now - plinkoLastPegSoundAt < PLINKO_PEG_SOUND_COOLDOWN_MS) return;
+        plinkoLastPegSoundAt = now;
+        try {
+            if (globalAudioCtx.state === 'suspended') globalAudioCtx.resume();
+            const t = globalAudioCtx.currentTime;
+            const osc = globalAudioCtx.createOscillator();
+            const gain = globalAudioCtx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(920 + Math.random() * 220, t);
+            osc.frequency.exponentialRampToValueAtTime(420, t + 0.045);
+            gain.gain.setValueAtTime(0.028, t);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
+            osc.connect(gain);
+            gain.connect(globalAudioCtx.destination);
+            osc.start(t);
+            osc.stop(t + 0.055);
+        } catch (e) { }
+    }
+
+    function playPlinkoLandSound() {
+        try {
+            if (globalAudioCtx.state === 'suspended') globalAudioCtx.resume();
+            const t = globalAudioCtx.currentTime;
+            const osc = globalAudioCtx.createOscillator();
+            const gain = globalAudioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(330, t);
+            osc.frequency.exponentialRampToValueAtTime(660, t + 0.12);
+            osc.frequency.exponentialRampToValueAtTime(440, t + 0.28);
+            gain.gain.setValueAtTime(0.001, t);
+            gain.gain.exponentialRampToValueAtTime(0.12, t + 0.04);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
+            osc.connect(gain);
+            gain.connect(globalAudioCtx.destination);
+            osc.start(t);
+            osc.stop(t + 0.38);
+        } catch (e) { }
+    }
+
+    function plinkoOnCollisionStart(event) {
+        if (!plinkoBall || plinkoSettled) return;
+        for (const pair of event.pairs) {
+            const labels = [pair.bodyA.label, pair.bodyB.label];
+            if (!labels.includes('ball')) continue;
+            if (labels.includes('peg') || labels.includes('boost-peg')) {
+                playPlinkoPegTick();
+                break;
+            }
+        }
     }
 
     function plinkoPegX(row, col, pegLeft, pegSpan, pegCols) {
@@ -1717,6 +1774,7 @@
             return;
         }
 
+        plinkoSettleToken += 1;
         plinkoStudents = [...pool];
         plinkoBoardW = plinkoComputeBoardWidth(plinkoStudents.length);
         plinkoTubeX = plinkoBoardW / 2;
@@ -1736,8 +1794,10 @@
     }
 
     function closePlinko() {
+        plinkoSettleToken += 1;
         plinkoActive = false;
         plinkoSettled = false;
+        plinkoWinIdx = -1;
         plinkoStopLoop();
         plinkoDestroyWorld();
         document.getElementById('ttPlinkoOverlay').classList.remove('visible');
@@ -1792,9 +1852,11 @@
     function plinkoBuildWorld() {
         plinkoDestroyWorld();
 
-        const { Engine, World, Bodies, Composite } = Matter;
+        const { Engine, World, Bodies, Composite, Events } = Matter;
         plinkoEngine = Engine.create({ gravity: { x: 0, y: 1.15 } });
         plinkoWorld = plinkoEngine.world;
+        Events.on(plinkoEngine, 'collisionStart', plinkoOnCollisionStart);
+        plinkoCollisionBound = true;
 
         const wallOpts = { isStatic: true, friction: 0.2, restitution: 0.35, label: 'wall' };
         const innerW = plinkoInnerWidth();
@@ -1863,12 +1925,17 @@
 
     function plinkoDestroyWorld() {
         if (plinkoEngine) {
+            if (plinkoCollisionBound) {
+                Matter.Events.off(plinkoEngine, 'collisionStart', plinkoOnCollisionStart);
+                plinkoCollisionBound = false;
+            }
             Matter.World.clear(plinkoWorld);
             Matter.Engine.clear(plinkoEngine);
             plinkoEngine = null;
             plinkoWorld = null;
         }
         plinkoBall = null;
+        plinkoLastPegSoundAt = 0;
     }
 
     function plinkoIsFalling() {
@@ -1946,12 +2013,14 @@
             plinkoSettled = true;
             plinkoWinIdx = plinkoSlotIndexFromX(plinkoBall.position.x);
             plinkoUpdateButtons();
-            playAudioBuffer(studentSelectedBuffer);
+            playPlinkoLandSound();
 
+            const settleToken = plinkoSettleToken;
+            const winnerName = plinkoStudents[plinkoWinIdx];
             setTimeout(() => {
-                const winner = plinkoStudents[plinkoWinIdx];
+                if (settleToken !== plinkoSettleToken || !winnerName) return;
                 closePlinko();
-                showWinner(winner);
+                showWinner(winnerName);
             }, 1400);
         }
     }
@@ -1993,12 +2062,29 @@
         ctx.closePath();
     }
 
+    function plinkoDrawBallAt(ctx, x, y) {
+        ctx.beginPath();
+        ctx.arc(x, y, PLINKO_BALL_R, 0, Math.PI * 2);
+        const ballGrad = ctx.createRadialGradient(
+            x - 3, y - 3, 1,
+            x, y, PLINKO_BALL_R
+        );
+        ballGrad.addColorStop(0, '#ff8ed4');
+        ballGrad.addColorStop(1, '#ff2d9b');
+        ctx.fillStyle = ballGrad;
+        ctx.shadowColor = '#ff2d9b';
+        ctx.shadowBlur = 14;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+    }
+
     function plinkoDrawTube(ctx) {
         const tw = PLINKO_TUBE_W;
         const th = PLINKO_TUBE_H - 6;
         const x = plinkoTubeX;
         const top = 6;
         const left = x - tw / 2;
+        const previewY = PLINKO_TUBE_H * 0.55;
 
         ctx.save();
         ctx.shadowColor = '#00e5ff';
@@ -2037,6 +2123,11 @@
         ctx.fill();
 
         ctx.restore();
+
+        // Preview ball drawn after tube chrome so it stays visible while dragging
+        if (!plinkoBall) {
+            plinkoDrawBallAt(ctx, x, previewY);
+        }
     }
 
     function plinkoRender() {
@@ -2072,11 +2163,11 @@
                 ctx.shadowBlur = 0;
             }
 
-            const fontSize = Math.max(8, Math.min(11, Math.floor(slot.width / 4)));
-            ctx.fillStyle = isWin ? '#fff' : 'rgba(168, 230, 255, 0.9)';
+            const fontSize = Math.max(11, Math.min(15, Math.floor(slot.width / 2.6)));
+            ctx.fillStyle = isWin ? '#fff' : 'rgba(210, 245, 255, 0.98)';
             ctx.font = isWin
                 ? `bold ${fontSize + 1}px 'Reddit Sans', sans-serif`
-                : `600 ${fontSize}px 'Reddit Sans', sans-serif`;
+                : `700 ${fontSize}px 'Reddit Sans', sans-serif`;
 
             const drawVerticalLabel = () => {
                 ctx.save();
@@ -2086,6 +2177,9 @@
                     ctx.scale(scale, scale);
                     ctx.shadowColor = '#00e5ff';
                     ctx.shadowBlur = 12;
+                } else {
+                    ctx.shadowColor = 'rgba(0, 0, 0, 0.65)';
+                    ctx.shadowBlur = 4;
                 }
                 ctx.rotate(-Math.PI / 2);
                 ctx.textAlign = 'center';
@@ -2133,19 +2227,7 @@
             });
 
             if (plinkoBall) {
-                ctx.beginPath();
-                ctx.arc(plinkoBall.position.x, plinkoBall.position.y, PLINKO_BALL_R, 0, Math.PI * 2);
-                const ballGrad = ctx.createRadialGradient(
-                    plinkoBall.position.x - 3, plinkoBall.position.y - 3, 1,
-                    plinkoBall.position.x, plinkoBall.position.y, PLINKO_BALL_R
-                );
-                ballGrad.addColorStop(0, '#ff8ed4');
-                ballGrad.addColorStop(1, '#ff2d9b');
-                ctx.fillStyle = ballGrad;
-                ctx.shadowColor = '#ff2d9b';
-                ctx.shadowBlur = 14;
-                ctx.fill();
-                ctx.shadowBlur = 0;
+                plinkoDrawBallAt(ctx, plinkoBall.position.x, plinkoBall.position.y);
             }
         }
     }

@@ -1,0 +1,6 @@
+[     794ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:8080/assets/sounds/pi%C3%B1ata-hit-1.ogg:0
+[     794ms] [WARNING] Custom sound files (.ogg) not found or failed to load. Will fail gracefully. @ http://127.0.0.1:8080/js/student-turn-tracker.js?v=plinko2:71
+[   45240ms] TypeError: Cannot read properties of undefined (reading 'trim')
+    at parseName (http://127.0.0.1:8080/js/student-turn-tracker.js?v=plinko2:84:32)
+    at showWinner (http://127.0.0.1:8080/js/student-turn-tracker.js?v=plinko2:387:24)
+    at http://127.0.0.1:8080/js/student-turn-tracker.js?v=plinko2:2017:17

@@ -1,0 +1,366 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e3]:
+      - heading " Student Turn Tracker" [level=1] [ref=e4]:
+        - generic [ref=e5]: 
+        - text: Student Turn Tracker
+      - generic [ref=e6]:
+        - link " Back" [ref=e7] [cursor=pointer]:
+          - /url: tools.html
+          - generic [ref=e8]: 
+          - text: Back
+        - button " Drive" [ref=e9] [cursor=pointer]:
+          - generic [ref=e10]: 
+          - text: Drive
+        - button " Clear All" [ref=e11] [cursor=pointer]:
+          - generic [ref=e12]: 
+          - text: Clear All
+    - generic [ref=e13]:
+      - generic [ref=e14]:
+        - generic [ref=e15]: 
+        - text: "Class:"
+      - generic [ref=e16]:
+        - button " 3° A" [ref=e17] [cursor=pointer]:
+          - generic [ref=e18]: 
+          - text: 3° A
+        - button " 3° B" [ref=e19] [cursor=pointer]:
+          - generic [ref=e20]: 
+          - text: 3° B
+        - button " 3° C" [ref=e21] [cursor=pointer]:
+          - generic [ref=e22]: 
+          - text: 3° C
+        - button " 4° A" [ref=e23] [cursor=pointer]:
+          - generic [ref=e24]: 
+          - text: 4° A
+        - button " 4° B" [ref=e25] [cursor=pointer]:
+          - generic [ref=e26]: 
+          - text: 4° B
+        - button " 4° C" [ref=e27] [cursor=pointer]:
+          - generic [ref=e28]: 
+          - text: 4° C
+        - button " 5° A" [ref=e29] [cursor=pointer]:
+          - generic [ref=e30]: 
+          - text: 5° A
+        - button " 5° B" [ref=e31] [cursor=pointer]:
+          - generic [ref=e32]: 
+          - text: 5° B
+        - button " 5° C" [ref=e33] [cursor=pointer]:
+          - generic [ref=e34]: 
+          - text: 5° C
+        - button " 5° D" [ref=e35] [cursor=pointer]:
+          - generic [ref=e36]: 
+          - text: 5° D
+    - generic [ref=e37]:
+      - button " Select Picker Mode" [active] [ref=e39] [cursor=pointer]:
+        - generic [ref=e40]: 
+        - text: Select Picker Mode
+      - generic [ref=e41]:
+        - button " All 26" [ref=e42] [cursor=pointer]:
+          - generic [ref=e43]: 
+          - text: All
+          - generic [ref=e44]: "26"
+        - button " Correct 0" [ref=e45] [cursor=pointer]:
+          - generic [ref=e46]: 
+          - text: Correct
+          - generic [ref=e47]: "0"
+        - button " Participated 0" [ref=e48] [cursor=pointer]:
+          - generic [ref=e49]: 
+          - text: Participated
+          - generic [ref=e50]: "0"
+        - button " Unselected 26" [ref=e51] [cursor=pointer]:
+          - generic [ref=e52]: 
+          - text: Unselected
+          - generic [ref=e53]: "26"
+        - button " Reset Turns" [ref=e54] [cursor=pointer]:
+          - generic [ref=e55]: 
+          - text: Reset Turns
+      - generic [ref=e56]:
+        - button " Full Name" [ref=e57] [cursor=pointer]:
+          - generic [ref=e58]: 
+          - text: Full Name
+        - 'button " Sort: First" [ref=e59] [cursor=pointer]':
+          - generic [ref=e60]: 
+          - text: "Sort: First"
+    - generic [ref=e61]:
+      - generic [ref=e62] [cursor=pointer]:
+        - generic [ref=e63]: AARON GOMEZ GONZALEZ
+        - generic [ref=e64]:
+          - button "" [ref=e65]
+          - generic [ref=e67]:
+            - generic [ref=e68]: 
+            - text: "0"
+      - generic [ref=e69] [cursor=pointer]:
+        - generic [ref=e70]: ANTONELLA TORRES SARRIA
+        - generic [ref=e71]:
+          - button "" [ref=e72]
+          - generic [ref=e74]:
+            - generic [ref=e75]: 
+            - text: "0"
+      - generic [ref=e76] [cursor=pointer]:
+        - generic [ref=e77]: ARIADNA VALENTINA CORTES LOSADA
+        - generic [ref=e78]:
+          - button "" [ref=e79]
+          - generic [ref=e81]:
+            - generic [ref=e82]: 
+            - text: "0"
+      - generic [ref=e83] [cursor=pointer]:
+        - generic [ref=e84]: CELESTE SÁNCHEZ LUCUARA
+        - generic [ref=e85]:
+          - button "" [ref=e86]
+          - generic [ref=e88]:
+            - generic [ref=e89]: 
+            - text: "0"
+      - generic [ref=e90] [cursor=pointer]:
+        - generic [ref=e91]: DYLAN THOMAS RUGELES CASTAÑEDA
+        - generic [ref=e92]:
+          - button "" [ref=e93]
+          - generic [ref=e95]:
+            - generic [ref=e96]: 
+            - text: "0"
+      - generic [ref=e97] [cursor=pointer]:
+        - generic [ref=e98]: EIDER IVAN SAAVEDRA OYOLA
+        - generic [ref=e99]:
+          - button "" [ref=e100]
+          - generic [ref=e102]:
+            - generic [ref=e103]: 
+            - text: "0"
+      - generic [ref=e104] [cursor=pointer]:
+        - generic [ref=e105]: EMILIANO SERRATO MORENO
+        - generic [ref=e106]:
+          - button "" [ref=e107]
+          - generic [ref=e109]:
+            - generic [ref=e110]: 
+            - text: "0"
+      - generic [ref=e111] [cursor=pointer]:
+        - generic [ref=e112]: EMILIANO VÁSQUEZ PEREZ
+        - generic [ref=e113]:
+          - button "" [ref=e114]
+          - generic [ref=e116]:
+            - generic [ref=e117]: 
+            - text: "0"
+      - generic [ref=e118] [cursor=pointer]:
+        - generic [ref=e119]: GABRIELA PATIÑO CLAROS
+        - generic [ref=e120]:
+          - button "" [ref=e121]
+          - generic [ref=e123]:
+            - generic [ref=e124]: 
+            - text: "0"
+      - generic [ref=e125] [cursor=pointer]:
+        - generic [ref=e126]: ISABELLA CASTAÑEDA RENGIFO
+        - generic [ref=e127]:
+          - button "" [ref=e128]
+          - generic [ref=e130]:
+            - generic [ref=e131]: 
+            - text: "0"
+      - generic [ref=e132] [cursor=pointer]:
+        - generic [ref=e133]: JOSÉ MIGUEL CAMERO PERDOMO
+        - generic [ref=e134]:
+          - button "" [ref=e135]
+          - generic [ref=e137]:
+            - generic [ref=e138]: 
+            - text: "0"
+      - generic [ref=e139] [cursor=pointer]:
+        - generic [ref=e140]: JUAN ÁLVARO GUEVARA ORTIZ
+        - generic [ref=e141]:
+          - button "" [ref=e142]
+          - generic [ref=e144]:
+            - generic [ref=e145]: 
+            - text: "0"
+      - generic [ref=e146] [cursor=pointer]:
+        - generic [ref=e147]: JUAN ANDRÉS BUITRAGO MÉNDEZ
+        - generic [ref=e148]:
+          - button "" [ref=e149]
+          - generic [ref=e151]:
+            - generic [ref=e152]: 
+            - text: "0"
+      - generic [ref=e153] [cursor=pointer]:
+        - generic [ref=e154]: JULIANA CAMACHO SALAZAR
+        - generic [ref=e155]:
+          - button "" [ref=e156]
+          - generic [ref=e158]:
+            - generic [ref=e159]: 
+            - text: "0"
+      - generic [ref=e160] [cursor=pointer]:
+        - generic [ref=e161]: JULIETA CABRERA BARRERO
+        - generic [ref=e162]:
+          - button "" [ref=e163]
+          - generic [ref=e165]:
+            - generic [ref=e166]: 
+            - text: "0"
+      - generic [ref=e167] [cursor=pointer]:
+        - generic [ref=e168]: MARIA ANTONIA HERNANDEZ CELEITA
+        - generic [ref=e169]:
+          - button "" [ref=e170]
+          - generic [ref=e172]:
+            - generic [ref=e173]: 
+            - text: "0"
+      - generic [ref=e174] [cursor=pointer]:
+        - generic [ref=e175]: MATIAS YASNO ÁVILA
+        - generic [ref=e176]:
+          - button "" [ref=e177]
+          - generic [ref=e179]:
+            - generic [ref=e180]: 
+            - text: "0"
+      - generic [ref=e181] [cursor=pointer]:
+        - generic [ref=e182]: MAYTE RIVERA HERRERA
+        - generic [ref=e183]:
+          - button "" [ref=e184]
+          - generic [ref=e186]:
+            - generic [ref=e187]: 
+            - text: "0"
+      - generic [ref=e188] [cursor=pointer]:
+        - generic [ref=e189]: MELISSA MOGOLLÓN RODRÍGUEZ
+        - generic [ref=e190]:
+          - button "" [ref=e191]
+          - generic [ref=e193]:
+            - generic [ref=e194]: 
+            - text: "0"
+      - generic [ref=e195] [cursor=pointer]:
+        - generic [ref=e196]: SAMANTHA VICTORIA NIÑO GALINDO
+        - generic [ref=e197]:
+          - button "" [ref=e198]
+          - generic [ref=e200]:
+            - generic [ref=e201]: 
+            - text: "0"
+      - generic [ref=e202] [cursor=pointer]:
+        - generic [ref=e203]: SAMUEL ANDRÉS MACIAS IBÁÑEZ
+        - generic [ref=e204]:
+          - button "" [ref=e205]
+          - generic [ref=e207]:
+            - generic [ref=e208]: 
+            - text: "0"
+      - generic [ref=e209] [cursor=pointer]:
+        - generic [ref=e210]: SAMUEL TAMAYO CASTAÑEDA
+        - generic [ref=e211]:
+          - button "" [ref=e212]
+          - generic [ref=e214]:
+            - generic [ref=e215]: 
+            - text: "0"
+      - generic [ref=e216] [cursor=pointer]:
+        - generic [ref=e217]: SILVANA ANDRADE RODRIGUEZ
+        - generic [ref=e218]:
+          - button "" [ref=e219]
+          - generic [ref=e221]:
+            - generic [ref=e222]: 
+            - text: "0"
+      - generic [ref=e223] [cursor=pointer]:
+        - generic [ref=e224]: THIAGO GRANJA PABÓN
+        - generic [ref=e225]:
+          - button "" [ref=e226]
+          - generic [ref=e228]:
+            - generic [ref=e229]: 
+            - text: "0"
+      - generic [ref=e230] [cursor=pointer]:
+        - generic [ref=e231]: THOMAS CHACÓN RAMÍREZ
+        - generic [ref=e232]:
+          - button "" [ref=e233]
+          - generic [ref=e235]:
+            - generic [ref=e236]: 
+            - text: "0"
+      - generic [ref=e237] [cursor=pointer]:
+        - generic [ref=e238]: VALENTINA ESTRELLITA RAMOS MORA
+        - generic [ref=e239]:
+          - button "" [ref=e240]
+          - generic [ref=e242]:
+            - generic [ref=e243]: 
+            - text: "0"
+  - generic:
+    - generic:
+      - generic: 🎉
+      - generic: —
+      - generic: What happened?
+      - generic:
+        - button " Correct Answer":
+          - generic: 
+          - text: Correct Answer
+        - button " Participated":
+          - generic: 
+          - text: Participated
+        - button " Skip":
+          - generic: 
+          - text: Skip
+      - button " Close":
+        - generic: 
+        - text: Close
+  - generic [ref=e250]:
+    - button "" [ref=e251] [cursor=pointer]
+    - heading " Select Picker Mode" [level=2] [ref=e253]:
+      - generic [ref=e254]: 
+      - text: Select Picker Mode
+    - generic [ref=e255]:
+      - generic [ref=e256] [cursor=pointer]:
+        - heading "Roulette" [level=3] [ref=e258]
+        - paragraph [ref=e259]: Classic spinning wheel
+      - generic [ref=e260] [cursor=pointer]:
+        - heading "Balloons" [level=3] [ref=e262]
+        - paragraph [ref=e263]: Pop a random balloon
+      - generic [ref=e264] [cursor=pointer]:
+        - heading "Hop" [level=3] [ref=e266]
+        - paragraph [ref=e267]: Bouncing tile selector
+      - generic [ref=e268] [cursor=pointer]:
+        - heading "Plinko" [level=3] [ref=e270]
+        - paragraph [ref=e271]: Drop the ball, land a name.
+      - generic [ref=e272] [cursor=pointer]:
+        - generic [ref=e273]:
+          - generic:
+            - generic: "7"
+            - generic: "7"
+            - generic: "7"
+        - heading "Slot Machine" [level=3] [ref=e274]
+        - paragraph [ref=e275]: Fast-spinning reels
+      - generic [ref=e276] [cursor=pointer]:
+        - heading "Cards" [level=3] [ref=e278]
+        - paragraph [ref=e279]: Draw from a deck
+      - generic [ref=e280] [cursor=pointer]:
+        - heading "Piñata" [level=3] [ref=e282]
+        - paragraph [ref=e283]: Smash to reveal a student
+      - generic [ref=e284] [cursor=pointer]:
+        - heading "Flying Fruit" [level=3] [ref=e286]
+        - paragraph [ref=e287]: Catch a flying fruit to pick a student.
+  - generic:
+    - generic:
+      - button ""
+      - button " HOLD TO SPIN!":
+        - generic: 
+        - text: HOLD TO SPIN!
+  - generic:
+    - button ""
+    - generic: 🎈 Tap a balloon to pop it!
+  - generic:
+    - generic:
+      - button ""
+      - button " SPIN!":
+        - generic: 
+        - text: SPIN!
+  - generic:
+    - generic:
+      - button ""
+      - button " SHUFFLE":
+        - generic: 
+        - text: SHUFFLE
+  - generic:
+    - generic:
+      - button ""
+      - generic:
+        - generic "Plinko board"
+      - generic:
+        - button " Drop":
+          - generic: 
+          - text: Drop
+        - button " Reset":
+          - generic: 
+          - text: Reset
+  - generic:
+    - button ""
+    - paragraph: Click a fruit!
+    - group "Fruit speed":
+      - generic: Speed
+      - button "Slow"
+      - button "Normal"
+      - button "Fast"
+  - generic:
+    - button ""
+    - generic: 🪅 Tap the piñata to smash it!
+  - contentinfo [ref=e244]:
+    - paragraph [ref=e246]: ESL Learning Platform © 2025 | Made for Teachers, by Teachers
+  - button "" [ref=e247] [cursor=pointer]

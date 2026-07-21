@@ -2158,9 +2158,10 @@ body.dark-mode .tt-modes-close {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 18px;
-    width: min(94vw, 780px);
-    padding: 12px 8px 20px;
+    gap: 14px;
+    width: min(96vw, 1100px);
+    max-height: min(96vh, 920px);
+    padding: 12px 10px 16px;
     animation: ttModesPop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
@@ -2185,9 +2186,11 @@ body.dark-mode .tt-modes-close {
 }
 
 .tt-plinko-board-wrap {
-    width: 100%;
+    width: min(100%, 1080px);
     max-width: 100%;
-    aspect-ratio: 480 / 520;
+    max-height: calc(96vh - 120px);
+    aspect-ratio: 560 / 620;
+    flex: 0 1 auto;
     border-radius: 14px;
     overflow: hidden;
     box-shadow:
@@ -2210,6 +2213,7 @@ body.dark-mode .tt-modes-close {
 
 .tt-plinko-controls {
     display: flex;
+    flex-shrink: 0;
     gap: 12px;
     width: 100%;
     max-width: 100%;
