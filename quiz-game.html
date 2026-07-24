@@ -211,11 +211,22 @@
         <div class="qg-screen" id="screen-lobby">
             <div class="qg-lobby-container">
                 <div class="qg-lobby-header">
-                    <h2>Join at <span class="qg-lobby-url">this page</span></h2>
+                    <div class="qg-lobby-share">
+                        <div class="qg-lobby-share-text">
+                            <p class="qg-lobby-share-label">Students open this page</p>
+                            <input type="url" class="qg-lobby-share-url" id="lobby-share-url"
+                                autocomplete="off" spellcheck="false" aria-label="Join page URL">
+                            <p class="qg-lobby-localhost-tip" id="lobby-localhost-tip" hidden>
+                                Phones cannot use localhost. Paste your LAN URL (e.g.
+                                <code>http://192.168.x.x:5502/quiz-game.html</code>) and the QR will update.
+                            </p>
+                        </div>
+                        <div class="qg-lobby-qr-wrap" id="lobby-qr-wrap" aria-hidden="true"></div>
+                    </div>
                     <div class="qg-game-code" id="game-code-display">------</div>
                     <div class="qg-lobby-player-count">
                         <i class="fa-solid fa-users"></i>
-                        <span id="player-count">0</span> players joined
+                        <span id="player-count-label">0 players joined</span>
                     </div>
                 </div>
                 <div class="qg-lobby-players" id="lobby-players">
@@ -535,6 +546,7 @@
     <script src="https://apis.google.com/js/api.js"></script>
     <script src="https://accounts.google.com/gsi/client"></script>
     <script src="js/google-drive-service.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="js/quiz-game.js"></script>
 </body>
 

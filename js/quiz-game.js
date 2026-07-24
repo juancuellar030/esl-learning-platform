@@ -40,6 +40,58 @@ const QuizGame = (() => {
         return AVATAR_PATH + 'animal_' + index + '.png';
     }
 
+    let lobbyShareInitialized = false;
+    let lobbyQrInstance = null;
+
+    function formatPlayerCountLabel(count) {
+        if (count === 1) return '1 player joined';
+        return count + ' players joined';
+    }
+
+    function getDefaultShareUrl() {
+        return window.location.origin + window.location.pathname;
+    }
+
+    function isLocalhostHost() {
+        const h = window.location.hostname;
+        return h === 'localhost' || h === '127.0.0.1' || h === '[::1]';
+    }
+
+    function renderLobbyQR() {
+        const urlInput = $('lobby-share-url');
+        const qrWrap = $('lobby-qr-wrap');
+        if (!urlInput || !qrWrap) return;
+
+        const url = urlInput.value.trim() || getDefaultShareUrl();
+        qrWrap.innerHTML = '';
+        lobbyQrInstance = null;
+
+        if (typeof QRCode !== 'undefined') {
+            lobbyQrInstance = new QRCode(qrWrap, {
+                text: url,
+                width: 140,
+                height: 140,
+                colorDark: '#2d1b4e',
+                colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.M
+            });
+        }
+    }
+
+    function updateLobbyShareUI() {
+        const urlInput = $('lobby-share-url');
+        const tip = $('lobby-localhost-tip');
+        if (!urlInput) return;
+
+        if (!lobbyShareInitialized) {
+            urlInput.value = getDefaultShareUrl();
+            lobbyShareInitialized = true;
+        }
+
+        if (tip) tip.hidden = !isLocalhostHost();
+        renderLobbyQR();
+    }
+
     // Sound
     let audioCtx = null;
     let soundEnabled = true;
@@ -207,6 +259,12 @@ const QuizGame = (() => {
         $('btn-join-game').addEventListener('click', joinStep2);
         $('btn-lobby-cancel').addEventListener('click', cancelLobby);
         $('btn-start-game').addEventListener('click', startCountdown);
+
+        const shareUrlInput = $('lobby-share-url');
+        if (shareUrlInput) {
+            shareUrlInput.addEventListener('change', renderLobbyQR);
+            shareUrlInput.addEventListener('blur', renderLobbyQR);
+        }
         $('btn-play-again').addEventListener('click', playAgain);
         $('btn-new-game').addEventListener('click', () => {
             sessionStorage.removeItem('qg-last-code');
@@ -819,6 +877,7 @@ const QuizGame = (() => {
         // Animate code display
         const codeEl = $('game-code-display');
         codeEl.innerHTML = code.split('').map(c => `<span>${c}</span>`).join('');
+        updateLobbyShareUI();
         renderLobbyPlayers();
         showScreen('screen-lobby');
         // Show session code badge for host
@@ -828,7 +887,8 @@ const QuizGame = (() => {
     function renderLobbyPlayers() {
         const container = $('lobby-players');
         const count = Object.keys(players).length;
-        $('player-count').textContent = count;
+        const countLabel = $('player-count-label');
+        if (countLabel) countLabel.textContent = formatPlayerCountLabel(count);
         $('btn-start-game').disabled = count < 1;
 
         container.innerHTML = '';
@@ -837,20 +897,23 @@ const QuizGame = (() => {
             div.className = 'qg-lobby-player';
             div.style.animationDelay = (i * 0.05) + 's';
             const avatarId = p.avatar || '';
-            let avatarHtml = '<i class="fa-solid fa-user"></i>';
+            let avatarInner = '<i class="fa-solid fa-user" aria-hidden="true"></i>';
             if (avatarId.startsWith('animal_')) {
                 const idx = parseInt(avatarId.replace('animal_', ''));
-                avatarHtml = `<img class="player-avatar-img" src="${getAvatarSrc(idx)}" alt="">`;
+                avatarInner = `<img class="player-avatar-img" src="${getAvatarSrc(idx)}" alt="">`;
             }
 
             let bootHtml = '';
             if (role === 'host') {
-                bootHtml = `<button class="qg-boot-btn" aria-label="Remove Player" data-uid="${uid}" data-name="${escapeHtml(p.name)}">
+                bootHtml = `<button class="qg-boot-btn" aria-label="Remove ${escapeHtml(p.name)}" data-uid="${uid}" data-name="${escapeHtml(p.name)}">
                                 <i class="fa-solid fa-xmark"></i>
                             </button>`;
             }
 
-            div.innerHTML = `${avatarHtml} <span class="player-name">${escapeHtml(p.name)}</span>${bootHtml}`;
+            div.innerHTML = `
+                <div class="qg-lobby-player-avatar">${avatarInner}</div>
+                <span class="player-name">${escapeHtml(p.name)}</span>
+                ${bootHtml}`;
 
             if (role === 'host') {
                 const bootBtn = div.querySelector('.qg-boot-btn');
@@ -894,25 +957,41 @@ const QuizGame = (() => {
     function joinStep1() {
         const code = $('join-code').value.trim().toUpperCase();
         const name = $('join-name').value.trim();
+        const nextBtn = $('btn-join-next');
+        const errorEl = $('join-error');
 
-        $('join-error').textContent = '';
+        errorEl.textContent = '';
 
         if (!code || code.length < 4) {
-            $('join-error').textContent = 'Please enter a valid game code.';
+            errorEl.textContent = 'Please enter a valid game code.';
             return;
         }
         if (!name) {
-            $('join-error').textContent = 'Please enter your name.';
+            errorEl.textContent = 'Please enter your name.';
             return;
         }
 
-        // Store temporarily and show avatar selection
-        gameCode = code;
-        playerName = name;
-        selectedAvatar = null;
-        // Reset avatar selection
-        document.querySelectorAll('.qg-avatar-option').forEach(o => o.classList.remove('selected'));
-        showScreen('screen-avatar');
+        if (nextBtn) nextBtn.disabled = true;
+        errorEl.textContent = 'Checking…';
+
+        FirebaseService.getSession(code).then(session => {
+            if (nextBtn) nextBtn.disabled = false;
+
+            if (!session) {
+                errorEl.textContent = 'Could not find a game with that code. Check the code and try again.';
+                return;
+            }
+
+            gameCode = code;
+            playerName = name;
+            selectedAvatar = null;
+            document.querySelectorAll('.qg-avatar-option').forEach(o => o.classList.remove('selected'));
+            showScreen('screen-avatar');
+        }).catch(err => {
+            if (nextBtn) nextBtn.disabled = false;
+            errorEl.textContent = 'Could not join game. Check your code and connection.';
+            console.error(err);
+        });
     }
 
     function joinStep2() {
