@@ -26,6 +26,15 @@
             <a href="index.html" class="nav-btn" style="text-decoration: none;">
                 <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
             </a>
+            <div class="view-toggle" role="group" aria-label="Tool display style">
+                <button type="button" class="view-toggle-btn active" data-view="grid" aria-pressed="true"
+                    title="Grid view">
+                    <i class="fa-solid fa-table-cells-large"></i>
+                </button>
+                <button type="button" class="view-toggle-btn" data-view="list" aria-pressed="false" title="List view">
+                    <i class="fa-solid fa-list"></i>
+                </button>
+            </div>
         </div>
     </nav>
 
@@ -34,24 +43,44 @@
         <div class="container">
             <section class="content-section active">
                 <h2>Welcome to Your Teaching Tools</h2>
-                <div class="dashboard-grid">
+
+                <div class="tools-search-bar">
+                    <div class="tools-search-box">
+                        <i class="fa-solid fa-magnifying-glass search-icon" aria-hidden="true"></i>
+                        <input type="search" id="tools-search" placeholder="Search for a tool…" autocomplete="off"
+                            aria-label="Search for a tool">
+                        <button type="button" class="tools-search-btn" id="tools-search-btn">
+                            <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i> Search
+                        </button>
+                    </div>
+                    <p class="tools-search-empty" id="tools-search-empty" hidden>No tools match your search.</p>
+                </div>
+
+                <div class="dashboard-grid" id="tools-grid">
                     <a href="clock-timer.html" class="dashboard-card"
                         style="text-decoration: none; color: inherit; display: block;">
-                        <div class="card-icon"><i class="fa-solid fa-clock"></i></div>
+                        <div class="card-icon card-icon--png">
+                            <img src="assets/images/teacher-tools-icons/clock-and-timer.png"
+                                alt="Clock and timer icon">
+                        </div>
                         <h3>Clock & Timer</h3>
                         <p>Real-time clock and classroom timer with visual alerts</p>
                     </a>
                     <a href="lesson-planner.html" class="dashboard-card"
                         style="text-decoration: none; color: inherit; display: block;">
-                        <div class="card-icon"><i class="fa-solid fa-calendar-week"></i></div>
+                        <div class="card-icon card-icon--png">
+                            <img src="assets/images/teacher-tools-icons/weekly-lesson-planner.png"
+                                alt="Weekly lesson planner icon">
+                        </div>
                         <h3>Weekly Lesson Planner</h3>
                         <p>Plan and organize your weekly class activities</p>
                     </a>
                     <!-- Student Behavior Tracker Card -->
                     <a href="student-behavior-tracker.html" class="dashboard-card"
                         style="text-decoration: none; color: inherit; display: block;">
-                        <div class="card-icon">
-                            <i class="fa-solid fa-clipboard-check"></i>
+                        <div class="card-icon card-icon--png">
+                            <img src="assets/images/teacher-tools-icons/student-behavior-tracker.png"
+                                alt="Student behavior tracker icon">
                         </div>
                         <h3>Student Behavior Tracker</h3>
                         <p>Track and manage student behavior with weekly reports</p>
@@ -59,8 +88,9 @@
                     <!-- PDF Book Library Card -->
                     <a href="pdf-library.html" class="dashboard-card"
                         style="text-decoration: none; color: inherit; display: block;">
-                        <div class="card-icon">
-                            <i class="fa-solid fa-book"></i>
+                        <div class="card-icon card-icon--png">
+                            <img src="assets/images/teacher-tools-icons/pdf-book-library.png"
+                                alt="PDF book library icon">
                         </div>
                         <h3>PDF Book Library</h3>
                         <p>Store and annotate your teaching materials with drawing tools</p>
@@ -68,8 +98,9 @@
                     <!-- Student Material Tracker Card -->
                     <a href="student-material-tracker.html" class="dashboard-card"
                         style="text-decoration: none; color: inherit; display: block;">
-                        <div class="card-icon">
-                            <i class="fa-solid fa-box-open"></i>
+                        <div class="card-icon card-icon--png">
+                            <img src="assets/images/teacher-tools-icons/student-material-tracker.png"
+                                alt="Student material tracker icon">
                         </div>
                         <h3>Student Material Tracker</h3>
                         <p>Track materials and supplies brought by students</p>
@@ -77,8 +108,9 @@
                     <!-- Classroom Distribution Tool Card -->
                     <a href="classroom-distribution.html" class="dashboard-card"
                         style="text-decoration: none; color: inherit; display: block;">
-                        <div class="card-icon">
-                            <i class="fa-solid fa-users-rectangle"></i>
+                        <div class="card-icon card-icon--png">
+                            <img src="assets/images/teacher-tools-icons/classroom-layout-tool.png"
+                                alt="Classroom layout tool icon">
                         </div>
                         <h3>Classroom Layout Tool</h3>
                         <p>Arrange student desks in a 7x7 grid with drag-and-drop</p>
@@ -95,8 +127,9 @@
                     <!-- Bingo Generator Card -->
                     <a href="bingo-generator.html" class="dashboard-card"
                         style="text-decoration: none; color: inherit; display: block;">
-                        <div class="card-icon">
-                            <i class="fa-solid fa-table-cells"></i>
+                        <div class="card-icon card-icon--png">
+                            <img src="assets/images/teacher-tools-icons/bingo-generator.png"
+                                alt="Bingo generator icon">
                         </div>
                         <h3>Bingo Generator</h3>
                         <p>Create custom bingo cards with words or pictures and generate PDFs</p>
@@ -128,20 +161,21 @@
                         <h3>Grade Sheets</h3>
                         <p>Create and manage term grade sheets with weighted competencies and CSV export</p>
                     </a>
-                    <!-- Quiz / Test Builder Card -->
+                    <!-- Test Builder Card -->
                     <a href="test-builder.html" class="dashboard-card"
                         style="text-decoration: none; color: inherit; display: block;">
                         <div class="card-icon">
                             <i class="fa-solid fa-file-pen"></i>
                         </div>
-                        <h3>Quiz Builder</h3>
+                        <h3>Test Builder</h3>
                         <p>Design custom tests with multiple question types and share them with students</p>
                     </a>
                     <!-- Student Turn Tracker Card -->
                     <a href="student-turn-tracker.html" class="dashboard-card"
                         style="text-decoration: none; color: inherit; display: block;">
-                        <div class="card-icon">
-                            <i class="fa-solid fa-users-viewfinder"></i>
+                        <div class="card-icon card-icon--png">
+                            <img src="assets/images/teacher-tools-icons/student-turn-tracker.png"
+                                alt="Student turn tracker icon">
                         </div>
                         <h3>Student Turn Tracker</h3>
                         <p>Track participation with fun random pickers — roulette, balloons, and more</p>
@@ -149,8 +183,9 @@
                     <!-- Student Self-Assessment Card -->
                     <a href="student-self-assessment.html" class="dashboard-card"
                         style="text-decoration: none; color: inherit; display: block;">
-                        <div class="card-icon">
-                            <i class="fa-solid fa-star-half-stroke"></i>
+                        <div class="card-icon card-icon--png">
+                            <img src="assets/images/teacher-tools-icons/student-self-assessment.png"
+                                alt="Student self-assessment icon">
                         </div>
                         <h3>Student Self-Assessment</h3>
                         <p>Guía a los estudiantes en su autoevaluación de período con escala Likert y nota automática
@@ -159,8 +194,8 @@
                     <!-- Word Guesser Card -->
                     <a href="word-guesser.html" class="dashboard-card"
                         style="text-decoration: none; color: inherit; display: block;">
-                        <div class="card-icon">
-                            <i class="fa-solid fa-lightbulb"></i>
+                        <div class="card-icon card-icon--png">
+                            <img src="assets/images/teacher-tools-icons/word-guesser.png" alt="Word guesser icon">
                         </div>
                         <h3>Word Guesser</h3>
                         <p>Set up clue-based word guessing sessions with multiple-choice or typed answers</p>
@@ -177,8 +212,9 @@
                     <!-- Sequence Unscrambler Card -->
                     <a href="sequence-unscrambler.html" class="dashboard-card"
                         style="text-decoration: none; color: inherit; display: block;">
-                        <div class="card-icon">
-                            <i class="fa-solid fa-arrow-down-wide-short"></i>
+                        <div class="card-icon card-icon--png">
+                            <img src="assets/images/teacher-tools-icons/sequwnce-unscrambler.png"
+                                alt="Sequence unscrambler icon">
                         </div>
                         <h3>Sequence Unscrambler</h3>
                         <p>Drag and drop words or images to reconstruct sequences — food chains, life cycles, and more
@@ -196,11 +232,21 @@
                     <!-- PC Assignment Viewer Card -->
                     <a href="pc-assignment-viewer.html" class="dashboard-card"
                         style="text-decoration: none; color: inherit; display: block;">
-                        <div class="card-icon">
-                            <i class="fa-solid fa-desktop"></i>
+                        <div class="card-icon card-icon--png">
+                            <img src="assets/images/teacher-tools-icons/pc-assignment-viewer.png"
+                                alt="PC assignment viewer icon">
                         </div>
                         <h3>PC Assignment Viewer</h3>
                         <p>View and search student PC assignments by term, group, and layout</p>
+                    </a>
+                    <!-- Broadcast Message Card -->
+                    <a href="message-composer.html" class="dashboard-card"
+                        style="text-decoration: none; color: inherit; display: block;">
+                        <div class="card-icon">
+                            <i class="fa-solid fa-bullhorn"></i>
+                        </div>
+                        <h3>Broadcast Message</h3>
+                        <p>Send large, stylized full-screen messages to student PCs during class</p>
                     </a>
                 </div>
             </section>
@@ -214,8 +260,37 @@
     </footer>
 
     <script src="js/students-data.js"></script>
+    <script src="js/tools-search.js"></script>
     <script src="js/darkmode.js"></script>
     <script src="js/birthday-notifications.js"></script>
+    <script>
+        (function () {
+            const STORAGE_KEY = 'esl-tools-view';
+            const $grid = document.getElementById('tools-grid');
+            const $toggle = document.querySelector('.view-toggle');
+            if (!$grid || !$toggle) return;
+
+            const buttons = $toggle.querySelectorAll('.view-toggle-btn');
+
+            function setView(view) {
+                const isList = view === 'list';
+                $grid.classList.toggle('list-view', isList);
+                buttons.forEach((btn) => {
+                    const active = btn.dataset.view === view;
+                    btn.classList.toggle('active', active);
+                    btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+                });
+                localStorage.setItem(STORAGE_KEY, view);
+            }
+
+            setView(localStorage.getItem(STORAGE_KEY) === 'list' ? 'list' : 'grid');
+
+            $toggle.addEventListener('click', (e) => {
+                const btn = e.target.closest('.view-toggle-btn');
+                if (btn) setView(btn.dataset.view);
+            });
+        })();
+    </script>
 </body>
 
 </html>

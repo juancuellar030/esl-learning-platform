@@ -2256,7 +2256,7 @@ const TestBuilder = (function () {
         if (typeof GoogleDriveService === 'undefined') return;
 
         driveService = new GoogleDriveService({
-            folderName: 'ESL - Quiz Builder',
+            folderName: 'ESL - Test Builder',
             fileExtension: '.quiz.json',
             onSave: () => testData,
             onLoad: (data, filename) => {

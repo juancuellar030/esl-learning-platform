@@ -1,0 +1,331 @@
+/* ===== BROADCAST MESSAGE COMPOSER ===== */
+
+.main-nav {
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.tool-card {
+    background: white;
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+}
+
+.composer-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    align-items: start;
+}
+
+.composer-form h2 {
+    color: var(--indigo-velvet);
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+}
+
+.composer-form h2 i {
+    margin-right: 8px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--indigo-velvet);
+}
+
+.form-group textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 14px 16px;
+    border: 2px solid #ddd;
+    border-radius: 12px;
+    font-size: 1rem;
+    resize: vertical;
+    transition: border-color 0.2s ease;
+}
+
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--medium-slate-blue);
+}
+
+.form-group select {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #ddd;
+    border-radius: 12px;
+    font-size: 1rem;
+    background: white;
+    cursor: pointer;
+}
+
+.form-group select:focus {
+    outline: none;
+    border-color: var(--medium-slate-blue);
+}
+
+.preset-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.preset-btn {
+    padding: 8px 14px;
+    border: 2px solid #ddd;
+    border-radius: 20px;
+    background: #f8f9fa;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: #333;
+}
+
+.preset-btn:hover {
+    border-color: var(--medium-slate-blue);
+    background: rgba(118, 120, 237, 0.1);
+}
+
+.color-swatches {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.color-swatch {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 3px solid transparent;
+    cursor: pointer;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+    position: relative;
+}
+
+.color-swatch:hover {
+    transform: scale(1.1);
+}
+
+.color-swatch.active {
+    border-color: var(--indigo-velvet);
+    box-shadow: 0 0 0 2px white, 0 0 0 4px var(--indigo-velvet);
+}
+
+.color-swatch-label {
+    font-size: 0.7rem;
+    text-align: center;
+    margin-top: 4px;
+    color: #666;
+    font-weight: 500;
+}
+
+.color-swatch-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.size-options {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.size-btn {
+    padding: 10px 18px;
+    border: 2px solid #ddd;
+    border-radius: 12px;
+    background: #f8f9fa;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: #333;
+}
+
+.size-btn:hover {
+    border-color: var(--medium-slate-blue);
+}
+
+.size-btn.active {
+    background: var(--indigo-velvet);
+    color: white;
+    border-color: var(--indigo-velvet);
+}
+
+.link-output {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.link-output input {
+    flex: 1;
+    padding: 12px 16px;
+    border: 2px solid #ddd;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    background: #f8f9fa;
+    color: #333;
+}
+
+.link-output input:focus {
+    outline: none;
+    border-color: var(--medium-slate-blue);
+}
+
+.copy-feedback {
+    font-size: 0.85rem;
+    color: #2e7d32;
+    font-weight: 600;
+    margin-top: 6px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.copy-feedback.visible {
+    opacity: 1;
+}
+
+.recent-messages {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 2px solid #eee;
+}
+
+.recent-messages h3 {
+    font-size: 1rem;
+    color: var(--indigo-velvet);
+    margin-bottom: 12px;
+}
+
+.recent-messages h3 i {
+    margin-right: 6px;
+}
+
+.recent-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.recent-btn {
+    padding: 8px 14px;
+    border: 2px solid var(--medium-slate-blue);
+    border-radius: 20px;
+    background: rgba(118, 120, 237, 0.08);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--indigo-velvet);
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.recent-btn:hover {
+    background: rgba(118, 120, 237, 0.2);
+}
+
+.recent-empty {
+    font-size: 0.85rem;
+    color: #999;
+    font-style: italic;
+}
+
+.btn-generate {
+    width: 100%;
+    padding: 16px;
+    font-size: 1.1rem;
+    margin-top: 8px;
+}
+
+/* Preview panel */
+.preview-panel h2 {
+    color: var(--indigo-velvet);
+    margin-bottom: 16px;
+    font-size: 1.5rem;
+}
+
+.preview-panel h2 i {
+    margin-right: 8px;
+}
+
+.preview-box {
+    border-radius: 16px;
+    overflow: hidden;
+    border: 3px solid var(--indigo-velvet);
+    aspect-ratio: 16 / 9;
+    position: relative;
+    background: #1a4fa0;
+}
+
+.preview-screen {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    text-align: center;
+    word-break: break-word;
+    font-weight: 800;
+    line-height: 1.2;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.preview-hint {
+    font-size: 0.8rem;
+    color: #888;
+    margin-top: 10px;
+    text-align: center;
+}
+
+/* Dark mode */
+body.dark-mode .tool-card {
+    background-color: #1e1e1e !important;
+}
+
+body.dark-mode .composer-form h2,
+body.dark-mode .preview-panel h2,
+body.dark-mode .form-group label,
+body.dark-mode .recent-messages h3 {
+    color: var(--amber-flame) !important;
+}
+
+body.dark-mode .preset-btn,
+body.dark-mode .size-btn {
+    background: #2d2d2d;
+    border-color: #555;
+    color: #f5f5f5;
+}
+
+body.dark-mode .link-output input {
+    background: #2d2d2d;
+    border-color: #555;
+    color: #f5f5f5;
+}
+
+body.dark-mode .recent-btn {
+    background: rgba(118, 120, 237, 0.15);
+}
+
+body.dark-mode .recent-messages {
+    border-top-color: #444;
+}
+
+@media (max-width: 900px) {
+    .composer-layout {
+        grid-template-columns: 1fr;
+    }
+}

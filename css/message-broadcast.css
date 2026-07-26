@@ -1,0 +1,112 @@
+/* ===== BROADCAST MESSAGE DISPLAY (student view) ===== */
+
+@import url('https://fonts.googleapis.com/css2?family=Reddit+Sans:wght@400;500;600;700;800&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: 'Reddit Sans', 'Google Sans Flex', sans-serif;
+}
+
+.broadcast-screen {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4vw;
+    text-align: center;
+    word-break: break-word;
+    font-weight: 800;
+    line-height: 1.15;
+    transition: background-color 0.4s ease, color 0.4s ease;
+    overflow: hidden;
+}
+
+.broadcast-screen.placeholder {
+    background: #2d2d2d;
+    color: #888;
+    font-weight: 500;
+    font-size: 4vw;
+    font-style: italic;
+}
+
+.broadcast-text {
+    max-width: 100%;
+    max-height: 100%;
+    overflow: hidden;
+}
+
+/* Entrance animations */
+.broadcast-screen.anim-pulse .broadcast-text {
+    animation: broadcast-pulse 1.5s ease-in-out infinite;
+}
+
+.broadcast-screen.anim-shake .broadcast-text {
+    animation: broadcast-shake 0.6s ease-in-out;
+}
+
+.broadcast-screen.anim-flash {
+    animation: broadcast-flash-bg 1.2s ease-in-out 3;
+}
+
+@keyframes broadcast-pulse {
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.06);
+    }
+}
+
+@keyframes broadcast-shake {
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    15% {
+        transform: translateX(-12px);
+    }
+
+    30% {
+        transform: translateX(12px);
+    }
+
+    45% {
+        transform: translateX(-8px);
+    }
+
+    60% {
+        transform: translateX(8px);
+    }
+
+    75% {
+        transform: translateX(-4px);
+    }
+
+    90% {
+        transform: translateX(4px);
+    }
+}
+
+@keyframes broadcast-flash-bg {
+    0%,
+    100% {
+        filter: brightness(1);
+    }
+
+    50% {
+        filter: brightness(1.8);
+    }
+}
