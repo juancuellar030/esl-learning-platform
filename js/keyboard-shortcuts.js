@@ -187,15 +187,12 @@ function init() {
 // buttons wrap, so the offset is measured rather than hard-coded.
 function trackNavOffset() {
     const nav = document.querySelector('.main-nav');
-    if (!nav) return;
-
     const apply = () => {
-        document.documentElement.style.setProperty('--ks-nav-offset', `${nav.offsetHeight}px`);
+        document.documentElement.style.setProperty('--ks-nav-offset', `${nav ? nav.offsetHeight : 0}px`);
     };
     apply();
     window.addEventListener('resize', apply);
-    // The icon webfont lands after DOMContentLoaded and changes the nav height.
-    if (document.fonts) document.fonts.ready.then(apply);
+    if (nav && document.fonts) document.fonts.ready.then(apply);
 }
 
 function cacheDom() {
@@ -234,6 +231,9 @@ function renderKeyLabel(key, label) {
     if (key === 'meta') {
         return '<span class="ks-key-label"><i class="fa-brands fa-windows ks-key-icon" aria-hidden="true"></i><span>Win</span></span>';
     }
+    if (key === 'numlock') {
+        return '<span class="ks-key-label ks-key-label--stacked"><span>Num</span><span>Lock</span></span>';
+    }
     return label;
 }
 
@@ -251,7 +251,7 @@ function renderKeyboard() {
 
     const numpadKeys = NUMPAD_KEYS.map(([key, label]) => `
         <div class="ks-key${NUMPAD_MODIFIER_KEYS.includes(key) ? ' ks-key--modifier' : ''}"
-            data-key="${escapeAttribute(key)}">${label}</div>
+            data-key="${escapeAttribute(key)}"${key === 'numlock' ? ' aria-label="Num Lock"' : ''}>${renderKeyLabel(key, label)}</div>
     `).join('');
 
     dom.keyboard.innerHTML = `
