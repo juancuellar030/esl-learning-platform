@@ -1,0 +1,214 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - heading " ESL Learning Platform" [level=1] [ref=e4]:
+        - generic [ref=e5]: 
+        - text: ESL Learning Platform
+      - paragraph [ref=e6]: Keyboard Shortcut Playground
+  - navigation [ref=e7]:
+    - link " Back to Tools" [ref=e9] [cursor=pointer]:
+      - /url: tools.html
+      - generic [ref=e10]: 
+      - text: Back to Tools
+  - main [ref=e11]:
+    - generic [ref=e13]:
+      - generic [ref=e15]:
+        - heading " Keyboard Shortcut Playground" [level=2] [ref=e16]:
+          - generic [ref=e17]: 
+          - text: Keyboard Shortcut Playground
+        - paragraph [ref=e18]: Press keys, practice useful shortcuts, and build your keyboard confidence.
+      - region [ref=e19]:
+        - generic [ref=e20]:
+          - generic [ref=e21]:
+            - heading "Live Virtual Keyboard" [level=3] [ref=e22]
+            - paragraph [ref=e23]: Keys light up as you press them.
+          - generic "Keyboard visual themes" [ref=e24]:
+            - generic [ref=e25]:
+              - text: Shape
+              - combobox "Shape" [ref=e26]:
+                - option "Square" [selected]
+                - option "Round"
+            - generic [ref=e27]:
+              - text: Palette
+              - combobox "Palette" [ref=e28]:
+                - option "Classic" [selected]
+                - option "Gold Black"
+                - option "Retro Arcade"
+                - option "Kawaii Pastel"
+                - option "Mint Pop"
+                - option "Peach Cream"
+                - option "Pink Pop"
+            - generic [ref=e29]:
+              - text: Lighting
+              - combobox "Lighting" [ref=e30]:
+                - option "None" [selected]
+                - option "Glow"
+                - option "RGB Wave"
+        - generic "Interactive QWERTY keyboard" [ref=e31]:
+          - generic [ref=e32]:
+            - generic [ref=e33]: Esc
+            - generic [ref=e34]: F1
+            - generic [ref=e35]: F2
+            - generic [ref=e36]: F3
+            - generic [ref=e37]: F4
+            - generic [ref=e38]: F5
+            - generic [ref=e39]: F6
+            - generic [ref=e40]: F7
+            - generic [ref=e41]: F8
+            - generic [ref=e42]: F9
+            - generic [ref=e43]: F10
+            - generic [ref=e44]: F11
+            - generic [ref=e45]: F12
+          - generic [ref=e46]:
+            - generic [ref=e47]: "`"
+            - generic [ref=e48]: "1"
+            - generic [ref=e49]: "2"
+            - generic [ref=e50]: "3"
+            - generic [ref=e51]: "4"
+            - generic [ref=e52]: "5"
+            - generic [ref=e53]: "6"
+            - generic [ref=e54]: "7"
+            - generic [ref=e55]: "8"
+            - generic [ref=e56]: "9"
+            - generic [ref=e57]: "0"
+            - generic [ref=e58]: "-"
+            - generic [ref=e59]: =
+            - generic [ref=e60]: Backspace
+          - generic [ref=e61]:
+            - generic [ref=e62]: Tab
+            - generic [ref=e63]: Q
+            - generic [ref=e64]: W
+            - generic [ref=e65]: E
+            - generic [ref=e66]: R
+            - generic [ref=e67]: T
+            - generic [ref=e68]: "Y"
+            - generic [ref=e69]: U
+            - generic [ref=e70]: I
+            - generic [ref=e71]: O
+            - generic [ref=e72]: P
+            - generic [ref=e73]: "["
+            - generic [ref=e74]: "]"
+            - generic [ref=e75]: \
+          - generic [ref=e76]:
+            - generic [ref=e77]: Caps Lock
+            - generic [ref=e78]: A
+            - generic [ref=e79]: S
+            - generic [ref=e80]: D
+            - generic [ref=e81]: F
+            - generic [ref=e82]: G
+            - generic [ref=e83]: H
+            - generic [ref=e84]: J
+            - generic [ref=e85]: K
+            - generic [ref=e86]: L
+            - generic [ref=e87]: ;
+            - generic [ref=e88]: "'"
+            - generic [ref=e89]: Enter
+          - generic [ref=e90]:
+            - generic [ref=e91]: Shift
+            - generic [ref=e92]: Z
+            - generic [ref=e93]: X
+            - generic [ref=e94]: C
+            - generic [ref=e95]: V
+            - generic [ref=e96]: B
+            - generic [ref=e97]: "N"
+            - generic [ref=e98]: M
+            - generic [ref=e99]: ","
+            - generic [ref=e100]: .
+            - generic [ref=e101]: /
+            - generic [ref=e102]: Shift
+          - generic [ref=e103]:
+            - generic [ref=e104]: Ctrl
+            - generic [ref=e105]: Win
+            - generic [ref=e106]: Alt
+            - generic [ref=e107]: Space
+            - generic [ref=e108]: Alt
+            - generic [ref=e109]: Win
+            - generic [ref=e110]: Ctrl
+            - generic [ref=e111]: ←
+            - generic [ref=e112]: ↑
+            - generic [ref=e113]: ↓
+            - generic [ref=e114]: →
+      - tablist "Shortcut activities" [ref=e115]:
+        - tab " Practice & Detect" [selected] [ref=e116] [cursor=pointer]:
+          - generic [ref=e117]: 
+          - text: Practice & Detect
+        - tab " Watch & Learn" [ref=e118] [cursor=pointer]:
+          - generic [ref=e119]: 
+          - text: Watch & Learn
+        - tab " Check My 10" [ref=e120] [cursor=pointer]:
+          - generic [ref=e121]: 
+          - text: Check My 10
+      - tabpanel [ref=e122]:
+        - generic "Shortcut categories" [ref=e123]:
+          - button "Basic Actions" [ref=e201] [cursor=pointer]
+          - button "Text Formatting" [ref=e202] [cursor=pointer]
+          - button "Web Browser" [ref=e203] [cursor=pointer]
+          - button "Windows Actions" [ref=e204] [cursor=pointer]
+          - button "Search & Refresh" [ref=e205] [cursor=pointer]
+          - button "Zoom & View" [ref=e206] [cursor=pointer]
+        - generic [ref=e130]:
+          - article [ref=e207]:
+            - generic "Completed" [ref=e208]
+            - heading "Bold" [level=3] [ref=e209]
+            - generic [ref=e210]:
+              - generic [ref=e211]: Ctrl
+              - generic [ref=e212]: +
+              - generic [ref=e213]: B
+          - article [ref=e214]:
+            - generic "Not tried" [ref=e215]
+            - heading "Italic" [level=3] [ref=e216]
+            - generic [ref=e217]:
+              - generic [ref=e218]: Ctrl
+              - generic [ref=e219]: +
+              - generic [ref=e220]: I
+          - article [ref=e221]:
+            - generic "Not tried" [ref=e222]
+            - heading "Underline" [level=3] [ref=e223]
+            - generic [ref=e224]:
+              - generic [ref=e225]: Ctrl
+              - generic [ref=e226]: +
+              - generic [ref=e227]: U
+          - article [ref=e228]:
+            - generic "Not tried" [ref=e229]
+            - heading "Align Left" [level=3] [ref=e230]
+            - generic [ref=e231]:
+              - generic [ref=e232]: Ctrl
+              - generic [ref=e233]: +
+              - generic [ref=e234]: Shift
+              - generic [ref=e235]: +
+              - generic [ref=e236]: L
+          - article [ref=e237]:
+            - generic "Not tried" [ref=e238]
+            - heading "Center Text" [level=3] [ref=e239]
+            - generic [ref=e240]:
+              - generic [ref=e241]: Ctrl
+              - generic [ref=e242]: +
+              - generic [ref=e243]: Shift
+              - generic [ref=e244]: +
+              - generic [ref=e245]: E
+          - article [ref=e246]:
+            - generic "Not tried" [ref=e247]
+            - heading "Align Right" [level=3] [ref=e248]
+            - generic [ref=e249]:
+              - generic [ref=e250]: Ctrl
+              - generic [ref=e251]: +
+              - generic [ref=e252]: Shift
+              - generic [ref=e253]: +
+              - generic [ref=e254]: R
+        - generic [ref=e187]:
+          - generic [ref=e188]:
+            - generic [ref=e189]:
+              - heading " Practice Sandbox" [level=3] [ref=e190]:
+                - generic [ref=e191]: 
+                - text: Practice Sandbox
+              - paragraph [ref=e192]: Click inside the paragraph, select some text, then try a shortcut.
+            - generic [ref=e193]: Click the sandbox to begin
+          - text: 
+          - generic [ref=e194]:
+            - text: 
+            - textbox [ref=e195]
+      - text:       
+  - status
+  - contentinfo [ref=e196]:
+    - paragraph [ref=e198]: ESL Learning Platform © 2025 | Made for Teachers, by Teachers
+  - button "" [ref=e199] [cursor=pointer]

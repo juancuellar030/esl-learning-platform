@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="assets/graduation-cap-icon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keyboard Shortcut Playground - ESL Learning Platform</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+    <header class="main-header">
+        <div class="container">
+            <h1><i class="fa-solid fa-graduation-cap"></i> ESL Learning Platform</h1>
+            <p class="tagline">Keyboard Shortcut Playground</p>
+        </div>
+    </header>
+
+    <nav class="main-nav">
+        <div class="container">
+            <a href="tools.html" class="nav-btn" style="text-decoration: none;">
+                <i class="fa-solid fa-arrow-left"></i> Back to Tools
+            </a>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="container">
+            <section class="content-section active ks-playground">
+                <div class="ks-heading">
+                    <div>
+                        <h2><i class="fa-solid fa-keyboard"></i> Keyboard Shortcut Playground</h2>
+                        <p>Press keys, practice useful shortcuts, and build your keyboard confidence.</p>
+                    </div>
+                </div>
+
+                <section class="ks-keyboard-section" aria-labelledby="keyboard-heading">
+                    <div class="ks-section-heading">
+                        <div>
+                            <h3 id="keyboard-heading">Live Virtual Keyboard</h3>
+                            <p>Keys light up as you press them.</p>
+                        </div>
+                        <div class="ks-theme-controls" aria-label="Keyboard visual themes">
+                            <label>
+                                Shape
+                                <select id="ks-shape-picker">
+                                    <option value="square">Square</option>
+                                    <option value="round">Round</option>
+                                </select>
+                            </label>
+                            <label>
+                                Palette
+                                <select id="ks-palette-picker">
+                                    <option value="classic">Classic</option>
+                                    <option value="gold-black">Gold Black</option>
+                                    <option value="retro-arcade">Retro Arcade</option>
+                                    <option value="kawaii-pastel">Kawaii Pastel</option>
+                                    <option value="mint-pop">Mint Pop</option>
+                                    <option value="peach-cream">Peach Cream</option>
+                                    <option value="pink-pop">Pink Pop</option>
+                                    <option value="frost-white">Frost White</option>
+                                </select>
+                            </label>
+                            <label>
+                                Lighting
+                                <select id="ks-effect-picker">
+                                    <option value="none">None</option>
+                                    <option value="glow">Glow</option>
+                                    <option value="rgb">RGB Wave</option>
+                                </select>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="ks-keyboard keyboard--palette-classic" id="ks-keyboard"
+                        aria-label="Interactive QWERTY keyboard with numeric keypad"></div>
+                </section>
+
+                <div class="ks-tab-navigation" role="tablist" aria-label="Shortcut activities">
+                    <button class="ks-tab-btn active" type="button" data-tab="practice" role="tab"
+                        aria-selected="true">
+                        <i class="fa-solid fa-hand-pointer"></i> Practice &amp; Detect
+                    </button>
+                    <button class="ks-tab-btn" type="button" data-tab="watch" role="tab" aria-selected="false">
+                        <i class="fa-solid fa-eye"></i> Watch &amp; Learn
+                    </button>
+                    <button class="ks-tab-btn" type="button" data-tab="check" role="tab" aria-selected="false">
+                        <i class="fa-solid fa-list-check"></i> Check My 10
+                    </button>
+                </div>
+
+                <section class="ks-tab-panel active" id="ks-practice-panel" data-panel="practice" role="tabpanel">
+                    <div class="ks-category-tabs" id="ks-category-tabs" aria-label="Shortcut categories"></div>
+                    <div class="ks-panel-columns">
+                        <div class="ks-panel-main">
+                            <div class="ks-card-grid" id="ks-practice-grid"></div>
+                        </div>
+                        <aside class="ks-panel-side" id="ks-practice-side">
+                            <section class="ks-sandbox-panel">
+                                <div class="ks-sandbox-heading">
+                                    <div>
+                                        <h3><i class="fa-solid fa-pen-to-square"></i> Practice Sandbox</h3>
+                                        <p>Click inside the paragraph, select some text, then try a shortcut.</p>
+                                    </div>
+                                    <span class="ks-focus-status" id="ks-focus-status">Click the sandbox to
+                                        begin</span>
+                                </div>
+                                <div class="ks-find-bar" id="ks-find-bar" hidden>
+                                    <label for="ks-find-input">Find in sandbox</label>
+                                    <input type="search" id="ks-find-input" placeholder="Type a word or phrase">
+                                    <button type="button" class="btn-secondary" id="ks-find-close"
+                                        aria-label="Close find box"><i class="fa-solid fa-xmark"></i></button>
+                                </div>
+                                <div class="ks-sandbox-wrap" id="ks-sandbox-wrap">
+                                    <div class="ks-refresh-spinner" id="ks-refresh-spinner" aria-hidden="true">
+                                        <i class="fa-solid fa-arrows-rotate"></i>
+                                    </div>
+                                    <div class="ks-sandbox" id="ks-sandbox" contenteditable="true" spellcheck="true"
+                                        role="textbox" aria-multiline="true">Learning keyboard shortcuts can make everyday computer work faster and easier. Select part of this paragraph, then practice formatting, copying, finding, or aligning the text.</div>
+                                </div>
+                            </section>
+                        </aside>
+                    </div>
+                </section>
+
+                <section class="ks-tab-panel" id="ks-watch-panel" data-panel="watch" role="tabpanel" hidden>
+                    <div class="ks-demo-banner">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <span>These shortcuts can't be detected inside a web page for browser security reasons —
+                            practice them directly on your computer.</span>
+                    </div>
+                    <div class="ks-panel-columns">
+                        <div class="ks-panel-main">
+                            <div class="ks-card-grid ks-demo-grid" id="ks-demo-grid"></div>
+                        </div>
+                        <aside class="ks-panel-side">
+                            <section class="ks-side-note">
+                                <h3><i class="fa-solid fa-lightbulb"></i> How to use this tab</h3>
+                                <p>Watch each animation to see what the shortcut does, then switch to your desktop and
+                                    try it for real.</p>
+                                <ul>
+                                    <li>Press the combination slowly — hold the modifier first, then tap the letter.</li>
+                                    <li>Watch the virtual keyboard above: the same keys light up as you press them.</li>
+                                    <li>Tick the box on a card once you have practiced it on your own computer.</li>
+                                </ul>
+                            </section>
+                        </aside>
+                    </div>
+                </section>
+
+                <section class="ks-tab-panel" id="ks-check-panel" data-panel="check" role="tabpanel" hidden>
+                    <div class="ks-check-header">
+                        <div>
+                            <h3>Choose Your Challenge</h3>
+                            <p>Select exactly 10 interactive shortcuts, or let the playground pick for you.</p>
+                        </div>
+                        <button type="button" class="btn-secondary" id="ks-random-ten">
+                            <i class="fa-solid fa-shuffle"></i> Pick Random 10
+                        </button>
+                    </div>
+                    <div class="ks-panel-columns">
+                        <div class="ks-panel-main">
+                            <div class="ks-selection-status">
+                                <strong id="ks-selected-count">0 / 10 selected</strong>
+                                <button type="button" class="btn-primary" id="ks-start-check" disabled>Start My
+                                    10</button>
+                            </div>
+                            <div class="ks-check-options" id="ks-check-options"></div>
+                        </div>
+                        <aside class="ks-panel-side" id="ks-check-side">
+                            <div class="ks-check-session" id="ks-check-session" hidden>
+                                <div class="ks-score-banner">
+                                    <span>Check My 10</span>
+                                    <strong id="ks-score">0 / 10 correct</strong>
+                                </div>
+                                <p>Use the shared Practice Sandbox to perform the selected shortcuts.</p>
+                                <div class="ks-check-progress" id="ks-check-progress"></div>
+                            </div>
+                        </aside>
+                    </div>
+
+                    <div class="ks-pass-banner" id="ks-pass-banner" hidden>
+                        <i class="fa-solid fa-trophy"></i>
+                        <div>
+                            <h3>You completed all 10!</h3>
+                            <p>Every selected shortcut was detected correctly.</p>
+                        </div>
+                        <button type="button" class="btn-primary" id="ks-try-more">Try 10 More</button>
+                    </div>
+                </section>
+            </section>
+        </div>
+    </main>
+
+    <div class="ks-toast" id="ks-toast" role="status" aria-live="polite"></div>
+
+    <footer class="main-footer">
+        <div class="container">
+            <p>ESL Learning Platform © 2025 | Made for Teachers, by Teachers</p>
+        </div>
+    </footer>
+
+    <script src="js/keyboard-shortcuts.js"></script>
+    <script src="js/darkmode.js"></script>
+</body>
+
+</html>
