@@ -2487,6 +2487,10 @@ body.ks-student-view .main-content {
     min-height: 100vh;
 }
 
+body.ks-student-view .main-footer {
+    display: none;
+}
+
 .ks-playground {
     --ks-surface: #ffffff;
     --ks-soft-surface: #f5f5ff;
