@@ -1,0 +1,247 @@
+- generic [active] [ref=f1e1]:
+  - main [ref=f1e2]:
+    - generic [ref=f1e4]:
+      - generic [ref=f1e6]:
+        - heading " Keyboard Shortcut Playground" [level=2] [ref=f1e7]:
+          - generic [ref=f1e8]: 
+          - text: Keyboard Shortcut Playground
+        - paragraph [ref=f1e9]: Press keys, practice useful shortcuts, and build your keyboard confidence.
+      - region [ref=f1e10]:
+        - generic [ref=f1e11]:
+          - generic [ref=f1e12]:
+            - heading "Live Virtual Keyboard" [level=3] [ref=f1e13]
+            - paragraph [ref=f1e14]: Keys light up as you press them.
+          - generic "Keyboard visual themes" [ref=f1e15]:
+            - generic [ref=f1e16]:
+              - text: Shape
+              - combobox "Shape" [ref=f1e17]:
+                - option "Square" [selected]
+                - option "Round"
+            - generic [ref=f1e18]:
+              - text: Palette
+              - combobox "Palette" [ref=f1e19]:
+                - option "Classic" [selected]
+                - option "Gold Black"
+                - option "Retro Arcade"
+                - option "Kawaii Pastel"
+                - option "Mint Pop"
+                - option "Peach Cream"
+                - option "Pink Pop"
+                - option "Frost White"
+            - generic [ref=f1e20]:
+              - text: Lighting
+              - combobox "Lighting" [ref=f1e21]:
+                - option "None" [selected]
+                - option "Glow"
+                - option "RGB Wave"
+        - generic "Interactive QWERTY keyboard with numeric keypad" [ref=f1e22]:
+          - generic [ref=f1e23]:
+            - generic [ref=f1e24]:
+              - generic [ref=f1e25]: Esc
+              - generic [ref=f1e26]: F1
+              - generic [ref=f1e27]: F2
+              - generic [ref=f1e28]: F3
+              - generic [ref=f1e29]: F4
+              - generic [ref=f1e30]: F5
+              - generic [ref=f1e31]: F6
+              - generic [ref=f1e32]: F7
+              - generic [ref=f1e33]: F8
+              - generic [ref=f1e34]: F9
+              - generic [ref=f1e35]: F10
+              - generic [ref=f1e36]: F11
+              - generic [ref=f1e37]: F12
+            - generic [ref=f1e38]:
+              - generic [ref=f1e39]: "`"
+              - generic [ref=f1e40]: "1"
+              - generic [ref=f1e41]: "2"
+              - generic [ref=f1e42]: "3"
+              - generic [ref=f1e43]: "4"
+              - generic [ref=f1e44]: "5"
+              - generic [ref=f1e45]: "6"
+              - generic [ref=f1e46]: "7"
+              - generic [ref=f1e47]: "8"
+              - generic [ref=f1e48]: "9"
+              - generic [ref=f1e49]: "0"
+              - generic [ref=f1e50]: "-"
+              - generic [ref=f1e51]: =
+              - generic [ref=f1e52]: Backspace
+            - generic [ref=f1e53]:
+              - generic [ref=f1e54]: Tab
+              - generic [ref=f1e55]: Q
+              - generic [ref=f1e56]: W
+              - generic [ref=f1e57]: E
+              - generic [ref=f1e58]: R
+              - generic [ref=f1e59]: T
+              - generic [ref=f1e60]: "Y"
+              - generic [ref=f1e61]: U
+              - generic [ref=f1e62]: I
+              - generic [ref=f1e63]: O
+              - generic [ref=f1e64]: P
+              - generic [ref=f1e65]: "["
+              - generic [ref=f1e66]: "]"
+              - generic [ref=f1e67]: \
+            - generic [ref=f1e68]:
+              - generic [ref=f1e69]: Caps Lock
+              - generic [ref=f1e70]: A
+              - generic [ref=f1e71]: S
+              - generic [ref=f1e72]: D
+              - generic [ref=f1e73]: F
+              - generic [ref=f1e74]: G
+              - generic [ref=f1e75]: H
+              - generic [ref=f1e76]: J
+              - generic [ref=f1e77]: K
+              - generic [ref=f1e78]: L
+              - generic [ref=f1e79]: ;
+              - generic [ref=f1e80]: "'"
+              - generic [ref=f1e81]: Enter
+            - generic [ref=f1e82]:
+              - generic "Shift" [ref=f1e83]:
+                - generic [ref=f1e84]:
+                  - generic: 
+                  - generic [ref=f1e85]: Shift
+              - generic [ref=f1e86]: Z
+              - generic [ref=f1e87]: X
+              - generic [ref=f1e88]: C
+              - generic [ref=f1e89]: V
+              - generic [ref=f1e90]: B
+              - generic [ref=f1e91]: "N"
+              - generic [ref=f1e92]: M
+              - generic [ref=f1e93]: ","
+              - generic [ref=f1e94]: .
+              - generic [ref=f1e95]: /
+              - generic "Shift" [ref=f1e96]:
+                - generic [ref=f1e97]:
+                  - generic: 
+                  - generic [ref=f1e98]: Shift
+            - generic [ref=f1e99]:
+              - generic [ref=f1e100]: Ctrl
+              - generic "Win" [ref=f1e101]:
+                - generic [ref=f1e102]:
+                  - generic: 
+                  - generic [ref=f1e103]: Win
+              - generic [ref=f1e104]: Alt
+              - generic [ref=f1e105]: Space
+              - generic [ref=f1e106]: Alt
+              - generic "Win" [ref=f1e107]:
+                - generic [ref=f1e108]:
+                  - generic: 
+                  - generic [ref=f1e109]: Win
+              - generic [ref=f1e110]: Ctrl
+              - generic [ref=f1e111]: ←
+              - generic [ref=f1e112]: ↑
+              - generic [ref=f1e113]: ↓
+              - generic [ref=f1e114]: →
+          - generic "Numeric keypad" [ref=f1e115]:
+            - generic "Num Lock" [ref=f1e116]:
+              - generic [ref=f1e117]:
+                - generic [ref=f1e118]: Num
+                - generic [ref=f1e119]: Lock
+            - generic [ref=f1e120]: /
+            - generic [ref=f1e121]: "*"
+            - generic [ref=f1e122]: −
+            - generic [ref=f1e123]: "7"
+            - generic [ref=f1e124]: "8"
+            - generic [ref=f1e125]: "9"
+            - generic [ref=f1e126]: +
+            - generic [ref=f1e127]: "4"
+            - generic [ref=f1e128]: "5"
+            - generic [ref=f1e129]: "6"
+            - generic [ref=f1e130]: "1"
+            - generic [ref=f1e131]: "2"
+            - generic [ref=f1e132]: "3"
+            - generic [ref=f1e133]: Enter
+            - generic [ref=f1e134]: "0"
+            - generic [ref=f1e135]: .
+      - tablist "Shortcut activities" [ref=f1e136]:
+        - tab " Practice & Detect" [selected] [ref=f1e137] [cursor=pointer]:
+          - generic [ref=f1e138]: 
+          - text: Practice & Detect
+        - tab " Watch & Learn" [ref=f1e139] [cursor=pointer]:
+          - generic [ref=f1e140]: 
+          - text: Watch & Learn
+        - tab " Quiz Mode" [ref=f1e141] [cursor=pointer]:
+          - generic [ref=f1e142]: 
+          - text: Quiz Mode
+      - tabpanel [ref=f1e143]:
+        - generic "Shortcut categories" [ref=f1e144]:
+          - button "Basic Actions" [ref=f1e145] [cursor=pointer]
+          - button "Text Formatting" [ref=f1e146] [cursor=pointer]
+          - button "Web Browser" [ref=f1e147] [cursor=pointer]
+          - button "Windows Actions" [ref=f1e148] [cursor=pointer]
+          - button "Search & Refresh" [ref=f1e149] [cursor=pointer]
+          - button "Zoom & View" [ref=f1e150] [cursor=pointer]
+        - generic [ref=f1e151]:
+          - generic [ref=f1e153]:
+            - article [ref=f1e154]:
+              - generic "Not tried" [ref=f1e155]
+              - heading "Copy" [level=3] [ref=f1e156]
+              - generic [ref=f1e157]:
+                - generic [ref=f1e158]: Ctrl
+                - generic [ref=f1e159]: +
+                - generic [ref=f1e160]: C
+            - article [ref=f1e161]:
+              - generic "Not tried" [ref=f1e162]
+              - heading "Cut" [level=3] [ref=f1e163]
+              - generic [ref=f1e164]:
+                - generic [ref=f1e165]: Ctrl
+                - generic [ref=f1e166]: +
+                - generic [ref=f1e167]: X
+            - article [ref=f1e168]:
+              - generic "Not tried" [ref=f1e169]
+              - heading "Paste" [level=3] [ref=f1e170]
+              - generic [ref=f1e171]:
+                - generic [ref=f1e172]: Ctrl
+                - generic [ref=f1e173]: +
+                - generic [ref=f1e174]: V
+            - article [ref=f1e175]:
+              - generic "Not tried" [ref=f1e176]
+              - heading "Undo" [level=3] [ref=f1e177]
+              - generic [ref=f1e178]:
+                - generic [ref=f1e179]: Ctrl
+                - generic [ref=f1e180]: +
+                - generic [ref=f1e181]: Z
+            - article [ref=f1e182]:
+              - generic "Not tried" [ref=f1e183]
+              - heading "Redo" [level=3] [ref=f1e184]
+              - generic [ref=f1e185]:
+                - generic [ref=f1e186]: Ctrl
+                - generic [ref=f1e187]: +
+                - generic [ref=f1e188]: "Y"
+            - article [ref=f1e189]:
+              - generic "Not tried" [ref=f1e190]
+              - heading "Select All" [level=3] [ref=f1e191]
+              - generic [ref=f1e192]:
+                - generic [ref=f1e193]: Ctrl
+                - generic [ref=f1e194]: +
+                - generic [ref=f1e195]: A
+            - article [ref=f1e196]:
+              - generic "Not tried" [ref=f1e197]
+              - heading "Save" [level=3] [ref=f1e198]
+              - generic [ref=f1e199]:
+                - generic [ref=f1e200]: Ctrl
+                - generic [ref=f1e201]: +
+                - generic [ref=f1e202]: S
+            - article [ref=f1e203]:
+              - generic "Not tried" [ref=f1e204]
+              - heading "Print" [level=3] [ref=f1e205]
+              - generic [ref=f1e206]:
+                - generic [ref=f1e207]: Ctrl
+                - generic [ref=f1e208]: +
+                - generic [ref=f1e209]: P
+          - complementary [ref=f1e210]:
+            - generic [ref=f1e211]:
+              - generic [ref=f1e212]:
+                - generic [ref=f1e213]:
+                  - heading " Practice Sandbox" [level=3] [ref=f1e214]:
+                    - generic [ref=f1e215]: 
+                    - text: Practice Sandbox
+                  - paragraph [ref=f1e216]: Click inside the paragraph, select some text, then try a shortcut.
+                - generic [ref=f1e217]: Click the sandbox to begin
+              - text: 
+              - generic [ref=f1e218]:
+                - text: 
+                - textbox [ref=f1e219]
+      - text:       
+  - text:    
+  - status
+  - button "" [ref=f1e220] [cursor=pointer]

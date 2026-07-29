@@ -151,16 +151,34 @@ const NUMPAD_MODIFIER_KEYS = [
     'numlock', 'numpaddivide', 'numpadmultiply', 'numpadsubtract', 'numpadadd'
 ];
 
+// These shortcuts are useful in Practice & Detect, but the browser cannot
+// reliably receive them during a scored quiz because the OS/browser intercepts them.
+const QUIZ_EXCLUDED = ['switch-app', 'show-desktop', 'file-explorer', 'fullscreen'];
+const QUIZ_POOL = SHORTCUTS.filter((shortcut) =>
+    shortcut.type === 'interactive' && !QUIZ_EXCLUDED.includes(shortcut.id)
+);
+
+const QUIZ_MODIFIER_KEYS = ['control', 'ctrl', 'shift', 'alt', 'meta', 'os', 'capslock', 'numlock'];
+
 const state = {
     completed: new Set(),
     activeCategory: CATEGORIES[0],
     selectedTen: new Set(),
-    checkCorrect: new Set(),
-    checkActive: false,
     sandboxFontSize: 18,
     shape: 'square',
     palette: 'classic',
     effect: 'none'
+};
+
+const quiz = {
+    active: false,
+    name: '',
+    order: [],
+    index: 0,
+    triesLeft: 3,
+    locked: false,
+    results: [],
+    advanceTimer: null
 };
 
 const dom = {};
@@ -173,11 +191,11 @@ function init() {
     renderCategoryTabs();
     renderPracticeCards();
     renderDemoCards();
-    renderCheckOptions();
+    renderQuizOptions();
     bindTabs();
     bindThemeControls();
     bindSandbox();
-    bindCheckMyTen();
+    bindQuizMode();
     bindKeyboardListeners();
     updateTheme();
     trackNavOffset();
@@ -204,10 +222,6 @@ function cacheDom() {
     dom.practiceGrid = document.getElementById('ks-practice-grid');
     dom.demoGrid = document.getElementById('ks-demo-grid');
     dom.sandbox = document.getElementById('ks-sandbox');
-    dom.sandboxPanel = document.querySelector('.ks-sandbox-panel');
-    dom.practiceSide = document.getElementById('ks-practice-side');
-    dom.checkSide = document.getElementById('ks-check-side');
-    dom.checkSession = document.getElementById('ks-check-session');
     dom.focusStatus = document.getElementById('ks-focus-status');
     dom.findBar = document.getElementById('ks-find-bar');
     dom.findInput = document.getElementById('ks-find-input');
@@ -215,12 +229,29 @@ function cacheDom() {
     dom.refreshSpinner = document.getElementById('ks-refresh-spinner');
     dom.checkOptions = document.getElementById('ks-check-options');
     dom.selectedCount = document.getElementById('ks-selected-count');
-    dom.startCheck = document.getElementById('ks-start-check');
+    dom.studentName = document.getElementById('ks-student-name');
+    dom.startQuiz = document.getElementById('ks-start-quiz');
     dom.randomTen = document.getElementById('ks-random-ten');
-    dom.score = document.getElementById('ks-score');
-    dom.checkProgress = document.getElementById('ks-check-progress');
-    dom.passBanner = document.getElementById('ks-pass-banner');
-    dom.tryMore = document.getElementById('ks-try-more');
+    dom.keyboardSection = document.querySelector('.ks-keyboard-section');
+    dom.quizOverlay = document.getElementById('ks-quiz-overlay');
+    dom.quizActiveView = document.getElementById('ks-quiz-active-view');
+    dom.quizKeyboardSlot = document.getElementById('ks-quiz-keyboard-slot');
+    dom.quizProgress = document.getElementById('ks-quiz-progress');
+    dom.quizPromptCard = document.getElementById('ks-quiz-prompt-card');
+    dom.quizPromptLabel = document.getElementById('ks-quiz-prompt-label');
+    dom.quizTries = document.getElementById('ks-quiz-tries');
+    dom.quizFeedback = document.getElementById('ks-quiz-feedback');
+    dom.quizAnswer = document.getElementById('ks-quiz-answer');
+    dom.quizFullscreen = document.getElementById('ks-quiz-fullscreen');
+    dom.quizExit = document.getElementById('ks-quiz-exit');
+    dom.quizResults = document.getElementById('ks-quiz-results');
+    dom.resultName = document.getElementById('ks-result-name');
+    dom.resultDate = document.getElementById('ks-result-date');
+    dom.resultScore = document.getElementById('ks-result-score');
+    dom.resultMessage = document.getElementById('ks-result-message');
+    dom.resultList = document.getElementById('ks-result-list');
+    dom.printResults = document.getElementById('ks-print-results');
+    dom.tryAgain = document.getElementById('ks-try-again');
     dom.toast = document.getElementById('ks-toast');
 }
 
@@ -333,31 +364,18 @@ function getDemoVisual(id) {
     return '<div class="ks-tab-bar"><span></span><span></span><span></span></div>';
 }
 
-function renderCheckOptions() {
-    const interactive = SHORTCUTS.filter((shortcut) => shortcut.type === 'interactive');
-    dom.checkOptions.innerHTML = interactive.map((shortcut) => `
+function renderQuizOptions() {
+    dom.checkOptions.innerHTML = QUIZ_POOL.map((shortcut) => `
         <label class="ks-check-option${state.selectedTen.has(shortcut.id) ? ' selected' : ''}">
             <input type="checkbox" value="${shortcut.id}" ${state.selectedTen.has(shortcut.id) ? 'checked' : ''}
-                ${state.checkActive ? 'disabled' : ''}>
+                ${quiz.active ? 'disabled' : ''}>
             <span>
                 <strong>${shortcut.label}</strong>
                 ${renderCombo(shortcut.keys)}
             </span>
         </label>
     `).join('');
-    updateSelectionStatus();
-}
-
-function renderCheckProgress() {
-    const selected = SHORTCUTS.filter((shortcut) => state.selectedTen.has(shortcut.id));
-    dom.checkProgress.innerHTML = selected.map((shortcut) => `
-        <div class="ks-progress-item${state.checkCorrect.has(shortcut.id) ? ' completed' : ''}">
-            <i class="fa-solid ${state.checkCorrect.has(shortcut.id) ? 'fa-circle-check' : 'fa-circle'}"></i>
-            <span>${shortcut.label}</span>
-            ${renderCombo(shortcut.keys)}
-        </div>
-    `).join('');
-    dom.score.textContent = `${state.checkCorrect.size} / 10 correct`;
+    updateQuizSetupStatus();
 }
 
 function bindTabs() {
@@ -380,11 +398,6 @@ function showTab(tabName) {
         panel.hidden = !active;
     });
 
-    if (tabName === 'check' && state.checkActive) {
-        dom.checkSide.appendChild(dom.sandboxPanel);
-    } else if (tabName === 'practice') {
-        dom.practiceSide.appendChild(dom.sandboxPanel);
-    }
 }
 
 function bindThemeControls() {
@@ -424,10 +437,10 @@ function bindSandbox() {
     dom.findClose.addEventListener('click', closeFind);
 }
 
-function bindCheckMyTen() {
+function bindQuizMode() {
     dom.checkOptions.addEventListener('change', (event) => {
         const checkbox = event.target.closest('input[type="checkbox"]');
-        if (!checkbox || state.checkActive) return;
+        if (!checkbox || quiz.active) return;
 
         if (checkbox.checked && state.selectedTen.size >= 10) {
             checkbox.checked = false;
@@ -437,54 +450,227 @@ function bindCheckMyTen() {
 
         if (checkbox.checked) state.selectedTen.add(checkbox.value);
         else state.selectedTen.delete(checkbox.value);
-        renderCheckOptions();
+        renderQuizOptions();
     });
 
     dom.randomTen.addEventListener('click', () => {
-        if (state.checkActive) return;
-        const ids = SHORTCUTS.filter((shortcut) => shortcut.type === 'interactive').map((shortcut) => shortcut.id);
-        ids.sort(() => Math.random() - 0.5);
-        state.selectedTen = new Set(ids.slice(0, 10));
-        renderCheckOptions();
+        if (quiz.active) return;
+        state.selectedTen = new Set(shuffleQuizItems(QUIZ_POOL).slice(0, 10).map((shortcut) => shortcut.id));
+        renderQuizOptions();
     });
 
-    dom.startCheck.addEventListener('click', startCheck);
-    dom.tryMore.addEventListener('click', resetCheck);
+    dom.studentName.addEventListener('input', updateQuizSetupStatus);
+    dom.startQuiz.addEventListener('click', startQuiz);
+    dom.quizExit.addEventListener('click', exitQuiz);
+    dom.quizFullscreen.addEventListener('click', toggleQuizFullscreen);
+    dom.printResults.addEventListener('click', () => window.print());
+    dom.tryAgain.addEventListener('click', tryQuizAgain);
+    document.addEventListener('fullscreenchange', updateFullscreenButton);
 }
 
-function updateSelectionStatus() {
+function updateQuizSetupStatus() {
     dom.selectedCount.textContent = `${state.selectedTen.size} / 10 selected`;
-    dom.startCheck.disabled = state.selectedTen.size !== 10 || state.checkActive;
+    dom.startQuiz.disabled = state.selectedTen.size !== 10 || !dom.studentName.value.trim() || quiz.active;
 }
 
-function startCheck() {
-    if (state.selectedTen.size !== 10) return;
-    state.checkActive = true;
-    state.checkCorrect.clear();
-    dom.checkSession.hidden = false;
-    dom.passBanner.hidden = true;
+function shuffleQuizItems(items) {
+    const shuffled = [...items];
+    for (let index = shuffled.length - 1; index > 0; index -= 1) {
+        const swapIndex = Math.floor(Math.random() * (index + 1));
+        [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+    }
+    return shuffled;
+}
+
+function startQuiz() {
+    const name = dom.studentName.value.trim();
+    if (state.selectedTen.size !== 10 || !name) return;
+
+    quiz.active = true;
+    quiz.name = name;
+    quiz.order = shuffleQuizItems(QUIZ_POOL.filter((shortcut) => state.selectedTen.has(shortcut.id)));
+    quiz.index = 0;
+    quiz.triesLeft = 3;
+    quiz.locked = false;
+    quiz.results = [];
+
     dom.randomTen.disabled = true;
-    renderCheckOptions();
-    renderCheckProgress();
-    dom.checkSide.appendChild(dom.sandboxPanel);
-    dom.sandbox.focus();
+    dom.quizResults.hidden = true;
+    dom.quizActiveView.hidden = false;
+    dom.quizOverlay.hidden = false;
+    dom.quizKeyboardSlot.appendChild(dom.keyboard);
+    document.body.classList.add('ks-quiz-open');
+    document.activeElement?.blur();
+    clearKeyboardHighlights();
+    renderQuizPrompt();
 }
 
-function resetCheck() {
-    state.checkActive = false;
+function renderQuizPrompt() {
+    const shortcut = quiz.order[quiz.index];
+    quiz.triesLeft = 3;
+    quiz.locked = false;
+    dom.quizProgress.textContent = `Shortcut ${quiz.index + 1} of ${quiz.order.length}`;
+    dom.quizPromptLabel.textContent = shortcut.label;
+    dom.quizTries.textContent = '3 tries remaining';
+    dom.quizFeedback.textContent = '';
+    dom.quizAnswer.hidden = true;
+    dom.quizAnswer.innerHTML = '';
+    dom.quizPromptCard.classList.remove('is-correct', 'is-wrong', 'is-missed');
+}
+
+function handleQuizKeydown(event) {
+    if (event.repeat || quiz.locked) return;
+    if (event.key !== 'Escape' && event.key !== 'F11') event.preventDefault();
+
+    const capKey = resolveCapKey(event);
+    if (QUIZ_MODIFIER_KEYS.includes(capKey)) return;
+
+    const shortcut = quiz.order[quiz.index];
+    if (matchesShortcut(shortcut, event)) {
+        recordQuizSuccess();
+    } else {
+        recordQuizMiss();
+    }
+}
+
+function recordQuizSuccess() {
+    const shortcut = quiz.order[quiz.index];
+    quiz.locked = true;
+    quiz.results.push({
+        shortcut,
+        passed: true,
+        attempts: 4 - quiz.triesLeft
+    });
+    dom.quizPromptCard.classList.remove('is-wrong');
+    dom.quizPromptCard.classList.add('is-correct');
+    dom.quizFeedback.innerHTML = '<i class="fa-solid fa-circle-check"></i> Correct!';
+    quiz.advanceTimer = setTimeout(advanceQuiz, 800);
+}
+
+function recordQuizMiss() {
+    quiz.triesLeft -= 1;
+    dom.quizPromptCard.classList.remove('is-wrong');
+    void dom.quizPromptCard.offsetWidth;
+    dom.quizPromptCard.classList.add('is-wrong');
+
+    if (quiz.triesLeft > 0) {
+        const label = quiz.triesLeft === 1 ? 'try' : 'tries';
+        dom.quizTries.textContent = `${quiz.triesLeft} ${label} remaining`;
+        dom.quizFeedback.textContent = 'Try again!';
+        setTimeout(() => dom.quizPromptCard.classList.remove('is-wrong'), 400);
+        return;
+    }
+
+    const shortcut = quiz.order[quiz.index];
+    quiz.locked = true;
+    quiz.results.push({ shortcut, passed: false, attempts: 3 });
+    dom.quizPromptCard.classList.add('is-missed');
+    dom.quizTries.textContent = 'Answer';
+    dom.quizFeedback.textContent = 'Keep learning — here is the shortcut:';
+    dom.quizAnswer.innerHTML = renderCombo(shortcut.keys);
+    dom.quizAnswer.hidden = false;
+    quiz.advanceTimer = setTimeout(advanceQuiz, 1500);
+}
+
+function advanceQuiz() {
+    quiz.advanceTimer = null;
+    quiz.index += 1;
+    if (quiz.index >= quiz.order.length) {
+        showQuizResults();
+        return;
+    }
+    renderQuizPrompt();
+}
+
+function showQuizResults() {
+    quiz.active = false;
+    quiz.locked = true;
+    clearKeyboardHighlights();
+    dom.quizProgress.textContent = 'Quiz complete';
+    dom.quizActiveView.hidden = true;
+    dom.quizResults.hidden = false;
+
+    const score = quiz.results.filter((result) => result.passed).length;
+    dom.resultName.textContent = quiz.name;
+    dom.resultDate.textContent = new Date().toLocaleDateString();
+    dom.resultScore.textContent = `${score} / ${quiz.results.length} correct`;
+    dom.resultMessage.textContent = getQuizFeedback(score);
+    dom.resultList.innerHTML = quiz.results.map((result) => `
+        <div class="ks-quiz-result-item ${result.passed ? 'passed' : 'missed'}">
+            <i class="fa-solid ${result.passed ? 'fa-circle-check' : 'fa-circle-xmark'}"></i>
+            <div>
+                <strong>${result.shortcut.label}</strong>
+                <span>${result.passed ? `Passed on attempt ${result.attempts}` : `Missed after ${result.attempts} attempts`}</span>
+            </div>
+            ${result.passed ? '' : renderCombo(result.shortcut.keys)}
+        </div>
+    `).join('');
+}
+
+function getQuizFeedback(score) {
+    if (score === 10) return 'Amazing work — you are a keyboard shortcut star!';
+    if (score >= 7) return 'Great job — your shortcut skills are getting strong!';
+    if (score >= 4) return 'Nice effort — every practice round builds your skills!';
+    return 'Good start — keep practicing and watch your score grow!';
+}
+
+function exitQuiz() {
+    if (!window.confirm('Exit the quiz? Your current progress will be discarded.')) return;
+    closeQuizOverlay(false);
+}
+
+function tryQuizAgain() {
     state.selectedTen.clear();
-    state.checkCorrect.clear();
-    dom.checkSession.hidden = true;
-    dom.passBanner.hidden = true;
+    closeQuizOverlay(true);
+    renderQuizOptions();
+}
+
+function closeQuizOverlay(clearSelections) {
+    clearTimeout(quiz.advanceTimer);
+    quiz.advanceTimer = null;
+    quiz.active = false;
+    quiz.locked = false;
+    quiz.order = [];
+    quiz.index = 0;
+    quiz.results = [];
+    clearKeyboardHighlights();
+    dom.keyboardSection.appendChild(dom.keyboard);
+    dom.quizOverlay.hidden = true;
+    dom.quizActiveView.hidden = false;
+    dom.quizResults.hidden = true;
+    document.body.classList.remove('ks-quiz-open');
+    if (document.fullscreenElement === dom.quizOverlay) document.exitFullscreen().catch(() => {});
+    if (clearSelections) state.selectedTen.clear();
     dom.randomTen.disabled = false;
-    dom.practiceSide.appendChild(dom.sandboxPanel);
-    renderCheckOptions();
-    renderCheckProgress();
+    renderQuizOptions();
+}
+
+async function toggleQuizFullscreen() {
+    try {
+        if (document.fullscreenElement === dom.quizOverlay) {
+            await document.exitFullscreen();
+        } else {
+            await dom.quizOverlay.requestFullscreen();
+        }
+    } catch {
+        showToast('Fullscreen is unavailable in this browser.');
+    }
+}
+
+function updateFullscreenButton() {
+    const active = document.fullscreenElement === dom.quizOverlay;
+    dom.quizFullscreen.innerHTML = active
+        ? '<i class="fa-solid fa-compress"></i> Exit Fullscreen'
+        : '<i class="fa-solid fa-expand"></i> Go Fullscreen';
 }
 
 function bindKeyboardListeners() {
     document.addEventListener('keydown', (event) => {
         highlightPressedKeys(event);
+        if (quiz.active) {
+            handleQuizKeydown(event);
+            return;
+        }
         if (event.repeat || document.activeElement !== dom.sandbox) return;
 
         const shortcut = SHORTCUTS.find((item) => item.type === 'interactive' && matchesShortcut(item, event));
@@ -502,7 +688,7 @@ function bindKeyboardListeners() {
 
     window.addEventListener('blur', clearKeyboardHighlights);
     window.addEventListener('beforeunload', (event) => {
-        if (!state.checkActive || state.checkCorrect.size === 10) return;
+        if (!quiz.active) return;
         event.preventDefault();
         event.returnValue = '';
     });
@@ -569,19 +755,6 @@ function normalizeKeyboardKey(key) {
 function markCompleted(shortcut) {
     state.completed.add(shortcut.id);
     if (shortcut.category === state.activeCategory) renderPracticeCards();
-
-    if (state.checkActive && state.selectedTen.has(shortcut.id)) {
-        state.checkCorrect.add(shortcut.id);
-        renderCheckProgress();
-        if (state.checkCorrect.size === 10) {
-            state.checkActive = false;
-            dom.passBanner.hidden = false;
-            dom.checkSession.hidden = true;
-            dom.randomTen.disabled = false;
-            dom.practiceSide.appendChild(dom.sandboxPanel);
-            showToast('All 10 shortcuts completed!');
-        }
-    }
 }
 
 async function performSandboxAction(shortcut) {
