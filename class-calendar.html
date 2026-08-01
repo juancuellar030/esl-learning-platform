@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="assets/graduation-cap-icon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Class Events Calendar - ESL Learning Platform</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/google-drive.css">
+</head>
+
+<body class="cc-page">
+    <header class="main-header">
+        <div class="container">
+            <h1><i class="fa-solid fa-graduation-cap"></i> ESL Learning Platform</h1>
+            <p class="tagline">Class Events Calendar</p>
+        </div>
+    </header>
+
+    <nav class="main-nav">
+        <div class="container">
+            <a href="tools.html" class="nav-btn" style="text-decoration: none;">
+                <i class="fa-solid fa-arrow-left"></i> Back to Tools
+            </a>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="container">
+            <section class="content-section active cc-calendar-shell" aria-labelledby="cc-page-title">
+                <div class="cc-calendar-heading">
+                    <div>
+                        <p class="cc-eyebrow">Teacher planning tool</p>
+                        <h2 id="cc-page-title"><i class="fa-solid fa-calendar-days"></i> Class Events Calendar</h2>
+                        <p>Keep school events, deadlines, celebrations, and class reminders in one place.</p>
+                    </div>
+                    <div class="cc-primary-actions">
+                        <button type="button" class="btn-primary" id="cc-add-event-btn">
+                            <i class="fa-solid fa-plus"></i> Add Event
+                        </button>
+                        <button type="button" class="btn-secondary" id="cc-export-btn">
+                            <i class="fa-solid fa-file-export"></i> Export Events
+                        </button>
+                        <button type="button" class="btn-secondary" id="cc-import-btn">
+                            <i class="fa-solid fa-file-import"></i> Import Events
+                        </button>
+                        <button type="button" class="drive-nav-btn" id="cc-drive-btn">
+                            <i class="fa-brands fa-google-drive"></i> Google Drive
+                        </button>
+                        <input type="file" id="cc-import-input" class="cc-visually-hidden" accept=".json,application/json"
+                            aria-label="Choose an events backup file">
+                    </div>
+                </div>
+
+                <div id="cc-status" class="cc-status" role="status" aria-live="polite" hidden></div>
+
+                <div class="cc-view-toolbar">
+                    <div class="cc-tabs" role="tablist" aria-label="Calendar view">
+                        <button type="button" class="cc-tab active" id="cc-month-tab" role="tab"
+                            aria-selected="true" aria-controls="cc-month-panel" data-view="month">
+                            <i class="fa-regular fa-calendar"></i> Month
+                        </button>
+                        <button type="button" class="cc-tab" id="cc-week-tab" role="tab" aria-selected="false"
+                            aria-controls="cc-week-panel" data-view="week" tabindex="-1">
+                            <i class="fa-solid fa-calendar-week"></i> Week
+                        </button>
+                        <button type="button" class="cc-tab" id="cc-day-tab" role="tab" aria-selected="false"
+                            aria-controls="cc-day-panel" data-view="day" tabindex="-1">
+                            <i class="fa-solid fa-calendar-day"></i> Day
+                        </button>
+                    </div>
+
+                    <div class="cc-period-navigation" aria-label="Calendar period navigation">
+                        <button type="button" class="cc-icon-btn" id="cc-previous-period" aria-label="Previous period"
+                            title="Previous period">
+                            <i class="fa-solid fa-chevron-left"></i>
+                        </button>
+                        <button type="button" class="btn-secondary cc-today-btn" id="cc-today-btn">Today</button>
+                        <h3 id="cc-period-title" aria-live="polite"></h3>
+                        <button type="button" class="cc-icon-btn" id="cc-next-period" aria-label="Next period"
+                            title="Next period">
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <section class="cc-view-panel" id="cc-month-panel" role="tabpanel"
+                    aria-labelledby="cc-month-tab">
+                    <div class="cc-weekday-headings" aria-hidden="true">
+                        <span>Sun</span>
+                        <span>Mon</span>
+                        <span>Tue</span>
+                        <span>Wed</span>
+                        <span>Thu</span>
+                        <span>Fri</span>
+                        <span>Sat</span>
+                    </div>
+                    <div class="cc-month-grid" id="cc-month-grid"></div>
+                </section>
+
+                <section class="cc-view-panel" id="cc-week-panel" role="tabpanel"
+                    aria-labelledby="cc-week-tab" hidden>
+                    <div class="cc-week-grid" id="cc-week-grid"></div>
+                </section>
+
+                <section class="cc-view-panel" id="cc-day-panel" role="tabpanel"
+                    aria-labelledby="cc-day-tab" hidden>
+                    <div class="cc-day-events" id="cc-day-events"></div>
+                </section>
+            </section>
+        </div>
+    </main>
+
+    <div class="modal-backdrop cc-modal-backdrop" id="cc-event-modal" role="dialog" aria-modal="true"
+        aria-labelledby="cc-modal-title" hidden>
+        <div class="modal-card cc-event-modal-card">
+            <div class="cc-modal-header">
+                <div>
+                    <p class="cc-eyebrow">Class calendar</p>
+                    <h2 id="cc-modal-title">Add Event</h2>
+                </div>
+                <button type="button" class="cc-icon-btn" id="cc-close-modal" aria-label="Close event form">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form id="cc-event-form" novalidate>
+                <input type="hidden" id="cc-event-id">
+
+                <div class="cc-form-grid">
+                    <div class="cc-form-group cc-form-span-2">
+                        <label for="cc-title">Title <span aria-hidden="true">*</span></label>
+                        <input type="text" id="cc-title" name="title" required maxlength="120"
+                            autocomplete="off">
+                    </div>
+
+                    <div class="cc-form-group">
+                        <label for="cc-category">Category <span aria-hidden="true">*</span></label>
+                        <select id="cc-category" name="category" required>
+                            <option value="">Choose a category</option>
+                            <optgroup label="Classwork">
+                                <option value="assignment">Assignment</option>
+                                <option value="exam">Exam</option>
+                                <option value="bring-item">Bring an Item</option>
+                            </optgroup>
+                            <optgroup label="School life">
+                                <option value="school-event">School Event</option>
+                                <option value="flag-ceremony">Flag Ceremony</option>
+                                <option value="sports">Sports</option>
+                                <option value="field-trip">Field Trip</option>
+                                <option value="parent-meeting">Parent Meeting</option>
+                            </optgroup>
+                            <optgroup label="Special dates">
+                                <option value="celebration">Celebration</option>
+                                <option value="holiday">Holiday</option>
+                            </optgroup>
+                            <optgroup label="Other">
+                                <option value="other">Other</option>
+                            </optgroup>
+                        </select>
+                    </div>
+
+                    <div class="cc-form-group">
+                        <label for="cc-start-date">Date <span aria-hidden="true">*</span></label>
+                        <input type="date" id="cc-start-date" name="startDate" required>
+                    </div>
+
+                    <div class="cc-form-group">
+                        <label for="cc-start-time">Time <span class="cc-optional">(optional)</span></label>
+                        <input type="time" id="cc-start-time" name="startTime">
+                    </div>
+
+                    <div class="cc-form-group">
+                        <label for="cc-duration">Duration in minutes <span
+                                class="cc-optional">(optional)</span></label>
+                        <input type="number" id="cc-duration" name="durationMinutes" min="1" step="1"
+                            inputmode="numeric">
+                        <small>Leave blank for all-day/no set duration.</small>
+                    </div>
+
+                    <div class="cc-form-group cc-form-span-2">
+                        <label for="cc-description">Description <span class="cc-optional">(optional)</span></label>
+                        <textarea id="cc-description" name="description" rows="4" maxlength="1500"></textarea>
+                    </div>
+
+                    <div class="cc-form-group cc-form-span-2">
+                        <label for="cc-image">Event image <span class="cc-optional">(optional)</span></label>
+                        <input type="file" id="cc-image" name="image" accept="image/*">
+                        <small>Images are stored only in this browser. Large files may exceed browser storage.</small>
+                        <div class="cc-image-preview" id="cc-image-preview" hidden>
+                            <img id="cc-image-preview-img" src="" alt="Selected event preview">
+                            <button type="button" class="btn-secondary" id="cc-remove-image">
+                                <i class="fa-solid fa-trash-can"></i> Remove image
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="cc-form-group cc-form-span-2 cc-checkbox-group">
+                        <input type="checkbox" id="cc-show-countdown" name="showCountdown">
+                        <label for="cc-show-countdown">Show a live countdown on this event</label>
+                    </div>
+                </div>
+
+                <p class="cc-form-error" id="cc-form-error" role="alert" hidden></p>
+
+                <div class="cc-modal-footer">
+                    <button type="button" class="btn-secondary" id="cc-cancel-event">Cancel</button>
+                    <button type="submit" class="btn-primary">
+                        <i class="fa-solid fa-floppy-disk"></i> Save Event
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer class="main-footer">
+        <div class="container">
+            <p>ESL Learning Platform © 2025 | Made for Teachers, by Teachers</p>
+        </div>
+    </footer>
+
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="https://accounts.google.com/gsi/client"></script>
+    <script src="js/google-drive-service.js"></script>
+    <script src="js/students-data.js"></script>
+    <script src="js/teachers-data.js"></script>
+    <script src="js/class-calendar.js"></script>
+    <script src="js/darkmode.js"></script>
+</body>
+
+</html>

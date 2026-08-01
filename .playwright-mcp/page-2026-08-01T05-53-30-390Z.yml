@@ -1,0 +1,148 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - heading " ESL Learning Platform" [level=1] [ref=e4]:
+        - generic [ref=e5]: 
+        - text: ESL Learning Platform
+      - paragraph [ref=e6]: Class Events Calendar
+  - navigation [ref=e7]:
+    - link " Back to Tools" [ref=e9] [cursor=pointer]:
+      - /url: tools.html
+      - generic [ref=e10]: 
+      - text: Back to Tools
+  - main [ref=e11]:
+    - region [ref=e13]:
+      - generic [ref=e14]:
+        - generic [ref=e15]:
+          - paragraph [ref=e16]: Teacher planning tool
+          - heading " Class Events Calendar" [level=2] [ref=e17]:
+            - generic [ref=e18]: 
+            - text: Class Events Calendar
+          - paragraph [ref=e19]: Keep school events, deadlines, celebrations, and class reminders in one place.
+        - generic [ref=e20]:
+          - button "+ Add Event" [ref=e21] [cursor=pointer]:
+            - generic [ref=e22]: +
+            - text: Add Event
+          - button " Export Events" [ref=e23] [cursor=pointer]:
+            - generic [ref=e24]: 
+            - text: Export Events
+          - button " Import Events" [ref=e25] [cursor=pointer]:
+            - generic [ref=e26]: 
+            - text: Import Events
+          - button "Choose an events backup file" [ref=e27]
+      - generic [ref=e28]:
+        - tablist "Calendar view" [ref=e29]:
+          - tab " Month" [selected] [ref=e30] [cursor=pointer]:
+            - generic [ref=e31]: 
+            - text: Month
+          - tab " Week" [ref=e32] [cursor=pointer]:
+            - generic [ref=e33]: 
+            - text: Week
+          - tab " Day" [ref=e34] [cursor=pointer]:
+            - generic [ref=e35]: 
+            - text: Day
+        - generic "Calendar period navigation" [ref=e36]:
+          - button "Previous period" [ref=e37] [cursor=pointer]:
+            - generic [ref=e38]: 
+          - button "Today" [ref=e39] [cursor=pointer]
+          - heading "August 2026" [level=3] [ref=e40]
+          - button "Next period" [ref=e41] [cursor=pointer]:
+            - generic [ref=e42]: 
+      - tabpanel " Month" [ref=e43]:
+        - generic [ref=e44]:
+          - generic [ref=e45]: Sun
+          - generic [ref=e46]: Mon
+          - generic [ref=e47]: Tue
+          - generic [ref=e48]: Wed
+          - generic [ref=e49]: Thu
+          - generic [ref=e50]: Fri
+          - generic [ref=e51]: Sat
+        - generic [ref=e52]:
+          - button "Sun, Jul 26, 2026, 0 events. Open day view." [ref=e53] [cursor=pointer]:
+            - generic [ref=e54]: "26"
+          - button "Mon, Jul 27, 2026, 0 events. Open day view." [ref=e55] [cursor=pointer]:
+            - generic [ref=e56]: "27"
+          - button "Tue, Jul 28, 2026, 0 events. Open day view." [ref=e57] [cursor=pointer]:
+            - generic [ref=e58]: "28"
+          - button "Wed, Jul 29, 2026, 0 events. Open day view." [ref=e59] [cursor=pointer]:
+            - generic [ref=e60]: "29"
+          - button "Thu, Jul 30, 2026, 0 events. Open day view." [ref=e61] [cursor=pointer]:
+            - generic [ref=e62]: "30"
+          - button "Fri, Jul 31, 2026, 0 events. Open day view." [ref=e63] [cursor=pointer]:
+            - generic [ref=e64]: "31"
+          - button "Sat, Aug 1, 2026, 0 events. Open day view." [ref=e65] [cursor=pointer]:
+            - generic [ref=e66]: "1"
+          - button "Sun, Aug 2, 2026, 0 events. Open day view." [ref=e67] [cursor=pointer]:
+            - generic [ref=e68]: "2"
+          - button "Mon, Aug 3, 2026, 0 events. Open day view." [ref=e69] [cursor=pointer]:
+            - generic [ref=e70]: "3"
+          - button "Tue, Aug 4, 2026, 0 events. Open day view." [ref=e71] [cursor=pointer]:
+            - generic [ref=e72]: "4"
+          - button "Wed, Aug 5, 2026, 0 events. Open day view." [ref=e73] [cursor=pointer]:
+            - generic [ref=e74]: "5"
+          - button "Thu, Aug 6, 2026, 0 events. Open day view." [ref=e75] [cursor=pointer]:
+            - generic [ref=e76]: "6"
+          - button "Fri, Aug 7, 2026, 0 events. Open day view." [ref=e77] [cursor=pointer]:
+            - generic [ref=e78]: "7"
+          - button "Sat, Aug 8, 2026, 0 events. Open day view." [ref=e79] [cursor=pointer]:
+            - generic [ref=e80]: "8"
+          - button "Sun, Aug 9, 2026, 0 events. Open day view." [ref=e81] [cursor=pointer]:
+            - generic [ref=e82]: "9"
+          - button "Mon, Aug 10, 2026, 0 events. Open day view." [ref=e83] [cursor=pointer]:
+            - generic [ref=e84]: "10"
+          - button "Tue, Aug 11, 2026, 0 events. Open day view." [ref=e85] [cursor=pointer]:
+            - generic [ref=e86]: "11"
+          - button "Wed, Aug 12, 2026, 0 events. Open day view." [ref=e87] [cursor=pointer]:
+            - generic [ref=e88]: "12"
+          - button "Thu, Aug 13, 2026, 0 events. Open day view." [ref=e89] [cursor=pointer]:
+            - generic [ref=e90]: "13"
+          - button "Fri, Aug 14, 2026, 0 events. Open day view." [ref=e91] [cursor=pointer]:
+            - generic [ref=e92]: "14"
+          - button "Sat, Aug 15, 2026, 0 events. Open day view." [ref=e93] [cursor=pointer]:
+            - generic [ref=e94]: "15"
+          - button "Sun, Aug 16, 2026, 0 events. Open day view." [ref=e95] [cursor=pointer]:
+            - generic [ref=e96]: "16"
+          - button "Mon, Aug 17, 2026, 0 events. Open day view." [ref=e97] [cursor=pointer]:
+            - generic [ref=e98]: "17"
+          - button "Tue, Aug 18, 2026, 0 events. Open day view." [ref=e99] [cursor=pointer]:
+            - generic [ref=e100]: "18"
+          - button "Wed, Aug 19, 2026, 0 events. Open day view." [ref=e101] [cursor=pointer]:
+            - generic [ref=e102]: "19"
+          - button "Thu, Aug 20, 2026, 0 events. Open day view." [ref=e103] [cursor=pointer]:
+            - generic [ref=e104]: "20"
+          - button "Fri, Aug 21, 2026, 0 events. Open day view." [ref=e105] [cursor=pointer]:
+            - generic [ref=e106]: "21"
+          - button "Sat, Aug 22, 2026, 0 events. Open day view." [ref=e107] [cursor=pointer]:
+            - generic [ref=e108]: "22"
+          - button "Sun, Aug 23, 2026, 0 events. Open day view." [ref=e109] [cursor=pointer]:
+            - generic [ref=e110]: "23"
+          - button "Mon, Aug 24, 2026, 0 events. Open day view." [ref=e111] [cursor=pointer]:
+            - generic [ref=e112]: "24"
+          - button "Tue, Aug 25, 2026, 0 events. Open day view." [ref=e113] [cursor=pointer]:
+            - generic [ref=e114]: "25"
+          - button "Wed, Aug 26, 2026, 0 events. Open day view." [ref=e115] [cursor=pointer]:
+            - generic [ref=e116]: "26"
+          - button "Thu, Aug 27, 2026, 0 events. Open day view." [ref=e117] [cursor=pointer]:
+            - generic [ref=e118]: "27"
+          - button "Fri, Aug 28, 2026, 0 events. Open day view." [ref=e119] [cursor=pointer]:
+            - generic [ref=e120]: "28"
+          - button "Sat, Aug 29, 2026, 0 events. Open day view." [ref=e121] [cursor=pointer]:
+            - generic [ref=e122]: "29"
+          - button "Sun, Aug 30, 2026, 0 events. Open day view." [ref=e123] [cursor=pointer]:
+            - generic [ref=e124]: "30"
+          - button "Mon, Aug 31, 2026, 0 events. Open day view." [ref=e125] [cursor=pointer]:
+            - generic [ref=e126]: "31"
+          - button "Tue, Sep 1, 2026, 0 events. Open day view." [ref=e127] [cursor=pointer]:
+            - generic [ref=e128]: "1"
+          - button "Wed, Sep 2, 2026, 0 events. Open day view." [ref=e129] [cursor=pointer]:
+            - generic [ref=e130]: "2"
+          - button "Thu, Sep 3, 2026, 0 events. Open day view." [ref=e131] [cursor=pointer]:
+            - generic [ref=e132]: "3"
+          - button "Fri, Sep 4, 2026, 0 events. Open day view." [ref=e133] [cursor=pointer]:
+            - generic [ref=e134]: "4"
+          - button "Sat, Sep 5, 2026, 0 events. Open day view." [ref=e135] [cursor=pointer]:
+            - generic [ref=e136]: "5"
+  - text:   
+  - contentinfo [ref=e137]:
+    - paragraph [ref=e139]: ESL Learning Platform © 2025 | Made for Teachers, by Teachers
+  - button "" [ref=e140] [cursor=pointer]
