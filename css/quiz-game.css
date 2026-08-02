@@ -1532,7 +1532,18 @@
 
 .qg-sv-shortcut #sv-keyboard {
     width: 100%;
-    max-width: 900px;
+    max-width: 940px;
+    overflow-x: hidden;
+}
+
+/* The Playground board assumes a fixed 880px row; here it has to shrink to the
+   available width instead of spilling out of its container. */
+.qg-sv-shortcut .ks-keyboard-row {
+    min-width: 0;
+}
+
+.qg-sv-shortcut .ks-key {
+    min-width: 0;
 }
 
 .qg-sv-shortcut .ks-key {
@@ -1540,23 +1551,28 @@
     user-select: none;
 }
 
+/* !important mirrors how the Playground styles its own .ks-key.active state — the
+   base keycap rules are zebra-striped with :nth-child and otherwise win the cascade. */
 .qg-sv-shortcut .ks-key.selected {
-    background: var(--palette-highlight-bg, #f7b801);
-    color: var(--palette-highlight-text, #1a1530);
+    background-color: var(--palette-highlight-bg, #f7b801) !important;
+    color: var(--palette-highlight-text, #1a1530) !important;
+    border-color: var(--palette-highlight-bg, #f7b801) !important;
     transform: translateY(2px);
-    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.6);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.6) !important;
 }
 
 .qg-sv-shortcut .ks-key.key-correct {
-    background: #2b8a3e;
-    color: #fff;
-    box-shadow: 0 0 0 3px rgba(43, 138, 62, 0.45);
+    background-color: #2b8a3e !important;
+    color: #fff !important;
+    border-color: #2b8a3e !important;
+    box-shadow: 0 0 0 3px rgba(43, 138, 62, 0.45) !important;
 }
 
 .qg-sv-shortcut .ks-key.key-wrong {
-    background: #c92a2a;
-    color: #fff;
-    box-shadow: 0 0 0 3px rgba(201, 42, 42, 0.4);
+    background-color: #c92a2a !important;
+    color: #fff !important;
+    border-color: #c92a2a !important;
+    box-shadow: 0 0 0 3px rgba(201, 42, 42, 0.4) !important;
 }
 
 .qg-sv-shortcut #sv-keyboard.qg-keyboard-locked {
@@ -1597,17 +1613,12 @@
 /* On phones the board has to shrink rather than scroll sideways, since students
    need to reach modifier keys and letters in the same view. */
 @media (max-width: 780px) {
-    .qg-sv-shortcut .ks-numpad {
-        display: none;
-    }
-
     .qg-sv-shortcut .ks-keyboard {
         gap: 0;
         padding: 8px;
     }
 
     .qg-sv-shortcut .ks-keyboard-row {
-        min-width: 0;
         gap: 3px;
     }
 
@@ -1928,14 +1939,16 @@ body.dark-mode .qg-extra-btn:hover {
 /* ===== SOURCE TOGGLE ===== */
 .qg-source-toggle {
     display: flex;
-    gap: 0;
+    flex-wrap: wrap;
+    gap: 4px;
     background: #eee;
     border-radius: 14px;
     padding: 4px;
 }
 
 .qg-source-btn {
-    flex: 1;
+    flex: 1 1 30%;
+    min-width: 140px;
     padding: 10px 16px;
     border: none;
     border-radius: 11px;

@@ -67,8 +67,8 @@ function watch(page, tag) {
             hostTheme: await host.evaluate(() => document.getElementById('quiz-app').dataset.theme),
             playerTheme: await player.evaluate(() => document.getElementById('quiz-app').dataset.theme),
             playerQuestion: (await player.textContent('#sv-question')).trim(),
-            hostQuestion: (await host.textContent('#tv-question')).trim(),
-            hostBars: (await host.textContent('#tv-answers')).replace(/\s+/g, ' ').trim(),
+            hostQuestion: (await host.textContent('#tv-question').catch(() => '')).trim(),
+            hostBars: ((await host.textContent('#tv-answers').catch(() => '')) || '').replace(/\s+/g, ' ').trim(),
             shortcutVisible: await player.isVisible('#sv-shortcut'),
             tilesVisible: await player.isVisible('#sv-answers')
         };
@@ -77,16 +77,49 @@ function watch(page, tag) {
             report.keyboardClass = await player.getAttribute('#sv-keyboard', 'class');
             report.capCount = await player.$$eval('#sv-keyboard .ks-key', e => e.length);
             step('clicking keys');
-            const comboText = report.hostBars.split('Correct — ')[1].replace(/\s*\d+\s*$/, '').trim();
-            const map = { ctrl: 'control', win: 'meta', shift: 'shift', alt: 'alt', '+': '=', '−': '-' };
-            const caps = comboText.split(' + ').map(t => t.trim()).filter(Boolean)
-                .map(t => map[t.toLowerCase()] || map[t] || t.toLowerCase());
+            // Resolve the expected caps from the page's own shared shortcut module.
+            const caps = await player.evaluate(text => {
+                const match = window.ShortcutsData.SHORTCUTS
+                    .filter(s => text.includes(`"${s.label}"`))
+                    .sort((a, b) => b.label.length - a.label.length)[0];
+                return match ? window.ShortcutsData.comboCapKeys(match) : null;
+            }, report.playerQuestion);
             report.expectedCaps = caps;
+            if (!caps) throw new Error('could not resolve expected caps for ' + report.playerQuestion);
             for (const cap of caps) {
                 await player.click(`#sv-keyboard .ks-key[data-key="${cap.replace(/"/g, '\\"')}"] >> nth=0`);
             }
             report.selection = (await player.textContent('#sv-shortcut-selection')).trim();
             report.selectedCaps = await player.$$eval('#sv-keyboard .ks-key.selected', e => e.map(x => x.dataset.key));
+            report.selectedVsPlain = await player.evaluate(() => {
+                const sel = document.querySelector('#sv-keyboard .ks-key.selected');
+                const plain = document.querySelector('#sv-keyboard .ks-key:not(.selected)');
+                const bg = el => getComputedStyle(el).backgroundColor;
+                const matched = [];
+                for (const sheet of document.styleSheets) {
+                    let rules; try { rules = sheet.cssRules; } catch { continue; }
+                    for (const r of rules) {
+                        if (!r.selectorText) continue;
+                        try {
+                            if (sel.matches(r.selectorText) && (r.style.background || r.style.backgroundColor)) {
+                                matched.push(`${(sheet.href || 'inline').split('/').pop()} :: ${r.cssText}`);
+                            }
+                        } catch { }
+                    }
+                }
+                return {
+                    selectedKey: sel.dataset.key,
+                    selected: bg(sel),
+                    plain: bg(plain),
+                    differs: bg(sel) !== bg(plain),
+                    ancestorHasClass: !!sel.closest('.qg-sv-shortcut'),
+                    kbClass: document.getElementById('sv-keyboard').className,
+                    varOnKey: getComputedStyle(sel).getPropertyValue('--palette-highlight-bg'),
+                    varOnKb: getComputedStyle(document.getElementById('sv-keyboard')).getPropertyValue('--palette-highlight-bg'),
+                    amber: getComputedStyle(document.documentElement).getPropertyValue('--amber-flame'),
+                    matched
+                };
+            });
             await player.screenshot({ path: `tmp-shot-player-${MODE}-${SOURCE}-selected.png` });
             await player.click('#btn-shortcut-submit');
         } else {
@@ -95,7 +128,19 @@ function watch(page, tag) {
             await player.click('.qg-answer-btn[data-index="0"]');
         }
 
-        await player.waitForTimeout(3500);
+        await player.waitForTimeout(1200);
+        await player.screenshot({ path: `tmp-shot-player-${MODE}-${SOURCE}-reveal.png` });
+        await host.screenshot({ path: `tmp-shot-host-${MODE}-${SOURCE}-reveal.png` });
+        report.atReveal = {
+            keysRevealed: await player.$$eval('#sv-keyboard .ks-key.key-correct', e => e.length).catch(() => 0),
+            keysWrong: await player.$$eval('#sv-keyboard .ks-key.key-wrong', e => e.length).catch(() => 0),
+            correctTiles: await player.$$eval('.qg-answer-btn.correct', e => e.length),
+            hostBars: (await host.textContent('#tv-answers')).replace(/\s+/g, ' ').trim(),
+            hostAnswered: await host.textContent('#tv-answered'),
+            score: await player.textContent('#sv-score')
+        };
+
+        await player.waitForTimeout(3000);
         report.afterSubmit = {
             keysRevealed: await player.$$eval('#sv-keyboard .ks-key.key-correct', e => e.length).catch(() => 0),
             correctTiles: await player.$$eval('.qg-answer-btn.correct', e => e.length),
