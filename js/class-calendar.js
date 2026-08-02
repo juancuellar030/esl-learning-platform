@@ -42,6 +42,12 @@
     const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
     const TIME_PATTERN = /^([01]\d|2[0-3]):([0-5]\d)$/;
     const BIRTHDATE_PATTERN = /^(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/;
+    // Phone photos as raw base64 routinely blow past localStorage (~5MB). Shrink first.
+    const IMAGE_MAX_EDGE = 960;
+    const IMAGE_JPEG_QUALITY = 0.72;
+    const IMAGE_FALLBACK_EDGE = 640;
+    const IMAGE_FALLBACK_QUALITY = 0.5;
+    const IMAGE_SKIP_IF_UNDER_BYTES = 180000;
 
     let events = [];
     let birthdayEntries = [];
@@ -607,7 +613,7 @@
         }
     }
 
-    function handleCommentSubmit(event) {
+    async function handleCommentSubmit(event) {
         const form = event.target.closest('[data-comment-form]');
         if (!form) return;
         event.preventDefault();
@@ -620,7 +626,7 @@
             ? { ...item, comment: textarea.value.trim() }
             : item);
 
-        if (commitEvents(candidate, 'Note saved.')) {
+        if (await commitEvents(candidate, 'Note saved.')) {
             editingCommentIds.delete(eventId);
             render();
         }
@@ -674,7 +680,7 @@
         lastFocusedElement?.focus();
     }
 
-    function saveEventFromForm(event) {
+    async function saveEventFromForm(event) {
         event.preventDefault();
         const title = elements.title.value.trim();
         const category = elements.category.value;
@@ -710,20 +716,20 @@
             ? events.map((item) => item.id === existing.id ? calendarEvent : item)
             : [...events, calendarEvent];
 
-        if (commitEvents(candidate, existing ? 'Event updated.' : 'Event added.')) {
+        if (await commitEvents(candidate, existing ? 'Event updated.' : 'Event added.')) {
             selectedDate = parseDateKey(startDate);
             closeEventModal();
             render();
         }
     }
 
-    function deleteEvent(eventId) {
+    async function deleteEvent(eventId) {
         const calendarEvent = events.find((item) => item.id === eventId);
         if (!calendarEvent) return;
         if (!window.confirm(`Delete "${calendarEvent.title}"? This cannot be undone.`)) return;
 
         const candidate = events.filter((item) => item.id !== eventId);
-        if (commitEvents(candidate, 'Event deleted.')) {
+        if (await commitEvents(candidate, 'Event deleted.')) {
             editingCommentIds.delete(eventId);
             render();
         }
@@ -740,10 +746,19 @@
         }
 
         const reader = new FileReader();
-        reader.addEventListener('load', () => {
-            pendingImageDataUrl = typeof reader.result === 'string' ? reader.result : '';
-            updateImagePreview();
-            elements.formError.hidden = true;
+        reader.addEventListener('load', async () => {
+            try {
+                const raw = typeof reader.result === 'string' ? reader.result : '';
+                pendingImageDataUrl = await compressImageDataUrl(raw, IMAGE_MAX_EDGE, IMAGE_JPEG_QUALITY);
+                updateImagePreview();
+                elements.formError.hidden = true;
+            } catch (error) {
+                pendingImageDataUrl = '';
+                elements.image.value = '';
+                updateImagePreview();
+                elements.formError.textContent = 'The selected image could not be processed.';
+                elements.formError.hidden = false;
+            }
         });
         reader.addEventListener('error', () => {
             elements.formError.textContent = 'The selected image could not be read.';
@@ -764,24 +779,145 @@
         elements.imagePreviewImg.src = hasImage ? pendingImageDataUrl : '';
     }
 
-    function commitEvents(candidate, successMessage) {
-        const sortedCandidate = candidate.map(normalizeEvent).sort(compareEvents);
+    function estimateDataUrlBytes(dataUrl) {
+        if (!dataUrl) return 0;
+        const base64 = dataUrl.split(',')[1] || '';
+        return Math.ceil(base64.length * 0.75);
+    }
+
+    function loadImageElement(dataUrl) {
+        return new Promise((resolve, reject) => {
+            const image = new Image();
+            image.onload = () => resolve(image);
+            image.onerror = () => reject(new Error('Image decode failed'));
+            image.src = dataUrl;
+        });
+    }
+
+    async function compressImageDataUrl(dataUrl, maxEdge = IMAGE_MAX_EDGE, quality = IMAGE_JPEG_QUALITY) {
+        if (!dataUrl || !dataUrl.startsWith('data:image/')) return dataUrl || '';
+        if (estimateDataUrlBytes(dataUrl) <= IMAGE_SKIP_IF_UNDER_BYTES) return dataUrl;
+
+        const image = await loadImageElement(dataUrl);
+        const longest = Math.max(image.naturalWidth || image.width, image.naturalHeight || image.height);
+        const scale = longest > maxEdge ? maxEdge / longest : 1;
+        const width = Math.max(1, Math.round((image.naturalWidth || image.width) * scale));
+        const height = Math.max(1, Math.round((image.naturalHeight || image.height) * scale));
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const context = canvas.getContext('2d');
+        if (!context) return dataUrl;
+
+        context.fillStyle = '#ffffff';
+        context.fillRect(0, 0, width, height);
+        context.drawImage(image, 0, 0, width, height);
+
+        const compressed = canvas.toDataURL('image/jpeg', quality);
+        return estimateDataUrlBytes(compressed) < estimateDataUrlBytes(dataUrl) ? compressed : dataUrl;
+    }
+
+    async function prepareEventsForStorage(candidate, options = {}) {
+        const maxEdge = options.maxEdge || IMAGE_MAX_EDGE;
+        const quality = options.quality || IMAGE_JPEG_QUALITY;
+        const prepared = [];
+
+        for (const event of candidate) {
+            const normalized = normalizeEvent(event);
+            if (normalized.imageDataUrl) {
+                normalized.imageDataUrl = await compressImageDataUrl(
+                    normalized.imageDataUrl,
+                    maxEdge,
+                    quality
+                );
+            }
+            prepared.push(normalized);
+        }
+
+        return prepared.sort(compareEvents);
+    }
+
+    function tryWriteEvents(sortedCandidate) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(sortedCandidate));
+        events = sortedCandidate;
+        return true;
+    }
+
+    function isQuotaError(error) {
+        return error?.name === 'QuotaExceededError'
+            || error?.code === 22
+            || /quota/i.test(String(error?.message || ''));
+    }
+
+    /**
+     * Persist events with progressive image shrinking. Phone photos as data URLs
+     * often exceed localStorage; compression (and a last-resort strip) keeps the
+     * calendar usable across devices.
+     */
+    async function commitEvents(candidate, successMessage, options = {}) {
+        const allowStripImages = options.allowStripImages === true;
+
         try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(sortedCandidate));
-            events = sortedCandidate;
+            const prepared = await prepareEventsForStorage(candidate);
+            tryWriteEvents(prepared);
             if (successMessage) showStatus(successMessage, 'success');
             return true;
         } catch (error) {
-            const quotaMessage = error?.name === 'QuotaExceededError'
-                ? 'Browser storage is full. Remove or reduce event images, then try again.'
-                : 'Events could not be saved in this browser.';
-            showStatus(quotaMessage, 'error', false);
-            if (!elements.modal.hidden) {
-                elements.formError.textContent = quotaMessage;
-                elements.formError.hidden = false;
+            if (!isQuotaError(error)) {
+                showStatus('Events could not be saved in this browser.', 'error', false);
+                if (!elements.modal.hidden) {
+                    elements.formError.textContent = 'Events could not be saved in this browser.';
+                    elements.formError.hidden = false;
+                }
+                return false;
             }
-            return false;
         }
+
+        try {
+            const smaller = await prepareEventsForStorage(candidate, {
+                maxEdge: IMAGE_FALLBACK_EDGE,
+                quality: IMAGE_FALLBACK_QUALITY
+            });
+            tryWriteEvents(smaller);
+            const message = successMessage
+                ? `${successMessage} Images were compressed to fit browser storage.`
+                : 'Events saved. Images were compressed to fit browser storage.';
+            showStatus(message, 'success');
+            return true;
+        } catch (error) {
+            if (!isQuotaError(error)) {
+                showStatus('Events could not be saved in this browser.', 'error', false);
+                return false;
+            }
+        }
+
+        if (allowStripImages) {
+            const withImages = candidate.filter((event) => event.imageDataUrl).length;
+            if (withImages > 0) {
+                const stripped = candidate.map((event) => ({ ...event, imageDataUrl: '' }));
+                try {
+                    const prepared = await prepareEventsForStorage(stripped);
+                    tryWriteEvents(prepared);
+                    showStatus(
+                        `Events saved, but ${withImages} image(s) were removed because browser storage is full. Keep using Export / Google Drive for the full backup with photos.`,
+                        'error',
+                        false
+                    );
+                    return true;
+                } catch (error) {
+                    // fall through to final error
+                }
+            }
+        }
+
+        const quotaMessage = 'Browser storage is full. Remove or reduce event images, then try again.';
+        showStatus(quotaMessage, 'error', false);
+        if (!elements.modal.hidden) {
+            elements.formError.textContent = quotaMessage;
+            elements.formError.hidden = false;
+        }
+        return false;
     }
 
     function exportEvents() {
@@ -806,22 +942,25 @@
         try {
             const text = await file.text();
             const parsed = JSON.parse(text);
-            applyImportedEvents(parsed, {
+            await applyImportedEvents(parsed, {
                 confirmMessage: 'Importing will replace all current events. Continue?',
                 successMessage: 'Events imported successfully.',
-                errorPrefix: 'Import failed'
+                errorPrefix: 'Import failed',
+                allowStripImages: true
             });
         } catch (error) {
             showStatus('Import failed: the selected file is not valid JSON.', 'error', false);
         }
     }
 
-    function applyImportedEvents(parsed, options = {}) {
+    async function applyImportedEvents(parsed, options = {}) {
         const {
             confirmMessage = 'Loading will replace all current events. Continue?',
             successMessage = 'Events loaded successfully.',
             errorPrefix = 'Load failed',
-            throwOnFailure = false
+            throwOnFailure = false,
+            allowStripImages = false,
+            skipConfirm = false
         } = options;
 
         const validation = validateEventsArray(parsed);
@@ -832,12 +971,14 @@
             return false;
         }
 
-        if (!window.confirm(confirmMessage)) {
+        if (!skipConfirm && !window.confirm(confirmMessage)) {
             if (throwOnFailure) throw new Error('Load cancelled');
             return false;
         }
 
-        if (!commitEvents(parsed, throwOnFailure ? '' : successMessage)) {
+        showStatus('Preparing events for this browser…', 'info', false);
+        const saved = await commitEvents(parsed, throwOnFailure ? '' : successMessage, { allowStripImages });
+        if (!saved) {
             if (throwOnFailure) throw new Error('Could not save loaded events locally.');
             return false;
         }
@@ -862,11 +1003,23 @@
             fileExtension: '.json',
             onSave: () => events,
             onLoad: (data) => {
+                // GoogleDriveService does not await onLoad, so validate/confirm sync first,
+                // then finish compression + write asynchronously.
+                const validation = validateEventsArray(data);
+                if (!validation.valid) throw new Error(validation.message);
+                if (!window.confirm('Loading from Drive will replace all current events. Continue?')) {
+                    throw new Error('Load cancelled');
+                }
+
+                showStatus('Preparing events for this browser…', 'info', false);
                 applyImportedEvents(data, {
                     confirmMessage: 'Loading from Drive will replace all current events. Continue?',
                     successMessage: 'Events loaded from Google Drive.',
                     errorPrefix: 'Drive load failed',
-                    throwOnFailure: true
+                    allowStripImages: true,
+                    skipConfirm: true
+                }).catch((error) => {
+                    showStatus(`Drive load failed: ${error.message}`, 'error', false);
                 });
             },
             onNotify: (message, type) => {
