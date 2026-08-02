@@ -29,9 +29,22 @@ const QuizGame = (() => {
     let selectedAvatar = null;
     let playerGameStarted = false; // Guard: prevents listenAsPlayer() being triggered multiple times
 
-    let sourceMode = 'vocab'; // 'vocab' | 'custom'
+    let sourceMode = 'vocab'; // 'vocab' | 'custom' | 'shortcuts'
     let gameMode = 'automatic'; // 'automatic' | 'student-paced' | 'teacher-paced'
     let customRows = [];
+
+    // Shortcut Combo question state (player side)
+    let selectedKeys = new Set();
+    let shortcutKeyboardBound = false;
+
+    // Answer slot shapes — shared by the host bars and the player tiles so a given
+    // slot always looks the same on both screens.
+    const ANSWER_SHAPES = ['▲', '◆', '●', '■'];
+
+    // Questions saved before the Shortcut Combo type existed have no `type` field.
+    function getQuestionType(q) {
+        return q && q.type === 'shortcut' ? 'shortcut' : 'mcq';
+    }
 
     // Avatar library — 35 animal photos
     const AVATAR_COUNT = 35;
@@ -124,6 +137,7 @@ const QuizGame = (() => {
                     if (session.hostId === user.uid) {
                         console.log(`[QuizGame] Resuming host role for session: ${savedCode}`);
                         role = 'host';
+                        enforceHostTheme();
                         gameCode = savedCode;
                         config = session.config || {};
                         questions = session.questions || [];
@@ -193,12 +207,16 @@ const QuizGame = (() => {
                 folderName: 'ESL Custom Quizzes',
                 fileExtension: '.json',
                 onSave: () => {
-                    const validRows = customRows.filter(r => r.question.trim() && r.options.some(opt => opt.trim()));
+                    const validRows = customRows.filter(r => r.type === 'shortcut'
+                        ? Boolean(r.shortcutId)
+                        : (r.question.trim() && r.options.some(opt => opt.trim())));
                     if (validRows.length === 0) {
                         alert('Your quiz is empty. Add at least one question with options to save.');
                         return null;
                     }
                     return validRows.map(r => ({
+                        type: r.type || 'mcq',
+                        shortcutId: r.shortcutId || '',
                         question: r.question,
                         options: r.options,
                         correctIndex: r.correctIndex,
@@ -221,6 +239,8 @@ const QuizGame = (() => {
                         const rowId = 'cq-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5);
                         const newRow = {
                             id: rowId,
+                            type: rowData.type === 'shortcut' ? 'shortcut' : 'mcq',
+                            shortcutId: rowData.shortcutId || '',
                             question: rowData.question || '',
                             options: rowData.options || ['', '', '', ''],
                             correctIndex: rowData.correctIndex !== undefined ? rowData.correctIndex : 0,
@@ -307,6 +327,10 @@ const QuizGame = (() => {
             btn.addEventListener('click', () => selectAnswer(parseInt(btn.dataset.index)));
         });
 
+        // Shortcut Combo answer controls
+        $('btn-shortcut-submit')?.addEventListener('click', submitShortcutAnswer);
+        $('btn-shortcut-clear')?.addEventListener('click', clearShortcutSelection);
+
         // Join code uppercase
         $('join-code').addEventListener('input', e => {
             e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
@@ -320,6 +344,7 @@ const QuizGame = (() => {
                 sourceMode = btn.dataset.source;
                 $('vocab-mode').classList.toggle('qg-hidden', sourceMode !== 'vocab');
                 $('custom-mode').classList.toggle('qg-hidden', sourceMode !== 'custom');
+                $('shortcuts-mode').classList.toggle('qg-hidden', sourceMode !== 'shortcuts');
             });
         });
 
@@ -488,7 +513,7 @@ const QuizGame = (() => {
         const list = $('custom-list');
         for (let i = 0; i < count; i++) {
             const rowId = 'cq-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5);
-            const rowData = { id: rowId, question: '', options: ['', '', '', ''], correctIndex: 0, imageData: null, audioData: null, imageName: '', audioName: '' };
+            const rowData = { id: rowId, type: 'mcq', shortcutId: '', question: '', options: ['', '', '', ''], correctIndex: 0, imageData: null, audioData: null, imageName: '', audioName: '' };
             customRows.push(rowData);
             renderCustomRow(list, rowData, customRows.length);
         }
@@ -501,6 +526,13 @@ const QuizGame = (() => {
         row.innerHTML = `
             <span class="qg-custom-row-num">Q${num}</span>
             <div class="qg-custom-inputs">
+                <div class="qg-custom-type-row">
+                    <select class="cq-type" aria-label="Question type">
+                        <option value="mcq">Multiple Choice</option>
+                        <option value="shortcut">Shortcut Combo</option>
+                    </select>
+                    <select class="cq-shortcut" aria-label="Shortcut"></select>
+                </div>
                 <input type="text" class="cq-question" placeholder="Enter question..." maxlength="150">
                 <div class="qg-custom-options-grid"></div>
             </div>
@@ -523,6 +555,34 @@ const QuizGame = (() => {
         const qInput = row.querySelector('.cq-question');
         qInput.value = rowData.question || '';
         qInput.addEventListener('input', e => { rowData.question = e.target.value; });
+
+        // Question type: Multiple Choice or Shortcut Combo
+        const typeSelect = row.querySelector('.cq-type');
+        const shortcutSelect = row.querySelector('.cq-shortcut');
+        const pool = window.ShortcutsData ? ShortcutsData.QUIZ_POOL : [];
+
+        shortcutSelect.innerHTML = pool
+            .map(s => `<option value="${escapeHtml(s.id)}">${escapeHtml(s.label)} — ${escapeHtml(ShortcutsData.formatCombo(s))}</option>`)
+            .join('');
+        if (!rowData.shortcutId && pool.length) rowData.shortcutId = pool[0].id;
+        shortcutSelect.value = rowData.shortcutId || '';
+        shortcutSelect.addEventListener('change', e => { rowData.shortcutId = e.target.value; });
+
+        const applyRowType = () => {
+            const isShortcut = rowData.type === 'shortcut';
+            row.classList.toggle('qg-custom-row-shortcut', isShortcut);
+            shortcutSelect.classList.toggle('qg-hidden', !isShortcut);
+            qInput.classList.toggle('qg-hidden', isShortcut);
+            row.querySelector('.qg-custom-options-grid').classList.toggle('qg-hidden', isShortcut);
+        };
+
+        typeSelect.value = rowData.type === 'shortcut' ? 'shortcut' : 'mcq';
+        typeSelect.addEventListener('change', e => {
+            rowData.type = e.target.value;
+            applyRowType();
+        });
+        if (!pool.length) typeSelect.querySelector('option[value="shortcut"]').disabled = true;
+        applyRowType();
 
         const optionsGrid = row.querySelector('.qg-custom-options-grid');
         for (let i = 0; i < 4; i++) {
@@ -612,7 +672,9 @@ const QuizGame = (() => {
     }
 
     function generateCustomQuestions() {
-        const validRows = customRows.filter(r => r.question.trim() && r.options.filter(o => o.trim()).length >= 2);
+        const validRows = customRows.filter(r => r.type === 'shortcut'
+            ? Boolean(r.shortcutId)
+            : (r.question.trim() && r.options.filter(o => o.trim()).length >= 2));
 
         if (validRows.length === 0) {
             alert('Please add at least 1 question with at least 2 options.');
@@ -623,6 +685,15 @@ const QuizGame = (() => {
 
         for (let i = 0; i < validRows.length; i++) {
             const item = validRows[i];
+
+            if (item.type === 'shortcut') {
+                const shortcut = window.ShortcutsData
+                    ? ShortcutsData.SHORTCUTS.find(s => s.id === item.shortcutId)
+                    : null;
+                const built = shortcut ? buildShortcutQuestion(shortcut) : null;
+                if (built) qs.push(built);
+                continue;
+            }
 
             const rawOptions = item.options.map((opt, idx) => ({ opt: opt.trim(), isCorrect: idx === item.correctIndex }));
             let validOptions = rawOptions.filter(o => o.opt);
@@ -806,6 +877,43 @@ const QuizGame = (() => {
         return qs;
     }
 
+    /**
+     * Builds a Shortcut Combo question. The answer is encoded as a two-slot choice
+     * (1 = correct combo, 0 = anything else) so the existing scoring, reveal and
+     * host-tally code paths work untouched.
+     */
+    function buildShortcutQuestion(shortcut) {
+        const keys = ShortcutsData.comboCapKeys(shortcut);
+        if (!keys) return null;
+
+        return {
+            type: 'shortcut',
+            text: `Which keys do this: "${shortcut.label}"?`,
+            shortcutId: shortcut.id,
+            keys: keys,
+            combo: ShortcutsData.formatCombo(shortcut),
+            options: ['Incorrect', 'Correct'],
+            correctIndex: 1,
+            word: shortcut.label,
+            category: shortcut.category
+        };
+    }
+
+    function generateShortcutQuestions(count) {
+        if (!window.ShortcutsData) {
+            alert('Shortcut data failed to load. Please refresh the page.');
+            return null;
+        }
+
+        const pool = shuffle([...ShortcutsData.QUIZ_POOL]);
+        if (pool.length === 0) {
+            alert('No shortcuts are available for a quiz.');
+            return null;
+        }
+
+        return pool.slice(0, count).map(buildShortcutQuestion).filter(Boolean);
+    }
+
     function shuffle(arr) {
         for (let i = arr.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -834,6 +942,10 @@ const QuizGame = (() => {
             questions = generateCustomQuestions();
             if (!questions || questions.length === 0) return;
             config.totalQuestions = questions.length;
+        } else if (sourceMode === 'shortcuts') {
+            questions = generateShortcutQuestions(parseInt($('q-count').textContent));
+            if (!questions || questions.length === 0) return;
+            config.totalQuestions = questions.length;
         } else {
             const selectedCats = [...document.querySelectorAll('.qg-cat-chip.selected')]
                 .map(c => c.dataset.cat);
@@ -848,6 +960,7 @@ const QuizGame = (() => {
         config.totalQuestions = questions.length;
 
         role = 'host';
+        enforceHostTheme();
 
         FirebaseService.createSession(config, questions).then(code => {
             gameCode = code;
@@ -1245,24 +1358,42 @@ const QuizGame = (() => {
         $('tv-question').innerHTML = qHtml;
         $('tv-answered').textContent = '0';
 
-        // Render answer bars
-        const answersEl = $('tv-answers');
-        answersEl.innerHTML = '';
-        const icons = ['▲', '◆', '●', '■'];
-        q.options.forEach((opt, i) => {
-            if (!opt || opt.trim() === '') return;
-            const div = document.createElement('div');
-            div.className = 'qg-tv-answer';
-            div.id = 'tv-ans-' + i;
-            div.innerHTML = `
-                <span class="ans-icon">${icons[i]}</span>
-                <span class="ans-text">${escapeHtml(opt)}</span>
-                <span class="ans-count" id="tv-ans-count-${i}">0</span>
-            `;
-            answersEl.appendChild(div);
-        });
+        renderHostAnswerBars(q);
 
         startTimer();
+    }
+
+    /**
+     * Shortcut Combo answers are submitted as index 1 (correct) / 0 (incorrect), so the
+     * host tallies them into two buckets instead of the four A/B/C/D option bars.
+     */
+    function renderHostAnswerBars(q) {
+        const answersEl = $('tv-answers');
+        answersEl.innerHTML = '';
+
+        const addBar = (index, icon, text, extraClass = '') => {
+            const div = document.createElement('div');
+            div.className = 'qg-tv-answer' + (extraClass ? ' ' + extraClass : '');
+            div.id = 'tv-ans-' + index;
+            div.innerHTML = `
+                <span class="ans-icon">${icon}</span>
+                <span class="ans-text">${escapeHtml(text)}</span>
+                <span class="ans-count" id="tv-ans-count-${index}">0</span>
+            `;
+            answersEl.appendChild(div);
+        };
+
+        if (getQuestionType(q) === 'shortcut') {
+            addBar(0, '<i class="fa-solid fa-xmark"></i>', 'Incorrect', 'qg-tv-answer-tally');
+            addBar(1, '<i class="fa-solid fa-check"></i>',
+                'Correct — ' + (q.combo || ''), 'qg-tv-answer-tally');
+            return;
+        }
+
+        q.options.forEach((opt, i) => {
+            if (!opt || opt.trim() === '') return;
+            addBar(i, ANSWER_SHAPES[i], opt);
+        });
     }
 
     function startTimer() {
@@ -1567,7 +1698,6 @@ const QuizGame = (() => {
         // Hide bonus stage, show question
         $('sv-bonus-container').classList.add('qg-hidden');
         $('sv-question').classList.remove('qg-hidden');
-        $('sv-answers').classList.remove('qg-hidden');
         $('sv-timer-container').classList.remove('qg-hidden');
 
         let qHtml = `<div>${escapeHtml(q.text)}</div>`;
@@ -1576,22 +1706,11 @@ const QuizGame = (() => {
         }
         $('sv-question').innerHTML = qHtml;
 
-        const btns = document.querySelectorAll('.qg-answer-btn');
-        btns.forEach((btn, i) => {
-            if (i < q.options.length && q.options[i] && q.options[i].trim() !== '') {
-                btn.textContent = q.options[i];
-                btn.className = 'qg-answer-btn qg-ans-' + i;
-                btn.disabled = false;
-                btn.style.display = ''; // Reset visibility
-                btn.style.opacity = '1';
-            } else {
-                btn.style.display = 'none';
-            }
-        });
+        const btns = renderPlayerAnswerArea(q);
 
         // Apply pending powerups
         let timerDuration = config.timer;
-        if (pendingPowerup === '5050') {
+        if (pendingPowerup === '5050' && getQuestionType(q) === 'mcq') {
             // Remove 2 wrong answers
             const wrongIndices = [];
             q.options.forEach((_, i) => { if (i !== q.correctIndex) wrongIndices.push(i); });
@@ -1644,7 +1763,6 @@ const QuizGame = (() => {
             // Hide bonus stage, show question
             $('sv-bonus-container').classList.add('qg-hidden');
             $('sv-question').classList.remove('qg-hidden');
-            $('sv-answers').classList.remove('qg-hidden');
             $('sv-timer-container').classList.remove('qg-hidden');
 
             $('sv-score').textContent = myScore;
@@ -1656,22 +1774,11 @@ const QuizGame = (() => {
             }
             $('sv-question').innerHTML = qHtml;
 
-            const btns = document.querySelectorAll('.qg-answer-btn');
-            btns.forEach((btn, i) => {
-                if (i < q.options.length && q.options[i] && q.options[i].trim() !== '') {
-                    btn.textContent = q.options[i];
-                    btn.className = 'qg-answer-btn qg-ans-' + i;
-                    btn.disabled = false;
-                    btn.style.display = ''; // Reset visibility
-                    btn.style.opacity = '1';
-                } else {
-                    btn.style.display = 'none';
-                }
-            });
+            const btns = renderPlayerAnswerArea(q);
 
             // Apply pending powerups
             let timerDuration = config.timer;
-            if (pendingPowerup === '5050') {
+            if (pendingPowerup === '5050' && getQuestionType(q) === 'mcq') {
                 const wrongIndices = [];
                 q.options.forEach((_, i) => { if (i !== q.correctIndex) wrongIndices.push(i); });
                 wrongIndices.sort(() => Math.random() - 0.5);
@@ -1700,6 +1807,181 @@ const QuizGame = (() => {
         });
     }
 
+    /**
+     * Renders whichever answer UI the question needs and returns the MCQ tile buttons,
+     * which the 50/50 powerup and the shared answer-submission path still rely on.
+     */
+    function renderPlayerAnswerArea(q) {
+        const isShortcut = getQuestionType(q) === 'shortcut';
+        $('sv-answers').classList.toggle('qg-hidden', isShortcut);
+        $('sv-shortcut').classList.toggle('qg-hidden', !isShortcut);
+
+        const btns = document.querySelectorAll('.qg-answer-btn');
+        btns.forEach((btn, i) => {
+            btn.className = 'qg-answer-btn qg-ans-' + i;
+            btn.disabled = false;
+            btn.style.opacity = '1';
+
+            if (isShortcut) {
+                // Left in the DOM but hidden: a shortcut answer is submitted as slot 1
+                // (correct) or slot 0 (incorrect), so the existing reveal and scoring
+                // code can keep reading the selected tile with no special cases.
+                btn.textContent = '';
+                btn.style.display = 'none';
+                return;
+            }
+
+            const opt = q.options && q.options[i];
+            if (opt && opt.trim() !== '') {
+                setAnswerTile(btn, i, opt);
+                btn.style.display = '';
+            } else {
+                btn.style.display = 'none';
+            }
+        });
+
+        if (isShortcut) renderShortcutQuestion(q);
+        return btns;
+    }
+
+    function setAnswerTile(btn, index, text) {
+        btn.innerHTML = `<span class="qg-tile-shape" aria-hidden="true">${ANSWER_SHAPES[index]}</span>`
+            + '<span class="qg-tile-text"></span>';
+        btn.querySelector('.qg-tile-text').textContent = text;
+    }
+
+    // ===== PLAYER: SHORTCUT COMBO QUESTIONS =====
+    function getKeyboardPaletteClass() {
+        const app = $('quiz-app');
+        const theme = (app && app.dataset.theme) || 'default';
+        const themeData = QUIZ_THEMES[theme];
+        return (themeData && themeData.keyboard) || 'keyboard--palette-classic';
+    }
+
+    function formatCapLabel(key) {
+        const labels = {
+            control: 'Ctrl', meta: 'Win', shift: 'Shift', alt: 'Alt', ' ': 'Space',
+            escape: 'Esc', capslock: 'Caps Lock', backspace: 'Backspace', enter: 'Enter', tab: 'Tab'
+        };
+        return labels[key] || String(key).toUpperCase();
+    }
+
+    function renderShortcutQuestion(q) {
+        const container = $('sv-keyboard');
+        if (!container || !window.ShortcutsData) return;
+
+        selectedKeys = new Set();
+        // No combo in the shortcut set uses a numpad key, and the numpad crowds the
+        // main rows at the widths students play on, so it is left out here.
+        ShortcutsData.renderVirtualKeyboard(container, {
+            paletteClass: getKeyboardPaletteClass(),
+            includeNumpad: false
+        });
+        container.classList.remove('qg-keyboard-locked');
+        bindShortcutKeyboard();
+
+        const keyCount = (q.keys || []).length;
+        $('sv-shortcut-hint').textContent = keyCount
+            ? `Click the ${keyCount} keys for this shortcut, then submit.`
+            : 'Click every key in the combo, then submit.';
+
+        setShortcutLocked(false);
+        updateShortcutSelectionLabel();
+    }
+
+    function bindShortcutKeyboard() {
+        if (shortcutKeyboardBound) return;
+        const container = $('sv-keyboard');
+        if (!container) return;
+        shortcutKeyboardBound = true;
+
+        container.addEventListener('click', e => {
+            const cap = e.target.closest('.ks-key');
+            if (cap) toggleShortcutKey(cap);
+        });
+
+        container.addEventListener('keydown', e => {
+            if (e.key !== 'Enter' && e.key !== ' ') return;
+            const cap = e.target.closest('.ks-key');
+            if (!cap) return;
+            e.preventDefault();
+            toggleShortcutKey(cap);
+        });
+    }
+
+    function toggleShortcutKey(cap) {
+        if (hasAnswered || timeLeft <= 0) return;
+        const key = cap.dataset.key;
+        if (!key) return;
+
+        const wasSelected = selectedKeys.has(key);
+        if (wasSelected) selectedKeys.delete(key);
+        else selectedKeys.add(key);
+
+        // Shift/Ctrl/Alt appear twice on the board under one data-key — keep the twins in sync.
+        $('sv-keyboard').querySelectorAll(`.ks-key[data-key="${CSS.escape(key)}"]`).forEach(el => {
+            el.classList.toggle('selected', !wasSelected);
+            el.setAttribute('aria-pressed', String(!wasSelected));
+        });
+
+        playSound('click');
+        updateShortcutSelectionLabel();
+    }
+
+    function updateShortcutSelectionLabel() {
+        const el = $('sv-shortcut-selection');
+        if (!el) return;
+        el.textContent = selectedKeys.size
+            ? [...selectedKeys].map(formatCapLabel).join(' + ')
+            : 'No keys selected';
+    }
+
+    function clearShortcutSelection() {
+        if (hasAnswered) return;
+        selectedKeys = new Set();
+        const container = $('sv-keyboard');
+        if (container) {
+            container.querySelectorAll('.ks-key.selected').forEach(cap => {
+                cap.classList.remove('selected');
+                cap.setAttribute('aria-pressed', 'false');
+            });
+        }
+        updateShortcutSelectionLabel();
+    }
+
+    function submitShortcutAnswer() {
+        if (hasAnswered || timeLeft <= 0) return;
+        const q = questions[currentQ];
+        if (!q || getQuestionType(q) !== 'shortcut') return;
+        if (!selectedKeys.size || !window.ShortcutsData) return;
+
+        const correct = ShortcutsData.isComboCorrect([...selectedKeys], q.keys || []);
+        selectAnswer(correct ? 1 : 0);
+    }
+
+    function setShortcutLocked(locked) {
+        const container = $('sv-keyboard');
+        if (container) container.classList.toggle('qg-keyboard-locked', locked);
+        const submit = $('btn-shortcut-submit');
+        const clear = $('btn-shortcut-clear');
+        if (submit) submit.disabled = locked;
+        if (clear) clear.disabled = locked;
+    }
+
+    function revealShortcutKeys() {
+        const q = questions[currentQ];
+        const container = $('sv-keyboard');
+        if (!container || !q || getQuestionType(q) !== 'shortcut') return;
+
+        setShortcutLocked(true);
+        const expected = (q.keys || []).map(k => String(k).toLowerCase());
+        container.querySelectorAll('.ks-key').forEach(cap => {
+            const key = (cap.dataset.key || '').toLowerCase();
+            if (expected.includes(key)) cap.classList.add('key-correct');
+            else if (cap.classList.contains('selected')) cap.classList.add('key-wrong');
+        });
+    }
+
     function startPlayerTimer(remaining, total) {
         clearInterval(timerInterval);
         timeLeft = remaining;
@@ -1725,6 +2007,7 @@ const QuizGame = (() => {
                         btns.forEach((btn, i) => {
                             if (i === q.correctIndex) btn.classList.add('correct');
                         });
+                        revealShortcutKeys();
                     }
                     if (!FirebaseService.isDemo()) {
                         FirebaseService.updatePlayerScore(gameCode, FirebaseService.getUid(), myScore, myStreak);
@@ -1746,6 +2029,7 @@ const QuizGame = (() => {
         document.querySelector(`.qg-answer-btn[data-index="${index}"]`).classList.add('selected');
 
         playSound('click');
+        setShortcutLocked(true);
 
         // Submit to Firebase
         FirebaseService.submitAnswer(gameCode, index);
@@ -1767,6 +2051,7 @@ const QuizGame = (() => {
             btn.classList.add('disabled');
             if (i === q.correctIndex) btn.classList.add('correct');
         });
+        revealShortcutKeys();
 
         if (selectedIdx === q.correctIndex) {
             const timeBonus = Math.round((timeLeft / config.timer) * 50);
@@ -1818,6 +2103,7 @@ const QuizGame = (() => {
                 btn.classList.add('correct');
             }
         });
+        revealShortcutKeys();
 
         // Check if player answered correctly
         const selectedBtn = document.querySelector('.qg-answer-btn.selected');
@@ -1851,6 +2137,7 @@ const QuizGame = (() => {
 
     function disableAnswerButtons() {
         document.querySelectorAll('.qg-answer-btn').forEach(btn => btn.classList.add('disabled'));
+        setShortcutLocked(true);
     }
 
     function updateStreakDisplay() {
@@ -2417,12 +2704,15 @@ const QuizGame = (() => {
     window._addDemoPlayers = addDemoPlayers;
 
     // ===== QUIZ THEME ENGINE =====
+    // `keyboard` picks the Keyboard Shortcut Playground keycap palette used for
+    // Shortcut Combo questions on this player's device.
     const QUIZ_THEMES = {
         'default': {
             '--qg-bg-from': '#3d348b',
             '--qg-bg-to': '#7678ed',
             '--qg-accent': '#f7b801',
             '--qg-particle': 'rgba(255,255,255,0.08)',
+            keyboard: 'keyboard--palette-classic',
             dark: { '--qg-bg-from': '#1a1530', '--qg-bg-to': '#2c2a5a' }
         },
         'neon': {
@@ -2430,6 +2720,7 @@ const QuizGame = (() => {
             '--qg-bg-to': '#0d0d2b',
             '--qg-accent': '#00f5ff',
             '--qg-particle': 'rgba(0,245,255,0.12)',
+            keyboard: 'keyboard--palette-gold-black',
             dark: { '--qg-bg-from': '#02020a', '--qg-bg-to': '#080820' }
         },
         'forest': {
@@ -2437,6 +2728,7 @@ const QuizGame = (() => {
             '--qg-bg-to': '#2d6a4f',
             '--qg-accent': '#52b788',
             '--qg-particle': 'rgba(82,183,136,0.12)',
+            keyboard: 'keyboard--palette-mint-pop',
             dark: { '--qg-bg-from': '#0a1a11', '--qg-bg-to': '#152d1e' }
         },
         'winter': {
@@ -2444,6 +2736,7 @@ const QuizGame = (() => {
             '--qg-bg-to': '#2a7fa8',
             '--qg-accent': '#caf0f8',
             '--qg-particle': 'rgba(255,255,255,0.18)',
+            keyboard: 'keyboard--palette-frost-white',
             dark: { '--qg-bg-from': '#0a2233', '--qg-bg-to': '#1a3a55' }
         },
         'candy': {
@@ -2451,6 +2744,7 @@ const QuizGame = (() => {
             '--qg-bg-to': '#6a00c0',
             '--qg-accent': '#ff9de2',
             '--qg-particle': 'rgba(255,157,226,0.14)',
+            keyboard: 'keyboard--palette-pink-pop',
             dark: { '--qg-bg-from': '#3d0030', '--qg-bg-to': '#28004a' }
         },
         'pastel': {
@@ -2458,6 +2752,7 @@ const QuizGame = (() => {
             '--qg-bg-to': '#ee88b5',
             '--qg-accent': '#fff0f8',
             '--qg-particle': 'rgba(255,255,255,0.14)',
+            keyboard: 'keyboard--palette-kawaii-pastel',
             dark: { '--qg-bg-from': '#3d1f5a', '--qg-bg-to': '#5a1f3a' }
         },
         'ocean': {
@@ -2465,7 +2760,68 @@ const QuizGame = (() => {
             '--qg-bg-to': '#0077b6',
             '--qg-accent': '#90e0ef',
             '--qg-particle': 'rgba(144,224,239,0.14)',
+            keyboard: 'keyboard--palette-frost-white',
             dark: { '--qg-bg-from': '#03045e', '--qg-bg-to': '#023e8a' }
+        },
+
+        // Palettes shared with the Keyboard Shortcut Playground. Their backgrounds are
+        // deepened versions of the palette so the app's white chrome text stays readable —
+        // the palette identity lives in the answer tiles and the keycaps.
+        'gold-black': {
+            '--qg-bg-from': '#171717',
+            '--qg-bg-to': '#3a2f14',
+            '--qg-accent': '#e4bf70',
+            '--qg-particle': 'rgba(228,191,112,0.14)',
+            keyboard: 'keyboard--palette-gold-black',
+            dark: { '--qg-bg-from': '#0d0d0d', '--qg-bg-to': '#241d0c' }
+        },
+        'retro-arcade': {
+            '--qg-bg-from': '#24201e',
+            '--qg-bg-to': '#5c2523',
+            '--qg-accent': '#ff6b4a',
+            '--qg-particle': 'rgba(255,107,74,0.16)',
+            keyboard: 'keyboard--palette-retro-arcade',
+            dark: { '--qg-bg-from': '#151211', '--qg-bg-to': '#3a1614' }
+        },
+        'kawaii-pastel': {
+            '--qg-bg-from': '#7a4a63',
+            '--qg-bg-to': '#b06a89',
+            '--qg-accent': '#fff1a8',
+            '--qg-particle': 'rgba(255,241,168,0.18)',
+            keyboard: 'keyboard--palette-kawaii-pastel',
+            dark: { '--qg-bg-from': '#3f2432', '--qg-bg-to': '#6b3b52' }
+        },
+        'mint-pop': {
+            '--qg-bg-from': '#14544c',
+            '--qg-bg-to': '#2f8d7d',
+            '--qg-accent': '#a8dfc8',
+            '--qg-particle': 'rgba(168,223,200,0.18)',
+            keyboard: 'keyboard--palette-mint-pop',
+            dark: { '--qg-bg-from': '#0a2c28', '--qg-bg-to': '#154f47' }
+        },
+        'peach-cream': {
+            '--qg-bg-from': '#7a3b12',
+            '--qg-bg-to': '#c46a35',
+            '--qg-accent': '#ffc3a5',
+            '--qg-particle': 'rgba(255,195,165,0.18)',
+            keyboard: 'keyboard--palette-peach-cream',
+            dark: { '--qg-bg-from': '#3f1d08', '--qg-bg-to': '#6d3a1a' }
+        },
+        'pink-pop': {
+            '--qg-bg-from': '#7a1f47',
+            '--qg-bg-to': '#c93f78',
+            '--qg-accent': '#f6b3ca',
+            '--qg-particle': 'rgba(246,179,202,0.18)',
+            keyboard: 'keyboard--palette-pink-pop',
+            dark: { '--qg-bg-from': '#440f27', '--qg-bg-to': '#7d2549' }
+        },
+        'frost-white': {
+            '--qg-bg-from': '#3d4f6f',
+            '--qg-bg-to': '#6c86ad',
+            '--qg-accent': '#cfe3ff',
+            '--qg-particle': 'rgba(255,255,255,0.18)',
+            keyboard: 'keyboard--palette-frost-white',
+            dark: { '--qg-bg-from': '#1f2836', '--qg-bg-to': '#3a4a63' }
         }
     };
 
@@ -2577,10 +2933,22 @@ const QuizGame = (() => {
         if (canvas) canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
     }
 
-    function applyQuizTheme(theme, isDark) {
+    /**
+     * The host screen is projected for the whole class, so it always renders the
+     * default palette no matter what this device has stored. Player theme choices
+     * stay local — nothing here is written to the shared session.
+     */
+    function enforceHostTheme() {
+        const app = $('quiz-app');
+        applyQuizTheme('default', app ? app.classList.contains('qg-dark') : false, { persist: false });
+    }
+
+    function applyQuizTheme(requestedTheme, isDark, options = {}) {
         const app = $('quiz-app');
         if (!app) return;
 
+        const theme = role === 'host' ? 'default' : requestedTheme;
+        const persist = options.persist !== false && role !== 'host';
         const themeData = QUIZ_THEMES[theme] || QUIZ_THEMES['default'];
         const vars = isDark
             ? Object.assign({}, themeData, themeData.dark || {})
@@ -2606,9 +2974,20 @@ const QuizGame = (() => {
         // Update dark icon
         updateDarkIcon(isDark);
 
-        // Persist
-        localStorage.setItem('qg-theme', theme);
-        localStorage.setItem('qg-dark', isDark ? '1' : '0');
+        // Persist (player devices only)
+        if (persist) {
+            localStorage.setItem('qg-theme', theme);
+            localStorage.setItem('qg-dark', isDark ? '1' : '0');
+        }
+
+        // Keep an in-progress Shortcut Combo keyboard on the newly picked palette
+        const keyboard = $('sv-keyboard');
+        if (keyboard) {
+            Object.values(QUIZ_THEMES).forEach(t => {
+                if (t.keyboard) keyboard.classList.remove(t.keyboard);
+            });
+            keyboard.classList.add(themeData.keyboard || 'keyboard--palette-classic');
+        }
 
         // Restart background animation
         startBgAnimation(theme, isDark);

@@ -1313,44 +1313,69 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-template-rows: 1fr 1fr;
-    gap: 12px;
+    gap: 16px;
     padding: 16px 20px 24px;
     flex: 1;
-    max-height: 60vh;
+    max-height: 62vh;
 }
 
 .qg-answer-btn {
+    position: relative;
     border: none;
-    border-radius: 18px;
-    padding: 24px 20px;
-    font-size: clamp(1.05rem, 3vw, 1.4rem);
-    font-weight: 700;
+    border-radius: 20px;
+    padding: 20px 22px;
+    font-size: clamp(1.15rem, 3.2vw, 1.65rem);
+    font-weight: 800;
     font-family: inherit;
     color: white;
     cursor: pointer;
-    transition: all 0.2s ease;
-    min-height: 100px;
+    transition: transform 0.15s ease, filter 0.15s ease, opacity 0.2s ease, box-shadow 0.2s ease;
+    min-height: 120px;
     word-wrap: break-word;
-    line-height: 1.3;
+    overflow-wrap: anywhere;
+    line-height: 1.25;
     animation: popIn 0.3s ease backwards;
     display: flex;
     align-items: center;
+    justify-content: flex-start;
+    gap: 16px;
+    text-align: left;
+    box-shadow: 0 6px 0 rgba(0, 0, 0, 0.18), 0 10px 24px rgba(0, 0, 0, 0.18);
+}
+
+.qg-tile-shape {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
     justify-content: center;
-    text-align: center;
+    width: clamp(38px, 8vw, 52px);
+    height: clamp(38px, 8vw, 52px);
+    border-radius: 14px;
+    background: rgba(0, 0, 0, 0.16);
+    font-size: clamp(1.2rem, 3.4vw, 1.7rem);
+    line-height: 1;
+}
+
+.qg-tile-text {
+    flex: 1 1 auto;
+    min-width: 0;
 }
 
 .qg-answer-btn:nth-child(1) {
     background: var(--qg-ans-1, #E74C3C);
+    color: var(--qg-ans-1-text, #fff);
     animation-delay: 0s;
 }
 
 .qg-answer-btn:nth-child(2) {
     background: var(--qg-ans-2, #3498DB);
+    color: var(--qg-ans-2-text, #fff);
     animation-delay: 0.08s;
 }
 
 .qg-answer-btn:nth-child(3) {
     background: var(--qg-ans-3, #2ECC71);
+    color: var(--qg-ans-3-text, #fff);
     animation-delay: 0.16s;
 }
 
@@ -1362,31 +1387,273 @@
 
 .qg-answer-btn:hover {
     transform: translateY(-4px);
-    filter: brightness(1.1);
+    filter: brightness(1.08);
 }
 
 .qg-answer-btn:active {
-    transform: scale(0.95);
+    transform: translateY(2px) scale(0.99);
+    box-shadow: 0 2px 0 rgba(0, 0, 0, 0.18);
 }
 
 .qg-answer-btn.selected {
-    box-shadow: inset 0 0 0 4px white;
-    opacity: 0.8;
+    box-shadow: inset 0 0 0 5px white, 0 6px 0 rgba(0, 0, 0, 0.18);
+    opacity: 0.9;
 }
 
 .qg-answer-btn.disabled {
     pointer-events: none;
-    opacity: 0.5;
+    opacity: 0.42;
+    filter: grayscale(0.65);
 }
 
 .qg-answer-btn.correct {
-    box-shadow: inset 0 0 0 4px #2b8a3e, 0 0 20px rgba(46, 204, 113, 0.5);
+    box-shadow: inset 0 0 0 5px #2b8a3e, 0 0 26px rgba(46, 204, 113, 0.55);
     opacity: 1 !important;
+    filter: none !important;
+    animation: qgTilePulse 0.55s ease;
+}
+
+.qg-answer-btn.correct::after {
+    content: '\f00c';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #2b8a3e;
+    color: #fff;
+    font-size: 0.95rem;
+    animation: popIn 0.35s ease backwards;
 }
 
 .qg-answer-btn.wrong {
-    box-shadow: inset 0 0 0 4px #c92a2a;
-    opacity: 0.4;
+    box-shadow: inset 0 0 0 5px #c92a2a;
+    opacity: 0.45;
+    filter: grayscale(0.8);
+}
+
+@keyframes qgTilePulse {
+    0% {
+        transform: scale(1);
+    }
+
+    45% {
+        transform: scale(1.045);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Light confetti burst behind the correct tile — pure CSS, no canvas work */
+.qg-answer-btn.correct::before {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border-radius: 24px;
+    pointer-events: none;
+    background:
+        radial-gradient(circle 6px at 12% 18%, #ffd166 98%, transparent 100%),
+        radial-gradient(circle 5px at 82% 12%, #06d6a0 98%, transparent 100%),
+        radial-gradient(circle 5px at 26% 86%, #ef476f 98%, transparent 100%),
+        radial-gradient(circle 4px at 68% 88%, #118ab2 98%, transparent 100%),
+        radial-gradient(circle 4px at 94% 62%, #ffd166 98%, transparent 100%),
+        radial-gradient(circle 5px at 6% 58%, #06d6a0 98%, transparent 100%);
+    animation: qgConfettiBurst 0.9s ease-out forwards;
+}
+
+@keyframes qgConfettiBurst {
+    0% {
+        opacity: 0;
+        transform: scale(0.75);
+    }
+
+    35% {
+        opacity: 1;
+        transform: scale(1.06);
+    }
+
+    100% {
+        opacity: 0;
+        transform: scale(1.22);
+    }
+}
+
+@media (max-width: 640px) {
+    .qg-sv-answers {
+        gap: 12px;
+        padding: 12px 14px 18px;
+    }
+
+    .qg-answer-btn {
+        min-height: 96px;
+        padding: 16px;
+        gap: 12px;
+        border-radius: 16px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .qg-answer-btn,
+    .qg-answer-btn.correct,
+    .qg-answer-btn.correct::before,
+    .qg-answer-btn.correct::after {
+        animation: none;
+    }
+}
+
+/* ===== SHORTCUT COMBO ANSWER AREA ===== */
+.qg-sv-shortcut {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    padding: 8px 20px 24px;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+}
+
+.qg-sv-shortcut-hint {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    opacity: 0.85;
+    text-align: center;
+}
+
+.qg-sv-shortcut #sv-keyboard {
+    width: 100%;
+    max-width: 900px;
+}
+
+.qg-sv-shortcut .ks-key {
+    cursor: pointer;
+    user-select: none;
+}
+
+.qg-sv-shortcut .ks-key.selected {
+    background: var(--palette-highlight-bg, #f7b801);
+    color: var(--palette-highlight-text, #1a1530);
+    transform: translateY(2px);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.6);
+}
+
+.qg-sv-shortcut .ks-key.key-correct {
+    background: #2b8a3e;
+    color: #fff;
+    box-shadow: 0 0 0 3px rgba(43, 138, 62, 0.45);
+}
+
+.qg-sv-shortcut .ks-key.key-wrong {
+    background: #c92a2a;
+    color: #fff;
+    box-shadow: 0 0 0 3px rgba(201, 42, 42, 0.4);
+}
+
+.qg-sv-shortcut #sv-keyboard.qg-keyboard-locked {
+    pointer-events: none;
+}
+
+.qg-sv-shortcut-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    width: 100%;
+}
+
+.qg-sv-shortcut-selection {
+    min-width: 180px;
+    padding: 10px 18px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    font-weight: 700;
+    font-size: 1.05rem;
+    text-align: center;
+}
+
+.qg-sv-shortcut-buttons {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.qg-sv-shortcut-buttons .qg-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+/* On phones the board has to shrink rather than scroll sideways, since students
+   need to reach modifier keys and letters in the same view. */
+@media (max-width: 780px) {
+    .qg-sv-shortcut .ks-numpad {
+        display: none;
+    }
+
+    .qg-sv-shortcut .ks-keyboard {
+        gap: 0;
+        padding: 8px;
+    }
+
+    .qg-sv-shortcut .ks-keyboard-row {
+        min-width: 0;
+        gap: 3px;
+    }
+
+    .qg-sv-shortcut .ks-keyboard-main {
+        gap: 4px;
+    }
+
+    .qg-sv-shortcut .ks-key {
+        min-width: 0;
+        height: 34px;
+        font-size: 0.62rem;
+        border-radius: 4px;
+    }
+
+    .qg-sv-shortcut .ks-key-icon {
+        font-size: 0.7rem;
+    }
+}
+
+/* Host tally rows for Shortcut Combo questions */
+.qg-tv-answer-tally .ans-icon {
+    font-size: 1.1rem;
+}
+
+/* Custom builder: question type row */
+.qg-custom-type-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+}
+
+.qg-custom-type-row select {
+    padding: 8px 10px;
+    border-radius: 10px;
+    border: 2px solid rgba(0, 0, 0, 0.12);
+    font-family: inherit;
+    font-size: 0.9rem;
+    background: #fff;
+    color: #333;
+    max-width: 100%;
+}
+
+.qg-custom-type-row .cq-shortcut {
+    flex: 1;
+    min-width: 200px;
 }
 
 /* ===== RESULTS SCREEN ===== */
@@ -2781,6 +3048,132 @@ body.dark-mode .qg-avatar-option.selected::after {
     --qg-ans-3-text: #023047;
     --qg-ans-4: #caf0f8;
     --qg-ans-4-text: #023047;
+}
+
+/* --- Keyboard Shortcut Playground palettes ---
+   The keycap colors come from css/styles.css (.keyboard--palette-*); these blocks add
+   the four mutually distinct answer-tile colors that the Playground doesn't define. */
+
+.qg-app.qg-theme-gold-black {
+    --qg-ans-1: #e4bf70;
+    --qg-ans-1-text: #191919;
+    --qg-ans-2: #2f2f2f;
+    --qg-ans-3: #a8741a;
+    --qg-ans-3-text: #fff8e6;
+    --qg-ans-4: #6b6b6b;
+    --qg-ans-4-text: #ffffff;
+}
+
+.qg-app.qg-theme-gold-black .qg-logo-icon,
+.qg-app.qg-theme-gold-black .qg-role-icon,
+.qg-app.qg-theme-gold-black .qg-game-code,
+.qg-app.qg-theme-gold-black .qg-waiting-name {
+    color: #e4bf70;
+}
+
+.qg-app.qg-theme-retro-arcade {
+    --qg-ans-1: #8d2e2b;
+    --qg-ans-2: #f4ecd8;
+    --qg-ans-2-text: #26201d;
+    --qg-ans-3: #2f6f6a;
+    --qg-ans-4: #e0a01f;
+    --qg-ans-4-text: #26201d;
+}
+
+.qg-app.qg-theme-retro-arcade .qg-logo-icon,
+.qg-app.qg-theme-retro-arcade .qg-role-icon,
+.qg-app.qg-theme-retro-arcade .qg-game-code,
+.qg-app.qg-theme-retro-arcade .qg-waiting-name {
+    color: #ff6b4a;
+}
+
+.qg-app.qg-theme-kawaii-pastel {
+    --qg-ans-1: #f2a9c0;
+    --qg-ans-1-text: #5a3544;
+    --qg-ans-2: #87d8cb;
+    --qg-ans-2-text: #244d49;
+    --qg-ans-3: #fff1a8;
+    --qg-ans-3-text: #5f4c54;
+    --qg-ans-4: #b39ddb;
+    --qg-ans-4-text: #2e2247;
+}
+
+.qg-app.qg-theme-kawaii-pastel .qg-logo-icon,
+.qg-app.qg-theme-kawaii-pastel .qg-role-icon,
+.qg-app.qg-theme-kawaii-pastel .qg-game-code,
+.qg-app.qg-theme-kawaii-pastel .qg-waiting-name {
+    color: #fff1a8;
+}
+
+.qg-app.qg-theme-mint-pop {
+    --qg-ans-1: #1f6f65;
+    --qg-ans-2: #a8dfc8;
+    --qg-ans-2-text: #21433d;
+    --qg-ans-3: #afdbea;
+    --qg-ans-3-text: #1d3b47;
+    --qg-ans-4: #fff4d5;
+    --qg-ans-4-text: #584d31;
+}
+
+.qg-app.qg-theme-mint-pop .qg-logo-icon,
+.qg-app.qg-theme-mint-pop .qg-role-icon,
+.qg-app.qg-theme-mint-pop .qg-game-code,
+.qg-app.qg-theme-mint-pop .qg-waiting-name {
+    color: #d6f5e9;
+}
+
+.qg-app.qg-theme-peach-cream {
+    --qg-ans-1: #e8844f;
+    --qg-ans-1-text: #3b1a0a;
+    --qg-ans-2: #7a3b12;
+    --qg-ans-3: #ffc3a5;
+    --qg-ans-3-text: #65372d;
+    --qg-ans-4: #fff6e9;
+    --qg-ans-4-text: #684c3d;
+}
+
+.qg-app.qg-theme-peach-cream .qg-logo-icon,
+.qg-app.qg-theme-peach-cream .qg-role-icon,
+.qg-app.qg-theme-peach-cream .qg-game-code,
+.qg-app.qg-theme-peach-cream .qg-waiting-name {
+    color: #ffd9c2;
+}
+
+.qg-app.qg-theme-pink-pop {
+    --qg-ans-1: #c93f78;
+    --qg-ans-2: #7a1f47;
+    --qg-ans-3: #f6b3ca;
+    --qg-ans-3-text: #6c2944;
+    --qg-ans-4: #ffffff;
+    --qg-ans-4-text: #6c2944;
+}
+
+.qg-app.qg-theme-pink-pop .qg-logo-icon,
+.qg-app.qg-theme-pink-pop .qg-role-icon,
+.qg-app.qg-theme-pink-pop .qg-game-code,
+.qg-app.qg-theme-pink-pop .qg-waiting-name {
+    color: #ffd6e6;
+}
+
+.qg-app.qg-theme-frost-white {
+    --qg-ans-1: #3d4f6f;
+    --qg-ans-2: #5b8fd9;
+    --qg-ans-2-text: #0d1b2a;
+    --qg-ans-3: #cfcfcf;
+    --qg-ans-3-text: #3a3a3a;
+    --qg-ans-4: #f5f5f5;
+    --qg-ans-4-text: #4a4a4a;
+}
+
+.qg-app.qg-theme-frost-white .qg-answer-btn:nth-child(4) {
+    box-shadow: inset 0 0 0 2px #c8c8c8, 0 6px 0 rgba(0, 0, 0, 0.18);
+}
+
+.qg-app.qg-theme-frost-white .qg-logo-icon,
+.qg-app.qg-theme-frost-white .qg-role-icon,
+.qg-app.qg-theme-frost-white .qg-game-code,
+.qg-app.qg-theme-frost-white .qg-waiting-name {
+    color: #e6efff;
 }
 
 /* ===== BONUS STAGE ===== */

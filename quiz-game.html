@@ -67,6 +67,8 @@
                                 class="fa-solid fa-book"></i> Vocabulary Bank</button>
                         <button class="qg-source-btn" id="src-custom" data-source="custom"><i
                                 class="fa-solid fa-pen-ruler"></i> Custom Quiz</button>
+                        <button class="qg-source-btn" id="src-shortcuts" data-source="shortcuts"><i
+                                class="fa-solid fa-keyboard"></i> Keyboard Shortcuts</button>
                     </div>
                 </div>
 
@@ -117,7 +119,8 @@
                         <label class="qg-setup-label">Your Questions</label>
                         <p class="qg-custom-hint">Enter a question and up to 4 options. Select the correct answer.
                             Optional: attach images or
-                            audio.</p>
+                            audio. Switch a row to <em>Shortcut Combo</em> to have students click the keys on a
+                            virtual keyboard instead.</p>
 
                         <!-- Drive Integration Actions -->
                         <div class="qg-drive-actions" style="display: flex; gap: 10px; margin-bottom: 15px;">
@@ -140,7 +143,15 @@
                     </div>
                 </div>
 
-
+                <!-- SHORTCUTS MODE (hidden by default) -->
+                <div id="shortcuts-mode" class="qg-hidden">
+                    <div class="qg-setup-section">
+                        <label class="qg-setup-label">Shortcut Combo Questions</label>
+                        <p class="qg-custom-hint">Students see a shortcut like <em>&ldquo;Close Tab&rdquo;</em> and
+                            click the matching keys on a virtual keyboard. Questions are drawn at random from the
+                            Keyboard Shortcut Playground set.</p>
+                    </div>
+                </div>
 
                 <div class="qg-setup-row">
                     <div class="qg-setup-section">
@@ -375,6 +386,25 @@
                     <button class="qg-answer-btn qg-ans-2" data-index="2"></button>
                     <button class="qg-answer-btn qg-ans-3" data-index="3"></button>
                 </div>
+
+                <!-- SHORTCUT COMBO ANSWER AREA -->
+                <div class="qg-sv-shortcut qg-hidden" id="sv-shortcut">
+                    <p class="qg-sv-shortcut-hint" id="sv-shortcut-hint">Click every key in the combo, then submit.</p>
+                    <div class="ks-keyboard keyboard--palette-classic" id="sv-keyboard"
+                        aria-label="Virtual keyboard — click the keys of the shortcut"></div>
+                    <div class="qg-sv-shortcut-footer">
+                        <div class="qg-sv-shortcut-selection" id="sv-shortcut-selection" aria-live="polite">No keys
+                            selected</div>
+                        <div class="qg-sv-shortcut-buttons">
+                            <button class="qg-btn qg-btn-ghost" type="button" id="btn-shortcut-clear">
+                                <i class="fa-solid fa-eraser"></i> Clear
+                            </button>
+                            <button class="qg-btn qg-btn-accent qg-btn-lg" type="button" id="btn-shortcut-submit">
+                                <i class="fa-solid fa-paper-plane"></i> Submit Answer
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -494,8 +524,8 @@
                     style="display: flex; flex-direction: column; gap: 20px; align-items: center;">
                     <div class="qg-theme-swatches"
                         style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; width: 100%;">
-                        <button class="qg-theme-swatch active" data-theme="default" title="Default"
-                            style="background: linear-gradient(135deg,#3d348b,#7678ed);">Default</button>
+                        <button class="qg-theme-swatch active" data-theme="default" title="Classic"
+                            style="background: linear-gradient(135deg,#3d348b,#7678ed);">Classic</button>
                         <button class="qg-theme-swatch" data-theme="neon" title="Neon"
                             style="background: linear-gradient(135deg,#0a0a1a,#00f5ff);">Neon</button>
                         <button class="qg-theme-swatch" data-theme="forest" title="Forest"
@@ -508,6 +538,21 @@
                             style="background: linear-gradient(135deg,#ffd6e7,#c77dff);">Pastel</button>
                         <button class="qg-theme-swatch" data-theme="ocean" title="Ocean"
                             style="background: linear-gradient(135deg,#023e8a,#90e0ef);">Ocean</button>
+                        <button class="qg-theme-swatch" data-theme="gold-black" title="Gold Black"
+                            style="background: linear-gradient(135deg,#171717,#d5a94f);">Gold Black</button>
+                        <button class="qg-theme-swatch" data-theme="retro-arcade" title="Retro Arcade"
+                            style="background: linear-gradient(135deg,#24201e,#8d2e2b);">Retro Arcade</button>
+                        <button class="qg-theme-swatch" data-theme="kawaii-pastel" title="Kawaii Pastel"
+                            style="background: linear-gradient(135deg,#f2a9c0,#87d8cb);">Kawaii Pastel</button>
+                        <button class="qg-theme-swatch" data-theme="mint-pop" title="Mint Pop"
+                            style="background: linear-gradient(135deg,#1f6f65,#a8dfc8);">Mint Pop</button>
+                        <button class="qg-theme-swatch" data-theme="peach-cream" title="Peach Cream"
+                            style="background: linear-gradient(135deg,#e8844f,#ffe5cf);">Peach Cream</button>
+                        <button class="qg-theme-swatch" data-theme="pink-pop" title="Pink Pop"
+                            style="background: linear-gradient(135deg,#c93f78,#f6b3ca);">Pink Pop</button>
+                        <button class="qg-theme-swatch" data-theme="frost-white" title="Frost White"
+                            style="background: linear-gradient(135deg,#8fa8c8,#e8e8ec); color:#33415c;">Frost
+                            White</button>
                     </div>
 
                     <div style="width: 100%; height: 1px; background: rgba(0,0,0,0.05); margin: 5px 0;"></div>
@@ -547,6 +592,7 @@
     <script src="https://accounts.google.com/gsi/client"></script>
     <script src="js/google-drive-service.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="js/shortcuts-data.js"></script>
     <script src="js/quiz-game.js"></script>
 </body>
 
