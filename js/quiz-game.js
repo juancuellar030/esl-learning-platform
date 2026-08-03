@@ -265,6 +265,8 @@ const QuizGame = (() => {
             applyQuizTheme('default', false, { persist: false });
         }
 
+        updateFloatingThemeBtn('screen-role');
+
         FirebaseService.init().then(user => {
             populateCategories();
             initAvatarGrids();
@@ -556,14 +558,18 @@ const QuizGame = (() => {
             showScreen('screen-join');
         });
 
-        // Lobby theme swatch buttons
-        document.querySelectorAll('.qg-theme-swatch').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const theme = btn.dataset.theme;
+        // Lobby theme picker bars
+        renderThemePicker();
+        const themePicker = $('theme-picker-list');
+        if (themePicker) {
+            themePicker.addEventListener('click', (e) => {
+                const bar = e.target.closest('.qg-theme-bar');
+                if (!bar) return;
+                const theme = bar.dataset.theme;
                 const isDark = $('quiz-app').classList.contains('qg-dark');
                 applyQuizTheme(theme, isDark);
             });
-        });
+        }
 
         // Theme modal open/close
         document.querySelectorAll('.qg-open-theme-btn').forEach((btn) => {
@@ -3015,6 +3021,7 @@ const QuizGame = (() => {
         console.log(`[QuizGame] Transitioning to screen: ${id} (Role: ${role})`);
         document.querySelectorAll('.qg-screen').forEach(s => s.classList.remove('active'));
         $(id).classList.add('active');
+        updateFloatingThemeBtn(id);
 
         // Show/hide session badge depending on screen
         const badgeScreens = ['screen-lobby', 'screen-game', 'screen-waiting'];
@@ -3091,10 +3098,17 @@ const QuizGame = (() => {
     window._addDemoPlayers = addDemoPlayers;
 
     // ===== QUIZ THEME ENGINE =====
+    const THEME_PICKER_ORDER = [
+        'default', 'gold-black', 'retro-arcade', 'kawaii-pastel',
+        'mint-pop', 'peach-cream', 'pink-pop', 'frost-white'
+    ];
+
     // `keyboard` picks the Keyboard Shortcut Playground keycap palette used for
     // Shortcut Combo questions on this player's device.
     const QUIZ_THEMES = {
         'default': {
+            label: 'Classic',
+            palette: ['#3d348b', '#7678ed', '#f7b801', '#9b9eff', '#f0eeff'],
             '--qg-bg-from': '#3d348b',
             '--qg-bg-to': '#7678ed',
             '--qg-accent': '#f7b801',
@@ -3105,12 +3119,14 @@ const QuizGame = (() => {
                 host: { face: '#f7b801', depth: '#b88a00', text: '#1a1530', icon: '#1a1530' },
                 join: { face: '#9b9eff', depth: '#5c5fd4', text: '#ffffff', icon: '#ffffff' },
                 dark: {
-                    host: { face: '#2c2860', depth: '#1a1530', text: '#ffffff', icon: '#f7b801' },
-                    join: { face: '#3d3a7a', depth: '#2c2860', text: '#ffffff', icon: '#c8caff' }
+                    host: { face: '#100e22', depth: '#06040f', text: '#ffffff', icon: '#f7b801' },
+                    join: { face: '#14122e', depth: '#080618', text: '#ffffff', icon: '#b8bbff' }
                 }
             }
         },
         'gold-black': {
+            label: 'Gold Black',
+            palette: ['#171717', '#e4bf70', '#2f2f2f', '#a8741a', '#6b6b6b'],
             '--qg-bg-from': '#171717',
             '--qg-bg-to': '#3a2f14',
             '--qg-accent': '#e4bf70',
@@ -3121,12 +3137,14 @@ const QuizGame = (() => {
                 host: { face: '#e4bf70', depth: '#9a7430', text: '#141414', icon: '#141414' },
                 join: { face: '#f0d48a', depth: '#b89442', text: '#141414', icon: '#141414' },
                 dark: {
-                    host: { face: '#2a2418', depth: '#141414', text: '#f5e6c0', icon: '#e4bf70' },
-                    join: { face: '#1f1f1f', depth: '#0d0d0d', text: '#f5e6c0', icon: '#e4bf70' }
+                    host: { face: '#0e0c06', depth: '#050403', text: '#f8edd0', icon: '#e4bf70' },
+                    join: { face: '#080808', depth: '#020202', text: '#f8edd0', icon: '#d4af5a' }
                 }
             }
         },
         'retro-arcade': {
+            label: 'Retro Arcade',
+            palette: ['#24201e', '#ff6b4a', '#8d2e2b', '#2f6f6a', '#f4ecd8'],
             '--qg-bg-from': '#24201e',
             '--qg-bg-to': '#5c2523',
             '--qg-accent': '#ff6b4a',
@@ -3137,12 +3155,14 @@ const QuizGame = (() => {
                 host: { face: '#ffe8c8', depth: '#c9b08a', text: '#3a1614', icon: '#3a1614' },
                 join: { face: '#ff6b4a', depth: '#c44f32', text: '#ffffff', icon: '#ffffff' },
                 dark: {
-                    host: { face: '#3a2a24', depth: '#241815', text: '#ffe8c8', icon: '#ff8a6e' },
-                    join: { face: '#5c2523', depth: '#3a1614', text: '#ffffff', icon: '#ffb8a8' }
+                    host: { face: '#1a120e', depth: '#0c0806', text: '#ffe8c8', icon: '#ff8a6e' },
+                    join: { face: '#2a100e', depth: '#140806', text: '#ffffff', icon: '#ffb8a8' }
                 }
             }
         },
         'kawaii-pastel': {
+            label: 'Kawaii Pastel',
+            palette: ['#7a4a63', '#f2a9c0', '#87d8cb', '#fff1a8', '#b39ddb'],
             '--qg-bg-from': '#7a4a63',
             '--qg-bg-to': '#b06a89',
             '--qg-accent': '#fff1a8',
@@ -3153,12 +3173,14 @@ const QuizGame = (() => {
                 host: { face: '#fff1a8', depth: '#d9c97a', text: '#4a2a3a', icon: '#4a2a3a' },
                 join: { face: '#f2a9c0', depth: '#d4869f', text: '#4a2a3a', icon: '#4a2a3a' },
                 dark: {
-                    host: { face: '#4a2a3a', depth: '#3f2432', text: '#fff1a8', icon: '#fff1a8' },
-                    join: { face: '#6b3b52', depth: '#4a2a3a', text: '#ffffff', icon: '#f2a9c0' }
+                    host: { face: '#241420', depth: '#120a10', text: '#fff8d0', icon: '#fff1a8' },
+                    join: { face: '#301828', depth: '#180c14', text: '#ffffff', icon: '#f2a9c0' }
                 }
             }
         },
         'mint-pop': {
+            label: 'Mint Pop',
+            palette: ['#14544c', '#1f6f65', '#a8dfc8', '#afdbea', '#fff4d5'],
             '--qg-bg-from': '#14544c',
             '--qg-bg-to': '#2f8d7d',
             '--qg-accent': '#a8dfc8',
@@ -3169,12 +3191,14 @@ const QuizGame = (() => {
                 host: { face: '#a8dfc8', depth: '#6fb89e', text: '#0a2c28', icon: '#0a2c28' },
                 join: { face: '#2f8d7d', depth: '#1f6f65', text: '#ffffff', icon: '#ffffff' },
                 dark: {
-                    host: { face: '#154f47', depth: '#0a2c28', text: '#e8fff6', icon: '#a8dfc8' },
-                    join: { face: '#1f6f65', depth: '#14544c', text: '#ffffff', icon: '#d6f5e9' }
+                    host: { face: '#081a18', depth: '#040e0c', text: '#eafff8', icon: '#a8dfc8' },
+                    join: { face: '#0c2622', depth: '#061412', text: '#ffffff', icon: '#d6f5e9' }
                 }
             }
         },
         'peach-cream': {
+            label: 'Peach Cream',
+            palette: ['#7a3b12', '#e8844f', '#ffc3a5', '#fff6e9', '#c46a35'],
             '--qg-bg-from': '#7a3b12',
             '--qg-bg-to': '#c46a35',
             '--qg-accent': '#ffc3a5',
@@ -3185,12 +3209,14 @@ const QuizGame = (() => {
                 host: { face: '#ffc3a5', depth: '#d99a7a', text: '#3f1d08', icon: '#3f1d08' },
                 join: { face: '#e8844f', depth: '#b86335', text: '#ffffff', icon: '#ffffff' },
                 dark: {
-                    host: { face: '#5c3018', depth: '#3f1d08', text: '#ffe8d8', icon: '#ffc3a5' },
-                    join: { face: '#7a3b12', depth: '#5c3018', text: '#ffffff', icon: '#ffc3a5' }
+                    host: { face: '#281408', depth: '#140a04', text: '#fff0e6', icon: '#ffc3a5' },
+                    join: { face: '#341808', depth: '#1a0c04', text: '#ffffff', icon: '#ffc3a5' }
                 }
             }
         },
         'pink-pop': {
+            label: 'Pink Pop',
+            palette: ['#7a1f47', '#c93f78', '#f6b3ca', '#ffffff', '#ff9ec4'],
             '--qg-bg-from': '#7a1f47',
             '--qg-bg-to': '#c93f78',
             '--qg-accent': '#f6b3ca',
@@ -3201,12 +3227,14 @@ const QuizGame = (() => {
                 host: { face: '#f6b3ca', depth: '#d486a8', text: '#440f27', icon: '#440f27' },
                 join: { face: '#c93f78', depth: '#9a2f5c', text: '#ffffff', icon: '#ffffff' },
                 dark: {
-                    host: { face: '#5a2040', depth: '#440f27', text: '#ffe8f2', icon: '#f6b3ca' },
-                    join: { face: '#7a1f47', depth: '#5a2040', text: '#ffffff', icon: '#f6b3ca' }
+                    host: { face: '#280818', depth: '#14040c', text: '#fff0f6', icon: '#f6b3ca' },
+                    join: { face: '#340c1e', depth: '#1a0610', text: '#ffffff', icon: '#f6b3ca' }
                 }
             }
         },
         'frost-white': {
+            label: 'Frost White',
+            palette: ['#3d4f6f', '#6c86ad', '#5b8fd9', '#cfcfcf', '#e8eef8'],
             '--qg-bg-from': '#3d4f6f',
             '--qg-bg-to': '#6c86ad',
             '--qg-accent': '#cfe3ff',
@@ -3217,8 +3245,8 @@ const QuizGame = (() => {
                 host: { face: '#e8eef8', depth: '#b8c4d8', text: '#1f2836', icon: '#1f2836' },
                 join: { face: '#8fa8c8', depth: '#6a849f', text: '#ffffff', icon: '#ffffff' },
                 dark: {
-                    host: { face: '#2a3548', depth: '#1f2836', text: '#e8eef8', icon: '#cfe3ff' },
-                    join: { face: '#3d4f6f', depth: '#2a3548', text: '#ffffff', icon: '#cfe3ff' }
+                    host: { face: '#121820', depth: '#080c12', text: '#eef4ff', icon: '#cfe3ff' },
+                    join: { face: '#182030', depth: '#0c1018', text: '#ffffff', icon: '#b8d4ff' }
                 }
             }
         }
@@ -3341,6 +3369,34 @@ const QuizGame = (() => {
     function enforceHostTheme() {
         const app = $('quiz-app');
         applyQuizTheme('default', app ? app.classList.contains('qg-dark') : false, { persist: false });
+        updateFloatingThemeBtn(document.querySelector('.qg-screen.active')?.id);
+    }
+
+    const THEME_PICKER_SCREENS = new Set(['screen-role', 'screen-join', 'screen-waiting']);
+
+    function updateFloatingThemeBtn(screenId) {
+        const btn = $('btn-floating-theme');
+        if (!btn) return;
+        btn.hidden = !THEME_PICKER_SCREENS.has(screenId) || role === 'host';
+    }
+
+    function renderThemePicker() {
+        const container = $('theme-picker-list');
+        if (!container) return;
+
+        container.innerHTML = THEME_PICKER_ORDER.map((themeId) => {
+            const theme = QUIZ_THEMES[themeId];
+            if (!theme) return '';
+
+            const segments = (theme.palette || []).map((color) =>
+                `<span class="qg-theme-bar-seg" style="--c:${color}"></span>`
+            ).join('');
+
+            return `<button type="button" class="qg-theme-bar qg-theme-swatch" data-theme="${themeId}" title="${theme.label || themeId}">
+                <span class="qg-theme-bar-name">${theme.label || themeId}</span>
+                <span class="qg-theme-bar-colors" aria-hidden="true">${segments}</span>
+            </button>`;
+        }).join('');
     }
 
     function applyQuizTheme(requestedTheme, isDark, options = {}) {
@@ -3440,7 +3496,7 @@ const QuizGame = (() => {
     }
 
     function updateThemeSwatches(activeTheme) {
-        document.querySelectorAll('.qg-theme-swatch').forEach(btn => {
+        document.querySelectorAll('.qg-theme-bar, .qg-theme-swatch').forEach(btn => {
             btn.classList.toggle('active', btn.dataset.theme === activeTheme);
         });
     }

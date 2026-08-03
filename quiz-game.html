@@ -27,6 +27,12 @@
             <span id="session-badge-code">------</span>
         </div>
 
+        <!-- ===== FLOATING THEME BUTTON ===== -->
+        <button type="button" class="qg-floating-theme-btn qg-open-theme-btn" id="btn-floating-theme"
+            title="Themes" aria-label="Open themes" hidden>
+            <i class="fa-solid fa-palette" aria-hidden="true"></i>
+        </button>
+
         <!-- ===== BACKGROUND ANIMATION LAYER ===== -->
         <canvas id="qg-bg-canvas" aria-hidden="true"></canvas>
 
@@ -48,11 +54,6 @@
                         <div class="qg-role-icon"><i class="fa-solid fa-gamepad"></i></div>
                         <h2>Join a Game</h2>
                         <p>Enter a game code to play</p>
-                    </button>
-                </div>
-                <div class="qg-intro-theme-wrap">
-                    <button type="button" class="qg-change-avatar-btn qg-open-theme-btn">
-                        <i class="fa-solid fa-palette"></i> Themes
                     </button>
                 </div>
                 <a href="tools.html" class="qg-back-link" id="btn-back-to-tools"><i class="fa-solid fa-arrow-left"></i> Back to Tools</a>
@@ -297,9 +298,6 @@
                         Next</button>
                 </div>
                 <p class="qg-join-error" id="join-error"></p>
-                <button type="button" class="qg-change-avatar-btn qg-open-theme-btn qg-join-theme-btn">
-                    <i class="fa-solid fa-palette"></i> Themes
-                </button>
             </div>
         </div>
 
@@ -329,9 +327,6 @@
                 <div class="qg-waiting-actions">
                     <button type="button" class="qg-change-avatar-btn" id="btn-change-avatar">
                         <i class="fa-solid fa-shuffle"></i> Change Avatar
-                    </button>
-                    <button type="button" class="qg-change-avatar-btn qg-open-theme-btn" id="btn-change-theme">
-                        <i class="fa-solid fa-palette"></i> Themes
                     </button>
                 </div>
                 <p class="qg-waiting-dots">Waiting for the host to start<span
@@ -551,42 +546,18 @@
         </div>
 
         <!-- ===== OVERLAY: Change Theme Modal ===== -->
-        <div class="qg-overlay" id="overlay-theme-modal"
-            style="align-items: center; justify-content: center; padding: 20px;">
-            <div class="qg-join-panel"
-                style="position: relative; max-width: 500px; padding: 30px; margin: 0 auto; text-align: center;">
-                <button class="qg-modal-close" id="btn-close-theme-modal"
-                    style="position: absolute; top: 15px; right: 20px; border: none; background: transparent; font-size: 1.8rem; color: #888; cursor: pointer; transition: color 0.2s;">
+        <div class="qg-overlay qg-theme-modal-overlay" id="overlay-theme-modal">
+            <div class="qg-theme-modal-panel">
+                <button class="qg-modal-close" id="btn-close-theme-modal" type="button"
+                    aria-label="Close theme panel">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
-                <h2 style="margin-bottom: 25px; color: var(--indigo-velvet); justify-content: center;">
+                <h2 class="qg-theme-modal-title">
                     <i class="fa-solid fa-palette"></i> Select Theme
                 </h2>
-                <div class="qg-theme-modal-content"
-                    style="display: flex; flex-direction: column; gap: 20px; align-items: center;">
-                    <div class="qg-theme-swatches"
-                        style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; width: 100%;">
-                        <button class="qg-theme-swatch active" data-theme="default" title="Classic"
-                            style="background: linear-gradient(135deg,#3d348b,#7678ed);">Classic</button>
-                        <button class="qg-theme-swatch" data-theme="gold-black" title="Gold Black"
-                            style="background: linear-gradient(135deg,#171717,#d5a94f);">Gold Black</button>
-                        <button class="qg-theme-swatch" data-theme="retro-arcade" title="Retro Arcade"
-                            style="background: linear-gradient(135deg,#24201e,#8d2e2b);">Retro Arcade</button>
-                        <button class="qg-theme-swatch" data-theme="kawaii-pastel" title="Kawaii Pastel"
-                            style="background: linear-gradient(135deg,#f2a9c0,#87d8cb);">Kawaii Pastel</button>
-                        <button class="qg-theme-swatch" data-theme="mint-pop" title="Mint Pop"
-                            style="background: linear-gradient(135deg,#1f6f65,#a8dfc8);">Mint Pop</button>
-                        <button class="qg-theme-swatch" data-theme="peach-cream" title="Peach Cream"
-                            style="background: linear-gradient(135deg,#e8844f,#ffe5cf);">Peach Cream</button>
-                        <button class="qg-theme-swatch" data-theme="pink-pop" title="Pink Pop"
-                            style="background: linear-gradient(135deg,#c93f78,#f6b3ca);">Pink Pop</button>
-                        <button class="qg-theme-swatch" data-theme="frost-white" title="Frost White"
-                            style="background: linear-gradient(135deg,#8fa8c8,#e8e8ec); color:#33415c;">Frost
-                            White</button>
-                    </div>
-
-                    <div style="width: 100%; height: 1px; background: rgba(0,0,0,0.05); margin: 5px 0;"></div>
-
+                <div class="qg-theme-modal-content">
+                    <div class="qg-theme-bars" id="theme-picker-list"></div>
+                    <div class="qg-theme-modal-divider"></div>
                     <div class="qg-dark-switch-wrap">
                         <label class="qg-dark-switch" id="qg-lobby-dark-toggle" title="Toggle dark mode">
                             <input type="checkbox" class="qg-dark-switch-input" id="qg-dark-checkbox"
