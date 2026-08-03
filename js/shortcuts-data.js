@@ -228,6 +228,37 @@ window.ShortcutsData = (() => {
         `;
     }
 
+    function normalizeShortcutKey(event) {
+        const key = String(event.key || '').toLowerCase();
+        if ((key === '=' || key === '+') && event.ctrlKey) return '+';
+        if (key === 'control') return 'ctrl';
+        if (key === 'meta' || key === 'os') return 'win';
+        return key;
+    }
+
+    /** True when a live KeyboardEvent matches the shortcut combo (modifiers + main key). */
+    function matchesKeyboardEvent(shortcut, event) {
+        if (!shortcut || !event) return false;
+        const required = shortcut.keys.map((k) => String(k).toLowerCase());
+        const needsCtrl = required.includes('ctrl');
+        const needsShift = required.includes('shift');
+        const needsAlt = required.includes('alt');
+        const needsMeta = required.includes('win');
+        const mainKey = required.find((item) => !['ctrl', 'shift', 'alt', 'win'].includes(item));
+        const pressed = normalizeShortcutKey(event);
+
+        return event.ctrlKey === needsCtrl &&
+            event.shiftKey === needsShift &&
+            event.altKey === needsAlt &&
+            event.metaKey === needsMeta &&
+            pressed === mainKey;
+    }
+
+    function isModifierOnlyEvent(event) {
+        const key = normalizeShortcutKey(event);
+        return ['ctrl', 'win', 'shift', 'alt', 'control', 'meta', 'os', 'capslock'].includes(key);
+    }
+
     return {
         SHORTCUTS,
         QUIZ_POOL,
@@ -237,6 +268,8 @@ window.ShortcutsData = (() => {
         normalizeComboKey,
         comboCapKeys,
         isComboCorrect,
+        matchesKeyboardEvent,
+        isModifierOnlyEvent,
         displayKey,
         formatCombo
     };

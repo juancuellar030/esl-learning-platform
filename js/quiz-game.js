@@ -36,14 +36,33 @@ const QuizGame = (() => {
     // Shortcut Combo question state (player side)
     let selectedKeys = new Set();
     let shortcutKeyboardBound = false;
+    let liveShortcutListener = null;
 
     // Answer slot shapes — shared by the host bars and the player tiles so a given
     // slot always looks the same on both screens.
-    const ANSWER_SHAPES = ['▲', '◆', '●', '■'];
+    const ANSWER_SHAPE_ICONS = [
+        'assets/images/live-quiz-icons/quiz-question-triangle.svg',
+        'assets/images/live-quiz-icons/quiz-question-diamond.svg',
+        'assets/images/live-quiz-icons/question-circle.svg',
+        'assets/images/live-quiz-icons/quiz-question-square.svg'
+    ];
 
-    // Questions saved before the Shortcut Combo type existed have no `type` field.
+    function getAnswerShapeHtml(index) {
+        const src = ANSWER_SHAPE_ICONS[index];
+        if (!src) return '';
+        return `<img class="qg-shape-icon" src="${src}" alt="" aria-hidden="true">`;
+    }
+
+    // Questions saved before shortcut sub-formats existed default to click-the-caps.
     function getQuestionType(q) {
-        return q && q.type === 'shortcut' ? 'shortcut' : 'mcq';
+        if (!q) return 'mcq';
+        if (q.type === 'shortcut') return 'shortcut';
+        return 'mcq';
+    }
+
+    function getShortcutFormat(q) {
+        if (!q || getQuestionType(q) !== 'shortcut') return null;
+        return q.shortcutFormat || 'click';
     }
 
     // Avatar library — 35 animal photos
@@ -56,13 +75,105 @@ const QuizGame = (() => {
     let lobbyShareInitialized = false;
     let lobbyQrInstance = null;
 
+    // Dev freeze — pause timers/auto-advance for layout/CSS tweaking (?freeze=1 or Shift+F)
+    let devFreeze = false;
+
+    function parseDevFlags() {
+        const params = new URLSearchParams(window.location.search);
+        if (params.has('freeze')) {
+            devFreeze = true;
+            localStorage.setItem('qg-dev-freeze', '1');
+        } else {
+            devFreeze = localStorage.getItem('qg-dev-freeze') === '1';
+        }
+        if (devFreeze) {
+            console.info('[QuizGame] Dev freeze ON — timers and auto-advance paused. Shift+F toggles; localStorage qg-dev-freeze=0 to disable.');
+        }
+    }
+
+    function isDevFreeze() {
+        return devFreeze;
+    }
+
+    function setDevFreeze(on) {
+        devFreeze = Boolean(on);
+        localStorage.setItem('qg-dev-freeze', on ? '1' : '0');
+        console.info(`[QuizGame] Dev freeze ${on ? 'ON' : 'OFF'}`);
+    }
+
+    function delayUnlessFrozen(fn, ms) {
+        if (isDevFreeze()) return null;
+        return setTimeout(fn, ms);
+    }
+
+    // Entry mode: host (from Tools) vs student (shared join link / QR)
+    let isStudentEntry = false;
+    let isHostEntry = true;
+    let urlJoinCode = null;
+
     function formatPlayerCountLabel(count) {
         if (count === 1) return '1 player joined';
         return count + ' players joined';
     }
 
-    function getDefaultShareUrl() {
+    function getPageBaseUrl() {
         return window.location.origin + window.location.pathname;
+    }
+
+    function getStudentJoinUrl(code) {
+        const params = new URLSearchParams({ join: '1' });
+        if (code) params.set('code', String(code).trim().toUpperCase());
+        return `${getPageBaseUrl()}?${params.toString()}`;
+    }
+
+    function parseEntryMode() {
+        const params = new URLSearchParams(window.location.search);
+        urlJoinCode = params.get('code')?.trim().toUpperCase() || null;
+        isStudentEntry = params.has('join') || Boolean(urlJoinCode);
+        isHostEntry = params.has('host') || !isStudentEntry;
+    }
+
+    function stripJoinParamsFromUrl() {
+        if (!window.location.search) return;
+        const params = new URLSearchParams(window.location.search);
+        if (!params.has('join') && !params.has('code')) return;
+        params.delete('join');
+        params.delete('code');
+        const qs = params.toString();
+        const next = window.location.pathname + (qs ? `?${qs}` : '') + window.location.hash;
+        history.replaceState(null, '', next);
+    }
+
+    function applyEntryModeUI() {
+        $('btn-role-host')?.classList.toggle('qg-hidden', isStudentEntry);
+        $('btn-back-to-tools')?.classList.toggle('qg-hidden', !isHostEntry);
+        $('btn-join-back')?.classList.toggle('qg-hidden', isStudentEntry);
+        document.querySelector('.qg-role-cards')
+            ?.classList.toggle('qg-role-cards--join-only', isStudentEntry);
+    }
+
+    function applyStudentEntryRoute() {
+        applyEntryModeUI();
+        if (!isStudentEntry) return;
+
+        if (urlJoinCode) {
+            $('join-code').value = urlJoinCode;
+        }
+        stripJoinParamsFromUrl();
+        showScreen('screen-join');
+    }
+
+    function goToEntryHome() {
+        if (isStudentEntry) {
+            applyStudentEntryRoute();
+        } else {
+            applyEntryModeUI();
+            showScreen('screen-role');
+        }
+    }
+
+    function getDefaultShareUrl() {
+        return getStudentJoinUrl(gameCode);
     }
 
     function isLocalhostHost() {
@@ -82,8 +193,8 @@ const QuizGame = (() => {
         if (typeof QRCode !== 'undefined') {
             lobbyQrInstance = new QRCode(qrWrap, {
                 text: url,
-                width: 140,
-                height: 140,
+                width: 112,
+                height: 112,
                 colorDark: '#2d1b4e',
                 colorLight: '#ffffff',
                 correctLevel: QRCode.CorrectLevel.M
@@ -91,13 +202,17 @@ const QuizGame = (() => {
         }
     }
 
-    function updateLobbyShareUI() {
+    function updateLobbyShareUI(code) {
         const urlInput = $('lobby-share-url');
         const tip = $('lobby-localhost-tip');
         if (!urlInput) return;
 
-        if (!lobbyShareInitialized) {
-            urlInput.value = getDefaultShareUrl();
+        const shareCode = code || gameCode;
+        if (shareCode) {
+            urlInput.value = getStudentJoinUrl(shareCode);
+            lobbyShareInitialized = true;
+        } else if (!lobbyShareInitialized) {
+            urlInput.value = getPageBaseUrl() + '?join=1';
             lobbyShareInitialized = true;
         }
 
@@ -120,6 +235,8 @@ const QuizGame = (() => {
     // ===== INITIALIZATION =====
     function init() {
         loadQuizTheme();
+        parseDevFlags();
+        parseEntryMode();
         FirebaseService.init().then(user => {
             bindEvents();
             populateCategories();
@@ -132,7 +249,10 @@ const QuizGame = (() => {
             const savedCode = sessionStorage.getItem('qg-last-code');
             if (savedCode && user) {
                 FirebaseService.getSession(savedCode).then(session => {
-                    if (!session) return;
+                    if (!session) {
+                        applyStudentEntryRoute();
+                        return;
+                    }
 
                     if (session.hostId === user.uid) {
                         console.log(`[QuizGame] Resuming host role for session: ${savedCode}`);
@@ -177,8 +297,12 @@ const QuizGame = (() => {
 
                         // Re-attach all player-side listeners consistently
                         setupPlayerListeners();
+                    } else {
+                        applyStudentEntryRoute();
                     }
-                });
+                }).catch(() => applyStudentEntryRoute());
+            } else {
+                applyStudentEntryRoute();
             }
         });
     }
@@ -271,8 +395,8 @@ const QuizGame = (() => {
     function bindEvents() {
         $('btn-role-host').addEventListener('click', () => showScreen('screen-setup'));
         $('btn-role-join').addEventListener('click', () => showScreen('screen-join'));
-        $('btn-setup-back').addEventListener('click', () => showScreen('screen-role'));
-        $('btn-join-back').addEventListener('click', () => showScreen('screen-role'));
+        $('btn-setup-back').addEventListener('click', () => goToEntryHome());
+        $('btn-join-back').addEventListener('click', () => goToEntryHome());
         $('btn-create-game').addEventListener('click', createGame);
         $('btn-join-next').addEventListener('click', joinStep1);
         $('btn-avatar-back').addEventListener('click', () => showScreen('screen-join'));
@@ -285,11 +409,14 @@ const QuizGame = (() => {
             shareUrlInput.addEventListener('change', renderLobbyQR);
             shareUrlInput.addEventListener('blur', renderLobbyQR);
         }
+
+        $('btn-copy-join-url')?.addEventListener('click', (e) => copyLobbyText($('lobby-share-url')?.value.trim(), e.currentTarget));
+        $('btn-copy-game-code')?.addEventListener('click', (e) => copyLobbyText(gameCode || '', e.currentTarget));
         $('btn-play-again').addEventListener('click', playAgain);
         $('btn-new-game').addEventListener('click', () => {
             sessionStorage.removeItem('qg-last-code');
             cleanup();
-            showScreen('screen-role');
+            goToEntryHome();
         });
         $('btn-change-avatar').addEventListener('click', toggleWaitingAvatars);
         $('btn-close-avatar-modal').addEventListener('click', toggleWaitingAvatars);
@@ -412,12 +539,11 @@ const QuizGame = (() => {
         });
 
         // Theme modal open/close
-        const btnChangeTheme = $('btn-change-theme');
-        if (btnChangeTheme) {
-            btnChangeTheme.addEventListener('click', () => {
+        document.querySelectorAll('.qg-open-theme-btn').forEach((btn) => {
+            btn.addEventListener('click', () => {
                 $('overlay-theme-modal').style.display = 'flex';
             });
-        }
+        });
         const btnCloseThemeModal = $('btn-close-theme-modal');
         if (btnCloseThemeModal) {
             btnCloseThemeModal.addEventListener('click', () => {
@@ -426,16 +552,15 @@ const QuizGame = (() => {
         }
 
         // Lobby dark mode toggle
-        const darkToggle = $('qg-lobby-dark-toggle');
-        if (darkToggle) {
-            darkToggle.addEventListener('click', () => {
+        const darkCheckbox = $('qg-dark-checkbox');
+        if (darkCheckbox) {
+            darkCheckbox.addEventListener('change', () => {
                 const app = $('quiz-app');
-                const isDark = app.classList.contains('qg-dark');
+                const isDark = darkCheckbox.checked;
                 const currentTheme = app.dataset.theme || 'default';
-                applyQuizTheme(currentTheme, !isDark);
+                applyQuizTheme(currentTheme, isDark);
 
-                // Sync global body dark mode
-                if (!isDark) {
+                if (isDark) {
                     document.body.classList.add('dark-mode');
                     localStorage.setItem('dark-mode', 'enabled');
                 } else {
@@ -447,6 +572,12 @@ const QuizGame = (() => {
 
         $('btn-download-results')?.addEventListener('click', downloadScoreboard);
         $('btn-save-drive')?.addEventListener('click', () => driveService?.openModal());
+
+        document.addEventListener('keydown', (e) => {
+            if (e.shiftKey && e.key.toLowerCase() === 'f') {
+                setDevFreeze(!devFreeze);
+            }
+        });
     }
 
     function adjustStepper(id, delta, min, max) {
@@ -457,6 +588,22 @@ const QuizGame = (() => {
     }
 
     // ===== CATEGORIES =====
+    function copyLobbyText(text, buttonEl) {
+        if (!text) return;
+        const showCopied = () => {
+            if (!buttonEl) return;
+            const original = buttonEl.innerHTML;
+            buttonEl.innerHTML = '<i class="fa-solid fa-check"></i> Copied';
+            setTimeout(() => {
+                buttonEl.innerHTML = original;
+            }, 1600);
+        };
+
+        if (navigator.clipboard?.writeText) {
+            navigator.clipboard.writeText(text).then(showCopied).catch(() => {});
+        }
+    }
+
     function populateCategories() {
         const cats = {};
         (window.vocabularyBank || []).forEach(w => {
@@ -690,7 +837,7 @@ const QuizGame = (() => {
                 const shortcut = window.ShortcutsData
                     ? ShortcutsData.SHORTCUTS.find(s => s.id === item.shortcutId)
                     : null;
-                const built = shortcut ? buildShortcutQuestion(shortcut) : null;
+                const built = shortcut ? buildShortcutQuestion(shortcut, 'click', ShortcutsData.QUIZ_POOL) : null;
                 if (built) qs.push(built);
                 continue;
             }
@@ -878,17 +1025,17 @@ const QuizGame = (() => {
     }
 
     /**
-     * Builds a Shortcut Combo question. The answer is encoded as a two-slot choice
-     * (1 = correct combo, 0 = anything else) so the existing scoring, reveal and
-     * host-tally code paths work untouched.
+     * Shortcut questions use three player-facing formats that rotate in the
+     * Keyboard Shortcuts source: click caps, pick the combo (MCQ), or press live.
      */
-    function buildShortcutQuestion(shortcut) {
+    function buildShortcutClickQuestion(shortcut) {
         const keys = ShortcutsData.comboCapKeys(shortcut);
         if (!keys) return null;
 
         return {
             type: 'shortcut',
-            text: `Which keys do this: "${shortcut.label}"?`,
+            shortcutFormat: 'click',
+            text: `Click the keys for: "${shortcut.label}"`,
             shortcutId: shortcut.id,
             keys: keys,
             combo: ShortcutsData.formatCombo(shortcut),
@@ -897,6 +1044,59 @@ const QuizGame = (() => {
             word: shortcut.label,
             category: shortcut.category
         };
+    }
+
+    function buildShortcutMcqQuestion(shortcut, pool) {
+        const keys = ShortcutsData.comboCapKeys(shortcut);
+        if (!keys) return null;
+
+        const correctCombo = ShortcutsData.formatCombo(shortcut);
+        const distractors = shuffle([...pool])
+            .filter((s) => s.id !== shortcut.id)
+            .slice(0, 3)
+            .map((s) => ShortcutsData.formatCombo(s));
+
+        while (distractors.length < 3) {
+            distractors.push('Ctrl + Z');
+        }
+
+        const options = shuffle([correctCombo, ...distractors.slice(0, 3)]);
+        return {
+            type: 'shortcut',
+            shortcutFormat: 'mcq',
+            text: `What is the keyboard shortcut for "${shortcut.label}"?`,
+            shortcutId: shortcut.id,
+            keys: keys,
+            combo: correctCombo,
+            options: options,
+            correctIndex: options.indexOf(correctCombo),
+            word: shortcut.label,
+            category: shortcut.category
+        };
+    }
+
+    function buildShortcutLiveQuestion(shortcut) {
+        const keys = ShortcutsData.comboCapKeys(shortcut);
+        if (!keys) return null;
+
+        return {
+            type: 'shortcut',
+            shortcutFormat: 'live',
+            text: `Press the keyboard shortcut for "${shortcut.label}"`,
+            shortcutId: shortcut.id,
+            keys: keys,
+            combo: ShortcutsData.formatCombo(shortcut),
+            options: ['Incorrect', 'Correct'],
+            correctIndex: 1,
+            word: shortcut.label,
+            category: shortcut.category
+        };
+    }
+
+    function buildShortcutQuestion(shortcut, format, pool) {
+        if (format === 'mcq') return buildShortcutMcqQuestion(shortcut, pool);
+        if (format === 'live') return buildShortcutLiveQuestion(shortcut);
+        return buildShortcutClickQuestion(shortcut);
     }
 
     function generateShortcutQuestions(count) {
@@ -911,7 +1111,15 @@ const QuizGame = (() => {
             return null;
         }
 
-        return pool.slice(0, count).map(buildShortcutQuestion).filter(Boolean);
+        const formats = [];
+        for (let i = 0; i < count; i++) {
+            formats.push(['click', 'mcq', 'live'][i % 3]);
+        }
+        shuffle(formats);
+
+        return pool.slice(0, count).map((shortcut, i) => {
+            return buildShortcutQuestion(shortcut, formats[i], pool);
+        }).filter(Boolean);
     }
 
     function shuffle(arr) {
@@ -990,7 +1198,7 @@ const QuizGame = (() => {
         // Animate code display
         const codeEl = $('game-code-display');
         codeEl.innerHTML = code.split('').map(c => `<span>${c}</span>`).join('');
-        updateLobbyShareUI();
+        updateLobbyShareUI(code);
         renderLobbyPlayers();
         showScreen('screen-lobby');
         // Show session code badge for host
@@ -1056,7 +1264,7 @@ const QuizGame = (() => {
         if (gameCode) FirebaseService.deleteSession(gameCode);
         sessionStorage.removeItem('qg-last-code');
         cleanup();
-        showScreen('screen-role');
+        goToEntryHome();
     }
 
     function showDisconnectScreen(title, message) {
@@ -1383,7 +1591,7 @@ const QuizGame = (() => {
             answersEl.appendChild(div);
         };
 
-        if (getQuestionType(q) === 'shortcut') {
+        if (getQuestionType(q) === 'shortcut' && getShortcutFormat(q) !== 'mcq') {
             addBar(0, '<i class="fa-solid fa-xmark"></i>', 'Incorrect', 'qg-tv-answer-tally');
             addBar(1, '<i class="fa-solid fa-check"></i>',
                 'Correct — ' + (q.combo || ''), 'qg-tv-answer-tally');
@@ -1392,7 +1600,7 @@ const QuizGame = (() => {
 
         q.options.forEach((opt, i) => {
             if (!opt || opt.trim() === '') return;
-            addBar(i, ANSWER_SHAPES[i], opt);
+            addBar(i, getAnswerShapeHtml(i), opt);
         });
     }
 
@@ -1403,7 +1611,10 @@ const QuizGame = (() => {
 
         updateTimerUI(total, total);
 
+        if (isDevFreeze()) return;
+
         timerInterval = setInterval(() => {
+            if (isDevFreeze()) return;
             timeLeft -= 0.1;
             if (timeLeft <= 0) {
                 timeLeft = 0;
@@ -1591,7 +1802,7 @@ const QuizGame = (() => {
             }
         } else {
             // Automatic mode: wait then advance
-            setTimeout(() => {
+            delayUnlessFrozen(() => {
                 nextQuestion();
             }, 3000);
         }
@@ -1710,7 +1921,7 @@ const QuizGame = (() => {
 
         // Apply pending powerups
         let timerDuration = config.timer;
-        if (pendingPowerup === '5050' && getQuestionType(q) === 'mcq') {
+        if (pendingPowerup === '5050' && (getQuestionType(q) === 'mcq' || getShortcutFormat(q) === 'mcq')) {
             // Remove 2 wrong answers
             const wrongIndices = [];
             q.options.forEach((_, i) => { if (i !== q.correctIndex) wrongIndices.push(i); });
@@ -1778,7 +1989,7 @@ const QuizGame = (() => {
 
             // Apply pending powerups
             let timerDuration = config.timer;
-            if (pendingPowerup === '5050' && getQuestionType(q) === 'mcq') {
+            if (pendingPowerup === '5050' && (getQuestionType(q) === 'mcq' || getShortcutFormat(q) === 'mcq')) {
                 const wrongIndices = [];
                 q.options.forEach((_, i) => { if (i !== q.correctIndex) wrongIndices.push(i); });
                 wrongIndices.sort(() => Math.random() - 0.5);
@@ -1812,9 +2023,20 @@ const QuizGame = (() => {
      * which the 50/50 powerup and the shared answer-submission path still rely on.
      */
     function renderPlayerAnswerArea(q) {
+        stopLiveShortcutListener();
+        const studentView = $('student-view');
         const isShortcut = getQuestionType(q) === 'shortcut';
-        $('sv-answers').classList.toggle('qg-hidden', isShortcut);
-        $('sv-shortcut').classList.toggle('qg-hidden', !isShortcut);
+        const format = isShortcut ? getShortcutFormat(q) : null;
+        const isShortcutMcq = format === 'mcq';
+        const isShortcutClick = format === 'click';
+        const isShortcutLive = format === 'live';
+
+        studentView?.classList.toggle('qg-has-shortcut', isShortcutClick);
+        studentView?.classList.toggle('qg-has-shortcut-live', isShortcutLive);
+
+        $('sv-answers').classList.toggle('qg-hidden', !isShortcutMcq && isShortcut);
+        $('sv-shortcut').classList.toggle('qg-hidden', !isShortcutClick);
+        $('sv-shortcut-live').classList.toggle('qg-hidden', !isShortcutLive);
 
         const btns = document.querySelectorAll('.qg-answer-btn');
         btns.forEach((btn, i) => {
@@ -1822,17 +2044,14 @@ const QuizGame = (() => {
             btn.disabled = false;
             btn.style.opacity = '1';
 
-            if (isShortcut) {
-                // Left in the DOM but hidden: a shortcut answer is submitted as slot 1
-                // (correct) or slot 0 (incorrect), so the existing reveal and scoring
-                // code can keep reading the selected tile with no special cases.
+            if (isShortcut && !isShortcutMcq) {
                 btn.textContent = '';
                 btn.style.display = 'none';
                 return;
             }
 
             const opt = q.options && q.options[i];
-            if (opt && opt.trim() !== '') {
+            if (opt && String(opt).trim() !== '') {
                 setAnswerTile(btn, i, opt);
                 btn.style.display = '';
             } else {
@@ -1840,13 +2059,13 @@ const QuizGame = (() => {
             }
         });
 
-        if (isShortcut) renderShortcutQuestion(q);
+        if (isShortcutClick) renderShortcutClickQuestion(q);
+        else if (isShortcutLive) renderShortcutLiveQuestion(q);
         return btns;
     }
 
     function setAnswerTile(btn, index, text) {
-        btn.innerHTML = `<span class="qg-tile-shape" aria-hidden="true">${ANSWER_SHAPES[index]}</span>`
-            + '<span class="qg-tile-text"></span>';
+        btn.innerHTML = `${getAnswerShapeHtml(index)}<span class="qg-tile-text"></span>`;
         btn.querySelector('.qg-tile-text').textContent = text;
     }
 
@@ -1866,16 +2085,14 @@ const QuizGame = (() => {
         return labels[key] || String(key).toUpperCase();
     }
 
-    function renderShortcutQuestion(q) {
+    function renderShortcutClickQuestion(q) {
         const container = $('sv-keyboard');
         if (!container || !window.ShortcutsData) return;
 
         selectedKeys = new Set();
-        // No combo in the shortcut set uses a numpad key, and the numpad crowds the
-        // main rows at the widths students play on, so it is left out here.
         ShortcutsData.renderVirtualKeyboard(container, {
             paletteClass: getKeyboardPaletteClass(),
-            includeNumpad: false
+            includeNumpad: true
         });
         container.classList.remove('qg-keyboard-locked');
         bindShortcutKeyboard();
@@ -1886,7 +2103,93 @@ const QuizGame = (() => {
             : 'Click every key in the combo, then submit.';
 
         setShortcutLocked(false);
-        updateShortcutSelectionLabel();
+    }
+
+    function resetLiveKeyDisplay(message = 'Waiting for keypress…') {
+        const keysEl = $('sv-shortcut-live-keys');
+        const selectionEl = $('sv-shortcut-selection');
+        if (keysEl) {
+            keysEl.innerHTML = '<span class="qg-live-keycap qg-live-keycap--placeholder">Press keys…</span>';
+        }
+        if (selectionEl) selectionEl.textContent = message;
+    }
+
+    function updateLiveKeyDisplay(event) {
+        const keysEl = $('sv-shortcut-live-keys');
+        const selectionEl = $('sv-shortcut-selection');
+        if (!keysEl || !event) return;
+
+        const pressed = [];
+        if (event.ctrlKey) pressed.push('control');
+        if (event.shiftKey) pressed.push('shift');
+        if (event.altKey) pressed.push('alt');
+        if (event.metaKey) pressed.push('meta');
+
+        const mainKey = ShortcutsData.normalizeComboKey(
+            event.key === 'Control' ? 'ctrl'
+                : event.key === 'Meta' ? 'win'
+                    : String(event.key || '').toLowerCase()
+        );
+        const isModifier = ['ctrl', 'control', 'shift', 'alt', 'win', 'meta'].includes(mainKey);
+        if (mainKey && !isModifier) pressed.push(mainKey);
+
+        if (!pressed.length) {
+            resetLiveKeyDisplay();
+            return;
+        }
+
+        const labels = pressed.map((key) => formatCapLabel(key === 'control' ? 'control' : key));
+        keysEl.innerHTML = labels.map((label) => `<span class="qg-live-keycap">${escapeHtml(label)}</span>`).join('<span class="qg-live-keycap-plus" aria-hidden="true">+</span>');
+        if (selectionEl) selectionEl.textContent = labels.join(' + ');
+    }
+
+    function renderShortcutLiveQuestion(q) {
+        const reveal = $('sv-shortcut-live-reveal');
+        if (!window.ShortcutsData) return;
+
+        $('sv-shortcut-live-hint').textContent =
+            `Press the keyboard shortcut for "${q.word || 'this action'}" on your keyboard.`;
+        resetLiveKeyDisplay();
+        if (reveal) {
+            reveal.textContent = '';
+            reveal.classList.add('qg-hidden');
+        }
+
+        startLiveShortcutListener();
+    }
+
+    function startLiveShortcutListener() {
+        stopLiveShortcutListener();
+        liveShortcutListener = (event) => handleLiveShortcutKeydown(event);
+        document.addEventListener('keydown', liveShortcutListener, true);
+    }
+
+    function stopLiveShortcutListener() {
+        if (!liveShortcutListener) return;
+        document.removeEventListener('keydown', liveShortcutListener, true);
+        liveShortcutListener = null;
+    }
+
+    function handleLiveShortcutKeydown(event) {
+        if (hasAnswered || timeLeft <= 0) return;
+        const q = questions[currentQ];
+        if (!q || getShortcutFormat(q) !== 'live') return;
+        if (event.repeat) return;
+        if (event.key === 'Escape') return;
+
+        updateLiveKeyDisplay(event);
+        if (ShortcutsData.isModifierOnlyEvent(event)) return;
+
+        const shortcut = ShortcutsData.SHORTCUTS.find((s) => s.id === q.shortcutId);
+        if (!shortcut) return;
+
+        event.preventDefault();
+        const correct = ShortcutsData.matchesKeyboardEvent(shortcut, event);
+        const selectionEl = $('sv-shortcut-selection');
+        if (selectionEl) {
+            selectionEl.textContent = correct ? 'Correct combo!' : 'That was not the right shortcut.';
+        }
+        selectAnswer(correct ? 1 : 0);
     }
 
     function bindShortcutKeyboard() {
@@ -1925,15 +2228,6 @@ const QuizGame = (() => {
         });
 
         playSound('click');
-        updateShortcutSelectionLabel();
-    }
-
-    function updateShortcutSelectionLabel() {
-        const el = $('sv-shortcut-selection');
-        if (!el) return;
-        el.textContent = selectedKeys.size
-            ? [...selectedKeys].map(formatCapLabel).join(' + ')
-            : 'No keys selected';
     }
 
     function clearShortcutSelection() {
@@ -1946,13 +2240,12 @@ const QuizGame = (() => {
                 cap.setAttribute('aria-pressed', 'false');
             });
         }
-        updateShortcutSelectionLabel();
     }
 
     function submitShortcutAnswer() {
         if (hasAnswered || timeLeft <= 0) return;
         const q = questions[currentQ];
-        if (!q || getQuestionType(q) !== 'shortcut') return;
+        if (!q || getShortcutFormat(q) !== 'click') return;
         if (!selectedKeys.size || !window.ShortcutsData) return;
 
         const correct = ShortcutsData.isComboCorrect([...selectedKeys], q.keys || []);
@@ -1970,8 +2263,23 @@ const QuizGame = (() => {
 
     function revealShortcutKeys() {
         const q = questions[currentQ];
+        const format = getShortcutFormat(q);
+
+        if (format === 'live') {
+            stopLiveShortcutListener();
+            const reveal = $('sv-shortcut-live-reveal');
+            resetLiveKeyDisplay('Time is up.');
+            if (reveal) {
+                reveal.textContent = 'Answer: ' + (q.combo || '');
+                reveal.classList.remove('qg-hidden');
+            }
+            return;
+        }
+
+        if (format !== 'click') return;
+
         const container = $('sv-keyboard');
-        if (!container || !q || getQuestionType(q) !== 'shortcut') return;
+        if (!container || !q) return;
 
         setShortcutLocked(true);
         const expected = (q.keys || []).map(k => String(k).toLowerCase());
@@ -1987,7 +2295,10 @@ const QuizGame = (() => {
         timeLeft = remaining;
         updateTimerUI(timeLeft, total);
 
+        if (isDevFreeze()) return;
+
         timerInterval = setInterval(() => {
+            if (isDevFreeze()) return;
             timeLeft -= 0.1;
             if (timeLeft <= 0) {
                 timeLeft = 0;
@@ -2012,7 +2323,7 @@ const QuizGame = (() => {
                     if (!FirebaseService.isDemo()) {
                         FirebaseService.updatePlayerScore(gameCode, FirebaseService.getUid(), myScore, myStreak);
                     }
-                    setTimeout(() => studentPacedNextQuestion(), 2000);
+                    delayUnlessFrozen(() => studentPacedNextQuestion(), 2000);
                 }
             }
             updateTimerUI(timeLeft, total);
@@ -2030,6 +2341,7 @@ const QuizGame = (() => {
 
         playSound('click');
         setShortcutLocked(true);
+        if (getShortcutFormat(questions[currentQ]) === 'live') stopLiveShortcutListener();
 
         // Submit to Firebase
         FirebaseService.submitAnswer(gameCode, index);
@@ -2082,7 +2394,7 @@ const QuizGame = (() => {
         }
 
         // Auto-advance to next question after brief delay
-        setTimeout(() => {
+        delayUnlessFrozen(() => {
             if (config.bonusEnabled && (currentQ + 1) % config.bonusFrequency === 0 && (currentQ + 1) < questions.length) {
                 startBonusStage('student-paced');
             } else {
@@ -2138,6 +2450,7 @@ const QuizGame = (() => {
     function disableAnswerButtons() {
         document.querySelectorAll('.qg-answer-btn').forEach(btn => btn.classList.add('disabled'));
         setShortcutLocked(true);
+        stopLiveShortcutListener();
     }
 
     function updateStreakDisplay() {
@@ -2210,12 +2523,38 @@ const QuizGame = (() => {
         playSound('podium');
     }
 
+    function hideShortcutPanels() {
+        $('sv-shortcut')?.classList.add('qg-hidden');
+        $('sv-shortcut-live')?.classList.add('qg-hidden');
+        $('student-view')?.classList.remove('qg-has-shortcut');
+        stopLiveShortcutListener();
+    }
+
+    function renderPodiumAvatar(container, avatarId, medal) {
+        if (!container) return;
+        let imgHtml = '';
+        if (avatarId && avatarId.startsWith('animal_')) {
+            const idx = parseInt(avatarId.replace('animal_', ''), 10);
+            if (!Number.isNaN(idx)) {
+                imgHtml = `<img class="qg-podium-avatar-img" src="${getAvatarSrc(idx)}" alt="">`;
+            }
+        }
+        container.innerHTML = `${imgHtml}<span class="qg-podium-medal" aria-hidden="true">${medal}</span>`;
+    }
+
     function renderResults(playerData) {
         const sorted = Object.entries(playerData || {})
-            .map(([uid, p]) => ({ uid, name: p.name, score: p.score || 0, streak: p.streak || 0 }))
+            .map(([uid, p]) => ({
+                uid,
+                name: p.name,
+                score: p.score || 0,
+                streak: p.streak || 0,
+                avatar: p.avatar || ''
+            }))
             .sort((a, b) => b.score - a.score);
 
         lastSortedResults = sorted;
+        const medals = ['🥇', '🥈', '🥉'];
 
         // Podium
         for (let i = 0; i < 3; i++) {
@@ -2223,6 +2562,7 @@ const QuizGame = (() => {
             if (sorted[i]) {
                 place.querySelector('.qg-podium-name').textContent = sorted[i].name;
                 place.querySelector('.qg-podium-score').textContent = sorted[i].score + ' pts';
+                renderPodiumAvatar(place.querySelector('.qg-podium-avatar'), sorted[i].avatar, medals[i]);
                 place.style.display = '';
             } else {
                 place.style.display = 'none';
@@ -2287,7 +2627,7 @@ const QuizGame = (() => {
             }
 
             // Wait for players to finish bonus then resume
-            setTimeout(() => {
+            delayUnlessFrozen(() => {
                 $('tv-bonus-indicator').classList.add('qg-hidden');
                 $('tv-question').classList.remove('qg-hidden');
                 $('tv-answers').classList.remove('qg-hidden');
@@ -2305,6 +2645,7 @@ const QuizGame = (() => {
         $('sv-question').classList.add('qg-hidden');
         $('sv-answers').classList.add('qg-hidden');
         $('sv-timer-container').classList.add('qg-hidden');
+        hideShortcutPanels();
 
         const bonusContainer = $('sv-bonus-container');
         bonusContainer.classList.remove('qg-hidden');
@@ -2358,45 +2699,62 @@ const QuizGame = (() => {
             grid.appendChild(wrapper);
         });
 
+        if (isDevFreeze()) {
+            grid.querySelectorAll('.qg-bonus-card').forEach(c => c.classList.add('is-flipped'));
+            shuffleBonusCards(grid, rewards, context, { instant: true });
+            return;
+        }
+
         // Phase 1: Show rewards for 3 seconds (cards are face-up)
-        setTimeout(() => {
+        delayUnlessFrozen(() => {
             // Phase 2: Flip cards face-down (add is-flipped to show the question-mark side)
             const cards = grid.querySelectorAll('.qg-bonus-card');
             cards.forEach(c => c.classList.add('is-flipped'));
 
             // Phase 3: Start shuffling after the flip animation completes
-            setTimeout(() => {
+            delayUnlessFrozen(() => {
                 shuffleBonusCards(grid, rewards, context);
             }, 800);
         }, 3000);
     }
 
-    function shuffleBonusCards(grid, rewards, context) {
+    function shuffleBonusCards(grid, rewards, context, options = {}) {
         grid.parentNode.classList.add('shuffling');
         const wrappers = Array.from(grid.querySelectorAll('.qg-bonus-card-wrapper'));
         let positions = [0, 1, 2, 3, 4, 5];
 
+        function applyPositions(nextPositions) {
+            wrappers.forEach((w, i) => {
+                w.className = `qg-bonus-card-wrapper qg-bonus-pos-${nextPositions[i]}`;
+            });
+        }
+
+        function enableCardClicks() {
+            grid.parentNode.classList.remove('shuffling');
+            wrappers.forEach((w, i) => {
+                const card = w.querySelector('.qg-bonus-card');
+                card.addEventListener('click', () => {
+                    if (!isBonusActive) return;
+                    selectBonusCard(card, rewards[i], context, grid);
+                }, { once: true });
+            });
+        }
+
+        if (options.instant) {
+            applyPositions(positions.sort(() => Math.random() - 0.5));
+            enableCardClicks();
+            return;
+        }
+
         let shuffles = 0;
         const shuffleInterval = setInterval(() => {
             positions = positions.sort(() => Math.random() - 0.5);
-
-            wrappers.forEach((w, i) => {
-                w.className = `qg-bonus-card-wrapper qg-bonus-pos-${positions[i]}`;
-            });
+            applyPositions(positions);
 
             shuffles++;
-            if (shuffles > 8) {
+            if (shuffles > 10) {
                 clearInterval(shuffleInterval);
-                grid.parentNode.classList.remove('shuffling');
-
-                // Enable clicks — cards are still face-down (is-flipped)
-                wrappers.forEach((w, i) => {
-                    const card = w.querySelector('.qg-bonus-card');
-                    card.addEventListener('click', () => {
-                        if (!isBonusActive) return;
-                        selectBonusCard(card, rewards[i], context, grid);
-                    }, { once: true });
-                });
+                enableCardClicks();
             }
         }, 400);
     }
@@ -2442,8 +2800,9 @@ const QuizGame = (() => {
         }
 
         // Leave visible for a moment then resume
-        setTimeout(() => {
+        delayUnlessFrozen(() => {
             $('sv-bonus-container').classList.add('qg-hidden');
+            hideShortcutPanels();
             if (context === 'student-paced') {
                 studentPacedNextQuestion();
             } else {
@@ -2642,6 +3001,7 @@ const QuizGame = (() => {
     // ===== CLEANUP =====
     function cleanup() {
         clearInterval(timerInterval);
+        stopLiveShortcutListener();
         listeners.forEach(unsub => { if (typeof unsub === 'function') unsub(); });
         listeners = [];
         role = null;
@@ -2666,7 +3026,7 @@ const QuizGame = (() => {
             showScreen('screen-setup');
         } else {
             cleanup();
-            showScreen('screen-role');
+            goToEntryHome();
         }
     }
 
@@ -2713,67 +3073,31 @@ const QuizGame = (() => {
             '--qg-accent': '#f7b801',
             '--qg-particle': 'rgba(255,255,255,0.08)',
             keyboard: 'keyboard--palette-classic',
-            dark: { '--qg-bg-from': '#1a1530', '--qg-bg-to': '#2c2a5a' }
+            dark: { '--qg-bg-from': '#1a1530', '--qg-bg-to': '#2c2a5a' },
+            roleCards: {
+                host: { face: '#f7b801', depth: '#b88a00', text: '#1a1530', icon: '#1a1530' },
+                join: { face: '#9b9eff', depth: '#5c5fd4', text: '#ffffff', icon: '#ffffff' },
+                dark: {
+                    host: { face: '#2c2860', depth: '#1a1530', text: '#ffffff', icon: '#f7b801' },
+                    join: { face: '#3d3a7a', depth: '#2c2860', text: '#ffffff', icon: '#c8caff' }
+                }
+            }
         },
-        'neon': {
-            '--qg-bg-from': '#05050f',
-            '--qg-bg-to': '#0d0d2b',
-            '--qg-accent': '#00f5ff',
-            '--qg-particle': 'rgba(0,245,255,0.12)',
-            keyboard: 'keyboard--palette-gold-black',
-            dark: { '--qg-bg-from': '#02020a', '--qg-bg-to': '#080820' }
-        },
-        'forest': {
-            '--qg-bg-from': '#1a3d2b',
-            '--qg-bg-to': '#2d6a4f',
-            '--qg-accent': '#52b788',
-            '--qg-particle': 'rgba(82,183,136,0.12)',
-            keyboard: 'keyboard--palette-mint-pop',
-            dark: { '--qg-bg-from': '#0a1a11', '--qg-bg-to': '#152d1e' }
-        },
-        'winter': {
-            '--qg-bg-from': '#4a9bbe',
-            '--qg-bg-to': '#2a7fa8',
-            '--qg-accent': '#caf0f8',
-            '--qg-particle': 'rgba(255,255,255,0.18)',
-            keyboard: 'keyboard--palette-frost-white',
-            dark: { '--qg-bg-from': '#0a2233', '--qg-bg-to': '#1a3a55' }
-        },
-        'candy': {
-            '--qg-bg-from': '#a8005a',
-            '--qg-bg-to': '#6a00c0',
-            '--qg-accent': '#ff9de2',
-            '--qg-particle': 'rgba(255,157,226,0.14)',
-            keyboard: 'keyboard--palette-pink-pop',
-            dark: { '--qg-bg-from': '#3d0030', '--qg-bg-to': '#28004a' }
-        },
-        'pastel': {
-            '--qg-bg-from': '#b57bee',
-            '--qg-bg-to': '#ee88b5',
-            '--qg-accent': '#fff0f8',
-            '--qg-particle': 'rgba(255,255,255,0.14)',
-            keyboard: 'keyboard--palette-kawaii-pastel',
-            dark: { '--qg-bg-from': '#3d1f5a', '--qg-bg-to': '#5a1f3a' }
-        },
-        'ocean': {
-            '--qg-bg-from': '#023e8a',
-            '--qg-bg-to': '#0077b6',
-            '--qg-accent': '#90e0ef',
-            '--qg-particle': 'rgba(144,224,239,0.14)',
-            keyboard: 'keyboard--palette-frost-white',
-            dark: { '--qg-bg-from': '#03045e', '--qg-bg-to': '#023e8a' }
-        },
-
-        // Palettes shared with the Keyboard Shortcut Playground. Their backgrounds are
-        // deepened versions of the palette so the app's white chrome text stays readable —
-        // the palette identity lives in the answer tiles and the keycaps.
         'gold-black': {
             '--qg-bg-from': '#171717',
             '--qg-bg-to': '#3a2f14',
             '--qg-accent': '#e4bf70',
             '--qg-particle': 'rgba(228,191,112,0.14)',
             keyboard: 'keyboard--palette-gold-black',
-            dark: { '--qg-bg-from': '#0d0d0d', '--qg-bg-to': '#241d0c' }
+            dark: { '--qg-bg-from': '#0d0d0d', '--qg-bg-to': '#241d0c' },
+            roleCards: {
+                host: { face: '#e4bf70', depth: '#9a7430', text: '#141414', icon: '#141414' },
+                join: { face: '#f0d48a', depth: '#b89442', text: '#141414', icon: '#141414' },
+                dark: {
+                    host: { face: '#2a2418', depth: '#141414', text: '#f5e6c0', icon: '#e4bf70' },
+                    join: { face: '#1f1f1f', depth: '#0d0d0d', text: '#f5e6c0', icon: '#e4bf70' }
+                }
+            }
         },
         'retro-arcade': {
             '--qg-bg-from': '#24201e',
@@ -2781,7 +3105,15 @@ const QuizGame = (() => {
             '--qg-accent': '#ff6b4a',
             '--qg-particle': 'rgba(255,107,74,0.16)',
             keyboard: 'keyboard--palette-retro-arcade',
-            dark: { '--qg-bg-from': '#151211', '--qg-bg-to': '#3a1614' }
+            dark: { '--qg-bg-from': '#151211', '--qg-bg-to': '#3a1614' },
+            roleCards: {
+                host: { face: '#ffe8c8', depth: '#c9b08a', text: '#3a1614', icon: '#3a1614' },
+                join: { face: '#ff6b4a', depth: '#c44f32', text: '#ffffff', icon: '#ffffff' },
+                dark: {
+                    host: { face: '#3a2a24', depth: '#241815', text: '#ffe8c8', icon: '#ff8a6e' },
+                    join: { face: '#5c2523', depth: '#3a1614', text: '#ffffff', icon: '#ffb8a8' }
+                }
+            }
         },
         'kawaii-pastel': {
             '--qg-bg-from': '#7a4a63',
@@ -2789,7 +3121,15 @@ const QuizGame = (() => {
             '--qg-accent': '#fff1a8',
             '--qg-particle': 'rgba(255,241,168,0.18)',
             keyboard: 'keyboard--palette-kawaii-pastel',
-            dark: { '--qg-bg-from': '#3f2432', '--qg-bg-to': '#6b3b52' }
+            dark: { '--qg-bg-from': '#3f2432', '--qg-bg-to': '#6b3b52' },
+            roleCards: {
+                host: { face: '#fff1a8', depth: '#d9c97a', text: '#4a2a3a', icon: '#4a2a3a' },
+                join: { face: '#f2a9c0', depth: '#d4869f', text: '#4a2a3a', icon: '#4a2a3a' },
+                dark: {
+                    host: { face: '#4a2a3a', depth: '#3f2432', text: '#fff1a8', icon: '#fff1a8' },
+                    join: { face: '#6b3b52', depth: '#4a2a3a', text: '#ffffff', icon: '#f2a9c0' }
+                }
+            }
         },
         'mint-pop': {
             '--qg-bg-from': '#14544c',
@@ -2797,7 +3137,15 @@ const QuizGame = (() => {
             '--qg-accent': '#a8dfc8',
             '--qg-particle': 'rgba(168,223,200,0.18)',
             keyboard: 'keyboard--palette-mint-pop',
-            dark: { '--qg-bg-from': '#0a2c28', '--qg-bg-to': '#154f47' }
+            dark: { '--qg-bg-from': '#0a2c28', '--qg-bg-to': '#154f47' },
+            roleCards: {
+                host: { face: '#a8dfc8', depth: '#6fb89e', text: '#0a2c28', icon: '#0a2c28' },
+                join: { face: '#2f8d7d', depth: '#1f6f65', text: '#ffffff', icon: '#ffffff' },
+                dark: {
+                    host: { face: '#154f47', depth: '#0a2c28', text: '#e8fff6', icon: '#a8dfc8' },
+                    join: { face: '#1f6f65', depth: '#14544c', text: '#ffffff', icon: '#d6f5e9' }
+                }
+            }
         },
         'peach-cream': {
             '--qg-bg-from': '#7a3b12',
@@ -2805,7 +3153,15 @@ const QuizGame = (() => {
             '--qg-accent': '#ffc3a5',
             '--qg-particle': 'rgba(255,195,165,0.18)',
             keyboard: 'keyboard--palette-peach-cream',
-            dark: { '--qg-bg-from': '#3f1d08', '--qg-bg-to': '#6d3a1a' }
+            dark: { '--qg-bg-from': '#3f1d08', '--qg-bg-to': '#6d3a1a' },
+            roleCards: {
+                host: { face: '#ffc3a5', depth: '#d99a7a', text: '#3f1d08', icon: '#3f1d08' },
+                join: { face: '#e8844f', depth: '#b86335', text: '#ffffff', icon: '#ffffff' },
+                dark: {
+                    host: { face: '#5c3018', depth: '#3f1d08', text: '#ffe8d8', icon: '#ffc3a5' },
+                    join: { face: '#7a3b12', depth: '#5c3018', text: '#ffffff', icon: '#ffc3a5' }
+                }
+            }
         },
         'pink-pop': {
             '--qg-bg-from': '#7a1f47',
@@ -2813,7 +3169,15 @@ const QuizGame = (() => {
             '--qg-accent': '#f6b3ca',
             '--qg-particle': 'rgba(246,179,202,0.18)',
             keyboard: 'keyboard--palette-pink-pop',
-            dark: { '--qg-bg-from': '#440f27', '--qg-bg-to': '#7d2549' }
+            dark: { '--qg-bg-from': '#440f27', '--qg-bg-to': '#7d2549' },
+            roleCards: {
+                host: { face: '#f6b3ca', depth: '#d486a8', text: '#440f27', icon: '#440f27' },
+                join: { face: '#c93f78', depth: '#9a2f5c', text: '#ffffff', icon: '#ffffff' },
+                dark: {
+                    host: { face: '#5a2040', depth: '#440f27', text: '#ffe8f2', icon: '#f6b3ca' },
+                    join: { face: '#7a1f47', depth: '#5a2040', text: '#ffffff', icon: '#f6b3ca' }
+                }
+            }
         },
         'frost-white': {
             '--qg-bg-from': '#3d4f6f',
@@ -2821,7 +3185,15 @@ const QuizGame = (() => {
             '--qg-accent': '#cfe3ff',
             '--qg-particle': 'rgba(255,255,255,0.18)',
             keyboard: 'keyboard--palette-frost-white',
-            dark: { '--qg-bg-from': '#1f2836', '--qg-bg-to': '#3a4a63' }
+            dark: { '--qg-bg-from': '#1f2836', '--qg-bg-to': '#3a4a63' },
+            roleCards: {
+                host: { face: '#e8eef8', depth: '#b8c4d8', text: '#1f2836', icon: '#1f2836' },
+                join: { face: '#8fa8c8', depth: '#6a849f', text: '#ffffff', icon: '#ffffff' },
+                dark: {
+                    host: { face: '#2a3548', depth: '#1f2836', text: '#e8eef8', icon: '#cfe3ff' },
+                    join: { face: '#3d4f6f', depth: '#2a3548', text: '#ffffff', icon: '#cfe3ff' }
+                }
+            }
         }
     };
 
@@ -2844,15 +3216,16 @@ const QuizGame = (() => {
         const themeData = QUIZ_THEMES[theme] || QUIZ_THEMES['default'];
         const particleColor = (isDark && themeData.dark?.['--qg-particle']) || themeData['--qg-particle'];
 
-        // Particle configs per theme
+        // Particle configs per theme — extra-large soft circles
         const configs = {
-            default: { count: 18, speed: 0.25, size: [3, 6], shape: 'circle' },
-            neon: { count: 20, speed: 0.5, size: [2, 4], shape: 'line' },
-            forest: { count: 14, speed: 0.2, size: [4, 8], shape: 'circle' },
-            winter: { count: 25, speed: 0.4, size: [3, 7], shape: 'snow' },
-            candy: { count: 16, speed: 0.3, size: [5, 9], shape: 'circle' },
-            pastel: { count: 15, speed: 0.22, size: [4, 8], shape: 'circle' },
-            ocean: { count: 18, speed: 0.3, size: [3, 7], shape: 'wave' }
+            default: { count: 9, speed: 0.16, size: [60, 140], shape: 'circle' },
+            'gold-black': { count: 8, speed: 0.14, size: [55, 130], shape: 'circle' },
+            'retro-arcade': { count: 9, speed: 0.18, size: [58, 135], shape: 'circle' },
+            'kawaii-pastel': { count: 9, speed: 0.15, size: [62, 145], shape: 'circle' },
+            'mint-pop': { count: 9, speed: 0.14, size: [60, 140], shape: 'circle' },
+            'peach-cream': { count: 9, speed: 0.15, size: [60, 142], shape: 'circle' },
+            'pink-pop': { count: 9, speed: 0.16, size: [58, 138], shape: 'circle' },
+            'frost-white': { count: 10, speed: 0.17, size: [52, 125], shape: 'snow' }
         };
         const cfg = configs[theme] || configs['default'];
 
@@ -2879,10 +3252,10 @@ const QuizGame = (() => {
                 p.phase += 0.01;
 
                 // Wrap around edges
-                if (p.x < -20) p.x = canvas.width + 20;
-                if (p.x > canvas.width + 20) p.x = -20;
-                if (p.y > canvas.height + 20) p.y = -20;
-                if (p.y < -20) p.y = canvas.height + 20;
+                if (p.x < -p.r - 20) p.x = canvas.width + p.r + 20;
+                if (p.x > canvas.width + p.r + 20) p.x = -p.r - 20;
+                if (p.y > canvas.height + p.r + 20) p.y = -p.r - 20;
+                if (p.y < -p.r - 20) p.y = canvas.height + p.r + 20;
 
                 const breathe = Math.sin(p.phase) * 0.15;
                 const alpha = Math.min(1, p.opacity + breathe);
@@ -2959,6 +3332,13 @@ const QuizGame = (() => {
             if (vars[v]) app.style.setProperty(v, vars[v]);
         });
 
+        const bonusDark = themeData.dark?.['--qg-bg-from'] || themeData['--qg-bg-from'];
+        const bonusMid = themeData.dark?.['--qg-bg-to'] || themeData['--qg-bg-to'];
+        app.style.setProperty('--qg-bonus-dark', bonusDark);
+        app.style.setProperty('--qg-bonus-mid', bonusMid);
+
+        applyRoleCardTheme(themeData.roleCards, isDark);
+
         // Remove old theme & dark classes
         Object.keys(QUIZ_THEMES).forEach(t => app.classList.remove('qg-theme-' + t));
         app.classList.remove('qg-dark');
@@ -2971,8 +3351,8 @@ const QuizGame = (() => {
         // Update active swatch
         updateThemeSwatches(theme);
 
-        // Update dark icon
-        updateDarkIcon(isDark);
+        // Update dark toggle
+        updateDarkToggle(isDark);
 
         // Persist (player devices only)
         if (persist) {
@@ -2980,21 +3360,42 @@ const QuizGame = (() => {
             localStorage.setItem('qg-dark', isDark ? '1' : '0');
         }
 
-        // Keep an in-progress Shortcut Combo keyboard on the newly picked palette
-        const keyboard = $('sv-keyboard');
-        if (keyboard) {
+        // Keep shortcut keyboards on the newly picked palette
+        [$('sv-keyboard')].forEach((keyboard) => {
+            if (!keyboard) return;
             Object.values(QUIZ_THEMES).forEach(t => {
                 if (t.keyboard) keyboard.classList.remove(t.keyboard);
             });
             keyboard.classList.add(themeData.keyboard || 'keyboard--palette-classic');
-        }
+        });
 
         // Restart background animation
         startBgAnimation(theme, isDark);
     }
 
+    function applyRoleCardTheme(roleCards, isDark) {
+        const hostCard = document.querySelector('.qg-role-host');
+        const joinCard = document.querySelector('.qg-role-join');
+        if (!roleCards) return;
+
+        const palette = isDark && roleCards.dark ? roleCards.dark : roleCards;
+
+        [['host', hostCard], ['join', joinCard]].forEach(([key, el]) => {
+            const colors = palette[key];
+            if (!el || !colors) return;
+            el.style.setProperty('--qg-role-face', colors.face);
+            el.style.setProperty('--qg-role-depth', colors.depth);
+            el.style.setProperty('--qg-role-text', colors.text);
+            el.style.setProperty('--qg-role-subtext', colors.subtext || colors.text);
+            el.style.setProperty('--qg-role-icon', colors.icon || colors.text);
+        });
+    }
+
     function loadQuizTheme() {
-        const theme = localStorage.getItem('qg-theme') || 'default';
+        const validThemes = new Set(Object.keys(QUIZ_THEMES));
+        let theme = localStorage.getItem('qg-theme') || 'default';
+        if (!validThemes.has(theme)) theme = 'default';
+
         const globalDark = localStorage.getItem('dark-mode') === 'enabled';
 
         // If qg-dark isn't set yet, inherit from global dark mode
@@ -3017,11 +3418,9 @@ const QuizGame = (() => {
         });
     }
 
-    function updateDarkIcon(isDark) {
-        const icon = $('qg-dark-icon');
-        if (icon) {
-            icon.className = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
-        }
+    function updateDarkToggle(isDark) {
+        const checkbox = $('qg-dark-checkbox');
+        if (checkbox) checkbox.checked = isDark;
     }
 
     // Resize handler for bg canvas
@@ -3036,6 +3435,11 @@ const QuizGame = (() => {
 
     // ===== INIT ON LOAD =====
     window.addEventListener('DOMContentLoaded', init);
+
+    window.QuizGameDev = {
+        setFreeze: setDevFreeze,
+        isFrozen: isDevFreeze
+    };
 
     return { init };
 })();

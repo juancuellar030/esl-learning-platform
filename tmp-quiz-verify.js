@@ -175,9 +175,9 @@ async function joinGame(player, code, theme) {
             await player.waitForSelector('#student-view.active', { timeout: 25000 });
             await player.waitForSelector('.qg-answer-btn .qg-tile-shape', { timeout: 15000 });
 
-            const shapeTexts = await player.$$eval('.qg-answer-btn .qg-tile-shape', els => els.map(e => e.textContent));
-            if (JSON.stringify(shapeTexts) === JSON.stringify(['▲', '◆', '●', '■'])) pass(`tile shapes: ${shapeTexts.join(' ')}`);
-            else fail(`tile shapes: ${shapeTexts}`);
+            const shapeCount = await player.$$eval('.qg-answer-btn > .qg-shape-icon', els => els.length);
+            if (shapeCount === 4) pass('tile shape icons: 4 SVGs');
+            else fail(`tile shape icons: ${shapeCount}`);
 
             const playerTheme = await player.evaluate(() => document.getElementById('quiz-app').dataset.theme);
             const hostTheme = await host.evaluate(() => document.getElementById('quiz-app').dataset.theme);

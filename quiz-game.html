@@ -50,7 +50,12 @@
                         <p>Enter a game code to play</p>
                     </button>
                 </div>
-                <a href="tools.html" class="qg-back-link"><i class="fa-solid fa-arrow-left"></i> Back to Tools</a>
+                <div class="qg-intro-theme-wrap">
+                    <button type="button" class="qg-change-avatar-btn qg-open-theme-btn">
+                        <i class="fa-solid fa-palette"></i> Themes
+                    </button>
+                </div>
+                <a href="tools.html" class="qg-back-link" id="btn-back-to-tools"><i class="fa-solid fa-arrow-left"></i> Back to Tools</a>
             </div>
         </div>
 
@@ -147,9 +152,9 @@
                 <div id="shortcuts-mode" class="qg-hidden">
                     <div class="qg-setup-section">
                         <label class="qg-setup-label">Shortcut Combo Questions</label>
-                        <p class="qg-custom-hint">Students see a shortcut like <em>&ldquo;Close Tab&rdquo;</em> and
-                            click the matching keys on a virtual keyboard. Questions are drawn at random from the
-                            Keyboard Shortcut Playground set.</p>
+                        <p class="qg-custom-hint">Students answer in three rotating formats: click the
+                            virtual keyboard, pick the correct combo from tiles, or press the real shortcut.
+                            Questions are drawn at random from the Keyboard Shortcut Playground set.</p>
                     </div>
                 </div>
 
@@ -221,34 +226,52 @@
         <!-- ===== SCREEN: LOBBY ===== -->
         <div class="qg-screen" id="screen-lobby">
             <div class="qg-lobby-container">
-                <div class="qg-lobby-header">
+                <div class="qg-lobby-join-panel">
                     <div class="qg-lobby-share">
-                        <div class="qg-lobby-share-text">
+                        <div class="qg-lobby-share-main">
                             <p class="qg-lobby-share-label">Students open this page</p>
-                            <input type="url" class="qg-lobby-share-url" id="lobby-share-url"
-                                autocomplete="off" spellcheck="false" aria-label="Join page URL">
+                            <div class="qg-lobby-url-row">
+                                <input type="url" class="qg-lobby-share-url" id="lobby-share-url"
+                                    autocomplete="off" spellcheck="false" aria-label="Join page URL">
+                                <button type="button" class="qg-btn-copy" id="btn-copy-join-url"
+                                    title="Copy join link" aria-label="Copy join link">
+                                    <i class="fa-solid fa-copy" aria-hidden="true"></i> Copy
+                                </button>
+                            </div>
                             <p class="qg-lobby-localhost-tip" id="lobby-localhost-tip" hidden>
                                 Phones cannot use localhost. Paste your LAN URL (e.g.
                                 <code>http://192.168.x.x:5502/quiz-game.html</code>) and the QR will update.
                             </p>
+                            <div class="qg-lobby-code-center">
+                                <p class="qg-lobby-share-label">Game code</p>
+                                <div class="qg-lobby-code-row">
+                                    <div class="qg-game-code" id="game-code-display">------</div>
+                                    <button type="button" class="qg-btn-copy" id="btn-copy-game-code"
+                                        title="Copy game code" aria-label="Copy game code">
+                                        <i class="fa-solid fa-copy" aria-hidden="true"></i> Copy
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                         <div class="qg-lobby-qr-wrap" id="lobby-qr-wrap" aria-hidden="true"></div>
                     </div>
-                    <div class="qg-game-code" id="game-code-display">------</div>
-                    <div class="qg-lobby-player-count">
-                        <i class="fa-solid fa-users"></i>
-                        <span id="player-count-label">0 players joined</span>
-                    </div>
                 </div>
-                <div class="qg-lobby-players" id="lobby-players">
-                    <!-- Player cards populated by JS -->
-                </div>
+
                 <div class="qg-lobby-actions">
                     <button class="qg-btn qg-btn-ghost" id="btn-lobby-cancel"><i class="fa-solid fa-xmark"></i>
                         Cancel</button>
                     <button class="qg-btn qg-btn-accent qg-btn-lg qg-pulse" id="btn-start-game" disabled>
                         <i class="fa-solid fa-rocket"></i> Start Game
                     </button>
+                </div>
+
+                <div class="qg-lobby-player-count">
+                    <i class="fa-solid fa-users"></i>
+                    <span id="player-count-label">0 players joined</span>
+                </div>
+
+                <div class="qg-lobby-players" id="lobby-players">
+                    <!-- Player cards populated by JS -->
                 </div>
             </div>
         </div>
@@ -274,6 +297,9 @@
                         Next</button>
                 </div>
                 <p class="qg-join-error" id="join-error"></p>
+                <button type="button" class="qg-change-avatar-btn qg-open-theme-btn qg-join-theme-btn">
+                    <i class="fa-solid fa-palette"></i> Themes
+                </button>
             </div>
         </div>
 
@@ -298,14 +324,16 @@
         <div class="qg-screen" id="screen-waiting">
             <div class="qg-waiting-container">
                 <div class="qg-waiting-avatar" id="waiting-avatar"></div>
-                <h2>You're in the lobby!</h2>
+                <h2 class="qg-waiting-title">You're in the lobby!</h2>
                 <p class="qg-waiting-name" id="waiting-name"></p>
-                <button type="button" class="qg-change-avatar-btn" id="btn-change-avatar">
-                    <i class="fa-solid fa-shuffle"></i> Change Avatar
-                </button>
-                <button type="button" class="qg-change-avatar-btn" id="btn-change-theme" style="margin-top: 10px;">
-                    <i class="fa-solid fa-palette"></i> Themes
-                </button>
+                <div class="qg-waiting-actions">
+                    <button type="button" class="qg-change-avatar-btn" id="btn-change-avatar">
+                        <i class="fa-solid fa-shuffle"></i> Change Avatar
+                    </button>
+                    <button type="button" class="qg-change-avatar-btn qg-open-theme-btn" id="btn-change-theme">
+                        <i class="fa-solid fa-palette"></i> Themes
+                    </button>
+                </div>
                 <p class="qg-waiting-dots">Waiting for the host to start<span
                         class="qg-dots"><span>.</span><span>.</span><span>.</span></span></p>
             </div>
@@ -387,16 +415,16 @@
                     <button class="qg-answer-btn qg-ans-3" data-index="3"></button>
                 </div>
 
-                <!-- SHORTCUT COMBO ANSWER AREA -->
+                <!-- SHORTCUT COMBO ANSWER AREA (click caps) -->
                 <div class="qg-sv-shortcut qg-hidden" id="sv-shortcut">
                     <p class="qg-sv-shortcut-hint" id="sv-shortcut-hint">Click every key in the combo, then submit.</p>
-                    <div class="ks-keyboard keyboard--palette-classic" id="sv-keyboard"
-                        aria-label="Virtual keyboard — click the keys of the shortcut"></div>
-                    <div class="qg-sv-shortcut-footer">
-                        <div class="qg-sv-shortcut-selection" id="sv-shortcut-selection" aria-live="polite">No keys
-                            selected</div>
+                    <div class="qg-sv-keyboard-wrap">
+                        <div class="ks-keyboard keyboard--palette-classic" id="sv-keyboard"
+                            aria-label="Virtual keyboard — click the keys of the shortcut"></div>
+                    </div>
+                    <div class="qg-sv-shortcut-footer qg-sv-shortcut-footer--click">
                         <div class="qg-sv-shortcut-buttons">
-                            <button class="qg-btn qg-btn-ghost" type="button" id="btn-shortcut-clear">
+                            <button class="qg-btn qg-btn-ghost qg-btn-shortcut-clear" type="button" id="btn-shortcut-clear">
                                 <i class="fa-solid fa-eraser"></i> Clear
                             </button>
                             <button class="qg-btn qg-btn-accent qg-btn-lg" type="button" id="btn-shortcut-submit">
@@ -404,6 +432,20 @@
                             </button>
                         </div>
                     </div>
+                </div>
+
+                <!-- SHORTCUT LIVE INPUT (press real keys) -->
+                <div class="qg-sv-shortcut qg-sv-shortcut-live qg-hidden" id="sv-shortcut-live">
+                    <p class="qg-sv-shortcut-hint" id="sv-shortcut-live-hint">Press the keyboard shortcut on your
+                        keyboard now.</p>
+                    <div class="qg-sv-live-keystage" id="sv-shortcut-live-keystage">
+                        <div class="qg-sv-live-keys" id="sv-shortcut-live-keys" aria-live="polite">
+                            <span class="qg-live-keycap qg-live-keycap--placeholder">Press keys…</span>
+                        </div>
+                    </div>
+                    <div class="qg-sv-shortcut-selection qg-sv-shortcut-selection--live" id="sv-shortcut-selection"
+                        aria-live="polite">Waiting for keypress…</div>
+                    <p class="qg-sv-live-reveal qg-hidden" id="sv-shortcut-live-reveal"></p>
                 </div>
             </div>
         </div>
@@ -414,19 +456,19 @@
                 <h2 class="qg-results-title">🏆 Game Over!</h2>
                 <div class="qg-podium" id="podium">
                     <div class="qg-podium-place qg-place-2" id="podium-2">
-                        <div class="qg-podium-avatar">🥈</div>
+                        <div class="qg-podium-avatar"><span class="qg-podium-medal" aria-hidden="true">🥈</span></div>
                         <div class="qg-podium-name"></div>
                         <div class="qg-podium-score"></div>
                         <div class="qg-podium-bar"></div>
                     </div>
                     <div class="qg-podium-place qg-place-1" id="podium-1">
-                        <div class="qg-podium-avatar">🥇</div>
+                        <div class="qg-podium-avatar"><span class="qg-podium-medal" aria-hidden="true">🥇</span></div>
                         <div class="qg-podium-name"></div>
                         <div class="qg-podium-score"></div>
                         <div class="qg-podium-bar"></div>
                     </div>
                     <div class="qg-podium-place qg-place-3" id="podium-3">
-                        <div class="qg-podium-avatar">🥉</div>
+                        <div class="qg-podium-avatar"><span class="qg-podium-medal" aria-hidden="true">🥉</span></div>
                         <div class="qg-podium-name"></div>
                         <div class="qg-podium-score"></div>
                         <div class="qg-podium-bar"></div>
@@ -526,18 +568,6 @@
                         style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; width: 100%;">
                         <button class="qg-theme-swatch active" data-theme="default" title="Classic"
                             style="background: linear-gradient(135deg,#3d348b,#7678ed);">Classic</button>
-                        <button class="qg-theme-swatch" data-theme="neon" title="Neon"
-                            style="background: linear-gradient(135deg,#0a0a1a,#00f5ff);">Neon</button>
-                        <button class="qg-theme-swatch" data-theme="forest" title="Forest"
-                            style="background: linear-gradient(135deg,#1a3d2b,#52b788);">Forest</button>
-                        <button class="qg-theme-swatch" data-theme="winter" title="Winter"
-                            style="background: linear-gradient(135deg,#a8d8ea,#48cae4);">Winter</button>
-                        <button class="qg-theme-swatch" data-theme="candy" title="Candy"
-                            style="background: linear-gradient(135deg,#f72585,#c77dff);">Candy</button>
-                        <button class="qg-theme-swatch" data-theme="pastel" title="Pastel"
-                            style="background: linear-gradient(135deg,#ffd6e7,#c77dff);">Pastel</button>
-                        <button class="qg-theme-swatch" data-theme="ocean" title="Ocean"
-                            style="background: linear-gradient(135deg,#023e8a,#90e0ef);">Ocean</button>
                         <button class="qg-theme-swatch" data-theme="gold-black" title="Gold Black"
                             style="background: linear-gradient(135deg,#171717,#d5a94f);">Gold Black</button>
                         <button class="qg-theme-swatch" data-theme="retro-arcade" title="Retro Arcade"
@@ -557,11 +587,19 @@
 
                     <div style="width: 100%; height: 1px; background: rgba(0,0,0,0.05); margin: 5px 0;"></div>
 
-                    <div style="display: flex; align-items: center; justify-content: center; width: 100%;">
-                        <button class="qg-dark-toggle" id="qg-lobby-dark-toggle" title="Toggle Dark Mode"
-                            style="background: #333; color: #f1c40f; border: none; width: 50px; height: 50px; border-radius: 50%; font-size: 1.5rem; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
-                            <i class="fa-solid fa-moon" id="qg-dark-icon"></i>
-                        </button>
+                    <div class="qg-dark-switch-wrap">
+                        <label class="qg-dark-switch" id="qg-lobby-dark-toggle" title="Toggle dark mode">
+                            <input type="checkbox" class="qg-dark-switch-input" id="qg-dark-checkbox"
+                                aria-label="Dark mode">
+                            <span class="qg-dark-switch-track" aria-hidden="true">
+                                <i class="fa-solid fa-sun qg-dark-switch-icon qg-dark-switch-icon--sun"></i>
+                                <i class="fa-solid fa-moon qg-dark-switch-icon qg-dark-switch-icon--moon"></i>
+                                <span class="qg-dark-switch-thumb">
+                                    <i class="fa-solid fa-sun qg-dark-switch-thumb-icon qg-dark-switch-thumb-icon--light"></i>
+                                    <i class="fa-solid fa-moon qg-dark-switch-thumb-icon qg-dark-switch-thumb-icon--dark"></i>
+                                </span>
+                            </span>
+                        </label>
                     </div>
                 </div>
             </div>
