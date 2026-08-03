@@ -82,9 +82,9 @@ const QuizGame = (() => {
         const params = new URLSearchParams(window.location.search);
         if (params.has('freeze')) {
             devFreeze = true;
-            localStorage.setItem('qg-dev-freeze', '1');
+            safeSetLocalStorage('qg-dev-freeze', '1');
         } else {
-            devFreeze = localStorage.getItem('qg-dev-freeze') === '1';
+            devFreeze = safeGetLocalStorage('qg-dev-freeze') === '1';
         }
         if (devFreeze) {
             console.info('[QuizGame] Dev freeze ON — timers and auto-advance paused. Shift+F toggles; localStorage qg-dev-freeze=0 to disable.');
@@ -97,7 +97,7 @@ const QuizGame = (() => {
 
     function setDevFreeze(on) {
         devFreeze = Boolean(on);
-        localStorage.setItem('qg-dev-freeze', on ? '1' : '0');
+        safeSetLocalStorage('qg-dev-freeze', on ? '1' : '0');
         console.info(`[QuizGame] Dev freeze ${on ? 'ON' : 'OFF'}`);
     }
 
@@ -232,13 +232,40 @@ const QuizGame = (() => {
     // ===== DOM REFS =====
     const $ = id => document.getElementById(id);
 
+    function safeSetLocalStorage(key, value) {
+        try {
+            localStorage.setItem(key, value);
+            return true;
+        } catch (err) {
+            console.warn(`[QuizGame] Could not save "${key}" to localStorage:`, err);
+            return false;
+        }
+    }
+
+    function safeGetLocalStorage(key, fallback = null) {
+        try {
+            const value = localStorage.getItem(key);
+            return value === null ? fallback : value;
+        } catch (err) {
+            console.warn(`[QuizGame] Could not read "${key}" from localStorage:`, err);
+            return fallback;
+        }
+    }
+
     // ===== INITIALIZATION =====
     function init() {
-        loadQuizTheme();
         parseDevFlags();
         parseEntryMode();
+        bindEvents();
+
+        try {
+            loadQuizTheme();
+        } catch (err) {
+            console.warn('[QuizGame] Could not load saved theme:', err);
+            applyQuizTheme('default', false, { persist: false });
+        }
+
         FirebaseService.init().then(user => {
-            bindEvents();
             populateCategories();
             initAvatarGrids();
             addCustomRows(4);
@@ -562,10 +589,10 @@ const QuizGame = (() => {
 
                 if (isDark) {
                     document.body.classList.add('dark-mode');
-                    localStorage.setItem('dark-mode', 'enabled');
+                    safeSetLocalStorage('dark-mode', 'enabled');
                 } else {
                     document.body.classList.remove('dark-mode');
-                    localStorage.setItem('dark-mode', 'disabled');
+                    safeSetLocalStorage('dark-mode', 'disabled');
                 }
             });
         }
@@ -3356,8 +3383,8 @@ const QuizGame = (() => {
 
         // Persist (player devices only)
         if (persist) {
-            localStorage.setItem('qg-theme', theme);
-            localStorage.setItem('qg-dark', isDark ? '1' : '0');
+            safeSetLocalStorage('qg-theme', theme);
+            safeSetLocalStorage('qg-dark', isDark ? '1' : '0');
         }
 
         // Keep shortcut keyboards on the newly picked palette
@@ -3393,16 +3420,16 @@ const QuizGame = (() => {
 
     function loadQuizTheme() {
         const validThemes = new Set(Object.keys(QUIZ_THEMES));
-        let theme = localStorage.getItem('qg-theme') || 'default';
+        let theme = safeGetLocalStorage('qg-theme', 'default');
         if (!validThemes.has(theme)) theme = 'default';
 
-        const globalDark = localStorage.getItem('dark-mode') === 'enabled';
+        const globalDark = safeGetLocalStorage('dark-mode') === 'enabled';
 
         // If qg-dark isn't set yet, inherit from global dark mode
-        const isDarkStr = localStorage.getItem('qg-dark');
+        const isDarkStr = safeGetLocalStorage('qg-dark');
         const isDark = isDarkStr !== null ? (isDarkStr === '1') : globalDark;
 
-        applyQuizTheme(theme, isDark);
+        applyQuizTheme(theme, isDark, { persist: false });
 
         // Sync global body dark mode on load
         if (isDark) {
