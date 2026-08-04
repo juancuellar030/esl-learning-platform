@@ -38,6 +38,7 @@ const QuizGame = (() => {
     let shortcutKeyboardBound = false;
     let liveShortcutListener = null;
     let kickCheckTimer = null;
+    let waitingPlayersListenerAdded = false;
 
     const INACTIVE_PLAYER_GRACE_MS = 60000;
     const playerSyncState = {
@@ -1710,7 +1711,8 @@ const QuizGame = (() => {
         if (!FirebaseService.isDemo()) {
             FirebaseService.updateSessionFields(gameCode, {
                 'bonusActive': false,
-                'status': 'playing'
+                'status': 'playing',
+                'questionStartedAt': Date.now()
             });
         }
 
@@ -1983,14 +1985,34 @@ const QuizGame = (() => {
         playerSyncState.bonusActive = bonusActive;
 
         if (status === 'finished' && lastPlayerSync.status !== 'finished') {
+            hideWaitingOverlay();
             lastPlayerSync = { currentQuestion: qIdx, questionStartedAt: startedAt, bonusActive, status };
             showResults();
+            return;
+        }
+
+        // Bonus must win over a stale "reviewing" status write that can arrive after beginBonusRound.
+        if (bonusActive) {
+            if (qIdx >= 0) currentQ = qIdx;
+            hideWaitingOverlay();
+            lastPlayerSync = { currentQuestion: qIdx, questionStartedAt: startedAt, bonusActive, status };
+            const bonusVisible = !$('sv-bonus-container').classList.contains('qg-hidden');
+            if (!isBonusActive || !bonusVisible) startBonusStage('auto');
+            return;
+        }
+
+        if (status === 'bonus') {
+            if (qIdx >= 0) currentQ = qIdx;
+            hideWaitingOverlay();
+            lastPlayerSync = { currentQuestion: qIdx, questionStartedAt: startedAt, bonusActive, status };
+            startBonusStage('auto');
             return;
         }
 
         if (status === 'reviewing' && lastPlayerSync.status !== 'reviewing') {
             if (qIdx >= 0) currentQ = qIdx;
             lastPlayerSync = { currentQuestion: qIdx, questionStartedAt: startedAt, bonusActive, status };
+            hideWaitingOverlay();
             revealPlayerAnswer();
             return;
         }
@@ -2004,12 +2026,6 @@ const QuizGame = (() => {
         lastPlayerSync = { currentQuestion: qIdx, questionStartedAt: startedAt, bonusActive, status };
 
         if (qIdx === null || qIdx === undefined || qIdx < 0) return;
-
-        if (bonusActive) {
-            currentQ = qIdx;
-            if (!isBonusActive) startBonusStage('auto');
-            return;
-        }
 
         const syncGen = ++playerSessionGen;
         loadPlayerQuestion(qIdx, { questionStartedAt: startedAt, sessionGen: syncGen });
@@ -2139,7 +2155,8 @@ const QuizGame = (() => {
 
         if (playerSyncState.bonusActive) {
             currentQ = qIdx;
-            if (!isBonusActive) startBonusStage('auto');
+            const bonusVisible = !$('sv-bonus-container').classList.contains('qg-hidden');
+            if (!isBonusActive || !bonusVisible) startBonusStage('auto');
             return;
         }
 
@@ -2525,7 +2542,9 @@ const QuizGame = (() => {
         FirebaseService.submitAnswer(gameCode, index);
 
         const gm = config.gameMode || 'automatic';
-        if (gm === 'student-paced') {
+        if (gm === 'automatic' || gm === 'teacher-paced') {
+            showWaitingOverlay();
+        } else if (gm === 'student-paced') {
             // Immediately reveal and advance locally
             studentPacedRevealAndAdvance(index);
         }
@@ -2582,6 +2601,7 @@ const QuizGame = (() => {
     }
 
     function revealPlayerAnswer() {
+        hideWaitingOverlay();
         clearInterval(timerInterval);
         const q = questions[currentQ];
         if (!q) return;
@@ -2642,6 +2662,45 @@ const QuizGame = (() => {
         }
     }
 
+    function ensureWaitingPlayersListener() {
+        if (waitingPlayersListenerAdded || FirebaseService.isDemo() || !gameCode) return;
+        waitingPlayersListenerAdded = true;
+        const unsub = FirebaseService.onPlayersChange(gameCode, updateWaitingCount);
+        listeners.push(unsub);
+    }
+
+    function updateWaitingCount(playersData) {
+        const overlay = $('overlay-waiting');
+        const countEl = $('waiting-count');
+        if (!overlay || !countEl || !overlay.classList.contains('active')) return;
+
+        const roster = playersData || {};
+        const total = Object.keys(roster).length;
+        let answered = 0;
+        Object.values(roster).forEach(p => {
+            if (p && p.currentAnswer !== null && p.currentAnswer !== undefined) answered++;
+        });
+        countEl.textContent = `${answered} / ${total} answered`;
+    }
+
+    function showWaitingOverlay() {
+        if (role === 'host') return;
+        const gm = config.gameMode || 'automatic';
+        if (gm === 'student-paced') return;
+
+        const overlay = $('overlay-waiting');
+        if (!overlay) return;
+
+        ensureWaitingPlayersListener();
+        overlay.classList.add('active');
+        updateWaitingCount(players);
+    }
+
+    function hideWaitingOverlay() {
+        const overlay = $('overlay-waiting');
+        if (overlay) overlay.classList.remove('active');
+    }
+
     function showFeedback(correct, points) {
         const overlay = $('overlay-feedback');
         const icon = $('feedback-icon');
@@ -2675,6 +2734,7 @@ const QuizGame = (() => {
     }
 
     function showResults() {
+        hideWaitingOverlay();
         showScreen('screen-results');
 
         // Gather final scores
@@ -3179,6 +3239,8 @@ const QuizGame = (() => {
         myStreak = 0;
         hasAnswered = false;
         playerGameStarted = false; // Reset so next session starts clean
+        waitingPlayersListenerAdded = false;
+        hideWaitingOverlay();
         lastPlayerSync = { currentQuestion: -2, questionStartedAt: 0, bonusActive: false, status: '' };
         playerSessionGen = 0;
         $('teacher-view').classList.remove('active');
