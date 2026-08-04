@@ -88,7 +88,11 @@ const QuizGame = (() => {
 
     function getShortcutFormat(q) {
         if (!q || getQuestionType(q) !== 'shortcut') return null;
-        return q.shortcutFormat || 'click';
+        const format = q.shortcutFormat || 'click';
+        if (!window.ShortcutsData?.resolveQuizFormat || !q.shortcutId) return format;
+        const shortcut = ShortcutsData.SHORTCUTS.find((s) => s.id === q.shortcutId);
+        if (!shortcut) return format;
+        return ShortcutsData.resolveQuizFormat(shortcut, format);
     }
 
     // Avatar library — 35 animal photos

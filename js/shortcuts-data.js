@@ -154,11 +154,12 @@ window.ShortcutsData = (() => {
     }
 
     /**
-     * Live "press the keys" format cannot capture OS-level shortcuts (Alt+Tab, Win+*, F11…)
-     * because the browser never receives those keydown events.
+     * Live "press the keys" format cannot capture OS/browser shortcuts (Alt+Tab, Win+*, F11,
+     * Ctrl+T new tab, etc.) because the browser never delivers those keydown events to the page.
      */
     function isLiveFormatAllowed(shortcut) {
         if (!shortcut) return false;
+        if (shortcut.type === 'demo') return false;
         const keys = shortcut.keys.map((k) => String(k).toLowerCase());
         if (keys.some((k) => k === 'win' || k === 'alt')) return false;
         if (shortcut.id === 'fullscreen') return false;
