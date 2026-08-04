@@ -85,6 +85,7 @@ const FirebaseService = (() => {
             questions: questions,
             currentQuestion: -1,
             questionStartedAt: 0,
+            bonusActive: false,
             players: {},
             createdAt: Date.now()
         };
@@ -102,7 +103,8 @@ const FirebaseService = (() => {
             score: 0,
             streak: 0,
             currentAnswer: null,
-            joinedAt: Date.now()
+            joinedAt: Date.now(),
+            connectionStatus: { state: 'connected', at: Date.now() }
         };
         if (isDemo()) {
             if (!window._demoSession) return Promise.reject('Session not found');
@@ -116,7 +118,7 @@ const FirebaseService = (() => {
             sessionSnapshot = snap.val();
             // Allow joining in any session state (lobby, countdown, playing, reviewing)
             return db.ref('sessions/' + code + '/players/' + uid).set(playerData);
-        }).then(() => sessionSnapshot);
+        }).then(() => markPlayerConnected(code)).then(() => sessionSnapshot);
     }
 
     function updateSessionField(code, field, value) {
@@ -221,9 +223,38 @@ const FirebaseService = (() => {
     }
 
     function setupDisconnect(code) {
-        if (isDemo()) return;
+        if (isDemo()) return Promise.resolve();
         const uid = getUid();
-        db.ref('sessions/' + code + '/players/' + uid).onDisconnect().remove();
+        const ref = db.ref('sessions/' + code + '/players/' + uid + '/connectionStatus');
+        return ref.onDisconnect().set({
+            state: 'disconnected',
+            at: firebase.database.ServerValue.TIMESTAMP
+        });
+    }
+
+    function markPlayerConnected(code) {
+        if (isDemo()) {
+            const uid = getUid();
+            if (window._demoSession && window._demoSession.players && window._demoSession.players[uid]) {
+                window._demoSession.players[uid].connectionStatus = {
+                    state: 'connected',
+                    at: Date.now()
+                };
+            }
+            return Promise.resolve();
+        }
+        const uid = getUid();
+        const ref = db.ref('sessions/' + code + '/players/' + uid + '/connectionStatus');
+        return ref.set({
+            state: 'connected',
+            at: firebase.database.ServerValue.TIMESTAMP
+        }).then(() => setupDisconnect(code));
+    }
+
+    function getConnectionTimestamp(connectionStatus) {
+        if (!connectionStatus || connectionStatus.at == null) return 0;
+        const at = connectionStatus.at;
+        return typeof at === 'number' ? at : Date.now();
     }
 
     function setupHostDisconnect(code) {
@@ -408,6 +439,8 @@ const FirebaseService = (() => {
         clearAllAnswers,
         setupDisconnect,
         setupHostDisconnect,
+        markPlayerConnected,
+        getConnectionTimestamp,
         removePlayer,
         deleteSession,
         // Test Builder

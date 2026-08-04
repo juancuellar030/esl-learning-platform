@@ -37,6 +37,31 @@ const QuizGame = (() => {
     let selectedKeys = new Set();
     let shortcutKeyboardBound = false;
     let liveShortcutListener = null;
+    let kickCheckTimer = null;
+
+    const INACTIVE_PLAYER_GRACE_MS = 60000;
+    const playerSyncState = {
+        questionStartedAt: 0,
+        bonusActive: false
+    };
+    let playerSessionGen = 0;
+    let lastPlayerSync = {
+        currentQuestion: -2,
+        questionStartedAt: 0,
+        bonusActive: false,
+        status: ''
+    };
+
+    function isPlayerDisconnected(player) {
+        return player?.connectionStatus?.state === 'disconnected';
+    }
+
+    function getDisconnectedAt(player) {
+        if (!player?.connectionStatus) return 0;
+        return FirebaseService.getConnectionTimestamp
+            ? FirebaseService.getConnectionTimestamp(player.connectionStatus)
+            : (player.connectionStatus.at || 0);
+    }
 
     // Answer slot shapes — shared by the host bars and the player tiles so a given
     // slot always looks the same on both screens.
@@ -441,6 +466,7 @@ const QuizGame = (() => {
 
         $('btn-copy-join-url')?.addEventListener('click', (e) => copyLobbyText($('lobby-share-url')?.value.trim(), e.currentTarget));
         $('btn-copy-game-code')?.addEventListener('click', (e) => copyLobbyText(gameCode || '', e.currentTarget));
+        $('btn-remove-inactive-players')?.addEventListener('click', removeInactivePlayers);
         $('btn-play-again').addEventListener('click', playAgain);
         $('btn-new-game').addEventListener('click', () => {
             sessionStorage.removeItem('qg-last-code');
@@ -1127,8 +1153,11 @@ const QuizGame = (() => {
     }
 
     function buildShortcutQuestion(shortcut, format, pool) {
-        if (format === 'mcq') return buildShortcutMcqQuestion(shortcut, pool);
-        if (format === 'live') return buildShortcutLiveQuestion(shortcut);
+        const resolved = ShortcutsData.resolveQuizFormat
+            ? ShortcutsData.resolveQuizFormat(shortcut, format)
+            : format;
+        if (resolved === 'mcq') return buildShortcutMcqQuestion(shortcut, pool);
+        if (resolved === 'live') return buildShortcutLiveQuestion(shortcut);
         return buildShortcutClickQuestion(shortcut);
     }
 
@@ -1245,10 +1274,15 @@ const QuizGame = (() => {
         if (countLabel) countLabel.textContent = formatPlayerCountLabel(count);
         $('btn-start-game').disabled = count < 1;
 
+        const inactiveBtn = $('btn-remove-inactive-players');
+        const hasInactive = role === 'host' && Object.values(players).some(isPlayerDisconnected);
+        if (inactiveBtn) inactiveBtn.hidden = !hasInactive;
+
         container.innerHTML = '';
         Object.entries(players).forEach(([uid, p], i) => {
             const div = document.createElement('div');
-            div.className = 'qg-lobby-player';
+            const disconnected = isPlayerDisconnected(p);
+            div.className = 'qg-lobby-player' + (disconnected ? ' qg-lobby-player--disconnected' : '');
             div.style.animationDelay = (i * 0.05) + 's';
             const avatarId = p.avatar || '';
             let avatarInner = '<i class="fa-solid fa-user" aria-hidden="true"></i>';
@@ -1267,6 +1301,7 @@ const QuizGame = (() => {
             div.innerHTML = `
                 <div class="qg-lobby-player-avatar">${avatarInner}</div>
                 <span class="player-name">${escapeHtml(p.name)}</span>
+                ${disconnected ? '<span class="qg-reconnect-badge">Reconnecting…</span>' : ''}
                 ${bootHtml}`;
 
             if (role === 'host') {
@@ -1290,6 +1325,33 @@ const QuizGame = (() => {
         // Remove from Firebase
         FirebaseService.removePlayer(gameCode, uid).catch(err => {
             console.error('[QuizGame] Failed to boot player:', err);
+        });
+    }
+
+    function removeInactivePlayers() {
+        if (role !== 'host' || !gameCode) return;
+
+        const now = Date.now();
+        const stale = Object.entries(players).filter(([uid, p]) => {
+            if (!isPlayerDisconnected(p)) return false;
+            const disconnectedAt = getDisconnectedAt(p) || now;
+            return (now - disconnectedAt) >= INACTIVE_PLAYER_GRACE_MS;
+        });
+
+        if (stale.length === 0) {
+            alert(`No players have been disconnected for ${INACTIVE_PLAYER_GRACE_MS / 1000} seconds or longer.`);
+            return;
+        }
+
+        if (!confirm(`Remove ${stale.length} inactive player${stale.length === 1 ? '' : 's'}?`)) return;
+
+        Promise.all(stale.map(([uid]) => {
+            delete players[uid];
+            return FirebaseService.removePlayer(gameCode, uid);
+        })).then(() => {
+            renderLobbyPlayers();
+        }).catch(err => {
+            console.error('[QuizGame] Failed to remove inactive players:', err);
         });
     }
 
@@ -1386,7 +1448,6 @@ const QuizGame = (() => {
 
             if (!FirebaseService.isDemo()) {
                 console.log('[QuizGame][Player] Setting up listeners for code:', gameCode, '| UID:', FirebaseService.getUid());
-                FirebaseService.setupDisconnect(gameCode);
                 setupPlayerListeners();
             } else {
                 console.warn('[QuizGame][Player] Firebase is in demo mode — real-time listeners will NOT fire.');
@@ -1406,6 +1467,10 @@ const QuizGame = (() => {
         }
 
         console.log('[QuizGame][Player] setupPlayerListeners() called. gameCode:', gameCode, '| playerGameStarted:', playerGameStarted);
+
+        if (gameCode) {
+            FirebaseService.markPlayerConnected(gameCode);
+        }
 
         // 1. Status transition listener
         const unsubStatus = FirebaseService.onFieldChange(gameCode, 'status', status => {
@@ -1435,16 +1500,26 @@ const QuizGame = (() => {
         });
         listeners.push(unsubStatus);
 
-        // 2. Kick listener (player removed by host)
+        // 2. Kick listener (player removed by host — node actually deleted)
         const unsubKick = FirebaseService.onFieldChange(gameCode, 'players/' + FirebaseService.getUid(), val => {
-            // If player is null and we are still in game screens, they were kicked
-            if (val === null && role === 'player') {
-                // Ignore if we are already seeing the booted/disconnect screen
-                if ($('screen-booted').classList.contains('active')) return;
+            if (val !== null || role !== 'player') return;
+            if ($('screen-booted').classList.contains('active')) return;
 
-                console.log('[QuizGame] Player data removed - showing disconnect screen.');
-                showDisconnectScreen('Oops!', 'You have been removed from the lobby by the host.');
-            }
+            clearTimeout(kickCheckTimer);
+            kickCheckTimer = setTimeout(() => {
+                FirebaseService.getSession(gameCode).then(session => {
+                    if (!session) {
+                        showDisconnectScreen('Disconnected', 'The host has ended the session or disconnected.');
+                        return;
+                    }
+                    const uid = FirebaseService.getUid();
+                    const stillRemoved = !session.players || !session.players[uid];
+                    if (stillRemoved) {
+                        console.log('[QuizGame] Player node still missing after grace period — showing disconnect screen.');
+                        showDisconnectScreen('Oops!', 'You have been removed from the lobby by the host.');
+                    }
+                });
+            }, 2000);
         });
         listeners.push(unsubKick);
 
@@ -1567,31 +1642,53 @@ const QuizGame = (() => {
             return;
         }
 
-        // Handle Bonus Stage BEFORE showing the next question
+        // Handle Bonus Stage — advance session index first so players stay in sync
         if (!skipBonusCheck && config.bonusEnabled && currentQ > 0 && currentQ % config.bonusFrequency === 0) {
-            startBonusStage('host');
+            beginBonusRound();
             return;
         }
-        skipBonusCheck = false; // reset for future calls
+        skipBonusCheck = false;
 
-        const q = questions[currentQ];
-        hasAnswered = false;
-        answerCounts = [0, 0, 0, 0];
-        timeLeft = config.timer;
-        isAdvancing = false; // Allow answer counting for new question
-
-        // Clear previous answers
         if (!FirebaseService.isDemo()) {
             FirebaseService.clearAllAnswers(gameCode, players);
             FirebaseService.updateSessionFields(gameCode, {
                 'currentQuestion': currentQ,
                 'questionStartedAt': Date.now(),
+                'bonusActive': false,
                 'status': 'playing'
             });
         }
 
-        // Update UI
+        showHostQuestionAtIndex(currentQ);
+    }
+
+    function beginBonusRound() {
+        isAdvancing = false;
+
+        if (!FirebaseService.isDemo()) {
+            FirebaseService.clearAllAnswers(gameCode, players);
+            FirebaseService.updateSessionFields(gameCode, {
+                'currentQuestion': currentQ,
+                'questionStartedAt': Date.now(),
+                'bonusActive': true,
+                'status': 'playing'
+            });
+        }
+
         $('tv-q-num').textContent = currentQ + 1;
+        startBonusStage('host');
+    }
+
+    function showHostQuestionAtIndex(qIdx) {
+        const q = questions[qIdx];
+        if (!q) return;
+
+        hasAnswered = false;
+        answerCounts = [0, 0, 0, 0];
+        timeLeft = config.timer;
+        isAdvancing = false;
+
+        $('tv-q-num').textContent = qIdx + 1;
         let qHtml = `<div>${escapeHtml(q.text)}</div>`;
         if (q.imageData) {
             qHtml = `<img src="${q.imageData}" style="max-height: 200px; max-width: 100%; border-radius: 12px; margin-bottom: 15px; object-fit: contain;" alt="Question Image" />` + qHtml;
@@ -1600,8 +1697,25 @@ const QuizGame = (() => {
         $('tv-answered').textContent = '0';
 
         renderHostAnswerBars(q);
-
         startTimer();
+    }
+
+    function finishHostBonusRound() {
+        $('tv-bonus-indicator').classList.add('qg-hidden');
+        $('tv-question').classList.remove('qg-hidden');
+        $('tv-answers').classList.remove('qg-hidden');
+        $('tv-timer-container').classList.remove('qg-hidden');
+        isBonusActive = false;
+
+        if (!FirebaseService.isDemo()) {
+            FirebaseService.updateSessionFields(gameCode, {
+                'bonusActive': false,
+                'status': 'playing'
+            });
+        }
+
+        skipBonusCheck = true;
+        showHostQuestionAtIndex(currentQ);
     }
 
     /**
@@ -1765,6 +1879,12 @@ const QuizGame = (() => {
             let statusTag = '';
             if (p.isDone) {
                 statusTag = `<span style="font-size: 0.7rem; background: var(--medium-slate-blue); color: white; padding: 2px 6px; border-radius: 4px; margin-left: 8px;">Completed</span>`;
+            } else if (isPlayerDisconnected(p)) {
+                statusTag = '<span class="qg-reconnect-badge qg-reconnect-badge--lb">Reconnecting…</span>';
+            }
+
+            if (isPlayerDisconnected(p)) {
+                row.classList.add('qg-tv-lb-row--disconnected');
             }
 
             row.innerHTML = `
@@ -1847,6 +1967,54 @@ const QuizGame = (() => {
     }
 
     // ===== PLAYER: GAME PLAY =====
+    function handleHostedSessionSync(session) {
+        if (!session) return;
+
+        questions = session.questions || questions;
+        config = session.config || config;
+        soundEnabled = config.sound !== false;
+
+        const qIdx = session.currentQuestion;
+        const startedAt = session.questionStartedAt || 0;
+        const bonusActive = !!session.bonusActive;
+        const status = session.status || '';
+
+        playerSyncState.questionStartedAt = startedAt;
+        playerSyncState.bonusActive = bonusActive;
+
+        if (status === 'finished' && lastPlayerSync.status !== 'finished') {
+            lastPlayerSync = { currentQuestion: qIdx, questionStartedAt: startedAt, bonusActive, status };
+            showResults();
+            return;
+        }
+
+        if (status === 'reviewing' && lastPlayerSync.status !== 'reviewing') {
+            if (qIdx >= 0) currentQ = qIdx;
+            lastPlayerSync = { currentQuestion: qIdx, questionStartedAt: startedAt, bonusActive, status };
+            revealPlayerAnswer();
+            return;
+        }
+
+        const questionChanged = qIdx !== lastPlayerSync.currentQuestion;
+        const timerChanged = startedAt !== lastPlayerSync.questionStartedAt;
+        const bonusChanged = bonusActive !== lastPlayerSync.bonusActive;
+
+        if (!questionChanged && !timerChanged && !bonusChanged) return;
+
+        lastPlayerSync = { currentQuestion: qIdx, questionStartedAt: startedAt, bonusActive, status };
+
+        if (qIdx === null || qIdx === undefined || qIdx < 0) return;
+
+        if (bonusActive) {
+            currentQ = qIdx;
+            if (!isBonusActive) startBonusStage('auto');
+            return;
+        }
+
+        const syncGen = ++playerSessionGen;
+        loadPlayerQuestion(qIdx, { questionStartedAt: startedAt, sessionGen: syncGen });
+    }
+
     function listenAsPlayer() {
         showScreen('screen-game');
         $('student-view').classList.add('active');
@@ -1855,6 +2023,8 @@ const QuizGame = (() => {
         myStreak = 0;
 
         if (!FirebaseService.isDemo()) {
+            FirebaseService.markPlayerConnected(gameCode);
+
             // Get initial game state first
             FirebaseService.getSession(gameCode).then(session => {
                 if (!session) {
@@ -1880,37 +2050,21 @@ const QuizGame = (() => {
                     });
                     listeners.push(unsub2);
                 } else {
-                    // Automatic & Teacher-paced: listen for host-pushed question changes.
-                    // Guard: skip if the question is the same as the one being loaded explicitly below,
-                    // to avoid a redundant double-load on the initial attach.
-                    const unsub1 = FirebaseService.onFieldChange(gameCode, 'currentQuestion', qIdx => {
-                        if (qIdx === null || qIdx === -1) return;
-                        if (qIdx === currentQ) return; // already loaded explicitly below
-                        loadPlayerQuestion(qIdx);
-                    });
-                    listeners.push(unsub1);
+                    const unsubSync = FirebaseService.onSessionValue(gameCode, handleHostedSessionSync);
+                    listeners.push(unsubSync);
 
-                    const unsub2 = FirebaseService.onFieldChange(gameCode, 'status', status => {
-                        if (status === 'reviewing') {
-                            revealPlayerAnswer();
-                        } else if (status === 'bonus') {
-                            startBonusStage('auto');
-                        } else if (status === 'finished') {
-                            showResults();
+                    const unsubSelf = FirebaseService.onFieldChange(gameCode, 'players/' + FirebaseService.getUid(), pData => {
+                        if (!pData) return;
+                        myScore = pData.score || 0;
+                        myStreak = pData.streak || 0;
+                        if ($('screen-game').classList.contains('active')) {
+                            $('sv-score').textContent = myScore;
+                            updateStreakDisplay();
                         }
                     });
-                    listeners.push(unsub2);
+                    listeners.push(unsubSelf);
 
-                    // Explicitly load the current question using the already-fetched session data.
-                    // This is essential: onFieldChange's immediate-fire is not guaranteed before
-                    // the Firebase initial sync completes, so without this explicit call the player
-                    // could be stuck seeing "Loading question..." until the host advances.
-                    if (session.currentQuestion >= 0) {
-                        console.log('[QuizGame][Player] Explicitly loading question index:', session.currentQuestion);
-                        loadPlayerQuestion(session.currentQuestion);
-                    } else {
-                        console.warn('[QuizGame][Player] session.currentQuestion is', session.currentQuestion, '- waiting for host to set it.');
-                    }
+                    handleHostedSessionSync(session);
                 }
             });
         }
@@ -1977,78 +2131,69 @@ const QuizGame = (() => {
         startPlayerTimer(timerDuration, timerDuration);
     }
 
-    function loadPlayerQuestion(qIdx) {
+    function loadPlayerQuestion(qIdx, opts = {}) {
+        if (opts.sessionGen != null && opts.sessionGen !== playerSessionGen) {
+            console.log('[QuizGame][Player] Discarding stale question load for index', qIdx);
+            return;
+        }
+
+        if (playerSyncState.bonusActive) {
+            currentQ = qIdx;
+            if (!isBonusActive) startBonusStage('auto');
+            return;
+        }
+
         currentQ = qIdx;
         hasAnswered = false;
         console.log('[QuizGame][Player] loadPlayerQuestion called. qIdx:', qIdx);
 
-        FirebaseService.getSession(gameCode).then(session => {
-            if (!session) {
-                console.error('[QuizGame][Player] loadPlayerQuestion: getSession returned null!');
-                return;
-            }
-            questions = session.questions || [];
-            config = session.config || {};
-            const q = questions[currentQ];
-            if (!q) {
-                console.error('[QuizGame][Player] loadPlayerQuestion: question at index', currentQ, 'is undefined! questions.length:', questions.length);
-                return;
-            }
-            console.log('[QuizGame][Player] Rendering question', currentQ, ':', q.text?.substring(0, 50));
+        const q = questions[currentQ];
+        if (!q) {
+            console.error('[QuizGame][Player] loadPlayerQuestion: question at index', currentQ, 'is undefined! questions.length:', questions.length);
+            return;
+        }
+        console.log('[QuizGame][Player] Rendering question', currentQ, ':', q.text?.substring(0, 50));
 
-            // Update player data
-            const pData = session.players ? session.players[FirebaseService.getUid()] : null;
-            if (pData) {
-                myScore = pData.score || 0;
-                myStreak = pData.streak || 0;
-            }
+        // Render
+        $('sv-bonus-container').classList.add('qg-hidden');
+        $('sv-question').classList.remove('qg-hidden');
+        $('sv-timer-container').classList.remove('qg-hidden');
 
-            // Render
-            // Hide bonus stage, show question
-            $('sv-bonus-container').classList.add('qg-hidden');
-            $('sv-question').classList.remove('qg-hidden');
-            $('sv-timer-container').classList.remove('qg-hidden');
+        $('sv-score').textContent = myScore;
+        $('sv-progress').textContent = `${currentQ + 1} / ${questions.length}`;
+        updateStreakDisplay();
+        let qHtml = `<div>${escapeHtml(q.text)}</div>`;
+        if (q.imageData) {
+            qHtml += `<img src="${q.imageData}" style="max-height: 300px; max-width: 100%; border-radius: 12px; margin-top: 12px; margin-left: 16px; object-fit: contain;" alt="Question Image" />`;
+        }
+        $('sv-question').innerHTML = qHtml;
 
-            $('sv-score').textContent = myScore;
-            $('sv-progress').textContent = `${currentQ + 1} / ${questions.length}`;
-            updateStreakDisplay();
-            let qHtml = `<div>${escapeHtml(q.text)}</div>`;
-            if (q.imageData) {
-                qHtml += `<img src="${q.imageData}" style="max-height: 300px; max-width: 100%; border-radius: 12px; margin-top: 12px; margin-left: 16px; object-fit: contain;" alt="Question Image" />`;
-            }
-            $('sv-question').innerHTML = qHtml;
+        const btns = renderPlayerAnswerArea(q);
 
-            const btns = renderPlayerAnswerArea(q);
+        // Apply pending powerups
+        let timerDuration = config.timer;
+        if (pendingPowerup === '5050' && (getQuestionType(q) === 'mcq' || getShortcutFormat(q) === 'mcq')) {
+            const wrongIndices = [];
+            q.options.forEach((_, i) => { if (i !== q.correctIndex) wrongIndices.push(i); });
+            wrongIndices.sort(() => Math.random() - 0.5);
+            const toHide = wrongIndices.slice(0, 2);
+            toHide.forEach(idx => {
+                const btn = btns[idx];
+                if (btn) {
+                    btn.style.display = 'none';
+                }
+            });
+            pendingPowerup = null;
+        } else if (pendingPowerup === 'time') {
+            timerDuration = config.timer * 2;
+            pendingPowerup = null;
+        }
 
-            // Apply pending powerups
-            let timerDuration = config.timer;
-            if (pendingPowerup === '5050' && (getQuestionType(q) === 'mcq' || getShortcutFormat(q) === 'mcq')) {
-                const wrongIndices = [];
-                q.options.forEach((_, i) => { if (i !== q.correctIndex) wrongIndices.push(i); });
-                wrongIndices.sort(() => Math.random() - 0.5);
-                const toHide = wrongIndices.slice(0, 2);
-                toHide.forEach(idx => {
-                    const btn = btns[idx];
-                    if (btn) {
-                        btn.style.display = 'none';
-                    }
-                });
-                pendingPowerup = null;
-            } else if (pendingPowerup === 'time') {
-                timerDuration = config.timer * 2;
-                pendingPowerup = null;
-            }
-
-            // Start local timer — questionStartedAt helps sync the timer with
-            // the host, but due to non-atomic Firebase writes the field may
-            // still hold the PREVIOUS question's timestamp when we fetch. 
-            // Clamp to a minimum so the player always gets a usable timer.
-            const startedAt = session.questionStartedAt || 0;
-            const elapsed = startedAt > 0 ? (Date.now() - startedAt) / 1000 : 0;
-            const remaining = Math.max(3, timerDuration - elapsed);
-            console.log('[QuizGame][Player] Timer: elapsed', elapsed.toFixed(1), 's | remaining', remaining.toFixed(1), 's');
-            startPlayerTimer(remaining, timerDuration);
-        });
+        const startedAt = opts.questionStartedAt ?? playerSyncState.questionStartedAt ?? 0;
+        const elapsed = startedAt > 0 ? (Date.now() - startedAt) / 1000 : 0;
+        const remaining = Math.max(3, timerDuration - elapsed);
+        console.log('[QuizGame][Player] Timer: elapsed', elapsed.toFixed(1), 's | remaining', remaining.toFixed(1), 's');
+        startPlayerTimer(remaining, timerDuration);
     }
 
     /**
@@ -2654,22 +2799,9 @@ const QuizGame = (() => {
             $('tv-timer-container').classList.add('qg-hidden');
             $('tv-bonus-indicator').classList.remove('qg-hidden');
 
-            // Push status to Firebase so players trigger bonus too
-            if (!FirebaseService.isDemo()) {
-                FirebaseService.updateSessionField(gameCode, 'status', 'bonus');
-            }
-
-            // Wait for players to finish bonus then resume
+            // Wait for players to finish bonus then resume the current question
             delayUnlessFrozen(() => {
-                $('tv-bonus-indicator').classList.add('qg-hidden');
-                $('tv-question').classList.remove('qg-hidden');
-                $('tv-answers').classList.remove('qg-hidden');
-                $('tv-timer-container').classList.remove('qg-hidden');
-                isBonusActive = false;
-                if (context !== 'student-paced') {
-                    skipBonusCheck = true;
-                    nextQuestion();
-                }
+                finishHostBonusRound();
             }, 18000);
             return;
         }
@@ -3035,6 +3167,7 @@ const QuizGame = (() => {
     // ===== CLEANUP =====
     function cleanup() {
         clearInterval(timerInterval);
+        clearTimeout(kickCheckTimer);
         stopLiveShortcutListener();
         listeners.forEach(unsub => { if (typeof unsub === 'function') unsub(); });
         listeners = [];
@@ -3046,6 +3179,8 @@ const QuizGame = (() => {
         myStreak = 0;
         hasAnswered = false;
         playerGameStarted = false; // Reset so next session starts clean
+        lastPlayerSync = { currentQuestion: -2, questionStartedAt: 0, bonusActive: false, status: '' };
+        playerSessionGen = 0;
         $('teacher-view').classList.remove('active');
         $('student-view').classList.remove('active');
         hideSessionBadge();

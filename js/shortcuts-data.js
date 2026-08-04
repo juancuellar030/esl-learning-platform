@@ -153,6 +153,24 @@ window.ShortcutsData = (() => {
         return comboCapKeys(shortcut) !== null;
     }
 
+    /**
+     * Live "press the keys" format cannot capture OS-level shortcuts (Alt+Tab, Win+*, F11…)
+     * because the browser never receives those keydown events.
+     */
+    function isLiveFormatAllowed(shortcut) {
+        if (!shortcut) return false;
+        const keys = shortcut.keys.map((k) => String(k).toLowerCase());
+        if (keys.some((k) => k === 'win' || k === 'alt')) return false;
+        if (shortcut.id === 'fullscreen') return false;
+        return true;
+    }
+
+    /** Downgrade live format to click or MCQ when the OS would steal the combo. */
+    function resolveQuizFormat(shortcut, format) {
+        if (format !== 'live' || isLiveFormatAllowed(shortcut)) return format;
+        return shortcut.id.charCodeAt(0) % 2 === 0 ? 'mcq' : 'click';
+    }
+
     // Every shortcut is fair game here (including browser-reserved "demo" ones) because
     // clicking caps never triggers a real keydown. Only unmappable combos drop out.
     const QUIZ_POOL = SHORTCUTS.filter(isSelectable);
@@ -270,6 +288,8 @@ window.ShortcutsData = (() => {
         isComboCorrect,
         matchesKeyboardEvent,
         isModifierOnlyEvent,
+        isLiveFormatAllowed,
+        resolveQuizFormat,
         displayKey,
         formatCombo
     };

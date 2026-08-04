@@ -654,20 +654,28 @@
 
 /* ===== LOBBY SCREEN ===== */
 #screen-lobby {
-    align-items: center;
-    justify-content: center;
+    align-items: stretch;
+    justify-content: flex-start;
     flex-direction: column;
-    padding: 40px 20px;
+    padding: 28px clamp(14px, 2.5vw, 36px) 24px;
+}
+
+#screen-lobby.active {
+    align-items: stretch;
+    justify-content: flex-start;
 }
 
 .qg-lobby-container {
     text-align: center;
     width: 100%;
-    max-width: 980px;
+    max-width: min(1440px, 100%);
+    margin: 0 auto;
     animation: fadeIn 0.5s ease;
     display: flex;
     flex-direction: column;
     gap: 20px;
+    flex: 1 1 auto;
+    min-height: 0;
 }
 
 .qg-lobby-join-panel {
@@ -852,19 +860,90 @@
     justify-content: center;
     gap: 8px;
     margin: 0;
+    flex-wrap: wrap;
+}
+
+.qg-btn-remove-inactive {
+    margin-left: 8px;
+    padding: 6px 12px;
+    font-size: 0.82rem;
+    border-radius: 999px;
+}
+
+.qg-lobby-player--disconnected {
+    opacity: 0.62;
+    filter: grayscale(0.35);
+}
+
+.qg-reconnect-badge {
+    flex: 0 0 auto;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: rgba(31, 36, 48, 0.85);
+    background: rgba(255, 255, 255, 0.72);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 999px;
+    padding: 4px 8px;
+    white-space: nowrap;
+}
+
+.qg-reconnect-badge--lb {
+    margin-left: 8px;
+    font-size: 0.65rem;
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+.qg-tv-lb-row--disconnected {
+    opacity: 0.65;
 }
 
 .qg-lobby-players {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
     gap: 12px;
-    justify-content: center;
+    justify-content: stretch;
+    align-content: start;
+    width: 100%;
     min-height: 80px;
-    max-height: 42vh;
+    max-height: min(50vh, 560px);
     overflow-y: auto;
-    overflow-x: visible;
-    padding: 12px 10px 8px;
+    overflow-x: hidden;
+    padding: 14px 12px 12px;
     text-align: left;
+    background: rgba(0, 0, 0, 0.14);
+    border: 2px solid rgba(255, 255, 255, 0.12);
+    border-radius: 20px;
+    box-sizing: border-box;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(247, 184, 1, 0.85) rgba(255, 255, 255, 0.1);
+}
+
+.qg-lobby-players::-webkit-scrollbar {
+    width: 11px;
+}
+
+.qg-lobby-players::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.22);
+    border-radius: 999px;
+    margin: 6px 2px;
+}
+
+.qg-lobby-players::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #ffcc33, var(--amber-flame, #f7b801));
+    border-radius: 999px;
+    border: 2px solid rgba(26, 21, 48, 0.35);
+    min-height: 48px;
+}
+
+.qg-lobby-players::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #ffe08a, #ffcc33);
+}
+
+.qg-lobby-players::-webkit-scrollbar-corner {
+    background: transparent;
 }
 
 .qg-lobby-player {
