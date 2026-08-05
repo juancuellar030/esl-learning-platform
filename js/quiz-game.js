@@ -41,6 +41,26 @@ const QuizGame = (() => {
     let waitingPlayersListenerAdded = false;
 
     const INACTIVE_PLAYER_GRACE_MS = 60000;
+
+    /**
+     * Host waits this long before finishHostBonusRound(). Student bonus animation
+     * (reveal + flip + shuffle) must finish well before this — see derived timings below.
+     * If you change this value, verify BONUS_SEQUENCE_TARGET_MS still leaves a pick window.
+     */
+    const BONUS_STAGE_DURATION_MS = 18000;
+    const BONUS_REVEAL_MS = 3000;
+    const BONUS_FLIP_WAIT_MS = 800;
+    const BONUS_SHUFFLE_INTERVAL_MS = 400;
+    /** Target time for reveal→flip→shuffle before cards become clickable (~12–14s). */
+    const BONUS_SEQUENCE_TARGET_MS = 13000;
+    const BONUS_SHUFFLE_CYCLES = Math.max(
+        1,
+        Math.floor(
+            (BONUS_SEQUENCE_TARGET_MS - BONUS_REVEAL_MS - BONUS_FLIP_WAIT_MS) / BONUS_SHUFFLE_INTERVAL_MS
+        )
+    );
+    const BONUS_PICK_MARGIN_MS = BONUS_STAGE_DURATION_MS - BONUS_SEQUENCE_TARGET_MS;
+
     const playerSyncState = {
         questionStartedAt: 0,
         bonusActive: false
@@ -105,19 +125,22 @@ const QuizGame = (() => {
     let lobbyShareInitialized = false;
     let lobbyQrInstance = null;
 
-    // Dev freeze — pause timers/auto-advance for layout/CSS tweaking (?freeze=1 or Shift+F)
+    // Dev freeze — pause timers/auto-advance for layout/CSS tweaking (?freeze=1 only, this page load)
     let devFreeze = false;
 
+    function clearPersistedDevFreeze() {
+        try {
+            localStorage.removeItem('qg-dev-freeze');
+        } catch (_) { /* ignore */ }
+    }
+    clearPersistedDevFreeze();
+
     function parseDevFlags() {
+        clearPersistedDevFreeze();
         const params = new URLSearchParams(window.location.search);
-        if (params.has('freeze')) {
-            devFreeze = true;
-            safeSetLocalStorage('qg-dev-freeze', '1');
-        } else {
-            devFreeze = safeGetLocalStorage('qg-dev-freeze') === '1';
-        }
+        devFreeze = params.has('freeze');
         if (devFreeze) {
-            console.info('[QuizGame] Dev freeze ON — timers and auto-advance paused. Shift+F toggles; localStorage qg-dev-freeze=0 to disable.');
+            console.info('[QuizGame] Dev freeze ON for this page load (?freeze=1). Reload without the param to disable.');
         }
     }
 
@@ -127,8 +150,7 @@ const QuizGame = (() => {
 
     function setDevFreeze(on) {
         devFreeze = Boolean(on);
-        safeSetLocalStorage('qg-dev-freeze', on ? '1' : '0');
-        console.info(`[QuizGame] Dev freeze ${on ? 'ON' : 'OFF'}`);
+        console.info(`[QuizGame] Dev freeze ${on ? 'ON' : 'OFF'} (this page load only)`);
     }
 
     function delayUnlessFrozen(fn, ms) {
@@ -253,6 +275,9 @@ const QuizGame = (() => {
     // Sound
     let audioCtx = null;
     let soundEnabled = true;
+    let musicEnabled = true;
+    let lastQuestionTrackIndex = null;
+    let currentQuestionTrackIndex = null;
 
     // Google Drive
     let driveService = null;
@@ -636,12 +661,6 @@ const QuizGame = (() => {
 
         $('btn-download-results')?.addEventListener('click', downloadScoreboard);
         $('btn-save-drive')?.addEventListener('click', () => driveService?.openModal());
-
-        document.addEventListener('keydown', (e) => {
-            if (e.shiftKey && e.key.toLowerCase() === 'f') {
-                setDevFreeze(!devFreeze);
-            }
-        });
     }
 
     function adjustStepper(id, delta, min, max) {
@@ -1212,6 +1231,7 @@ const QuizGame = (() => {
             bonusFrequency: parseInt($('b-count').textContent)
         };
         soundEnabled = config.sound;
+        musicEnabled = config.sound;
 
         if (sourceMode === 'custom') {
             questions = generateCustomQuestions();
@@ -1590,6 +1610,63 @@ const QuizGame = (() => {
         }, 800);
     }
 
+    // ===== HOST-ONLY MUSIC / STINGERS (real audio files) =====
+    function isHostMusicEnabled() {
+        return role === 'host' && musicEnabled;
+    }
+
+    function stopQuestionTrack() {
+        for (let i = 1; i <= 4; i++) {
+            const el = $('bg-question-' + i);
+            if (el) {
+                el.pause();
+                el.currentTime = 0;
+            }
+        }
+        currentQuestionTrackIndex = null;
+    }
+
+    function playQuestionTrack() {
+        if (!isHostMusicEnabled()) return;
+
+        stopQuestionTrack();
+
+        const choices = [];
+        for (let i = 1; i <= 4; i++) {
+            if (i !== lastQuestionTrackIndex) choices.push(i);
+        }
+        const pick = choices[Math.floor(Math.random() * choices.length)];
+        lastQuestionTrackIndex = pick;
+        currentQuestionTrackIndex = pick;
+
+        const el = $('bg-question-' + pick);
+        if (!el) return;
+        el.loop = true;
+        el.play().catch(() => { });
+    }
+
+    function playHostSfxOneShot(elementId) {
+        if (!isHostMusicEnabled()) return;
+        const el = $(elementId);
+        if (!el) return;
+        el.pause();
+        el.currentTime = 0;
+        el.play().catch(() => { });
+    }
+
+    function playHostQuestionEndSfx() {
+        if (!isHostMusicEnabled()) return;
+        const gm = config.gameMode || 'automatic';
+        if (gm !== 'teacher-paced') return;
+        playHostSfxOneShot('sfx-question-end');
+    }
+
+    function playHostPodiumSfx() {
+        if (!isHostMusicEnabled()) return;
+        stopQuestionTrack();
+        playHostSfxOneShot('sfx-podium');
+    }
+
     // ===== HOST: GAME PLAY =====
     function startHostGame() {
         showScreen('screen-game');
@@ -1670,6 +1747,13 @@ const QuizGame = (() => {
     function beginBonusRound() {
         isAdvancing = false;
 
+        // TODO(BonusDebug): remove diagnostic log once bonus sync is confirmed stable in classrooms.
+        console.log('[BonusDebug]', Date.now(), 'beginBonusRound host', {
+            currentQ,
+            bonusActive: true,
+            status: 'playing'
+        });
+
         if (!FirebaseService.isDemo()) {
             FirebaseService.clearAllAnswers(gameCode, players);
             FirebaseService.updateSessionFields(gameCode, {
@@ -1681,6 +1765,7 @@ const QuizGame = (() => {
         }
 
         $('tv-q-num').textContent = currentQ + 1;
+        if (role === 'host') stopQuestionTrack();
         startBonusStage('host');
     }
 
@@ -1703,6 +1788,7 @@ const QuizGame = (() => {
 
         renderHostAnswerBars(q);
         startTimer();
+        if (role === 'host') playQuestionTrack();
     }
 
     function finishHostBonusRound() {
@@ -1911,6 +1997,11 @@ const QuizGame = (() => {
     }
 
     function revealAnswer() {
+        if (role === 'host') {
+            stopQuestionTrack();
+            playHostQuestionEndSfx();
+        }
+
         clearInterval(timerInterval);
         isAdvancing = true;
         const q = questions[currentQ];
@@ -1975,6 +2066,13 @@ const QuizGame = (() => {
     // ===== PLAYER: GAME PLAY =====
     function handleHostedSessionSync(session) {
         if (!session) return;
+
+        // TODO(BonusDebug): remove diagnostic log once bonus sync is confirmed stable in classrooms.
+        console.log('[BonusDebug]', Date.now(), 'handleHostedSessionSync', {
+            bonusActive: session.bonusActive,
+            currentQuestion: session.currentQuestion,
+            status: session.status
+        });
 
         questions = session.questions || questions;
         config = session.config || config;
@@ -2762,7 +2860,9 @@ const QuizGame = (() => {
 
         // Confetti!
         setTimeout(launchConfetti, 500);
-        playSound('podium');
+        if (role === 'host') {
+            playHostPodiumSfx();
+        }
     }
 
     function hideShortcutPanels() {
@@ -2856,6 +2956,15 @@ const QuizGame = (() => {
     function startBonusStage(context) {
         isBonusActive = true;
 
+        if (context === 'host' || context === 'auto') {
+            // TODO(BonusDebug): remove diagnostic log once bonus sync is confirmed stable in classrooms.
+            console.log('[BonusDebug]', Date.now(), 'startBonusStage', context, {
+                role,
+                currentQ,
+                isBonusActive: true
+            });
+        }
+
         if (role === 'host') {
             // Hide question/answer/timer, show the indicator
             $('tv-question').classList.add('qg-hidden');
@@ -2866,7 +2975,7 @@ const QuizGame = (() => {
             // Wait for players to finish bonus then resume the current question
             delayUnlessFrozen(() => {
                 finishHostBonusRound();
-            }, 18000);
+            }, BONUS_STAGE_DURATION_MS);
             return;
         }
 
@@ -2934,7 +3043,7 @@ const QuizGame = (() => {
             return;
         }
 
-        // Phase 1: Show rewards for 3 seconds (cards are face-up)
+        // Phase 1: Show rewards (cards face-up)
         delayUnlessFrozen(() => {
             // Phase 2: Flip cards face-down (add is-flipped to show the question-mark side)
             const cards = grid.querySelectorAll('.qg-bonus-card');
@@ -2943,8 +3052,8 @@ const QuizGame = (() => {
             // Phase 3: Start shuffling after the flip animation completes
             delayUnlessFrozen(() => {
                 shuffleBonusCards(grid, rewards, context);
-            }, 800);
-        }, 3000);
+            }, BONUS_FLIP_WAIT_MS);
+        }, BONUS_REVEAL_MS);
     }
 
     function shuffleBonusCards(grid, rewards, context, options = {}) {
@@ -2981,11 +3090,11 @@ const QuizGame = (() => {
             applyPositions(positions);
 
             shuffles++;
-            if (shuffles > 10) {
+            if (shuffles >= BONUS_SHUFFLE_CYCLES) {
                 clearInterval(shuffleInterval);
                 enableCardClicks();
             }
-        }, 400);
+        }, BONUS_SHUFFLE_INTERVAL_MS);
     }
 
     function selectBonusCard(selectedCard, reward, context, grid) {
@@ -3245,6 +3354,8 @@ const QuizGame = (() => {
         playerGameStarted = false; // Reset so next session starts clean
         waitingPlayersListenerAdded = false;
         hideWaitingOverlay();
+        stopQuestionTrack();
+        lastQuestionTrackIndex = null;
         lastPlayerSync = { currentQuestion: -2, questionStartedAt: 0, bonusActive: false, status: '' };
         playerSessionGen = 0;
         $('teacher-view').classList.remove('active');
