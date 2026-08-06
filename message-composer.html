@@ -3,6 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="referrer" content="no-referrer">
     <link rel="icon" type="image/png" href="assets/graduation-cap-icon.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Broadcast Message - ESL Learning Platform</title>
@@ -53,18 +54,54 @@
                         </div>
 
                         <div class="form-group">
-                            <label>Font Size</label>
-                            <div class="size-options" id="size-options"></div>
+                            <label for="bg-image-url">Background Image URL</label>
+                            <div class="bg-url-row">
+                                <input type="url" id="bg-image-url" class="bg-url-input"
+                                    placeholder="https://i.imgur.com/… or Google Drive share link">
+                                <button type="button" class="btn-secondary bg-url-apply" id="bg-url-apply">
+                                    Apply
+                                </button>
+                                <button type="button" class="bg-remove-btn" id="bg-image-remove" hidden>
+                                    <i class="fa-solid fa-xmark"></i> Clear
+                                </button>
+                            </div>
+                            <p class="bg-upload-hint">Paste a public Imgur or Google Drive link. For Imgur, right-click the
+                                image and choose <strong>Copy image address</strong> for best results.</p>
+                            <p class="bg-upload-error" id="bg-upload-error" hidden></p>
                         </div>
 
                         <div class="form-group">
-                            <label for="animation-select">Animation Style</label>
-                            <select id="animation-select">
-                                <option value="none">None</option>
-                                <option value="pulse">Pulse</option>
-                                <option value="shake">Shake</option>
-                                <option value="flash">Flash</option>
-                            </select>
+                            <div class="size-animation-row">
+                                <div class="size-animation-col">
+                                    <label>Font Size</label>
+                                    <div class="size-options" id="size-options"></div>
+                                </div>
+                                <div class="size-animation-col animation-col">
+                                    <label for="animation-select">Animation</label>
+                                    <select id="animation-select" class="animation-select-inline"
+                                        aria-label="Animation style">
+                                        <option value="none">None</option>
+                                        <option value="pulse">Pulse</option>
+                                        <option value="shake">Shake</option>
+                                        <option value="flash">Flash</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group composer-panel-toggle">
+                            <div class="composer-toggle-row">
+                                <div class="composer-toggle-info">
+                                    <span class="composer-toggle-label" id="setting-show-copy-label">Display copy button on
+                                        broadcast</span>
+                                    <span class="composer-toggle-hint">Shows a copy button on student devices so they can
+                                        copy the message text.</span>
+                                </div>
+                                <label class="composer-toggle-switch" aria-labelledby="setting-show-copy-label">
+                                    <input type="checkbox" id="setting-show-copy-btn" />
+                                    <span class="composer-toggle-slider"></span>
+                                </label>
+                            </div>
                         </div>
 
                         <button type="button" class="btn-primary btn-generate" id="generate-link-btn">
@@ -92,7 +129,16 @@
                     <div class="preview-panel">
                         <h2><i class="fa-solid fa-eye"></i> Live Preview</h2>
                         <div class="preview-box">
-                            <div class="preview-screen" id="preview-screen">Your message preview…</div>
+                            <div class="preview-screen" id="preview-screen">
+                                <img class="preview-bg" id="preview-bg" alt="" referrerpolicy="no-referrer" hidden>
+                                <div class="preview-overlay" id="preview-overlay" hidden></div>
+                                <div class="preview-content">
+                                    <span class="preview-message" id="preview-message">Your message preview…</span>
+                                    <button type="button" class="preview-copy-btn" id="preview-copy-btn" hidden>
+                                        <i class="fa-solid fa-copy"></i> Copy
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                         <p class="preview-hint">Scaled preview — actual broadcast fills the entire screen</p>
                     </div>

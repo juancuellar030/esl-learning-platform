@@ -19,6 +19,7 @@ body {
 .broadcast-screen {
     width: 100vw;
     height: 100vh;
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -31,18 +32,37 @@ body {
     overflow: hidden;
 }
 
+.broadcast-bg,
+.broadcast-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.broadcast-bg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.broadcast-overlay {
+    transition: background-color 0.4s ease, opacity 0.4s ease;
+}
+
+.broadcast-text {
+    position: relative;
+    z-index: 1;
+    max-width: 100%;
+    max-height: 100%;
+    overflow: hidden;
+}
+
 .broadcast-screen.placeholder {
     background: #2d2d2d;
     color: #888;
     font-weight: 500;
     font-size: 4vw;
     font-style: italic;
-}
-
-.broadcast-text {
-    max-width: 100%;
-    max-height: 100%;
-    overflow: hidden;
 }
 
 /* Entrance animations */
@@ -54,7 +74,11 @@ body {
     animation: broadcast-shake 0.6s ease-in-out;
 }
 
-.broadcast-screen.anim-flash {
+.broadcast-screen.anim-flash:not(.has-bg-image) {
+    animation: broadcast-flash-bg 1.2s ease-in-out 3;
+}
+
+.broadcast-screen.anim-flash.has-bg-image .broadcast-overlay {
     animation: broadcast-flash-bg 1.2s ease-in-out 3;
 }
 
@@ -109,4 +133,48 @@ body {
     50% {
         filter: brightness(1.8);
     }
+}
+
+.broadcast-copy-btn {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 10;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    border: 2px solid rgba(255, 255, 255, 0.85);
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.45);
+    color: #fff;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    backdrop-filter: blur(6px);
+    transition: background 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+}
+
+.broadcast-copy-btn:hover {
+    background: rgba(0, 0, 0, 0.65);
+    transform: scale(1.04);
+}
+
+.broadcast-copy-btn.copied {
+    border-color: #a5f3b5;
+    background: rgba(46, 125, 50, 0.85);
+}
+
+.broadcast-copy-feedback {
+    position: fixed;
+    bottom: 80px;
+    right: 24px;
+    z-index: 11;
+    padding: 8px 14px;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.75);
+    color: #a5f3b5;
+    font-size: 0.9rem;
+    font-weight: 600;
 }

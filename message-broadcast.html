@@ -3,15 +3,23 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="referrer" content="no-referrer">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Broadcast Message</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/message-broadcast.css">
 </head>
 
 <body>
     <div class="broadcast-screen" id="broadcast-screen">
+        <img class="broadcast-bg" id="broadcast-bg" alt="" referrerpolicy="no-referrer" hidden>
+        <div class="broadcast-overlay" id="broadcast-overlay" hidden></div>
         <div class="broadcast-text" id="broadcast-text"></div>
     </div>
+    <button type="button" class="broadcast-copy-btn" id="broadcast-copy-btn" hidden>
+        <i class="fa-solid fa-copy"></i> Copy
+    </button>
+    <div class="broadcast-copy-feedback" id="broadcast-copy-feedback" hidden>Copied!</div>
 
     <script src="js/message-broadcast.js"></script>
 </body>

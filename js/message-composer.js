@@ -16,28 +16,39 @@ const COLOR_THEMES = {
 };
 
 const FONT_SIZES = {
-    small: '3vw',
-    medium: '5vw',
-    large: '7vw',
-    huge: '9vw'
+    small: 3,
+    medium: 5,
+    large: 7,
+    huge: 9
 };
 
-const PREVIEW_FONT_SIZES = {
-    small: '0.65rem',
-    medium: '0.85rem',
-    large: '1.1rem',
-    huge: '1.4rem'
-};
+const SIZE_LABELS = { small: 'S', medium: 'M', large: 'L', huge: 'XL' };
+const SIZE_TITLES = { small: 'Small', medium: 'Medium', large: 'Large', huge: 'Huge' };
 
 const RECENT_KEY = 'broadcastRecentMessages';
+const SETTINGS_KEY = 'broadcastComposerSettings';
 const MAX_RECENT = 5;
+const BG_OVERLAY_OPACITY = 0.72;
 
 let selectedColor = 'blue';
 let selectedSize = 'huge';
+let backgroundImageUrl = null;
+let backgroundPreviewUrl = null;
+let backgroundFetchToken = 0;
+let settings = { showCopyButton: false };
 
 const $messageText = document.getElementById('message-text');
 const $animationSelect = document.getElementById('animation-select');
 const $previewScreen = document.getElementById('preview-screen');
+const $previewBg = document.getElementById('preview-bg');
+const $previewOverlay = document.getElementById('preview-overlay');
+const $previewMessage = document.getElementById('preview-message');
+const $previewCopyBtn = document.getElementById('preview-copy-btn');
+const $previewBox = document.querySelector('.preview-box');
+const $bgImageUrl = document.getElementById('bg-image-url');
+const $bgUrlApply = document.getElementById('bg-url-apply');
+const $bgImageRemove = document.getElementById('bg-image-remove');
+const $bgUploadError = document.getElementById('bg-upload-error');
 const $broadcastLink = document.getElementById('broadcast-link');
 const $copyFeedback = document.getElementById('copy-feedback');
 const $presetContainer = document.getElementById('preset-buttons');
@@ -46,14 +57,38 @@ const $sizeOptions = document.getElementById('size-options');
 const $recentContainer = document.getElementById('recent-buttons');
 const $generateBtn = document.getElementById('generate-link-btn');
 const $copyBtn = document.getElementById('copy-link-btn');
+const $showCopyBtnSetting = document.getElementById('setting-show-copy-btn');
+
+const PREVIEW_ANIM_CLASSES = ['anim-pulse', 'anim-shake', 'anim-flash'];
 
 function init() {
+    loadSettings();
     renderPresets();
     renderColorSwatches();
     renderSizeOptions();
     renderRecentMessages();
     bindEvents();
     updatePreview();
+
+    if ($previewBox && window.ResizeObserver) {
+        new ResizeObserver(() => fitPreviewText($previewMessage, selectedSize)).observe($previewBox);
+    }
+}
+
+function loadSettings() {
+    try {
+        const saved = JSON.parse(localStorage.getItem(SETTINGS_KEY));
+        if (saved && typeof saved.showCopyButton === 'boolean') {
+            settings.showCopyButton = saved.showCopyButton;
+        }
+    } catch {
+        settings = { showCopyButton: false };
+    }
+    $showCopyBtnSetting.checked = settings.showCopyButton;
+}
+
+function saveSettings() {
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
 }
 
 function renderPresets() {
@@ -74,10 +109,124 @@ function renderColorSwatches() {
 }
 
 function renderSizeOptions() {
-    const labels = { small: 'Small', medium: 'Medium', large: 'Large', huge: 'Huge' };
-    $sizeOptions.innerHTML = Object.keys(FONT_SIZES).map(key =>
-        `<button type="button" class="size-btn${key === selectedSize ? ' active' : ''}" data-size="${key}">${labels[key]}</button>`
-    ).join('');
+    $sizeOptions.innerHTML = Object.keys(FONT_SIZES).map(key => {
+        const isActive = key === selectedSize;
+        return `<button type="button" class="size-btn${isActive ? ' active' : ''}" data-size="${key}" title="${SIZE_TITLES[key]}" aria-label="${SIZE_TITLES[key]}" aria-pressed="${isActive}">${SIZE_LABELS[key]}</button>`;
+    }).join('');
+}
+
+function fitPreviewText(el, sizeKey) {
+    const screen = $previewScreen;
+    if (!screen || !el) return;
+
+    const baseVw = FONT_SIZES[sizeKey] || FONT_SIZES.huge;
+    const padding = parseFloat(getComputedStyle(screen).paddingLeft) * 2;
+    const maxWidth = screen.clientWidth - padding;
+    const maxHeight = screen.clientHeight - padding;
+
+    let vw = baseVw;
+    const minVw = 2;
+
+    const setSize = (v) => {
+        el.style.fontSize = (screen.clientWidth * v / 100) + 'px';
+    };
+
+    setSize(vw);
+
+    let safety = 0;
+    while (safety < 40 && (el.scrollWidth > maxWidth || el.scrollHeight > maxHeight) && vw > minVw) {
+        vw -= 0.25;
+        setSize(vw);
+        safety++;
+    }
+
+    if (el.scrollWidth > maxWidth || el.scrollHeight > maxHeight) {
+        const ratioW = maxWidth / el.scrollWidth;
+        const ratioH = maxHeight / el.scrollHeight;
+        const ratio = Math.min(ratioW, ratioH, 1);
+        const currentPx = parseFloat(getComputedStyle(el).fontSize);
+        el.style.fontSize = (currentPx * ratio * 0.95) + 'px';
+    }
+}
+
+function extractImgurId(pathname) {
+    const parts = pathname.split('/').filter(Boolean);
+    if (!parts.length) return null;
+    if (parts[0] === 'a' || parts[0] === 'gallery') return parts[1] || null;
+    return parts[0];
+}
+
+function normalizeBackgroundUrl(raw) {
+    const trimmed = raw.trim();
+    if (!trimmed) return null;
+
+    let url;
+    try {
+        url = new URL(trimmed);
+    } catch {
+        throw new Error('Enter a valid image URL starting with https://');
+    }
+
+    if (!['http:', 'https:'].includes(url.protocol)) {
+        throw new Error('Image URL must use http:// or https://');
+    }
+
+    const host = url.hostname.toLowerCase();
+
+    if (host === 'imgur.com' || host === 'www.imgur.com') {
+        const id = extractImgurId(url.pathname);
+        if (id) return `https://i.imgur.com/${id}`;
+        throw new Error('Use an Imgur image link or right-click the image and choose “Copy image address”.');
+    }
+
+    if (host === 'i.imgur.com') {
+        const path = url.pathname.replace(/^\//, '').split('?')[0];
+        if (path) return `https://i.imgur.com/${path}`;
+    }
+
+    if (host === 'drive.google.com' || host === 'docs.google.com') {
+        const fileMatch = url.pathname.match(/\/file\/d\/([^/]+)/);
+        if (fileMatch) {
+            return `https://drive.google.com/uc?export=view&id=${fileMatch[1]}`;
+        }
+        const idParam = url.searchParams.get('id');
+        if (idParam) {
+            return `https://drive.google.com/uc?export=view&id=${idParam}`;
+        }
+    }
+
+    return url.href;
+}
+
+function revokeBackgroundPreviewUrl() {
+    if (backgroundPreviewUrl && backgroundPreviewUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(backgroundPreviewUrl);
+    }
+    backgroundPreviewUrl = null;
+}
+
+async function fetchBackgroundPreviewUrl(imageUrl) {
+    const response = await fetch(imageUrl, { referrerPolicy: 'no-referrer', mode: 'cors' });
+    if (!response.ok) {
+        throw new Error(`Image request blocked (${response.status}). Try Google Drive or re-upload to Imgur.`);
+    }
+    const blob = await response.blob();
+    return URL.createObjectURL(blob);
+}
+
+function setBackgroundImageElement(bgEl, displayUrl) {
+    bgEl.referrerPolicy = 'no-referrer';
+    if (bgEl.dataset.displaySrc !== displayUrl) {
+        bgEl.dataset.displaySrc = displayUrl;
+        bgEl.src = displayUrl;
+    }
+    bgEl.hidden = false;
+}
+
+function clearBackgroundImageElement(bgEl) {
+    bgEl.removeAttribute('src');
+    delete bgEl.dataset.displaySrc;
+    bgEl.hidden = true;
 }
 
 function getFormState() {
@@ -85,8 +234,17 @@ function getFormState() {
         text: $messageText.value.trim(),
         color: selectedColor,
         size: selectedSize,
-        anim: $animationSelect.value
+        anim: $animationSelect.value,
+        bgUrl: backgroundImageUrl || null
     };
+}
+
+function resolveStoredBgUrl(state) {
+    if (state.bgUrl) return state.bgUrl;
+    if (state.bgImage && typeof state.bgImage === 'string' && /^https?:\/\//i.test(state.bgImage)) {
+        return state.bgImage;
+    }
+    return null;
 }
 
 function applyState(state) {
@@ -94,19 +252,132 @@ function applyState(state) {
     selectedColor = state.color || 'blue';
     selectedSize = state.size || 'huge';
     $animationSelect.value = state.anim || 'none';
+    backgroundImageUrl = resolveStoredBgUrl(state);
+    $bgImageUrl.value = backgroundImageUrl || '';
+    $bgImageRemove.hidden = !backgroundImageUrl;
+    clearBgUploadError();
     renderColorSwatches();
     renderSizeOptions();
+    if (backgroundImageUrl) {
+        refreshBackgroundPreview();
+    } else {
+        backgroundFetchToken++;
+        revokeBackgroundPreviewUrl();
+        updatePreview();
+    }
+}
+
+function applyBackgroundLayers(bgEl, overlayEl, screenEl, displayUrl, themeBg) {
+    if (displayUrl) {
+        setBackgroundImageElement(bgEl, displayUrl);
+        overlayEl.style.backgroundColor = themeBg;
+        overlayEl.style.opacity = BG_OVERLAY_OPACITY;
+        overlayEl.hidden = false;
+        screenEl.style.backgroundColor = 'transparent';
+    } else {
+        clearBackgroundImageElement(bgEl);
+        overlayEl.hidden = true;
+        screenEl.style.backgroundColor = themeBg;
+    }
+}
+
+async function refreshBackgroundPreview() {
+    const token = ++backgroundFetchToken;
+    revokeBackgroundPreviewUrl();
+
+    if (!backgroundImageUrl) {
+        updatePreview();
+        return;
+    }
+
+    try {
+        const displayUrl = await fetchBackgroundPreviewUrl(backgroundImageUrl);
+        if (token !== backgroundFetchToken) {
+            URL.revokeObjectURL(displayUrl);
+            return;
+        }
+        backgroundPreviewUrl = displayUrl;
+        clearBgUploadError();
+        updatePreview();
+    } catch (err) {
+        if (token !== backgroundFetchToken) return;
+        backgroundPreviewUrl = backgroundImageUrl;
+        showBgUploadError(
+            `${err.message} Showing direct link — if preview is blank, use Google Drive instead.`
+        );
+        updatePreview();
+    }
+}
+
+function clearBgUploadError() {
+    $bgUploadError.hidden = true;
+    $bgUploadError.textContent = '';
+}
+
+function showBgUploadError(message) {
+    $bgUploadError.textContent = message;
+    $bgUploadError.hidden = false;
+}
+
+function removeBackgroundImage() {
+    backgroundFetchToken++;
+    backgroundImageUrl = null;
+    revokeBackgroundPreviewUrl();
+    $bgImageUrl.value = '';
+    $bgImageRemove.hidden = true;
+    clearBgUploadError();
     updatePreview();
+    if ($broadcastLink.value) generateLink();
+}
+
+async function applyBackgroundUrl() {
+    const raw = $bgImageUrl.value.trim();
+    if (!raw) {
+        removeBackgroundImage();
+        return;
+    }
+
+    clearBgUploadError();
+
+    try {
+        const normalized = normalizeBackgroundUrl(raw);
+        backgroundImageUrl = normalized;
+        $bgImageUrl.value = normalized;
+        $bgImageRemove.hidden = false;
+        await refreshBackgroundPreview();
+        if ($broadcastLink.value) generateLink();
+    } catch (err) {
+        backgroundFetchToken++;
+        backgroundImageUrl = null;
+        revokeBackgroundPreviewUrl();
+        $bgImageRemove.hidden = true;
+        showBgUploadError(err.message || 'Could not use that image link.');
+        updatePreview();
+    }
 }
 
 function updatePreview() {
-    const { text, color, size } = getFormState();
+    const { text, color, size, anim } = getFormState();
     const theme = COLOR_THEMES[color] || COLOR_THEMES.blue;
 
-    $previewScreen.style.backgroundColor = theme.bg;
+    applyBackgroundLayers(
+        $previewBg,
+        $previewOverlay,
+        $previewScreen,
+        backgroundPreviewUrl || backgroundImageUrl,
+        theme.bg
+    );
+    $previewScreen.classList.toggle('has-bg-image', Boolean(backgroundImageUrl));
     $previewScreen.style.color = theme.text;
-    $previewScreen.style.fontSize = PREVIEW_FONT_SIZES[size] || PREVIEW_FONT_SIZES.huge;
-    $previewScreen.textContent = text || 'Your message preview…';
+    $previewMessage.textContent = text || 'Your message preview…';
+    $previewCopyBtn.hidden = !(settings.showCopyButton && text);
+    fitPreviewText($previewMessage, size);
+
+    $previewScreen.classList.remove(...PREVIEW_ANIM_CLASSES);
+    void $previewScreen.offsetWidth;
+    if (anim && anim !== 'none') {
+        $previewScreen.classList.add(`anim-${anim}`);
+    }
 }
 
 function buildBroadcastUrl(state) {
@@ -116,6 +387,12 @@ function buildBroadcastUrl(state) {
         size: state.size,
         anim: state.anim
     });
+    if (settings.showCopyButton) {
+        params.set('copy', '1');
+    }
+    if (state.bgUrl) {
+        params.set('bgUrl', state.bgUrl);
+    }
     const base = new URL('message-broadcast.html', window.location.href);
     base.search = params.toString();
     return base.href;
@@ -131,7 +408,8 @@ function saveToRecent(state) {
 
     recent = recent.filter(item =>
         !(item.text === state.text && item.color === state.color &&
-          item.size === state.size && item.anim === state.anim)
+          item.size === state.size && item.anim === state.anim &&
+          (item.bgUrl || resolveStoredBgUrl(item) || null) === (state.bgUrl || null))
     );
 
     recent.unshift({ ...state, sentAt: Date.now() });
@@ -155,8 +433,31 @@ function renderRecentMessages() {
 
     $recentContainer.innerHTML = recent.map((item, i) => {
         const label = item.text.length > 30 ? item.text.slice(0, 30) + '…' : item.text;
-        return `<button type="button" class="recent-btn" data-recent="${i}" title="${item.text.replace(/"/g, '&quot;')}">${label}</button>`;
+        const safeTitle = item.text.replace(/"/g, '&quot;');
+        return `
+            <div class="recent-item">
+                <button type="button" class="recent-btn" data-recent="${i}" title="${safeTitle}">
+                    <span class="recent-btn-text">${label}</span>
+                </button>
+                <button type="button" class="recent-btn-delete" data-delete-recent="${i}" aria-label="Remove message" title="Remove">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>`;
     }).join('');
+}
+
+function deleteRecentMessage(index) {
+    let recent = [];
+    try {
+        recent = JSON.parse(localStorage.getItem(RECENT_KEY)) || [];
+    } catch {
+        return;
+    }
+
+    if (index < 0 || index >= recent.length) return;
+    recent.splice(index, 1);
+    localStorage.setItem(RECENT_KEY, JSON.stringify(recent));
+    renderRecentMessages();
 }
 
 function generateLink() {
@@ -218,10 +519,26 @@ function bindEvents() {
 
     $animationSelect.addEventListener('change', updatePreview);
 
+    $bgUrlApply.addEventListener('click', applyBackgroundUrl);
+    $bgImageUrl.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            applyBackgroundUrl();
+        }
+    });
+    $bgImageRemove.addEventListener('click', removeBackgroundImage);
+
     $generateBtn.addEventListener('click', generateLink);
     $copyBtn.addEventListener('click', copyLink);
 
     $recentContainer.addEventListener('click', (e) => {
+        const deleteBtn = e.target.closest('[data-delete-recent]');
+        if (deleteBtn) {
+            e.stopPropagation();
+            deleteRecentMessage(Number(deleteBtn.dataset.deleteRecent));
+            return;
+        }
+
         const btn = e.target.closest('[data-recent]');
         if (!btn) return;
         let recent = [];
@@ -234,6 +551,23 @@ function bindEvents() {
         if (item) {
             applyState(item);
             generateLink();
+        }
+    });
+
+    $showCopyBtnSetting.addEventListener('change', () => {
+        settings.showCopyButton = $showCopyBtnSetting.checked;
+        saveSettings();
+        updatePreview();
+        if ($broadcastLink.value) generateLink();
+    });
+
+    $previewCopyBtn.addEventListener('click', async () => {
+        const text = $messageText.value.trim();
+        if (!text) return;
+        try {
+            await navigator.clipboard.writeText(text);
+        } catch {
+            /* preview-only fallback */
         }
     });
 }
