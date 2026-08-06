@@ -39,6 +39,11 @@ const QuizGame = (() => {
     let liveShortcutListener = null;
     let kickCheckTimer = null;
     let waitingPlayersListenerAdded = false;
+    const lobbyPlayerCardMap = new Map();
+    const liveStandingsRowMap = new Map();
+    const liveStandingsRankMap = new Map();
+    let liveStandingsListenerAdded = false;
+    let onLiveStandings = false;
 
     const INACTIVE_PLAYER_GRACE_MS = 60000;
 
@@ -496,6 +501,19 @@ const QuizGame = (() => {
 
         $('btn-copy-join-url')?.addEventListener('click', (e) => copyLobbyText($('lobby-share-url')?.value.trim(), e.currentTarget));
         $('btn-copy-game-code')?.addEventListener('click', (e) => copyLobbyText(gameCode || '', e.currentTarget));
+
+        const toggleShareUrlBtn = $('btn-toggle-share-url');
+        const shareUrlExpand = $('lobby-url-expand');
+        if (toggleShareUrlBtn && shareUrlExpand) {
+            toggleShareUrlBtn.addEventListener('click', () => {
+                const willExpand = shareUrlExpand.hidden;
+                shareUrlExpand.hidden = !willExpand;
+                toggleShareUrlBtn.setAttribute('aria-expanded', String(willExpand));
+                if (willExpand) {
+                    $('lobby-share-url')?.focus();
+                }
+            });
+        }
         $('btn-remove-inactive-players')?.addEventListener('click', removeInactivePlayers);
         $('btn-play-again').addEventListener('click', playAgain);
         $('btn-new-game').addEventListener('click', () => {
@@ -627,16 +645,27 @@ const QuizGame = (() => {
             });
         }
 
-        // Theme modal open/close
         document.querySelectorAll('.qg-open-theme-btn').forEach((btn) => {
-            btn.addEventListener('click', () => {
-                $('overlay-theme-modal').style.display = 'flex';
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (isThemePanelOpen()) closeThemePanel();
+                else openThemePanel();
             });
         });
+
+        $('theme-dropdown-backdrop')?.addEventListener('click', () => {
+            closeThemePanel();
+        });
+
+        $('overlay-theme-modal')?.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+
         const btnCloseThemeModal = $('btn-close-theme-modal');
         if (btnCloseThemeModal) {
-            btnCloseThemeModal.addEventListener('click', () => {
-                $('overlay-theme-modal').style.display = 'none';
+            btnCloseThemeModal.addEventListener('click', (e) => {
+                e.stopPropagation();
+                closeThemePanel();
             });
         }
 
@@ -1292,8 +1321,137 @@ const QuizGame = (() => {
         showSessionBadge(code);
     }
 
+    function hasLobbyAvatar(avatarId) {
+        return !!(avatarId && avatarId.startsWith('animal_'));
+    }
+
+    function isLobbyPlayerPending(p) {
+        return !p.name?.trim() || !hasLobbyAvatar(p.avatar);
+    }
+
+    function getLobbyNameLoadingHtml() {
+        return `<span class="qg-lobby-name-loading" aria-label="Loading player" role="status">
+            <span></span><span></span><span></span><span></span>
+        </span>`;
+    }
+
+    function getLobbyAvatarInnerHtml(avatarId) {
+        if (hasLobbyAvatar(avatarId)) {
+            const idx = parseInt(avatarId.replace('animal_', ''), 10);
+            if (!Number.isNaN(idx)) {
+                return `<img class="player-avatar-img" src="${getAvatarSrc(idx)}" alt="">`;
+            }
+        }
+        return '<i class="fa-solid fa-user" aria-hidden="true"></i>';
+    }
+
+    function renderLobbyPlayerName(nameEl, p) {
+        if (!nameEl) return;
+        if (isLobbyPlayerPending(p)) {
+            if (!nameEl.querySelector('.qg-lobby-name-loading')) {
+                nameEl.innerHTML = getLobbyNameLoadingHtml();
+            }
+        } else {
+            nameEl.textContent = p.name;
+        }
+    }
+
+    function setLobbyPlayerPending(el, pending) {
+        el.classList.toggle('qg-lobby-player--pending', pending);
+    }
+
+    function createLobbyPlayerCard(uid, p, staggerIndex) {
+        const div = document.createElement('div');
+        div.className = 'qg-lobby-player';
+        div.dataset.playerUid = uid;
+        div.dataset.playerAvatar = p.avatar || '';
+        div.dataset.playerName = p.name || '';
+        div.style.animationDelay = (staggerIndex * 0.05) + 's';
+
+        const disconnected = isPlayerDisconnected(p);
+        const pending = isLobbyPlayerPending(p);
+        if (disconnected) div.classList.add('qg-lobby-player--disconnected');
+        setLobbyPlayerPending(div, pending);
+
+        const avatarWrap = document.createElement('div');
+        avatarWrap.className = 'qg-lobby-player-avatar';
+        avatarWrap.innerHTML = getLobbyAvatarInnerHtml(p.avatar || '');
+
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'player-name';
+        renderLobbyPlayerName(nameSpan, p);
+
+        div.appendChild(avatarWrap);
+        div.appendChild(nameSpan);
+
+        if (disconnected) {
+            const badge = document.createElement('span');
+            badge.className = 'qg-reconnect-badge';
+            badge.textContent = 'Reconnecting…';
+            div.appendChild(badge);
+        }
+
+        if (role === 'host') {
+            const bootBtn = document.createElement('button');
+            bootBtn.className = 'qg-boot-btn';
+            bootBtn.setAttribute('aria-label', `Remove ${p.name}`);
+            bootBtn.dataset.uid = uid;
+            bootBtn.dataset.name = p.name;
+            bootBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+            bootBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                bootPlayer(bootBtn.dataset.uid, bootBtn.dataset.name);
+            });
+            div.appendChild(bootBtn);
+        }
+
+        return div;
+    }
+
+    function updateLobbyPlayerCard(el, p) {
+        const disconnected = isPlayerDisconnected(p);
+        el.classList.toggle('qg-lobby-player--disconnected', disconnected);
+
+        const avatarId = p.avatar || '';
+        const playerName = p.name || '';
+        const pending = isLobbyPlayerPending(p);
+        setLobbyPlayerPending(el, pending);
+
+        if (el.dataset.playerAvatar !== avatarId) {
+            const avatarEl = el.querySelector('.qg-lobby-player-avatar');
+            if (avatarEl) avatarEl.innerHTML = getLobbyAvatarInnerHtml(avatarId);
+            el.dataset.playerAvatar = avatarId;
+        }
+
+        const nameEl = el.querySelector('.player-name');
+        renderLobbyPlayerName(nameEl, p);
+        el.dataset.playerName = playerName;
+
+        const badge = el.querySelector('.qg-reconnect-badge');
+        if (disconnected) {
+            if (!badge) {
+                const newBadge = document.createElement('span');
+                newBadge.className = 'qg-reconnect-badge';
+                newBadge.textContent = 'Reconnecting…';
+                const bootBtn = el.querySelector('.qg-boot-btn');
+                if (bootBtn) el.insertBefore(newBadge, bootBtn);
+                else el.appendChild(newBadge);
+            }
+        } else if (badge) {
+            badge.remove();
+        }
+
+        const bootBtn = el.querySelector('.qg-boot-btn');
+        if (bootBtn) {
+            bootBtn.setAttribute('aria-label', `Remove ${p.name}`);
+            bootBtn.dataset.name = p.name;
+        }
+    }
+
     function renderLobbyPlayers() {
         const container = $('lobby-players');
+        if (!container) return;
+
         const count = Object.keys(players).length;
         const countLabel = $('player-count-label');
         if (countLabel) countLabel.textContent = formatPlayerCountLabel(count);
@@ -1303,42 +1461,26 @@ const QuizGame = (() => {
         const hasInactive = role === 'host' && Object.values(players).some(isPlayerDisconnected);
         if (inactiveBtn) inactiveBtn.hidden = !hasInactive;
 
-        container.innerHTML = '';
-        Object.entries(players).forEach(([uid, p], i) => {
-            const div = document.createElement('div');
-            const disconnected = isPlayerDisconnected(p);
-            div.className = 'qg-lobby-player' + (disconnected ? ' qg-lobby-player--disconnected' : '');
-            div.style.animationDelay = (i * 0.05) + 's';
-            const avatarId = p.avatar || '';
-            let avatarInner = '<i class="fa-solid fa-user" aria-hidden="true"></i>';
-            if (avatarId.startsWith('animal_')) {
-                const idx = parseInt(avatarId.replace('animal_', ''));
-                avatarInner = `<img class="player-avatar-img" src="${getAvatarSrc(idx)}" alt="">`;
+        const activeUids = new Set(Object.keys(players));
+
+        lobbyPlayerCardMap.forEach((el, uid) => {
+            if (!activeUids.has(uid)) {
+                el.remove();
+                lobbyPlayerCardMap.delete(uid);
+            }
+        });
+
+        Object.entries(players).forEach(([uid, p]) => {
+            const existing = lobbyPlayerCardMap.get(uid);
+            if (existing) {
+                updateLobbyPlayerCard(existing, p);
+                return;
             }
 
-            let bootHtml = '';
-            if (role === 'host') {
-                bootHtml = `<button class="qg-boot-btn" aria-label="Remove ${escapeHtml(p.name)}" data-uid="${uid}" data-name="${escapeHtml(p.name)}">
-                                <i class="fa-solid fa-xmark"></i>
-                            </button>`;
-            }
-
-            div.innerHTML = `
-                <div class="qg-lobby-player-avatar">${avatarInner}</div>
-                <span class="player-name">${escapeHtml(p.name)}</span>
-                ${disconnected ? '<span class="qg-reconnect-badge">Reconnecting…</span>' : ''}
-                ${bootHtml}`;
-
-            if (role === 'host') {
-                const bootBtn = div.querySelector('.qg-boot-btn');
-                if (bootBtn) {
-                    bootBtn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        bootPlayer(bootBtn.dataset.uid, bootBtn.dataset.name);
-                    });
-                }
-            }
-            container.appendChild(div);
+            const staggerIndex = lobbyPlayerCardMap.size;
+            const card = createLobbyPlayerCard(uid, p, staggerIndex);
+            container.appendChild(card);
+            lobbyPlayerCardMap.set(uid, card);
         });
     }
 
@@ -1575,6 +1717,8 @@ const QuizGame = (() => {
     }
 
     function runCountdown(callback) {
+        closeThemePanel();
+
         const overlay = $('overlay-countdown');
         const numEl = $('countdown-number');
         overlay.classList.add('active');
@@ -1605,6 +1749,7 @@ const QuizGame = (() => {
                 clearInterval(interval);
                 overlay.classList.remove('active');
                 numEl.style.color = '';
+                closeThemePanel();
                 callback();
             }
         }, 800);
@@ -1665,6 +1810,16 @@ const QuizGame = (() => {
         if (!isHostMusicEnabled()) return;
         stopQuestionTrack();
         playHostSfxOneShot('sfx-podium');
+    }
+
+    function playPlayerAnswerSfx(type) {
+        if (!soundEnabled) return;
+        const elementId = type === 'correct' ? 'sfx-correct-answer' : 'sfx-incorrect-answer';
+        const el = $(elementId);
+        if (!el) return;
+        el.pause();
+        el.currentTime = 0;
+        el.play().catch(() => { });
     }
 
     // ===== HOST: GAME PLAY =====
@@ -2192,14 +2347,7 @@ const QuizGame = (() => {
     function studentPacedNextQuestion() {
         currentQ++;
         if (currentQ >= questions.length) {
-            // Student finished all questions
-            showResults();
-            // Report final score to Firebase
-            if (!FirebaseService.isDemo()) {
-                FirebaseService.updatePlayerScore(gameCode, FirebaseService.getUid(), myScore, myStreak);
-                FirebaseService.updateSessionField(gameCode,
-                    'players/' + FirebaseService.getUid() + '/progress', questions.length);
-            }
+            showLiveStandings();
             return;
         }
 
@@ -2671,13 +2819,13 @@ const QuizGame = (() => {
             myScore += points;
             myStreak++;
             showFeedback(true, points);
-            playSound('correct');
+            playPlayerAnswerSfx('correct');
         } else {
             const selectedBtn = document.querySelector(`.qg-answer-btn[data-index="${selectedIdx}"]`);
             if (selectedBtn) selectedBtn.classList.add('wrong');
             myStreak = 0;
             showFeedback(false, 0);
-            playSound('wrong');
+            playPlayerAnswerSfx('incorrect');
         }
 
         $('sv-score').textContent = myScore;
@@ -2729,12 +2877,12 @@ const QuizGame = (() => {
                 myScore += points;
                 myStreak++;
                 showFeedback(true, points);
-                playSound('correct');
+                playPlayerAnswerSfx('correct');
             } else {
                 selectedBtn.classList.add('wrong');
                 myStreak = 0;
                 showFeedback(false, 0);
-                playSound('wrong');
+                playPlayerAnswerSfx('incorrect');
             }
         } else {
             myStreak = 0;
@@ -2835,7 +2983,179 @@ const QuizGame = (() => {
         showResults();
     }
 
+    function isStudentFinished(p) {
+        const tot = questions.length || 1;
+        return (p?.progress || 0) >= tot;
+    }
+
+    function countFinishedStudents(roster) {
+        const total = Object.keys(roster || {}).length;
+        let finished = 0;
+        Object.values(roster || {}).forEach(p => {
+            if (isStudentFinished(p)) finished++;
+        });
+        return { finished, total };
+    }
+
+    function getLiveStandingsSorted(roster) {
+        const tot = questions.length || 1;
+        return Object.entries(roster || {})
+            .map(([uid, p]) => ({
+                uid,
+                name: p.name || '',
+                score: p.score || 0,
+                progress: p.progress || 0,
+                avatar: p.avatar || '',
+                isDone: (p.progress || 0) >= tot
+            }))
+            .sort((a, b) => {
+                if (b.score !== a.score) return b.score - a.score;
+                if (b.progress !== a.progress) return b.progress - a.progress;
+                return a.name.localeCompare(b.name);
+            });
+    }
+
+    function updateLiveStandingsFinishedCount(roster) {
+        const el = $('live-standings-finished-count');
+        if (!el) return;
+        const { finished, total } = countFinishedStudents(roster);
+        el.textContent = `${finished} / ${total} students finished`;
+    }
+
+    function createLiveStandingsRow(entry, rank) {
+        const row = document.createElement('div');
+        row.className = 'qg-ls-row';
+        row.setAttribute('role', 'listitem');
+        row.dataset.uid = entry.uid;
+        row.innerHTML = `
+            <span class="qg-ls-rank">${rank}</span>
+            <span class="qg-ls-rank-change" aria-hidden="true"></span>
+            <div class="qg-ls-avatar" aria-hidden="true"></div>
+            <div class="qg-ls-info">
+                <span class="qg-ls-name"></span>
+                <span class="qg-ls-score"></span>
+            </div>
+        `;
+        updateLiveStandingsRow(row, entry, rank, null);
+        return row;
+    }
+
+    function updateLiveStandingsRow(row, entry, rank, prevRank) {
+        row.querySelector('.qg-ls-rank').textContent = rank;
+        row.querySelector('.qg-ls-name').textContent = entry.name;
+        row.querySelector('.qg-ls-score').textContent = entry.score + ' pts';
+
+        const avatarId = entry.avatar || '';
+        if (row.dataset.playerAvatar !== avatarId) {
+            const avatarEl = row.querySelector('.qg-ls-avatar');
+            if (avatarEl) avatarEl.innerHTML = getLobbyAvatarInnerHtml(avatarId);
+            row.dataset.playerAvatar = avatarId;
+        }
+
+        const isSelf = entry.uid === FirebaseService.getUid();
+        row.classList.toggle('qg-ls-row--self', isSelf);
+        row.classList.toggle('qg-ls-row--done', entry.isDone);
+
+        const changeEl = row.querySelector('.qg-ls-rank-change');
+        if (prevRank != null && prevRank !== rank) {
+            const movedUp = rank < prevRank;
+            changeEl.textContent = movedUp ? '▲' : '▼';
+            changeEl.className = 'qg-ls-rank-change ' + (movedUp ? 'qg-ls-rank-change--up' : 'qg-ls-rank-change--down');
+            row.classList.remove('qg-ls-row--moved');
+            void row.offsetWidth;
+            row.classList.add('qg-ls-row--moved');
+        } else if (changeEl) {
+            changeEl.textContent = '';
+            changeEl.className = 'qg-ls-rank-change';
+        }
+    }
+
+    function renderLiveStandings(roster) {
+        const container = $('live-standings-list');
+        if (!container) return;
+
+        const sorted = getLiveStandingsSorted(roster);
+        const activeUids = new Set(sorted.map(entry => entry.uid));
+
+        liveStandingsRowMap.forEach((el, uid) => {
+            if (!activeUids.has(uid)) {
+                el.remove();
+                liveStandingsRowMap.delete(uid);
+                liveStandingsRankMap.delete(uid);
+            }
+        });
+
+        sorted.forEach((entry, index) => {
+            const rank = index + 1;
+            const prevRank = liveStandingsRankMap.get(entry.uid);
+            let row = liveStandingsRowMap.get(entry.uid);
+            if (!row) {
+                row = createLiveStandingsRow(entry, rank);
+                liveStandingsRowMap.set(entry.uid, row);
+            } else {
+                updateLiveStandingsRow(row, entry, rank, prevRank);
+            }
+            liveStandingsRankMap.set(entry.uid, rank);
+        });
+
+        sorted.forEach((entry, index) => {
+            const row = liveStandingsRowMap.get(entry.uid);
+            const ref = container.children[index];
+            if (row && ref !== row) {
+                container.insertBefore(row, ref || null);
+            }
+        });
+
+        updateLiveStandingsFinishedCount(roster);
+    }
+
+    function ensureLiveStandingsListener() {
+        if (liveStandingsListenerAdded || FirebaseService.isDemo() || !gameCode) return;
+        liveStandingsListenerAdded = true;
+        const unsub = FirebaseService.onPlayersChange(gameCode, roster => {
+            players = roster || {};
+            if (onLiveStandings) renderLiveStandings(players);
+        });
+        listeners.push(unsub);
+    }
+
+    function showLiveStandings() {
+        clearInterval(timerInterval);
+        hideWaitingOverlay();
+        hideShortcutPanels();
+        onLiveStandings = true;
+
+        if (!FirebaseService.isDemo()) {
+            FirebaseService.updatePlayerScore(gameCode, FirebaseService.getUid(), myScore, myStreak);
+            FirebaseService.updateSessionField(gameCode,
+                'players/' + FirebaseService.getUid() + '/progress', questions.length);
+        } else {
+            const uid = FirebaseService.getUid() || 'demo_self';
+            players[uid] = {
+                name: playerName || 'You',
+                score: myScore,
+                streak: myStreak,
+                progress: questions.length,
+                avatar: selectedAvatar || ''
+            };
+        }
+
+        showScreen('screen-live-standings');
+        renderLiveStandings(players);
+
+        if (!FirebaseService.isDemo()) {
+            ensureLiveStandingsListener();
+            FirebaseService.getSession(gameCode).then(session => {
+                if (session?.players) {
+                    players = session.players;
+                    renderLiveStandings(players);
+                }
+            });
+        }
+    }
+
     function showResults() {
+        onLiveStandings = false;
         hideWaitingOverlay();
         showScreen('screen-results');
 
@@ -3329,7 +3649,7 @@ const QuizGame = (() => {
         updateFloatingThemeBtn(id);
 
         // Show/hide session badge depending on screen
-        const badgeScreens = ['screen-lobby', 'screen-game', 'screen-waiting'];
+        const badgeScreens = ['screen-lobby', 'screen-game', 'screen-waiting', 'screen-live-standings'];
         if (gameCode && badgeScreens.includes(id)) {
             showSessionBadge(gameCode);
         } else if (!badgeScreens.includes(id)) {
@@ -3353,6 +3673,8 @@ const QuizGame = (() => {
         hasAnswered = false;
         playerGameStarted = false; // Reset so next session starts clean
         waitingPlayersListenerAdded = false;
+        onLiveStandings = false;
+        liveStandingsListenerAdded = false;
         hideWaitingOverlay();
         stopQuestionTrack();
         lastQuestionTrackIndex = null;
@@ -3361,6 +3683,11 @@ const QuizGame = (() => {
         $('teacher-view').classList.remove('active');
         $('student-view').classList.remove('active');
         hideSessionBadge();
+        lobbyPlayerCardMap.forEach((el) => el.remove());
+        lobbyPlayerCardMap.clear();
+        liveStandingsRowMap.forEach((el) => el.remove());
+        liveStandingsRowMap.clear();
+        liveStandingsRankMap.clear();
 
         // Only remove if it's a full cleanup (leaving session)
         // Note: we don't remove on refresh, only on manual 'New Game' or 'Cancel'
@@ -3686,10 +4013,38 @@ const QuizGame = (() => {
 
     const THEME_PICKER_SCREENS = new Set(['screen-role', 'screen-join', 'screen-waiting']);
 
+    function isThemePanelOpen() {
+        return $('overlay-theme-modal')?.classList.contains('open');
+    }
+
+    function openThemePanel() {
+        const panel = $('overlay-theme-modal');
+        const backdrop = $('theme-dropdown-backdrop');
+        if (!panel || !backdrop) return;
+        panel.classList.add('open');
+        panel.setAttribute('aria-hidden', 'false');
+        backdrop.classList.add('open');
+        backdrop.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeThemePanel() {
+        const panel = $('overlay-theme-modal');
+        const backdrop = $('theme-dropdown-backdrop');
+        if (!panel || !backdrop) return;
+        panel.classList.remove('open');
+        panel.setAttribute('aria-hidden', 'true');
+        backdrop.classList.remove('open');
+        backdrop.setAttribute('aria-hidden', 'true');
+        panel.style.display = '';
+    }
+
     function updateFloatingThemeBtn(screenId) {
+        const anchor = $('floating-theme-anchor');
         const btn = $('btn-floating-theme');
-        if (!btn) return;
-        btn.hidden = !THEME_PICKER_SCREENS.has(screenId) || role === 'host';
+        const show = THEME_PICKER_SCREENS.has(screenId) && role !== 'host';
+        if (anchor) anchor.hidden = !show;
+        if (btn) btn.hidden = !show;
+        if (!show) closeThemePanel();
     }
 
     function renderThemePicker() {

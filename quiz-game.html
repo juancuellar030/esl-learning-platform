@@ -27,11 +27,44 @@
             <span id="session-badge-code">------</span>
         </div>
 
-        <!-- ===== FLOATING THEME BUTTON ===== -->
-        <button type="button" class="qg-floating-theme-btn qg-open-theme-btn" id="btn-floating-theme"
-            title="Themes" aria-label="Open themes" hidden>
-            <i class="fa-solid fa-palette" aria-hidden="true"></i>
-        </button>
+        <!-- ===== FLOATING THEME BUTTON + DROPDOWN ===== -->
+        <div class="qg-floating-theme-anchor" id="floating-theme-anchor">
+            <button type="button" class="qg-floating-theme-btn qg-open-theme-btn" id="btn-floating-theme"
+                title="Themes" aria-label="Open themes" hidden>
+                <i class="fa-solid fa-palette" aria-hidden="true"></i>
+            </button>
+            <div class="qg-theme-dropdown-backdrop" id="theme-dropdown-backdrop" aria-hidden="true"></div>
+            <div class="qg-theme-dropdown" id="overlay-theme-modal" role="dialog" aria-modal="true"
+                aria-labelledby="theme-modal-title" aria-hidden="true">
+                <div class="qg-theme-modal-panel">
+                    <button class="qg-modal-close" id="btn-close-theme-modal" type="button"
+                        aria-label="Close theme panel">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                    <h2 class="qg-theme-modal-title" id="theme-modal-title">
+                        <i class="fa-solid fa-palette"></i> Select Theme
+                    </h2>
+                    <div class="qg-theme-modal-content">
+                        <div class="qg-theme-bars" id="theme-picker-list"></div>
+                        <div class="qg-theme-modal-divider"></div>
+                        <div class="qg-dark-switch-wrap">
+                            <label class="qg-dark-switch" id="qg-lobby-dark-toggle" title="Toggle dark mode">
+                                <input type="checkbox" class="qg-dark-switch-input" id="qg-dark-checkbox"
+                                    aria-label="Dark mode">
+                                <span class="qg-dark-switch-track" aria-hidden="true">
+                                    <i class="fa-solid fa-sun qg-dark-switch-icon qg-dark-switch-icon--sun"></i>
+                                    <i class="fa-solid fa-moon qg-dark-switch-icon qg-dark-switch-icon--moon"></i>
+                                    <span class="qg-dark-switch-thumb">
+                                        <i class="fa-solid fa-sun qg-dark-switch-thumb-icon qg-dark-switch-thumb-icon--light"></i>
+                                        <i class="fa-solid fa-moon qg-dark-switch-thumb-icon qg-dark-switch-thumb-icon--dark"></i>
+                                    </span>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- ===== BACKGROUND ANIMATION LAYER ===== -->
         <canvas id="qg-bg-canvas" aria-hidden="true"></canvas>
@@ -229,32 +262,45 @@
             <div class="qg-lobby-container">
                 <div class="qg-lobby-join-panel">
                     <div class="qg-lobby-share">
-                        <div class="qg-lobby-share-main">
-                            <p class="qg-lobby-share-label">Students open this page</p>
-                            <div class="qg-lobby-url-row">
-                                <input type="url" class="qg-lobby-share-url" id="lobby-share-url"
-                                    autocomplete="off" spellcheck="false" aria-label="Join page URL">
-                                <button type="button" class="qg-btn-copy" id="btn-copy-join-url"
+                        <div class="qg-lobby-share-col qg-lobby-share-col--link">
+                            <div class="qg-lobby-link-actions">
+                                <button type="button" class="qg-btn-copy qg-btn-copy--join" id="btn-copy-join-url"
                                     title="Copy join link" aria-label="Copy join link">
+                                    <i class="fa-solid fa-copy" aria-hidden="true"></i> Copy Join Link
+                                </button>
+                                <button type="button" class="qg-btn-edit-link" id="btn-toggle-share-url"
+                                    aria-label="Edit join link" title="Edit join link" aria-expanded="false">
+                                    <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                            <div class="qg-lobby-url-expand" id="lobby-url-expand" hidden>
+                                <div class="qg-lobby-url-row">
+                                    <input type="url" class="qg-lobby-share-url" id="lobby-share-url"
+                                        autocomplete="off" spellcheck="false" aria-label="Join page URL">
+                                </div>
+                                <p class="qg-lobby-localhost-tip" id="lobby-localhost-tip" hidden>
+                                    Phones cannot use localhost. Paste your LAN URL (e.g.
+                                    <code>http://192.168.x.x:5502/quiz-game.html</code>) and the QR will update.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="qg-lobby-share-col qg-lobby-share-col--code">
+                            <p class="qg-lobby-share-label">Game code</p>
+                            <div class="qg-lobby-code-row">
+                                <button type="button" class="qg-btn-copy qg-lobby-code-balance" tabindex="-1"
+                                    aria-hidden="true" disabled>
+                                    <i class="fa-solid fa-copy" aria-hidden="true"></i> Copy
+                                </button>
+                                <div class="qg-game-code" id="game-code-display">------</div>
+                                <button type="button" class="qg-btn-copy" id="btn-copy-game-code"
+                                    title="Copy game code" aria-label="Copy game code">
                                     <i class="fa-solid fa-copy" aria-hidden="true"></i> Copy
                                 </button>
                             </div>
-                            <p class="qg-lobby-localhost-tip" id="lobby-localhost-tip" hidden>
-                                Phones cannot use localhost. Paste your LAN URL (e.g.
-                                <code>http://192.168.x.x:5502/quiz-game.html</code>) and the QR will update.
-                            </p>
-                            <div class="qg-lobby-code-center">
-                                <p class="qg-lobby-share-label">Game code</p>
-                                <div class="qg-lobby-code-row">
-                                    <div class="qg-game-code" id="game-code-display">------</div>
-                                    <button type="button" class="qg-btn-copy" id="btn-copy-game-code"
-                                        title="Copy game code" aria-label="Copy game code">
-                                        <i class="fa-solid fa-copy" aria-hidden="true"></i> Copy
-                                    </button>
-                                </div>
-                            </div>
                         </div>
-                        <div class="qg-lobby-qr-wrap" id="lobby-qr-wrap" aria-hidden="true"></div>
+                        <div class="qg-lobby-share-col qg-lobby-share-col--qr">
+                            <div class="qg-lobby-qr-wrap" id="lobby-qr-wrap" aria-hidden="true"></div>
+                        </div>
                     </div>
                 </div>
 
@@ -448,6 +494,17 @@
             </div>
         </div>
 
+        <!-- ===== SCREEN: LIVE STANDINGS (student-paced provisional) ===== -->
+        <div class="qg-screen" id="screen-live-standings">
+            <div class="qg-live-standings-container">
+                <p class="qg-live-standings-eyebrow">Standings so far — still updating!</p>
+                <h2 class="qg-live-standings-title">Live Standings</h2>
+                <p class="qg-live-standings-finished" id="live-standings-finished-count">0 / 0 students finished</p>
+                <div class="qg-live-standings-list" id="live-standings-list" role="list"></div>
+                <p class="qg-live-standings-hint"><i class="fa-solid fa-hourglass-half" aria-hidden="true"></i> Waiting for the host to end the game…</p>
+            </div>
+        </div>
+
         <!-- ===== SCREEN: RESULTS ===== -->
         <div class="qg-screen" id="screen-results">
             <div class="qg-results-container">
@@ -548,37 +605,6 @@
             </div>
         </div>
 
-        <!-- ===== OVERLAY: Change Theme Modal ===== -->
-        <div class="qg-overlay qg-theme-modal-overlay" id="overlay-theme-modal">
-            <div class="qg-theme-modal-panel">
-                <button class="qg-modal-close" id="btn-close-theme-modal" type="button"
-                    aria-label="Close theme panel">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-                <h2 class="qg-theme-modal-title">
-                    <i class="fa-solid fa-palette"></i> Select Theme
-                </h2>
-                <div class="qg-theme-modal-content">
-                    <div class="qg-theme-bars" id="theme-picker-list"></div>
-                    <div class="qg-theme-modal-divider"></div>
-                    <div class="qg-dark-switch-wrap">
-                        <label class="qg-dark-switch" id="qg-lobby-dark-toggle" title="Toggle dark mode">
-                            <input type="checkbox" class="qg-dark-switch-input" id="qg-dark-checkbox"
-                                aria-label="Dark mode">
-                            <span class="qg-dark-switch-track" aria-hidden="true">
-                                <i class="fa-solid fa-sun qg-dark-switch-icon qg-dark-switch-icon--sun"></i>
-                                <i class="fa-solid fa-moon qg-dark-switch-icon qg-dark-switch-icon--moon"></i>
-                                <span class="qg-dark-switch-thumb">
-                                    <i class="fa-solid fa-sun qg-dark-switch-thumb-icon qg-dark-switch-thumb-icon--light"></i>
-                                    <i class="fa-solid fa-moon qg-dark-switch-thumb-icon qg-dark-switch-thumb-icon--dark"></i>
-                                </span>
-                            </span>
-                        </label>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <!-- ===== OVERLAY: Countdown ===== -->
         <div class="qg-overlay" id="overlay-countdown">
             <div class="qg-countdown-number" id="countdown-number">3</div>
@@ -593,8 +619,8 @@
 
         <!-- ===== OVERLAY: Waiting for others (player, teacher-paced / automatic) ===== -->
         <div class="qg-overlay" id="overlay-waiting">
-            <div class="qg-waiting-icon"><i class="fa-solid fa-circle-check"></i></div>
-            <div class="qg-waiting-text">Answer locked in!</div>
+            <div class="qg-waiting-icon"><i class="fa-solid fa-spinner"></i></div>
+            <div class="qg-waiting-text">Answer submitted — waiting...</div>
             <div class="qg-waiting-sub" id="waiting-sub-text">Waiting for others...</div>
             <div class="qg-waiting-count" id="waiting-count">0 / 0 answered</div>
         </div>
@@ -609,6 +635,8 @@
         <audio id="bg-question-4" src="assets/audio/live-quiz/question_track_4.mp3" loop preload="auto"></audio>
         <audio id="sfx-question-end" src="assets/audio/live-quiz/question_end.mp3" preload="auto"></audio>
         <audio id="sfx-podium" src="assets/audio/live-quiz/question_podium.mp3" preload="auto"></audio>
+        <audio id="sfx-correct-answer" src="assets/audio/live-quiz/correct-answer.mp3" preload="auto"></audio>
+        <audio id="sfx-incorrect-answer" src="assets/audio/live-quiz/incorrect-answer.mp3" preload="auto"></audio>
 
     </div>
 
