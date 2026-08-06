@@ -103,27 +103,6 @@
                                 </label>
                             </div>
                         </div>
-
-                        <button type="button" class="btn-primary btn-generate" id="generate-link-btn">
-                            <i class="fa-solid fa-link"></i> Generate Broadcast Link
-                        </button>
-
-                        <div class="form-group" style="margin-top: 20px;">
-                            <label for="broadcast-link">Broadcast Link</label>
-                            <div class="link-output">
-                                <input type="text" id="broadcast-link" readonly
-                                    placeholder="Generate a link to share with student PCs…">
-                                <button type="button" class="btn-secondary" id="copy-link-btn">
-                                    <i class="fa-solid fa-copy"></i> Copy Link
-                                </button>
-                            </div>
-                            <div class="copy-feedback" id="copy-feedback">Copied!</div>
-                        </div>
-
-                        <div class="recent-messages">
-                            <h3><i class="fa-solid fa-clock-rotate-left"></i> Recent Messages</h3>
-                            <div class="recent-buttons" id="recent-buttons"></div>
-                        </div>
                     </div>
 
                     <div class="preview-panel">
@@ -141,6 +120,29 @@
                             </div>
                         </div>
                         <p class="preview-hint">Scaled preview — actual broadcast fills the entire screen</p>
+
+                        <div class="preview-actions">
+                            <button type="button" class="btn-primary btn-generate" id="generate-link-btn">
+                                <i class="fa-solid fa-link"></i> Generate Broadcast Link
+                            </button>
+
+                            <div class="form-group broadcast-link-group">
+                                <label for="broadcast-link">Broadcast Link</label>
+                                <div class="link-output">
+                                    <input type="text" id="broadcast-link" readonly
+                                        placeholder="Generate a link to share with student PCs…">
+                                    <button type="button" class="btn-secondary" id="copy-link-btn">
+                                        <i class="fa-solid fa-copy"></i> Copy Link
+                                    </button>
+                                </div>
+                                <div class="copy-feedback" id="copy-feedback">Copied!</div>
+                            </div>
+
+                            <div class="recent-messages">
+                                <h3><i class="fa-solid fa-clock-rotate-left"></i> Recent Messages</h3>
+                                <div class="recent-buttons" id="recent-buttons"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

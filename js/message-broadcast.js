@@ -4,7 +4,9 @@ const COLOR_THEMES = {
     blue: { bg: '#1a4fa0', text: '#ffffff' },
     red: { bg: '#c62828', text: '#ffffff' },
     green: { bg: '#2e7d32', text: '#ffffff' },
-    yellow: { bg: '#f7b801', text: '#1a1a1a' }
+    yellow: { bg: '#f7b801', text: '#1a1a1a' },
+    purple: { bg: '#6a1b9a', text: '#ffffff' },
+    black: { bg: '#1a1a1a', text: '#ffffff' }
 };
 
 const FONT_SIZES = {

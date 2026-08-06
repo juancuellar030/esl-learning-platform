@@ -12,7 +12,9 @@ const COLOR_THEMES = {
     blue: { bg: '#1a4fa0', text: '#ffffff', label: 'Instruction' },
     red: { bg: '#c62828', text: '#ffffff', label: 'Warning' },
     green: { bg: '#2e7d32', text: '#ffffff', label: 'Praise' },
-    yellow: { bg: '#f7b801', text: '#1a1a1a', label: 'Attention' }
+    yellow: { bg: '#f7b801', text: '#1a1a1a', label: 'Attention' },
+    purple: { bg: '#6a1b9a', text: '#ffffff', label: 'Neutral' },
+    black: { bg: '#1a1a1a', text: '#ffffff', label: 'Serious' }
 };
 
 const FONT_SIZES = {
