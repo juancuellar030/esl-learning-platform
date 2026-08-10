@@ -2731,14 +2731,26 @@ const QuizGame = (() => {
         const key = cap.dataset.key;
         if (!key) return;
 
-        const wasSelected = selectedKeys.has(key);
-        if (wasSelected) selectedKeys.delete(key);
-        else selectedKeys.add(key);
+        const aliasGroup = ShortcutsData.getCapAliasGroup
+            ? ShortcutsData.getCapAliasGroup(key)
+            : [key];
+        const wasSelected = aliasGroup.some((alias) => selectedKeys.has(alias));
+
+        if (wasSelected) {
+            aliasGroup.forEach((alias) => selectedKeys.delete(alias));
+        } else {
+            aliasGroup.forEach((alias) => selectedKeys.add(alias));
+        }
 
         // Shift/Ctrl/Alt appear twice on the board under one data-key — keep the twins in sync.
-        $('sv-keyboard').querySelectorAll(`.ks-key[data-key="${CSS.escape(key)}"]`).forEach(el => {
-            el.classList.toggle('selected', !wasSelected);
-            el.setAttribute('aria-pressed', String(!wasSelected));
+        $('sv-keyboard').querySelectorAll('.ks-key').forEach((el) => {
+            const capKey = el.dataset.key;
+            if (!capKey) return;
+            const selected = ShortcutsData.getCapAliasGroup
+                ? ShortcutsData.getCapAliasGroup(capKey).some((alias) => selectedKeys.has(alias))
+                : selectedKeys.has(capKey);
+            el.classList.toggle('selected', selected);
+            el.setAttribute('aria-pressed', String(selected));
         });
 
         playSound('click');
@@ -2799,7 +2811,12 @@ const QuizGame = (() => {
         const expected = (q.keys || []).map(k => String(k).toLowerCase());
         container.querySelectorAll('.ks-key').forEach(cap => {
             const key = (cap.dataset.key || '').toLowerCase();
-            if (expected.includes(key)) cap.classList.add('key-correct');
+            const isExpected = expected.some((exp) =>
+                ShortcutsData.capMatchesExpected
+                    ? ShortcutsData.capMatchesExpected(key, exp)
+                    : key === exp
+            );
+            if (isExpected) cap.classList.add('key-correct');
             else if (cap.classList.contains('selected')) cap.classList.add('key-wrong');
         });
     }

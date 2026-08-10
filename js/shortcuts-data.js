@@ -130,6 +130,33 @@ window.ShortcutsData = (() => {
         '+': '='
     };
 
+    /** Main-row and numpad caps that satisfy the same shortcut token when clicked. */
+    const CAP_ALIAS_GROUPS = [
+        ['=', '+', 'numpadadd'],
+        ['-', 'numpadsubtract'],
+        ['0', 'numpad0'],
+        ['enter', 'numpadenter'],
+        ['.', 'numpaddecimal'],
+        ['/', 'numpaddivide'],
+        ['*', 'numpadmultiply']
+    ];
+
+    function canonicalizeCap(cap) {
+        const key = String(cap).toLowerCase();
+        const group = CAP_ALIAS_GROUPS.find((aliases) => aliases.includes(key));
+        return group ? group[0] : key;
+    }
+
+    function getCapAliasGroup(cap) {
+        const key = String(cap).toLowerCase();
+        const group = CAP_ALIAS_GROUPS.find((aliases) => aliases.includes(key));
+        return group ? [...group] : [key];
+    }
+
+    function capMatchesExpected(cap, expectedCap) {
+        return canonicalizeCap(cap) === canonicalizeCap(expectedCap);
+    }
+
     function normalizeComboKey(token) {
         const key = String(token).toLowerCase().trim();
         if (COMBO_KEY_TO_CAP[key]) return COMBO_KEY_TO_CAP[key];
@@ -188,8 +215,8 @@ window.ShortcutsData = (() => {
     /** Order-independent comparison of clicked caps against the expected combo. */
     function isComboCorrect(selectedCaps, expectedCaps) {
         if (!Array.isArray(selectedCaps) || !Array.isArray(expectedCaps)) return false;
-        const selected = new Set(selectedCaps.map((key) => String(key).toLowerCase()));
-        const expected = new Set(expectedCaps.map((key) => String(key).toLowerCase()));
+        const selected = new Set(selectedCaps.map((key) => canonicalizeCap(key)));
+        const expected = new Set(expectedCaps.map((key) => canonicalizeCap(key)));
         if (selected.size !== expected.size) return false;
         for (const key of expected) {
             if (!selected.has(key)) return false;
@@ -286,6 +313,9 @@ window.ShortcutsData = (() => {
         renderVirtualKeyboard,
         normalizeComboKey,
         comboCapKeys,
+        canonicalizeCap,
+        getCapAliasGroup,
+        capMatchesExpected,
         isComboCorrect,
         matchesKeyboardEvent,
         isModifierOnlyEvent,
