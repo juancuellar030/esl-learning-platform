@@ -39,6 +39,7 @@ const QuizGame = (() => {
     let liveShortcutListener = null;
     let kickCheckTimer = null;
     let waitingPlayersListenerAdded = false;
+    let waitingMiniGameDisabled = false;
     const lobbyPlayerCardMap = new Map();
     const liveStandingsRowMap = new Map();
     const liveStandingsRankMap = new Map();
@@ -120,11 +121,52 @@ const QuizGame = (() => {
         return ShortcutsData.resolveQuizFormat(shortcut, format);
     }
 
-    // Avatar library — 35 animal photos
-    const AVATAR_COUNT = 35;
+    // Avatar library — named animal photos (assets/images/live-quiz-avatars/)
     const AVATAR_PATH = 'assets/images/live-quiz-avatars/';
-    function getAvatarSrc(index) {
-        return AVATAR_PATH + 'animal_' + index + '.png';
+    const AVATAR_IDS = [
+        'animal_bat', 'animal_bear', 'animal_bee', 'animal_butterfly', 'animal_cat',
+        'animal_chameleon', 'animal_clown_fish', 'animal_cow', 'animal_crocodile', 'animal_dog',
+        'animal_dolphin', 'animal_flamingo', 'animal_fox', 'animal_frog', 'animal_gorilla',
+        'animal_hamster', 'animal_horse', 'animal_hummingbird', 'animal_jellyfish', 'animal_koala',
+        'animal_lion', 'animal_llama', 'animal_monkey', 'animal_owl', 'animal_panda',
+        'animal_peacock', 'animal_penguin', 'animal_pig', 'animal_polar_bear', 'animal_rabbit',
+        'animal_raccoon', 'animal_reindeer', 'animal_rhino', 'animal_sea_turtle', 'animal_shark',
+        'animal_sheep', 'animal_snake', 'animal_squirrel', 'animal_tiger', 'animal_wolf'
+    ];
+
+    function resolveAvatarId(avatarId) {
+        if (!avatarId) return '';
+        if (AVATAR_IDS.includes(avatarId)) return avatarId;
+        const legacy = /^animal_(\d+)$/.exec(avatarId);
+        if (legacy) {
+            const idx = parseInt(legacy[1], 10) - 1;
+            if (idx >= 0 && idx < AVATAR_IDS.length) return AVATAR_IDS[idx];
+        }
+        return '';
+    }
+
+    function getAvatarSrc(avatarId) {
+        const resolved = resolveAvatarId(avatarId);
+        return resolved ? `${AVATAR_PATH}${resolved}.png` : '';
+    }
+
+    function getAvatarLabel(avatarId) {
+        const resolved = resolveAvatarId(avatarId);
+        if (!resolved) return 'Avatar';
+        return resolved.replace(/^animal_/, '').replace(/_/g, ' ');
+    }
+
+    function shuffledAvatarIds() {
+        const ids = [...AVATAR_IDS];
+        for (let i = ids.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [ids[i], ids[j]] = [ids[j], ids[i]];
+        }
+        return ids;
+    }
+
+    function pickRandomAvatarId() {
+        return AVATAR_IDS[Math.floor(Math.random() * AVATAR_IDS.length)];
     }
 
     let lobbyShareInitialized = false;
@@ -317,6 +359,7 @@ const QuizGame = (() => {
         parseDevFlags();
         parseEntryMode();
         bindEvents();
+        initWaitingMiniGames();
 
         try {
             loadQuizTheme();
@@ -366,17 +409,22 @@ const QuizGame = (() => {
                         role = 'player';
                         gameCode = savedCode;
                         playerName = session.players[user.uid].name;
-                        selectedAvatar = session.players[user.uid].avatar;
+                        selectedAvatar = resolveAvatarId(session.players[user.uid].avatar)
+                            || session.players[user.uid].avatar;
 
                         // Determine where to land
                         const status = session.status;
                         if (status === 'lobby') {
                             // Re-setup player lobby state
-                            const idx = selectedAvatar ? parseInt(selectedAvatar.replace('animal_', '')) : 1;
-                            $('waiting-avatar').innerHTML = `<img src="${getAvatarSrc(idx)}" alt="Your avatar">`;
+                            if (selectedAvatar) {
+                                $('waiting-avatar').innerHTML =
+                                    `<img src="${getAvatarSrc(selectedAvatar)}" alt="Your avatar">`;
+                            }
                             $('waiting-name').textContent = playerName;
+                            resetWaitingMiniGamesForLobby();
                             showScreen('screen-waiting');
                         } else if (status === 'countdown') {
+                            teardownWaitingMiniGames();
                             runCountdown(() => listenAsPlayer());
                         } else if (status === 'finished') {
                             showResults();
@@ -980,44 +1028,55 @@ const QuizGame = (() => {
 
     // ===== AVATAR SYSTEM =====
     function initAvatarGrids() {
-        populateAvatarGrid('avatar-grid-select');
-        populateAvatarGrid('avatar-grid-waiting');
+        populateAvatarGrid('avatar-grid-select', { animate: false });
+        populateAvatarGrid('avatar-grid-waiting', { animate: false });
     }
 
-    function populateAvatarGrid(containerId) {
+    function populateAvatarGrid(containerId, options = {}) {
         const container = $(containerId);
         if (!container) return;
+
+        const animate = options.animate !== false;
+        const selectedId = resolveAvatarId(selectedAvatar);
         container.innerHTML = '';
 
-        for (let i = 1; i <= AVATAR_COUNT; i++) {
+        shuffledAvatarIds().forEach((avatarId, index) => {
             const btn = document.createElement('button');
             btn.type = 'button';
-            btn.className = 'qg-avatar-option';
-            btn.dataset.avatar = 'animal_' + i;
-            btn.innerHTML = `<img src="${getAvatarSrc(i)}" alt="Animal ${i}" loading="lazy">`;
-            btn.addEventListener('click', () => selectAvatar('animal_' + i));
+            btn.className = 'qg-avatar-option' + (animate ? ' qg-avatar-pop-in' : '');
+            if (animate) {
+                btn.style.setProperty('--qg-avatar-pop-delay', `${Math.min(index * 30, 1100)}ms`);
+            }
+            btn.dataset.avatar = avatarId;
+            const label = getAvatarLabel(avatarId);
+            btn.innerHTML = `<img src="${getAvatarSrc(avatarId)}" alt="${label}" loading="lazy">`;
+            btn.addEventListener('click', () => selectAvatar(avatarId));
+            if (selectedId && selectedId === avatarId) {
+                btn.classList.add('selected');
+            }
             container.appendChild(btn);
-        }
+        });
     }
 
     function selectAvatar(avatarId) {
-        selectedAvatar = avatarId;
+        const resolved = resolveAvatarId(avatarId);
+        if (!resolved) return;
+        selectedAvatar = resolved;
 
         // Sync selection across all grids
         document.querySelectorAll('.qg-avatar-option').forEach(opt => {
-            opt.classList.toggle('selected', opt.dataset.avatar === avatarId);
+            opt.classList.toggle('selected', resolveAvatarId(opt.dataset.avatar) === resolved);
         });
 
         // Update waiting screen avatar display
         const waitingAvatar = $('waiting-avatar');
         if (waitingAvatar) {
-            const idx = parseInt(avatarId.replace('animal_', ''));
-            waitingAvatar.innerHTML = `<img src="${getAvatarSrc(idx)}" alt="Your avatar">`;
+            waitingAvatar.innerHTML = `<img src="${getAvatarSrc(resolved)}" alt="Your avatar">`;
         }
 
         // Update Firebase if in session
         if (gameCode && !FirebaseService.isDemo()) {
-            FirebaseService.updateSessionField(gameCode, 'players/' + FirebaseService.getUid() + '/avatar', avatarId);
+            FirebaseService.updateSessionField(gameCode, 'players/' + FirebaseService.getUid() + '/avatar', resolved);
         }
 
         playSound('click');
@@ -1025,7 +1084,11 @@ const QuizGame = (() => {
 
     function toggleWaitingAvatars() {
         const modal = $('overlay-avatar-modal');
+        const opening = !modal.classList.contains('active');
         modal.classList.toggle('active');
+        if (opening) {
+            populateAvatarGrid('avatar-grid-waiting', { animate: true });
+        }
         playSound('click');
     }
 
@@ -1322,7 +1385,7 @@ const QuizGame = (() => {
     }
 
     function hasLobbyAvatar(avatarId) {
-        return !!(avatarId && avatarId.startsWith('animal_'));
+        return !!resolveAvatarId(avatarId);
     }
 
     function isLobbyPlayerPending(p) {
@@ -1336,11 +1399,9 @@ const QuizGame = (() => {
     }
 
     function getLobbyAvatarInnerHtml(avatarId) {
-        if (hasLobbyAvatar(avatarId)) {
-            const idx = parseInt(avatarId.replace('animal_', ''), 10);
-            if (!Number.isNaN(idx)) {
-                return `<img class="player-avatar-img" src="${getAvatarSrc(idx)}" alt="">`;
-            }
+        const resolved = resolveAvatarId(avatarId);
+        if (resolved) {
+            return `<img class="player-avatar-img" src="${getAvatarSrc(resolved)}" alt="">`;
         }
         return '<i class="fa-solid fa-user" aria-hidden="true"></i>';
     }
@@ -1570,6 +1631,7 @@ const QuizGame = (() => {
             selectedAvatar = null;
             document.querySelectorAll('.qg-avatar-option').forEach(o => o.classList.remove('selected'));
             showScreen('screen-avatar');
+            populateAvatarGrid('avatar-grid-select', { animate: true });
         }).catch(err => {
             if (nextBtn) nextBtn.disabled = false;
             errorEl.textContent = 'Could not join game. Check your code and connection.';
@@ -1579,9 +1641,9 @@ const QuizGame = (() => {
 
     function joinStep2() {
         if (!selectedAvatar) {
-            // Auto-select a random one
-            const idx = Math.floor(Math.random() * AVATAR_COUNT) + 1;
-            selectedAvatar = 'animal_' + idx;
+            selectedAvatar = pickRandomAvatarId();
+        } else {
+            selectedAvatar = resolveAvatarId(selectedAvatar) || pickRandomAvatarId();
         }
 
         role = 'player';
@@ -1595,8 +1657,10 @@ const QuizGame = (() => {
                 FirebaseService.updateSessionField(gameCode, 'players/' + FirebaseService.getUid() + '/avatar', selectedAvatar);
             }
 
-            const idx = parseInt(selectedAvatar.replace('animal_', ''));
-            $('waiting-avatar').innerHTML = `<img src="${getAvatarSrc(idx)}" alt="Your avatar">`;
+            const resolved = resolveAvatarId(selectedAvatar);
+            if (resolved) {
+                $('waiting-avatar').innerHTML = `<img src="${getAvatarSrc(resolved)}" alt="Your avatar">`;
+            }
             $('waiting-name').textContent = playerName;
 
             // Detect if the game is already running (rejoin scenario)
@@ -1608,8 +1672,10 @@ const QuizGame = (() => {
                 // Jump straight into the game
                 listenAsPlayer();
             } else if (isCountdownRejoin) {
+                teardownWaitingMiniGames();
                 runCountdown(() => listenAsPlayer());
             } else {
+                resetWaitingMiniGamesForLobby();
                 showScreen('screen-waiting');
             }
 
@@ -1652,10 +1718,12 @@ const QuizGame = (() => {
             }
 
             if (status === 'countdown' && waitingActive) {
+                teardownWaitingMiniGames();
                 playerGameStarted = true;
                 console.log('[QuizGame][Player] Starting countdown -> listenAsPlayer()');
                 runCountdown(() => listenAsPlayer());
             } else if ((status === 'playing' || status === 'reviewing') && waitingActive) {
+                teardownWaitingMiniGames();
                 console.log(`[QuizGame][Player] Syncing to active game on status: ${status}`);
                 playerGameStarted = true;
                 listenAsPlayer();
@@ -1717,6 +1785,7 @@ const QuizGame = (() => {
     }
 
     function runCountdown(callback) {
+        teardownWaitingMiniGames();
         closeThemePanel();
 
         const overlay = $('overlay-countdown');
@@ -3195,10 +3264,10 @@ const QuizGame = (() => {
     function renderPodiumAvatar(container, avatarId, medal) {
         if (!container) return;
         let imgHtml = '';
-        if (avatarId && avatarId.startsWith('animal_')) {
-            const idx = parseInt(avatarId.replace('animal_', ''), 10);
-            if (!Number.isNaN(idx)) {
-                imgHtml = `<img class="qg-podium-avatar-img" src="${getAvatarSrc(idx)}" alt="">`;
+        if (avatarId) {
+            const resolved = resolveAvatarId(avatarId);
+            if (resolved) {
+                imgHtml = `<img class="qg-podium-avatar-img" src="${getAvatarSrc(resolved)}" alt="">`;
             }
         }
         container.innerHTML = `${imgHtml}<span class="qg-podium-medal" aria-hidden="true">${medal}</span>`;
@@ -3673,6 +3742,7 @@ const QuizGame = (() => {
         hasAnswered = false;
         playerGameStarted = false; // Reset so next session starts clean
         waitingPlayersListenerAdded = false;
+        resetWaitingMiniGamesForLobby();
         onLiveStandings = false;
         liveStandingsListenerAdded = false;
         hideWaitingOverlay();
@@ -3751,6 +3821,7 @@ const QuizGame = (() => {
             '--qg-bg-from': '#3d348b',
             '--qg-bg-to': '#7678ed',
             '--qg-accent': '#f7b801',
+            '--qg-panel-accent': '#f7b801',
             '--qg-particle': 'rgba(255,255,255,0.08)',
             keyboard: 'keyboard--palette-classic',
             dark: { '--qg-bg-from': '#1a1530', '--qg-bg-to': '#2c2a5a' },
@@ -3758,8 +3829,8 @@ const QuizGame = (() => {
                 host: { face: '#f7b801', depth: '#b88a00', text: '#1a1530', icon: '#1a1530' },
                 join: { face: '#9b9eff', depth: '#5c5fd4', text: '#ffffff', icon: '#ffffff' },
                 dark: {
-                    host: { face: '#100e22', depth: '#06040f', text: '#ffffff', icon: '#f7b801' },
-                    join: { face: '#14122e', depth: '#080618', text: '#ffffff', icon: '#b8bbff' }
+                    host: { face: '#524d82', depth: '#32305a', text: '#ffffff', icon: '#f7b801' },
+                    join: { face: '#625d92', depth: '#3a3868', text: '#ffffff', icon: '#b8bbff' }
                 }
             }
         },
@@ -3769,15 +3840,16 @@ const QuizGame = (() => {
             '--qg-bg-from': '#171717',
             '--qg-bg-to': '#3a2f14',
             '--qg-accent': '#e4bf70',
+            '--qg-panel-accent': '#e4bf70',
             '--qg-particle': 'rgba(228,191,112,0.14)',
             keyboard: 'keyboard--palette-gold-black',
             dark: { '--qg-bg-from': '#0d0d0d', '--qg-bg-to': '#241d0c' },
             roleCards: {
                 host: { face: '#e4bf70', depth: '#9a7430', text: '#141414', icon: '#141414' },
-                join: { face: '#f0d48a', depth: '#b89442', text: '#141414', icon: '#141414' },
+                join: { face: '#6b8fa5', depth: '#4a6d82', text: '#ffffff', icon: '#e8f4fc' },
                 dark: {
-                    host: { face: '#0e0c06', depth: '#050403', text: '#f8edd0', icon: '#e4bf70' },
-                    join: { face: '#080808', depth: '#020202', text: '#f8edd0', icon: '#d4af5a' }
+                    host: { face: '#4a3f22', depth: '#2e2814', text: '#f8edd0', icon: '#e4bf70' },
+                    join: { face: '#3a4248', depth: '#242a2e', text: '#f8edd0', icon: '#a8c4d4' }
                 }
             }
         },
@@ -3787,6 +3859,7 @@ const QuizGame = (() => {
             '--qg-bg-from': '#24201e',
             '--qg-bg-to': '#5c2523',
             '--qg-accent': '#ff6b4a',
+            '--qg-panel-accent': '#ff6b4a',
             '--qg-particle': 'rgba(255,107,74,0.16)',
             keyboard: 'keyboard--palette-retro-arcade',
             dark: { '--qg-bg-from': '#151211', '--qg-bg-to': '#3a1614' },
@@ -3794,8 +3867,8 @@ const QuizGame = (() => {
                 host: { face: '#ffe8c8', depth: '#c9b08a', text: '#3a1614', icon: '#3a1614' },
                 join: { face: '#ff6b4a', depth: '#c44f32', text: '#ffffff', icon: '#ffffff' },
                 dark: {
-                    host: { face: '#1a120e', depth: '#0c0806', text: '#ffe8c8', icon: '#ff8a6e' },
-                    join: { face: '#2a100e', depth: '#140806', text: '#ffffff', icon: '#ffb8a8' }
+                    host: { face: '#4a3228', depth: '#2e1e18', text: '#ffe8c8', icon: '#ff8a6e' },
+                    join: { face: '#5a2820', depth: '#381810', text: '#ffffff', icon: '#ffb8a8' }
                 }
             }
         },
@@ -3805,6 +3878,7 @@ const QuizGame = (() => {
             '--qg-bg-from': '#7a4a63',
             '--qg-bg-to': '#b06a89',
             '--qg-accent': '#fff1a8',
+            '--qg-panel-accent': '#fff1a8',
             '--qg-particle': 'rgba(255,241,168,0.18)',
             keyboard: 'keyboard--palette-kawaii-pastel',
             dark: { '--qg-bg-from': '#3f2432', '--qg-bg-to': '#6b3b52' },
@@ -3812,8 +3886,8 @@ const QuizGame = (() => {
                 host: { face: '#fff1a8', depth: '#d9c97a', text: '#4a2a3a', icon: '#4a2a3a' },
                 join: { face: '#f2a9c0', depth: '#d4869f', text: '#4a2a3a', icon: '#4a2a3a' },
                 dark: {
-                    host: { face: '#241420', depth: '#120a10', text: '#fff8d0', icon: '#fff1a8' },
-                    join: { face: '#301828', depth: '#180c14', text: '#ffffff', icon: '#f2a9c0' }
+                    host: { face: '#8a5570', depth: '#5a3548', text: '#fff8d0', icon: '#fff1a8' },
+                    join: { face: '#a06888', depth: '#6a4058', text: '#ffffff', icon: '#f2a9c0' }
                 }
             }
         },
@@ -3823,6 +3897,7 @@ const QuizGame = (() => {
             '--qg-bg-from': '#14544c',
             '--qg-bg-to': '#2f8d7d',
             '--qg-accent': '#a8dfc8',
+            '--qg-panel-accent': '#a8dfc8',
             '--qg-particle': 'rgba(168,223,200,0.18)',
             keyboard: 'keyboard--palette-mint-pop',
             dark: { '--qg-bg-from': '#0a2c28', '--qg-bg-to': '#154f47' },
@@ -3830,8 +3905,8 @@ const QuizGame = (() => {
                 host: { face: '#a8dfc8', depth: '#6fb89e', text: '#0a2c28', icon: '#0a2c28' },
                 join: { face: '#2f8d7d', depth: '#1f6f65', text: '#ffffff', icon: '#ffffff' },
                 dark: {
-                    host: { face: '#081a18', depth: '#040e0c', text: '#eafff8', icon: '#a8dfc8' },
-                    join: { face: '#0c2622', depth: '#061412', text: '#ffffff', icon: '#d6f5e9' }
+                    host: { face: '#2a6858', depth: '#1a4840', text: '#eafff8', icon: '#a8dfc8' },
+                    join: { face: '#3a7888', depth: '#205058', text: '#ffffff', icon: '#d6f5e9' }
                 }
             }
         },
@@ -3841,6 +3916,7 @@ const QuizGame = (() => {
             '--qg-bg-from': '#7a3b12',
             '--qg-bg-to': '#c46a35',
             '--qg-accent': '#ffc3a5',
+            '--qg-panel-accent': '#ffc3a5',
             '--qg-particle': 'rgba(255,195,165,0.18)',
             keyboard: 'keyboard--palette-peach-cream',
             dark: { '--qg-bg-from': '#3f1d08', '--qg-bg-to': '#6d3a1a' },
@@ -3848,8 +3924,8 @@ const QuizGame = (() => {
                 host: { face: '#ffc3a5', depth: '#d99a7a', text: '#3f1d08', icon: '#3f1d08' },
                 join: { face: '#e8844f', depth: '#b86335', text: '#ffffff', icon: '#ffffff' },
                 dark: {
-                    host: { face: '#281408', depth: '#140a04', text: '#fff0e6', icon: '#ffc3a5' },
-                    join: { face: '#341808', depth: '#1a0c04', text: '#ffffff', icon: '#ffc3a5' }
+                    host: { face: '#a85830', depth: '#6a3818', text: '#fff0e6', icon: '#ffc3a5' },
+                    join: { face: '#c07850', depth: '#784028', text: '#ffffff', icon: '#ffc3a5' }
                 }
             }
         },
@@ -3859,6 +3935,7 @@ const QuizGame = (() => {
             '--qg-bg-from': '#7a1f47',
             '--qg-bg-to': '#c93f78',
             '--qg-accent': '#f6b3ca',
+            '--qg-panel-accent': '#f6b3ca',
             '--qg-particle': 'rgba(246,179,202,0.18)',
             keyboard: 'keyboard--palette-pink-pop',
             dark: { '--qg-bg-from': '#440f27', '--qg-bg-to': '#7d2549' },
@@ -3866,8 +3943,8 @@ const QuizGame = (() => {
                 host: { face: '#f6b3ca', depth: '#d486a8', text: '#440f27', icon: '#440f27' },
                 join: { face: '#c93f78', depth: '#9a2f5c', text: '#ffffff', icon: '#ffffff' },
                 dark: {
-                    host: { face: '#280818', depth: '#14040c', text: '#fff0f6', icon: '#f6b3ca' },
-                    join: { face: '#340c1e', depth: '#1a0610', text: '#ffffff', icon: '#f6b3ca' }
+                    host: { face: '#a03860', depth: '#682040', text: '#fff0f6', icon: '#f6b3ca' },
+                    join: { face: '#b84878', depth: '#802850', text: '#ffffff', icon: '#f6b3ca' }
                 }
             }
         },
@@ -3877,6 +3954,7 @@ const QuizGame = (() => {
             '--qg-bg-from': '#3d4f6f',
             '--qg-bg-to': '#6c86ad',
             '--qg-accent': '#cfe3ff',
+            '--qg-panel-accent': '#cfe3ff',
             '--qg-particle': 'rgba(255,255,255,0.18)',
             keyboard: 'keyboard--palette-frost-white',
             dark: { '--qg-bg-from': '#1f2836', '--qg-bg-to': '#3a4a63' },
@@ -3884,8 +3962,8 @@ const QuizGame = (() => {
                 host: { face: '#e8eef8', depth: '#b8c4d8', text: '#1f2836', icon: '#1f2836' },
                 join: { face: '#8fa8c8', depth: '#6a849f', text: '#ffffff', icon: '#ffffff' },
                 dark: {
-                    host: { face: '#121820', depth: '#080c12', text: '#eef4ff', icon: '#cfe3ff' },
-                    join: { face: '#182030', depth: '#0c1018', text: '#ffffff', icon: '#b8d4ff' }
+                    host: { face: '#5a6a82', depth: '#3a4860', text: '#eef4ff', icon: '#cfe3ff' },
+                    join: { face: '#6a7a92', depth: '#485870', text: '#ffffff', icon: '#b8d4ff' }
                 }
             }
         }
@@ -3910,31 +3988,71 @@ const QuizGame = (() => {
         const themeData = QUIZ_THEMES[theme] || QUIZ_THEMES['default'];
         const particleColor = (isDark && themeData.dark?.['--qg-particle']) || themeData['--qg-particle'];
 
-        // Particle configs per theme — extra-large soft circles
+        // Particle configs per theme — cubes rise from the bottom (frost-white keeps snow)
         const configs = {
-            default: { count: 9, speed: 0.16, size: [60, 140], shape: 'circle' },
-            'gold-black': { count: 8, speed: 0.14, size: [55, 130], shape: 'circle' },
-            'retro-arcade': { count: 9, speed: 0.18, size: [58, 135], shape: 'circle' },
-            'kawaii-pastel': { count: 9, speed: 0.15, size: [62, 145], shape: 'circle' },
-            'mint-pop': { count: 9, speed: 0.14, size: [60, 140], shape: 'circle' },
-            'peach-cream': { count: 9, speed: 0.15, size: [60, 142], shape: 'circle' },
-            'pink-pop': { count: 9, speed: 0.16, size: [58, 138], shape: 'circle' },
+            default: { count: 9, speed: 0.16, size: [60, 140], shape: 'cube' },
+            'gold-black': { count: 8, speed: 0.14, size: [55, 130], shape: 'cube' },
+            'retro-arcade': { count: 9, speed: 0.18, size: [58, 135], shape: 'cube' },
+            'kawaii-pastel': { count: 9, speed: 0.15, size: [62, 145], shape: 'cube' },
+            'mint-pop': { count: 9, speed: 0.14, size: [60, 140], shape: 'cube' },
+            'peach-cream': { count: 9, speed: 0.15, size: [60, 142], shape: 'cube' },
+            'pink-pop': { count: 9, speed: 0.16, size: [58, 138], shape: 'cube' },
             'frost-white': { count: 10, speed: 0.17, size: [52, 125], shape: 'snow' }
         };
         const cfg = configs[theme] || configs['default'];
 
         // Build particles
         for (let i = 0; i < cfg.count; i++) {
-            bgParticles.push({
+            const radius = cfg.size[0] + Math.random() * (cfg.size[1] - cfg.size[0]);
+            const isCube = cfg.shape === 'cube';
+            const particle = {
                 x: Math.random() * canvas.width,
-                y: Math.random() * canvas.height,
-                r: cfg.size[0] + Math.random() * (cfg.size[1] - cfg.size[0]),
+                y: isCube
+                    ? canvas.height + radius + 20 - Math.random() * (canvas.height + radius * 2 + 40)
+                    : Math.random() * canvas.height,
+                r: radius,
                 vx: (Math.random() - 0.5) * cfg.speed,
-                vy: theme === 'winter' ? (Math.random() * cfg.speed + 0.15) : (Math.random() - 0.5) * cfg.speed,
+                vy: isCube
+                    ? -(Math.random() * cfg.speed + cfg.speed * 0.25)
+                    : theme === 'winter'
+                        ? (Math.random() * cfg.speed + 0.15)
+                        : (Math.random() - 0.5) * cfg.speed,
                 opacity: 0.3 + Math.random() * 0.5,
                 phase: Math.random() * Math.PI * 2,
                 shape: cfg.shape
-            });
+            };
+            if (isCube) {
+                particle.angle = Math.random() * Math.PI * 2;
+                particle.rotationSpeed = (Math.random() - 0.5) * 0.02;
+            }
+            bgParticles.push(particle);
+        }
+
+        function drawCubeParticle(p) {
+            const size = p.r * 2;
+            const radius = size * 0.17;
+            const half = p.r;
+
+            if (typeof ctx.roundRect === 'function') {
+                ctx.beginPath();
+                ctx.roundRect(-half, -half, size, size, radius);
+                ctx.fill();
+                return;
+            }
+
+            const x = -half;
+            const y = -half;
+            const w = size;
+            const h = size;
+            const r = Math.min(radius, w / 2, h / 2);
+            ctx.beginPath();
+            ctx.moveTo(x + r, y);
+            ctx.arcTo(x + w, y, x + w, y + h, r);
+            ctx.arcTo(x + w, y + h, x, y + h, r);
+            ctx.arcTo(x, y + h, x, y, r);
+            ctx.arcTo(x, y, x + w, y, r);
+            ctx.closePath();
+            ctx.fill();
         }
 
         function drawFrame() {
@@ -3948,8 +4066,12 @@ const QuizGame = (() => {
                 // Wrap around edges
                 if (p.x < -p.r - 20) p.x = canvas.width + p.r + 20;
                 if (p.x > canvas.width + p.r + 20) p.x = -p.r - 20;
-                if (p.y > canvas.height + p.r + 20) p.y = -p.r - 20;
-                if (p.y < -p.r - 20) p.y = canvas.height + p.r + 20;
+                if (p.shape === 'cube') {
+                    if (p.y < -p.r - 20) p.y = canvas.height + p.r + 20;
+                } else {
+                    if (p.y > canvas.height + p.r + 20) p.y = -p.r - 20;
+                    if (p.y < -p.r - 20) p.y = canvas.height + p.r + 20;
+                }
 
                 const breathe = Math.sin(p.phase) * 0.15;
                 const alpha = Math.min(1, p.opacity + breathe);
@@ -3972,6 +4094,11 @@ const QuizGame = (() => {
                         ctx.stroke();
                         ctx.restore();
                     }
+                } else if (p.shape === 'cube') {
+                    p.angle += p.rotationSpeed;
+                    ctx.translate(p.x, p.y);
+                    ctx.rotate(p.angle);
+                    drawCubeParticle(p);
                 } else if (p.shape === 'line') {
                     // Neon streak
                     ctx.lineWidth = 1;
@@ -4066,6 +4193,50 @@ const QuizGame = (() => {
         }).join('');
     }
 
+    function hexToRgb(hex) {
+        const normalized = hex.replace('#', '');
+        const expanded = normalized.length === 3
+            ? normalized.split('').map((ch) => ch + ch).join('')
+            : normalized;
+        const value = parseInt(expanded, 16);
+        return { r: (value >> 16) & 255, g: (value >> 8) & 255, b: value & 255 };
+    }
+
+    function mixHex(hex, targetHex, amount) {
+        const a = hexToRgb(hex);
+        const b = hexToRgb(targetHex);
+        const t = Math.max(0, Math.min(1, amount));
+        const channels = ['r', 'g', 'b'].map((key) =>
+            Math.round(a[key] + (b[key] - a[key]) * t)
+        );
+        return `#${channels.map((v) => v.toString(16).padStart(2, '0')).join('')}`;
+    }
+
+    function accentLuminance(hex) {
+        const { r, g, b } = hexToRgb(hex);
+        const [rs, gs, bs] = [r, g, b].map((v) => {
+            const channel = v / 255;
+            return channel <= 0.03928 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+        });
+        return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
+    }
+
+    function resolvePanelButtonAccents(accent) {
+        if (!accent || accent[0] !== '#') {
+            return { btn: accent, btnDark: accent };
+        }
+        if (accentLuminance(accent) > 0.5) {
+            return {
+                btn: mixHex(accent, '#000000', 0.45),
+                btnDark: mixHex(accent, '#000000', 0.65)
+            };
+        }
+        return {
+            btn: accent,
+            btnDark: mixHex(accent, '#000000', 0.25)
+        };
+    }
+
     function applyQuizTheme(requestedTheme, isDark, options = {}) {
         const app = $('quiz-app');
         if (!app) return;
@@ -4078,9 +4249,23 @@ const QuizGame = (() => {
             : themeData;
 
         // Apply CSS variables to the app element
-        ['--qg-bg-from', '--qg-bg-to', '--qg-accent'].forEach(v => {
+        ['--qg-bg-from', '--qg-bg-to', '--qg-accent', '--qg-panel-accent'].forEach(v => {
             if (vars[v]) app.style.setProperty(v, vars[v]);
         });
+
+        const panelAccent = vars['--qg-panel-accent'] || vars['--qg-accent'];
+        if (panelAccent) {
+            const buttonAccents = resolvePanelButtonAccents(panelAccent);
+            app.style.setProperty('--qg-panel-accent-btn', buttonAccents.btn);
+            app.style.setProperty('--qg-panel-accent-btn-dark', buttonAccents.btnDark);
+
+            const needsLightTitle =
+                panelAccent[0] === '#' && accentLuminance(panelAccent) > 0.5;
+            app.style.setProperty(
+                '--qg-panel-accent-title',
+                needsLightTitle ? buttonAccents.btn : panelAccent
+            );
+        }
 
         const bonusDark = themeData.dark?.['--qg-bg-from'] || themeData['--qg-bg-from'];
         const bonusMid = themeData.dark?.['--qg-bg-to'] || themeData['--qg-bg-to'];
@@ -4171,6 +4356,479 @@ const QuizGame = (() => {
     function updateDarkToggle(isDark) {
         const checkbox = $('qg-dark-checkbox');
         if (checkbox) checkbox.checked = isDark;
+    }
+
+    // ===== WAITING ROOM MINI-GAMES (local only — no Firebase) =====
+    const WAITING_SCRAMBLE_FALLBACK_WORDS = [
+        'CAT', 'DOG', 'FISH', 'BIRD', 'APPLE', 'HOUSE', 'BOOK', 'CHAIR', 'TABLE', 'WATER',
+        'HAPPY', 'GREEN', 'BLUE', 'SUNNY', 'CLOUD', 'RIVER', 'PLANT', 'MUSIC', 'PAPER', 'LIGHT',
+        'SMILE', 'FRIEND', 'SCHOOL', 'SPRING', 'TIGER', 'MONKEY', 'RABBIT', 'PURPLE', 'ORANGE', 'YELLOW'
+    ];
+
+    const WAITING_SCRAMBLE_WORDS = (() => {
+        if (typeof vocabularyBank !== 'undefined' && Array.isArray(vocabularyBank)) {
+            const fromBank = vocabularyBank
+                .filter((entry) => entry.level === 'beginner' && entry.word.length >= 3 && entry.word.length <= 9)
+                .map((entry) => entry.word.toUpperCase().replace(/[^A-Z]/g, ''))
+                .filter((word) => word.length >= 3);
+            if (fromBank.length >= 20) {
+                return [...new Set(fromBank)].slice(0, 30);
+            }
+        }
+        return WAITING_SCRAMBLE_FALLBACK_WORDS;
+    })();
+
+    const WAITING_MINI_GAMES = [
+        {
+            id: 'word-scramble',
+            label: 'Word Scramble Sprint',
+            icon: 'fa-solid fa-shuffle',
+            initFn: initWordScrambleSprint
+        },
+        {
+            id: 'word-clue',
+            label: 'Hint Pick',
+            icon: 'fa-solid fa-lightbulb',
+            initFn: initWordCluePick
+        }
+    ];
+
+    const WAITING_CLUE_FALLBACK = [
+        { word: 'CAT', hint: 'A small furry pet' },
+        { word: 'DOG', hint: 'A friendly pet that barks' },
+        { word: 'BIRD', hint: 'An animal that can fly' },
+        { word: 'FISH', hint: 'An animal that lives in water' },
+        { word: 'APPLE', hint: 'A red or green fruit' },
+        { word: 'HOUSE', hint: 'A place where people live' },
+        { word: 'BOOK', hint: 'You read this for stories' },
+        { word: 'HAPPY', hint: 'Feeling good and smiling' },
+        { word: 'GREEN', hint: 'The color of grass' },
+        { word: 'BLUE', hint: 'The color of the sky' },
+        { word: 'SUNNY', hint: 'Bright weather with sunshine' },
+        { word: 'WATER', hint: 'You drink this every day' },
+        { word: 'FRIEND', hint: 'Someone you like to play with' },
+        { word: 'SCHOOL', hint: 'A place where students learn' },
+        { word: 'RABBIT', hint: 'A small animal with long ears' },
+        { word: 'MONKEY', hint: 'An animal that lives in trees' },
+        { word: 'PURPLE', hint: 'A mix of red and blue' },
+        { word: 'ORANGE', hint: 'A citrus fruit color' },
+        { word: 'YELLOW', hint: 'The color of bananas' },
+        { word: 'SPRING', hint: 'The season after winter' }
+    ];
+
+    const WAITING_CLUE_WORDS = (() => {
+        if (typeof vocabularyBank !== 'undefined' && Array.isArray(vocabularyBank)) {
+            const fromBank = vocabularyBank
+                .filter((entry) => entry.level === 'beginner' && entry.definition && entry.word.length >= 3 && entry.word.length <= 12)
+                .map((entry) => ({
+                    word: entry.word.toUpperCase().replace(/[^A-Z]/g, ''),
+                    hint: entry.definition
+                }))
+                .filter((entry) => entry.word.length >= 3);
+            if (fromBank.length >= 20) {
+                return fromBank.slice(0, 30);
+            }
+        }
+        return WAITING_CLUE_FALLBACK;
+    })();
+
+    let activeWaitingMiniGame = null;
+    let wordScrambleState = null;
+    let wordClueState = null;
+
+    function isWaitingMiniGameModalOpen() {
+        return $('waiting-minigame-overlay')?.classList.contains('open') ?? false;
+    }
+
+    function openWaitingMiniGameModal() {
+        const overlay = $('waiting-minigame-overlay');
+        const modal = $('waiting-minigame');
+        const toggle = $('waiting-minigame-toggle');
+        if (!overlay || !modal || waitingMiniGameDisabled) return;
+
+        overlay.classList.add('open');
+        overlay.setAttribute('aria-hidden', 'false');
+        modal.setAttribute('aria-hidden', 'false');
+        toggle?.setAttribute('aria-expanded', 'true');
+    }
+
+    function closeWaitingMiniGameModal({ resetPicker = true } = {}) {
+        const overlay = $('waiting-minigame-overlay');
+        const modal = $('waiting-minigame');
+        const toggle = $('waiting-minigame-toggle');
+
+        overlay?.classList.remove('open');
+        overlay?.setAttribute('aria-hidden', 'true');
+        modal?.setAttribute('aria-hidden', 'true');
+        toggle?.setAttribute('aria-expanded', 'false');
+
+        if (resetPicker) {
+            showWaitingMiniGamePicker();
+        }
+    }
+
+    function initWaitingMiniGames() {
+        const toggle = $('waiting-minigame-toggle');
+        const grid = $('waiting-minigame-grid');
+        const backBtn = $('waiting-minigame-back');
+        const overlay = $('waiting-minigame-overlay');
+        const modal = $('waiting-minigame');
+
+        if (!toggle || !grid) return;
+
+        grid.innerHTML = WAITING_MINI_GAMES.map((game) => `
+            <button type="button" class="qg-waiting-minigame-card" data-game-id="${game.id}">
+                <i class="${game.icon}" aria-hidden="true"></i>
+                <span>${game.label}</span>
+            </button>
+        `).join('');
+
+        toggle.addEventListener('click', () => {
+            if (waitingMiniGameDisabled) return;
+            if (isWaitingMiniGameModalOpen()) closeWaitingMiniGameModal();
+            else openWaitingMiniGameModal();
+        });
+
+        overlay?.addEventListener('click', (event) => {
+            if (waitingMiniGameDisabled) return;
+            if (event.target === overlay) closeWaitingMiniGameModal();
+        });
+
+        modal?.addEventListener('click', (event) => {
+            event.stopPropagation();
+        });
+
+        grid.addEventListener('click', (event) => {
+            if (waitingMiniGameDisabled) return;
+            const card = event.target.closest('[data-game-id]');
+            if (!card) return;
+            const game = WAITING_MINI_GAMES.find((entry) => entry.id === card.dataset.gameId);
+            if (game) startWaitingMiniGame(game);
+        });
+
+        backBtn?.addEventListener('click', () => {
+            if (waitingMiniGameDisabled) return;
+            showWaitingMiniGamePicker();
+        });
+    }
+
+    function resetWaitingMiniGamesForLobby() {
+        waitingMiniGameDisabled = false;
+        activeWaitingMiniGame = null;
+        wordScrambleState = null;
+        wordClueState = null;
+
+        const root = $('waiting-minigame');
+        const overlay = $('waiting-minigame-overlay');
+        const toggle = $('waiting-minigame-toggle');
+        const picker = $('waiting-minigame-picker');
+        const play = $('waiting-minigame-play');
+        const stage = $('waiting-minigame-stage');
+
+        closeWaitingMiniGameModal({ resetPicker: false });
+
+        if (overlay) {
+            overlay.classList.remove('qg-waiting-minigame--disabled');
+            overlay.style.pointerEvents = '';
+        }
+        if (root) {
+            root.classList.remove('qg-waiting-minigame--disabled');
+            root.removeAttribute('hidden');
+            root.style.pointerEvents = '';
+        }
+        if (toggle) {
+            toggle.disabled = false;
+            toggle.setAttribute('aria-expanded', 'false');
+        }
+        if (picker) {
+            picker.classList.remove('is-hidden');
+            picker.hidden = false;
+        }
+        if (play) {
+            play.classList.remove('is-active');
+            play.hidden = true;
+        }
+        if (stage) stage.innerHTML = '';
+    }
+
+    function teardownWaitingMiniGames() {
+        if (waitingMiniGameDisabled) return;
+        waitingMiniGameDisabled = true;
+        activeWaitingMiniGame = null;
+        wordScrambleState = null;
+        wordClueState = null;
+
+        const root = $('waiting-minigame');
+        const overlay = $('waiting-minigame-overlay');
+        const toggle = $('waiting-minigame-toggle');
+        const picker = $('waiting-minigame-picker');
+        const play = $('waiting-minigame-play');
+        const stage = $('waiting-minigame-stage');
+
+        closeWaitingMiniGameModal({ resetPicker: false });
+
+        if (toggle) {
+            toggle.disabled = true;
+            toggle.setAttribute('aria-expanded', 'false');
+        }
+        if (picker) {
+            picker.classList.remove('is-hidden');
+            picker.hidden = false;
+        }
+        if (play) {
+            play.classList.remove('is-active');
+            play.hidden = true;
+        }
+        if (stage) stage.innerHTML = '';
+
+        if (overlay) {
+            overlay.classList.add('qg-waiting-minigame--disabled');
+            overlay.style.pointerEvents = 'none';
+        }
+        if (root) {
+            root.classList.add('qg-waiting-minigame--disabled');
+            root.setAttribute('hidden', '');
+            root.style.pointerEvents = 'none';
+        }
+    }
+
+    function showWaitingMiniGamePicker() {
+        activeWaitingMiniGame = null;
+        wordScrambleState = null;
+        wordClueState = null;
+        const picker = $('waiting-minigame-picker');
+        const play = $('waiting-minigame-play');
+        if (picker) {
+            picker.hidden = false;
+            picker.classList.remove('is-hidden');
+        }
+        if (play) {
+            play.hidden = true;
+            play.classList.remove('is-active');
+        }
+        $('waiting-minigame-stage').innerHTML = '';
+    }
+
+    function startWaitingMiniGame(game) {
+        if (waitingMiniGameDisabled) return;
+        activeWaitingMiniGame = game.id;
+        const picker = $('waiting-minigame-picker');
+        const play = $('waiting-minigame-play');
+        if (picker) {
+            picker.hidden = true;
+            picker.classList.add('is-hidden');
+        }
+        if (play) {
+            play.hidden = false;
+            play.classList.add('is-active');
+        }
+        const stage = $('waiting-minigame-stage');
+        stage.innerHTML = '';
+        game.initFn(stage);
+    }
+
+    function shuffleLetters(word) {
+        const letters = word.split('');
+        let shuffled = [...letters];
+        let attempts = 0;
+        do {
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            attempts++;
+        } while (shuffled.join('') === word && attempts < 8);
+        return shuffled;
+    }
+
+    function pickScrambleWord(previousWord) {
+        const pool = WAITING_SCRAMBLE_WORDS;
+        if (pool.length <= 1) return pool[0] || 'CAT';
+        let next = pool[Math.floor(Math.random() * pool.length)];
+        let guard = 0;
+        while (next === previousWord && guard < 10) {
+            next = pool[Math.floor(Math.random() * pool.length)];
+            guard++;
+        }
+        return next;
+    }
+
+    function initWordScrambleSprint(stage) {
+        wordScrambleState = {
+            score: 0,
+            currentWord: '',
+            placedTileIds: [],
+            tiles: []
+        };
+        loadNextScrambleWord(stage);
+    }
+
+    function loadNextScrambleWord(stage) {
+        if (!wordScrambleState || waitingMiniGameDisabled) return;
+
+        const previous = wordScrambleState.currentWord;
+        wordScrambleState.currentWord = pickScrambleWord(previous);
+        wordScrambleState.placedTileIds = [];
+        wordScrambleState.tiles = shuffleLetters(wordScrambleState.currentWord).map((letter, index) => ({
+            id: `${wordScrambleState.currentWord}-${index}`,
+            letter,
+            used: false
+        }));
+
+        renderWordScrambleSprint(stage);
+    }
+
+    function renderWordScrambleSprint(stage) {
+        if (!wordScrambleState || waitingMiniGameDisabled) return;
+
+        const { score, currentWord, placedTileIds, tiles } = wordScrambleState;
+        const placedLetters = placedTileIds.map((tileId) => {
+            const tile = tiles.find((entry) => entry.id === tileId);
+            return tile ? tile.letter : '';
+        });
+
+        stage.innerHTML = `
+            <div class="qg-scramble-score">Words completed: <strong>${score}</strong></div>
+            <div class="qg-scramble-build" id="scramble-build-area">
+                ${currentWord.split('').map((_, index) => {
+                    const letter = placedLetters[index] || '';
+                    return `<span class="qg-scramble-slot${letter ? '' : ' qg-scramble-slot--empty'}">${letter || '·'}</span>`;
+                }).join('')}
+            </div>
+            <div class="qg-scramble-actions">
+                <button type="button" class="qg-scramble-undo" id="scramble-undo-btn"
+                    ${placedTileIds.length ? '' : 'disabled'}>
+                    <i class="fa-solid fa-delete-left" aria-hidden="true"></i> Remove last
+                </button>
+            </div>
+            <div class="qg-scramble-tiles" id="scramble-tiles">
+                ${tiles.map((tile) => `
+                    <button type="button" class="qg-scramble-tile${tile.used ? ' qg-scramble-tile--used' : ''}"
+                        data-tile-id="${tile.id}" ${tile.used ? 'disabled' : ''}>${tile.letter}</button>
+                `).join('')}
+            </div>
+        `;
+
+        stage.querySelector('#scramble-undo-btn')?.addEventListener('click', () => {
+            if (!wordScrambleState || waitingMiniGameDisabled) return;
+            if (!wordScrambleState.placedTileIds.length) return;
+            const removedId = wordScrambleState.placedTileIds.pop();
+            const tile = wordScrambleState.tiles.find((entry) => entry.id === removedId);
+            if (tile) tile.used = false;
+            renderWordScrambleSprint(stage);
+        });
+
+        stage.querySelectorAll('.qg-scramble-tile:not(:disabled)').forEach((button) => {
+            button.addEventListener('click', () => {
+                if (!wordScrambleState || waitingMiniGameDisabled) return;
+                handleScrambleTileTap(stage, button.dataset.tileId);
+            });
+        });
+    }
+
+    function handleScrambleTileTap(stage, tileId) {
+        const state = wordScrambleState;
+        if (!state || waitingMiniGameDisabled) return;
+
+        const tile = state.tiles.find((entry) => entry.id === tileId);
+        if (!tile || tile.used) return;
+
+        const expected = state.currentWord[state.placedTileIds.length];
+        if (tile.letter !== expected) return;
+
+        tile.used = true;
+        state.placedTileIds.push(tileId);
+
+        if (state.placedTileIds.length === state.currentWord.length) {
+            state.score += 1;
+            renderWordScrambleSprint(stage);
+            stage.querySelector('#scramble-build-area')?.classList.add('qg-scramble-success');
+            window.setTimeout(() => {
+                if (!wordScrambleState || waitingMiniGameDisabled) return;
+                loadNextScrambleWord(stage);
+            }, 420);
+            return;
+        }
+
+        renderWordScrambleSprint(stage);
+    }
+
+    function pickClueEntry(previousWord) {
+        const pool = WAITING_CLUE_WORDS;
+        if (pool.length <= 1) return pool[0] || WAITING_CLUE_FALLBACK[0];
+        let next = pool[Math.floor(Math.random() * pool.length)];
+        let guard = 0;
+        while (next.word === previousWord && guard < 10) {
+            next = pool[Math.floor(Math.random() * pool.length)];
+            guard++;
+        }
+        return next;
+    }
+
+    function buildClueOptions(correctWord) {
+        const distractors = WAITING_CLUE_WORDS
+            .map((entry) => entry.word)
+            .filter((word) => word !== correctWord);
+        const options = [correctWord];
+        while (options.length < 4 && distractors.length) {
+            const pick = distractors.splice(Math.floor(Math.random() * distractors.length), 1)[0];
+            if (!options.includes(pick)) options.push(pick);
+        }
+        while (options.length < 4) {
+            const fallback = WAITING_CLUE_FALLBACK[options.length].word;
+            if (!options.includes(fallback)) options.push(fallback);
+        }
+        for (let i = options.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [options[i], options[j]] = [options[j], options[i]];
+        }
+        return options;
+    }
+
+    function initWordCluePick(stage) {
+        wordClueState = {
+            score: 0,
+            currentEntry: null,
+            options: []
+        };
+        loadNextClueRound(stage);
+    }
+
+    function loadNextClueRound(stage) {
+        if (!wordClueState || waitingMiniGameDisabled) return;
+        const previous = wordClueState.currentEntry?.word || '';
+        wordClueState.currentEntry = pickClueEntry(previous);
+        wordClueState.options = buildClueOptions(wordClueState.currentEntry.word);
+        renderWordCluePick(stage);
+    }
+
+    function renderWordCluePick(stage) {
+        if (!wordClueState || waitingMiniGameDisabled) return;
+        const { score, currentEntry, options } = wordClueState;
+        stage.innerHTML = `
+            <div class="qg-clue-score">Words completed: <strong>${score}</strong></div>
+            <p class="qg-clue-prompt" id="clue-prompt">${currentEntry.hint}</p>
+            <div class="qg-clue-options" id="clue-options">
+                ${options.map((word) => `
+                    <button type="button" class="qg-clue-option" data-word="${word}">
+                        ${word.charAt(0) + word.slice(1).toLowerCase()}
+                    </button>
+                `).join('')}
+            </div>
+        `;
+
+        stage.querySelectorAll('.qg-clue-option').forEach((button) => {
+            button.addEventListener('click', () => {
+                if (!wordClueState || waitingMiniGameDisabled) return;
+                if (button.dataset.word !== wordClueState.currentEntry.word) return;
+                wordClueState.score += 1;
+                stage.querySelector('#clue-prompt')?.classList.add('qg-clue-success');
+                window.setTimeout(() => {
+                    if (!wordClueState || waitingMiniGameDisabled) return;
+                    loadNextClueRound(stage);
+                }, 420);
+            });
+        });
     }
 
     // Resize handler for bg canvas

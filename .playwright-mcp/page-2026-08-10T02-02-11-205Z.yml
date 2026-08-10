@@ -1,0 +1,27 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - text: "#"
+    - generic [ref=e3]:
+      - button "Open themes" [ref=e4] [cursor=pointer]:
+        - generic [ref=e5]: 
+      - text:      
+    - generic [ref=e7]:
+      - generic [ref=e8]:
+        - generic [ref=e9]: 
+        - heading "Live Quiz" [level=1] [ref=e10]
+        - paragraph [ref=e11]: Real-time multiplayer classroom quiz
+      - generic [ref=e12]:
+        - button " Host a Game Create a quiz and invite your students" [ref=e13] [cursor=pointer]:
+          - generic [ref=e14]: 
+          - heading "Host a Game" [level=2] [ref=e16]
+          - paragraph [ref=e17]: Create a quiz and invite your students
+        - button " Join a Game Enter a game code to play" [ref=e18] [cursor=pointer]:
+          - generic [ref=e19]: 
+          - heading "Join a Game" [level=2] [ref=e21]
+          - paragraph [ref=e22]: Enter a game code to play
+      - link " Back to Tools" [ref=e23] [cursor=pointer]:
+        - /url: tools.html
+        - generic [ref=e24]: 
+        - text: Back to Tools
+    - text:          +  +  +   +                                        
+  - text: 
