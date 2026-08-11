@@ -3316,6 +3316,19 @@ body.dark-mode .qg-mode-btn.active .qg-mode-label {
     position: relative;
 }
 
+.qg-tv-lb-boot {
+    position: static;
+    flex: 0 0 auto;
+    width: 30px;
+    height: 30px;
+    margin-left: 2px;
+    opacity: 0.88;
+}
+
+.qg-tv-lb-boot:hover {
+    opacity: 1;
+}
+
 .qg-tv-lb-progress-wrap {
     flex: 1;
     min-width: 0;

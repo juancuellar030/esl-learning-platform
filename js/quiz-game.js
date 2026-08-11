@@ -1548,14 +1548,50 @@ const QuizGame = (() => {
     }
 
     function bootPlayer(uid, name) {
+        if (role !== 'host' || !uid) return;
+
+        const label = name || 'this student';
+        if (!confirm(`Remove ${label} from the session?`)) return;
+
         // Immediately remove from local state for instant UI feedback
         delete players[uid];
         renderLobbyPlayers();
 
-        // Remove from Firebase
+        if ($('teacher-view')?.classList.contains('active')) {
+            updateHostLeaderboard();
+            if ((config.gameMode || 'automatic') !== 'student-paced') {
+                updateAnswerCounts();
+            }
+            const totalEl = $('tv-total-players');
+            if (totalEl) totalEl.textContent = Object.keys(players).length;
+        }
+
+        // Remove from Firebase — player's kick listener sends them to the booted screen
         FirebaseService.removePlayer(gameCode, uid).catch(err => {
             console.error('[QuizGame] Failed to boot player:', err);
         });
+    }
+
+    function attachHostLbBootButton(row, entry) {
+        if (role !== 'host' || !row || !entry?.uid) return;
+
+        let bootBtn = row.querySelector('.qg-tv-lb-boot');
+        if (!bootBtn) {
+            bootBtn = document.createElement('button');
+            bootBtn.type = 'button';
+            bootBtn.className = 'qg-boot-btn qg-tv-lb-boot';
+            bootBtn.innerHTML = '<i class="fa-solid fa-xmark" aria-hidden="true"></i>';
+            bootBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                bootPlayer(bootBtn.dataset.uid, bootBtn.dataset.name);
+            });
+            row.appendChild(bootBtn);
+        }
+
+        bootBtn.dataset.uid = entry.uid;
+        bootBtn.dataset.name = entry.name || '';
+        bootBtn.setAttribute('aria-label', `Remove ${entry.name || 'student'}`);
+        bootBtn.title = `Remove ${entry.name || 'student'}`;
     }
 
     function removeInactivePlayers() {
@@ -1753,7 +1789,7 @@ const QuizGame = (() => {
                     const stillRemoved = !session.players || !session.players[uid];
                     if (stillRemoved) {
                         console.log('[QuizGame] Player node still missing after grace period — showing disconnect screen.');
-                        showDisconnectScreen('Oops!', 'You have been removed from the lobby by the host.');
+                        showDisconnectScreen('Oops!', 'You have been removed from the session by the host.');
                     }
                 });
             }, 2000);
@@ -2251,6 +2287,7 @@ const QuizGame = (() => {
         }
 
         applyHostLbRowChrome(row, entry, rank);
+        attachHostLbBootButton(row, entry);
 
         if (prevRank != null && prevRank !== rank) {
             row.classList.remove('qg-ls-row--moved');
@@ -2331,6 +2368,7 @@ const QuizGame = (() => {
                 </div>
                 <span class="qg-tv-lb-streak">${streakHtml}</span>
             `;
+            attachHostLbBootButton(row, p);
             list.appendChild(row);
         });
     }
