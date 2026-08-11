@@ -43,6 +43,8 @@ const QuizGame = (() => {
     const lobbyPlayerCardMap = new Map();
     const liveStandingsRowMap = new Map();
     const liveStandingsRankMap = new Map();
+    const hostLbRowMap = new Map();
+    const hostLbRankMap = new Map();
     let liveStandingsListenerAdded = false;
     let onLiveStandings = false;
 
@@ -1902,8 +1904,11 @@ const QuizGame = (() => {
 
         const gm = config.gameMode || 'automatic';
 
+        syncHostStudentPacedChrome();
+        clearHostLeaderboardRows();
+
         // Show/hide teacher controls based on mode
-        $('tv-teacher-controls').classList.toggle('qg-hidden', gm !== 'teacher-paced');
+        $('tv-teacher-controls').classList.toggle('qg-hidden', gm !== 'teacher-paced' && gm !== 'student-paced');
 
         // Listen for player answers/progress
         if (!FirebaseService.isDemo()) {
@@ -2152,72 +2157,206 @@ const QuizGame = (() => {
         }
     }
 
-    function updateHostLeaderboard() {
+    function getHostLeaderboardSorted() {
         const tot = questions.length || 1;
 
-        const sorted = Object.entries(players)
+        return Object.entries(players)
             .map(([uid, p]) => {
                 const prog = getPlayerProgress(p);
                 return { uid, prog, isDone: prog >= tot, ...p };
             })
-            // Sort completed first, then by score descending (or progress desc if score is 0)
             .sort((a, b) => {
                 if (a.isDone && !b.isDone) return -1;
                 if (!a.isDone && b.isDone) return 1;
                 if (a.score !== b.score) return (b.score || 0) - (a.score || 0);
                 return b.prog - a.prog;
             });
+    }
 
+    function getHostLbBarClass(streak) {
+        if (streak >= 5) return 'streak-5';
+        if (streak >= 3) return 'streak-3';
+        if (streak >= 2) return 'streak-2';
+        return '';
+    }
+
+    function getHostLbStreakHtml(streak) {
+        if (streak >= 3) return `<span class="fire">🔥</span>${streak}`;
+        if (streak > 0) return `⚡${streak}`;
+        return '';
+    }
+
+    function getHostLbStatusTag(entry) {
+        if (entry.isDone) {
+            return '<span class="qg-tv-lb-status qg-tv-lb-status--done">Completed</span>';
+        }
+        if (isPlayerDisconnected(entry)) {
+            return '<span class="qg-reconnect-badge qg-reconnect-badge--lb">Reconnecting…</span>';
+        }
+        return '';
+    }
+
+    function applyHostLbRowChrome(row, entry, rank) {
+        row.classList.toggle('qg-tv-lb-row--disconnected', isPlayerDisconnected(entry));
+
+        if (entry.isDone) {
+            row.style.background = 'rgba(118, 120, 237, 0.15)';
+            row.style.border = '1px solid rgba(118, 120, 237, 0.3)';
+        } else if (rank === 1 && (entry.score || 0) > 0) {
+            row.style.background = 'rgba(247, 184, 1, 0.15)';
+            row.style.border = '';
+        } else {
+            row.style.background = '';
+            row.style.border = '';
+        }
+    }
+
+    function createHostLeaderboardRow(entry, rank) {
+        const row = document.createElement('div');
+        row.className = 'qg-tv-lb-row';
+        row.dataset.uid = entry.uid;
+        row.innerHTML = `
+            <span class="qg-tv-lb-rank"></span>
+            <div class="qg-tv-lb-progress-wrap">
+                <div class="qg-tv-lb-info">
+                    <span class="qg-tv-lb-name"></span>
+                    <span class="qg-tv-lb-score"></span>
+                </div>
+                <div class="qg-tv-lb-bar-bg">
+                    <div class="qg-tv-lb-bar"></div>
+                </div>
+            </div>
+            <span class="qg-tv-lb-streak"></span>
+        `;
+        updateHostLeaderboardRow(row, entry, rank, null);
+        return row;
+    }
+
+    function updateHostLeaderboardRow(row, entry, rank, prevRank) {
+        const tot = questions.length || 1;
+        const streak = entry.streak || 0;
+        const pct = Math.min(100, Math.round((entry.prog / tot) * 100));
+        const barClass = getHostLbBarClass(streak);
+
+        row.querySelector('.qg-tv-lb-rank').textContent = rank;
+        row.querySelector('.qg-tv-lb-name').innerHTML =
+            `${escapeHtml(entry.name || '')} ${getHostLbStatusTag(entry)}`;
+        row.querySelector('.qg-tv-lb-score').textContent = entry.score || 0;
+        row.querySelector('.qg-tv-lb-streak').innerHTML = getHostLbStreakHtml(streak);
+
+        const bar = row.querySelector('.qg-tv-lb-bar');
+        if (bar) {
+            bar.className = 'qg-tv-lb-bar' + (barClass ? ` ${barClass}` : '');
+            bar.style.width = `${pct}%`;
+        }
+
+        applyHostLbRowChrome(row, entry, rank);
+
+        if (prevRank != null && prevRank !== rank) {
+            row.classList.remove('qg-ls-row--moved');
+            void row.offsetWidth;
+            row.classList.add('qg-ls-row--moved');
+        }
+    }
+
+    function updateHostLeaderboardKeyed() {
         const list = $('tv-lb-list');
+        if (!list) return;
+
+        const sorted = getHostLeaderboardSorted();
+        const activeUids = new Set(sorted.map((entry) => entry.uid));
+
+        hostLbRowMap.forEach((row, uid) => {
+            if (!activeUids.has(uid)) {
+                row.remove();
+                hostLbRowMap.delete(uid);
+                hostLbRankMap.delete(uid);
+            }
+        });
+
+        sorted.forEach((entry, index) => {
+            const rank = index + 1;
+            const prevRank = hostLbRankMap.get(entry.uid);
+            let row = hostLbRowMap.get(entry.uid);
+            if (!row) {
+                row = createHostLeaderboardRow(entry, rank);
+                hostLbRowMap.set(entry.uid, row);
+            } else {
+                updateHostLeaderboardRow(row, entry, rank, prevRank);
+            }
+            hostLbRankMap.set(entry.uid, rank);
+        });
+
+        sorted.forEach((entry, index) => {
+            const row = hostLbRowMap.get(entry.uid);
+            const ref = list.children[index];
+            if (row && ref !== row) {
+                list.insertBefore(row, ref || null);
+            }
+        });
+    }
+
+    function updateHostLeaderboardClassic() {
+        const tot = questions.length || 1;
+        const sorted = getHostLeaderboardSorted();
+        const list = $('tv-lb-list');
+        if (!list) return;
+
         list.innerHTML = '';
         sorted.forEach((p, i) => {
             const row = document.createElement('div');
             row.className = 'qg-tv-lb-row';
-            if (p.isDone) {
-                row.style.background = 'rgba(118, 120, 237, 0.15)';
-                row.style.border = '1px solid rgba(118, 120, 237, 0.3)';
-            } else if (i === 0 && (p.score || 0) > 0) {
-                row.style.background = 'rgba(247, 184, 1, 0.15)';
-            }
+            const rank = i + 1;
+            applyHostLbRowChrome(row, p, rank);
 
             const streak = p.streak || 0;
-            const streakHtml = streak >= 3 ? `<span class="fire">🔥</span>${streak}` : (streak > 0 ? `⚡${streak}` : '');
-
-            // Progress width (0 to 100%)
+            const streakHtml = getHostLbStreakHtml(streak);
             const pct = Math.min(100, Math.round((p.prog / tot) * 100));
-
-            // Determine bar streak class
-            let barClass = '';
-            if (streak >= 5) barClass = 'streak-5';
-            else if (streak >= 3) barClass = 'streak-3';
-            else if (streak >= 2) barClass = 'streak-2';
-
-            let statusTag = '';
-            if (p.isDone) {
-                statusTag = `<span style="font-size: 0.7rem; background: var(--medium-slate-blue); color: white; padding: 2px 6px; border-radius: 4px; margin-left: 8px;">Completed</span>`;
-            } else if (isPlayerDisconnected(p)) {
-                statusTag = '<span class="qg-reconnect-badge qg-reconnect-badge--lb">Reconnecting…</span>';
-            }
+            const barClass = getHostLbBarClass(streak);
 
             if (isPlayerDisconnected(p)) {
                 row.classList.add('qg-tv-lb-row--disconnected');
             }
 
             row.innerHTML = `
-                <span class="qg-tv-lb-rank">${i + 1}</span>
+                <span class="qg-tv-lb-rank">${rank}</span>
                 <div class="qg-tv-lb-progress-wrap">
                     <div class="qg-tv-lb-info">
-                        <span class="qg-tv-lb-name">${escapeHtml(p.name)} ${statusTag}</span>
+                        <span class="qg-tv-lb-name">${escapeHtml(p.name)} ${getHostLbStatusTag(p)}</span>
                         <span class="qg-tv-lb-score">${p.score || 0}</span>
                     </div>
                     <div class="qg-tv-lb-bar-bg">
-                        <div class="qg-tv-lb-bar ${barClass}" style="width: ${pct}%; transition: width 0.5s ease-out;"></div>
+                        <div class="qg-tv-lb-bar ${barClass}" style="width: ${pct}%;"></div>
                     </div>
                 </div>
                 <span class="qg-tv-lb-streak">${streakHtml}</span>
             `;
             list.appendChild(row);
         });
+    }
+
+    function updateHostLeaderboard() {
+        const gm = config.gameMode || 'automatic';
+        if (gm === 'student-paced') {
+            updateHostLeaderboardKeyed();
+        } else {
+            updateHostLeaderboardClassic();
+        }
+    }
+
+    function clearHostLeaderboardRows() {
+        hostLbRowMap.forEach((row) => row.remove());
+        hostLbRowMap.clear();
+        hostLbRankMap.clear();
+        const list = $('tv-lb-list');
+        if (list) list.innerHTML = '';
+    }
+
+    function syncHostStudentPacedChrome() {
+        const teacherView = $('teacher-view');
+        if (!teacherView) return;
+        const studentPaced = role === 'host' && (config.gameMode || gameMode) === 'student-paced';
+        teacherView.classList.toggle('qg-teacher-view--student-paced', studentPaced);
     }
 
     function revealAnswer() {
@@ -3769,12 +3908,14 @@ const QuizGame = (() => {
         playerSessionGen = 0;
         $('teacher-view').classList.remove('active');
         $('student-view').classList.remove('active');
+        $('teacher-view')?.classList.remove('qg-teacher-view--student-paced');
         hideSessionBadge();
         lobbyPlayerCardMap.forEach((el) => el.remove());
         lobbyPlayerCardMap.clear();
         liveStandingsRowMap.forEach((el) => el.remove());
         liveStandingsRowMap.clear();
         liveStandingsRankMap.clear();
+        clearHostLeaderboardRows();
 
         // Only remove if it's a full cleanup (leaving session)
         // Note: we don't remove on refresh, only on manual 'New Game' or 'Cancel'

@@ -3374,6 +3374,123 @@ body.dark-mode .qg-mode-btn.active .qg-mode-label {
     animation: barPulse 1.5s ease-in-out infinite;
 }
 
+/* ===== HOST STUDENT-PACED LIVE PROGRESS ===== */
+.qg-teacher-view--student-paced .qg-tv-progress,
+.qg-teacher-view--student-paced .qg-tv-timer-bar,
+.qg-teacher-view--student-paced .qg-tv-answered,
+.qg-teacher-view--student-paced #btn-global-end-game {
+    display: none !important;
+}
+
+.qg-teacher-view--student-paced .qg-tv-header {
+    min-height: 0;
+    padding: 0;
+    gap: 0;
+}
+
+.qg-teacher-view--student-paced .qg-tv-question {
+    flex-shrink: 0;
+    padding: 8px 0 12px;
+    font-size: clamp(1.25rem, 2.8vw, 1.6rem);
+}
+
+.qg-teacher-view--student-paced .qg-tv-leaderboard {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: min(70vh, 720px);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 18px 18px 16px;
+}
+
+.qg-teacher-view--student-paced .qg-tv-leaderboard h3 {
+    flex-shrink: 0;
+    margin-bottom: 14px;
+    font-size: 1.1rem;
+}
+
+.qg-teacher-view--student-paced #tv-lb-list {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 6px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(247, 184, 1, 0.85) rgba(255, 255, 255, 0.1);
+}
+
+.qg-teacher-view--student-paced #tv-lb-list::-webkit-scrollbar {
+    width: 11px;
+}
+
+.qg-teacher-view--student-paced #tv-lb-list::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.22);
+    border-radius: 999px;
+    margin: 6px 2px;
+}
+
+.qg-teacher-view--student-paced #tv-lb-list::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #ffcc33, var(--amber-flame, #f7b801));
+    border-radius: 999px;
+    border: 2px solid rgba(26, 21, 48, 0.35);
+    min-height: 48px;
+}
+
+.qg-teacher-view--student-paced #tv-lb-list::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #ffe08a, #ffcc33);
+}
+
+.qg-teacher-view--student-paced #tv-lb-list::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
+.qg-teacher-view--student-paced .qg-tv-lb-row {
+    padding: 10px 14px;
+    margin-bottom: 8px;
+}
+
+.qg-teacher-view--student-paced .qg-tv-lb-name {
+    font-size: 1.28rem;
+    line-height: 1.25;
+}
+
+.qg-teacher-view--student-paced .qg-tv-lb-score {
+    font-size: 1.15rem;
+}
+
+.qg-teacher-view--student-paced .qg-tv-lb-rank {
+    font-size: 1.1rem;
+    min-width: 30px;
+}
+
+.qg-teacher-view--student-paced .qg-tv-lb-streak {
+    font-size: 1rem;
+    min-width: 48px;
+}
+
+.qg-teacher-view--student-paced .qg-tv-lb-bar-bg {
+    height: 12px;
+    border-radius: 8px;
+}
+
+.qg-teacher-view--student-paced .qg-tv-lb-bar {
+    border-radius: 8px;
+}
+
+.qg-teacher-view--student-paced .qg-tv-lb-status--done {
+    font-size: 0.72rem;
+    background: var(--medium-slate-blue);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: 8px;
+}
+
+.qg-teacher-view--student-paced .qg-tv-lb-row.qg-ls-row--moved {
+    animation: qgLsFlash 0.65s ease;
+}
+
 /* ===== TEACHER-PACED CONTROLS ===== */
 .qg-tv-teacher-controls {
     display: flex;
