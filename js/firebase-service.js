@@ -116,6 +116,9 @@ const FirebaseService = (() => {
         return db.ref('sessions/' + code).once('value').then(snap => {
             if (!snap.exists()) throw new Error('Session not found');
             sessionSnapshot = snap.val();
+            if (sessionSnapshot.kicked && sessionSnapshot.kicked[uid]) {
+                throw new Error('You were removed from this session by the host.');
+            }
             // Allow joining in any session state (lobby, countdown, playing, reviewing)
             return db.ref('sessions/' + code + '/players/' + uid).set(playerData);
         }).then(() => markPlayerConnected(code)).then(() => sessionSnapshot);
@@ -192,18 +195,24 @@ const FirebaseService = (() => {
     function submitAnswer(code, answerIndex) {
         const uid = getUid();
         const data = { index: answerIndex, timestamp: Date.now() };
-        return updateSessionField(code, 'players/' + uid + '/currentAnswer', data);
+        return isPlayerKicked(code, uid).then(kicked => {
+            if (kicked) return Promise.reject(new Error('Kicked from session'));
+            return updateSessionField(code, 'players/' + uid + '/currentAnswer', data);
+        });
     }
 
     function updatePlayerScore(code, uid, score, streak) {
         if (isDemo()) {
-            if (window._demoSession && window._demoSession.players[uid]) {
+            if (window._demoSession && window._demoSession.players && window._demoSession.players[uid]) {
                 window._demoSession.players[uid].score = score;
                 window._demoSession.players[uid].streak = streak;
             }
             return Promise.resolve();
         }
-        return db.ref('sessions/' + code + '/players/' + uid).update({ score, streak });
+        return isPlayerKicked(code, uid).then(kicked => {
+            if (kicked) return Promise.reject(new Error('Kicked from session'));
+            return db.ref('sessions/' + code + '/players/' + uid).update({ score, streak });
+        });
     }
 
     function clearAllAnswers(code, players) {
@@ -270,6 +279,43 @@ const FirebaseService = (() => {
             return Promise.resolve();
         }
         return db.ref('sessions/' + code + '/players/' + uid).remove();
+    }
+
+    /**
+     * Host boots a student: mark them kicked (so answer/score writes can't silently
+     * recreate the player node and defeat removal), then delete their player entry.
+     */
+    function kickPlayer(code, uid) {
+        if (!code || !uid) return Promise.resolve();
+        if (isDemo()) {
+            if (window._demoSession) {
+                if (!window._demoSession.kicked) window._demoSession.kicked = {};
+                window._demoSession.kicked[uid] = Date.now();
+                if (window._demoSession.players) delete window._demoSession.players[uid];
+            }
+            return Promise.resolve();
+        }
+        return db.ref('sessions/' + code).update({
+            ['kicked/' + uid]: firebase.database.ServerValue.TIMESTAMP,
+            ['players/' + uid]: null
+        });
+    }
+
+    function isPlayerKicked(code, uid) {
+        if (isDemo()) {
+            return Promise.resolve(Boolean(window._demoSession && window._demoSession.kicked && window._demoSession.kicked[uid]));
+        }
+        return db.ref('sessions/' + code + '/kicked/' + uid).once('value')
+            .then(snap => snap.exists());
+    }
+
+    function cancelPlayerDisconnect(code) {
+        if (isDemo()) return Promise.resolve();
+        const uid = getUid();
+        return db.ref('sessions/' + code + '/players/' + uid + '/connectionStatus')
+            .onDisconnect()
+            .cancel()
+            .catch(() => { });
     }
 
     function deleteSession(code) {
@@ -442,6 +488,9 @@ const FirebaseService = (() => {
         markPlayerConnected,
         getConnectionTimestamp,
         removePlayer,
+        kickPlayer,
+        isPlayerKicked,
+        cancelPlayerDisconnect,
         deleteSession,
         // Test Builder
         publishTest,

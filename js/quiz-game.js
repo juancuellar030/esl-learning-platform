@@ -40,6 +40,7 @@ const QuizGame = (() => {
     let kickCheckTimer = null;
     let waitingPlayersListenerAdded = false;
     let waitingMiniGameDisabled = false;
+    let playerKicked = false;
     const lobbyPlayerCardMap = new Map();
     const liveStandingsRowMap = new Map();
     const liveStandingsRankMap = new Map();
@@ -1566,8 +1567,9 @@ const QuizGame = (() => {
             if (totalEl) totalEl.textContent = Object.keys(players).length;
         }
 
-        // Remove from Firebase — player's kick listener sends them to the booted screen
-        FirebaseService.removePlayer(gameCode, uid).catch(err => {
+        // Mark kicked + delete player node so answer/score writes cannot recreate them
+        const kickFn = FirebaseService.kickPlayer || FirebaseService.removePlayer;
+        kickFn(gameCode, uid).catch(err => {
             console.error('[QuizGame] Failed to boot player:', err);
         });
     }
@@ -1613,9 +1615,13 @@ const QuizGame = (() => {
 
         Promise.all(stale.map(([uid]) => {
             delete players[uid];
-            return FirebaseService.removePlayer(gameCode, uid);
+            const kickFn = FirebaseService.kickPlayer || FirebaseService.removePlayer;
+            return kickFn(gameCode, uid);
         })).then(() => {
             renderLobbyPlayers();
+            if ($('teacher-view')?.classList.contains('active')) {
+                updateHostLeaderboard();
+            }
         }).catch(err => {
             console.error('[QuizGame] Failed to remove inactive players:', err);
         });
@@ -1630,9 +1636,31 @@ const QuizGame = (() => {
 
     function showDisconnectScreen(title, message) {
         clearInterval(timerInterval);
+        clearTimeout(kickCheckTimer);
+        stopLiveShortcutListener();
+        hideWaitingOverlay();
+        hideShortcutPanels();
+        onLiveStandings = false;
         $('booted-title').textContent = title;
         $('booted-message').textContent = message;
         showScreen('screen-booted');
+    }
+
+    function handlePlayerKicked() {
+        if (playerKicked || role !== 'player') return;
+        playerKicked = true;
+        clearInterval(timerInterval);
+        clearTimeout(kickCheckTimer);
+        stopLiveShortcutListener();
+        hideWaitingOverlay();
+        hideShortcutPanels();
+        onLiveStandings = false;
+        hasAnswered = true;
+        sessionStorage.removeItem('qg-last-code');
+        if (gameCode && FirebaseService.cancelPlayerDisconnect) {
+            FirebaseService.cancelPlayerDisconnect(gameCode);
+        }
+        showDisconnectScreen('Oops!', 'You have been removed from the session by the host.');
     }
 
     // ===== PLAYER: JOIN GAME (Two-step) =====
@@ -1773,26 +1801,41 @@ const QuizGame = (() => {
         });
         listeners.push(unsubStatus);
 
-        // 2. Kick listener (player removed by host — node actually deleted)
-        const unsubKick = FirebaseService.onFieldChange(gameCode, 'players/' + FirebaseService.getUid(), val => {
-            if (val !== null || role !== 'player') return;
+        // 2. Kick listeners — host boot writes kicked/{uid} AND deletes players/{uid}.
+        // Answer/score writes used to recreate the player node within a grace window;
+        // the kicked flag is the durable signal that stops local play immediately.
+        const myUid = FirebaseService.getUid();
+        const unsubKicked = FirebaseService.onFieldChange(gameCode, 'kicked/' + myUid, val => {
+            if (val == null || role !== 'player') return;
+            console.log('[QuizGame] Player marked kicked by host.');
+            handlePlayerKicked();
+        });
+        listeners.push(unsubKicked);
+
+        const unsubKick = FirebaseService.onFieldChange(gameCode, 'players/' + myUid, val => {
+            if (val !== null || role !== 'player' || playerKicked) return;
             if ($('screen-booted').classList.contains('active')) return;
 
             clearTimeout(kickCheckTimer);
             kickCheckTimer = setTimeout(() => {
-                FirebaseService.getSession(gameCode).then(session => {
+                if (playerKicked) return;
+                Promise.all([
+                    FirebaseService.getSession(gameCode),
+                    FirebaseService.isPlayerKicked
+                        ? FirebaseService.isPlayerKicked(gameCode, myUid)
+                        : Promise.resolve(false)
+                ]).then(([session, kicked]) => {
+                    if (playerKicked) return;
                     if (!session) {
                         showDisconnectScreen('Disconnected', 'The host has ended the session or disconnected.');
                         return;
                     }
-                    const uid = FirebaseService.getUid();
-                    const stillRemoved = !session.players || !session.players[uid];
-                    if (stillRemoved) {
-                        console.log('[QuizGame] Player node still missing after grace period — showing disconnect screen.');
-                        showDisconnectScreen('Oops!', 'You have been removed from the session by the host.');
+                    if (kicked || !session.players || !session.players[myUid]) {
+                        console.log('[QuizGame] Player node still missing after grace period — ejecting.');
+                        handlePlayerKicked();
                     }
                 });
-            }, 2000);
+            }, 800);
         });
         listeners.push(unsubKick);
 
@@ -2591,6 +2634,7 @@ const QuizGame = (() => {
 
     // Student-paced: advance to next question locally
     function studentPacedNextQuestion() {
+        if (playerKicked) return;
         currentQ++;
         if (currentQ >= questions.length) {
             showLiveStandings();
@@ -3039,7 +3083,7 @@ const QuizGame = (() => {
     }
 
     function selectAnswer(index) {
-        if (hasAnswered || timeLeft <= 0) return;
+        if (playerKicked || hasAnswered || timeLeft <= 0) return;
         hasAnswered = true;
 
         // Visual feedback
@@ -3064,6 +3108,7 @@ const QuizGame = (() => {
     }
 
     function studentPacedRevealAndAdvance(selectedIdx) {
+        if (playerKicked) return;
         clearInterval(timerInterval);
         const q = questions[currentQ];
         if (!q) return;
@@ -3936,6 +3981,7 @@ const QuizGame = (() => {
         hasAnswered = false;
         playerGameStarted = false; // Reset so next session starts clean
         waitingPlayersListenerAdded = false;
+        playerKicked = false;
         resetWaitingMiniGamesForLobby();
         onLiveStandings = false;
         liveStandingsListenerAdded = false;
