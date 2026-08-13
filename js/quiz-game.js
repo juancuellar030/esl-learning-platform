@@ -1878,7 +1878,7 @@ const QuizGame = (() => {
         void numEl.offsetWidth;
         numEl.style.animation = '';
 
-        playSound('countdown');
+        playSfxOneShot('sfx-quiz-countdown');
 
         const interval = setInterval(() => {
             count--;
@@ -1887,7 +1887,6 @@ const QuizGame = (() => {
                 numEl.style.animation = 'none';
                 void numEl.offsetWidth;
                 numEl.style.animation = '';
-                playSound('countdown');
             } else if (count === 0) {
                 numEl.textContent = 'GO!';
                 numEl.style.animation = 'none';
@@ -1965,11 +1964,32 @@ const QuizGame = (() => {
     function playPlayerAnswerSfx(type) {
         if (!soundEnabled) return;
         const elementId = type === 'correct' ? 'sfx-correct-answer' : 'sfx-incorrect-answer';
+        playSfxOneShot(elementId);
+    }
+
+    function playSfxOneShot(elementId) {
+        if (!soundEnabled) return;
         const el = $(elementId);
         if (!el) return;
         el.pause();
         el.currentTime = 0;
         el.play().catch(() => { });
+    }
+
+    function startBonusShuffleTrack() {
+        if (!soundEnabled) return;
+        const el = $('sfx-bonus-shuffle');
+        if (!el) return;
+        el.loop = true;
+        el.currentTime = 0;
+        el.play().catch(() => { });
+    }
+
+    function stopBonusShuffleTrack() {
+        const el = $('sfx-bonus-shuffle');
+        if (!el) return;
+        el.pause();
+        el.currentTime = 0;
     }
 
     // ===== HOST: GAME PLAY =====
@@ -2650,6 +2670,7 @@ const QuizGame = (() => {
         updateStreakDisplay();
 
         // Hide bonus stage, show question
+        stopBonusShuffleTrack();
         $('sv-bonus-container').classList.add('qg-hidden');
         $('sv-question').classList.remove('qg-hidden');
         $('sv-timer-container').classList.remove('qg-hidden');
@@ -2712,6 +2733,7 @@ const QuizGame = (() => {
         console.log('[QuizGame][Player] Rendering question', currentQ, ':', q.text?.substring(0, 50));
 
         // Render
+        stopBonusShuffleTrack();
         $('sv-bonus-container').classList.add('qg-hidden');
         $('sv-question').classList.remove('qg-hidden');
         $('sv-timer-container').classList.remove('qg-hidden');
@@ -3615,6 +3637,7 @@ const QuizGame = (() => {
 
         const bonusContainer = $('sv-bonus-container');
         bonusContainer.classList.remove('qg-hidden');
+        playSfxOneShot('sfx-bonus-stage-intro');
 
         // Generate Rewards
         const rewards = generateBonusRewards();
@@ -3686,6 +3709,7 @@ const QuizGame = (() => {
 
     function shuffleBonusCards(grid, rewards, context, options = {}) {
         grid.parentNode.classList.add('shuffling');
+        startBonusShuffleTrack();
         const wrappers = Array.from(grid.querySelectorAll('.qg-bonus-card-wrapper'));
         let positions = [0, 1, 2, 3, 4, 5];
 
@@ -3727,17 +3751,11 @@ const QuizGame = (() => {
 
     function selectBonusCard(selectedCard, reward, context, grid) {
         isBonusActive = false;
+        stopBonusShuffleTrack();
 
-        // Play sound based on reward type
-        if (reward.type === 'points' && reward.val > 0) {
-            playSound('bonus-positive');
-        } else if (reward.type === 'powerup') {
-            playSound('bonus-positive');
-        } else if (reward.type === 'points' && reward.val < 0) {
-            playSound('bonus-negative');
-        } else {
-            playSound('click');
-        }
+        const isPositive = (reward.type === 'points' && reward.val > 0)
+            || (reward.type === 'powerup' && reward.val !== 0);
+        playSfxOneShot(isPositive ? 'sfx-positive-bonus' : 'sfx-negative-bonus');
 
         // Flip ALL cards face-up to reveal everything
         grid.querySelectorAll('.qg-bonus-card').forEach(c => {

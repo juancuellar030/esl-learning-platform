@@ -1119,7 +1119,7 @@
 
 .qg-lobby-player .player-name {
     flex: 1 1 auto;
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -2205,6 +2205,7 @@
 .qg-answer-btn {
     position: relative;
     border: none;
+    border-radius: 16px;
     padding: 20px 22px;
     font-size: clamp(1.15rem, 3.2vw, 1.65rem);
     font-weight: 800;
@@ -4708,6 +4709,7 @@ body.dark-mode .qg-reconnect-badge {
 .qg-bonus-card {
     width: 100%;
     height: 100%;
+    border-radius: 16px;
     max-height: none;
     perspective: 1000px;
     cursor: pointer;
