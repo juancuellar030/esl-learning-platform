@@ -1852,6 +1852,14 @@
     color: #c92a2a;
 }
 
+.qg-feedback.shield {
+    background: rgba(76, 110, 245, 0.38);
+}
+
+.qg-feedback.shield .qg-feedback-icon {
+    color: #4c6ef5;
+}
+
 .qg-feedback-text {
     font-size: 1.8rem;
     font-weight: 800;
@@ -2146,11 +2154,44 @@
     opacity: 0.7;
 }
 
+.qg-sv-header-end {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    min-width: 50px;
+}
+
 .qg-sv-streak {
     font-size: 1.1rem;
     font-weight: 800;
     min-width: 50px;
     text-align: right;
+}
+
+.qg-sv-music-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    border: 2px solid rgba(255, 255, 255, 0.28);
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.28);
+    color: #fff;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: transform 0.15s ease, background 0.15s ease, opacity 0.15s ease;
+}
+
+.qg-sv-music-btn:hover {
+    transform: scale(1.06);
+    background: rgba(0, 0, 0, 0.42);
+}
+
+.qg-sv-music-btn.is-muted {
+    opacity: 0.55;
 }
 
 .qg-sv-streak .fire {
@@ -4709,7 +4750,6 @@ body.dark-mode .qg-reconnect-badge {
 .qg-bonus-card {
     width: 100%;
     height: 100%;
-    border-radius: 16px;
     max-height: none;
     perspective: 1000px;
     cursor: pointer;
@@ -4733,6 +4773,7 @@ body.dark-mode .qg-reconnect-badge {
     position: absolute;
     width: 100%;
     height: 100%;
+    border-radius: 16px;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
     display: flex;

@@ -458,7 +458,13 @@
                         <span class="qg-sv-score-value" id="sv-score">0</span>
                     </div>
                     <div class="qg-sv-progress" id="sv-progress">1 / 10</div>
-                    <div class="qg-sv-streak" id="sv-streak"></div>
+                    <div class="qg-sv-header-end">
+                        <div class="qg-sv-streak" id="sv-streak"></div>
+                        <button type="button" id="btn-sv-music" class="qg-sv-music-btn qg-hidden"
+                            aria-pressed="true" aria-label="Turn question music off" title="Turn music off">
+                            <i class="fa-solid fa-volume-high"></i>
+                        </button>
+                    </div>
                 </div>
                 <div class="qg-sv-timer" id="sv-timer-container">
                     <div class="qg-sv-timer-fill" id="sv-timer-fill"></div>
@@ -645,7 +651,7 @@
         <!-- ===== Confetti Canvas ===== -->
         <canvas id="confetti-canvas"></canvas>
 
-        <!-- Host-only quiz music / stingers (triggered only when role === host) -->
+        <!-- Quiz music / stingers (host classroom speakers; student-paced also plays question tracks locally) -->
         <audio id="bg-question-1" src="assets/audio/live-quiz/question_track_1.mp3" loop preload="auto"></audio>
         <audio id="bg-question-2" src="assets/audio/live-quiz/question_track_2.mp3" loop preload="auto"></audio>
         <audio id="bg-question-3" src="assets/audio/live-quiz/question_track_3.mp3" loop preload="auto"></audio>

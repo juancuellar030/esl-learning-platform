@@ -611,6 +611,7 @@ const QuizGame = (() => {
         // Shortcut Combo answer controls
         $('btn-shortcut-submit')?.addEventListener('click', submitShortcutAnswer);
         $('btn-shortcut-clear')?.addEventListener('click', clearShortcutSelection);
+        $('btn-sv-music')?.addEventListener('click', toggleStudentQuestionMusic);
 
         // Join code uppercase
         $('join-code').addEventListener('input', e => {
@@ -1909,6 +1910,50 @@ const QuizGame = (() => {
         return role === 'host' && musicEnabled;
     }
 
+    function isStudentPacedPlayer() {
+        return role !== 'host' && (config.gameMode || '') === 'student-paced';
+    }
+
+    function isQuestionTrackEnabled() {
+        if (!musicEnabled) return false;
+        if (role === 'host') return true;
+        return isStudentPacedPlayer();
+    }
+
+    function updateStudentMusicButton() {
+        const btn = $('btn-sv-music');
+        if (!btn) return;
+        const on = musicEnabled;
+        btn.classList.toggle('is-muted', !on);
+        btn.setAttribute('aria-pressed', String(on));
+        btn.title = on ? 'Turn music off' : 'Turn music on';
+        btn.setAttribute('aria-label', on ? 'Turn question music off' : 'Turn question music on');
+        btn.innerHTML = on
+            ? '<i class="fa-solid fa-volume-high"></i>'
+            : '<i class="fa-solid fa-volume-xmark"></i>';
+    }
+
+    function syncStudentMusicChrome() {
+        const btn = $('btn-sv-music');
+        if (!btn) return;
+        const show = isStudentPacedPlayer() && $('screen-game')?.classList.contains('active');
+        btn.classList.toggle('qg-hidden', !show);
+        updateStudentMusicButton();
+    }
+
+    function toggleStudentQuestionMusic() {
+        if (!isStudentPacedPlayer()) return;
+        musicEnabled = !musicEnabled;
+        updateStudentMusicButton();
+        if (!musicEnabled) {
+            stopQuestionTrack();
+            return;
+        }
+        if (!hasAnswered && !isBonusActive && $('screen-game')?.classList.contains('active')) {
+            playQuestionTrack();
+        }
+    }
+
     function stopQuestionTrack() {
         for (let i = 1; i <= 4; i++) {
             const el = $('bg-question-' + i);
@@ -1921,7 +1966,7 @@ const QuizGame = (() => {
     }
 
     function playQuestionTrack() {
-        if (!isHostMusicEnabled()) return;
+        if (!isQuestionTrackEnabled()) return;
 
         stopQuestionTrack();
 
@@ -2616,12 +2661,14 @@ const QuizGame = (() => {
                 questions = session.questions || [];
                 config = session.config || {};
                 soundEnabled = config.sound !== false;
+                musicEnabled = config.sound !== false;
                 const gm = config.gameMode || 'automatic';
                 console.log('[QuizGame][Player] listenAsPlayer: session loaded. questions:', questions.length, '| currentQuestion:', session.currentQuestion, '| gameMode:', gm);
 
                 if (gm === 'student-paced') {
                     // Student-paced: start from question 0 and advance locally
                     currentQ = -1;
+                    syncStudentMusicChrome();
                     studentPacedNextQuestion();
 
                     // Listen for game end
@@ -2706,6 +2753,7 @@ const QuizGame = (() => {
 
         // Start local timer
         startPlayerTimer(timerDuration, timerDuration);
+        playQuestionTrack();
     }
 
     function loadPlayerQuestion(qIdx, opts = {}) {
@@ -3083,8 +3131,13 @@ const QuizGame = (() => {
                 if (gm === 'student-paced' && !hasAnswered) {
                     // Auto-advance when time runs out in student-paced
                     hasAnswered = true;
-                    myStreak = 0;
-                    showFeedback(false, 0);
+                    if (pendingPowerup === 'shield') {
+                        pendingPowerup = null;
+                        showFeedback(false, 0, { shield: true });
+                    } else {
+                        myStreak = 0;
+                        showFeedback(false, 0);
+                    }
                     // Show correct answer briefly
                     const q = questions[currentQ];
                     if (q) {
@@ -3145,7 +3198,11 @@ const QuizGame = (() => {
         if (selectedIdx === q.correctIndex) {
             const timeBonus = Math.round((timeLeft / config.timer) * 50);
             const streakMultiplier = config.streaks ? Math.min(myStreak + 1, 5) : 1;
-            const points = Math.round((100 + timeBonus) * (1 + (streakMultiplier - 1) * 0.2));
+            let points = Math.round((100 + timeBonus) * (1 + (streakMultiplier - 1) * 0.2));
+            if (pendingPowerup === 'double') {
+                points *= 2;
+                pendingPowerup = null;
+            }
             myScore += points;
             myStreak++;
             showFeedback(true, points);
@@ -3153,9 +3210,14 @@ const QuizGame = (() => {
         } else {
             const selectedBtn = document.querySelector(`.qg-answer-btn[data-index="${selectedIdx}"]`);
             if (selectedBtn) selectedBtn.classList.add('wrong');
-            myStreak = 0;
-            showFeedback(false, 0);
-            playPlayerAnswerSfx('incorrect');
+            if (pendingPowerup === 'shield') {
+                pendingPowerup = null;
+                showFeedback(false, 0, { shield: true });
+            } else {
+                myStreak = 0;
+                showFeedback(false, 0);
+                playPlayerAnswerSfx('incorrect');
+            }
         }
 
         $('sv-score').textContent = myScore;
@@ -3203,17 +3265,29 @@ const QuizGame = (() => {
                 // Correct!
                 const timeBonus = Math.round((timeLeft / config.timer) * 50);
                 const streakMultiplier = config.streaks ? Math.min(myStreak + 1, 5) : 1;
-                const points = Math.round((100 + timeBonus) * (1 + (streakMultiplier - 1) * 0.2));
+                let points = Math.round((100 + timeBonus) * (1 + (streakMultiplier - 1) * 0.2));
+                if (pendingPowerup === 'double') {
+                    points *= 2;
+                    pendingPowerup = null;
+                }
                 myScore += points;
                 myStreak++;
                 showFeedback(true, points);
                 playPlayerAnswerSfx('correct');
             } else {
                 selectedBtn.classList.add('wrong');
-                myStreak = 0;
-                showFeedback(false, 0);
-                playPlayerAnswerSfx('incorrect');
+                if (pendingPowerup === 'shield') {
+                    pendingPowerup = null;
+                    showFeedback(false, 0, { shield: true });
+                } else {
+                    myStreak = 0;
+                    showFeedback(false, 0);
+                    playPlayerAnswerSfx('incorrect');
+                }
             }
+        } else if (pendingPowerup === 'shield') {
+            pendingPowerup = null;
+            showFeedback(false, 0, { shield: true });
         } else {
             myStreak = 0;
             showFeedback(false, 0);
@@ -3281,18 +3355,26 @@ const QuizGame = (() => {
         if (overlay) overlay.classList.remove('active');
     }
 
-    function showFeedback(correct, points) {
+    function showFeedback(correct, points, options = {}) {
+        stopQuestionTrack();
         const overlay = $('overlay-feedback');
         const icon = $('feedback-icon');
         const text = $('feedback-text');
         const pts = $('feedback-points');
 
-        overlay.className = 'qg-overlay qg-feedback active ' + (correct ? 'correct' : 'incorrect');
-        icon.innerHTML = correct
-            ? '<i class="fa-solid fa-check"></i>'
-            : '<i class="fa-solid fa-xmark"></i>';
-        text.textContent = correct ? 'Correct!' : 'Wrong!';
-        pts.textContent = correct ? `+${points} points` : '';
+        if (options.shield) {
+            overlay.className = 'qg-overlay qg-feedback active shield';
+            icon.innerHTML = '<i class="fa-solid fa-shield-halved"></i>';
+            text.textContent = 'Shield protected you!';
+            pts.textContent = '';
+        } else {
+            overlay.className = 'qg-overlay qg-feedback active ' + (correct ? 'correct' : 'incorrect');
+            icon.innerHTML = correct
+                ? '<i class="fa-solid fa-check"></i>'
+                : '<i class="fa-solid fa-xmark"></i>';
+            text.textContent = correct ? 'Correct!' : 'Wrong!';
+            pts.textContent = correct ? `+${points} points` : '';
+        }
 
         // Re-trigger animations
         icon.style.animation = 'none';
@@ -3307,6 +3389,8 @@ const QuizGame = (() => {
     // ===== END GAME =====
     function endGame() {
         clearInterval(timerInterval);
+        isBonusActive = false;
+        stopBonusShuffleTrack();
         if (!FirebaseService.isDemo()) {
             FirebaseService.updateSessionField(gameCode, 'status', 'finished');
         }
@@ -3451,6 +3535,7 @@ const QuizGame = (() => {
 
     function showLiveStandings() {
         clearInterval(timerInterval);
+        stopQuestionTrack();
         hideWaitingOverlay();
         hideShortcutPanels();
         onLiveStandings = true;
@@ -3471,6 +3556,7 @@ const QuizGame = (() => {
         }
 
         showScreen('screen-live-standings');
+        syncStudentMusicChrome();
         renderLiveStandings(players);
 
         if (!FirebaseService.isDemo()) {
@@ -3486,8 +3572,13 @@ const QuizGame = (() => {
 
     function showResults() {
         onLiveStandings = false;
+        isBonusActive = false;
+        stopBonusShuffleTrack();
+        stopQuestionTrack();
+        $('sv-bonus-container')?.classList.add('qg-hidden');
         hideWaitingOverlay();
         showScreen('screen-results');
+        syncStudentMusicChrome();
 
         // Gather final scores
         const finalPlayers = role === 'host' ? players : {};
@@ -3601,7 +3692,7 @@ const QuizGame = (() => {
     // ===== BONUS STAGE LOGIC =====
     let isBonusActive = false;
     let skipBonusCheck = false;
-    let pendingPowerup = null; // Stores '5050' or 'time' for the NEXT question
+    let pendingPowerup = null; // Stores '5050', 'time', 'shield', or 'double'
 
     function startBonusStage(context) {
         isBonusActive = true;
@@ -3630,6 +3721,7 @@ const QuizGame = (() => {
         }
 
         // Student View Logic
+        stopQuestionTrack();
         $('sv-question').classList.add('qg-hidden');
         $('sv-answers').classList.add('qg-hidden');
         $('sv-timer-container').classList.add('qg-hidden');
@@ -3646,18 +3738,40 @@ const QuizGame = (() => {
 
     function generateBonusRewards() {
         const pool = [
-            { type: 'points', val: 100, text: '+100 Pts', icon: 'fa-coins', class: 'positive' },
-            { type: 'points', val: 200, text: '+200 Pts', icon: 'fa-coins', class: 'positive' },
-            { type: 'points', val: 500, text: '+500 Pts', icon: 'fa-gem', class: 'positive' },
-            { type: 'points', val: -100, text: '-100 Pts', icon: 'fa-skull', class: 'negative' },
-            { type: 'points', val: -200, text: '-200 Pts', icon: 'fa-skull-crossbones', class: 'negative' },
-            { type: 'powerup', val: '5050', text: '50:50', icon: 'fa-arrows-down-to-line', class: 'powerup' },
-            { type: 'powerup', val: 'time', text: '+Extra Time', icon: 'fa-stopwatch-20', class: 'powerup' },
-            { type: 'points', val: 0, text: 'Blank', icon: 'fa-ghost', class: 'powerup' }
+            { type: 'points', val: 100, text: '+100 Pts', icon: 'fa-coins', class: 'positive', weight: 3 },
+            { type: 'points', val: 200, text: '+200 Pts', icon: 'fa-coins', class: 'positive', weight: 2 },
+            { type: 'points', val: 500, text: '+500 Pts', icon: 'fa-gem', class: 'positive', weight: 2 },
+            { type: 'points', val: -100, text: '-100 Pts', icon: 'fa-skull', class: 'negative', weight: 3 },
+            { type: 'points', val: -200, text: '-200 Pts', icon: 'fa-skull-crossbones', class: 'negative', weight: 2 },
+            { type: 'powerup', val: '5050', text: '50:50', icon: 'fa-arrows-down-to-line', class: 'powerup', weight: 3 },
+            { type: 'powerup', val: 'time', text: '+Extra Time', icon: 'fa-stopwatch-20', class: 'powerup', weight: 2 },
+            { type: 'points', val: 0, text: 'Blank', icon: 'fa-ghost', class: 'powerup', weight: 3 },
+            { type: 'powerup', val: 'shield', text: 'Shield', icon: 'fa-shield-halved', class: 'powerup', weight: 2 },
+            { type: 'powerup', val: 'double', text: '2x Points', icon: 'fa-clone', class: 'powerup', weight: 2 },
+            { type: 'points', val: 1000, text: '+1000 Pts', icon: 'fa-trophy', class: 'positive', weight: 1 }
         ];
 
-        const shuffled = [...pool].sort(() => Math.random() - 0.5);
-        return shuffled.slice(0, 6);
+        return weightedSampleWithoutReplacement(pool, 6);
+    }
+
+    function weightedSampleWithoutReplacement(pool, count) {
+        const remaining = pool.slice();
+        const picked = [];
+        const n = Math.min(count, remaining.length);
+        for (let i = 0; i < n; i++) {
+            const totalWeight = remaining.reduce((sum, item) => sum + (item.weight || 1), 0);
+            let roll = Math.random() * totalWeight;
+            let idx = remaining.length - 1;
+            for (let j = 0; j < remaining.length; j++) {
+                roll -= remaining[j].weight || 1;
+                if (roll <= 0) {
+                    idx = j;
+                    break;
+                }
+            }
+            picked.push(remaining.splice(idx, 1)[0]);
+        }
+        return picked;
     }
 
     function renderBonusCards(rewards, context) {
@@ -3779,7 +3893,7 @@ const QuizGame = (() => {
                 FirebaseService.updatePlayerScore(gameCode, FirebaseService.getUid(), myScore, myStreak);
             }
         } else if (reward.type === 'powerup') {
-            pendingPowerup = reward.val; // '5050' or 'time'
+            pendingPowerup = reward.val; // '5050', 'time', 'shield', or 'double'
             console.log('[QuizGame] Powerup earned and stored:', pendingPowerup);
         }
 
@@ -4004,6 +4118,7 @@ const QuizGame = (() => {
         onLiveStandings = false;
         liveStandingsListenerAdded = false;
         hideWaitingOverlay();
+        stopBonusShuffleTrack();
         stopQuestionTrack();
         lastQuestionTrackIndex = null;
         lastPlayerSync = { currentQuestion: -2, questionStartedAt: 0, bonusActive: false, status: '' };
@@ -4011,6 +4126,7 @@ const QuizGame = (() => {
         $('teacher-view').classList.remove('active');
         $('student-view').classList.remove('active');
         $('teacher-view')?.classList.remove('qg-teacher-view--student-paced');
+        $('btn-sv-music')?.classList.add('qg-hidden');
         hideSessionBadge();
         lobbyPlayerCardMap.forEach((el) => el.remove());
         lobbyPlayerCardMap.clear();
