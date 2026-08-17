@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Pac-Man — Vanilla JS</title>
+  <style>
+    :root{
+      --bg:#080b17; --panel:#0d1224; --grid:#131a33;
+      --text:#e6f2ff; --muted:#93a4c7; --accent:#22d3ee;
+      --maze:#1e3a8a; --dot:#f8fafc; --power:#fde047;
+      --pac:#facc15; --ghost:#f43f5e; --ghostFright:#60a5fa; --eyes:#94a3b8;
+
+      /* ghost theme colors */
+      --blinky:#ef4444; /* red */
+      --pinky:#f472b6;  /* pink */
+      --inky:#22d3ee;   /* cyan */
+      --clyde:#f59e0b;  /* orange */
+    }
+    *{box-sizing:border-box}
+    html,body{
+      height:100%;margin:0;
+      color:var(--text);font:16px/1.45 system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif
+    }
+    /* overall page background with a gentle dark overlay */
+    body{
+      background:
+        linear-gradient(rgba(0,0,0,.55), rgba(0,0,0,.55)),
+        url("./pac.jpg") center/cover no-repeat fixed;
+    }
+    .wrap{min-height:100%;display:grid;place-items:center;padding:18px}
+    .card{
+      width:min(1100px,96vw);
+      background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.04));
+      border:1px solid rgba(255,255,255,.1);
+      border-radius:20px; box-shadow:0 10px 30px rgba(0,0,0,.45)
+    }
+    header{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.1)}
+    header h1{margin:0;font-size:18px;letter-spacing:.3px}
+    .hud{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:14px}
+    .badge{padding:.25rem .6rem;border:1px solid rgba(255,255,255,.15);border-radius:999px;background:rgba(34,211,238,.10)}
+    .board{display:grid;grid-template-columns:auto 280px;gap:16px;padding:16px}
+    @media (max-width:980px){.board{grid-template-columns:1fr}}
+    canvas{
+      /* internal grid is 672x504; scaled to initial 720x540 on screen */
+      width:720px;height:540px;
+      border-radius:14px;background:var(--panel);
+      border:1px solid rgba(255,255,255,.1);
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)
+    }
+    aside{display:flex;flex-direction:column;gap:12px}
+    aside .panel{padding:12px 14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px}
+    .legend{font-size:13px;color:var(--muted)}
+    kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:.9em;padding:.15rem .4rem;border-radius:6px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.12)}
+    .controls{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:260px}
+    .btn{appearance:none;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.10);border-radius:12px;padding:10px 8px;color:inherit;cursor:pointer}
+    .btn:active{transform:translateY(1px)}
+    .controls .btn:nth-child(2){grid-column:2}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <header>
+        <h1>5.Pac-Man — JavaScript</h1>
+        <div class="hud">
+          <span class="badge">Score <strong id="score">0</strong></span>
+          <span class="badge">High <strong id="high">0</strong></span>
+          <span class="badge">Lives <strong id="lives">3</strong></span>
+          <span class="badge">Level <strong id="level">1</strong></span>
+        </div>
+      </header>
+      <div class="board">
+        <canvas id="game" width="672" height="504" aria-label="Pac-Man board" role="img"></canvas>
+
+        <aside>
+          <div class="panel">
+            <div style="font-weight:600;margin-bottom:.35rem">How to Play</div>
+            <div class="legend">
+              <div>Move: <kbd>←</kbd><kbd>→</kbd><kbd>↑</kbd><kbd>↓</kbd> or <kbd>WASD</kbd></div>
+              <div>Pause/Restart: <kbd>P</kbd>/<kbd>R</kbd></div>
+              <div>Eat all dots. Power pellets frighten ghosts.</div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div style="font-weight:600;margin-bottom:.35rem">Touch Controls</div>
+            <div class="controls">
+              <button class="btn" data-touch="up">▲</button>
+              <button class="btn" data-touch="left">◀</button>
+              <button class="btn" data-touch="down">▼</button>
+              <button class="btn" data-touch="right">▶</button>
+            </div>
+          </div>
+
+          <div class="panel legend">
+            Four ghosts with classic behaviors: Blinky (chase), Pinky (ahead), Inky (vector with Blinky), Clyde (run away when close). Frightened = blue & edible.
+          </div>
+
+          <div class="panel">
+            <button class="btn" id="pauseBtn">⏸ Pause</button>
+            <button class="btn" id="resetBtn">🔄 Restart</button>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+
+  <script src="./script.js" defer></script>
+</body>
+</html>

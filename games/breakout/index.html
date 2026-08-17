@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Breakout — Vanilla JS</title>
+  <script>if (/\bembed=1\b/.test(location.search)) document.documentElement.classList.add('qg-embed');</script>
+  <style>
+    :root{
+      /* Light, airy theme for variety */
+      --bg:#f6f7fb; --panel:#ffffff; --grid:#e6e8f0; --text:#0f172a; --muted:#475569; --accent:#2563eb;
+      --paddle:#111827; --ball:#ef4444;
+      --b1:#60a5fa; --b2:#34d399; --b3:#fbbf24; --b4:#f472b6; --b5:#a78bfa; --b6:#22d3ee;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font:16px/1.45 system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+    html.qg-embed,html.qg-embed body{background:transparent;height:auto;overflow:auto}
+    html.qg-embed .wrap{min-height:0;padding:0;display:block}
+    html.qg-embed .card{width:100%;box-shadow:none}
+    html.qg-embed canvas{width:min(720px,100%);height:auto;aspect-ratio:720/540}
+    .wrap{min-height:100%;display:grid;place-items:center;padding:18px}
+    .card{
+      width:min(1100px,96vw);
+      background:linear-gradient(180deg,rgba(255,255,255,.9),rgba(255,255,255,.85));
+      border:1px solid rgba(15,23,42,.08);
+      border-radius:20px; box-shadow:0 10px 30px rgba(2,6,23,.12)
+    }
+    header{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid rgba(15,23,42,.08)}
+    header h1{margin:0;font-size:18px;letter-spacing:.3px}
+    .hud{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:14px}
+    .badge{padding:.25rem .6rem;border:1px solid rgba(15,23,42,.12);border-radius:999px;background:rgba(37,99,235,.08)}
+    .board{display:grid;grid-template-columns:auto 280px;gap:16px;padding:16px}
+    @media (max-width:980px){.board{grid-template-columns:1fr}}
+    canvas{
+      width:720px;height:540px; /* initial screen size */
+      border-radius:14px;background:var(--panel);
+      border:1px solid rgba(15,23,42,.10);
+      box-shadow:inset 0 0 0 1px rgba(15,23,42,.06)
+    }
+    aside{display:flex;flex-direction:column;gap:12px}
+    aside .panel{padding:12px 14px;background:rgba(255,255,255,.9);border:1px solid rgba(15,23,42,.10);border-radius:12px}
+    .legend{font-size:13px;color:var(--muted)}
+    kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:.9em;padding:.15rem .4rem;border-radius:6px;border:1px solid rgba(15,23,42,.2);background:rgba(2,6,23,.06);color:#0f172a}
+    .controls{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:260px}
+    .btn{appearance:none;border:1px solid rgba(15,23,42,.15);background:rgba(2,6,23,.06);border-radius:12px;padding:10px 8px;color:inherit;cursor:pointer}
+    .btn:active{transform:translateY(1px)}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <header>
+        <h1>6.Breakout — JavaScript</h1>
+        <div class="hud">
+          <span class="badge">Score <strong id="score">0</strong></span>
+          <span class="badge">High <strong id="high">0</strong></span>
+          <span class="badge">Lives <strong id="lives">3</strong></span>
+          <span class="badge">Level <strong id="level">1</strong></span>
+        </div>
+      </header>
+      <div class="board">
+        <canvas id="game" width="720" height="540" aria-label="Breakout board" role="img"></canvas>
+
+        <aside>
+          <div class="panel">
+            <div style="font-weight:600;margin-bottom:.35rem">How to Play</div>
+            <div class="legend">
+              <div>Move: <kbd>←</kbd>/<kbd>→</kbd> or <kbd>A</kbd>/<kbd>D</kbd></div>
+              <div>Launch: <kbd>Space</kbd></div>
+              <div>Pause/Restart: <kbd>P</kbd>/<kbd>R</kbd></div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div style="font-weight:600;margin-bottom:.35rem">Touch Controls</div>
+            <div class="controls">
+              <button class="btn" data-touch="left">◀</button>
+              <button class="btn" data-touch="launch">●</button>
+              <button class="btn" data-touch="right">▶</button>
+            </div>
+          </div>
+
+          <div class="panel legend">
+            Clear all bricks to advance. Hits near paddle edges reflect at sharper angles.  
+            Ball gets a little faster as you break bricks.
+          </div>
+
+          <div class="panel">
+            <button class="btn" id="pauseBtn">⏸ Pause</button>
+            <button class="btn" id="resetBtn">🔄 Restart</button>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+
+  <script src="./script.js" defer></script>
+</body>
+</html>

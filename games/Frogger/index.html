@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Frogger — Vanilla JS</title>
+  <style>
+    :root{
+      --bg:#0a1114; --panel:#0e171a; --grid:#102228;
+      --text:#e7f6ff; --muted:#8faebd; --accent:#22d3ee;
+      --grass:#0e2e1e; --river:#0a2740; --road:#1f1f25;
+      --frog:#84cc16; --car:#f59e0b; --truck:#ef4444; --log:#9ca3af;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;background:radial-gradient(1400px 900px at 50% -20%, #12323b 0%, var(--bg) 60%);color:var(--text);font:16px/1.45 system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+    .wrap{min-height:100%;display:grid;place-items:center;padding:18px}
+    .card{
+      width:min(1100px,96vw);
+      background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.04));
+      border:1px solid rgba(255,255,255,.1);
+      border-radius:20px; box-shadow:0 10px 30px rgba(0,0,0,.45)
+    }
+    header{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.1)}
+    header h1{margin:0;font-size:18px;letter-spacing:.3px}
+    .hud{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:14px}
+    .badge{padding:.25rem .6rem;border:1px solid rgba(255,255,255,.15);border-radius:999px;background:rgba(34,211,238,.10)}
+    .board{display:grid;grid-template-columns:auto 280px;gap:16px;padding:16px}
+    @media (max-width:980px){.board{grid-template-columns:1fr}}
+    canvas{
+      width:720px;height:540px; /* initial screen size */
+      border-radius:14px;background:var(--panel);
+      border:1px solid rgba(255,255,255,.1);
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)
+    }
+    aside{display:flex;flex-direction:column;gap:12px}
+    aside .panel{padding:12px 14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px}
+    .legend{font-size:13px;color:var(--muted)}
+    kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:.9em;padding:.15rem .4rem;border-radius:6px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.12)}
+    .controls{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:260px}
+    .btn{appearance:none;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.10);border-radius:12px;padding:10px 8px;color:inherit;cursor:pointer}
+    .btn:active{transform:translateY(1px)}
+    .controls .btn:nth-child(2){grid-column:2}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <header>
+        <h1>10.Frogger — JavaScript</h1>
+        <div class="hud">
+          <span class="badge">Score <strong id="score">0</strong></span>
+          <span class="badge">High <strong id="high">0</strong></span>
+          <span class="badge">Lives <strong id="lives">3</strong></span>
+          <span class="badge">Level <strong id="level">1</strong></span>
+        </div>
+      </header>
+
+      <div class="board">
+        <canvas id="game" width="720" height="540" aria-label="Frogger board" role="img"></canvas>
+
+        <aside>
+          <div class="panel">
+            <div style="font-weight:600;margin-bottom:.35rem">How to Play</div>
+            <div class="legend">
+              <div>Hop: <kbd>←</kbd><kbd>→</kbd><kbd>↑</kbd><kbd>↓</kbd> or <kbd>WASD</kbd> (discrete tiles)</div>
+              <div>Pause/Restart: <kbd>P</kbd>/<kbd>R</kbd></div>
+              <div>Reach the 5 home bays at the top. Cars = 💀, Water without a log = 💀. Logs carry you.</div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div style="font-weight:600;margin-bottom:.35rem">Touch Controls</div>
+            <div class="controls">
+              <button class="btn" data-touch="up">▲</button>
+              <button class="btn" data-touch="left">◀</button>
+              <button class="btn" data-touch="down">▼</button>
+              <button class="btn" data-touch="right">▶</button>
+            </div>
+          </div>
+
+          <div class="panel legend">
+            Alternating lanes for cars/logs; speed ramps each level. Frog has a soft glow so it pops.
+          </div>
+
+          <div class="panel">
+            <button class="btn" id="pauseBtn">⏸ Pause</button>
+            <button class="btn" id="resetBtn">🔄 Restart</button>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+
+  <script src="./script.js" defer></script>
+</body>
+</html>

@@ -2839,106 +2839,148 @@ body.ks-student-view .main-footer {
 }
 
 .keyboard--palette-gold-black {
-    --kb-board-bg: #171717;
-    --kb-key-bg: #292929;
-    --kb-key-alt-bg: #333333;
-    --kb-key-text: #f5f5f5;
-    --kb-mod-bg: #d5a94f;
-    --kb-mod-text: #191919;
-    --kb-accent-bg: #e4bf70;
-    --kb-accent-text: #191919;
-    --palette-glow-color: #e4bf70;
-    --palette-highlight-bg: #ffdf7a;
-    --palette-highlight-text: #191919;
+    --kb-board-bg: #0B0B0C;
+    --kb-key-bg: #1A1B1F;
+    --kb-key-alt-bg: #3B3C41;
+    --kb-key-text: #F5E6C8;
+    --kb-mod-bg: #D4AF37;
+    --kb-mod-text: #0B0B0C;
+    --kb-accent-bg: #D4AF37;
+    --kb-accent-text: #0B0B0C;
+    --palette-glow-color: #D4AF37;
+    --palette-highlight-bg: #F5E6C8;
+    --palette-highlight-text: #0B0B0C;
 }
 
 .keyboard--palette-retro-arcade {
-    --kb-board-bg: #24201e;
-    --kb-key-bg: #f4ecd8;
-    --kb-key-alt-bg: #e7ddc4;
-    --kb-key-text: #26201d;
-    --kb-mod-bg: #8d2e2b;
+    --kb-board-bg: #221B17;
+    --kb-key-bg: #EBE0CA;
+    --kb-key-alt-bg: #ddd2b8;
+    --kb-key-text: #221B17;
+    --kb-mod-bg: #8F2F2B;
     --kb-mod-text: #ffffff;
-    --kb-accent-bg: #171717;
+    --kb-accent-bg: #1A1816;
     --kb-accent-text: #ffffff;
-    --palette-glow-color: #8d2e2b;
-    --palette-highlight-bg: #ff6b4a;
-    --palette-highlight-text: #26140f;
+    --palette-glow-color: #8F2F2B;
+    --palette-highlight-bg: #8F2F2B;
+    --palette-highlight-text: #EBE0CA;
 }
 
 .keyboard--palette-kawaii-pastel {
-    --kb-board-bg: #f5e8ee;
-    --kb-key-bg: #fff1a8;
-    --kb-key-alt-bg: #ffe89a;
-    --kb-key-text: #5f4c54;
-    --kb-mod-bg: #f2a9c0;
-    --kb-mod-text: #5a3544;
-    --kb-accent-bg: #87d8cb;
-    --kb-accent-text: #244d49;
-    --palette-glow-color: #f2a9c0;
-    --palette-highlight-bg: #4a2a52;
-    --palette-highlight-text: #fff9c4;
+    --kb-board-bg: #ffffb0;
+    --kb-key-bg: #ffabde;
+    --kb-key-alt-bg: #dbafff;
+    --kb-key-text: #3a2450;
+    --kb-mod-bg: #afd0ff;
+    --kb-mod-text: #3a2450;
+    --kb-accent-bg: #aafff8;
+    --kb-accent-text: #3a2450;
+    --palette-glow-color: #dbafff;
+    --palette-highlight-bg: #3a2450;
+    --palette-highlight-text: #ffffb0;
 }
 
 .keyboard--palette-mint-pop {
-    --kb-board-bg: #d9f0e8;
-    --kb-key-bg: #a8dfc8;
-    --kb-key-alt-bg: #afdbea;
-    --kb-key-text: #21433d;
-    --kb-mod-bg: #fff4d5;
-    --kb-mod-text: #584d31;
-    --kb-accent-bg: #f4ead1;
-    --kb-accent-text: #51462e;
-    --palette-glow-color: #3aa893;
-    --palette-highlight-bg: #1f6f65;
-    --palette-highlight-text: #ffffff;
+    --kb-board-bg: #F8FAFC;
+    --kb-key-bg: #A7F3D0;
+    --kb-key-alt-bg: #99F6E4;
+    --kb-key-text: #0F766E;
+    --kb-mod-bg: #5EEAD4;
+    --kb-mod-text: #0F766E;
+    --kb-accent-bg: #0F766E;
+    --kb-accent-text: #F8FAFC;
+    --palette-glow-color: #0F766E;
+    --palette-highlight-bg: #0F766E;
+    --palette-highlight-text: #F8FAFC;
 }
 
 .keyboard--palette-peach-cream {
-    --kb-board-bg: #f3d5c7;
-    --kb-key-bg: #ef9d7f;
-    --kb-key-alt-bg: #ffe5cf;
-    --kb-key-text: #5c3329;
-    --kb-mod-bg: #fff6e9;
-    --kb-mod-text: #684c3d;
-    --kb-accent-bg: #ffc3a5;
-    --kb-accent-text: #65372d;
-    --palette-glow-color: #e8844f;
-    --palette-highlight-bg: #7a3b12;
-    --palette-highlight-text: #ffffff;
+    --kb-board-bg: #fff0e1;
+    --kb-key-bg: #ffbab3;
+    --kb-key-alt-bg: #fe90a0;
+    --kb-key-text: #5c2210;
+    --kb-mod-bg: #afdcd4;
+    --kb-mod-text: #1d3b38;
+    --kb-accent-bg: #ff6632;
+    --kb-accent-text: #3b1a0a;
+    --palette-glow-color: #ff6632;
+    --palette-highlight-bg: #ff6632;
+    --palette-highlight-text: #fff0e1;
 }
 
 .keyboard--palette-pink-pop {
-    --kb-board-bg: #f5d9e4;
-    --kb-key-bg: #ffffff;
-    --kb-key-alt-bg: #f6b3ca;
+    --kb-board-bg: #FFE1E9;
+    --kb-key-bg: #FFC2D1;
+    --kb-key-alt-bg: #FFB3C6;
     --kb-key-text: #6c2944;
-    --kb-mod-bg: #e8699a;
-    --kb-mod-text: #ffffff;
-    --kb-accent-bg: #c93f78;
-    --kb-accent-text: #ffffff;
-    --palette-glow-color: #e8699a;
-    --palette-highlight-bg: #7a1f47;
-    --palette-highlight-text: #ffffff;
+    --kb-mod-bg: #FF8FAB;
+    --kb-mod-text: #6c2944;
+    --kb-accent-bg: #FB6F92;
+    --kb-accent-text: #3a1528;
+    --palette-glow-color: #FB6F92;
+    --palette-highlight-bg: #FB6F92;
+    --palette-highlight-text: #FFE1E9;
 }
 
 .keyboard--palette-frost-white {
-    --kb-board-bg: #e8e8ec;
-    --kb-key-bg: #f5f5f5;
-    --kb-key-alt-bg: #ededed;
-    --kb-key-text: #5f5f5f;
-    --kb-mod-bg: #dcdcdc;
-    --kb-mod-text: #4a4a4a;
-    --kb-accent-bg: #cfcfcf;
-    --kb-accent-text: #444444;
-    --palette-glow-color: #5b8fd9;
-    --palette-highlight-bg: #3d4f6f;
-    --palette-highlight-text: #ffffff;
+    --kb-board-bg: #F8F8F8;
+    --kb-key-bg: #E2E2E2;
+    --kb-key-alt-bg: #BDBDBD;
+    --kb-key-text: #3a3a3a;
+    --kb-mod-bg: #979797;
+    --kb-mod-text: #1a1a1a;
+    --kb-accent-bg: #6A6A6A;
+    --kb-accent-text: #F8F8F8;
+    --palette-glow-color: #6A6A6A;
+    --palette-highlight-bg: #6A6A6A;
+    --palette-highlight-text: #F8F8F8;
 }
 
 .keyboard--palette-frost-white .ks-key {
     border: 1px solid #c8c8c8;
     box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.05), 0 1px 0 rgba(255, 255, 255, 0.85);
+}
+
+.keyboard--palette-lego {
+    --kb-board-bg: #FFD700;
+    --kb-key-bg: #FFFFFF;
+    --kb-key-alt-bg: #FFE566;
+    --kb-key-text: #000000;
+    --kb-mod-bg: #DA291C;
+    --kb-mod-text: #FFFFFF;
+    --kb-accent-bg: #006CB7;
+    --kb-accent-text: #FFFFFF;
+    --palette-glow-color: #006CB7;
+    --palette-highlight-bg: #006CB7;
+    --palette-highlight-text: #FFFFFF;
+}
+
+.keyboard--palette-neon {
+    --kb-board-bg: #111111;
+    --kb-key-bg: #1a1a1a;
+    --kb-key-alt-bg: #222222;
+    --kb-key-text: #00FFD5;
+    --kb-mod-bg: #B026FF;
+    --kb-mod-text: #FFFFFF;
+    --kb-accent-bg: #FF2DAA;
+    --kb-accent-text: #FFFFFF;
+    --palette-glow-color: #00FFD5;
+    --palette-highlight-bg: #FFF200;
+    --palette-highlight-text: #111111;
+}
+
+.keyboard--palette-citrus {
+    --kb-board-bg: #FDD69B;
+    --kb-key-bg: #FDF05D;
+    --kb-key-alt-bg: #FCC92F;
+    --kb-key-text: #608336;
+    --kb-mod-bg: #608336;
+    --kb-mod-text: #FDD69B;
+    --kb-accent-bg: #A74900;
+    --kb-accent-text: #FDD69B;
+    --palette-glow-color: #A74900;
+    --palette-highlight-bg: #A74900;
+    --palette-highlight-text: #FDD69B;
 }
 
 .keyboard--fx-glow .ks-key.active {

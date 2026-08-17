@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pong — Vanilla JS</title>
+  <style>
+    :root{
+      --bg:#0b0f17; --panel:#121826; --grid:#1c2436; --paddle:#93c5fd; --ball:#fbbf24; --text:#e5e7eb; --accent:#60a5fa;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;background:radial-gradient(1200px 800px at 50% -10%,#111827 0%, var(--bg) 60%);color:var(--text);font:16px/1.4 system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+    .wrap{min-height:100%;display:grid;place-items:center;padding:24px}
+    .card{width:min(1400px, 96vw);background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.08);border-radius:20px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+    header{display:flex;justify-content:space-between;align-items:center;padding:16px 18px;border-bottom:1px solid rgba(255,255,255,.08)}
+    header h1{font-size:18px;margin:0;letter-spacing:.3px}
+    .hud{display:flex;gap:12px;align-items:center;font-size:14px;flex-wrap:wrap}
+    .badge{padding:.25rem .6rem;border:1px solid rgba(255,255,255,.15);border-radius:999px;background:rgba(255,255,255,.04)}
+    .board{display:grid;grid-template-columns:1fr 320px;gap:18px;padding:18px}
+    @media (max-width:1100px){.board{grid-template-columns:1fr}}
+    canvas{
+      width:100%; height:auto; aspect-ratio:16/10;
+      border-radius:14px; background:var(--panel);
+      border:1px solid rgba(255,255,255,.07);
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.04)
+    }
+    aside{display:flex;flex-direction:column;gap:12px}
+    aside .panel{padding:12px 14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px}
+    kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:.9em;padding:.15rem .4rem;border-radius:6px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06)}
+    select,button{appearance:none;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);border-radius:10px;padding:8px 10px;color:inherit;cursor:pointer}
+    .controls{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:260px}
+    .btn{border-radius:12px;padding:10px 8px}
+    .cta{display:flex;gap:10px;flex-wrap:wrap}
+    .legend{font-size:13px;opacity:.9}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <header>
+        <h1>1.Pong — JavaScript</h1>
+        <div class="hud">
+          <span class="badge">P1 <strong id="s1">0</strong></span>
+          <span class="badge">P2 <strong id="s2">0</strong></span>
+          <span class="badge">Speed <strong id="spd">1.0x</strong></span>
+          <label class="badge" style="display:flex;align-items:center;gap:6px">AI
+            <select id="difficulty">
+              <option>Easy</option>
+              <option selected>Medium</option>
+              <option>Hard</option>
+            </select>
+          </label>
+          <label class="badge" style="display:flex;align-items:center;gap:6px">
+            Mode
+            <select id="mode">
+              <option value="1p" selected>1 Player vs AI</option>
+              <option value="2p">2 Players (local)</option>
+            </select>
+          </label>
+        </div>
+      </header>
+      <div class="board">
+        <canvas id="game" aria-label="Pong game board" role="img"></canvas>
+        <aside>
+          <div class="panel legend"><strong>How to Play</strong><br>
+            <div>Left paddle (P1): <kbd>W</kbd>/<kbd>S</kbd></div>
+            <div>Right paddle (P2 in 2P mode): <kbd>↑</kbd>/<kbd>↓</kbd></div>
+            <div>Pause: <kbd>P</kbd> — Restart: <kbd>R</kbd></div>
+          </div>
+          <div class="panel legend"><strong>Goal</strong><br>First to 11 points wins. Ball speed increases after each rally. Aim your shots: hitting near paddle edges adds spin and changes angle.</div>
+          <div class="panel">
+            <div style="font-weight:600;margin-bottom:.35rem">Touch Controls (P1)</div>
+            <div class="controls">
+              <span></span>
+              <button class="btn" data-touch="up">▲</button>
+              <span></span>
+              <span></span>
+              <button class="btn" data-touch="down">▼</button>
+              <span></span>
+            </div>
+          </div>
+          <div class="panel cta">
+            <button class="btn" id="pauseBtn">⏸ Pause</button>
+            <button class="btn" id="resetBtn">🔄 Restart</button>
+          </div>
+          <div class="panel legend">Built with a fixed-timestep loop, paddle/ball collision with spin, and an adjustable AI. Minimal WebAudio beeps on hit/score (unlocked after first interaction). Scores reset with <kbd>R</kbd>.</div>
+        </aside>
+      </div>
+    </div>
+  </div>
+
+  <script src="./script.js" defer></script>
+</body>
+</html>

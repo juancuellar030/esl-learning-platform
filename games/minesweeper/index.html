@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Minesweeper — Vanilla JS</title>
+  <style>
+    :root{
+      /* light, simple */
+      --bg:#f6f7fb; --panel:#ffffff; --grid:#e5e7eb; --frame:#d1d5db;
+      --text:#0f172a; --muted:#475569; --accent:#2563eb;
+      --cell:#f9fafb; --cell2:#eef2f7; --reveal:#ffffff; --bomb:#ef4444; --flag:#f97316;
+      --n1:#2563eb; --n2:#16a34a; --n3:#dc2626; --n4:#7c3aed; --n5:#b45309; --n6:#0ea5e9; --n7:#334155; --n8:#9333ea;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;background:linear-gradient(rgba(255,255,255,.65), rgba(255,255,255,.65)),
+      url("./mine.jpg") center/cover no-repeat fixed;color:var(--text);font:16px/1.45 system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+    .wrap{min-height:100%;display:grid;place-items:center;padding:18px}
+    .card{
+      width:min(1100px,96vw);
+      background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(255,255,255,.9));
+      border:1px solid var(--frame);
+      border-radius:20px; box-shadow:0 10px 30px rgba(2,6,23,.12)
+    }
+    header{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--frame)}
+    header h1{margin:0;font-size:18px;letter-spacing:.3px}
+    .hud{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:14px}
+    .badge{padding:.25rem .6rem;border:1px solid var(--frame);border-radius:999px;background:rgba(37,99,235,.08)}
+    .board{display:grid;grid-template-columns:auto 280px;gap:16px;padding:16px}
+    @media (max-width:980px){.board{grid-template-columns:1fr}}
+    canvas{
+      width:720px;height:540px; /* initial screen size */
+      border-radius:14px;background:var(--panel);
+      border:1px solid var(--frame);
+      box-shadow:inset 0 0 0 1px rgba(15,23,42,.06)
+    }
+    aside{display:flex;flex-direction:column;gap:12px}
+    aside .panel{padding:12px 14px;background:rgba(255,255,255,.9);border:1px solid var(--frame);border-radius:12px}
+    .legend{font-size:13px;color:var(--muted)}
+    .controls{display:flex;gap:8px;flex-wrap:wrap}
+    .btn{appearance:none;border:1px solid var(--frame);background:var(--cell2);border-radius:10px;padding:8px 10px;color:inherit;cursor:pointer}
+    .btn:active{transform:translateY(1px)}
+    select{border:1px solid var(--frame);border-radius:8px;padding:6px 8px;background:#fff}
+    .toggle.on{background:#1e293b;color:#fff;border-color:#1e293b}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <header>
+        <h1>7.Minesweeper — JavaScript</h1>
+        <div class="hud">
+          <span class="badge">Mines <strong id="minesLeft">0</strong></span>
+          <span class="badge">Time <strong id="time">0</strong>s</span>
+          <span class="badge">Status <strong id="status">Ready</strong></span>
+        </div>
+      </header>
+
+      <div class="board">
+        <canvas id="game" width="720" height="540" aria-label="Minesweeper board" role="img"></canvas>
+
+        <aside>
+          <div class="panel">
+            <div class="controls">
+              <label>Difficulty:
+                <select id="difficulty">
+                  <option value="easy">Easy (40)</option>
+                  <option value="medium" selected>Medium (80)</option>
+                  <option value="hard">Hard (120)</option>
+                </select>
+              </label>
+              <button class="btn" id="resetBtn">🔄 Reset</button>
+              <button class="btn toggle" id="flagModeBtn">🚩 Flag Mode</button>
+            </div>
+          </div>
+
+          <div class="panel legend">
+            Left click = reveal. Right click = flag.  
+            On touch, toggle <b>Flag Mode</b>. First click is always safe.
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+
+  <script src="./script.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Asteroids — Vanilla JS</title>
+  <style>
+    :root{
+      /* neon space theme */
+      --bg:#070b10; --panel:#0b1017; --grid:#0f1824;
+      --text:#e6f2ff; --muted:#94a3b8; --accent:#38bdf8;
+      --ship:#22d3ee; --flame:#f59e0b; --bullet:#f43f5e;
+      --rock1:#a3e635; --rock2:#f472b6; --rock3:#60a5fa;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;background:radial-gradient(1400px 900px at 50% -20%, #142031 0%, var(--bg) 60%);color:var(--text);font:16px/1.45 system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+    .wrap{min-height:100%;display:grid;place-items:center;padding:18px}
+    .card{
+      width:min(1100px,96vw);
+      background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.04));
+      border:1px solid rgba(255,255,255,.1);
+      border-radius:20px; box-shadow:0 10px 30px rgba(0,0,0,.45)
+    }
+    header{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.1)}
+    header h1{margin:0;font-size:18px;letter-spacing:.3px}
+    .hud{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:14px}
+    .badge{padding:.25rem .6rem;border:1px solid rgba(255,255,255,.15);border-radius:999px;background:rgba(56,189,248,.10)}
+    .board{display:grid;grid-template-columns:auto 280px;gap:16px;padding:16px}
+    @media (max-width:980px){.board{grid-template-columns:1fr}}
+    canvas{
+      width:720px;height:540px; /* initial screen size */
+      border-radius:14px;background:var(--panel);
+      border:1px solid rgba(255,255,255,.1);
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)
+    }
+    aside{display:flex;flex-direction:column;gap:12px}
+    aside .panel{padding:12px 14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px}
+    .legend{font-size:13px;color:var(--muted)}
+    kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:.9em;padding:.15rem .4rem;border-radius:6px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.12)}
+    .controls{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-width:260px}
+    .btn{appearance:none;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.10);border-radius:12px;padding:10px 8px;color:inherit;cursor:pointer}
+    .btn:active{transform:translateY(1px)}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <header>
+        <h1>8.Asteroids — JavaScript</h1>
+        <div class="hud">
+          <span class="badge">Score <strong id="score">0</strong></span>
+          <span class="badge">High <strong id="high">0</strong></span>
+          <span class="badge">Lives <strong id="lives">3</strong></span>
+          <span class="badge">Level <strong id="level">1</strong></span>
+        </div>
+      </header>
+      <div class="board">
+        <canvas id="game" width="720" height="540" aria-label="Asteroids board" role="img"></canvas>
+
+        <aside>
+          <div class="panel">
+            <div style="font-weight:600;margin-bottom:.35rem">How to Play</div>
+            <div class="legend">
+              <div>Rotate: <kbd>←</kbd>/<kbd>→</kbd> or <kbd>A</kbd>/<kbd>D</kbd></div>
+              <div>Thrust: <kbd>↑</kbd> or <kbd>W</kbd></div>
+              <div>Fire: <kbd>Space</kbd></div>
+              <div>Pause/Restart: <kbd>P</kbd>/<kbd>R</kbd></div>
+              <div>Rocks split big → medium → small. Clear all to advance.</div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div style="font-weight:600;margin-bottom:.35rem">Touch Controls</div>
+            <div class="controls">
+              <button class="btn" data-touch="left">◀</button>
+              <button class="btn" data-touch="thrust">▲</button>
+              <button class="btn" data-touch="fire">●</button>
+              <button class="btn" data-touch="right">▶</button>
+            </div>
+          </div>
+
+          <div class="panel legend">
+            Wrap-around space. Short invulnerability after respawn.
+          </div>
+
+          <div class="panel">
+            <button class="btn" id="pauseBtn">⏸ Pause</button>
+            <button class="btn" id="resetBtn">🔄 Restart</button>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+
+  <script src="./script.js" defer></script>
+</body>
+</html>

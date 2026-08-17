@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tetris — Neon Variant</title>
+  <script>if (/\bembed=1\b/.test(location.search)) document.documentElement.classList.add('qg-embed');</script>
+  <style>
+    :root{
+      /* light theme to match the artwork */
+  --panel:#ffffff;            /* canvas card */
+  --frame:#d1d5db;            /* borders */
+  --grid:#e5e7eb;             /* board grid lines */
+  --text:#0f172a;             /* headings/text */
+  --muted:#475569;
+  --accent:#2563eb;           /* buttons/links */
+      /* piece colors (punchier) */
+      --c-i:#06b6d4; --c-j:#2563eb; --c-l:#fb923c; --c-o:#facc15; --c-s:#10b981; --c-t:#e879f9; --c-z:#f43f5e;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;background:#f6f7fb;color:var(--text);font:16px/1.45 system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+    html.qg-embed,html.qg-embed body{background:transparent;height:auto;overflow:auto}
+    html.qg-embed .wrap{min-height:0;padding:0;display:block}
+    html.qg-embed .card{width:100%;max-height:none;box-shadow:none}
+    .wrap{min-height:100%;display:grid;place-items:center;padding:12px}
+    .card{
+      width:min(1040px, 96vw);
+      background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(255,255,255,.92));
+      border:1px solid rgba(15,23,42,.08);
+      border-radius:20px; box-shadow:0 10px 30px rgba(2,6,23,.12);
+      max-height:96vh; overflow:hidden;
+    }
+    header{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid rgba(15,23,42,.08)}
+    header h1{font-size:18px;margin:0;letter-spacing:.3px}
+    .hud{display:flex;gap:10px;align-items:center;font-size:13px;flex-wrap:wrap}
+    .badge{padding:.25rem .6rem;border:1px solid rgba(15,23,42,.12);border-radius:999px;background:rgba(37,99,235,.08)}
+    .board{
+      display:grid;grid-template-columns:auto 260px;gap:14px;padding:14px;
+    }
+    @media (max-width:900px){.board{grid-template-columns:1fr}}
+    /* KEY: keep logical board 300×600, but CSS height clamps to viewport */
+    canvas#board{
+      width:auto;
+      height:clamp(420px, 72vh, 600px);   /* <= prevents vertical overflow on laptops */
+      aspect-ratio: 1 / 2;                /* 300×600 look */
+      border-radius:14px;
+      background:var(--panel);
+      border:1px solid rgba(15,23,42,.10);
+      box-shadow:inset 0 0 0 1px rgba(15,23,42,.06)
+    }
+    aside{display:flex;flex-direction:column;gap:10px;min-width:0;max-height:calc(72vh);overflow:auto}
+    aside .panel{padding:10px 12px;background:rgba(255,255,255,.9);border:1px solid rgba(15,23,42,.10);border-radius:12px}
+    .panel h3{margin:.2rem 0 .4rem;font-size:13px}
+    .kv{display:grid;grid-template-columns:auto 1fr;gap:6px 10px;font-size:13px}
+    .muted{color:var(--muted)}
+    .mini{width:96px;height:96px;border-radius:10px;background:var(--panel);border:1px solid rgba(15,23,42,.10)}
+    kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:.9em;padding:.15rem .4rem;border-radius:6px;border:1px solid rgba(15,23,42,.2);background:rgba(2,6,23,.06);color:#0f172a}
+    .controls{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:260px}
+    .btn{appearance:none;border:1px solid rgba(15,23,42,.15);background:rgba(2,6,23,.06);border-radius:12px;padding:10px 8px;color:inherit;cursor:pointer}
+    .btn:active{transform:translateY(1px)}
+    .cta{display:flex;gap:10px;flex-wrap:wrap}
+    /* Slightly tighter on short screens */
+    @media (max-height: 760px){
+      .mini{width:84px;height:84px}
+      .kv{font-size:12px}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <header>
+        <h1>3.Tetris — JavaScript</h1>
+        <div class="hud">
+          <span class="badge">Score <strong id="score">0</strong></span>
+          <span class="badge">Lines <strong id="lines">0</strong></span>
+          <span class="badge">Level <strong id="level">1</strong></span>
+          <span class="badge">High <strong id="high">0</strong></span>
+        </div>
+      </header>
+
+      <div class="board">
+        <!-- Logical size remains 300×600; CSS scales height to fit -->
+        <canvas id="board" width="300" height="600" aria-label="Tetris board" role="img"></canvas>
+
+        <aside>
+          <div class="panel">
+            <h3>Next</h3>
+            <canvas id="next" class="mini" width="96" height="96"></canvas>
+          </div>
+          <div class="panel">
+            <h3>Hold</h3>
+            <canvas id="hold" class="mini" width="96" height="96"></canvas>
+            <div class="muted" style="font-size:12px;margin-top:.25rem">Press <kbd>C</kbd> to hold</div>
+          </div>
+          <div class="panel">
+            <h3>How to Play</h3>
+            <div class="kv">
+              <div><kbd>←</kbd>/<kbd>→</kbd></div><div>Move</div>
+              <div><kbd>↑</kbd> / <kbd>X</kbd></div><div>Rotate CW</div>
+              <div><kbd>Z</kbd></div><div>Rotate CCW</div>
+              <div><kbd>↓</kbd></div><div>Soft Drop</div>
+              <div><kbd>Space</kbd></div><div>Hard Drop</div>
+              <div><kbd>C</kbd></div><div>Hold</div>
+              <div><kbd>P</kbd> / <kbd>R</kbd></div><div>Pause / Restart</div>
+            </div>
+          </div>
+          <div class="panel">
+            <div style="font-weight:600;margin-bottom:.35rem">Touch Controls</div>
+            <div class="controls">
+              <button class="btn" data-touch="left">◀</button>
+              <button class="btn" data-touch="drop">⤓</button>
+              <button class="btn" data-touch="right">▶</button>
+              <button class="btn" data-touch="rotl">⟲</button>
+              <button class="btn" data-touch="down">▼</button>
+              <button class="btn" data-touch="rotr">⟳</button>
+            </div>
+          </div>
+          <div class="panel cta">
+            <button class="btn" id="pauseBtn">⏸ Pause</button>
+            <button class="btn" id="resetBtn">🔄 Restart</button>
+          </div>
+          <div class="panel muted" style="font-size:13px">
+            7-bag randomizer, soft/hard drop scoring, wall-kicks, ghost, next/hold, levels, and localStorage high score.
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+
+  <!-- Same game logic as before -->
+  <script src="./script.js" defer></script>
+</body>
+</html>

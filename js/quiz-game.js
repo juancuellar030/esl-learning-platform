@@ -127,15 +127,19 @@ const QuizGame = (() => {
     // Avatar library — named animal photos (assets/images/live-quiz-avatars/)
     const AVATAR_PATH = 'assets/images/live-quiz-avatars/';
     const AVATAR_IDS = [
-        'animal_bat', 'animal_bear', 'animal_bee', 'animal_butterfly', 'animal_cat',
+        'animal_bat', 'animal_bear', 'animal_bee', 'animal_butterfly', 'animal_camel', 'animal_cat',
         'animal_chameleon', 'animal_clown_fish', 'animal_cow', 'animal_crocodile', 'animal_dog',
         'animal_dolphin', 'animal_flamingo', 'animal_fox', 'animal_frog', 'animal_gorilla',
         'animal_hamster', 'animal_horse', 'animal_hummingbird', 'animal_jellyfish', 'animal_koala',
-        'animal_lion', 'animal_llama', 'animal_monkey', 'animal_owl', 'animal_panda',
+        'animal_ladybug', 'animal_lion', 'animal_llama', 'animal_monkey', 'animal_owl', 'animal_panda',
         'animal_peacock', 'animal_penguin', 'animal_pig', 'animal_polar_bear', 'animal_rabbit',
         'animal_raccoon', 'animal_reindeer', 'animal_rhino', 'animal_sea_turtle', 'animal_shark',
-        'animal_sheep', 'animal_snake', 'animal_squirrel', 'animal_tiger', 'animal_wolf'
+        'animal_sheep', 'animal_sloth', 'animal_snake', 'animal_squirrel', 'animal_starfish',
+        'animal_tiger', 'animal_toucan', 'animal_wolf'
     ];
+    const AVATAR_EXT = {
+        animal_toucan: 'jpg'
+    };
 
     function resolveAvatarId(avatarId) {
         if (!avatarId) return '';
@@ -150,7 +154,9 @@ const QuizGame = (() => {
 
     function getAvatarSrc(avatarId) {
         const resolved = resolveAvatarId(avatarId);
-        return resolved ? `${AVATAR_PATH}${resolved}.png` : '';
+        if (!resolved) return '';
+        const ext = AVATAR_EXT[resolved] || 'png';
+        return `${AVATAR_PATH}${resolved}.${ext}`;
     }
 
     function getAvatarLabel(avatarId) {
@@ -328,6 +334,7 @@ const QuizGame = (() => {
     let musicEnabled = true;
     let lastQuestionTrackIndex = null;
     let currentQuestionTrackIndex = null;
+    const QUESTION_TRACK_VOLUME = 0.55;
 
     // Google Drive
     let driveService = null;
@@ -1946,15 +1953,15 @@ const QuizGame = (() => {
         musicEnabled = !musicEnabled;
         updateStudentMusicButton();
         if (!musicEnabled) {
-            stopQuestionTrack();
+            pauseQuestionTrack();
             return;
         }
         if (!hasAnswered && !isBonusActive && $('screen-game')?.classList.contains('active')) {
-            playQuestionTrack();
+            restartQuestionTrack();
         }
     }
 
-    function stopQuestionTrack() {
+    function pauseQuestionTrack() {
         for (let i = 1; i <= 4; i++) {
             const el = $('bg-question-' + i);
             if (el) {
@@ -1962,26 +1969,45 @@ const QuizGame = (() => {
                 el.currentTime = 0;
             }
         }
+    }
+
+    function stopQuestionTrack() {
+        pauseQuestionTrack();
         currentQuestionTrackIndex = null;
+    }
+
+    function startQuestionTrackAtIndex(index) {
+        if (!index) return;
+        pauseQuestionTrack();
+        lastQuestionTrackIndex = index;
+        currentQuestionTrackIndex = index;
+        const el = $('bg-question-' + index);
+        if (!el) return;
+        el.loop = true;
+        el.volume = QUESTION_TRACK_VOLUME;
+        el.currentTime = 0;
+        el.play().catch(() => { });
+    }
+
+    function restartQuestionTrack() {
+        if (!isQuestionTrackEnabled()) return;
+        const index = currentQuestionTrackIndex || lastQuestionTrackIndex;
+        if (index) {
+            startQuestionTrackAtIndex(index);
+            return;
+        }
+        playQuestionTrack();
     }
 
     function playQuestionTrack() {
         if (!isQuestionTrackEnabled()) return;
-
-        stopQuestionTrack();
 
         const choices = [];
         for (let i = 1; i <= 4; i++) {
             if (i !== lastQuestionTrackIndex) choices.push(i);
         }
         const pick = choices[Math.floor(Math.random() * choices.length)];
-        lastQuestionTrackIndex = pick;
-        currentQuestionTrackIndex = pick;
-
-        const el = $('bg-question-' + pick);
-        if (!el) return;
-        el.loop = true;
-        el.play().catch(() => { });
+        startQuestionTrackAtIndex(pick);
     }
 
     function playHostSfxOneShot(elementId) {
@@ -4184,7 +4210,7 @@ const QuizGame = (() => {
 
     // ===== QUIZ THEME ENGINE =====
     const THEME_PICKER_ORDER = [
-        'default', 'gold-black', 'retro-arcade', 'kawaii-pastel',
+        'default', 'gold-black', 'lego', 'neon', 'citrus', 'retro-arcade', 'kawaii-pastel',
         'mint-pop', 'peach-cream', 'pink-pop', 'frost-white'
     ];
 
@@ -4194,13 +4220,13 @@ const QuizGame = (() => {
         'default': {
             label: 'Classic',
             palette: ['#3d348b', '#7678ed', '#f7b801', '#9b9eff', '#f0eeff'],
-            '--qg-bg-from': '#3d348b',
-            '--qg-bg-to': '#7678ed',
+            '--qg-bg-color': '#7678ed',
+            '--qg-text': '#ffffff',
             '--qg-accent': '#f7b801',
             '--qg-panel-accent': '#f7b801',
             '--qg-particle': 'rgba(255,255,255,0.08)',
             keyboard: 'keyboard--palette-classic',
-            dark: { '--qg-bg-from': '#1a1530', '--qg-bg-to': '#2c2a5a' },
+            dark: { '--qg-bg-color': '#1a1530', '--qg-bg-from': '#1a1530', '--qg-bg-to': '#2c2a5a', '--qg-text': '#ffffff' },
             roleCards: {
                 host: { face: '#f7b801', depth: '#b88a00', text: '#1a1530', icon: '#1a1530' },
                 join: { face: '#9b9eff', depth: '#5c5fd4', text: '#ffffff', icon: '#ffffff' },
@@ -4212,134 +4238,274 @@ const QuizGame = (() => {
         },
         'gold-black': {
             label: 'Gold Black',
-            palette: ['#171717', '#e4bf70', '#2f2f2f', '#a8741a', '#6b6b6b'],
-            '--qg-bg-from': '#171717',
-            '--qg-bg-to': '#3a2f14',
-            '--qg-accent': '#e4bf70',
-            '--qg-panel-accent': '#e4bf70',
-            '--qg-particle': 'rgba(228,191,112,0.14)',
+            palette: ['#0B0B0C', '#1A1B1F', '#3B3C41', '#D4AF37', '#F5E6C8'],
+            '--qg-bg-color': '#0B0B0C',
+            '--qg-bg-from': '#0B0B0C',
+            '--qg-bg-to': '#1A1B1F',
+            '--qg-text': '#F5E6C8',
+            '--qg-subtitle-': '#3B3C41',
+            '--qg-theme-btn-icon': '#0B0B0C',
+            '--qg-accent': '#D4AF37',
+            '--qg-panel-accent': '#D4AF37',
+            '--qg-particle': 'rgba(212,175,55,0.18)',
             keyboard: 'keyboard--palette-gold-black',
-            dark: { '--qg-bg-from': '#0d0d0d', '--qg-bg-to': '#241d0c' },
+            dark: {
+                '--qg-bg-color': '#0B0B0C',
+                '--qg-bg-from': '#0B0B0C',
+                '--qg-bg-to': '#1A1B1F',
+                '--qg-text': '#F5E6C8',
+                '--qg-particle': 'rgba(245,230,200,0.12)'
+            },
             roleCards: {
-                host: { face: '#e4bf70', depth: '#9a7430', text: '#141414', icon: '#141414' },
-                join: { face: '#6b8fa5', depth: '#4a6d82', text: '#ffffff', icon: '#e8f4fc' },
+                host: { face: '#D4AF37', depth: '#9a7c22', text: '#0B0B0C', icon: '#0B0B0C' },
+                join: { face: '#3B3C41', depth: '#1A1B1F', text: '#F5E6C8', icon: '#D4AF37' },
                 dark: {
-                    host: { face: '#4a3f22', depth: '#2e2814', text: '#f8edd0', icon: '#e4bf70' },
-                    join: { face: '#3a4248', depth: '#242a2e', text: '#f8edd0', icon: '#a8c4d4' }
+                    host: { face: '#D4AF37', depth: '#9a7c22', text: '#0B0B0C', icon: '#0B0B0C' },
+                    join: { face: '#3B3C41', depth: '#1A1B1F', text: '#F5E6C8', icon: '#D4AF37' }
                 }
             }
         },
         'retro-arcade': {
             label: 'Retro Arcade',
-            palette: ['#24201e', '#ff6b4a', '#8d2e2b', '#2f6f6a', '#f4ecd8'],
-            '--qg-bg-from': '#24201e',
-            '--qg-bg-to': '#5c2523',
-            '--qg-accent': '#ff6b4a',
-            '--qg-panel-accent': '#ff6b4a',
-            '--qg-particle': 'rgba(255,107,74,0.16)',
+            light: true,
+            palette: ['#EBE0CA', '#8F2F2B', '#221B17', '#1A1816', '#c4a882'],
+            '--qg-bg-color': '#EBE0CA',
+            '--qg-bg-from': '#221B17',
+            '--qg-bg-to': '#8F2F2B',
+            '--qg-theme-btn-icon': '#EBE0CA',
+            '--qg-text': '#221B17',
+            '--qg-accent': '#8F2F2B',
+            '--qg-panel-accent': '#8F2F2B',
+            '--qg-particle': 'rgba(143,47,43,0.22)',
             keyboard: 'keyboard--palette-retro-arcade',
-            dark: { '--qg-bg-from': '#151211', '--qg-bg-to': '#3a1614' },
+            dark: {
+                '--qg-bg-color': '#221B17',
+                '--qg-bg-from': '#1A1816',
+                '--qg-bg-to': '#8F2F2B',
+                '--qg-text': '#EBE0CA',
+                '--qg-particle': 'rgba(235,224,202,0.16)'
+            },
             roleCards: {
-                host: { face: '#ffe8c8', depth: '#c9b08a', text: '#3a1614', icon: '#3a1614' },
-                join: { face: '#ff6b4a', depth: '#c44f32', text: '#ffffff', icon: '#ffffff' },
+                host: { face: '#8F2F2B', depth: '#5c1c19', text: '#EBE0CA', icon: '#EBE0CA' },
+                join: { face: '#3D3535', depth: '#000000', text: '#EBE0CA', icon: '#EBE0CA' },
                 dark: {
-                    host: { face: '#4a3228', depth: '#2e1e18', text: '#ffe8c8', icon: '#ff8a6e' },
-                    join: { face: '#5a2820', depth: '#381810', text: '#ffffff', icon: '#ffb8a8' }
+                    host: { face: '#8F2F2B', depth: '#5c1c19', text: '#EBE0CA', icon: '#EBE0CA' },
+                    join: { face: '#3a322c', depth: '#221B17', text: '#EBE0CA', icon: '#EBE0CA' }
                 }
             }
         },
         'kawaii-pastel': {
             label: 'Kawaii Pastel',
-            palette: ['#7a4a63', '#f2a9c0', '#87d8cb', '#fff1a8', '#b39ddb'],
-            '--qg-bg-from': '#7a4a63',
-            '--qg-bg-to': '#b06a89',
-            '--qg-accent': '#fff1a8',
-            '--qg-panel-accent': '#fff1a8',
-            '--qg-particle': 'rgba(255,241,168,0.18)',
+            light: true,
+            palette: ['#ffffb0', '#ffabde', '#dbafff', '#afd0ff', '#aafff8'],
+            '--qg-bg-color': '#FFFDCF',
+            '--qg-bg-from': '#dbafff',
+            '--qg-bg-to': '#ffabde',
+            '--qg-text': '#3a2450',
+            '--qg-accent': '#dbafff',
+            '--qg-panel-accent': '#7a4a9e',
+            '--qg-particle': 'rgba(219,175,255,0.32)',
             keyboard: 'keyboard--palette-kawaii-pastel',
-            dark: { '--qg-bg-from': '#3f2432', '--qg-bg-to': '#6b3b52' },
+            dark: {
+                '--qg-bg-color': '#3a2450',
+                '--qg-bg-from': '#3a2450',
+                '--qg-bg-to': '#6b3b7a',
+                '--qg-text': '#ffffb0',
+                '--qg-particle': 'rgba(255,171,222,0.18)'
+            },
             roleCards: {
-                host: { face: '#fff1a8', depth: '#d9c97a', text: '#4a2a3a', icon: '#4a2a3a' },
-                join: { face: '#f2a9c0', depth: '#d4869f', text: '#4a2a3a', icon: '#4a2a3a' },
+                host: { face: '#ffabde', depth: '#d486b8', text: '#3a2450', icon: '#3a2450' },
+                join: { face: '#dbafff', depth: '#b38ad9', text: '#3a2450', icon: '#3a2450' },
                 dark: {
-                    host: { face: '#8a5570', depth: '#5a3548', text: '#fff8d0', icon: '#fff1a8' },
-                    join: { face: '#a06888', depth: '#6a4058', text: '#ffffff', icon: '#f2a9c0' }
+                    host: { face: '#6b3b7a', depth: '#3a2450', text: '#ffffb0', icon: '#ffabde' },
+                    join: { face: '#4a3470', depth: '#2e2247', text: '#ffffff', icon: '#dbafff' }
                 }
             }
         },
         'mint-pop': {
             label: 'Mint Pop',
-            palette: ['#14544c', '#1f6f65', '#a8dfc8', '#afdbea', '#fff4d5'],
-            '--qg-bg-from': '#14544c',
-            '--qg-bg-to': '#2f8d7d',
-            '--qg-accent': '#a8dfc8',
-            '--qg-panel-accent': '#a8dfc8',
-            '--qg-particle': 'rgba(168,223,200,0.18)',
+            light: true,
+            palette: ['#F8FAFC', '#A7F3D0', '#5EEAD4', '#99F6E4', '#0F766E'],
+            '--qg-bg-color': '#D9FFEC',
+            '--qg-bg-from': '#0F766E',
+            '--qg-bg-to': '#5EEAD4',
+            '--qg-text': '#0F766E',
+            '--qg-accent': '#0F766E',
+            '--qg-panel-accent': '#0F766E',
+            '--qg-particle': 'rgba(15,118,110,0.18)',
             keyboard: 'keyboard--palette-mint-pop',
-            dark: { '--qg-bg-from': '#0a2c28', '--qg-bg-to': '#154f47' },
+            dark: {
+                '--qg-bg-color': '#0a4a46',
+                '--qg-bg-from': '#0a4a46',
+                '--qg-bg-to': '#0F766E',
+                '--qg-text': '#F8FAFC',
+                '--qg-particle': 'rgba(94,234,212,0.16)'
+            },
             roleCards: {
-                host: { face: '#a8dfc8', depth: '#6fb89e', text: '#0a2c28', icon: '#0a2c28' },
-                join: { face: '#2f8d7d', depth: '#1f6f65', text: '#ffffff', icon: '#ffffff' },
+                host: { face: '#5EEAB9', depth: '#2FBF94', text: '#0a4a46', icon: '#0a4a46' },
+                join: { face: '#0F766E', depth: '#0a4a46', text: '#F8FAFC', icon: '#F8FAFC' },
                 dark: {
-                    host: { face: '#2a6858', depth: '#1a4840', text: '#eafff8', icon: '#a8dfc8' },
-                    join: { face: '#3a7888', depth: '#205058', text: '#ffffff', icon: '#d6f5e9' }
+                    host: { face: '#5EEAB9', depth: '#0a4a46', text: '#F8FAFC', icon: '#A7F3D0' },
+                    join: { face: '#145e58', depth: '#0a3a38', text: '#ffffff', icon: '#5EEAD4' }
                 }
             }
         },
         'peach-cream': {
             label: 'Peach Cream',
-            palette: ['#7a3b12', '#e8844f', '#ffc3a5', '#fff6e9', '#c46a35'],
-            '--qg-bg-from': '#7a3b12',
-            '--qg-bg-to': '#c46a35',
-            '--qg-accent': '#ffc3a5',
-            '--qg-panel-accent': '#ffc3a5',
-            '--qg-particle': 'rgba(255,195,165,0.18)',
+            light: true,
+            palette: ['#FFEBD1', '#fe90a0', '#afdcd4', '#ffbab3', '#ff6632'],
+            '--qg-bg-color': '#FFEBD1',
+            '--qg-bg-from': '#ff6632',
+            '--qg-bg-to': '#fe90a0',
+            '--qg-text': '#5c2210',
+            '--qg-accent': '#ff6632',
+            '--qg-panel-accent': '#ff6632',
+            '--qg-particle': 'rgba(255,102,50,0.22)',
             keyboard: 'keyboard--palette-peach-cream',
-            dark: { '--qg-bg-from': '#3f1d08', '--qg-bg-to': '#6d3a1a' },
+            dark: {
+                '--qg-bg-color': '#5c2210',
+                '--qg-bg-from': '#3b1a0a',
+                '--qg-bg-to': '#ff6632',
+                '--qg-text': '#fff0e1',
+                '--qg-particle': 'rgba(255,186,179,0.16)'
+            },
             roleCards: {
-                host: { face: '#ffc3a5', depth: '#d99a7a', text: '#3f1d08', icon: '#3f1d08' },
-                join: { face: '#e8844f', depth: '#b86335', text: '#ffffff', icon: '#ffffff' },
+                host: { face: '#FFAA8A', depth: '#E87E56', text: '#3b1a0a', icon: '#3b1a0a' },
+                join: { face: '#FFA3B2', depth: '#DB6979', text: '#5c2210', icon: '#5c2210' },
                 dark: {
-                    host: { face: '#a85830', depth: '#6a3818', text: '#fff0e6', icon: '#ffc3a5' },
-                    join: { face: '#c07850', depth: '#784028', text: '#ffffff', icon: '#ffc3a5' }
+                    host: { face: '#c44a20', depth: '#7a2e12', text: '#fff0e1', icon: '#ffbab3' },
+                    join: { face: '#8a4038', depth: '#5c2210', text: '#fff0e1', icon: '#fe90a0' }
                 }
             }
         },
         'pink-pop': {
             label: 'Pink Pop',
-            palette: ['#7a1f47', '#c93f78', '#f6b3ca', '#ffffff', '#ff9ec4'],
-            '--qg-bg-from': '#7a1f47',
-            '--qg-bg-to': '#c93f78',
-            '--qg-accent': '#f6b3ca',
-            '--qg-panel-accent': '#f6b3ca',
-            '--qg-particle': 'rgba(246,179,202,0.18)',
+            light: true,
+            palette: ['#FFD6E1', '#FFB3C6', '#FFC2D1', '#FF8FAB', '#FB6F92'],
+            '--qg-bg-color': '#FFD6E1',
+            '--qg-bg-from': '#FB6F92',
+            '--qg-bg-to': '#FF8FAB',
+            '--qg-text': '#6c2944',
+            '--qg-accent': '#FB6F92',
+            '--qg-panel-accent': '#FB6F92',
+            '--qg-particle': 'rgba(251,111,146,0.24)',
             keyboard: 'keyboard--palette-pink-pop',
-            dark: { '--qg-bg-from': '#440f27', '--qg-bg-to': '#7d2549' },
+            dark: {
+                '--qg-bg-color': '#6c2944',
+                '--qg-bg-from': '#6c2944',
+                '--qg-bg-to': '#FB6F92',
+                '--qg-text': '#FFE1E9',
+                '--qg-particle': 'rgba(255,177,198,0.18)'
+            },
             roleCards: {
-                host: { face: '#f6b3ca', depth: '#d486a8', text: '#440f27', icon: '#440f27' },
-                join: { face: '#c93f78', depth: '#9a2f5c', text: '#ffffff', icon: '#ffffff' },
+                host: { face: '#FB6F92', depth: '#d44e72', text: '#3a1528', icon: '#3a1528' },
+                join: { face: '#FFB3C6', depth: '#e889a4', text: '#6c2944', icon: '#6c2944' },
                 dark: {
-                    host: { face: '#a03860', depth: '#682040', text: '#fff0f6', icon: '#f6b3ca' },
-                    join: { face: '#b84878', depth: '#802850', text: '#ffffff', icon: '#f6b3ca' }
+                    host: { face: '#a03860', depth: '#6c2944', text: '#FFE1E9', icon: '#FFB3C6' },
+                    join: { face: '#8a3058', depth: '#5a2040', text: '#ffffff', icon: '#FFC2D1' }
                 }
             }
         },
         'frost-white': {
             label: 'Frost White',
-            palette: ['#3d4f6f', '#6c86ad', '#5b8fd9', '#cfcfcf', '#e8eef8'],
-            '--qg-bg-from': '#3d4f6f',
-            '--qg-bg-to': '#6c86ad',
-            '--qg-accent': '#cfe3ff',
-            '--qg-panel-accent': '#cfe3ff',
-            '--qg-particle': 'rgba(255,255,255,0.18)',
+            light: true,
+            palette: ['#F8F8F8', '#E2E2E2', '#BDBDBD', '#979797', '#6A6A6A'],
+            '--qg-bg-color': '#F8F8F8',
+            '--qg-bg-from': '#6A6A6A',
+            '--qg-bg-to': '#BDBDBD',
+            '--qg-text': '#6A6A6A',
+            '--qg-accent': '#6A6A6A',
+            '--qg-panel-accent': '#6A6A6A',
+            '--qg-particle': 'rgba(106,106,106,0.20)',
             keyboard: 'keyboard--palette-frost-white',
-            dark: { '--qg-bg-from': '#1f2836', '--qg-bg-to': '#3a4a63' },
+            dark: {
+                '--qg-bg-color': '#161717',
+                '--qg-bg-from': '#3a3a3a',
+                '--qg-bg-to': '#6A6A6A',
+                '--qg-text': '#F8F8F8',
+                '--qg-particle': 'rgba(226,226,226,0.16)'
+            },
             roleCards: {
-                host: { face: '#e8eef8', depth: '#b8c4d8', text: '#1f2836', icon: '#1f2836' },
-                join: { face: '#8fa8c8', depth: '#6a849f', text: '#ffffff', icon: '#ffffff' },
+                host: { face: '#E2E2E2', depth: '#BDBDBD', text: '#3a3a3a', icon: '#3a3a3a' },
+                join: { face: '#6A6A6A', depth: '#4a4a4a', text: '#F8F8F8', icon: '#F8F8F8' },
                 dark: {
-                    host: { face: '#5a6a82', depth: '#3a4860', text: '#eef4ff', icon: '#cfe3ff' },
-                    join: { face: '#6a7a92', depth: '#485870', text: '#ffffff', icon: '#b8d4ff' }
+                    host: { face: '#6A6A6A', depth: '#4a4a4a', text: '#F8F8F8', icon: '#E2E2E2' },
+                    join: { face: '#4a4a4a', depth: '#2e2e2e', text: '#ffffff', icon: '#BDBDBD' }
+                }
+            }
+        },
+        'lego': {
+            label: 'LEGO',
+            light: true,
+            palette: ['#FFD700', '#DA291C', '#006CB7', '#FFFFFF', '#000000'],
+            '--qg-bg-color': '#FFD700',
+            '--qg-bg-from': '#DA291C',
+            '--qg-bg-to': '#006CB7',
+            '--qg-text': '#000000',
+            '--qg-theme-btn-icon': '#FFFFFF',
+            '--qg-accent': '#DA291C',
+            '--qg-panel-accent': '#DA291C',
+            '--qg-particle': 'rgba(183, 150, 0, 0.22)',
+            keyboard: 'keyboard--palette-lego',
+            dark: {
+                '--qg-bg-color': '#000000',
+                '--qg-bg-from': '#000000',
+                '--qg-bg-to': '#DA291C',
+                '--qg-text': '#FFD700',
+                '--qg-particle': 'rgba(255,215,0,0.16)'
+            },
+            roleCards: {
+                host: { face: '#006CB7', depth: '#004A82', text: '#FFFFFF', icon: '#FFFFFF' },
+                join: { face: '#DA291C', depth: '#9e1c14', text: '#FFFFFF', icon: '#FFFFFF' },
+                dark: {
+                    host: { face: '#006CB7', depth: '#004A82', text: '#FFFFFF', icon: '#FFD700' },
+                    join: { face: '#DA291C', depth: '#9e1c14', text: '#FFFFFF', icon: '#FFD700' }
+                }
+            }
+        },
+        'neon': {
+            label: 'Neon',
+            disableDark: true,
+            palette: ['#111111', '#B026FF', '#FF2DAA', '#00FFD5', '#FFF200'],
+            '--qg-bg-color': '#09090e',
+            '--qg-bg-from': '#09090e',
+            '--qg-bg-to': '#45125e',
+            '--qg-text': '#00FFD5',
+            '--qg-accent': '#B026FF',
+            '--qg-panel-accent': '#B026FF',
+            '--qg-particle': 'rgba(0,255,213,0.22)',
+            keyboard: 'keyboard--palette-neon',
+            roleCards: {
+                host: { face: '#B026FF', depth: '#6e00b8', text: '#FFFFFF', icon: '#FFFFFF' },
+                join: { face: '#FF2DAA', depth: '#b01872', text: '#FFFFFF', icon: '#FFFFFF' }
+            }
+        },
+        'citrus': {
+            label: 'Citrus',
+            light: true,
+            palette: ['#FDD69B', '#FDF05D', '#FCC92F', '#608336', '#A74900'],
+            '--qg-bg-color': '#FDD69B',
+            '--qg-bg-from': '#608336',
+            '--qg-bg-to': '#FCC92F',
+            '--qg-text': '#608336',
+            '--qg-theme-btn-icon': '#FDD69B',
+            '--qg-accent': '#A74900',
+            '--qg-panel-accent': '#A74900',
+            '--qg-particle': 'rgba(96,131,54,0.22)',
+            keyboard: 'keyboard--palette-citrus',
+            dark: {
+                '--qg-bg-color': '#608336',
+                '--qg-bg-from': '#3f5a22',
+                '--qg-bg-to': '#A74900',
+                '--qg-text': '#FDD69B',
+                '--qg-particle': 'rgba(253,240,93,0.16)'
+            },
+            roleCards: {
+                host: { face: '#FCC92F', depth: '#E4A646', text: '#608336', icon: '#608336' },
+                join: { face: '#608336', depth: '#3f5a22', text: '#FDD69B', icon: '#FDD69B' },
+                dark: {
+                    host: { face: '#A74900', depth: '#6e3000', text: '#FDD69B', icon: '#FDF05D' },
+                    join: { face: '#3f5a22', depth: '#2a3c16', text: '#FDD69B', icon: '#FCC92F' }
                 }
             }
         }
@@ -4349,6 +4515,426 @@ const QuizGame = (() => {
     let bgAnimFrame = null;
     let bgParticles = [];
 
+    const BG_PARTICLE_ICONS = {
+        frost: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36" width="256" height="256"><path fill="currentColor" d="M19 27.586V8.415l4.828-4.829s.707-.707 0-1.415c-.707-.707-1.414 0-1.414 0L19 5.586V1s0-1-1-1s-1 1-1 1v4.586l-3.414-3.415s-.707-.707-1.414 0c-.707.708 0 1.415 0 1.415L17 8.415v19.171l-4.828 4.828s-.707.707 0 1.414s1.414 0 1.414 0L17 30.414V35s0 1 1 1s1-1 1-1v-4.586l3.414 3.414s.707.707 1.414 0s0-1.414 0-1.414L19 27.586z"/><path fill="currentColor" d="M34.622 20.866c-.259-.966-1.225-.707-1.225-.707l-6.595 1.767l-16.603-9.586l-1.767-6.595s-.259-.966-1.225-.707C6.24 5.297 6.5 6.263 6.5 6.263l1.25 4.664l-3.972-2.294s-.866-.5-1.366.366c-.5.866.366 1.366.366 1.366l3.971 2.293l-4.664 1.249s-.967.259-.707 1.225c.259.967 1.225.708 1.225.708l6.596-1.767l16.603 9.586l1.767 6.596s.259.966 1.225.707c.966-.26.707-1.225.707-1.225l-1.25-4.664l3.972 2.293s.867.5 1.367-.365c.5-.867-.367-1.367-.367-1.367l-3.971-2.293l4.663-1.249c0-.001.966-.26.707-1.226z"/><path fill="currentColor" d="M33.915 13.907l-4.664-1.25l3.972-2.293s.867-.501.367-1.367c-.501-.867-1.367-.366-1.367-.366l-3.971 2.292l1.249-4.663s.259-.966-.707-1.225c-.966-.259-1.225.707-1.225.707l-1.767 6.595l-16.604 9.589l-6.594-1.768s-.966-.259-1.225.707c-.26.967.707 1.225.707 1.225l4.663 1.249l-3.971 2.293s-.865.501-.365 1.367c.5.865 1.365.365 1.365.365l3.972-2.293l-1.25 4.663s-.259.967.707 1.225c.967.26 1.226-.706 1.226-.706l1.768-6.597l16.604-9.585l6.595 1.768s.966.259 1.225-.707c.255-.967-.71-1.225-.71-1.225z"/></svg>',
+        lego: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="256" height="256"><path fill="currentColor" fill-rule="evenodd" d="M664.4,261.1h-42.2v-96.5c0-8.1-6.5-14.6-14.6-14.6h-165.2c-8.1,0-14.6,6.5-14.6,14.6v96.5h-55.6v-96.5c0-8.1-6.5-14.6-14.6-14.6h-165.2c-8.1,0-14.6,6.5-14.6,14.6v96.5h-42.2c-7.4,0-13.3,6-13.3,13.3v334.4c0,7.4,6,13.3,13.3,13.3h528.9c7.4,0,13.3-6,13.3-13.3v-334.4c0-7.4-6-13.3-13.3-13.3Z"/></svg>',
+        citrus: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14" width="256" height="256"><path fill="currentColor" d="m 12.461819,1.5381967 c -0.541265,-0.54123998 -1.274764,-0.67716998 -1.759944,-0.39454 -1.3806072,0.80418 -4.2480411,-1.24398998 -7.5251386,2.0331 -3.27709736,3.2771 -1.2288968,6.14451 -2.0330833,7.5250703 -0.28263244,0.48521 -0.14671855,1.21873 0.394523,1.75999 0.5412883,0.54129 1.2748108,0.67714 1.7600368,0.3945 1.3804904,-0.80414 4.2479477,1.24404 7.5250221,-2.03303 3.277074,-3.2770803 1.228944,-6.1445303 2.033107,-7.5251003 0.282632,-0.4852 0.146742,-1.21872 -0.394523,-1.75999 z m -5.7458605,1.7006 c -1.3638029,0.34095 -3.136121,2.11301 -3.4771362,3.47714 -0.042586,0.17039 -0.1955154,0.28416 -0.3635386,0.28416 -0.030094,0 -0.060703,-0.004 -0.091242,-0.0113 -0.200906,-0.0503 -0.3230621,-0.25383 -0.272859,-0.45475 0.4083745,-1.63343 2.3868486,-3.61383 4.0228543,-4.02286 0.2009763,-0.0502 0.4045542,0.0719 0.4547572,0.27286 0.050203,0.20093 -0.07193,0.40451 -0.2728356,0.45473 z"/></svg>',
+        arcade: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="256" height="256"><path fill="currentColor" fill-rule="evenodd" d="M7 4C3.68629 4 1 6.68629 1 10V14C1 17.3137 3.68629 20 7 20H17C20.3137 20 23 17.3137 23 14V10C23 6.68629 20.3137 4 17 4H7ZM7 15C6.44775 15 6 14.5522 6 14V13H5C4.44775 13 4 12.5522 4 12C4 11.4478 4.44775 11 5 11H6V10C6 9.44775 6.44775 9 7 9C7.55225 9 8 9.44775 8 10V11H9C9.55225 11 10 11.4478 10 12C10 12.5522 9.55225 13 9 13H8V14C8 14.5522 7.55225 15 7 15ZM17 11C17.5522 11 18 10.5522 18 10C18 9.44775 17.5522 9 17 9C16.4478 9 16 9.44775 16 10C16 10.5522 16.4478 11 17 11ZM18 14C18 14.5522 17.5522 15 17 15C16.4478 15 16 14.5522 16 14C16 13.4478 16.4478 13 17 13C17.5522 13 18 13.4478 18 14ZM18 12C18 12.5522 18.4478 13 19 13C19.5522 13 20 12.5522 20 12C20 11.4478 19.5522 11 19 11C18.4478 11 18 11.4478 18 12ZM15 13C14.4478 13 14 12.5522 14 12C14 11.4478 14.4478 11 15 11C15.5522 11 16 11.4478 16 12C16 12.5522 15.5522 13 15 13Z"/></svg>',
+        heart: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="256" height="256"><path fill="currentColor" d="M1.24264 8.24264L8 15L14.7574 8.24264C15.553 7.44699 16 6.36786 16 5.24264V5.05234C16 2.8143 14.1857 1 11.9477 1C10.7166 1 9.55233 1.55959 8.78331 2.52086L8 3.5L7.21669 2.52086C6.44767 1.55959 5.28338 1 4.05234 1C1.8143 1 0 2.8143 0 5.05234V5.24264C0 6.36786 0.44699 7.44699 1.24264 8.24264Z"/></svg>',
+        mint: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="256" height="256"><path fill="currentColor" d="M178.736,512c-2.359,0-4.717-0.899-6.518-2.7c-3.599-3.599-3.598-9.435,0.001-13.033 c81.329-81.309,74.657-213.411,74.581-214.736c-0.295-5.081,3.584-9.44,8.667-9.735c5.098-0.301,9.44,3.586,9.735,8.667 c0.084,1.441,1.949,35.827-6.836,81.238c-8.152,42.139-27.454,101.953-73.113,147.601C183.452,511.101,181.094,512,178.736,512z"/><path fill="currentColor" d="M427.082,161.402c-25.124-13.737-58.485-11.703-92.065-1.543 c24.589-24.4,41.987-52.391,41.987-80.711C377.003,35.436,346.906,0,309.78,0C280.078,0,256,28.348,256,63.319 C256,28.348,231.922,0,202.221,0c-37.127,0-67.224,35.436-67.224,79.148c0,28.32,17.397,56.311,41.987,80.711 c-33.579-10.16-66.94-12.192-92.065,1.543c-38.354,20.969-55.01,64.377-37.199,96.952c14.248,26.062,50.672,33.588,81.356,16.812 c-30.683,16.776-44.007,51.501-29.759,77.562c17.81,32.577,63.341,41.986,101.695,21.016c29.043-15.878,46.29-52.391,54.989-92.75 c8.699,40.359,25.946,76.871,54.989,92.75c38.354,20.969,83.885,11.561,101.695-21.016c14.248-26.06,0.924-60.786-29.759-77.562 c30.683,16.776,67.108,9.248,81.356-16.812C482.091,225.779,465.436,182.372,427.082,161.402z"/></svg>'
+    };
+
+    function makeParticleIconImage(svgMarkup, color) {
+        const tinted = svgMarkup.replace(/currentColor/g, color);
+        const img = new Image();
+        img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(tinted);
+        return img;
+    }
+
+    function aleaPrng(seed) {
+        let s0 = 0.1;
+        let s1 = 0.1;
+        let s2 = 0.1;
+        let c = 1;
+
+        if (seed) {
+            const mash = mashHash();
+            s0 = mash(' ');
+            s1 = mash(' ');
+            s2 = mash(' ');
+            for (let i = 0; i < seed.length; i++) {
+                s0 -= mash(seed[i]);
+                if (s0 < 0) s0 += 1;
+                s1 -= mash(seed[i]);
+                if (s1 < 0) s1 += 1;
+                s2 -= mash(seed[i]);
+                if (s2 < 0) s2 += 1;
+            }
+        }
+
+        return function () {
+            const t = 2091639 * s0 + c * 2.3283064365386963e-10;
+            s0 = s1;
+            s1 = s2;
+            s2 = t - (c = t | 0);
+            return s2;
+        };
+
+        function mashHash() {
+            let n = 0xefc8249d;
+            return function (data) {
+                for (let i = 0; i < data.length; i++) {
+                    n += data.charCodeAt(i);
+                    let h = 0.02519603282416938 * n;
+                    n = h >>> 0;
+                    h -= n;
+                    h *= n;
+                    n = h >>> 0;
+                    h -= n;
+                    n += h * 0x100000000;
+                }
+                return (n >>> 0) * 2.3283064365386963e-10;
+            };
+        }
+    }
+
+    function SimplexNoise2D(random) {
+        const F2 = 0.5 * (Math.sqrt(3) - 1);
+        const G2 = (3 - Math.sqrt(3)) / 6;
+        const grad3 = [
+            [1, 1], [-1, 1], [1, -1], [-1, -1],
+            [1, 0], [-1, 0], [1, 0], [-1, 0],
+            [0, 1], [0, -1], [0, 1], [0, -1]
+        ];
+        const p = new Uint8Array(256);
+        for (let i = 0; i < 256; i++) p[i] = Math.floor(random() * 256);
+        const perm = new Uint8Array(512);
+        const permMod12 = new Uint8Array(512);
+        for (let i = 0; i < 512; i++) {
+            perm[i] = p[i & 255];
+            permMod12[i] = perm[i] % 12;
+        }
+        this.noise2D = function (xin, yin) {
+            const s = (xin + yin) * F2;
+            const i = Math.floor(xin + s);
+            const j = Math.floor(yin + s);
+            const t = (i + j) * G2;
+            const x0 = xin - (i - t);
+            const y0 = yin - (j - t);
+            const i1 = x0 > y0 ? 1 : 0;
+            const j1 = x0 > y0 ? 0 : 1;
+            const x1 = x0 - i1 + G2;
+            const y1 = y0 - j1 + G2;
+            const x2 = x0 - 1 + 2 * G2;
+            const y2 = y0 - 1 + 2 * G2;
+            const ii = i & 255;
+            const jj = j & 255;
+            const gi0 = permMod12[ii + perm[jj]];
+            const gi1 = permMod12[ii + i1 + perm[jj + j1]];
+            const gi2 = permMod12[ii + 1 + perm[jj + 1]];
+            let n0 = 0;
+            let n1 = 0;
+            let n2 = 0;
+            let t0 = 0.5 - x0 * x0 - y0 * y0;
+            if (t0 >= 0) {
+                t0 *= t0;
+                n0 = t0 * t0 * (grad3[gi0][0] * x0 + grad3[gi0][1] * y0);
+            }
+            let t1 = 0.5 - x1 * x1 - y1 * y1;
+            if (t1 >= 0) {
+                t1 *= t1;
+                n1 = t1 * t1 * (grad3[gi1][0] * x1 + grad3[gi1][1] * y1);
+            }
+            let t2 = 0.5 - x2 * x2 - y2 * y2;
+            if (t2 >= 0) {
+                t2 *= t2;
+                n2 = t2 * t2 * (grad3[gi2][0] * x2 + grad3[gi2][1] * y2);
+            }
+            return 70 * (n0 + n1 + n2);
+        };
+    }
+
+    function startLavaLampBg(canvas, particleColor) {
+        const dpr = window.devicePixelRatio || 1;
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        canvas.width = width * dpr;
+        canvas.height = height * dpr;
+        canvas.classList.add('qg-bg-lava');
+
+        const ctx = canvas.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        const simplex = new SimplexNoise2D(aleaPrng('lava-lamp-seed'));
+        const noise2D = (x, y) => simplex.noise2D(x, y);
+        const random = (min, max) => Math.random() * (max - min) + min;
+
+        const MAX_MASS = 210;
+        const INITIAL_RADIUS_MIN = 1;
+        const INITIAL_RADIUS_MAX = 2;
+        const GROWTH_RATE = 12;
+        const MOVE_SPEED_MIN = 8;
+        const MOVE_SPEED_MAX = 12;
+        const NUM_POINTS = 100;
+        const NOISE_SCALE = 0.005;
+        const NOISE_STRENGTH = 14;
+        const MORPH_SPEED_MIN = 0.2;
+        const MORPH_SPEED_MAX = 0.3;
+        const NOISE_REDUCTION_RATE = 0.05;
+        const MIN_MAX_MASS = 100;
+        const SMALL_BUBBLE_CHANCE = 0.01;
+        const SMALL_BUBBLE_MAX_MASS_MIN = 20;
+        const SMALL_BUBBLE_MAX_MASS_MAX = 80;
+        const MIN_BUBBLES = 2;
+        const MAX_BUBBLES = 6;
+        const FAILSAFE_TIMEOUT = 10;
+        const BLOB_SPAWN_INTERVAL_MIN = 30;
+        const BLOB_SPAWN_INTERVAL_MAX = 60;
+
+        function Blob(options) {
+            this.numPoints = options.numPoints || NUM_POINTS;
+            this.initialRadius = options.radius || random(INITIAL_RADIUS_MIN, INITIAL_RADIUS_MAX);
+            this.mass = this.initialRadius * 0.1;
+            this.massGrowthRate = options.massGrowthRate || GROWTH_RATE;
+            this.maxMass = options.maxMass || MAX_MASS;
+            this.origin = options.origin || 'top';
+            this.direction = this.origin === 'top' ? 1 : -1;
+            this.centerX = options.centerX || random(width * 0.2, width * 0.8);
+            this.centerY = options.centerY || (this.origin === 'top'
+                ? random(-this.initialRadius, 0)
+                : random(height, height + this.initialRadius));
+            this.color = options.color || particleColor;
+            this.speed = options.speed || random(MOVE_SPEED_MIN, MOVE_SPEED_MAX);
+            this.morphSpeed = options.morphSpeed || random(MORPH_SPEED_MIN, MORPH_SPEED_MAX);
+            this.noiseScale = options.noiseScale || NOISE_SCALE;
+            this.noiseStrength = options.noiseStrength || NOISE_STRENGTH;
+            this.initialNoiseStrength = this.noiseStrength;
+            this.vx = 0;
+            this.vy = 0;
+            this.state = 'growing';
+            this.radius = this.initialRadius;
+            this.movingStartTime = null;
+            this.targetMass = null;
+            this.points = [];
+            const angleStep = (Math.PI * 2) / this.numPoints;
+            for (let i = 0; i < this.numPoints; i++) {
+                this.points.push({ angle: i * angleStep, offset: 0 });
+            }
+        }
+
+        Blob.prototype.isOutOfBounds = function () {
+            return (this.direction === 1 && this.centerY - this.radius > height)
+                || (this.direction === -1 && this.centerY + this.radius < 0);
+        };
+
+        Blob.prototype.update = function (deltaTime, globalTime) {
+            if (this.state === 'growing') {
+                this.mass += this.massGrowthRate * deltaTime;
+                if (this.targetMass !== null) {
+                    if (this.mass >= this.targetMass) {
+                        this.mass = this.targetMass;
+                        this.state = 'moving';
+                        this.vy = this.direction * this.speed;
+                        this.vx = 0;
+                        this.movingStartTime = globalTime;
+                    }
+                } else if (this.mass >= this.maxMass) {
+                    this.mass = this.maxMass;
+                    this.state = 'moving';
+                    this.vy = this.direction * this.speed;
+                    this.vx = 0;
+                    this.movingStartTime = globalTime;
+                }
+                this.radius = this.initialRadius + (this.mass - this.initialRadius * 0.1) * 0.5;
+            }
+            if (this.state === 'moving') {
+                if (this.movingStartTime !== null) {
+                    const movingDuration = globalTime - this.movingStartTime;
+                    this.noiseStrength = Math.max(0, this.initialNoiseStrength - movingDuration * NOISE_REDUCTION_RATE);
+                }
+                this.centerX += this.vx * deltaTime;
+                this.centerY += this.vy * deltaTime;
+            }
+            this.points.forEach((point) => {
+                const x = this.centerX + Math.cos(point.angle) * this.radius;
+                const y = this.centerY + Math.sin(point.angle) * this.radius;
+                point.offset = noise2D(x * this.noiseScale, y * this.noiseScale + globalTime * this.morphSpeed) * this.noiseStrength;
+            });
+        };
+
+        Blob.prototype.draw = function () {
+            ctx.save();
+            ctx.translate(this.centerX, this.centerY);
+            ctx.beginPath();
+            const points = this.points;
+            const len = points.length;
+            for (let i = 0; i < len; i++) {
+                const current = points[i];
+                const next = points[(i + 1) % len];
+                const currentRadius = this.radius + (current.offset || 0);
+                const currentX = currentRadius * Math.cos(current.angle);
+                const currentY = currentRadius * Math.sin(current.angle);
+                const nextRadius = this.radius + (next.offset || 0);
+                const nextX = nextRadius * Math.cos(next.angle);
+                const nextY = nextRadius * Math.sin(next.angle);
+                if (i === 0) ctx.moveTo(currentX, currentY);
+                ctx.quadraticCurveTo(currentX, currentY, (currentX + nextX) / 2, (currentY + nextY) / 2);
+            }
+            ctx.closePath();
+            ctx.fillStyle = this.color;
+            ctx.globalAlpha = 1;
+            ctx.fill();
+            ctx.restore();
+        };
+
+        function createBlob(origin) {
+            const maxMassVal = Math.random() < SMALL_BUBBLE_CHANCE
+                ? random(SMALL_BUBBLE_MAX_MASS_MIN, SMALL_BUBBLE_MAX_MASS_MAX)
+                : random(MIN_MAX_MASS, MAX_MASS);
+            return new Blob({
+                numPoints: NUM_POINTS,
+                radius: random(INITIAL_RADIUS_MIN, INITIAL_RADIUS_MAX),
+                origin,
+                centerX: random(width * 0.2, width * 0.8),
+                centerY: origin === 'top' ? random(-60, 0) : random(height, height + 60),
+                color: particleColor,
+                speed: random(MOVE_SPEED_MIN, MOVE_SPEED_MAX),
+                morphSpeed: random(MORPH_SPEED_MIN, MORPH_SPEED_MAX),
+                noiseScale: NOISE_SCALE,
+                noiseStrength: NOISE_STRENGTH,
+                massGrowthRate: GROWTH_RATE,
+                maxMass: maxMassVal
+            });
+        }
+
+        const blobs = [];
+        for (let i = 0; i < MIN_BUBBLES; i++) {
+            blobs.push(createBlob(i % 2 === 0 ? 'top' : 'bottom'));
+        }
+
+        let blobSpawnTimer = 0;
+        let nextBlobSpawnTime = random(BLOB_SPAWN_INTERVAL_MIN, BLOB_SPAWN_INTERVAL_MAX);
+        let noBlobsStartTime = null;
+        let lastTime = performance.now();
+        let time = 0;
+
+        function animate(currentTime) {
+            const deltaTime = (currentTime - lastTime) / 1000;
+            lastTime = currentTime;
+            time += deltaTime;
+            ctx.clearRect(0, 0, width, height);
+
+            blobs.forEach((blob) => {
+                blob.update(deltaTime, time);
+                blob.draw();
+            });
+
+            for (let i = 0; i < blobs.length; i++) {
+                for (let j = i + 1; j < blobs.length; j++) {
+                    const blobA = blobs[i];
+                    const blobB = blobs[j];
+                    const dx = blobA.centerX - blobB.centerX;
+                    const dy = blobA.centerY - blobB.centerY;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    const minDistance = (blobA.radius + blobB.radius) * 1.2;
+                    if (distance < minDistance && distance > 0) {
+                        const overlap = minDistance - distance;
+                        const angle = Math.atan2(dy, dx);
+                        const force = (overlap / minDistance) * 0.05;
+                        blobA.centerX += Math.cos(angle) * force;
+                        blobA.centerY += Math.sin(angle) * force;
+                        blobB.centerX -= Math.cos(angle) * force;
+                        blobB.centerY -= Math.sin(angle) * force;
+                    }
+                }
+            }
+
+            for (let i = 0; i < blobs.length; i++) {
+                for (let j = i + 1; j < blobs.length; j++) {
+                    const blobA = blobs[i];
+                    const blobB = blobs[j];
+                    if (blobA.state !== 'growing' || blobB.state !== 'growing') continue;
+                    const dx = blobA.centerX - blobB.centerX;
+                    const dy = blobA.centerY - blobB.centerY;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance >= blobA.radius + blobB.radius) continue;
+                    const newMass = blobA.mass + blobB.mass;
+                    const mergedBlob = new Blob({
+                        numPoints: NUM_POINTS,
+                        radius: (blobA.radius + blobB.radius) / 2,
+                        origin: blobA.origin,
+                        centerX: (blobA.centerX * blobA.mass + blobB.centerX * blobB.mass) / newMass,
+                        centerY: (blobA.centerY * blobA.mass + blobB.centerY * blobB.mass) / newMass,
+                        color: particleColor,
+                        speed: (blobA.speed + blobB.speed) / 2,
+                        morphSpeed: (blobA.morphSpeed + blobB.morphSpeed) / 2,
+                        noiseScale: NOISE_SCALE,
+                        noiseStrength: NOISE_STRENGTH,
+                        massGrowthRate: GROWTH_RATE,
+                        maxMass: newMass
+                    });
+                    mergedBlob.mass = (blobA.mass + blobB.mass) / 2;
+                    mergedBlob.targetMass = newMass;
+                    mergedBlob.state = 'growing';
+                    blobs.splice(j, 1);
+                    blobs.splice(i, 1, mergedBlob);
+                    j = i;
+                }
+            }
+
+            for (let i = blobs.length - 1; i >= 0; i--) {
+                if (!blobs[i].isOutOfBounds()) continue;
+                const origin = blobs[i].origin === 'top' ? 'bottom' : 'top';
+                blobs.splice(i, 1);
+                if (blobs.length < MAX_BUBBLES) blobs.push(createBlob(origin));
+            }
+
+            while (blobs.length < MIN_BUBBLES && blobs.length < MAX_BUBBLES) {
+                blobs.push(createBlob(blobs.length % 2 === 0 ? 'top' : 'bottom'));
+            }
+
+            blobSpawnTimer += deltaTime;
+            if (blobSpawnTimer >= nextBlobSpawnTime) {
+                if (blobs.length < MAX_BUBBLES) {
+                    blobs.push(createBlob(Math.random() < 0.5 ? 'top' : 'bottom'));
+                }
+                blobSpawnTimer = 0;
+                nextBlobSpawnTime = random(BLOB_SPAWN_INTERVAL_MIN, BLOB_SPAWN_INTERVAL_MAX);
+            }
+
+            if (blobs.length === 0) {
+                if (!noBlobsStartTime) noBlobsStartTime = time;
+                else if (time - noBlobsStartTime >= FAILSAFE_TIMEOUT) {
+                    blobs.push(createBlob('top'));
+                    noBlobsStartTime = null;
+                }
+            } else {
+                noBlobsStartTime = null;
+            }
+
+            bgAnimFrame = requestAnimationFrame(animate);
+        }
+
+        bgAnimFrame = requestAnimationFrame(animate);
+    }
+
+    function setSynthwaveVisible(on) {
+        const layer = $('qg-synthwave');
+        if (!layer) return;
+        layer.hidden = !on;
+        layer.setAttribute('aria-hidden', on ? 'false' : 'true');
+        if (on) initSynthwaveLayer(layer);
+    }
+
+    function initSynthwaveLayer(layer) {
+        if (layer.dataset.ready === 'css-floor-v2') return;
+        layer.dataset.ready = 'css-floor-v2';
+
+        const starsHost = layer.querySelector('.qg-synth-stars');
+        if (starsHost && !starsHost.childElementCount) {
+            for (let i = 0; i < 90; i++) {
+                const star = document.createElement('div');
+                star.className = 'qg-synth-star';
+                star.style.left = `${100 * Math.random()}%`;
+                star.style.top = `${55 * Math.random()}%`;
+                starsHost.appendChild(star);
+            }
+        }
+
+        const sun = layer.querySelector('.qg-synth-sun');
+        if (sun && !sun.childElementCount) {
+            for (let i = 0; i < 16; i++) {
+                const band = document.createElement('div');
+                band.className = 'qg-synth-sun-band';
+                band.style.animationDelay = `${-0.5 * i}s`;
+                sun.appendChild(band);
+            }
+        }
+
+        const grid = layer.querySelector('.qg-synth-grid');
+        if (grid) grid.innerHTML = '';
+    }
+
     function startBgAnimation(theme, isDark) {
         const canvas = $('qg-bg-canvas');
         if (!canvas) return;
@@ -4356,52 +4942,65 @@ const QuizGame = (() => {
         // Cancel existing
         if (bgAnimFrame) cancelAnimationFrame(bgAnimFrame);
         bgParticles = [];
+        canvas.classList.remove('qg-bg-lava');
+        setSynthwaveVisible(false);
+
+        const themeData = QUIZ_THEMES[theme] || QUIZ_THEMES['default'];
+        const particleColor = (isDark && themeData.dark?.['--qg-particle']) || themeData['--qg-particle'];
+
+        if (theme === 'neon') {
+            setSynthwaveVisible(true);
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+            return;
+        }
+
+        if (theme === 'kawaii-pastel' || theme === 'peach-cream') {
+            startLavaLampBg(canvas, particleColor);
+            return;
+        }
 
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
         const ctx = canvas.getContext('2d');
-        const themeData = QUIZ_THEMES[theme] || QUIZ_THEMES['default'];
-        const particleColor = (isDark && themeData.dark?.['--qg-particle']) || themeData['--qg-particle'];
 
-        // Particle configs per theme — cubes rise from the bottom (frost-white keeps snow)
         const configs = {
             default: { count: 9, speed: 0.16, size: [60, 140], shape: 'cube' },
             'gold-black': { count: 8, speed: 0.14, size: [55, 130], shape: 'cube' },
-            'retro-arcade': { count: 9, speed: 0.18, size: [58, 135], shape: 'cube' },
-            'kawaii-pastel': { count: 9, speed: 0.15, size: [62, 145], shape: 'cube' },
-            'mint-pop': { count: 9, speed: 0.14, size: [60, 140], shape: 'cube' },
-            'peach-cream': { count: 9, speed: 0.15, size: [60, 142], shape: 'cube' },
-            'pink-pop': { count: 9, speed: 0.16, size: [58, 138], shape: 'cube' },
-            'frost-white': { count: 10, speed: 0.17, size: [52, 125], shape: 'snow' }
+            'retro-arcade': { count: 9, speed: 0.18, size: [70, 120], shape: 'icon', icon: 'arcade', rise: true },
+            'mint-pop': { count: 9, speed: 0.14, size: [70, 130], shape: 'icon', icon: 'mint', rise: true },
+            'pink-pop': { count: 9, speed: 0.16, size: [58, 120], shape: 'icon', icon: 'heart', rise: true },
+            'frost-white': { count: 10, speed: 0.17, size: [52, 110], shape: 'icon', icon: 'frost', rise: false },
+            lego: { count: 9, speed: 0.16, size: [70, 130], shape: 'icon', icon: 'lego', rise: true },
+            neon: { count: 12, speed: 0.28, size: [36, 88], shape: 'line' },
+            citrus: { count: 9, speed: 0.15, size: [64, 120], shape: 'icon', icon: 'citrus', rise: true }
         };
         const cfg = configs[theme] || configs['default'];
+        const iconImg = cfg.shape === 'icon'
+            ? makeParticleIconImage(BG_PARTICLE_ICONS[cfg.icon], particleColor)
+            : null;
+        const rises = cfg.rise === true || cfg.shape === 'cube';
 
-        // Build particles
         for (let i = 0; i < cfg.count; i++) {
             const radius = cfg.size[0] + Math.random() * (cfg.size[1] - cfg.size[0]);
-            const isCube = cfg.shape === 'cube';
-            const particle = {
+            bgParticles.push({
                 x: Math.random() * canvas.width,
-                y: isCube
+                y: rises
                     ? canvas.height + radius + 20 - Math.random() * (canvas.height + radius * 2 + 40)
                     : Math.random() * canvas.height,
                 r: radius,
                 vx: (Math.random() - 0.5) * cfg.speed,
-                vy: isCube
+                vy: rises
                     ? -(Math.random() * cfg.speed + cfg.speed * 0.25)
-                    : theme === 'winter'
-                        ? (Math.random() * cfg.speed + 0.15)
-                        : (Math.random() - 0.5) * cfg.speed,
+                    : (Math.random() - 0.5) * cfg.speed,
                 opacity: 0.3 + Math.random() * 0.5,
                 phase: Math.random() * Math.PI * 2,
-                shape: cfg.shape
-            };
-            if (isCube) {
-                particle.angle = Math.random() * Math.PI * 2;
-                particle.rotationSpeed = (Math.random() - 0.5) * 0.02;
-            }
-            bgParticles.push(particle);
+                shape: cfg.shape,
+                angle: Math.random() * Math.PI * 2,
+                rotationSpeed: (Math.random() - 0.5) * 0.02
+            });
         }
 
         function drawCubeParticle(p) {
@@ -4439,10 +5038,9 @@ const QuizGame = (() => {
                 p.y += p.vy;
                 p.phase += 0.01;
 
-                // Wrap around edges
                 if (p.x < -p.r - 20) p.x = canvas.width + p.r + 20;
                 if (p.x > canvas.width + p.r + 20) p.x = -p.r - 20;
-                if (p.shape === 'cube') {
+                if (rises) {
                     if (p.y < -p.r - 20) p.y = canvas.height + p.r + 20;
                 } else {
                     if (p.y > canvas.height + p.r + 20) p.y = -p.r - 20;
@@ -4457,18 +5055,12 @@ const QuizGame = (() => {
                 ctx.fillStyle = particleColor;
                 ctx.strokeStyle = particleColor;
 
-                if (p.shape === 'snow') {
-                    // Snowflake: simple asterisk
-                    ctx.lineWidth = 1.5;
-                    for (let arm = 0; arm < 6; arm++) {
-                        ctx.save();
+                if (p.shape === 'icon') {
+                    p.angle += p.rotationSpeed;
+                    if (iconImg && iconImg.complete) {
                         ctx.translate(p.x, p.y);
-                        ctx.rotate((arm * Math.PI) / 3);
-                        ctx.beginPath();
-                        ctx.moveTo(0, 0);
-                        ctx.lineTo(0, -p.r);
-                        ctx.stroke();
-                        ctx.restore();
+                        ctx.rotate(p.angle);
+                        ctx.drawImage(iconImg, -p.r, -p.r, p.r * 2, p.r * 2);
                     }
                 } else if (p.shape === 'cube') {
                     p.angle += p.rotationSpeed;
@@ -4500,7 +5092,10 @@ const QuizGame = (() => {
     function stopBgAnimation() {
         if (bgAnimFrame) { cancelAnimationFrame(bgAnimFrame); bgAnimFrame = null; }
         const canvas = $('qg-bg-canvas');
-        if (canvas) canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+        if (!canvas) return;
+        canvas.classList.remove('qg-bg-lava');
+        setSynthwaveVisible(false);
+        canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
     }
 
     /**
@@ -4620,20 +5215,32 @@ const QuizGame = (() => {
         const theme = role === 'host' ? 'default' : requestedTheme;
         const persist = options.persist !== false && role !== 'host';
         const themeData = QUIZ_THEMES[theme] || QUIZ_THEMES['default'];
+        if (themeData.disableDark) isDark = false;
         const vars = isDark
             ? Object.assign({}, themeData, themeData.dark || {})
             : themeData;
 
         // Apply CSS variables to the app element
-        ['--qg-bg-from', '--qg-bg-to', '--qg-accent', '--qg-panel-accent'].forEach(v => {
+        ['--qg-bg-color', '--qg-bg-from', '--qg-bg-to', '--qg-text', '--qg-theme-btn-icon', '--qg-accent', '--qg-panel-accent'].forEach(v => {
             if (vars[v]) app.style.setProperty(v, vars[v]);
         });
+        if (!vars['--qg-bg-color'] && vars['--qg-bg-from']) {
+            app.style.setProperty('--qg-bg-color', vars['--qg-bg-from']);
+        }
+        if (!vars['--qg-text']) {
+            app.style.setProperty('--qg-text', '#ffffff');
+        }
 
         const panelAccent = vars['--qg-panel-accent'] || vars['--qg-accent'];
         if (panelAccent) {
             const buttonAccents = resolvePanelButtonAccents(panelAccent);
             app.style.setProperty('--qg-panel-accent-btn', buttonAccents.btn);
             app.style.setProperty('--qg-panel-accent-btn-dark', buttonAccents.btnDark);
+
+            if (!vars['--qg-theme-btn-icon']) {
+                const iconOnBtn = accentLuminance(buttonAccents.btn) > 0.45 ? '#1a1a1a' : '#ffffff';
+                app.style.setProperty('--qg-theme-btn-icon', iconOnBtn);
+            }
 
             const needsLightTitle =
                 panelAccent[0] === '#' && accentLuminance(panelAccent) > 0.5;
@@ -4652,18 +5259,19 @@ const QuizGame = (() => {
 
         // Remove old theme & dark classes
         Object.keys(QUIZ_THEMES).forEach(t => app.classList.remove('qg-theme-' + t));
-        app.classList.remove('qg-dark');
+        app.classList.remove('qg-dark', 'qg-theme-light');
 
         // Apply new classes
         app.classList.add('qg-theme-' + theme);
         if (isDark) app.classList.add('qg-dark');
+        app.classList.toggle('qg-theme-light', !isDark && themeData.light === true);
         app.dataset.theme = theme;
 
         // Update active swatch
         updateThemeSwatches(theme);
 
         // Update dark toggle
-        updateDarkToggle(isDark);
+        updateDarkToggle(isDark, theme);
 
         // Persist (player devices only)
         if (persist) {
@@ -4729,88 +5337,42 @@ const QuizGame = (() => {
         });
     }
 
-    function updateDarkToggle(isDark) {
+    function updateDarkToggle(isDark, themeId) {
         const checkbox = $('qg-dark-checkbox');
-        if (checkbox) checkbox.checked = isDark;
+        const wrap = document.querySelector('.qg-dark-switch-wrap');
+        const divider = document.querySelector('.qg-theme-modal-divider');
+        const disableDark = !!(QUIZ_THEMES[themeId] || {}).disableDark;
+        if (wrap) wrap.hidden = disableDark;
+        if (divider) divider.hidden = disableDark;
+        if (checkbox) {
+            checkbox.disabled = disableDark;
+            checkbox.checked = disableDark ? false : isDark;
+        }
     }
 
     // ===== WAITING ROOM MINI-GAMES (local only — no Firebase) =====
-    const WAITING_SCRAMBLE_FALLBACK_WORDS = [
-        'CAT', 'DOG', 'FISH', 'BIRD', 'APPLE', 'HOUSE', 'BOOK', 'CHAIR', 'TABLE', 'WATER',
-        'HAPPY', 'GREEN', 'BLUE', 'SUNNY', 'CLOUD', 'RIVER', 'PLANT', 'MUSIC', 'PAPER', 'LIGHT',
-        'SMILE', 'FRIEND', 'SCHOOL', 'SPRING', 'TIGER', 'MONKEY', 'RABBIT', 'PURPLE', 'ORANGE', 'YELLOW'
-    ];
-
-    const WAITING_SCRAMBLE_WORDS = (() => {
-        if (typeof vocabularyBank !== 'undefined' && Array.isArray(vocabularyBank)) {
-            const fromBank = vocabularyBank
-                .filter((entry) => entry.level === 'beginner' && entry.word.length >= 3 && entry.word.length <= 9)
-                .map((entry) => entry.word.toUpperCase().replace(/[^A-Z]/g, ''))
-                .filter((word) => word.length >= 3);
-            if (fromBank.length >= 20) {
-                return [...new Set(fromBank)].slice(0, 30);
-            }
-        }
-        return WAITING_SCRAMBLE_FALLBACK_WORDS;
-    })();
-
     const WAITING_MINI_GAMES = [
         {
-            id: 'word-scramble',
-            label: 'Word Scramble Sprint',
-            icon: 'fa-solid fa-shuffle',
-            initFn: initWordScrambleSprint
+            id: 'breakout',
+            label: 'Breakout',
+            icon: 'fa-solid fa-table-cells',
+            src: 'games/breakout/index.html?embed=1'
         },
         {
-            id: 'word-clue',
-            label: 'Hint Pick',
-            icon: 'fa-solid fa-lightbulb',
-            initFn: initWordCluePick
+            id: 'tetris',
+            label: 'Tetris',
+            icon: 'fa-solid fa-cubes',
+            src: 'games/tetris/index.html?embed=1'
+        },
+        {
+            id: 'space-invaders',
+            label: 'Space Invaders',
+            icon: 'fa-solid fa-rocket',
+            src: 'games/space-invaders/index.html?embed=1'
         }
     ];
-
-    const WAITING_CLUE_FALLBACK = [
-        { word: 'CAT', hint: 'A small furry pet' },
-        { word: 'DOG', hint: 'A friendly pet that barks' },
-        { word: 'BIRD', hint: 'An animal that can fly' },
-        { word: 'FISH', hint: 'An animal that lives in water' },
-        { word: 'APPLE', hint: 'A red or green fruit' },
-        { word: 'HOUSE', hint: 'A place where people live' },
-        { word: 'BOOK', hint: 'You read this for stories' },
-        { word: 'HAPPY', hint: 'Feeling good and smiling' },
-        { word: 'GREEN', hint: 'The color of grass' },
-        { word: 'BLUE', hint: 'The color of the sky' },
-        { word: 'SUNNY', hint: 'Bright weather with sunshine' },
-        { word: 'WATER', hint: 'You drink this every day' },
-        { word: 'FRIEND', hint: 'Someone you like to play with' },
-        { word: 'SCHOOL', hint: 'A place where students learn' },
-        { word: 'RABBIT', hint: 'A small animal with long ears' },
-        { word: 'MONKEY', hint: 'An animal that lives in trees' },
-        { word: 'PURPLE', hint: 'A mix of red and blue' },
-        { word: 'ORANGE', hint: 'A citrus fruit color' },
-        { word: 'YELLOW', hint: 'The color of bananas' },
-        { word: 'SPRING', hint: 'The season after winter' }
-    ];
-
-    const WAITING_CLUE_WORDS = (() => {
-        if (typeof vocabularyBank !== 'undefined' && Array.isArray(vocabularyBank)) {
-            const fromBank = vocabularyBank
-                .filter((entry) => entry.level === 'beginner' && entry.definition && entry.word.length >= 3 && entry.word.length <= 12)
-                .map((entry) => ({
-                    word: entry.word.toUpperCase().replace(/[^A-Z]/g, ''),
-                    hint: entry.definition
-                }))
-                .filter((entry) => entry.word.length >= 3);
-            if (fromBank.length >= 20) {
-                return fromBank.slice(0, 30);
-            }
-        }
-        return WAITING_CLUE_FALLBACK;
-    })();
 
     let activeWaitingMiniGame = null;
-    let wordScrambleState = null;
-    let wordClueState = null;
 
     function isWaitingMiniGameModalOpen() {
         return $('waiting-minigame-overlay')?.classList.contains('open') ?? false;
@@ -4891,17 +5453,15 @@ const QuizGame = (() => {
     function resetWaitingMiniGamesForLobby() {
         waitingMiniGameDisabled = false;
         activeWaitingMiniGame = null;
-        wordScrambleState = null;
-        wordClueState = null;
 
         const root = $('waiting-minigame');
         const overlay = $('waiting-minigame-overlay');
         const toggle = $('waiting-minigame-toggle');
         const picker = $('waiting-minigame-picker');
         const play = $('waiting-minigame-play');
-        const stage = $('waiting-minigame-stage');
 
         closeWaitingMiniGameModal({ resetPicker: false });
+        destroyWaitingArcadeFrame();
 
         if (overlay) {
             overlay.classList.remove('qg-waiting-minigame--disabled');
@@ -4924,24 +5484,21 @@ const QuizGame = (() => {
             play.classList.remove('is-active');
             play.hidden = true;
         }
-        if (stage) stage.innerHTML = '';
     }
 
     function teardownWaitingMiniGames() {
         if (waitingMiniGameDisabled) return;
         waitingMiniGameDisabled = true;
         activeWaitingMiniGame = null;
-        wordScrambleState = null;
-        wordClueState = null;
 
         const root = $('waiting-minigame');
         const overlay = $('waiting-minigame-overlay');
         const toggle = $('waiting-minigame-toggle');
         const picker = $('waiting-minigame-picker');
         const play = $('waiting-minigame-play');
-        const stage = $('waiting-minigame-stage');
 
         closeWaitingMiniGameModal({ resetPicker: false });
+        destroyWaitingArcadeFrame();
 
         if (toggle) {
             toggle.disabled = true;
@@ -4955,7 +5512,6 @@ const QuizGame = (() => {
             play.classList.remove('is-active');
             play.hidden = true;
         }
-        if (stage) stage.innerHTML = '';
 
         if (overlay) {
             overlay.classList.add('qg-waiting-minigame--disabled');
@@ -4968,10 +5524,20 @@ const QuizGame = (() => {
         }
     }
 
+    function destroyWaitingArcadeFrame() {
+        const stage = $('waiting-minigame-stage');
+        const frame = stage?.querySelector('.qg-waiting-arcade-frame');
+        if (frame) {
+            frame.src = 'about:blank';
+            frame.remove();
+        }
+        if (stage) stage.innerHTML = '';
+        $('waiting-minigame')?.classList.remove('qg-waiting-minigame--playing');
+    }
+
     function showWaitingMiniGamePicker() {
         activeWaitingMiniGame = null;
-        wordScrambleState = null;
-        wordClueState = null;
+        destroyWaitingArcadeFrame();
         const picker = $('waiting-minigame-picker');
         const play = $('waiting-minigame-play');
         if (picker) {
@@ -4982,7 +5548,6 @@ const QuizGame = (() => {
             play.hidden = true;
             play.classList.remove('is-active');
         }
-        $('waiting-minigame-stage').innerHTML = '';
     }
 
     function startWaitingMiniGame(game) {
@@ -4990,6 +5555,7 @@ const QuizGame = (() => {
         activeWaitingMiniGame = game.id;
         const picker = $('waiting-minigame-picker');
         const play = $('waiting-minigame-play');
+        const modal = $('waiting-minigame');
         if (picker) {
             picker.hidden = true;
             picker.classList.add('is-hidden');
@@ -4998,213 +5564,27 @@ const QuizGame = (() => {
             play.hidden = false;
             play.classList.add('is-active');
         }
+        modal?.classList.add('qg-waiting-minigame--playing');
         const stage = $('waiting-minigame-stage');
+        if (!stage || !game.src) return;
+        const existing = stage.querySelector('.qg-waiting-arcade-frame');
+        if (existing) {
+            existing.src = 'about:blank';
+            existing.remove();
+        }
         stage.innerHTML = '';
-        game.initFn(stage);
-    }
-
-    function shuffleLetters(word) {
-        const letters = word.split('');
-        let shuffled = [...letters];
-        let attempts = 0;
-        do {
-            for (let i = shuffled.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-            }
-            attempts++;
-        } while (shuffled.join('') === word && attempts < 8);
-        return shuffled;
-    }
-
-    function pickScrambleWord(previousWord) {
-        const pool = WAITING_SCRAMBLE_WORDS;
-        if (pool.length <= 1) return pool[0] || 'CAT';
-        let next = pool[Math.floor(Math.random() * pool.length)];
-        let guard = 0;
-        while (next === previousWord && guard < 10) {
-            next = pool[Math.floor(Math.random() * pool.length)];
-            guard++;
-        }
-        return next;
-    }
-
-    function initWordScrambleSprint(stage) {
-        wordScrambleState = {
-            score: 0,
-            currentWord: '',
-            placedTileIds: [],
-            tiles: []
-        };
-        loadNextScrambleWord(stage);
-    }
-
-    function loadNextScrambleWord(stage) {
-        if (!wordScrambleState || waitingMiniGameDisabled) return;
-
-        const previous = wordScrambleState.currentWord;
-        wordScrambleState.currentWord = pickScrambleWord(previous);
-        wordScrambleState.placedTileIds = [];
-        wordScrambleState.tiles = shuffleLetters(wordScrambleState.currentWord).map((letter, index) => ({
-            id: `${wordScrambleState.currentWord}-${index}`,
-            letter,
-            used: false
-        }));
-
-        renderWordScrambleSprint(stage);
-    }
-
-    function renderWordScrambleSprint(stage) {
-        if (!wordScrambleState || waitingMiniGameDisabled) return;
-
-        const { score, currentWord, placedTileIds, tiles } = wordScrambleState;
-        const placedLetters = placedTileIds.map((tileId) => {
-            const tile = tiles.find((entry) => entry.id === tileId);
-            return tile ? tile.letter : '';
+        const frame = document.createElement('iframe');
+        frame.className = 'qg-waiting-arcade-frame';
+        frame.title = game.label;
+        frame.tabIndex = 0;
+        frame.src = game.src;
+        frame.addEventListener('load', () => {
+            try {
+                frame.contentWindow?.focus();
+            } catch (err) { /* ignore cross-origin focus errors */ }
+            frame.focus();
         });
-
-        stage.innerHTML = `
-            <div class="qg-scramble-score">Words completed: <strong>${score}</strong></div>
-            <div class="qg-scramble-build" id="scramble-build-area">
-                ${currentWord.split('').map((_, index) => {
-                    const letter = placedLetters[index] || '';
-                    return `<span class="qg-scramble-slot${letter ? '' : ' qg-scramble-slot--empty'}">${letter || '·'}</span>`;
-                }).join('')}
-            </div>
-            <div class="qg-scramble-actions">
-                <button type="button" class="qg-scramble-undo" id="scramble-undo-btn"
-                    ${placedTileIds.length ? '' : 'disabled'}>
-                    <i class="fa-solid fa-delete-left" aria-hidden="true"></i> Remove last
-                </button>
-            </div>
-            <div class="qg-scramble-tiles" id="scramble-tiles">
-                ${tiles.map((tile) => `
-                    <button type="button" class="qg-scramble-tile${tile.used ? ' qg-scramble-tile--used' : ''}"
-                        data-tile-id="${tile.id}" ${tile.used ? 'disabled' : ''}>${tile.letter}</button>
-                `).join('')}
-            </div>
-        `;
-
-        stage.querySelector('#scramble-undo-btn')?.addEventListener('click', () => {
-            if (!wordScrambleState || waitingMiniGameDisabled) return;
-            if (!wordScrambleState.placedTileIds.length) return;
-            const removedId = wordScrambleState.placedTileIds.pop();
-            const tile = wordScrambleState.tiles.find((entry) => entry.id === removedId);
-            if (tile) tile.used = false;
-            renderWordScrambleSprint(stage);
-        });
-
-        stage.querySelectorAll('.qg-scramble-tile:not(:disabled)').forEach((button) => {
-            button.addEventListener('click', () => {
-                if (!wordScrambleState || waitingMiniGameDisabled) return;
-                handleScrambleTileTap(stage, button.dataset.tileId);
-            });
-        });
-    }
-
-    function handleScrambleTileTap(stage, tileId) {
-        const state = wordScrambleState;
-        if (!state || waitingMiniGameDisabled) return;
-
-        const tile = state.tiles.find((entry) => entry.id === tileId);
-        if (!tile || tile.used) return;
-
-        const expected = state.currentWord[state.placedTileIds.length];
-        if (tile.letter !== expected) return;
-
-        tile.used = true;
-        state.placedTileIds.push(tileId);
-
-        if (state.placedTileIds.length === state.currentWord.length) {
-            state.score += 1;
-            renderWordScrambleSprint(stage);
-            stage.querySelector('#scramble-build-area')?.classList.add('qg-scramble-success');
-            window.setTimeout(() => {
-                if (!wordScrambleState || waitingMiniGameDisabled) return;
-                loadNextScrambleWord(stage);
-            }, 420);
-            return;
-        }
-
-        renderWordScrambleSprint(stage);
-    }
-
-    function pickClueEntry(previousWord) {
-        const pool = WAITING_CLUE_WORDS;
-        if (pool.length <= 1) return pool[0] || WAITING_CLUE_FALLBACK[0];
-        let next = pool[Math.floor(Math.random() * pool.length)];
-        let guard = 0;
-        while (next.word === previousWord && guard < 10) {
-            next = pool[Math.floor(Math.random() * pool.length)];
-            guard++;
-        }
-        return next;
-    }
-
-    function buildClueOptions(correctWord) {
-        const distractors = WAITING_CLUE_WORDS
-            .map((entry) => entry.word)
-            .filter((word) => word !== correctWord);
-        const options = [correctWord];
-        while (options.length < 4 && distractors.length) {
-            const pick = distractors.splice(Math.floor(Math.random() * distractors.length), 1)[0];
-            if (!options.includes(pick)) options.push(pick);
-        }
-        while (options.length < 4) {
-            const fallback = WAITING_CLUE_FALLBACK[options.length].word;
-            if (!options.includes(fallback)) options.push(fallback);
-        }
-        for (let i = options.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [options[i], options[j]] = [options[j], options[i]];
-        }
-        return options;
-    }
-
-    function initWordCluePick(stage) {
-        wordClueState = {
-            score: 0,
-            currentEntry: null,
-            options: []
-        };
-        loadNextClueRound(stage);
-    }
-
-    function loadNextClueRound(stage) {
-        if (!wordClueState || waitingMiniGameDisabled) return;
-        const previous = wordClueState.currentEntry?.word || '';
-        wordClueState.currentEntry = pickClueEntry(previous);
-        wordClueState.options = buildClueOptions(wordClueState.currentEntry.word);
-        renderWordCluePick(stage);
-    }
-
-    function renderWordCluePick(stage) {
-        if (!wordClueState || waitingMiniGameDisabled) return;
-        const { score, currentEntry, options } = wordClueState;
-        stage.innerHTML = `
-            <div class="qg-clue-score">Words completed: <strong>${score}</strong></div>
-            <p class="qg-clue-prompt" id="clue-prompt">${currentEntry.hint}</p>
-            <div class="qg-clue-options" id="clue-options">
-                ${options.map((word) => `
-                    <button type="button" class="qg-clue-option" data-word="${word}">
-                        ${word.charAt(0) + word.slice(1).toLowerCase()}
-                    </button>
-                `).join('')}
-            </div>
-        `;
-
-        stage.querySelectorAll('.qg-clue-option').forEach((button) => {
-            button.addEventListener('click', () => {
-                if (!wordClueState || waitingMiniGameDisabled) return;
-                if (button.dataset.word !== wordClueState.currentEntry.word) return;
-                wordClueState.score += 1;
-                stage.querySelector('#clue-prompt')?.classList.add('qg-clue-success');
-                window.setTimeout(() => {
-                    if (!wordClueState || waitingMiniGameDisabled) return;
-                    loadNextClueRound(stage);
-                }, 420);
-            });
-        });
+        stage.appendChild(frame);
     }
 
     // Resize handler for bg canvas

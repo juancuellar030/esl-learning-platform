@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Chess — JavaScript (Canvas)</title>
+  <style>
+    :root{
+      /* light, neutral palette to match your reference */
+      --bg:#ffffff;              /* canvas panel (inside) */
+      --light:#f3f4f6;           /* light square */
+      --dark:#4b5563;            /* dark square */
+      --text:#0f172a;            /* main text */
+      --muted:#475569;
+      --accent:#0284c7;          /* selection dots */
+      --frame:#d1d5db;
+    }
+    *{box-sizing:border-box}
+    html,body{
+      height:100%; margin:0; color:var(--text);
+      /* overall photo background with a LIGHT overlay so the board stays readable */
+      background:
+        linear-gradient(rgba(255,255,255,.40), rgba(255,255,255,.40)),
+        url("./ches.jpg") center/cover no-repeat fixed;
+      font:16px/1.45 system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    }
+    .wrap{min-height:100%;display:grid;place-items:center;padding:18px}
+    .card{
+      width:min(1100px,96vw);
+      background:rgba(255,255,255,.92);
+      border:1px solid var(--frame);
+      border-radius:20px; box-shadow:0 10px 30px rgba(2,6,23,.15)
+    }
+    header{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--frame)}
+    header h1{margin:0}
+    .hud{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:14px}
+    .badge{padding:.25rem .6rem;border:1px solid var(--frame);border-radius:999px;background:rgba(2,132,199,.08)}
+    .board{display:grid;grid-template-columns:auto 280px;gap:16px;padding:16px}
+    @media (max-width:980px){.board{grid-template-columns:1fr}}
+    canvas{
+      width:720px;height:540px;
+      border-radius:14px;background:var(--bg);
+      border:1px solid var(--frame);
+      box-shadow:inset 0 0 0 1px rgba(15,23,42,.06)
+    }
+    aside{display:flex;flex-direction:column;gap:12px}
+    aside .panel{padding:12px 14px;background:#fff;border:1px solid var(--frame);border-radius:12px}
+    .legend{font-size:13px;color:var(--muted)}
+    .btn{appearance:none;border:1px solid var(--frame);background:#eef2f7;border-radius:10px;padding:8px 10px;color:inherit;cursor:pointer}
+    .btn:active{transform:translateY(1px)}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <header>
+        <h1>Chess — JavaScript (Canvas)</h1>
+        <div class="hud">
+          <span class="badge">Turn <strong id="turn">White</strong></span>
+          <span class="badge">Status <strong id="status">Ready</strong></span>
+        </div>
+      </header>
+      <div class="board">
+        <canvas id="game" width="720" height="540" aria-label="Chess board" role="img"></canvas>
+        <aside>
+          <div class="panel legend">
+            Click a piece to see legal moves. Promotion auto-queens.<br/>
+            (Castling & en passant omitted for now — easy to add later.)
+          </div>
+          <div class="panel">
+            <button class="btn" id="resetBtn">🔄 New Game</button>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+  <script src="./script.js" defer></script>
+</body>
+</html>
