@@ -1104,7 +1104,7 @@ const QuizGame = (() => {
     }
 
     function randomizeAvatar() {
-        const options = Array.from(document.querySelectorAll('#avatar-grid-waiting .qg-avatar-option'));
+        const options = Array.from(document.querySelectorAll('#overlay-avatar-modal .qg-avatar-option'));
         if (options.length === 0) return;
 
         // Disable UI
@@ -4228,8 +4228,8 @@ const QuizGame = (() => {
             keyboard: 'keyboard--palette-classic',
             dark: { '--qg-bg-color': '#1a1530', '--qg-bg-from': '#1a1530', '--qg-bg-to': '#2c2a5a', '--qg-text': '#ffffff' },
             roleCards: {
-                host: { face: '#f7b801', depth: '#b88a00', text: '#1a1530', icon: '#1a1530' },
-                join: { face: '#9b9eff', depth: '#5c5fd4', text: '#ffffff', icon: '#ffffff' },
+                host: { face: '#f7b801', depth: '#b88a00', text: '#3d348b', icon: '#1a1530' },
+                join: { face: '#f0eeff', depth: '#9b9eff', text: '#3d348b', icon: '#3d348b' },
                 dark: {
                     host: { face: '#524d82', depth: '#32305a', text: '#ffffff', icon: '#f7b801' },
                     join: { face: '#625d92', depth: '#3a3868', text: '#ffffff', icon: '#b8bbff' }
@@ -4279,18 +4279,23 @@ const QuizGame = (() => {
             '--qg-particle': 'rgba(143,47,43,0.22)',
             keyboard: 'keyboard--palette-retro-arcade',
             dark: {
-                '--qg-bg-color': '#221B17',
-                '--qg-bg-from': '#1A1816',
-                '--qg-bg-to': '#8F2F2B',
-                '--qg-text': '#EBE0CA',
-                '--qg-particle': 'rgba(235,224,202,0.16)'
+                '--qg-bg-color': '#1A1625',
+                '--qg-bg-from': '#1A1625',
+                '--qg-bg-to': '#2A2438',
+                '--qg-text': '#F8F9FA',
+                '--qg-subtitle': '#A09DA8',
+                '--qg-accent': '#FF4757',
+                '--qg-panel-accent': '#FF4757',
+                '--qg-theme-btn-icon': '#F8F9FA',
+                '--qg-particle': 'rgba(255,71,87,0.10)',
+                '--qg-particle-2': 'rgba(30,144,255,0.10)'
             },
             roleCards: {
                 host: { face: '#8F2F2B', depth: '#5c1c19', text: '#EBE0CA', icon: '#EBE0CA' },
                 join: { face: '#3D3535', depth: '#000000', text: '#EBE0CA', icon: '#EBE0CA' },
                 dark: {
-                    host: { face: '#8F2F2B', depth: '#5c1c19', text: '#EBE0CA', icon: '#EBE0CA' },
-                    join: { face: '#3a322c', depth: '#221B17', text: '#EBE0CA', icon: '#EBE0CA' }
+                    host: { face: '#FF4757', depth: '#C81D2A', text: '#F8F9FA', icon: '#F8F9FA', subtext: '#F8F9FA' },
+                    join: { face: '#1E90FF', depth: '#0050B3', text: '#F8F9FA', icon: '#F8F9FA', subtext: '#F8F9FA' }
                 }
             }
         },
@@ -4947,6 +4952,7 @@ const QuizGame = (() => {
 
         const themeData = QUIZ_THEMES[theme] || QUIZ_THEMES['default'];
         const particleColor = (isDark && themeData.dark?.['--qg-particle']) || themeData['--qg-particle'];
+        const particleColor2 = (isDark && themeData.dark?.['--qg-particle-2']) || null;
 
         if (theme === 'neon') {
             setSynthwaveVisible(true);
@@ -4981,7 +4987,11 @@ const QuizGame = (() => {
         const iconImg = cfg.shape === 'icon'
             ? makeParticleIconImage(BG_PARTICLE_ICONS[cfg.icon], particleColor)
             : null;
+        const iconImg2 = cfg.shape === 'icon' && particleColor2
+            ? makeParticleIconImage(BG_PARTICLE_ICONS[cfg.icon], particleColor2)
+            : null;
         const rises = cfg.rise === true || cfg.shape === 'cube';
+        const neonGlow = Boolean(particleColor2);
 
         for (let i = 0; i < cfg.count; i++) {
             const radius = cfg.size[0] + Math.random() * (cfg.size[1] - cfg.size[0]);
@@ -4995,11 +5005,12 @@ const QuizGame = (() => {
                 vy: rises
                     ? -(Math.random() * cfg.speed + cfg.speed * 0.25)
                     : (Math.random() - 0.5) * cfg.speed,
-                opacity: 0.3 + Math.random() * 0.5,
+                opacity: neonGlow ? 0.88 + Math.random() * 0.12 : 0.3 + Math.random() * 0.5,
                 phase: Math.random() * Math.PI * 2,
                 shape: cfg.shape,
                 angle: Math.random() * Math.PI * 2,
-                rotationSpeed: (Math.random() - 0.5) * 0.02
+                rotationSpeed: (Math.random() - 0.5) * 0.02,
+                icon: neonGlow && i % 2 === 1 ? iconImg2 : iconImg
             });
         }
 
@@ -5057,10 +5068,11 @@ const QuizGame = (() => {
 
                 if (p.shape === 'icon') {
                     p.angle += p.rotationSpeed;
-                    if (iconImg && iconImg.complete) {
+                    const img = p.icon || iconImg;
+                    if (img && img.complete) {
                         ctx.translate(p.x, p.y);
                         ctx.rotate(p.angle);
-                        ctx.drawImage(iconImg, -p.r, -p.r, p.r * 2, p.r * 2);
+                        ctx.drawImage(img, -p.r, -p.r, p.r * 2, p.r * 2);
                     }
                 } else if (p.shape === 'cube') {
                     p.angle += p.rotationSpeed;
@@ -5158,8 +5170,8 @@ const QuizGame = (() => {
             ).join('');
 
             return `<button type="button" class="qg-theme-bar qg-theme-swatch" data-theme="${themeId}" title="${theme.label || themeId}">
-                <span class="qg-theme-bar-name">${theme.label || themeId}</span>
                 <span class="qg-theme-bar-colors" aria-hidden="true">${segments}</span>
+                <span class="qg-theme-bar-name">${theme.label || themeId}</span>
             </button>`;
         }).join('');
     }
@@ -5221,8 +5233,9 @@ const QuizGame = (() => {
             : themeData;
 
         // Apply CSS variables to the app element
-        ['--qg-bg-color', '--qg-bg-from', '--qg-bg-to', '--qg-text', '--qg-theme-btn-icon', '--qg-accent', '--qg-panel-accent'].forEach(v => {
+        ['--qg-bg-color', '--qg-bg-from', '--qg-bg-to', '--qg-text', '--qg-subtitle', '--qg-theme-btn-icon', '--qg-accent', '--qg-panel-accent'].forEach(v => {
             if (vars[v]) app.style.setProperty(v, vars[v]);
+            else if (v === '--qg-subtitle') app.style.removeProperty(v);
         });
         if (!vars['--qg-bg-color'] && vars['--qg-bg-from']) {
             app.style.setProperty('--qg-bg-color', vars['--qg-bg-from']);

@@ -364,6 +364,7 @@
 
 .qg-subtitle {
     font-size: 1.15rem;
+    color: var(--qg-subtitle, var(--qg-text));
     opacity: 0.7;
     font-weight: 500;
 }
@@ -3584,10 +3585,10 @@ body.dark-mode .qg-mode-btn.active .qg-mode-label {
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(20px);
     border-radius: 28px;
-    padding: 20px 28px;
-    max-width: 960px;
-    width: min(96vw, 960px);
-    max-height: min(92vh, 900px);
+    padding: 18px 28px 32px;
+    width: fit-content;
+    max-width: min(96vw, 920px);
+    max-height: min(96vh, 900px);
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -3605,36 +3606,25 @@ body.dark-mode .qg-mode-btn.active .qg-mode-label {
 .qg-avatar-subtitle {
     color: #888;
     font-size: 0.9rem;
-    margin-bottom: 18px;
+    margin-bottom: 10px;
 }
 
 /* Grid layouts for avatar selection & waiting */
-.qg-avatar-grid-select {
-    display: grid;
-    grid-template-columns: repeat(8, 1fr);
-    gap: 10px;
-    justify-items: center;
-    padding: 8px 4px 8px 0;
-    width: 100%;
-    max-width: 100%;
-    margin: 0 auto 20px;
-    box-sizing: border-box;
-    overflow-y: auto;
-    max-height: min(58vh, 560px);
-}
-
+.qg-avatar-grid-select,
 .qg-avatar-grid-waiting {
     display: grid;
-    grid-template-columns: repeat(8, 1fr);
-    gap: 10px;
+    grid-template-columns: repeat(9, auto);
+    column-gap: 6px;
+    row-gap: 10px;
+    justify-content: center;
     justify-items: center;
-    padding: 8px 4px 8px 0;
-    width: 100%;
+    position: relative;
+    padding: 4px 0;
+    width: max-content;
     max-width: 100%;
-    margin: 0 auto 20px;
+    margin: 0 auto 8px;
+    min-height: 0;
     box-sizing: border-box;
-    overflow-y: auto;
-    max-height: min(52vh, 520px);
 }
 
 /* Change-avatar modal — match join-flow avatar panel width/layout */
@@ -3647,10 +3637,10 @@ body.dark-mode .qg-mode-btn.active .qg-mode-label {
 
 #overlay-avatar-modal .qg-avatar-modal-panel {
     position: relative;
-    max-width: 960px;
-    width: min(96vw, 960px);
-    max-height: min(92vh, 900px);
-    padding: 20px 28px 24px;
+    width: fit-content;
+    max-width: min(96vw, 920px);
+    max-height: min(96vh, 900px);
+    padding: 18px 28px 32px;
     margin: auto;
     text-align: center;
     box-sizing: border-box;
@@ -3687,9 +3677,15 @@ body.dark-mode .qg-mode-btn.active .qg-mode-label {
 }
 
 #overlay-avatar-modal .qg-avatar-modal-actions {
-    margin-top: 0;
+    margin-top: 12px;
     display: flex;
     gap: 15px;
+    flex-shrink: 0;
+}
+
+.qg-avatar-panel .qg-join-actions {
+    margin-top: 12px;
+    flex-shrink: 0;
 }
 
 #overlay-avatar-modal .qg-avatar-modal-actions .qg-btn {
@@ -3699,8 +3695,8 @@ body.dark-mode .qg-mode-btn.active .qg-mode-label {
 
 /* Individual squircle avatar button */
 .qg-avatar-option {
-    width: 85px;
-    height: 85px;
+    width: clamp(80px, 10.5vh, 102px);
+    height: clamp(80px, 10.5vh, 102px);
     border-radius: 22%;
     border: 3px solid #e0e0e0;
     background: #f0f0f5;
@@ -3822,27 +3818,22 @@ body.dark-mode .qg-mode-btn.active .qg-mode-label {
 
 /* ===== RESPONSIVE: Avatar grid + answer buttons ===== */
 @media (max-width: 600px) {
-    .qg-avatar-grid-select {
-        grid-template-columns: repeat(6, 1fr);
-        gap: 8px;
-    }
-
-    .qg-avatar-grid-select .qg-avatar-option {
-        width: 48px;
-        height: 48px;
-    }
-
+    .qg-avatar-grid-select,
     .qg-avatar-grid-waiting {
-        grid-template-columns: repeat(6, 1fr);
+        grid-template-columns: repeat(6, auto);
+        column-gap: 4px;
+        row-gap: 8px;
+        justify-content: center;
     }
 
+    .qg-avatar-grid-select .qg-avatar-option,
     .qg-avatar-grid-waiting .qg-avatar-option {
         width: 48px;
         height: 48px;
     }
 
     .qg-avatar-panel {
-        padding: 24px 16px;
+        padding: 24px 56px;
         max-height: min(94vh, 900px);
     }
 
@@ -4283,25 +4274,26 @@ body.dark-mode .qg-avatar-option.selected::after {
 
 .qg-theme-swatches,
 .qg-theme-bars {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 12px;
     width: 100%;
 }
 
 .qg-theme-bar {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     width: 100%;
-    padding: 7px 10px;
+    padding: 10px 8px 8px;
     border: 2px solid transparent;
     border-radius: 12px;
     background: rgba(0, 0, 0, 0.04);
     cursor: pointer;
     transition: border-color 0.2s ease, background 0.2s ease, transform 0.15s ease;
     font-family: inherit;
-    text-align: left;
+    text-align: center;
 }
 
 .qg-theme-bar:hover {
@@ -4316,8 +4308,9 @@ body.dark-mode .qg-avatar-option.selected::after {
 }
 
 .qg-theme-bar-name {
-    flex: 0 0 92px;
-    font-size: 0.82rem;
+    flex: none;
+    width: 100%;
+    font-size: 0.78rem;
     font-weight: 700;
     color: #2a2548;
     letter-spacing: 0.02em;
@@ -4327,9 +4320,11 @@ body.dark-mode .qg-avatar-option.selected::after {
 }
 
 .qg-theme-bar-colors {
-    flex: 1 1 auto;
+    flex: 0 0 auto;
+    width: 76%;
+    max-width: 128px;
     display: flex;
-    height: 26px;
+    height: 22px;
     min-width: 0;
     border-radius: 7px;
     overflow: hidden;
@@ -4355,6 +4350,10 @@ body.dark-mode .qg-avatar-option.selected::after {
     cursor: pointer;
 }
 
+.qg-theme-bar.qg-theme-swatch {
+    height: auto;
+}
+
 /* Theme dropdown — anchored below the floating theme button (above countdown overlay) */
 .qg-theme-dropdown-backdrop {
     display: none;
@@ -4374,7 +4373,7 @@ body.dark-mode .qg-avatar-option.selected::after {
     position: absolute;
     top: calc(100% + 10px);
     right: 0;
-    width: min(360px, calc(100vw - 36px));
+    width: min(500px, calc(100vw - 36px));
     max-height: calc(100vh - 96px);
     z-index: 2;
 }
@@ -4385,7 +4384,7 @@ body.dark-mode .qg-avatar-option.selected::after {
 
 .qg-theme-modal-panel {
     position: relative;
-    width: 100%;
+    width: 90%;
     max-height: calc(100vh - 96px);
     padding: 22px 20px 20px;
     border-radius: 20px;
@@ -4640,6 +4639,10 @@ body.dark-mode .qg-reconnect-badge {
 .qg-app.qg-theme-retro-arcade .qg-game-code,
 .qg-app.qg-theme-retro-arcade .qg-waiting-name {
     color: var(--qg-text, #221B17);
+}
+
+.qg-app.qg-theme-retro-arcade.qg-dark .qg-subtitle {
+    opacity: 1;
 }
 
 .qg-app.qg-theme-kawaii-pastel {
