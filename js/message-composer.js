@@ -28,9 +28,82 @@ const SIZE_LABELS = { small: 'S', medium: 'M', large: 'L', huge: 'XL' };
 const SIZE_TITLES = { small: 'Small', medium: 'Medium', large: 'Large', huge: 'Huge' };
 
 const RECENT_KEY = 'broadcastRecentMessages';
+const RECENT_BG_KEY = 'broadcastRecentBgUrls';
 const SETTINGS_KEY = 'broadcastComposerSettings';
 const MAX_RECENT = 5;
+const MAX_RECENT_BG = 6;
 const BG_OVERLAY_OPACITY = 0.72;
+const URL_PATTERN = /\b(?:https?:\/\/|www\.)[^\s<>"'`]+/gi;
+
+function splitUrlMatch(raw) {
+    let hrefText = raw;
+    let trailing = '';
+
+    while (hrefText.length) {
+        const last = hrefText.slice(-1);
+        if ('. ,;:!?'.includes(last)) {
+            trailing = last + trailing;
+            hrefText = hrefText.slice(0, -1);
+            continue;
+        }
+        if (last === ')' && (hrefText.match(/\(/g) || []).length < (hrefText.match(/\)/g) || []).length) {
+            trailing = last + trailing;
+            hrefText = hrefText.slice(0, -1);
+            continue;
+        }
+        break;
+    }
+
+    return { hrefText, trailing };
+}
+
+function toSafeHref(detected) {
+    const candidate = /^https?:\/\//i.test(detected) ? detected : `https://${detected}`;
+    try {
+        const url = new URL(candidate);
+        if (url.protocol !== 'http:' && url.protocol !== 'https:') return null;
+        return url.href;
+    } catch {
+        return null;
+    }
+}
+
+function renderTextWithLinks(el, text) {
+    el.textContent = '';
+    if (!text) return;
+
+    const pattern = new RegExp(URL_PATTERN.source, 'gi');
+    let lastIndex = 0;
+    let match;
+
+    while ((match = pattern.exec(text)) !== null) {
+        if (match.index > lastIndex) {
+            el.appendChild(document.createTextNode(text.slice(lastIndex, match.index)));
+        }
+
+        const { hrefText, trailing } = splitUrlMatch(match[0]);
+        const safeHref = toSafeHref(hrefText);
+        if (safeHref) {
+            const a = document.createElement('a');
+            a.href = safeHref;
+            a.textContent = hrefText;
+            a.target = '_blank';
+            a.rel = 'noopener noreferrer';
+            a.className = 'broadcast-inline-link';
+            el.appendChild(a);
+        } else {
+            el.appendChild(document.createTextNode(hrefText));
+        }
+        if (trailing) {
+            el.appendChild(document.createTextNode(trailing));
+        }
+        lastIndex = match.index + match[0].length;
+    }
+
+    if (lastIndex < text.length) {
+        el.appendChild(document.createTextNode(text.slice(lastIndex)));
+    }
+}
 
 let selectedColor = 'blue';
 let selectedSize = 'huge';
@@ -51,6 +124,8 @@ const $bgImageUrl = document.getElementById('bg-image-url');
 const $bgUrlApply = document.getElementById('bg-url-apply');
 const $bgImageRemove = document.getElementById('bg-image-remove');
 const $bgUploadError = document.getElementById('bg-upload-error');
+const $recentBgUrls = document.getElementById('recent-bg-urls');
+const $recentBgList = document.getElementById('recent-bg-list');
 const $broadcastLink = document.getElementById('broadcast-link');
 const $copyFeedback = document.getElementById('copy-feedback');
 const $presetContainer = document.getElementById('preset-buttons');
@@ -69,6 +144,7 @@ function init() {
     renderColorSwatches();
     renderSizeOptions();
     renderRecentMessages();
+    renderRecentBgUrls();
     bindEvents();
     updatePreview();
 
@@ -261,11 +337,13 @@ function applyState(state) {
     renderColorSwatches();
     renderSizeOptions();
     if (backgroundImageUrl) {
+        saveRecentBgUrl(backgroundImageUrl);
         refreshBackgroundPreview();
     } else {
         backgroundFetchToken++;
         revokeBackgroundPreviewUrl();
         updatePreview();
+        renderRecentBgUrls();
     }
 }
 
@@ -329,6 +407,7 @@ function removeBackgroundImage() {
     $bgImageRemove.hidden = true;
     clearBgUploadError();
     updatePreview();
+    renderRecentBgUrls();
     if ($broadcastLink.value) generateLink();
 }
 
@@ -346,6 +425,7 @@ async function applyBackgroundUrl() {
         backgroundImageUrl = normalized;
         $bgImageUrl.value = normalized;
         $bgImageRemove.hidden = false;
+        saveRecentBgUrl(normalized);
         await refreshBackgroundPreview();
         if ($broadcastLink.value) generateLink();
     } catch (err) {
@@ -371,7 +451,11 @@ function updatePreview() {
     );
     $previewScreen.classList.toggle('has-bg-image', Boolean(backgroundImageUrl));
     $previewScreen.style.color = theme.text;
-    $previewMessage.textContent = text || 'Your message preview…';
+    if (text) {
+        renderTextWithLinks($previewMessage, text);
+    } else {
+        $previewMessage.textContent = 'Your message preview…';
+    }
     $previewCopyBtn.hidden = !(settings.showCopyButton && text);
     fitPreviewText($previewMessage, size);
 
@@ -462,6 +546,116 @@ function deleteRecentMessage(index) {
     renderRecentMessages();
 }
 
+function readRecentBgUrls() {
+    const raw = localStorage.getItem(RECENT_BG_KEY);
+    if (raw === null) return null;
+    try {
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed)) return [];
+        return parsed.filter(url => typeof url === 'string' && /^https?:\/\//i.test(url));
+    } catch {
+        return [];
+    }
+}
+
+function backfillRecentBgUrlsFromMessages() {
+    let messages = [];
+    try {
+        messages = JSON.parse(localStorage.getItem(RECENT_KEY)) || [];
+    } catch {
+        return [];
+    }
+
+    const urls = [];
+    for (const item of messages) {
+        const url = resolveStoredBgUrl(item);
+        if (url && !urls.includes(url)) urls.push(url);
+    }
+    return urls.slice(0, MAX_RECENT_BG);
+}
+
+function getRecentBgUrls() {
+    const stored = readRecentBgUrls();
+    if (stored) return stored;
+
+    const backfilled = backfillRecentBgUrlsFromMessages();
+    if (backfilled.length) {
+        localStorage.setItem(RECENT_BG_KEY, JSON.stringify(backfilled));
+    }
+    return backfilled;
+}
+
+function bgUrlLabel(url) {
+    try {
+        const parsed = new URL(url);
+        const host = parsed.hostname.replace(/^www\./, '');
+        const file = parsed.pathname.split('/').filter(Boolean).pop() || '';
+        if (host.includes('imgur')) return file || 'Imgur';
+        if (host.includes('google')) return 'Google Drive';
+        return file ? `${host}/${file}` : host;
+    } catch {
+        return url;
+    }
+}
+
+function saveRecentBgUrl(url) {
+    if (!url) return;
+    let recent = getRecentBgUrls();
+    recent = recent.filter(item => item !== url);
+    recent.unshift(url);
+    recent = recent.slice(0, MAX_RECENT_BG);
+    localStorage.setItem(RECENT_BG_KEY, JSON.stringify(recent));
+    renderRecentBgUrls();
+}
+
+function deleteRecentBgUrl(index) {
+    const recent = getRecentBgUrls();
+    if (index < 0 || index >= recent.length) return;
+    recent.splice(index, 1);
+    localStorage.setItem(RECENT_BG_KEY, JSON.stringify(recent));
+    renderRecentBgUrls();
+}
+
+function renderRecentBgUrls() {
+    const recent = getRecentBgUrls();
+    $recentBgUrls.hidden = recent.length === 0;
+    $recentBgList.replaceChildren();
+
+    recent.forEach((url, i) => {
+        const item = document.createElement('div');
+        item.className = 'recent-bg-item';
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'recent-bg-thumb' + (url === backgroundImageUrl ? ' active' : '');
+        btn.dataset.recentBg = String(i);
+        btn.title = url;
+        btn.setAttribute('aria-label', `Use background ${bgUrlLabel(url)}`);
+
+        const img = document.createElement('img');
+        img.alt = '';
+        img.referrerPolicy = 'no-referrer';
+        img.src = url;
+        img.addEventListener('error', () => {
+            img.remove();
+            btn.classList.add('broken');
+        });
+        btn.appendChild(img);
+
+        const del = document.createElement('button');
+        del.type = 'button';
+        del.className = 'recent-bg-delete';
+        del.dataset.deleteRecentBg = String(i);
+        del.setAttribute('aria-label', 'Remove background');
+        del.title = 'Remove';
+        del.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+
+        item.appendChild(btn);
+        item.appendChild(del);
+        $recentBgList.appendChild(item);
+    });
+}
+
 function generateLink() {
     const state = getFormState();
     if (!state.text) {
@@ -529,6 +723,22 @@ function bindEvents() {
         }
     });
     $bgImageRemove.addEventListener('click', removeBackgroundImage);
+
+    $recentBgList.addEventListener('click', (e) => {
+        const deleteBtn = e.target.closest('[data-delete-recent-bg]');
+        if (deleteBtn) {
+            e.stopPropagation();
+            deleteRecentBgUrl(Number(deleteBtn.dataset.deleteRecentBg));
+            return;
+        }
+
+        const btn = e.target.closest('[data-recent-bg]');
+        if (!btn) return;
+        const url = getRecentBgUrls()[Number(btn.dataset.recentBg)];
+        if (!url) return;
+        $bgImageUrl.value = url;
+        applyBackgroundUrl();
+    });
 
     $generateBtn.addEventListener('click', generateLink);
     $copyBtn.addEventListener('click', copyLink);

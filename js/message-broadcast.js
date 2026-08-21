@@ -18,6 +18,77 @@ const FONT_SIZES = {
 
 const PLACEHOLDER_TEXT = 'Waiting for message…';
 const BG_OVERLAY_OPACITY = 0.72;
+const URL_PATTERN = /\b(?:https?:\/\/|www\.)[^\s<>"'`]+/gi;
+
+function splitUrlMatch(raw) {
+    let hrefText = raw;
+    let trailing = '';
+
+    while (hrefText.length) {
+        const last = hrefText.slice(-1);
+        if ('. ,;:!?'.includes(last)) {
+            trailing = last + trailing;
+            hrefText = hrefText.slice(0, -1);
+            continue;
+        }
+        if (last === ')' && (hrefText.match(/\(/g) || []).length < (hrefText.match(/\)/g) || []).length) {
+            trailing = last + trailing;
+            hrefText = hrefText.slice(0, -1);
+            continue;
+        }
+        break;
+    }
+
+    return { hrefText, trailing };
+}
+
+function toSafeHref(detected) {
+    const candidate = /^https?:\/\//i.test(detected) ? detected : `https://${detected}`;
+    try {
+        const url = new URL(candidate);
+        if (url.protocol !== 'http:' && url.protocol !== 'https:') return null;
+        return url.href;
+    } catch {
+        return null;
+    }
+}
+
+function renderTextWithLinks(el, text) {
+    el.textContent = '';
+    if (!text) return;
+
+    const pattern = new RegExp(URL_PATTERN.source, 'gi');
+    let lastIndex = 0;
+    let match;
+
+    while ((match = pattern.exec(text)) !== null) {
+        if (match.index > lastIndex) {
+            el.appendChild(document.createTextNode(text.slice(lastIndex, match.index)));
+        }
+
+        const { hrefText, trailing } = splitUrlMatch(match[0]);
+        const safeHref = toSafeHref(hrefText);
+        if (safeHref) {
+            const a = document.createElement('a');
+            a.href = safeHref;
+            a.textContent = hrefText;
+            a.target = '_blank';
+            a.rel = 'noopener noreferrer';
+            a.className = 'broadcast-inline-link';
+            el.appendChild(a);
+        } else {
+            el.appendChild(document.createTextNode(hrefText));
+        }
+        if (trailing) {
+            el.appendChild(document.createTextNode(trailing));
+        }
+        lastIndex = match.index + match[0].length;
+    }
+
+    if (lastIndex < text.length) {
+        el.appendChild(document.createTextNode(text.slice(lastIndex)));
+    }
+}
 
 let broadcastText = '';
 
@@ -80,7 +151,7 @@ function init() {
     applyBackgroundLayers($bg, $overlay, $screen, bgImage, theme.bg);
     $screen.classList.toggle('has-bg-image', Boolean(bgImage));
     $screen.style.color = theme.text;
-    $text.textContent = text;
+    renderTextWithLinks($text, text);
 
     if (anim && anim !== 'none') {
         $screen.classList.add(`anim-${anim}`);

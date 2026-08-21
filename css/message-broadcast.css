@@ -57,6 +57,20 @@ body {
     overflow: hidden;
 }
 
+.broadcast-inline-link {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 0.12em;
+    cursor: pointer;
+    pointer-events: auto;
+}
+
+.broadcast-inline-link:hover,
+.broadcast-inline-link:focus-visible {
+    opacity: 0.85;
+    text-decoration-thickness: 0.12em;
+}
+
 .broadcast-screen.placeholder {
     background: #2d2d2d;
     color: #888;
