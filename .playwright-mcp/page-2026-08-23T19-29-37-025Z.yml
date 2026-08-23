@@ -1,0 +1,95 @@
+- generic [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]:
+        - heading " Grade Sheets" [level=1] [ref=e6]:
+          - generic [ref=e7]: 
+          - text: Grade Sheets
+        - paragraph [ref=e8]: Manage your term grading sheets
+      - generic [ref=e9]:
+        - link " Tools" [ref=e10] [cursor=pointer]:
+          - /url: tools.html
+          - generic [ref=e11]: 
+          - text: Tools
+        - button " Export Selected" [disabled] [ref=e12]:
+          - generic [ref=e13]: 
+          - text: Export Selected
+        - button " Google Drive" [ref=e14] [cursor=pointer]:
+          - generic [ref=e15]: 
+          - text: Google Drive
+        - button "+ New Sheet" [ref=e16] [cursor=pointer]:
+          - generic [ref=e17]: +
+          - text: New Sheet
+    - text:  
+    - generic [ref=e18]:
+      - generic [ref=e19]: 
+      - heading "No Grade Sheets Yet" [level=2] [ref=e20]
+      - paragraph [ref=e21]:
+        - text: Click
+        - strong [ref=e22]: "\"New Sheet\""
+        - text: to create your first grading sheet.
+    - text: 
+  - text:               + + +  
+  - generic [ref=e27]:
+    - generic [ref=e28]:
+      - heading " New Grade Sheet" [level=2] [ref=e29]:
+        - generic [ref=e30]: 
+        - text: New Grade Sheet
+      - button "" [ref=e31] [cursor=pointer]
+    - generic [ref=e33]:
+      - generic [ref=e34]:
+        - generic [ref=e35]: Teacher Name
+        - textbox "Teacher Name" [ref=e36]:
+          - /placeholder: e.g. Juan Diego Cuellar Mazabel
+      - generic [ref=e37]:
+        - generic [ref=e38]: Subject
+        - textbox "Subject" [active] [ref=e39]:
+          - /placeholder: e.g. Technology
+      - generic [ref=e40]:
+        - generic [ref=e41]: Subject Icon
+        - generic [ref=e42]:
+          - button "" [ref=e43] [cursor=pointer]
+          - button "" [ref=e45] [cursor=pointer]
+          - button "" [ref=e47] [cursor=pointer]
+          - button "" [ref=e49] [cursor=pointer]
+          - button "" [ref=e51] [cursor=pointer]
+          - button "" [ref=e53] [cursor=pointer]
+      - generic [ref=e55]:
+        - generic [ref=e56]: Card Header Color
+        - generic [ref=e57]:
+          - textbox "Card Header Color" [ref=e58] [cursor=pointer]: "#2c1f56"
+          - generic [ref=e59]:
+            - button "Indigo" [ref=e60] [cursor=pointer]
+            - button "Purple" [ref=e61] [cursor=pointer]
+            - button "Blue" [ref=e62] [cursor=pointer]
+            - button "Teal" [ref=e63] [cursor=pointer]
+            - button "Green" [ref=e64] [cursor=pointer]
+            - button "Violet" [ref=e65] [cursor=pointer]
+      - generic [ref=e66]:
+        - generic [ref=e67]: Group / Course
+        - combobox "Group / Course" [ref=e68]:
+          - option "3A (26 students)" [selected]
+          - option "3B (26 students)"
+          - option "3C (25 students)"
+          - option "4A (29 students)"
+          - option "4B (29 students)"
+          - option "4C (30 students)"
+          - option "5A (28 students)"
+          - option "5B (28 students)"
+          - option "5C (28 students)"
+          - option "5D (28 students)"
+      - generic [ref=e69]:
+        - generic [ref=e70]: School Term
+        - combobox "School Term" [ref=e71]:
+          - option "First" [selected]
+          - option "Second"
+          - option "Third"
+          - option "Fourth"
+    - generic [ref=e72]:
+      - button "Cancel" [ref=e73] [cursor=pointer]
+      - button " Create Sheet" [ref=e74] [cursor=pointer]:
+        - generic [ref=e75]: 
+        - text: Create Sheet
+  - text:                                  
+  - generic [ref=e23]: ESL Learning Platform © 2025 | Made for Teachers, by Teachers
+  - button "" [ref=e24] [cursor=pointer]

@@ -1,0 +1,121 @@
+- generic [ref=e1]:
+  - text:     +          
+  - generic [ref=e118]:
+    - generic [ref=e119]:
+      - generic [ref=e120]:
+        - button " Back to Sheets" [ref=e121] [cursor=pointer]:
+          - generic [ref=e122]: 
+          - text: Back to Sheets
+        - heading "Template Verify — 3A (First Term)" [level=1] [ref=e123]
+      - generic [ref=e124]:
+        - button " Export CSV" [ref=e125] [cursor=pointer]:
+          - generic [ref=e126]: 
+          - text: Export CSV
+        - button " Missing Grades" [ref=e127] [cursor=pointer]:
+          - generic [ref=e128]: 
+          - text: Missing Grades
+        - button " Scale" [ref=e129] [cursor=pointer]:
+          - generic [ref=e130]: 
+          - text: Scale
+        - button " Import" [ref=e131] [cursor=pointer]:
+          - generic [ref=e132]: 
+          - text: Import
+        - button " Upload Grades" [ref=e133] [cursor=pointer]:
+          - generic [ref=e134]: 
+          - text: Upload Grades
+        - generic "Remove the decimal point from grades (e.g., 4.5 becomes 45)" [ref=e135]:
+          - generic [ref=e136]:
+            - checkbox
+            - generic [ref=e137] [cursor=pointer]
+          - generic [ref=e138]: Note Decimals
+        - button " Show Grades" [ref=e139] [cursor=pointer]:
+          - generic [ref=e140]: 
+          - text: Show Grades
+        - button " Clear Grades" [ref=e141] [cursor=pointer]:
+          - generic [ref=e142]: 
+          - text: Clear Grades
+        - button " Descriptions" [ref=e143] [cursor=pointer]:
+          - generic [ref=e144]: 
+          - text: Descriptions
+    - generic [ref=e145]:
+      - generic [ref=e146]:
+        - generic [ref=e147]: 
+        - generic [ref=e148]: Teacher
+      - generic [ref=e149]:
+        - generic [ref=e150]: 
+        - generic [ref=e151]: Template Verify
+      - generic [ref=e152]:
+        - generic [ref=e153]: 
+        - generic [ref=e154]: Course 3A
+      - generic [ref=e155]:
+        - generic [ref=e156]: 
+        - generic [ref=e157]: First Term
+      - button " Edit" [ref=e158] [cursor=pointer]:
+        - generic [ref=e159]: 
+        - text: Edit
+    - generic [ref=e160]:
+      - generic [ref=e161]:
+        - generic [ref=e162]: Cognitiva (35%)
+        - textbox "Activity description..." [ref=e163]
+        - button "+" [ref=e164] [cursor=pointer]
+      - generic [ref=e166]:
+        - generic [ref=e167]: Laboral (35%)
+        - textbox "Activity description..." [ref=e168]
+        - button "+" [ref=e169] [cursor=pointer]
+      - generic [ref=e171]:
+        - generic [ref=e172]: Ciudadana (30%)
+        - textbox "Activity description..." [ref=e173]
+        - button "+" [ref=e174] [cursor=pointer]
+    - generic [ref=e176]:
+      - generic [ref=e178]:
+        - generic [ref=e179]: 
+        - paragraph [ref=e180]: Add activities above to start grading
+      - generic [ref=e181]:
+        - heading " Activity Descriptions" [level=3] [ref=e182]:
+          - generic [ref=e183]: 
+          - text: Activity Descriptions
+        - paragraph [ref=e185]: No activities added yet.
+  - text:                                     
+  - generic [ref=e187]:
+    - generic [ref=e188]:
+      - heading " Upload Grades CSV" [level=3] [ref=e189]:
+        - generic [ref=e190]: 
+        - text: Upload Grades CSV
+      - button "" [ref=e191] [cursor=pointer]
+    - generic [ref=e193]:
+      - generic [ref=e194]:
+        - generic [ref=e195]: Need a template?
+        - generic [ref=e196]:
+          - button " Template for This Sheet" [ref=e197] [cursor=pointer]:
+            - generic [ref=e198]: 
+            - text: Template for This Sheet
+          - button " All Groups Roster" [active] [ref=e199] [cursor=pointer]:
+            - generic [ref=e200]: 
+            - text: All Groups Roster
+        - paragraph [ref=e201]: "\"Template for This Sheet\" gives you this sheet's students as rows and its activity columns, ready to fill in and re-upload above. \"All Groups Roster\" is a reference list of every group and student name."
+      - generic [ref=e202]:
+        - generic [ref=e203]: CSV File
+        - generic [ref=e204]:
+          - button "CSV File  Choose CSV"
+          - generic [ref=e205] [cursor=pointer]:
+            - generic [ref=e206]: 
+            - text: Choose CSV
+          - generic [ref=e207]: No file chosen
+      - generic [ref=e208]:
+        - generic [ref=e209]: Uploaded Numbers Are
+        - generic [ref=e210]:
+          - generic [ref=e211] [cursor=pointer]:
+            - radio "Raw scores" [checked] [ref=e212]
+            - text: Raw scores
+          - generic [ref=e213] [cursor=pointer]:
+            - radio "Final grades" [ref=e214]
+            - text: Final grades
+      - generic [ref=e215]: Choose a CSV file to preview matching students and activities.
+      - paragraph [ref=e216]: Importing writes only score values into matched activity columns. Activity descriptions and categories are not changed.
+    - generic [ref=e217]:
+      - button "Cancel" [ref=e218] [cursor=pointer]
+      - button " Import Grades" [disabled] [ref=e219] [cursor=pointer]:
+        - generic [ref=e220]: 
+        - text: Import Grades
+  - generic [ref=e23]: ESL Learning Platform © 2025 | Made for Teachers, by Teachers
+  - button "" [ref=e24] [cursor=pointer]

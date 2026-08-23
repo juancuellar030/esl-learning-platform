@@ -1231,6 +1231,22 @@
                 </div>
                 <div class="gs-modal-body">
                     <div class="gs-field">
+                        <label>Need a template?</label>
+                        <div class="gs-radio-row">
+                            <button type="button" id="gs-download-sheet-template" class="gs-btn gs-btn-ghost">
+                                <i class="fa-solid fa-file-arrow-down"></i> Template for This Sheet
+                            </button>
+                            <button type="button" id="gs-download-roster-template" class="gs-btn gs-btn-ghost">
+                                <i class="fa-solid fa-file-arrow-down"></i> All Groups Roster
+                            </button>
+                        </div>
+                        <p class="gs-hint">
+                            "Template for This Sheet" gives you this sheet's students as rows and
+                            its activity columns, ready to fill in and re-upload above.
+                            "All Groups Roster" is a reference list of every group and student name.
+                        </p>
+                    </div>
+                    <div class="gs-field">
                         <label for="gs-upload-file-input">CSV File</label>
                         <div class="gs-file-upload">
                             <input
@@ -1304,6 +1320,9 @@
 
         <script src="js/student-groups-data.js"></script>
         <script src="js/darkmode.js"></script>
+        <script src="https://accounts.google.com/gsi/client" async defer></script>
+        <script src="https://apis.google.com/js/api.js" async defer></script>
+        <script src="js/google-drive-service.js"></script>
         <script src="js/grade-sheets.js"></script>
     </body>
 </html>

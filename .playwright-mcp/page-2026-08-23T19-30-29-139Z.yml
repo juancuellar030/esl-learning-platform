@@ -1,0 +1,78 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]:
+        - heading " Grade Sheets" [level=1] [ref=e6]:
+          - generic [ref=e7]: 
+          - text: Grade Sheets
+        - paragraph [ref=e8]: Manage your term grading sheets
+      - generic [ref=e9]:
+        - link " Tools" [ref=e10] [cursor=pointer]:
+          - /url: tools.html
+          - generic [ref=e11]: 
+          - text: Tools
+        - button " Export Selected" [disabled] [ref=e12]:
+          - generic [ref=e13]: 
+          - text: Export Selected
+        - button " Google Drive" [ref=e14] [cursor=pointer]:
+          - generic [ref=e15]: 
+          - text: Google Drive
+        - button "+ New Sheet" [ref=e16] [cursor=pointer]:
+          - generic [ref=e17]: +
+          - text: New Sheet
+    - generic [ref=e76]:
+      - generic [ref=e77]:
+        - generic [ref=e78]: 
+        - searchbox "Search by subject, course, term or teacher..." [ref=e79]
+      - generic [ref=e80]:
+        - generic [ref=e81]:
+          - generic [ref=e82]: Subject
+          - combobox "Subject" [ref=e83]:
+            - option "All subjects" [selected]
+            - option "Template Verify"
+        - generic [ref=e84]:
+          - generic [ref=e85]: Course
+          - combobox "Course" [ref=e86]:
+            - option "All courses" [selected]
+            - option "3A"
+        - generic [ref=e87]:
+          - generic [ref=e88]: Term
+          - combobox "Term" [ref=e89]:
+            - option "All terms" [selected]
+            - option "First"
+        - generic [ref=e90]:
+          - generic [ref=e91]: Sort by
+          - combobox "Sort by" [ref=e92]:
+            - option "Recently updated" [selected]
+            - option "Most complete first"
+            - option "Least complete first"
+        - button " Clear" [disabled] [ref=e93]:
+          - generic [ref=e94]: 
+          - text: Clear
+      - generic [ref=e95]: 1 sheet
+    - generic [ref=e97] [cursor=pointer]:
+      - checkbox "Select for export" [ref=e98]
+      - button "" [ref=e100]
+      - generic [ref=e102]:
+        - heading " Template Verify — 3A" [level=3] [ref=e103]:
+          - generic [ref=e104]: 
+          - text: Template Verify — 3A
+        - generic [ref=e105]:
+          - generic [ref=e106]:
+            - generic [ref=e107]: 
+            - text: First Term
+          - generic [ref=e108]:
+            - generic [ref=e109]: 
+            - text: 26 students
+      - generic [ref=e110]:
+        - generic [ref=e111]:
+          - generic [ref=e112]: 
+          - text: Teacher
+        - generic [ref=e113]:
+          - generic [ref=e114]: 
+          - text: 0 activities
+        - generic [ref=e115]: 0% complete
+    - text:  
+  - text:               + + +                                             
+  - generic [ref=e23]: ESL Learning Platform © 2025 | Made for Teachers, by Teachers
+  - button "" [ref=e24] [cursor=pointer]

@@ -1813,6 +1813,45 @@
   // ══════════════════════════════════════════════════════
   //              UPLOAD CSV GRADES
   // ══════════════════════════════════════════════════════
+  function downloadRosterTemplate() {
+    const rows = [["Group", "Student"]];
+    if (typeof STUDENT_GROUPS !== "undefined") {
+      Object.keys(STUDENT_GROUPS)
+        .sort()
+        .forEach((group) => {
+          (STUDENT_GROUPS[group] || []).forEach((name) => {
+            rows.push([group, name]);
+          });
+        });
+    }
+    const csv = rows.map((r) => r.map(csvEscape).join(",")).join("\r\n");
+    downloadCsv("All_Groups_Roster.csv", csv);
+  }
+
+  function downloadSheetTemplate() {
+    const sheet = getSheet();
+    if (!sheet) {
+      showToast("Open a sheet first to download its template.", "error");
+      return;
+    }
+    const students = getStudentNames(sheet.group);
+    const activities = getAllActivities(sheet);
+    if (!activities.length) {
+      showToast("This sheet has no activities yet — add some first.", "error");
+      return;
+    }
+    const header = ["Student", ...activities.map((a) => a.label)];
+    const rows = [header];
+    students.forEach((name) => {
+      rows.push([name, ...activities.map(() => "")]);
+    });
+    const csv = rows.map((r) => r.map(csvEscape).join(",")).join("\r\n");
+    const filename =
+      (sheet.subject || sheet.group || "Sheet").replace(/\s+/g, "_") +
+      "_Template.csv";
+    downloadCsv(filename, csv);
+  }
+
   function openUploadModal() {
     pendingCsvImport = null;
     if ($uploadFileInput) $uploadFileInput.value = "";
@@ -2474,6 +2513,15 @@
       $uploadFileInput.addEventListener("change", handleUploadFileChange);
     if ($uploadImportBtn)
       $uploadImportBtn.addEventListener("click", executeCsvUpload);
+    const $downloadSheetTemplateBtn = $("gs-download-sheet-template");
+    const $downloadRosterTemplateBtn = $("gs-download-roster-template");
+    if ($downloadSheetTemplateBtn)
+      $downloadSheetTemplateBtn.addEventListener("click", downloadSheetTemplate);
+    if ($downloadRosterTemplateBtn)
+      $downloadRosterTemplateBtn.addEventListener(
+        "click",
+        downloadRosterTemplate,
+      );
     if ($uploadOverlay)
       $uploadOverlay.addEventListener("click", (e) => {
         if (e.target === $uploadOverlay) closeUploadModal();
