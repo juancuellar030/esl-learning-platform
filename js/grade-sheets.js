@@ -953,14 +953,19 @@
           th.dataset.cat = cat;
           th.draggable = true;
           const sc = getScaleForActivity(act, sheet);
-          const scaleLabel =
-            act.scaleId && act.scaleId !== "global"
-              ? escHtml(sc.name)
-              : `/${sc.pmax}`;
+          const hasCustomScale = act.scaleId && act.scaleId !== "global";
+          const scaleLabel = hasCustomScale ? escHtml(sc.name) : `/${sc.pmax}`;
+          const scaleTitle = (
+            hasCustomScale
+              ? `Custom scale: ${sc.name} — click to change`
+              : "Using default sheet scale — click to set a custom scale for this activity"
+          )
+            .replace(/&/g, "&amp;")
+            .replace(/"/g, "&quot;");
           th.innerHTML = `
                     <i class="fa-solid fa-grip-vertical gs-drag-handle"></i>
                     <span class="gs-col-num">${colNum}</span>
-                    <div class="gs-col-max gs-act-settings-trigger" data-id="${act.id}" title="Activity Settings">${scaleLabel}</div>
+                    <div class="gs-col-max gs-act-settings-trigger${hasCustomScale ? " gs-has-custom-scale" : ""}" data-id="${act.id}" title="${scaleTitle}">${scaleLabel} <i class="fa-solid fa-gear gs-act-settings-icon"></i></div>
                     <button class="gs-col-delete" data-id="${act.id}" title="Remove column"><i class="fa-solid fa-xmark"></i></button>
                     <button class="gs-col-hide" data-id="${act.id}" title="Hide column"><i class="fa-solid fa-eye-slash"></i></button>`;
           th.querySelector(".gs-act-settings-trigger").addEventListener(

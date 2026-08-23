@@ -1071,6 +1071,7 @@ body {
 .gs-act-th .gs-col-max {
     display: block;
     font-size: 0.75rem;
+    font-weight: 400;
     color: #b2bec3;
     margin-top: 2px;
     cursor: pointer;
@@ -1084,6 +1085,26 @@ body {
 .gs-act-th .gs-col-max:hover {
     text-decoration: underline;
     text-decoration-style: dotted;
+}
+
+.gs-act-th .gs-act-settings-icon {
+    margin-left: 3px;
+    font-size: 0.65rem;
+    opacity: 0.55;
+    transition: opacity 0.15s;
+}
+
+.gs-act-th .gs-col-max:hover .gs-act-settings-icon {
+    opacity: 1;
+}
+
+.gs-act-th .gs-col-max.gs-has-custom-scale {
+    color: #6c5ce7;
+    font-weight: 600;
+}
+
+.gs-act-th .gs-col-max.gs-has-custom-scale .gs-act-settings-icon {
+    opacity: 0.85;
 }
 
 /* Delete column button */
@@ -2029,6 +2050,11 @@ body.dark-mode .gs-act-th .gs-col-max {
 
 body.dark-mode .gs-act-th:hover .gs-col-max {
     color: #d1d8e0;
+}
+
+body.dark-mode .gs-act-th .gs-col-max.gs-has-custom-scale,
+body.dark-mode .gs-act-th:hover .gs-col-max.gs-has-custom-scale {
+    color: #a29bfe;
 }
 
 body.dark-mode .gs-show-col-btn {
