@@ -1040,6 +1040,7 @@
 
         input.addEventListener("change", onGradeChange);
         input.addEventListener("keydown", onGradeKeydown);
+        input.addEventListener("paste", onGradePaste);
 
         td.appendChild(input);
         tr.appendChild(td);
@@ -1152,6 +1153,84 @@
     sheet.updatedAt = Date.now();
     saveToStorage();
     renderGrid();
+  }
+
+  function onGradePaste(e) {
+    const clip = e.clipboardData || window.clipboardData;
+    if (!clip) return;
+    const text = clip.getData("text");
+    if (!text) return;
+
+    const lines = text
+      .replace(/\r\n/g, "\n")
+      .replace(/\r/g, "\n")
+      .split("\n")
+      .filter((line, i, arr) => !(i === arr.length - 1 && line === ""));
+
+    // Single value pasted — let the browser handle it normally.
+    if (lines.length <= 1) return;
+
+    e.preventDefault();
+
+    const sheet = getSheet();
+    if (!sheet) return;
+    const actId = e.target.dataset.actId;
+
+    const columnInputs = Array.from(
+      $tbody.querySelectorAll(".gs-grade-input"),
+    ).filter((inp) => inp.dataset.actId === actId);
+    const startIdx = columnInputs.indexOf(e.target);
+    if (startIdx === -1) return;
+
+    let actObj = null;
+    CATEGORIES.forEach((cat) => {
+      const f = (sheet.categories[cat] || []).find((a) => a.id === actId);
+      if (f) actObj = f;
+    });
+    const sc = getScaleForActivity(actObj, sheet);
+
+    let count = 0;
+    lines.forEach((raw, i) => {
+      const target = columnInputs[startIdx + i];
+      if (!target) return;
+      const name = target.dataset.student;
+      let valStr = String(raw).trim();
+      if (valStr.includes("\t")) valStr = valStr.split("\t")[0].trim();
+      valStr = valStr.replace(",", ".");
+
+      if (!sheet.grades[name]) sheet.grades[name] = {};
+      if (valStr === "") {
+        delete sheet.grades[name][actId];
+        count++;
+        return;
+      }
+      let num = parseFloat(valStr);
+      if (isNaN(num)) return;
+      if (isGradesView) {
+        if (removeDecimal && !valStr.includes(".")) num = num / 10;
+        num = inverseCalculateGrade(
+          num,
+          sc.pmax,
+          sc.exig,
+          sc.nmin,
+          sc.nmax,
+          sc.napr,
+        );
+        num = Math.round(num * 100) / 100;
+      }
+      if (num < 0) num = 0;
+      if (num > sc.pmax) num = sc.pmax;
+      sheet.grades[name][actId] = num;
+      count++;
+    });
+
+    sheet.updatedAt = Date.now();
+    saveToStorage();
+    renderGrid();
+    showToast(
+      `Pasted ${count} grade${count === 1 ? "" : "s"} into this column.`,
+      "success",
+    );
   }
 
   function onGradeKeydown(e) {
