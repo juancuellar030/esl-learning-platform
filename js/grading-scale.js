@@ -252,6 +252,64 @@
         container.innerHTML = html;
     }
 
+    // ===== FULL SCALE MODAL =====
+    function classifyRow(grade, napr) {
+        const isPassing = grade >= napr;
+        const isWarning = isPassing && grade <= napr + 0.2;
+        const rowClass = isWarning ? 'gs-warning-row' : (isPassing ? 'gs-passing-row' : 'gs-failing-row');
+        const badgeClass = isWarning ? 'gs-grade-warn' : (isPassing ? 'gs-grade-pass' : 'gs-grade-fail');
+        return { rowClass, badgeClass };
+    }
+
+    function renderFullScaleModal() {
+        const body = $('gs-scale-modal-body');
+        if (!scaleData.length) {
+            body.innerHTML = `
+                <div class="gs-modal-empty">
+                    <i class="fa-solid fa-chart-line" style="font-size:2.5rem; opacity:0.4;"></i>
+                    <p style="margin-top:12px;">No scale generated yet</p>
+                </div>`;
+            return;
+        }
+
+        const napr = parseFloat($('gs-napr').value) || 4.0;
+        const ROWS_PER_GROUP = 15;
+        const groupCount = Math.ceil(scaleData.length / ROWS_PER_GROUP);
+        const rowsPerGroup = Math.ceil(scaleData.length / groupCount);
+
+        let html = '<div class="gs-modal-grid">';
+        for (let g = 0; g < scaleData.length; g += rowsPerGroup) {
+            const chunk = scaleData.slice(g, g + rowsPerGroup);
+            html += '<div class="gs-modal-group"><table class="gs-modal-group-table"><tbody>';
+            chunk.forEach(row => {
+                const { rowClass, badgeClass } = classifyRow(row.grade, napr);
+                html += `<tr class="${rowClass}">
+                    <td class="gs-modal-score">${row.score.toFixed(1)}</td>
+                    <td class="gs-modal-arrow"><i class="fa-solid fa-arrow-right"></i></td>
+                    <td class="gs-modal-grade"><span class="gs-grade-badge ${badgeClass}">${row.grade.toFixed(1)}</span></td>
+                </tr>`;
+            });
+            html += '</tbody></table></div>';
+        }
+        html += '</div>';
+        body.innerHTML = html;
+    }
+
+    function openFullScaleModal() {
+        if (!scaleData.length) {
+            showToast('Generate a scale first', 'error');
+            return;
+        }
+        renderFullScaleModal();
+        $('gs-scale-modal-overlay').style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeFullScaleModal() {
+        $('gs-scale-modal-overlay').style.display = 'none';
+        document.body.style.overflow = '';
+    }
+
     // ===== CSV PARSING =====
     function parseCSV(text) {
         const lines = text.split(/\r?\n/).filter(l => l.trim());
@@ -822,6 +880,17 @@
         if ($('gs-export-whole-numbers')) {
             $('gs-export-whole-numbers').addEventListener('change', saveData);
         }
+
+        $('gs-view-full-scale-btn').addEventListener('click', openFullScaleModal);
+        $('gs-scale-modal-close-btn').addEventListener('click', closeFullScaleModal);
+        $('gs-scale-modal-overlay').addEventListener('click', (e) => {
+            if (e.target.id === 'gs-scale-modal-overlay') closeFullScaleModal();
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && $('gs-scale-modal-overlay').style.display === 'flex') {
+                closeFullScaleModal();
+            }
+        });
 
         renderScaleTable(parseFloat($('gs-napr').value) || 4.0);
         renderStudentsTable();

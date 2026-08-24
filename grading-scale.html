@@ -109,6 +109,9 @@
                     <div class="gs-section-header">
                         <i class="fa-solid fa-table-list"></i>
                         <h2>Generated Scale Preview</h2>
+                        <button id="gs-view-full-scale-btn" class="gs-view-full-btn">
+                            <i class="fa-solid fa-up-right-and-down-left-from-center"></i> View Full Scale
+                        </button>
                     </div>
                     <div class="gs-section-body" id="gs-scale-body">
                         <!-- Populated by JS -->
@@ -175,6 +178,21 @@
             ESL Learning Platform © 2025 | Made for Teachers, by Teachers
         </div>
 
+    </div>
+
+    <!-- ==================== FULL SCALE MODAL ==================== -->
+    <div id="gs-scale-modal-overlay" class="gs-modal-overlay" style="display:none;">
+        <div class="gs-modal">
+            <div class="gs-modal-header">
+                <h2><i class="fa-solid fa-table-list"></i> Full Grading Scale</h2>
+                <button id="gs-scale-modal-close-btn" class="gs-modal-close-btn" aria-label="Close">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="gs-modal-body" id="gs-scale-modal-body">
+                <!-- Populated by JS -->
+            </div>
+        </div>
     </div>
 
     <script src="https://accounts.google.com/gsi/client" async defer></script>
