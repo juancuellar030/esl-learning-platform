@@ -1,0 +1,116 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e3]:
+      - generic [ref=e4]:
+        - heading " Grading Scale Generator" [level=1] [ref=e5]:
+          - generic [ref=e6]: 
+          - text: Grading Scale Generator
+        - link " Back to Tools" [ref=e7] [cursor=pointer]:
+          - /url: tools.html
+          - generic [ref=e8]: 
+          - text: Back to Tools
+      - generic [ref=e9]:
+        - generic [ref=e10]:
+          - generic [ref=e11]:
+            - generic [ref=e12]: 
+            - heading "Scale Configuration" [level=2] [ref=e13]
+          - generic [ref=e14]:
+            - generic [ref=e15]:
+              - generic [ref=e16]:
+                - generic [ref=e17]: Max Score
+                - spinbutton "Max Score" [ref=e18]: "100"
+                - generic [ref=e19]: Maximum score a student can get
+              - generic [ref=e20]:
+                - generic [ref=e21]: Exigency (%)
+                - spinbutton "Exigency (%)" [ref=e22]: "60"
+                - generic [ref=e23]: Percentage of max score needed to pass
+              - generic [ref=e24]:
+                - generic [ref=e25]: Min Grade
+                - spinbutton "Min Grade" [ref=e26]: "1.0"
+                - generic [ref=e27]: Lowest possible grade (e.g. 1.0)
+              - generic [ref=e28]:
+                - generic [ref=e29]: Max Grade
+                - spinbutton "Max Grade" [ref=e30]: "7.0"
+                - generic [ref=e31]: Highest possible grade (e.g. 7.0)
+              - generic [ref=e32]:
+                - generic [ref=e33]: Passing Grade
+                - spinbutton "Passing Grade" [ref=e34]: "4.0"
+                - generic [ref=e35]: Minimum grade to pass (e.g. 4.0)
+              - generic [ref=e36]:
+                - generic [ref=e37]: Increment
+                - combobox "Increment" [ref=e38]:
+                  - option "0.5"
+                  - option "1.0" [selected]
+                  - option "2.0"
+                  - option "5.0"
+                  - option "10.0"
+                - generic [ref=e39]: Score step between each row
+            - generic [ref=e40]:
+              - button " Generate Scale" [ref=e41] [cursor=pointer]:
+                - generic [ref=e42]: 
+                - text: Generate Scale
+              - button " Save as Named Scale" [ref=e43] [cursor=pointer]:
+                - generic [ref=e44]: 
+                - text: Save as Named Scale
+              - button " Save/Load to Drive" [ref=e45] [cursor=pointer]:
+                - generic [ref=e46]: 
+                - text: Save/Load to Drive
+        - generic [ref=e47]:
+          - generic [ref=e48]:
+            - generic [ref=e49]: 
+            - heading "Named Scales" [level=2] [ref=e50]
+            - generic [ref=e51]: Save different scales to assign per column
+          - generic [ref=e54]:
+            - generic [ref=e55]:
+              - generic [ref=e56]: Oral Exam 20
+              - generic [ref=e57]:
+                - generic [ref=e58]:
+                  - text: "Max:"
+                  - strong [ref=e59]: "20"
+                - generic [ref=e60]:
+                  - text: "Exig:"
+                  - strong [ref=e61]: 60%
+                - generic [ref=e62]:
+                  - text: Pass ≥
+                  - strong [ref=e63]: "3"
+                - generic [ref=e64]:
+                  - text: "Range:"
+                  - strong [ref=e65]: 1–5
+            - button "" [ref=e66] [cursor=pointer]
+        - generic [ref=e68]:
+          - generic [ref=e69]:
+            - generic [ref=e70]: 
+            - heading "Generated Scale Preview" [level=2] [ref=e71]
+            - button " View Full Scale" [ref=e72] [cursor=pointer]:
+              - generic [ref=e73]: 
+              - text: View Full Scale
+          - generic [ref=e75]:
+            - generic [ref=e76]: 
+            - paragraph [ref=e77]: No scale generated yet
+            - text: Configure settings above and click Generate Scale
+        - generic [ref=e78]:
+          - generic [ref=e79]:
+            - generic [ref=e80]: 
+            - heading "Student Grading" [level=2] [ref=e81]
+          - generic [ref=e82]:
+            - generic [ref=e83]:
+              - button " Upload Student CSV" [ref=e84] [cursor=pointer]:
+                - generic [ref=e85]: 
+                - text: Upload Student CSV
+              - button " Calculate All Grades" [ref=e86] [cursor=pointer]:
+                - generic [ref=e87]: 
+                - text: Calculate All Grades
+              - button " Export CSV" [ref=e88] [cursor=pointer]:
+                - generic [ref=e89]: 
+                - text: Export CSV
+              - generic "Export grades as whole numbers without decimal point (e.g. 43 instead of 4.3)" [ref=e90] [cursor=pointer]:
+                - checkbox "Export as Whole Numbers" [ref=e91]
+                - text: Export as Whole Numbers
+            - text: 
+            - generic [ref=e93]:
+              - generic [ref=e94]: 
+              - paragraph [ref=e95]: No students loaded
+              - text: Upload a CSV file with student names and scores to get started
+    - generic [ref=e96]: ESL Learning Platform © 2025 | Made for Teachers, by Teachers
+  - text:  
+  - button "" [ref=e97] [cursor=pointer]

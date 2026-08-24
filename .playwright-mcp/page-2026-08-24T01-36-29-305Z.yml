@@ -1,0 +1,179 @@
+- generic [active] [ref=f3e1]:
+  - banner [ref=f3e2]:
+    - generic [ref=f3e3]:
+      - heading " ESL Learning Platform" [level=1] [ref=f3e4]:
+        - generic [ref=f3e5]: 
+        - text: ESL Learning Platform
+      - paragraph [ref=f3e6]: Teacher's Teaching Tools
+  - navigation [ref=f3e7]:
+    - generic [ref=f3e8]:
+      - link " Back to Dashboard" [ref=f3e9] [cursor=pointer]:
+        - /url: index.html
+        - generic [ref=f3e10]: 
+        - text: Back to Dashboard
+      - group "Tool display style" [ref=f3e11]:
+        - button "" [pressed] [ref=f3e12] [cursor=pointer]
+        - button "" [ref=f3e14] [cursor=pointer]
+  - main [ref=f3e16]:
+    - generic [ref=f3e18]:
+      - heading "Welcome to your Teaching Tools" [level=2] [ref=f3e19]
+      - generic [ref=f3e21]:
+        - generic: 
+        - searchbox "Search for a tool" [ref=f3e22]
+        - button "Search" [ref=f3e23] [cursor=pointer]:
+          - generic [ref=f3e24]: 
+          - text: Search
+      - generic [ref=f3e25]:
+        - link [ref=f3e26] [cursor=pointer]:
+          - /url: clock-timer.html
+          - img "Clock and timer icon" [ref=f3e28]
+          - heading "Clock & Timer" [level=3] [ref=f3e29]
+          - paragraph [ref=f3e30]: Real-time clock and classroom timer with visual alerts
+        - link [ref=f3e31] [cursor=pointer]:
+          - /url: lesson-planner.html
+          - img "Weekly lesson planner icon" [ref=f3e33]
+          - heading "Weekly Lesson Planner" [level=3] [ref=f3e34]
+          - paragraph [ref=f3e35]: Plan and organize your weekly class activities
+        - link [ref=f3e36] [cursor=pointer]:
+          - /url: student-behavior-tracker.html
+          - img "Student behavior tracker icon" [ref=f3e38]
+          - heading "Student Behavior Tracker" [level=3] [ref=f3e39]
+          - paragraph [ref=f3e40]: Track and manage student behavior with weekly reports
+        - link [ref=f3e41] [cursor=pointer]:
+          - /url: pdf-library.html
+          - img "PDF book library icon" [ref=f3e43]
+          - heading "PDF Book Library" [level=3] [ref=f3e44]
+          - paragraph [ref=f3e45]: Store and annotate your teaching materials with drawing tools
+        - link [ref=f3e46] [cursor=pointer]:
+          - /url: student-material-tracker.html
+          - img "Student material tracker icon" [ref=f3e48]
+          - heading "Student Material Tracker" [level=3] [ref=f3e49]
+          - paragraph [ref=f3e50]: Track materials and supplies brought by students
+        - link [ref=f3e51] [cursor=pointer]:
+          - /url: classroom-distribution.html
+          - img "Classroom layout tool icon" [ref=f3e53]
+          - heading "Classroom Layout Tool" [level=3] [ref=f3e54]
+          - paragraph [ref=f3e55]: Arrange student desks in a 7x7 grid with drag-and-drop
+        - link " Charades Game Play charades with vocabulary categories and a 60-second timer" [ref=f3e56] [cursor=pointer]:
+          - /url: charades.html
+          - generic [ref=f3e57]: 
+          - heading "Charades Game" [level=3] [ref=f3e59]
+          - paragraph [ref=f3e60]: Play charades with vocabulary categories and a 60-second timer
+        - link [ref=f3e61] [cursor=pointer]:
+          - /url: bingo-generator.html
+          - img "Bingo generator icon" [ref=f3e63]
+          - heading "Bingo Generator" [level=3] [ref=f3e64]
+          - paragraph [ref=f3e65]: Create custom bingo cards with words or pictures and generate PDFs
+        - link [ref=f3e66] [cursor=pointer]:
+          - /url: quiz-game.html?host=1
+          - img "Live quiz game icon" [ref=f3e68]
+          - heading "Live Quiz Game" [level=3] [ref=f3e69]
+          - paragraph [ref=f3e70]: Real-time multiplayer quiz — host or join a live session with your class
+        - link " Soundboard Trigger overlapping classroom sound effects with per-slot play, pause, and stop" [ref=f3e71] [cursor=pointer]:
+          - /url: soundboard.html
+          - generic [ref=f3e72]: 
+          - heading "Soundboard" [level=3] [ref=f3e74]
+          - paragraph [ref=f3e75]: Trigger overlapping classroom sound effects with per-slot play, pause, and stop
+        - link " Grading Scale Generator Generate custom grading scales, upload student lists, and export grades as CSV" [ref=f3e76] [cursor=pointer]:
+          - /url: grading-scale.html
+          - generic [ref=f3e77]: 
+          - heading "Grading Scale Generator" [level=3] [ref=f3e79]
+          - paragraph [ref=f3e80]: Generate custom grading scales, upload student lists, and export grades as CSV
+        - link [ref=f3e81] [cursor=pointer]:
+          - /url: grade-sheets.html
+          - img "Grade sheets icon" [ref=f3e83]
+          - heading "Grade Sheets" [level=3] [ref=f3e84]
+          - paragraph [ref=f3e85]: Create and manage term grade sheets with weighted competencies and CSV export
+        - link [ref=f3e86] [cursor=pointer]:
+          - /url: test-builder.html
+          - img "Test builder icon" [ref=f3e88]
+          - heading "Test Builder" [level=3] [ref=f3e89]
+          - paragraph [ref=f3e90]: Design custom tests with multiple question types and share them with students
+        - link [ref=f3e91] [cursor=pointer]:
+          - /url: student-turn-tracker.html
+          - img "Student turn tracker icon" [ref=f3e93]
+          - heading "Student Turn Tracker" [level=3] [ref=f3e94]
+          - paragraph [ref=f3e95]: Track participation with fun random pickers — roulette, balloons, and more
+        - link [ref=f3e96] [cursor=pointer]:
+          - /url: student-self-assessment.html
+          - img "Student self-assessment icon" [ref=f3e98]
+          - heading "Student Self-Assessment" [level=3] [ref=f3e99]
+          - paragraph [ref=f3e100]: Guía a los estudiantes en su autoevaluación de período con escala Likert y nota automática
+        - link [ref=f3e101] [cursor=pointer]:
+          - /url: word-guesser.html
+          - img "Word guesser icon" [ref=f3e103]
+          - heading "Word Guesser" [level=3] [ref=f3e104]
+          - paragraph [ref=f3e105]: Set up clue-based word guessing sessions with multiple-choice or typed answers
+        - link [ref=f3e106] [cursor=pointer]:
+          - /url: picture-reveal.html
+          - img "Picture reveal icon" [ref=f3e108]
+          - heading "Picture Reveal" [level=3] [ref=f3e109]
+          - paragraph [ref=f3e110]: Turn any image into a fun hidden picture game with your class
+        - link [ref=f3e111] [cursor=pointer]:
+          - /url: sequence-unscrambler.html
+          - img "Sequence unscrambler icon" [ref=f3e113]
+          - heading "Sequence Unscrambler" [level=3] [ref=f3e114]
+          - paragraph [ref=f3e115]: Drag and drop words or images to reconstruct sequences — food chains, life cycles, and more
+        - link [ref=f3e116] [cursor=pointer]:
+          - /url: pictionary.html
+          - img "Pictionary word picker icon" [ref=f3e118]
+          - heading "Pictionary Word Picker" [level=3] [ref=f3e119]
+          - paragraph [ref=f3e120]: Generate random words categorized by topic and difficulty for your drawing games
+        - link [ref=f3e121] [cursor=pointer]:
+          - /url: pc-assignment-viewer.html
+          - img "PC assignment viewer icon" [ref=f3e123]
+          - heading "PC Assignment Viewer" [level=3] [ref=f3e124]
+          - paragraph [ref=f3e125]: View and search student PC assignments by term, group, and layout
+        - link [ref=f3e126] [cursor=pointer]:
+          - /url: message-composer.html
+          - img "Broadcast message icon" [ref=f3e128]
+          - heading "Broadcast Message" [level=3] [ref=f3e129]
+          - paragraph [ref=f3e130]: Send large, stylized full-screen messages to student PCs during class
+        - link [ref=f3e131] [cursor=pointer]:
+          - /url: keyboard-shortcuts.html
+          - img "Keyboard shortcut playground icon" [ref=f3e133]
+          - heading "Keyboard Shortcut Playground" [level=3] [ref=f3e134]
+          - paragraph [ref=f3e135]: Practice keyboard shortcuts with a live keyboard highlighter and self-check mode
+        - link [ref=f3e136] [cursor=pointer]:
+          - /url: class-calendar.html
+          - img "Class events calendar icon" [ref=f3e138]
+          - heading "Class Events Calendar" [level=3] [ref=f3e139]
+          - paragraph [ref=f3e140]: Track upcoming school events, deadlines, and things to bring — with countdowns and reminders for your class
+  - contentinfo [ref=f3e141]:
+    - paragraph [ref=f3e143]: ESL Learning Platform © 2025 | Made for Teachers, by Teachers
+  - button "" [ref=f3e144] [cursor=pointer]
+  - button " 1" [ref=f3e146] [cursor=pointer]:
+    - generic [ref=f3e147]: 
+    - generic [ref=f3e148]: "1"
+  - generic:
+    - generic:
+      - heading "Share Birthday Link" [level=4]
+      - paragraph: "Choose a background effect:"
+      - generic:
+        - textbox
+        - button ""
+      - generic:
+        - button "Close"
+        - link "Preview":
+          - /url: "#"
+  - generic:
+    - generic:
+      - button ""
+      - heading " Aug 2026" [level=3]:
+        - generic: 
+        - text: Aug 2026
+      - button ""
+      - button ""
+    - generic:
+      - generic:
+        - generic: 
+        - generic:
+          - generic: SAMUEL G.
+          - generic: Aug 9
+        - generic: Aug 9
+        - button ""
+  - generic:
+    - button ""
+    - generic:
+      - generic: 🎂
+      - generic: Happy Birthday!
