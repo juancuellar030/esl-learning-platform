@@ -656,16 +656,42 @@ function renderRecentBgUrls() {
     });
 }
 
+function showToast(message, type = 'success') {
+    const existing = document.querySelector('.toast-notification');
+    if (existing) existing.remove();
+
+    const toast = document.createElement('div');
+    toast.className = `toast-notification ${type}`;
+    toast.setAttribute('role', 'status');
+    toast.setAttribute('aria-live', 'polite');
+
+    let icon = 'fa-circle-info';
+    if (type === 'success') icon = 'fa-circle-check';
+    if (type === 'error') icon = 'fa-circle-xmark';
+    if (type === 'warning') icon = 'fa-triangle-exclamation';
+
+    toast.innerHTML = `<i class="fa-solid ${icon}"></i> <span>${message}</span>`;
+    document.body.appendChild(toast);
+    void toast.offsetWidth;
+    toast.classList.add('show');
+
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 400);
+    }, 2800);
+}
+
 function generateLink() {
     const state = getFormState();
     if (!state.text) {
         $messageText.focus();
-        return;
+        return false;
     }
 
     const url = buildBroadcastUrl(state);
     $broadcastLink.value = url;
     saveToRecent(state);
+    return true;
 }
 
 async function copyLink() {
@@ -740,7 +766,11 @@ function bindEvents() {
         applyBackgroundUrl();
     });
 
-    $generateBtn.addEventListener('click', generateLink);
+    $generateBtn.addEventListener('click', () => {
+        if (generateLink()) {
+            showToast('Broadcast link generated', 'success');
+        }
+    });
     $copyBtn.addEventListener('click', copyLink);
 
     $recentContainer.addEventListener('click', (e) => {

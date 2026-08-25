@@ -158,6 +158,7 @@
   let removeDecimal = false;
   let pendingCsvImport = null;
   let pendingExportType = null; // 'current' or 'selected'
+  let pendingGradeFocus = null;
   let dashboardFilters = {
     search: "",
     subject: "",
@@ -1083,6 +1084,7 @@
         toggleHideActivity(btn.dataset.id, true);
       }),
     );
+    restorePendingGradeFocus();
   }
 
   function renderHiddenColsBar(hiddenActs) {
@@ -1233,17 +1235,89 @@
     );
   }
 
+  function getGradeInputs() {
+    return Array.from($tbody.querySelectorAll(".gs-grade-input"));
+  }
+
+  function restorePendingGradeFocus() {
+    if (!pendingGradeFocus || !$tbody) return;
+    const { student, actId } = pendingGradeFocus;
+    pendingGradeFocus = null;
+    const el = getGradeInputs().find(
+      (inp) => inp.dataset.student === student && inp.dataset.actId === actId,
+    );
+    if (!el) return;
+    el.focus();
+    el.select();
+    el.scrollIntoView({ block: "nearest", inline: "nearest" });
+  }
+
+  function moveGradeFocusTo(fromInput, toInput) {
+    if (!toInput || toInput === fromInput) return;
+    pendingGradeFocus = {
+      student: toInput.dataset.student,
+      actId: toInput.dataset.actId,
+    };
+    fromInput.blur();
+    restorePendingGradeFocus();
+  }
+
+  function neighborGradeInput(input, dRow, dCol) {
+    const sheet = getSheet();
+    if (!sheet) return null;
+    const colCount = getAllActivities(sheet).filter((a) => !a.hidden).length;
+    if (!colCount) return null;
+    const inputs = getGradeInputs();
+    const idx = inputs.indexOf(input);
+    if (idx === -1) return null;
+    const rowCount = Math.floor(inputs.length / colCount);
+    const row = Math.floor(idx / colCount);
+    const col = idx % colCount;
+    const nextRow = row + dRow;
+    const nextCol = col + dCol;
+    if (nextRow < 0 || nextRow >= rowCount || nextCol < 0 || nextCol >= colCount)
+      return null;
+    return inputs[nextRow * colCount + nextCol] || null;
+  }
+
+  function shouldLeaveCellHorizontally(input, dir) {
+    const start = input.selectionStart;
+    const end = input.selectionEnd;
+    if (start == null || end == null) return true;
+    const len = input.value.length;
+    if (len === 0 || (start === 0 && end === len)) return true;
+    return dir < 0 ? start === 0 : end === len;
+  }
+
   function onGradeKeydown(e) {
-    if (e.key === "Tab" || e.key === "Enter") {
+    const input = e.target;
+    let next = null;
+
+    if (e.key === "Tab") {
       e.preventDefault();
-      const allInputs = Array.from($tbody.querySelectorAll(".gs-grade-input"));
-      const idx = allInputs.indexOf(e.target);
-      if (e.shiftKey) {
-        if (idx > 0) allInputs[idx - 1].focus();
-      } else {
-        if (idx < allInputs.length - 1) allInputs[idx + 1].focus();
-      }
+      const inputs = getGradeInputs();
+      const idx = inputs.indexOf(input);
+      if (idx === -1) return;
+      next = e.shiftKey ? inputs[idx - 1] : inputs[idx + 1];
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      next = neighborGradeInput(input, e.shiftKey ? -1 : 1, 0);
+    } else if (e.key === "ArrowDown") {
+      e.preventDefault();
+      next = neighborGradeInput(input, 1, 0);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      next = neighborGradeInput(input, -1, 0);
+    } else if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+      const dir = e.key === "ArrowLeft" ? -1 : 1;
+      if (!shouldLeaveCellHorizontally(input, dir)) return;
+      e.preventDefault();
+      next = neighborGradeInput(input, 0, dir);
+    } else {
+      return;
     }
+
+    if (next) moveGradeFocusTo(input, next);
   }
 
   // ══════════════════════════════════════════════════════

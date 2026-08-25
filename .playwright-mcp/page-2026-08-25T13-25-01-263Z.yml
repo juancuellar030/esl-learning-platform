@@ -1,0 +1,320 @@
+- generic [active] [ref=f2e1]:
+  - text:     +          
+  - generic [ref=f2e63]:
+    - generic [ref=f2e64]:
+      - generic [ref=f2e65]:
+        - button " Back to Sheets" [ref=f2e66] [cursor=pointer]:
+          - generic [ref=f2e67]: 
+          - text: Back to Sheets
+        - heading "Arrow Nav — 3A (First Term)" [level=1] [ref=f2e68]
+      - generic [ref=f2e69]:
+        - button " Export CSV" [ref=f2e70] [cursor=pointer]:
+          - generic [ref=f2e71]: 
+          - text: Export CSV
+        - button " Missing Grades" [ref=f2e72] [cursor=pointer]:
+          - generic [ref=f2e73]: 
+          - text: Missing Grades
+        - button " Scale" [ref=f2e74] [cursor=pointer]:
+          - generic [ref=f2e75]: 
+          - text: Scale
+        - button " Import" [ref=f2e76] [cursor=pointer]:
+          - generic [ref=f2e77]: 
+          - text: Import
+        - button " Upload Grades" [ref=f2e78] [cursor=pointer]:
+          - generic [ref=f2e79]: 
+          - text: Upload Grades
+        - generic "Remove the decimal point from grades (e.g., 4.5 becomes 45)" [ref=f2e80]:
+          - generic [ref=f2e81]:
+            - checkbox
+            - generic [ref=f2e82] [cursor=pointer]
+          - generic [ref=f2e83]: Note Decimals
+        - button " Show Grades" [ref=f2e84] [cursor=pointer]:
+          - generic [ref=f2e85]: 
+          - text: Show Grades
+        - button " Clear Grades" [ref=f2e86] [cursor=pointer]:
+          - generic [ref=f2e87]: 
+          - text: Clear Grades
+        - button " Descriptions" [ref=f2e88] [cursor=pointer]:
+          - generic [ref=f2e89]: 
+          - text: Descriptions
+    - generic [ref=f2e90]:
+      - generic [ref=f2e91]:
+        - generic [ref=f2e92]: 
+        - generic [ref=f2e93]: Test
+      - generic [ref=f2e94]:
+        - generic [ref=f2e95]: 
+        - generic [ref=f2e96]: Arrow Nav
+      - generic [ref=f2e97]:
+        - generic [ref=f2e98]: 
+        - generic [ref=f2e99]: Course 3A
+      - generic [ref=f2e100]:
+        - generic [ref=f2e101]: 
+        - generic [ref=f2e102]: First Term
+      - button " Edit" [ref=f2e103] [cursor=pointer]:
+        - generic [ref=f2e104]: 
+        - text: Edit
+    - generic [ref=f2e105]:
+      - generic [ref=f2e106]:
+        - generic [ref=f2e107]: Cognitiva (35%)
+        - textbox "Activity description..." [ref=f2e108]
+        - button "+" [ref=f2e109] [cursor=pointer]
+      - generic [ref=f2e111]:
+        - generic [ref=f2e112]: Laboral (35%)
+        - textbox "Activity description..." [ref=f2e113]
+        - button "+" [ref=f2e114] [cursor=pointer]
+      - generic [ref=f2e116]:
+        - generic [ref=f2e117]: Ciudadana (30%)
+        - textbox "Activity description..." [ref=f2e118]
+        - button "+" [ref=f2e119] [cursor=pointer]
+    - generic [ref=f2e121]:
+      - generic [ref=f2e122]:
+        - table [ref=f2e123]:
+          - rowgroup [ref=f2e124]:
+            - row [ref=f2e125]:
+              - columnheader "#" [ref=f2e126]
+              - columnheader "STUDENT" [ref=f2e127] [cursor=pointer]
+              - columnheader "Cognitiva" [ref=f2e128]
+              - columnheader "WEIGHTED AVG" [ref=f2e129]: WEIGHTEDAVG
+            - row [ref=f2e130]:
+              - columnheader " 1 /50   " [ref=f2e131]:
+                - generic [ref=f2e132]: 
+                - generic [ref=f2e133]: "1"
+                - generic "Using default sheet scale — click to set a custom scale for this activity" [ref=f2e134] [cursor=pointer]:
+                  - text: /50
+                  - generic [ref=f2e135]: 
+                - button "" [ref=f2e136] [cursor=pointer]
+                - button "" [ref=f2e138] [cursor=pointer]
+              - columnheader " 2 /50   " [ref=f2e140]:
+                - generic [ref=f2e141]: 
+                - generic [ref=f2e142]: "2"
+                - generic "Using default sheet scale — click to set a custom scale for this activity" [ref=f2e143] [cursor=pointer]:
+                  - text: /50
+                  - generic [ref=f2e144]: 
+                - button "" [ref=f2e145] [cursor=pointer]
+                - button "" [ref=f2e147] [cursor=pointer]
+          - rowgroup [ref=f2e149]:
+            - row [ref=f2e150]:
+              - cell "1" [ref=f2e151]
+              - cell "ANDRADE RODRIGUEZ SILVANA" [ref=f2e152] [cursor=pointer]
+              - cell [ref=f2e153]:
+                - textbox [ref=f2e154]
+              - cell [ref=f2e155]:
+                - textbox [ref=f2e156]
+              - cell "—" [ref=f2e157]
+            - row [ref=f2e158]:
+              - cell "2" [ref=f2e159]
+              - cell "BUITRAGO MÉNDEZ JUAN ANDRÉS" [ref=f2e160] [cursor=pointer]
+              - cell [ref=f2e161]:
+                - textbox [ref=f2e162]
+              - cell [ref=f2e163]:
+                - textbox [ref=f2e164]
+              - cell "—" [ref=f2e165]
+            - row [ref=f2e166]:
+              - cell "3" [ref=f2e167]
+              - cell "CABRERA BARRERO JULIETA" [ref=f2e168] [cursor=pointer]
+              - cell [ref=f2e169]:
+                - textbox [ref=f2e170]
+              - cell [ref=f2e171]:
+                - textbox [ref=f2e172]
+              - cell "—" [ref=f2e173]
+            - row [ref=f2e174]:
+              - cell "4" [ref=f2e175]
+              - cell "CAMACHO SALAZAR JULIANA" [ref=f2e176] [cursor=pointer]
+              - cell [ref=f2e177]:
+                - textbox [ref=f2e178]
+              - cell [ref=f2e179]:
+                - textbox [ref=f2e180]
+              - cell "—" [ref=f2e181]
+            - row [ref=f2e182]:
+              - cell "5" [ref=f2e183]
+              - cell "CAMERO PERDOMO JOSÉ MIGUEL" [ref=f2e184] [cursor=pointer]
+              - cell [ref=f2e185]:
+                - textbox [ref=f2e186]
+              - cell [ref=f2e187]:
+                - textbox [ref=f2e188]
+              - cell "—" [ref=f2e189]
+            - row [ref=f2e190]:
+              - cell "6" [ref=f2e191]
+              - cell "CASTAÑEDA RENGIFO ISABELLA" [ref=f2e192] [cursor=pointer]
+              - cell [ref=f2e193]:
+                - textbox [ref=f2e194]
+              - cell [ref=f2e195]:
+                - textbox [ref=f2e196]
+              - cell "—" [ref=f2e197]
+            - row [ref=f2e198]:
+              - cell "7" [ref=f2e199]
+              - cell "CHACÓN RAMÍREZ THOMAS" [ref=f2e200] [cursor=pointer]
+              - cell [ref=f2e201]:
+                - textbox [ref=f2e202]
+              - cell [ref=f2e203]:
+                - textbox [ref=f2e204]
+              - cell "—" [ref=f2e205]
+            - row [ref=f2e206]:
+              - cell "8" [ref=f2e207]
+              - cell "CORTES LOSADA ARIADNA VALENTINA" [ref=f2e208] [cursor=pointer]
+              - cell [ref=f2e209]:
+                - textbox [ref=f2e210]
+              - cell [ref=f2e211]:
+                - textbox [ref=f2e212]
+              - cell "—" [ref=f2e213]
+            - row [ref=f2e214]:
+              - cell "9" [ref=f2e215]
+              - cell "GOMEZ GONZALEZ AARON" [ref=f2e216] [cursor=pointer]
+              - cell [ref=f2e217]:
+                - textbox [ref=f2e218]
+              - cell [ref=f2e219]:
+                - textbox [ref=f2e220]
+              - cell "—" [ref=f2e221]
+            - row [ref=f2e222]:
+              - cell "10" [ref=f2e223]
+              - cell "GRANJA PABÓN THIAGO" [ref=f2e224] [cursor=pointer]
+              - cell [ref=f2e225]:
+                - textbox [ref=f2e226]
+              - cell [ref=f2e227]:
+                - textbox [ref=f2e228]
+              - cell "—" [ref=f2e229]
+            - row [ref=f2e230]:
+              - cell "11" [ref=f2e231]
+              - cell "GUEVARA ORTIZ JUAN ÁLVARO" [ref=f2e232] [cursor=pointer]
+              - cell [ref=f2e233]:
+                - textbox [ref=f2e234]
+              - cell [ref=f2e235]:
+                - textbox [ref=f2e236]
+              - cell "—" [ref=f2e237]
+            - row [ref=f2e238]:
+              - cell "12" [ref=f2e239]
+              - cell "HERNANDEZ CELEITA MARIA ANTONIA" [ref=f2e240] [cursor=pointer]
+              - cell [ref=f2e241]:
+                - textbox [ref=f2e242]
+              - cell [ref=f2e243]:
+                - textbox [ref=f2e244]
+              - cell "—" [ref=f2e245]
+            - row [ref=f2e246]:
+              - cell "13" [ref=f2e247]
+              - cell "MACIAS IBÁÑEZ SAMUEL ANDRÉS" [ref=f2e248] [cursor=pointer]
+              - cell [ref=f2e249]:
+                - textbox [ref=f2e250]
+              - cell [ref=f2e251]:
+                - textbox [ref=f2e252]
+              - cell "—" [ref=f2e253]
+            - row [ref=f2e254]:
+              - cell "14" [ref=f2e255]
+              - cell "MOGOLLÓN RODRÍGUEZ MELISSA" [ref=f2e256] [cursor=pointer]
+              - cell [ref=f2e257]:
+                - textbox [ref=f2e258]
+              - cell [ref=f2e259]:
+                - textbox [ref=f2e260]
+              - cell "—" [ref=f2e261]
+            - row [ref=f2e262]:
+              - cell "15" [ref=f2e263]
+              - cell "NIÑO GALINDO SAMANTHA VICTORIA" [ref=f2e264] [cursor=pointer]
+              - cell [ref=f2e265]:
+                - textbox [ref=f2e266]
+              - cell [ref=f2e267]:
+                - textbox [ref=f2e268]
+              - cell "—" [ref=f2e269]
+            - row [ref=f2e270]:
+              - cell "16" [ref=f2e271]
+              - cell "PATIÑO CLAROS GABRIELA" [ref=f2e272] [cursor=pointer]
+              - cell [ref=f2e273]:
+                - textbox [ref=f2e274]
+              - cell [ref=f2e275]:
+                - textbox [ref=f2e276]
+              - cell "—" [ref=f2e277]
+            - row [ref=f2e278]:
+              - cell "17" [ref=f2e279]
+              - cell "RAMOS MORA VALENTINA ESTRELLITA" [ref=f2e280] [cursor=pointer]
+              - cell [ref=f2e281]:
+                - textbox [ref=f2e282]
+              - cell [ref=f2e283]:
+                - textbox [ref=f2e284]
+              - cell "—" [ref=f2e285]
+            - row [ref=f2e286]:
+              - cell "18" [ref=f2e287]
+              - cell "RIVERA HERRERA MAYTE" [ref=f2e288] [cursor=pointer]
+              - cell [ref=f2e289]:
+                - textbox [ref=f2e290]
+              - cell [ref=f2e291]:
+                - textbox [ref=f2e292]
+              - cell "—" [ref=f2e293]
+            - row [ref=f2e294]:
+              - cell "19" [ref=f2e295]
+              - cell "RUGELES CASTAÑEDA DYLAN THOMAS" [ref=f2e296] [cursor=pointer]
+              - cell [ref=f2e297]:
+                - textbox [ref=f2e298]
+              - cell [ref=f2e299]:
+                - textbox [ref=f2e300]
+              - cell "—" [ref=f2e301]
+            - row [ref=f2e302]:
+              - cell "20" [ref=f2e303]
+              - cell "SAAVEDRA OYOLA EIDER IVAN" [ref=f2e304] [cursor=pointer]
+              - cell [ref=f2e305]:
+                - textbox [ref=f2e306]
+              - cell [ref=f2e307]:
+                - textbox [ref=f2e308]
+              - cell "—" [ref=f2e309]
+            - row [ref=f2e310]:
+              - cell "21" [ref=f2e311]
+              - cell "SÁNCHEZ LUCUARA CELESTE" [ref=f2e312] [cursor=pointer]
+              - cell [ref=f2e313]:
+                - textbox [ref=f2e314]
+              - cell [ref=f2e315]:
+                - textbox [ref=f2e316]
+              - cell "—" [ref=f2e317]
+            - row [ref=f2e318]:
+              - cell "22" [ref=f2e319]
+              - cell "SERRATO MORENO EMILIANO" [ref=f2e320] [cursor=pointer]
+              - cell [ref=f2e321]:
+                - textbox [ref=f2e322]
+              - cell [ref=f2e323]:
+                - textbox [ref=f2e324]
+              - cell "—" [ref=f2e325]
+            - row [ref=f2e326]:
+              - cell "23" [ref=f2e327]
+              - cell "TAMAYO CASTAÑEDA SAMUEL" [ref=f2e328] [cursor=pointer]
+              - cell [ref=f2e329]:
+                - textbox [ref=f2e330]
+              - cell [ref=f2e331]:
+                - textbox [ref=f2e332]
+              - cell "—" [ref=f2e333]
+            - row [ref=f2e334]:
+              - cell "24" [ref=f2e335]
+              - cell "TORRES SARRIA ANTONELLA" [ref=f2e336] [cursor=pointer]
+              - cell [ref=f2e337]:
+                - textbox [ref=f2e338]
+              - cell [ref=f2e339]:
+                - textbox [ref=f2e340]
+              - cell "—" [ref=f2e341]
+            - row [ref=f2e342]:
+              - cell "25" [ref=f2e343]
+              - cell "VÁSQUEZ PEREZ EMILIANO" [ref=f2e344] [cursor=pointer]
+              - cell [ref=f2e345]:
+                - textbox [ref=f2e346]
+              - cell [ref=f2e347]:
+                - textbox [ref=f2e348]
+              - cell "—" [ref=f2e349]
+            - row [ref=f2e350]:
+              - cell "26" [ref=f2e351]
+              - cell "YASNO ÁVILA MATIAS" [ref=f2e352] [cursor=pointer]
+              - cell [ref=f2e353]:
+                - textbox [ref=f2e354]
+              - cell [ref=f2e355]:
+                - textbox [ref=f2e356]
+              - cell "—" [ref=f2e357]
+        - text: 
+      - generic [ref=f2e358]:
+        - heading " Activity Descriptions" [level=3] [ref=f2e359]:
+          - generic [ref=f2e360]: 
+          - text: Activity Descriptions
+        - generic [ref=f2e361]:
+          - generic [ref=f2e362]:
+            - generic [ref=f2e363]: "1."
+            - generic [ref=f2e364]: Quiz 1
+            - generic "Edit description" [ref=f2e365]: 
+          - generic [ref=f2e366]:
+            - generic [ref=f2e367]: "2."
+            - generic [ref=f2e368]: Quiz 2
+            - generic "Edit description" [ref=f2e369]: 
+  - text:                                           
+  - generic [ref=f2e59]: ESL Learning Platform © 2025 | Made for Teachers, by Teachers
+  - button "" [ref=f2e60] [cursor=pointer]

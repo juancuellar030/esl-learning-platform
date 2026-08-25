@@ -1,0 +1,122 @@
+- generic [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - heading " ESL Learning Platform" [level=1] [ref=e4]:
+        - generic [ref=e5]: 
+        - text: ESL Learning Platform
+      - paragraph [ref=e6]: Broadcast Message Tool
+  - navigation [ref=e7]:
+    - link " Back to Tools" [ref=e9] [cursor=pointer]:
+      - /url: tools.html
+      - generic [ref=e10]: 
+      - text: Back to Tools
+  - main [ref=e11]:
+    - generic [ref=e14]:
+      - generic [ref=e15]:
+        - heading " Compose Message" [level=2] [ref=e16]:
+          - generic [ref=e17]: 
+          - text: Compose Message
+        - generic [ref=e18]:
+          - generic [ref=e19]: Message Text
+          - textbox "Message Text" [ref=e20]:
+            - /placeholder: Type your broadcast message…
+            - text: Look at the front screen
+        - generic [ref=e21]:
+          - generic [ref=e22]: Quick Presets
+          - generic [ref=e23]:
+            - button "Look at the front screen" [ref=e24] [cursor=pointer]
+            - button "Stop and listen" [ref=e25] [cursor=pointer]
+            - button "Time's up" [ref=e26] [cursor=pointer]
+            - button "Great job!" [ref=e27] [cursor=pointer]
+            - button "Raise your hand if you need help" [ref=e28] [cursor=pointer]
+        - generic [ref=e29]:
+          - generic [ref=e30]: Message Color
+          - generic [ref=e31]:
+            - generic [ref=e106]:
+              - button "Instruction" [ref=e107] [cursor=pointer]
+              - generic [ref=e108]: Instruction
+            - generic [ref=e109]:
+              - button "Warning" [ref=e110] [cursor=pointer]
+              - generic [ref=e111]: Warning
+            - generic [ref=e112]:
+              - button "Praise" [ref=e113] [cursor=pointer]
+              - generic [ref=e114]: Praise
+            - generic [ref=e115]:
+              - button "Attention" [ref=e116] [cursor=pointer]
+              - generic [ref=e117]: Attention
+            - generic [ref=e118]:
+              - button "Neutral" [ref=e119] [cursor=pointer]
+              - generic [ref=e120]: Neutral
+            - generic [ref=e121]:
+              - button "Serious" [ref=e122] [cursor=pointer]
+              - generic [ref=e123]: Serious
+        - generic [ref=e50]:
+          - generic [ref=e51]: Background Image URL
+          - generic [ref=e52]:
+            - textbox "Background Image URL" [ref=e53]:
+              - /placeholder: https://i.imgur.com/… or Google Drive share link
+            - button "Apply" [ref=e54] [cursor=pointer]
+            - button " Clear" [ref=e55] [cursor=pointer]:
+              - generic [ref=e56]: 
+              - text: Clear
+          - paragraph [ref=e57]:
+            - text: Paste a public Imgur or Google Drive link. For Imgur, right-click the image and choose
+            - strong [ref=e58]: Copy image address
+            - text: for best results.
+        - generic [ref=e60]:
+          - generic [ref=e61]:
+            - generic [ref=e62]: Font Size
+            - generic [ref=e63]:
+              - button "Small" [ref=e124] [cursor=pointer]: S
+              - button "Medium" [ref=e125] [cursor=pointer]: M
+              - button "Large" [ref=e126] [cursor=pointer]: L
+              - button "Huge" [pressed] [ref=e127] [cursor=pointer]: XL
+          - generic [ref=e68]:
+            - generic [ref=e69]: Animation
+            - combobox "Animation style" [ref=e70] [cursor=pointer]:
+              - option "None" [selected]
+              - option "Pulse"
+              - option "Shake"
+              - option "Flash"
+        - generic [ref=e72]:
+          - generic [ref=e73]:
+            - generic [ref=e74]: Display copy button on broadcast
+            - generic [ref=e75]: Shows a copy button on student devices so they can copy the message text.
+          - generic "Display copy button on broadcast" [ref=e76]:
+            - checkbox "Display copy button on broadcast"
+            - generic [ref=e77] [cursor=pointer]
+      - generic [ref=e78]:
+        - heading " Live Preview" [level=2] [ref=e79]:
+          - generic [ref=e80]: 
+          - text: Live Preview
+        - generic [ref=e83]:
+          - generic [ref=e84]: Look at the front screen
+          - text: 
+        - paragraph [ref=e85]: Scaled preview — actual broadcast fills the entire screen
+        - generic [ref=e86]:
+          - button " Generate Broadcast Link" [active] [ref=e87] [cursor=pointer]:
+            - generic [ref=e88]: 
+            - text: Generate Broadcast Link
+          - generic [ref=e89]:
+            - generic [ref=e90]: Broadcast Link
+            - generic [ref=e91]:
+              - textbox "Broadcast Link" [ref=e92]:
+                - /placeholder: Generate a link to share with student PCs…
+                - text: http://127.0.0.1:8080/message-broadcast.html?text=Look+at+the+front+screen&color=blue&size=huge&anim=none
+              - button "Copy link" [ref=e93] [cursor=pointer]:
+                - generic [ref=e94]: 
+            - generic [ref=e95]: Copied!
+          - generic [ref=e96]:
+            - heading " Recent Messages" [level=3] [ref=e97]:
+              - generic [ref=e98]: 
+              - text: Recent Messages
+            - generic [ref=e128]:
+              - button "Look at the front screen" [ref=e129] [cursor=pointer]
+              - button "Remove message":
+                - generic: 
+  - contentinfo [ref=e101]:
+    - paragraph [ref=e103]: ESL Learning Platform © 2025 | Made for Teachers, by Teachers
+  - button "" [ref=e104] [cursor=pointer]
+  - status [ref=e131]:
+    - generic [ref=e132]: 
+    - generic [ref=e133]: Broadcast link generated
