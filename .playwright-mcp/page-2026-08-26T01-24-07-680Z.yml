@@ -1,0 +1,5 @@
+- generic [active] [ref=f2e1]:
+  - generic [ref=f2e2]: Look at the front screen
+  - button " Copy" [ref=f2e4] [cursor=pointer]:
+    - generic [ref=f2e5]: 
+    - text: Copy

@@ -1,0 +1,8 @@
+- generic [active] [ref=f3e1]:
+  - generic [ref=f3e3]:
+    - text: Please open this activity and complete all three tasks before the bell.
+    - link "https://docs.google.com/forms/d/e/1FAIpQLSdExampleFormId1234567890/viewform" [ref=f3e4] [cursor=pointer]:
+      - /url: https://docs.google.com/forms/d/e/1FAIpQLSdExampleFormId1234567890/viewform
+  - button " Copy" [ref=f3e5] [cursor=pointer]:
+    - generic [ref=f3e6]: 
+    - text: Copy
