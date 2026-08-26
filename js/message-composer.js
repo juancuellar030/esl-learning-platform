@@ -408,7 +408,7 @@ function removeBackgroundImage() {
     clearBgUploadError();
     updatePreview();
     renderRecentBgUrls();
-    if ($broadcastLink.value) generateLink();
+    if ($broadcastLink.value) void generateLink();
 }
 
 async function applyBackgroundUrl() {
@@ -427,7 +427,7 @@ async function applyBackgroundUrl() {
         $bgImageRemove.hidden = false;
         saveRecentBgUrl(normalized);
         await refreshBackgroundPreview();
-        if ($broadcastLink.value) generateLink();
+        if ($broadcastLink.value) await generateLink();
     } catch (err) {
         backgroundFetchToken++;
         backgroundImageUrl = null;
@@ -466,21 +466,9 @@ function updatePreview() {
     }
 }
 
-function buildBroadcastUrl(state) {
-    const params = new URLSearchParams({
-        text: state.text,
-        color: state.color,
-        size: state.size,
-        anim: state.anim
-    });
-    if (settings.showCopyButton) {
-        params.set('copy', '1');
-    }
-    if (state.bgUrl) {
-        params.set('bgUrl', state.bgUrl);
-    }
+async function buildBroadcastUrl(state) {
     const base = new URL('message-broadcast.html', window.location.href);
-    base.search = params.toString();
+    base.search = await BroadcastPayload.encodeToSearch(state, settings.showCopyButton);
     return base.href;
 }
 
@@ -681,14 +669,14 @@ function showToast(message, type = 'success') {
     }, 2800);
 }
 
-function generateLink() {
+async function generateLink() {
     const state = getFormState();
     if (!state.text) {
         $messageText.focus();
         return false;
     }
 
-    const url = buildBroadcastUrl(state);
+    const url = await buildBroadcastUrl(state);
     $broadcastLink.value = url;
     saveToRecent(state);
     return true;
@@ -697,7 +685,7 @@ function generateLink() {
 async function copyLink() {
     const link = $broadcastLink.value;
     if (!link) {
-        generateLink();
+        await generateLink();
         if (!$broadcastLink.value) return;
     }
 
@@ -766,8 +754,8 @@ function bindEvents() {
         applyBackgroundUrl();
     });
 
-    $generateBtn.addEventListener('click', () => {
-        if (generateLink()) {
+    $generateBtn.addEventListener('click', async () => {
+        if (await generateLink()) {
             showToast('Broadcast link generated', 'success');
         }
     });
@@ -792,7 +780,7 @@ function bindEvents() {
         const item = recent[Number(btn.dataset.recent)];
         if (item) {
             applyState(item);
-            generateLink();
+            void generateLink();
         }
     });
 
@@ -800,7 +788,7 @@ function bindEvents() {
         settings.showCopyButton = $showCopyBtnSetting.checked;
         saveSettings();
         updatePreview();
-        if ($broadcastLink.value) generateLink();
+        if ($broadcastLink.value) void generateLink();
     });
 
     $previewCopyBtn.addEventListener('click', async () => {

@@ -113,7 +113,9 @@ function applyBackgroundLayers(bgEl, overlayEl, screenEl, imageUrl, themeBg) {
     }
 }
 
-function resolveBroadcastBgImage(params) {
+function resolveBroadcastBgImage(params, decodedBgUrl) {
+    if (decodedBgUrl) return decodedBgUrl;
+
     const bgUrlParam = params.get('bgUrl');
     if (bgUrlParam) return bgUrlParam;
 
@@ -123,13 +125,14 @@ function resolveBroadcastBgImage(params) {
     return null;
 }
 
-function init() {
+async function init() {
     const params = new URLSearchParams(window.location.search);
-    const text = params.get('text');
-    const color = params.get('color') || 'blue';
-    const size = params.get('size') || 'huge';
-    const anim = params.get('anim') || 'none';
-    const showCopy = params.get('copy') === '1';
+    const decoded = await BroadcastPayload.decodeFromSearchParams(params);
+    const text = decoded && decoded.text;
+    const color = (decoded && decoded.color) || 'blue';
+    const size = (decoded && decoded.size) || 'huge';
+    const anim = (decoded && decoded.anim) || 'none';
+    const showCopy = Boolean(decoded && decoded.copy);
 
     const $screen = document.getElementById('broadcast-screen');
     const $bg = document.getElementById('broadcast-bg');
@@ -147,7 +150,7 @@ function init() {
     broadcastText = text;
 
     const theme = COLOR_THEMES[color] || COLOR_THEMES.blue;
-    const bgImage = resolveBroadcastBgImage(params);
+    const bgImage = resolveBroadcastBgImage(params, decoded && decoded.bgUrl);
     applyBackgroundLayers($bg, $overlay, $screen, bgImage, theme.bg);
     $screen.classList.toggle('has-bg-image', Boolean(bgImage));
     $screen.style.color = theme.text;
