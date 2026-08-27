@@ -88,7 +88,8 @@
   const $scaleSave = $("gs-scale-save");
 
   // ── DOM refs – Phase 6 ─────────────────────────────────
-  const $toggleViewBtn = $("gs-toggle-view");
+  const $modeScoresBtn = $("gs-mode-scores-btn");
+  const $modeGradesBtn = $("gs-mode-grades-btn");
   const $actSettingsOverlay = $("gs-activity-settings-overlay");
   const $actSettingsClose = document.querySelectorAll(".gs-act-settings-close");
   const $actSettingsSave = $("gs-act-settings-save");
@@ -968,7 +969,8 @@
                     <span class="gs-col-num">${colNum}</span>
                     <div class="gs-col-max gs-act-settings-trigger${hasCustomScale ? " gs-has-custom-scale" : ""}" data-id="${act.id}" title="${scaleTitle}">${scaleLabel} <i class="fa-solid fa-gear gs-act-settings-icon"></i></div>
                     <button class="gs-col-delete" data-id="${act.id}" title="Remove column"><i class="fa-solid fa-xmark"></i></button>
-                    <button class="gs-col-hide" data-id="${act.id}" title="Hide column"><i class="fa-solid fa-eye-slash"></i></button>`;
+                    <button class="gs-col-hide" data-id="${act.id}" title="Hide column"><i class="fa-solid fa-eye-slash"></i></button>
+                    <button class="gs-col-clear" data-id="${act.id}" title="Clear grades in this column"><i class="fa-solid fa-eraser"></i></button>`;
           th.querySelector(".gs-act-settings-trigger").addEventListener(
             "click",
             (e) => openActivitySettings(e, act.id),
@@ -1082,6 +1084,12 @@
       btn.addEventListener("click", (e) => {
         e.stopPropagation();
         toggleHideActivity(btn.dataset.id, true);
+      }),
+    );
+    $thead.querySelectorAll(".gs-col-clear").forEach((btn) =>
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        clearColumnGrades(btn.dataset.id);
       }),
     );
     restorePendingGradeFocus();
@@ -1382,23 +1390,16 @@
     renderGrid();
   }
 
-  function toggleViewMode() {
+  function setViewMode(mode) {
     if (!currentSheetId) return;
-    isGradesView = !isGradesView;
-    if (isGradesView) {
-      if ($toggleViewBtn) {
-        $toggleViewBtn.innerHTML =
-          '<i class="fa-solid fa-exchange-alt"></i> Show Scores';
-        $toggleViewBtn.classList.remove("gs-btn-secondary");
-        $toggleViewBtn.classList.add("gs-btn-primary");
-      }
-    } else {
-      if ($toggleViewBtn) {
-        $toggleViewBtn.innerHTML =
-          '<i class="fa-solid fa-exchange-alt"></i> Show Grades';
-        $toggleViewBtn.classList.remove("gs-btn-primary");
-        $toggleViewBtn.classList.add("gs-btn-secondary");
-      }
+    isGradesView = mode === "grades";
+    if ($modeScoresBtn) {
+      $modeScoresBtn.classList.toggle("gs-btn-primary", !isGradesView);
+      $modeScoresBtn.classList.toggle("gs-btn-secondary", isGradesView);
+    }
+    if ($modeGradesBtn) {
+      $modeGradesBtn.classList.toggle("gs-btn-primary", isGradesView);
+      $modeGradesBtn.classList.toggle("gs-btn-secondary", !isGradesView);
     }
     renderGrid();
   }
@@ -1412,6 +1413,31 @@
       )
     ) {
       sheet.grades = {};
+      sheet.updatedAt = Date.now();
+      saveToStorage();
+      renderGrid();
+    }
+  }
+
+  function clearColumnGrades(actId) {
+    const sheet = getSheet();
+    if (!sheet) return;
+    let act = null;
+    CATEGORIES.forEach((cat) => {
+      const f = (sheet.categories[cat] || []).find((a) => a.id === actId);
+      if (f) act = f;
+    });
+    const label = act ? act.label : "this column";
+    if (
+      confirm(
+        `Are you sure you want to clear all grades in "${label}"? This action cannot be undone.`,
+      )
+    ) {
+      Object.keys(sheet.grades).forEach((student) => {
+        if (sheet.grades[student] && actId in sheet.grades[student]) {
+          delete sheet.grades[student][actId];
+        }
+      });
       sheet.updatedAt = Date.now();
       saveToStorage();
       renderGrid();
@@ -2599,8 +2625,10 @@
       );
 
     // Phase 6 & 7 - Buttons
-    if ($toggleViewBtn)
-      $toggleViewBtn.addEventListener("click", toggleViewMode);
+    if ($modeScoresBtn)
+      $modeScoresBtn.addEventListener("click", () => setViewMode("scores"));
+    if ($modeGradesBtn)
+      $modeGradesBtn.addEventListener("click", () => setViewMode("grades"));
     if ($removeDecimalToggle)
       $removeDecimalToggle.addEventListener("change", toggleRemoveDecimal);
     if ($clearGradesBtn)

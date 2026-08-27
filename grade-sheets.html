@@ -219,7 +219,7 @@
 
                         <div
                             class="gs-toggle-switch-wrapper"
-                            title="Remove the decimal point from grades (e.g., 4.5 becomes 45)"
+                            title="When on, grades display and import without a decimal point (e.g., 4.5 becomes 45)"
                         >
                             <label class="gs-toggle-switch">
                                 <input
@@ -228,16 +228,17 @@
                                 />
                                 <span class="gs-slider round"></span>
                             </label>
-                            <span class="gs-toggle-label">Note Decimals</span>
+                            <span class="gs-toggle-label">No Decimals</span>
                         </div>
 
-                        <button
-                            id="gs-toggle-view"
-                            class="gs-btn gs-btn-secondary"
-                            title="Switch between Scores and Grades views"
-                        >
-                            <i class="fa-solid fa-exchange-alt"></i> Show Grades
-                        </button>
+                        <div class="gs-view-mode-group" title="Choose whether you type raw scores or final grades for this sheet">
+                            <button id="gs-mode-scores-btn" class="gs-btn gs-btn-primary" data-mode="scores">
+                                <i class="fa-solid fa-list-ol"></i> Scores
+                            </button>
+                            <button id="gs-mode-grades-btn" class="gs-btn gs-btn-secondary" data-mode="grades">
+                                <i class="fa-solid fa-graduation-cap"></i> Grades
+                            </button>
+                        </div>
                         <button
                             id="gs-clear-grades-btn"
                             class="gs-btn gs-btn-secondary gs-fail"
