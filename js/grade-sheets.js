@@ -1044,6 +1044,14 @@
         input.addEventListener("change", onGradeChange);
         input.addEventListener("keydown", onGradeKeydown);
         input.addEventListener("paste", onGradePaste);
+        input.addEventListener("focus", () => setActiveGradeRow(input));
+        input.addEventListener("blur", () => {
+          requestAnimationFrame(() => {
+            const active = document.activeElement;
+            if (active && active.classList.contains("gs-grade-input")) return;
+            setActiveGradeRow(null);
+          });
+        });
 
         td.appendChild(input);
         tr.appendChild(td);
@@ -1258,6 +1266,17 @@
     el.focus();
     el.select();
     el.scrollIntoView({ block: "nearest", inline: "nearest" });
+  }
+
+  function setActiveGradeRow(input) {
+    if (!$tbody) return;
+    $tbody
+      .querySelectorAll("tr.gs-row-active")
+      .forEach((tr) => tr.classList.remove("gs-row-active"));
+    if (input) {
+      const row = input.closest("tr");
+      if (row) row.classList.add("gs-row-active");
+    }
   }
 
   function moveGradeFocusTo(fromInput, toInput) {

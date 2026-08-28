@@ -1256,15 +1256,36 @@ body {
     background: #eef0f4;
 }
 
-/* Highlighted student row */
-.gs-grade-table tbody tr.gs-row-highlight {
+/* Highlighted / active student row */
+.gs-grade-table tbody tr.gs-row-highlight,
+.gs-grade-table tbody tr.gs-row-active,
+.gs-grade-table tbody tr:focus-within {
     background: #f0edff !important;
 }
 
 .gs-grade-table tbody tr.gs-row-highlight .gs-col-num-cell,
-.gs-grade-table tbody tr.gs-row-highlight .gs-col-name-cell {
+.gs-grade-table tbody tr.gs-row-highlight .gs-col-name-cell,
+.gs-grade-table tbody tr.gs-row-active .gs-col-num-cell,
+.gs-grade-table tbody tr.gs-row-active .gs-col-name-cell,
+.gs-grade-table tbody tr:focus-within .gs-col-num-cell,
+.gs-grade-table tbody tr:focus-within .gs-col-name-cell {
     background: #e8e3ff !important;
     color: #5b4dc7;
+}
+
+.gs-grade-table tbody tr.gs-row-active td,
+.gs-grade-table tbody tr:focus-within td {
+    box-shadow: inset 0 2px 0 #7b68ee, inset 0 -2px 0 #7b68ee;
+}
+
+.gs-grade-table tbody tr.gs-row-active .gs-grade-cell,
+.gs-grade-table tbody tr.gs-row-active .gs-avg-cell,
+.gs-grade-table tbody tr:focus-within .gs-grade-cell,
+.gs-grade-table tbody tr:focus-within .gs-avg-cell {
+    background-image: linear-gradient(
+        rgba(123, 104, 238, 0.14),
+        rgba(123, 104, 238, 0.14)
+    );
 }
 
 /* Grade cells */
@@ -1984,14 +2005,35 @@ body.dark-mode .gs-grade-table tbody tr:hover .gs-col-name-cell {
     background: #3a3a3a;
 }
 
-body.dark-mode .gs-grade-table tbody tr.gs-row-highlight {
+body.dark-mode .gs-grade-table tbody tr.gs-row-highlight,
+body.dark-mode .gs-grade-table tbody tr.gs-row-active,
+body.dark-mode .gs-grade-table tbody tr:focus-within {
     background: #2e2a50 !important;
 }
 
 body.dark-mode .gs-grade-table tbody tr.gs-row-highlight .gs-col-num-cell,
-body.dark-mode .gs-grade-table tbody tr.gs-row-highlight .gs-col-name-cell {
+body.dark-mode .gs-grade-table tbody tr.gs-row-highlight .gs-col-name-cell,
+body.dark-mode .gs-grade-table tbody tr.gs-row-active .gs-col-num-cell,
+body.dark-mode .gs-grade-table tbody tr.gs-row-active .gs-col-name-cell,
+body.dark-mode .gs-grade-table tbody tr:focus-within .gs-col-num-cell,
+body.dark-mode .gs-grade-table tbody tr:focus-within .gs-col-name-cell {
     background: #2e2a50 !important;
     color: #b0a8f0;
+}
+
+body.dark-mode .gs-grade-table tbody tr.gs-row-active td,
+body.dark-mode .gs-grade-table tbody tr:focus-within td {
+    box-shadow: inset 0 2px 0 #9b8cff, inset 0 -2px 0 #9b8cff;
+}
+
+body.dark-mode .gs-grade-table tbody tr.gs-row-active .gs-grade-cell,
+body.dark-mode .gs-grade-table tbody tr.gs-row-active .gs-avg-cell,
+body.dark-mode .gs-grade-table tbody tr:focus-within .gs-grade-cell,
+body.dark-mode .gs-grade-table tbody tr:focus-within .gs-avg-cell {
+    background-image: linear-gradient(
+        rgba(155, 140, 255, 0.18),
+        rgba(155, 140, 255, 0.18)
+    );
 }
 
 body.dark-mode .gs-grade-cell {
