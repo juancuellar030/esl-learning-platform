@@ -1,0 +1,78 @@
+- generic [active] [ref=f4e1]:
+  - generic [ref=f4e3]:
+    - generic [ref=f4e4]:
+      - generic [ref=f4e5]:
+        - heading " Grade Sheets" [level=1] [ref=f4e6]:
+          - generic [ref=f4e7]: 
+          - text: Grade Sheets
+        - paragraph [ref=f4e8]: Manage your term grading sheets
+      - generic [ref=f4e9]:
+        - link " Tools" [ref=f4e10] [cursor=pointer]:
+          - /url: tools.html
+          - generic [ref=f4e11]: 
+          - text: Tools
+        - button " Export Selected" [disabled] [ref=f4e12]:
+          - generic [ref=f4e13]: 
+          - text: Export Selected
+        - button " Google Drive" [ref=f4e14] [cursor=pointer]:
+          - generic [ref=f4e15]: 
+          - text: Google Drive
+        - button "+ New Sheet" [ref=f4e16] [cursor=pointer]:
+          - generic [ref=f4e17]: +
+          - text: New Sheet
+    - generic [ref=f4e18]:
+      - generic [ref=f4e19]:
+        - generic [ref=f4e20]: 
+        - searchbox "Search by subject, course, term or teacher..." [ref=f4e21]
+      - generic [ref=f4e22]:
+        - generic [ref=f4e23]:
+          - generic [ref=f4e24]: Subject
+          - combobox "Subject" [ref=f4e25]:
+            - option "All subjects" [selected]
+            - option "Arrow Nav"
+        - generic [ref=f4e26]:
+          - generic [ref=f4e27]: Course
+          - combobox "Course" [ref=f4e28]:
+            - option "All courses" [selected]
+            - option "3A"
+        - generic [ref=f4e29]:
+          - generic [ref=f4e30]: Term
+          - combobox "Term" [ref=f4e31]:
+            - option "All terms" [selected]
+            - option "First"
+        - generic [ref=f4e32]:
+          - generic [ref=f4e33]: Sort by
+          - combobox "Sort by" [ref=f4e34]:
+            - option "Recently updated" [selected]
+            - option "Most complete first"
+            - option "Least complete first"
+        - button " Clear" [disabled] [ref=f4e35]:
+          - generic [ref=f4e36]: 
+          - text: Clear
+      - generic [ref=f4e37]: 1 sheet
+    - generic [ref=f4e39] [cursor=pointer]:
+      - checkbox "Select for export" [ref=f4e40]
+      - button "" [ref=f4e42]
+      - generic [ref=f4e44]:
+        - heading " Arrow Nav — 3A" [level=3] [ref=f4e45]:
+          - generic [ref=f4e46]: 
+          - text: Arrow Nav — 3A
+        - generic [ref=f4e47]:
+          - generic [ref=f4e48]:
+            - generic [ref=f4e49]: 
+            - text: First Term
+          - generic [ref=f4e50]:
+            - generic [ref=f4e51]: 
+            - text: 25 students
+      - generic [ref=f4e52]:
+        - generic [ref=f4e53]:
+          - generic [ref=f4e54]: 
+          - text: Test
+        - generic [ref=f4e55]:
+          - generic [ref=f4e56]: 
+          - text: 2 activities
+        - generic [ref=f4e57]: 2% complete
+    - text:  
+  - text:                + + +                                             
+  - generic [ref=f4e60]: ESL Learning Platform © 2025 | Made for Teachers, by Teachers
+  - button "" [ref=f4e61] [cursor=pointer]
