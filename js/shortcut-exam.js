@@ -303,10 +303,7 @@ const ShortcutExam = (() => {
         };
 
         try {
-            const user = await FirebaseService.init();
-            // #region agent log
-            fetch('http://127.0.0.1:7299/ingest/23a439c6-36e6-4cbe-903c-026fcd6502ae',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'dfe617'},body:JSON.stringify({sessionId:'dfe617',hypothesisId:'A',location:'shortcut-exam.js:createExamSession',message:'Init finished before publishTest',data:{origin:location.origin,uidPrefix:String((user&&user.uid)||'').slice(0,8),isAnonymous:!!(user&&user.isAnonymous),minutes,payloadKeys:Object.keys(metadata)},timestamp:Date.now()})}).catch(()=>{});
-            // #endregion
+            await FirebaseService.init();
             const code = await FirebaseService.publishTest(metadata);
             const studentUrl = buildStudentUrl(code);
 
@@ -316,9 +313,6 @@ const ShortcutExam = (() => {
             renderQrCode(studentUrl);
             showScreen('screen-created');
         } catch (error) {
-            // #region agent log
-            fetch('http://127.0.0.1:7299/ingest/23a439c6-36e6-4cbe-903c-026fcd6502ae',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'dfe617'},body:JSON.stringify({sessionId:'dfe617',hypothesisId:'E',location:'shortcut-exam.js:createExamSession',message:'Session creation threw',data:{errorCode:error&&error.code,errorMessage:error&&error.message,origin:location.origin},timestamp:Date.now()})}).catch(()=>{});
-            // #endregion
             console.error('[ShortcutExam] Session creation failed:', error);
             showError('Could Not Create Session', 'Check your connection and try again.');
         } finally {
