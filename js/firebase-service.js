@@ -52,10 +52,16 @@ const FirebaseService = (() => {
     function signInAnonymously() {
         return auth.signInAnonymously().then(cred => {
             currentUser = cred.user;
+            // #region agent log
+            fetch('http://127.0.0.1:7299/ingest/23a439c6-36e6-4cbe-903c-026fcd6502ae',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'dfe617'},body:JSON.stringify({sessionId:'dfe617',hypothesisId:'A',location:'firebase-service.js:signInAnonymously',message:'Anonymous auth succeeded',data:{uidPrefix:String(currentUser&&currentUser.uid||'').slice(0,8),isAnonymous:!!(currentUser&&currentUser.isAnonymous),hasAuthUser:!!(auth&&auth.currentUser),origin:typeof location!=='undefined'?location.origin:''},timestamp:Date.now()})}).catch(()=>{});
+            // #endregion
             return currentUser;
         }).catch(err => {
             console.error('[FirebaseService] Auth error:', err);
             currentUser = { uid: 'anon_' + Date.now() };
+            // #region agent log
+            fetch('http://127.0.0.1:7299/ingest/23a439c6-36e6-4cbe-903c-026fcd6502ae',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'dfe617'},body:JSON.stringify({sessionId:'dfe617',hypothesisId:'A',location:'firebase-service.js:signInAnonymously',message:'Anonymous auth failed',data:{errorCode:err&&err.code,errorMessage:err&&err.message,fallbackUidPrefix:String(currentUser.uid).slice(0,8),hasAuthUser:!!(auth&&auth.currentUser),origin:typeof location!=='undefined'?location.origin:''},timestamp:Date.now()})}).catch(()=>{});
+            // #endregion
             return currentUser;
         });
     }
@@ -336,6 +342,11 @@ const FirebaseService = (() => {
             publishedAt: Date.now(),
             expiresAt: Date.now() + (7 * 24 * 60 * 60 * 1000) // 7 days
         };
+        const writePath = 'tests/' + code;
+        const authUid = auth && auth.currentUser ? auth.currentUser.uid : null;
+        // #region agent log
+        fetch('http://127.0.0.1:7299/ingest/23a439c6-36e6-4cbe-903c-026fcd6502ae',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'dfe617'},body:JSON.stringify({sessionId:'dfe617',hypothesisId:'B',location:'firebase-service.js:publishTest',message:'About to write published test',data:{writePath,code,isDemo:isDemo(),dbReady:!!db,payloadKeys:Object.keys(payload),hasQuestions:Array.isArray(payload.questions),hasSettings:!!payload.settings,serviceUidPrefix:String(getUid()||'').slice(0,8),authUidPrefix:String(authUid||'').slice(0,8),authMatchesService:String(getUid()||'')===String(authUid||'')},timestamp:Date.now()})}).catch(()=>{});
+        // #endregion
         if (isDemo()) {
             if (!window._demoTests) window._demoTests = {};
             window._demoTests[code] = payload;
@@ -343,9 +354,17 @@ const FirebaseService = (() => {
             try { localStorage.setItem('lastPublishedCode', code); } catch (e) { }
             return Promise.resolve(code);
         }
-        return db.ref('tests/' + code).set(payload).then(() => {
+        return db.ref(writePath).set(payload).then(() => {
+            // #region agent log
+            fetch('http://127.0.0.1:7299/ingest/23a439c6-36e6-4cbe-903c-026fcd6502ae',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'dfe617'},body:JSON.stringify({sessionId:'dfe617',hypothesisId:'C',location:'firebase-service.js:publishTest',message:'Published test write succeeded',data:{writePath,code},timestamp:Date.now()})}).catch(()=>{});
+            // #endregion
             try { localStorage.setItem('lastPublishedCode', code); } catch (e) { }
             return code;
+        }).catch(err => {
+            // #region agent log
+            fetch('http://127.0.0.1:7299/ingest/23a439c6-36e6-4cbe-903c-026fcd6502ae',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'dfe617'},body:JSON.stringify({sessionId:'dfe617',hypothesisId:'C',location:'firebase-service.js:publishTest',message:'Published test write failed',data:{writePath,code,errorCode:err&&err.code,errorMessage:err&&err.message,authUidPrefix:String((auth&&auth.currentUser&&auth.currentUser.uid)||'').slice(0,8)},timestamp:Date.now()})}).catch(()=>{});
+            // #endregion
+            throw err;
         });
     }
 

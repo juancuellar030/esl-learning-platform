@@ -1,0 +1,18 @@
+- main [ref=f15e2]:
+  - text:   
+  - generic [ref=f15e17]:
+    - generic [ref=f15e18]: 
+    - heading "Exam Session Ready" [level=1] [ref=f15e20]
+    - paragraph [ref=f15e21]: Send this direct link to students. It expires in 7 days.
+    - generic [ref=f15e22]: A2ZALG
+    - generic [ref=f15e23]:
+      - generic [ref=f15e24]:
+        - generic [ref=f15e25]:
+          - generic [ref=f15e26]: Student URL
+          - generic [ref=f15e27]:
+            - textbox "Student URL" [ref=f15e28]: http://127.0.0.1:8080/shortcut-exam.html?code=A2ZALG
+            - button "" [ref=f15e29] [cursor=pointer]
+        - paragraph
+      - generic "QR code for the student exam URL" [ref=f15e31]
+  - text:           
+  - button "" [ref=f15e14] [cursor=pointer]
