@@ -8,6 +8,7 @@ const TestBuilder = (function () {
     // ===== CONSTANTS =====
     const STORAGE_KEY = 'esl_test_builder_data'; // Legacy key — kept only for migration
     const REGISTRY_KEY = 'esl_active_tests';
+    const SHORTCUT_EXAM_REGISTRY_KEY = 'shortcut_exam_sessions';
     const QUESTION_TYPES = [
         { id: 'multiple-choice', label: 'Multiple Choice', icon: 'fa-list-ul' },
         { id: 'true-false', label: 'True / False', icon: 'fa-check-double' },
@@ -125,6 +126,30 @@ const TestBuilder = (function () {
     // ===== REGISTRY HELPERS =====
     function _getRegistry() {
         try { return JSON.parse(localStorage.getItem(REGISTRY_KEY)) || []; } catch { return []; }
+    }
+
+    function _getResponsesRegistry() {
+        let shortcutExams = [];
+        try {
+            shortcutExams = JSON.parse(localStorage.getItem(SHORTCUT_EXAM_REGISTRY_KEY)) || [];
+        } catch {
+            shortcutExams = [];
+        }
+
+        const now = Date.now();
+        const combined = [
+            ..._getRegistry(),
+            ...shortcutExams.map(entry => ({
+                ...entry,
+                active: entry.active !== false && (!entry.expiresAt || entry.expiresAt > now)
+            }))
+        ];
+        const seenCodes = new Set();
+        return combined.filter(entry => {
+            if (!entry.shareCode || seenCodes.has(entry.shareCode)) return false;
+            seenCodes.add(entry.shareCode);
+            return true;
+        });
     }
 
     function _updateRegistry(td) {
@@ -2291,7 +2316,7 @@ const TestBuilder = (function () {
                 responses.forEach(r => {
                     const dateObj = r.submittedAt ? new Date(r.submittedAt) : new Date();
                     const dateKey = dateObj.toLocaleDateString('en-CA'); // YYYY-MM-DD
-                    const groupName = r.studentGroup || 'No Group';
+                    const groupName = r.studentGroup || r.group || 'No Group';
                     const key = `${dateKey}_${groupName}`;
 
                     if (!groups[key]) {
@@ -2418,14 +2443,15 @@ const TestBuilder = (function () {
     }
 
     async function clearResponses() {
-        if (!testData.shareCode) return;
+        const code = responsesCode || testData.shareCode;
+        if (!code) return;
 
         if (!confirm('Are you sure you want to delete all responses for this shared test? This cannot be undone.')) {
             return;
         }
 
         try {
-            await FirebaseService.clearTestResponses(testData.shareCode);
+            await FirebaseService.clearTestResponses(code);
             responsesData = {};
             renderResponsesTable();
             updateResponseBadge();
@@ -2452,7 +2478,7 @@ const TestBuilder = (function () {
     function _renderResponsesCodeSelector() {
         let container = document.getElementById('resp-code-selector-wrap');
         if (!container) return; // Not in DOM yet — will add to HTML
-        const reg = _getRegistry().filter(e => e.shareCode);
+        const reg = _getResponsesRegistry();
         if (reg.length === 0) {
             container.style.display = 'none';
             return;
@@ -2485,7 +2511,7 @@ const TestBuilder = (function () {
             return;
         }
         // Check if active in registry
-        const reg = _getRegistry();
+        const reg = _getResponsesRegistry();
         const entry = reg.find(e => e.shareCode === code);
         const isActive = entry ? entry.active : false;
 
@@ -2579,7 +2605,7 @@ const TestBuilder = (function () {
         // Sort oldest to newest so the newest overwrites the responseData and marks hasRetake
         rawResponses.sort((a, b) => (a.submittedAt || 0) - (b.submittedAt || 0)).forEach(r => {
             const students = (r.coStudents && r.coStudents.length > 0) ? r.coStudents : [r.studentName || 'Unknown'];
-            const group = r.studentGroup || 'No Group';
+            const group = r.studentGroup || r.group || 'No Group';
 
             students.forEach(sName => {
                 const match = allRoster.find(x => x.studentName === sName && x.studentGroup === group);
@@ -2657,9 +2683,10 @@ const TestBuilder = (function () {
                 let pct = 0, scoreClass = '', vc = 0, violClass = '', dur = '—', submitted = '—', retakeBadge = '—';
 
                 if (isSub) {
-                    pct = d.totalPoints > 0 ? Math.round((d.score / d.totalPoints) * 100) : 0;
+                    const totalPoints = getResponseTotalPoints(d);
+                    pct = totalPoints > 0 ? Math.round((d.score / totalPoints) * 100) : 0;
                     scoreClass = pct >= 80 ? 'score-high' : pct >= 50 ? 'score-mid' : 'score-low';
-                    vc = d.violationCount || 0;
+                    vc = getResponseViolationCount(d);
                     violClass = vc === 0 ? 'viol-0' : vc <= 2 ? `viol-${vc}` : 'viol-high';
                     dur = d.durationSeconds ? formatDuration(d.durationSeconds) : '—';
                     submitted = d.submittedAt ? new Date(d.submittedAt).toLocaleString() : '—';
@@ -2678,7 +2705,7 @@ const TestBuilder = (function () {
                     <td>${esc(r.studentName || '—')}</td>
                     <td>${esc(r.studentGroup || '—')}</td>
                     <td>${statusBadge}</td>
-                    ${isSub ? `<td class="score-cell ${scoreClass}">${d.score ?? 0}/${d.totalPoints ?? 0} (${pct}%)</td>` : '<td class="score-cell">—</td>'}
+                    ${isSub ? `<td class="score-cell ${scoreClass}">${d.score ?? 0}/${getResponseTotalPoints(d)} (${pct}%)</td>` : '<td class="score-cell">—</td>'}
                     <td>${dur}</td>
                     ${isSub ? `<td><span class="viol-badge ${violClass}">${vc}</span></td>` : '<td>—</td>'}
                     <td>${retakeBadge}</td>
@@ -2700,7 +2727,8 @@ const TestBuilder = (function () {
         }
 
         const avgPct = Math.round(responses.reduce((s, r) => {
-            return s + (r.totalPoints > 0 ? (r.score / r.totalPoints) * 100 : 0);
+            const totalPoints = getResponseTotalPoints(r);
+            return s + (totalPoints > 0 ? (r.score / totalPoints) * 100 : 0);
         }, 0) / n);
         dom.statAvgScore.textContent = avgPct + '%';
 
@@ -2712,12 +2740,13 @@ const TestBuilder = (function () {
             dom.statAvgTime.textContent = '—';
         }
 
-        const totalViolations = responses.reduce((s, r) => s + (r.violationCount || 0), 0);
+        const totalViolations = responses.reduce((s, r) => s + getResponseViolationCount(r), 0);
         dom.statViolations.textContent = totalViolations;
     }
 
     function renderAccuracyBars(responses) {
-        if (!testData.questions.length || responses.length === 0) {
+        const hasShortcutExamResponses = responses.some(r => Array.isArray(r.shortcutResults));
+        if (!testData.questions.length || responses.length === 0 || hasShortcutExamResponses) {
             dom.qBreakdown.style.display = 'none';
             return;
         }
@@ -2760,6 +2789,19 @@ const TestBuilder = (function () {
         return m > 0 ? `${m}m ${s}s` : `${s}s`;
     }
 
+    function getResponseTotalPoints(response) {
+        if (response && response.totalPoints !== undefined && Number.isFinite(Number(response.totalPoints))) {
+            return Number(response.totalPoints);
+        }
+        return response && Array.isArray(response.shortcutResults) ? 10 : 0;
+    }
+
+    function getResponseViolationCount(response) {
+        if (!response) return 0;
+        const value = response.violationCount !== undefined ? response.violationCount : response.exitCount;
+        return Number.isFinite(Number(value)) ? Number(value) : 0;
+    }
+
     function esc(text) {
         if (!text) return '';
         const d = document.createElement('div');
@@ -2783,19 +2825,20 @@ const TestBuilder = (function () {
         const rows = roster.map(r => {
             const isSub = r.status === 'submitted';
             const d = r.responseData || {};
-            const pct = (isSub && d.totalPoints > 0) ? Math.round((d.score / d.totalPoints) * 100) : '';
+            const totalPoints = getResponseTotalPoints(d);
+            const pct = (isSub && totalPoints > 0) ? Math.round((d.score / totalPoints) * 100) : '';
 
             const row = [
                 `"${(r.studentName || '').replace(/"/g, '""')}"`,
                 `"${(r.studentGroup || '').replace(/"/g, '""')}"`,
                 isSub ? 'Submitted' : 'Pending',
                 isSub ? (d.score ?? 0) : '',
-                isSub ? (d.totalPoints ?? 0) : '',
+                isSub ? totalPoints : '',
                 isSub ? (pct + '%') : '',
                 isSub ? (d.durationSeconds ?? '') : '',
                 isSub && d.startedAt ? new Date(d.startedAt).toISOString() : '',
                 isSub && d.completedAt ? new Date(d.completedAt).toISOString() : '',
-                isSub ? (d.violationCount ?? 0) : '',
+                isSub ? getResponseViolationCount(d) : '',
                 isSub ? ((r.hasRetake || d.isRetake) ? 'Yes' : 'No') : '',
                 isSub && d.submittedAt ? new Date(d.submittedAt).toISOString() : ''
             ];
@@ -2828,7 +2871,7 @@ const TestBuilder = (function () {
         }
         rawResponses.sort((a, b) => (a.submittedAt || 0) - (b.submittedAt || 0)).forEach(r => {
             const students = (r.coStudents && r.coStudents.length > 0) ? r.coStudents : [r.studentName || 'Unknown'];
-            const group = r.studentGroup || 'No Group';
+            const group = r.studentGroup || r.group || 'No Group';
             students.forEach(sName => {
                 const match = allRoster.find(x => x.studentName === sName && x.studentGroup === group);
                 if (match) {
