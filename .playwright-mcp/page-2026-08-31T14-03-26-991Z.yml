@@ -1,0 +1,14 @@
+- main [ref=f2e2]:
+  - text: 
+  - generic [ref=f2e4]:
+    - generic [ref=f2e5]: 
+    - heading "Keyboard Shortcut Exam" [level=1] [ref=f2e7]
+    - paragraph [ref=f2e8]: Create a standalone exam session for your students.
+    - generic [ref=f2e9]:
+      - generic [ref=f2e10]: Time limit (minutes)
+      - spinbutton "Time limit (minutes)" [ref=f2e11]: "20"
+    - button " Create Exam Session" [ref=f2e12] [cursor=pointer]:
+      - generic [ref=f2e13]: 
+      - text: Create Exam Session
+  - text:             
+  - button "" [ref=f2e14] [cursor=pointer]

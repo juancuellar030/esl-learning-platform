@@ -1,0 +1,21 @@
+- main [ref=f3e2]:
+  - text:         
+  - generic [ref=f3e43]:
+    - generic [ref=f3e44]:
+      - generic [ref=f3e45]:
+        - generic [ref=f3e46]: 0 / 10 shortcuts demonstrated
+        - generic [ref=f3e47]:
+          - generic [ref=f3e48]: 
+          - text: 20:00
+      - generic [ref=f3e50]:
+        - generic [ref=f3e51]: 
+        - heading "Demonstrate your shortcuts" [level=1] [ref=f3e52]
+        - paragraph [ref=f3e53]: Use the physical keyboard to demonstrate 10 different shortcuts. Each recognized shortcut opens one question about its function.
+      - generic [ref=f3e54]:
+        - generic [ref=f3e55]: Right-click for theme options
+        - button " Finish Test" [disabled] [ref=f3e56]:
+          - generic [ref=f3e57]: 
+          - text: Finish Test
+    - text:  
+  - text:   
+  - button "" [ref=f3e6] [cursor=pointer]

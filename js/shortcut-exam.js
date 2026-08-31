@@ -159,6 +159,11 @@ const ShortcutExam = (() => {
             prompt: FUNCTION_PROMPT,
             options: ['Reset Zoom [Restablecer zoom]', 'Close [Cerrar]', 'Select [Seleccionar]', 'Clear [Borrar]'],
             correctIndex: 0
+        },
+        fullscreen: {
+            prompt: FUNCTION_PROMPT,
+            options: ['Fullscreen [Pantalla completa]', 'Refresh [Actualizar]', 'Zoom In [Acercar]', 'Print [Imprimir]'],
+            correctIndex: 0
         }
     };
 
@@ -182,6 +187,8 @@ const ShortcutExam = (() => {
     let creditedIds = new Set();
     let exitCount = 0;
     let submitInProgress = false;
+    let suppressFullscreenLock = false;
+    let suppressExitUntil = 0;
 
     let timeRemainingMs = 0;
     let timerDeadline = 0;
@@ -225,11 +232,12 @@ const ShortcutExam = (() => {
         return ShortcutsData.SHORTCUTS
             .filter((shortcut) => shortcut.type === 'interactive')
             .filter((shortcut) => {
+                if (shortcut.id === 'fullscreen') return true;
                 if (typeof ShortcutsData.isLiveFormatAllowed === 'function') {
                     return ShortcutsData.isLiveFormatAllowed(shortcut);
                 }
                 const keys = shortcut.keys.map((key) => String(key).toLowerCase());
-                return !keys.includes('alt') && !keys.includes('win') && shortcut.id !== 'fullscreen';
+                return !keys.includes('alt') && !keys.includes('win');
             })
             .map((shortcut) => ({
                 id: shortcut.id,
@@ -624,6 +632,8 @@ const ShortcutExam = (() => {
         examLocked = false;
         resumeRequested = false;
         ambientEnabled = true;
+        suppressFullscreenLock = false;
+        suppressExitUntil = 0;
         timeRemainingMs = testData.timeLimitMinutes * 60 * 1000;
 
         $('shortcut-exam-container').classList.remove('modal-open');
@@ -684,19 +694,46 @@ const ShortcutExam = (() => {
 
     function onFullscreenChange() {
         if (!examActive) return;
-        if (!isFullscreen()) {
-            showLock(true);
-        } else if (examLocked && resumeRequested) {
-            resumeFromLock();
+        if (isFullscreen()) {
+            if (examLocked && resumeRequested) resumeFromLock();
+            return;
         }
+        if (consumeFullscreenShortcutSuppression()) {
+            restoreExamFullscreen();
+            return;
+        }
+        showLock(true);
     }
 
     function onVisibilityChange() {
-        if (examActive && document.hidden) showLock(true);
+        if (examActive && document.hidden && !shouldSuppressExitLock()) showLock(true);
     }
 
     function onWindowBlur() {
-        if (examActive) showLock(true);
+        if (examActive && !shouldSuppressExitLock()) showLock(true);
+    }
+
+    function markFullscreenShortcutHandled() {
+        suppressFullscreenLock = true;
+        suppressExitUntil = Date.now() + 800;
+    }
+
+    function shouldSuppressExitLock() {
+        return suppressFullscreenLock || Date.now() < suppressExitUntil;
+    }
+
+    function consumeFullscreenShortcutSuppression() {
+        if (!shouldSuppressExitLock()) return false;
+        suppressFullscreenLock = false;
+        return true;
+    }
+
+    function restoreExamFullscreen() {
+        requestExamFullscreen().catch(() => {});
+    }
+
+    function isF11Event(event) {
+        return event.key === 'F11' || event.code === 'F11';
     }
 
     function showLock(incrementExitCount) {
@@ -768,7 +805,30 @@ const ShortcutExam = (() => {
     }
 
     function onAmbientKeydown(event) {
-        if (!examActive || examLocked || modalOpen || !ambientEnabled || submitInProgress) return;
+        if (!examActive || submitInProgress) return;
+
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            event.stopPropagation();
+            showLock(true);
+            return;
+        }
+
+        if (isF11Event(event) && isFullscreen()) {
+            event.preventDefault();
+            event.stopPropagation();
+            markFullscreenShortcutHandled();
+            restoreExamFullscreen();
+
+            if (examLocked || modalOpen || !ambientEnabled) return;
+
+            const fullscreenShortcut = eligibleShortcuts.find((candidate) => candidate.id === 'fullscreen');
+            if (!fullscreenShortcut) return;
+            recordShortcutAttempt(fullscreenShortcut);
+            return;
+        }
+
+        if (examLocked || modalOpen || !ambientEnabled) return;
         if (isModifierOnlyEvent(event)) return;
 
         const shortcut = eligibleShortcuts.find((candidate) => matchesShortcutEvent(candidate, event));
@@ -776,7 +836,10 @@ const ShortcutExam = (() => {
 
         event.preventDefault();
         event.stopPropagation();
+        recordShortcutAttempt(shortcut);
+    }
 
+    function recordShortcutAttempt(shortcut) {
         if (creditedIds.has(shortcut.id)) {
             showToast('That shortcut was already recorded.');
             return;
