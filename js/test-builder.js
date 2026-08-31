@@ -2527,6 +2527,15 @@ const TestBuilder = (function () {
         }
     }
 
+    function _isShortcutExamCode(code) {
+        try {
+            const sessions = JSON.parse(localStorage.getItem(SHORTCUT_EXAM_REGISTRY_KEY)) || [];
+            return sessions.some(entry => entry.shareCode === code);
+        } catch {
+            return false;
+        }
+    }
+
     async function loadHistoricalResponses(code) {
         try {
             await FirebaseService.init();
@@ -2543,7 +2552,7 @@ const TestBuilder = (function () {
         dom.responsesOverlay.classList.remove('active');
     }
 
-    function startResponseListener(code) {
+    async function startResponseListener(code) {
         // Clean up any existing listener
         if (responsesUnsubscribe) {
             responsesUnsubscribe();
@@ -2554,9 +2563,16 @@ const TestBuilder = (function () {
             responsesPollInterval = null;
         }
 
+        const listenCode = code;
         try {
+            await FirebaseService.init();
+            if (responsesCode !== listenCode) return;
+            if (FirebaseService.isDemo()) {
+                throw new Error('Firebase is in demo mode');
+            }
             // Use onNewResponse for real-time updates
-            responsesUnsubscribe = FirebaseService.onNewResponse(code, (id, response) => {
+            responsesUnsubscribe = FirebaseService.onNewResponse(listenCode, (id, response) => {
+                if (responsesCode !== listenCode) return;
                 responsesData[id] = response;
                 renderResponsesTable();
                 updateResponseBadge();
@@ -2565,8 +2581,10 @@ const TestBuilder = (function () {
         } catch (e) {
             // Fallback: poll every 5 seconds
             const poll = async () => {
+                if (responsesCode !== listenCode) return;
                 try {
-                    const test = await FirebaseService.getPublishedTest(code);
+                    await FirebaseService.init();
+                    const test = await FirebaseService.getPublishedTest(listenCode);
                     if (test && test.responses) {
                         responsesData = test.responses;
                         renderResponsesTable();
@@ -2581,11 +2599,14 @@ const TestBuilder = (function () {
     }
 
     function renderResponsesTable() {
-        const rawResponses = Object.values(responsesData);
+        const rawResponses = Object.values(responsesData).filter(Boolean);
         const allRoster = [];
+        const viewingShortcutExam = _isShortcutExamCode(responsesCode)
+            || rawResponses.some(r => Array.isArray(r.shortcutResults));
 
-        // Prepopulate roster from settings
-        if (testData.settings && testData.settings.groupOptions) {
+        // Prepopulate roster from the current Test Builder settings, but not when
+        // viewing a standalone Keyboard Shortcut Exam (different session, different roster).
+        if (!viewingShortcutExam && testData.settings && testData.settings.groupOptions) {
             testData.settings.groupOptions.forEach(groupCode => {
                 const students = STUDENT_DATA[groupCode] || [];
                 students.forEach(name => {

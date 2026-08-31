@@ -442,6 +442,9 @@ const FirebaseService = (() => {
             });
             // Then: listen for new ones
             ref.on('child_added', handler);
+        }).catch(err => {
+            console.error('[FirebaseService] Failed to load existing responses for', code, err);
+            ref.on('child_added', handler);
         });
 
         return () => ref.off('child_added', handler);
