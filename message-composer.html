@@ -39,8 +39,24 @@
                         <h2><i class="fa-solid fa-bullhorn"></i> Compose Message</h2>
 
                         <div class="form-group">
-                            <label for="message-text">Message Text</label>
-                            <textarea id="message-text" placeholder="Type your broadcast message…" rows="4"></textarea>
+                            <label for="message-text">Message / Caption</label>
+                            <textarea id="message-text"
+                                placeholder="Type a message, or add an optional caption above a table…"
+                                rows="4"></textarea>
+                        </div>
+
+                        <div class="form-group table-paste-group">
+                            <label for="table-paste-input">Paste Table <span class="label-optional">(optional)</span></label>
+                            <textarea id="table-paste-input" class="table-paste-input"
+                                placeholder="Copy cells from Google Sheets or Excel, then paste them here…"
+                                rows="4" spellcheck="false"></textarea>
+                            <div class="table-paste-meta">
+                                <span id="table-paste-status" aria-live="polite">No table pasted</span>
+                                <button type="button" class="table-clear-btn" id="table-clear-btn" hidden>
+                                    <i class="fa-solid fa-xmark"></i> Clear table
+                                </button>
+                            </div>
+                            <p class="table-paste-warning" id="table-paste-warning" role="alert" hidden></p>
                         </div>
 
                         <div class="form-group">
@@ -107,6 +123,21 @@
                                 </label>
                             </div>
                         </div>
+
+                        <div class="form-group composer-panel-toggle is-disabled" id="cell-copy-setting">
+                            <div class="composer-toggle-row">
+                                <div class="composer-toggle-info">
+                                    <span class="composer-toggle-label" id="setting-copy-cells-label">Click table cells to
+                                        copy</span>
+                                    <span class="composer-toggle-hint">Lets students copy one cell at a time by clicking
+                                        it on the broadcast screen.</span>
+                                </div>
+                                <label class="composer-toggle-switch" aria-labelledby="setting-copy-cells-label">
+                                    <input type="checkbox" id="setting-copy-cells" disabled />
+                                    <span class="composer-toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="preview-panel">
@@ -116,7 +147,10 @@
                                 <img class="preview-bg" id="preview-bg" alt="" referrerpolicy="no-referrer" hidden>
                                 <div class="preview-overlay" id="preview-overlay" hidden></div>
                                 <div class="preview-content">
-                                    <span class="preview-message" id="preview-message">Your message preview…</span>
+                                    <div class="preview-display" id="preview-display">
+                                        <div class="preview-message" id="preview-message">Your message preview…</div>
+                                        <div class="preview-table-wrap" id="preview-table-wrap" hidden></div>
+                                    </div>
                                     <button type="button" class="preview-copy-btn" id="preview-copy-btn" hidden>
                                         <i class="fa-solid fa-copy"></i> Copy
                                     </button>

@@ -92,6 +92,71 @@ function renderTextWithLinks(el, text) {
 
 let broadcastText = '';
 
+function tableToTsv(table) {
+    return table.map(row => row.map(value => {
+        const text = String(value ?? '');
+        return /["\t\r\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+    }).join('\t')).join('\n');
+}
+
+function buildBroadcastPlainText(text, table) {
+    const parts = [];
+    if (text) parts.push(text);
+    if (table.length) parts.push(tableToTsv(table));
+    return parts.join('\n\n');
+}
+
+function renderBroadcastTable(container, rows, copyCells, feedback) {
+    container.replaceChildren();
+    if (!rows.length) {
+        container.hidden = true;
+        return;
+    }
+
+    const table = document.createElement('table');
+    table.className = 'broadcast-table';
+    const tbody = document.createElement('tbody');
+
+    rows.forEach(row => {
+        const tr = document.createElement('tr');
+        row.forEach(value => {
+            const td = document.createElement('td');
+            td.textContent = value;
+            if (copyCells) {
+                td.tabIndex = 0;
+                td.setAttribute('role', 'button');
+                td.setAttribute('aria-label', value ? `Copy ${value}` : 'Copy blank cell');
+            }
+            tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+    });
+
+    table.appendChild(tbody);
+    container.appendChild(table);
+    container.hidden = false;
+    container.classList.toggle('cells-copyable', copyCells);
+
+    if (!copyCells) return;
+    const copyCell = async cell => {
+        await writeClipboardText(cell.textContent || '');
+        cell.classList.add('copied');
+        showCopyFeedback(feedback, 'Cell copied!');
+        setTimeout(() => cell.classList.remove('copied'), 900);
+    };
+    container.addEventListener('click', event => {
+        const cell = event.target.closest('td');
+        if (cell) void copyCell(cell);
+    });
+    container.addEventListener('keydown', event => {
+        if (event.key !== 'Enter' && event.key !== ' ') return;
+        const cell = event.target.closest('td');
+        if (!cell) return;
+        event.preventDefault();
+        void copyCell(cell);
+    });
+}
+
 function applyBackgroundLayers(bgEl, overlayEl, screenEl, imageUrl, themeBg) {
     if (imageUrl) {
         bgEl.referrerPolicy = 'no-referrer';
@@ -133,28 +198,40 @@ async function init() {
     const size = (decoded && decoded.size) || 'huge';
     const anim = (decoded && decoded.anim) || 'none';
     const showCopy = Boolean(decoded && decoded.copy);
+    const copyCells = Boolean(decoded && decoded.copyCells);
+    const table = decoded && Array.isArray(decoded.table) ? decoded.table : [];
 
     const $screen = document.getElementById('broadcast-screen');
     const $bg = document.getElementById('broadcast-bg');
     const $overlay = document.getElementById('broadcast-overlay');
+    const $content = document.getElementById('broadcast-content');
     const $text = document.getElementById('broadcast-text');
+    const $tableWrap = document.getElementById('broadcast-table-wrap');
     const $copyBtn = document.getElementById('broadcast-copy-btn');
     const $copyFeedback = document.getElementById('broadcast-copy-feedback');
 
-    if (!text) {
+    if (!text && !table.length) {
         $screen.classList.add('placeholder');
         $text.textContent = PLACEHOLDER_TEXT;
         return;
     }
 
-    broadcastText = text;
+    broadcastText = buildBroadcastPlainText(text || '', table);
 
     const theme = COLOR_THEMES[color] || COLOR_THEMES.blue;
     const bgImage = resolveBroadcastBgImage(params, decoded && decoded.bgUrl);
     applyBackgroundLayers($bg, $overlay, $screen, bgImage, theme.bg);
     $screen.classList.toggle('has-bg-image', Boolean(bgImage));
+    $screen.classList.toggle('has-table', table.length > 0);
     $screen.style.color = theme.text;
-    renderTextWithLinks($text, text);
+    if (text) {
+        $text.hidden = false;
+        renderTextWithLinks($text, text);
+    } else {
+        $text.hidden = true;
+    }
+    renderBroadcastTable($tableWrap, table, copyCells, $copyFeedback);
+    $content.classList.toggle('has-caption', Boolean(text && table.length));
 
     if (anim && anim !== 'none') {
         $screen.classList.add(`anim-${anim}`);
@@ -165,18 +242,29 @@ async function init() {
         $copyBtn.addEventListener('click', () => copyBroadcastText($copyBtn, $copyFeedback));
     }
 
-    fitTextToViewport($text, FONT_SIZES[size] || FONT_SIZES.huge);
-    window.addEventListener('resize', () => fitTextToViewport($text, FONT_SIZES[size] || FONT_SIZES.huge));
+    fitContentToViewport($content, FONT_SIZES[size] || FONT_SIZES.huge);
+    window.addEventListener('resize', () =>
+        fitContentToViewport($content, FONT_SIZES[size] || FONT_SIZES.huge)
+    );
 }
 
 async function copyBroadcastText($btn, $feedback) {
     if (!broadcastText) return;
 
+    await writeClipboardText(broadcastText);
+    showCopyFeedback($feedback, 'Copied!');
+    $btn.classList.add('copied');
+    setTimeout(() => {
+        $btn.classList.remove('copied');
+    }, 2000);
+}
+
+async function writeClipboardText(text) {
     try {
-        await navigator.clipboard.writeText(broadcastText);
+        await navigator.clipboard.writeText(text);
     } catch {
         const textarea = document.createElement('textarea');
-        textarea.value = broadcastText;
+        textarea.value = text;
         textarea.setAttribute('readonly', '');
         textarea.style.position = 'absolute';
         textarea.style.left = '-9999px';
@@ -185,16 +273,19 @@ async function copyBroadcastText($btn, $feedback) {
         document.execCommand('copy');
         document.body.removeChild(textarea);
     }
-
-    $feedback.hidden = false;
-    $btn.classList.add('copied');
-    setTimeout(() => {
-        $feedback.hidden = true;
-        $btn.classList.remove('copied');
-    }, 2000);
 }
 
-function fitTextToViewport(el, baseVw) {
+let feedbackTimer = null;
+function showCopyFeedback(feedback, message) {
+    feedback.textContent = message;
+    feedback.hidden = false;
+    if (feedbackTimer) clearTimeout(feedbackTimer);
+    feedbackTimer = setTimeout(() => {
+        feedback.hidden = true;
+    }, 1600);
+}
+
+function fitContentToViewport(el, baseVw) {
     const screen = document.getElementById('broadcast-screen');
     const padding = parseFloat(getComputedStyle(screen).paddingLeft) * 2;
     const maxWidth = screen.clientWidth - padding;

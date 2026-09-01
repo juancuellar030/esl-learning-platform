@@ -1,0 +1,140 @@
+- generic [active] [ref=f12e1]:
+  - banner [ref=f12e2]:
+    - generic [ref=f12e3]:
+      - heading " ESL Learning Platform" [level=1] [ref=f12e4]:
+        - generic [ref=f12e5]: 
+        - text: ESL Learning Platform
+      - paragraph [ref=f12e6]: Broadcast Message Tool
+  - navigation [ref=f12e7]:
+    - link " Back to Tools" [ref=f12e9] [cursor=pointer]:
+      - /url: tools.html
+      - generic [ref=f12e10]: 
+      - text: Back to Tools
+  - main [ref=f12e11]:
+    - generic [ref=f12e14]:
+      - generic [ref=f12e15]:
+        - heading " Compose Message" [level=2] [ref=f12e16]:
+          - generic [ref=f12e17]: 
+          - text: Compose Message
+        - generic [ref=f12e18]:
+          - generic [ref=f12e19]: Message / Caption
+          - textbox "Message / Caption" [ref=f12e20]:
+            - /placeholder: Type a message, or add an optional caption above a table…
+        - generic [ref=f12e21]:
+          - generic [ref=f12e22]: Paste Table (optional)
+          - textbox "Paste Table (optional)" [ref=f12e23]:
+            - /placeholder: Copy cells from Google Sheets or Excel, then paste them here…
+          - generic [ref=f12e24]:
+            - generic [ref=f12e25]: No table pasted
+            - text: 
+        - generic [ref=f12e26]:
+          - generic [ref=f12e27]: Quick Presets
+          - generic [ref=f12e28]:
+            - button "Look at the front screen" [ref=f12e29] [cursor=pointer]
+            - button "Stop and listen" [ref=f12e30] [cursor=pointer]
+            - button "Time's up" [ref=f12e31] [cursor=pointer]
+            - button "Great job!" [ref=f12e32] [cursor=pointer]
+            - button "Raise your hand if you need help" [ref=f12e33] [cursor=pointer]
+        - generic [ref=f12e34]:
+          - generic [ref=f12e35]: Message Color
+          - generic [ref=f12e36]:
+            - generic [ref=f12e37]:
+              - button "Instruction" [ref=f12e38] [cursor=pointer]
+              - generic [ref=f12e39]: Instruction
+            - generic [ref=f12e40]:
+              - button "Warning" [ref=f12e41] [cursor=pointer]
+              - generic [ref=f12e42]: Warning
+            - generic [ref=f12e43]:
+              - button "Praise" [ref=f12e44] [cursor=pointer]
+              - generic [ref=f12e45]: Praise
+            - generic [ref=f12e46]:
+              - button "Attention" [ref=f12e47] [cursor=pointer]
+              - generic [ref=f12e48]: Attention
+            - generic [ref=f12e49]:
+              - button "Neutral" [ref=f12e50] [cursor=pointer]
+              - generic [ref=f12e51]: Neutral
+            - generic [ref=f12e52]:
+              - button "Serious" [ref=f12e53] [cursor=pointer]
+              - generic [ref=f12e54]: Serious
+        - generic [ref=f12e55]:
+          - generic [ref=f12e56]: Background Image URL
+          - generic [ref=f12e57]:
+            - textbox "Background Image URL" [ref=f12e58]:
+              - /placeholder: https://i.imgur.com/… or Google Drive share link
+            - button "Apply" [ref=f12e59] [cursor=pointer]
+            - button " Clear" [ref=f12e60] [cursor=pointer]:
+              - generic [ref=f12e61]: 
+              - text: Clear
+          - paragraph [ref=f12e62]:
+            - text: Paste a public Imgur or Google Drive link. For Imgur, right-click the image and choose
+            - strong [ref=f12e63]: Copy image address
+            - text: for best results.
+        - generic [ref=f12e65]:
+          - generic [ref=f12e66]:
+            - generic [ref=f12e67]: Font Size
+            - generic [ref=f12e68]:
+              - button "Small" [ref=f12e69] [cursor=pointer]: S
+              - button "Medium" [ref=f12e70] [cursor=pointer]: M
+              - button "Large" [ref=f12e71] [cursor=pointer]: L
+              - button "Huge" [pressed] [ref=f12e72] [cursor=pointer]: XL
+          - generic [ref=f12e73]:
+            - generic [ref=f12e74]: Animation
+            - combobox "Animation style" [ref=f12e75] [cursor=pointer]:
+              - option "None" [selected]
+              - option "Pulse"
+              - option "Shake"
+              - option "Flash"
+        - generic [ref=f12e77]:
+          - generic [ref=f12e78]:
+            - generic [ref=f12e79]: Display copy button on broadcast
+            - generic [ref=f12e80]: Shows a copy button on student devices so they can copy the message text.
+          - generic "Display copy button on broadcast" [ref=f12e81]:
+            - checkbox "Display copy button on broadcast" [checked]
+            - generic [ref=f12e82] [cursor=pointer]
+        - generic [ref=f12e84]:
+          - generic [ref=f12e85]:
+            - generic [ref=f12e86]: Click table cells to copy
+            - generic [ref=f12e87]: Lets students copy one cell at a time by clicking it on the broadcast screen.
+          - generic "Click table cells to copy" [ref=f12e88]:
+            - checkbox "Click table cells to copy" [checked] [disabled]
+            - generic [ref=f12e89] [cursor=pointer]
+      - generic [ref=f12e90]:
+        - heading " Live Preview" [level=2] [ref=f12e91]:
+          - generic [ref=f12e92]: 
+          - text: Live Preview
+        - generic [ref=f12e95]:
+          - generic [ref=f12e96]: Your message preview…
+          - text: 
+        - paragraph [ref=f12e98]: Scaled preview — actual broadcast fills the entire screen
+        - generic [ref=f12e99]:
+          - button " Generate Broadcast Link" [ref=f12e100] [cursor=pointer]:
+            - generic [ref=f12e101]: 
+            - text: Generate Broadcast Link
+          - generic [ref=f12e102]:
+            - generic [ref=f12e103]: Broadcast Link
+            - generic [ref=f12e104]:
+              - textbox "Broadcast Link" [ref=f12e105]:
+                - /placeholder: Generate a link to share with student PCs…
+              - button "Copy link" [ref=f12e106] [cursor=pointer]:
+                - generic [ref=f12e107]: 
+            - generic [ref=f12e108]: Copied!
+          - generic [ref=f12e109]:
+            - heading " Recent Messages" [level=3] [ref=f12e110]:
+              - generic [ref=f12e111]: 
+              - text: Recent Messages
+            - generic [ref=f12e112]:
+              - generic [ref=f12e113]:
+                - button "Link test" [ref=f12e114] [cursor=pointer]
+                - button "Remove message":
+                  - generic: 
+              - generic [ref=f12e116]:
+                - button "Link test" [ref=f12e117] [cursor=pointer]
+                - button "Remove message":
+                  - generic: 
+              - generic [ref=f12e119]:
+                - button "Saved settings" [ref=f12e120] [cursor=pointer]
+                - button "Remove message":
+                  - generic: 
+  - contentinfo [ref=f12e122]:
+    - paragraph [ref=f12e124]: ESL Learning Platform © 2025 | Made for Teachers, by Teachers
+  - button "" [ref=f12e125] [cursor=pointer]

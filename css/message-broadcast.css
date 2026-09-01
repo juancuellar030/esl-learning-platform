@@ -49,12 +49,25 @@ body {
     transition: background-color 0.4s ease, opacity 0.4s ease;
 }
 
-.broadcast-text {
+.broadcast-content {
     position: relative;
     z-index: 1;
     max-width: 100%;
     max-height: 100%;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.broadcast-content.has-caption {
+    gap: 0.45em;
+}
+
+.broadcast-text {
+    max-width: 100%;
+    white-space: pre-wrap;
 }
 
 .broadcast-inline-link {
@@ -71,6 +84,49 @@ body {
     text-decoration-thickness: 0.12em;
 }
 
+.broadcast-table-wrap {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.broadcast-table {
+    border-collapse: collapse;
+    color: inherit;
+    font: inherit;
+    font-size: 0.55em;
+    line-height: 1.15;
+    table-layout: auto;
+}
+
+.broadcast-table td {
+    border: 0.07em solid currentColor;
+    padding: 0.3em 0.48em;
+    min-width: 2.5em;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.broadcast-table-wrap.cells-copyable td {
+    cursor: copy;
+    transition: background-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+
+.broadcast-table-wrap.cells-copyable td:hover,
+.broadcast-table-wrap.cells-copyable td:focus-visible {
+    background: rgba(255, 255, 255, 0.24);
+    outline: 0.08em solid currentColor;
+    outline-offset: -0.12em;
+}
+
+.broadcast-table-wrap.cells-copyable td:active {
+    transform: scale(0.98);
+}
+
+.broadcast-table-wrap.cells-copyable td.copied {
+    background: #dff7e5;
+    color: #195f2b;
+}
+
 .broadcast-screen.placeholder {
     background: #2d2d2d;
     color: #888;
@@ -80,11 +136,11 @@ body {
 }
 
 /* Entrance animations */
-.broadcast-screen.anim-pulse .broadcast-text {
+.broadcast-screen.anim-pulse .broadcast-content {
     animation: broadcast-pulse 1.5s ease-in-out infinite;
 }
 
-.broadcast-screen.anim-shake .broadcast-text {
+.broadcast-screen.anim-shake .broadcast-content {
     animation: broadcast-shake 0.6s ease-in-out;
 }
 
@@ -182,8 +238,9 @@ body {
 
 .broadcast-copy-feedback {
     position: fixed;
-    bottom: 80px;
-    right: 24px;
+    top: 1vw;
+    left: 50%;
+    transform: translateX(-50%);
     z-index: 11;
     padding: 8px 14px;
     border-radius: 8px;
@@ -191,4 +248,5 @@ body {
     color: #a5f3b5;
     font-size: 0.9rem;
     font-weight: 600;
+    pointer-events: none;
 }

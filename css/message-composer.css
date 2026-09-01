@@ -43,6 +43,7 @@
 
 .form-group textarea {
     width: 100%;
+    box-sizing: border-box;
     min-height: 120px;
     padding: 14px 16px;
     border: 2px solid #ddd;
@@ -55,6 +56,53 @@
 .form-group textarea:focus {
     outline: none;
     border-color: var(--medium-slate-blue);
+}
+
+.label-optional {
+    color: #888;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.table-paste-input {
+    min-height: 96px !important;
+    font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+    font-size: 0.88rem !important;
+    white-space: pre;
+    overflow: auto;
+}
+
+.table-paste-meta {
+    min-height: 30px;
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    color: #777;
+    font-size: 0.82rem;
+}
+
+.table-clear-btn {
+    border: 0;
+    background: transparent;
+    color: #c62828;
+    padding: 4px 0;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.table-clear-btn:hover {
+    text-decoration: underline;
+}
+
+.table-paste-warning {
+    margin: 6px 0 0;
+    color: #a33b00;
+    font-size: 0.82rem;
+    font-weight: 600;
+    line-height: 1.4;
 }
 
 .form-group select {
@@ -578,10 +626,61 @@
     max-height: 100%;
 }
 
+.preview-display {
+    max-width: 100%;
+    max-height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    line-height: 1.15;
+}
+
+.preview-display.has-caption {
+    gap: 0.45em;
+}
+
 .preview-message {
     max-width: 100%;
     max-height: 100%;
     overflow: hidden;
+    white-space: pre-wrap;
+}
+
+.preview-table-wrap {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.preview-table {
+    border-collapse: collapse;
+    color: inherit;
+    font: inherit;
+    font-size: 0.62em;
+    line-height: 1.15;
+    table-layout: auto;
+}
+
+.preview-table td {
+    border: 0.08em solid currentColor;
+    padding: 0.28em 0.42em;
+    min-width: 2.5em;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.preview-table-wrap.cells-copyable td {
+    cursor: copy;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.preview-table-wrap.cells-copyable td:hover {
+    background: rgba(255, 255, 255, 0.22);
+}
+
+.preview-table-wrap.cells-copyable td.copied {
+    background: #dff7e5;
+    color: #195f2b;
 }
 
 .preview-message .broadcast-inline-link {
@@ -639,11 +738,11 @@
 }
 
 /* Preview animations (mirrors broadcast view) */
-.preview-screen.anim-pulse .preview-message {
+.preview-screen.anim-pulse .preview-display {
     animation: preview-pulse 1.5s ease-in-out infinite;
 }
 
-.preview-screen.anim-shake .preview-message {
+.preview-screen.anim-shake .preview-display {
     animation: preview-shake 0.6s ease-in-out;
 }
 
@@ -714,6 +813,10 @@
     border: 2px solid #ddd;
     border-radius: 12px;
     background: #f8f9fa;
+}
+
+.composer-panel-toggle.is-disabled {
+    opacity: 0.58;
 }
 
 .composer-toggle-row {
@@ -819,6 +922,21 @@ body.dark-mode .bg-url-input {
     background: #2d2d2d;
     border-color: #555;
     color: #f5f5f5;
+}
+
+body.dark-mode .form-group textarea {
+    background: #2d2d2d;
+    border-color: #555;
+    color: #f5f5f5;
+}
+
+body.dark-mode .label-optional,
+body.dark-mode .table-paste-meta {
+    color: #aaa;
+}
+
+body.dark-mode .table-paste-warning {
+    color: #ffb16f;
 }
 
 body.dark-mode .bg-remove-btn {
