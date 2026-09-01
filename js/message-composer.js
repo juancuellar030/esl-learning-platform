@@ -215,18 +215,20 @@ function fitPreviewContent(sizeKey) {
     if (!screen || !el) return;
 
     const baseVw = FONT_SIZES[sizeKey] || FONT_SIZES.huge;
+    const setSize = (v) => {
+        el.style.fontSize = (screen.clientWidth * v / 100) + 'px';
+    };
+
+    setSize(baseVw);
+
+    if (tableData.length > 0) return;
+
     const padding = parseFloat(getComputedStyle(screen).paddingLeft) * 2;
     const maxWidth = screen.clientWidth - padding;
     const maxHeight = screen.clientHeight - padding;
 
     let vw = baseVw;
     const minVw = 2;
-
-    const setSize = (v) => {
-        el.style.fontSize = (screen.clientWidth * v / 100) + 'px';
-    };
-
-    setSize(vw);
 
     let safety = 0;
     while (safety < 40 && (el.scrollWidth > maxWidth || el.scrollHeight > maxHeight) && vw > minVw) {
@@ -352,7 +354,7 @@ function getTableWarning(rows) {
     if (!rows.length) return '';
     const columns = rows[0].length;
     if (rows.length > TABLE_ROW_WARNING_LIMIT || columns > TABLE_COLUMN_WARNING_LIMIT) {
-        return `Large table (${rows.length} rows × ${columns} columns): text may be very small on the broadcast screen.`;
+        return `Large table (${rows.length} rows × ${columns} columns): students can scroll on the broadcast screen to see every cell.`;
     }
     return '';
 }
@@ -404,6 +406,8 @@ function renderPreviewTable(rows) {
     $previewTableWrap.replaceChildren();
     if (!rows.length) {
         $previewTableWrap.hidden = true;
+        $previewTableWrap.removeAttribute('tabindex');
+        $previewTableWrap.removeAttribute('aria-label');
         return;
     }
 
@@ -422,6 +426,8 @@ function renderPreviewTable(rows) {
     table.appendChild(tbody);
     $previewTableWrap.appendChild(table);
     $previewTableWrap.hidden = false;
+    $previewTableWrap.tabIndex = 0;
+    $previewTableWrap.setAttribute('aria-label', 'Broadcast table preview');
     $previewTableWrap.classList.toggle('cells-copyable', settings.copyTableCells);
 }
 
@@ -690,6 +696,7 @@ function updatePreview() {
         $previewMessage.textContent = 'Your message preview…';
     }
     renderPreviewTable(table);
+    $previewScreen.classList.toggle('has-table', hasTable);
     $previewDisplay.classList.toggle('has-caption', Boolean(text && hasTable));
     $previewCopyBtn.hidden = !(settings.showCopyButton && hasContent);
     fitPreviewContent(size);

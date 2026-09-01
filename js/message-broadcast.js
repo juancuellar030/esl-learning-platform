@@ -110,6 +110,8 @@ function renderBroadcastTable(container, rows, copyCells, feedback) {
     container.replaceChildren();
     if (!rows.length) {
         container.hidden = true;
+        container.removeAttribute('tabindex');
+        container.removeAttribute('aria-label');
         return;
     }
 
@@ -135,6 +137,8 @@ function renderBroadcastTable(container, rows, copyCells, feedback) {
     table.appendChild(tbody);
     container.appendChild(table);
     container.hidden = false;
+    container.tabIndex = 0;
+    container.setAttribute('aria-label', 'Broadcast table');
     container.classList.toggle('cells-copyable', copyCells);
 
     if (!copyCells) return;
@@ -242,9 +246,10 @@ async function init() {
         $copyBtn.addEventListener('click', () => copyBroadcastText($copyBtn, $copyFeedback));
     }
 
-    fitContentToViewport($content, FONT_SIZES[size] || FONT_SIZES.huge);
+    const allowOverflow = table.length > 0;
+    fitContentToViewport($content, FONT_SIZES[size] || FONT_SIZES.huge, { allowOverflow });
     window.addEventListener('resize', () =>
-        fitContentToViewport($content, FONT_SIZES[size] || FONT_SIZES.huge)
+        fitContentToViewport($content, FONT_SIZES[size] || FONT_SIZES.huge, { allowOverflow })
     );
 }
 
@@ -285,16 +290,17 @@ function showCopyFeedback(feedback, message) {
     }, 1600);
 }
 
-function fitContentToViewport(el, baseVw) {
+function fitContentToViewport(el, baseVw, options = {}) {
     const screen = document.getElementById('broadcast-screen');
+    el.style.fontSize = baseVw + 'vw';
+    if (options.allowOverflow) return;
+
     const padding = parseFloat(getComputedStyle(screen).paddingLeft) * 2;
     const maxWidth = screen.clientWidth - padding;
     const maxHeight = screen.clientHeight - padding;
 
     let vw = baseVw;
     const minVw = 2;
-
-    el.style.fontSize = vw + 'vw';
 
     let safety = 0;
     while (safety < 40 && (el.scrollWidth > maxWidth || el.scrollHeight > maxHeight) && vw > minVw) {

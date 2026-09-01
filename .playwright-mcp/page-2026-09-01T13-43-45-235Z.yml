@@ -1,0 +1,148 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - heading " ESL Learning Platform" [level=1] [ref=e4]:
+        - generic [ref=e5]: 
+        - text: ESL Learning Platform
+      - paragraph [ref=e6]: Broadcast Message Tool
+  - navigation [ref=e7]:
+    - link " Back to Tools" [ref=e9] [cursor=pointer]:
+      - /url: tools.html
+      - generic [ref=e10]: 
+      - text: Back to Tools
+  - main [ref=e11]:
+    - generic [ref=e14]:
+      - generic [ref=e15]:
+        - heading " Compose Message" [level=2] [ref=e16]:
+          - generic [ref=e17]: 
+          - text: Compose Message
+        - generic [ref=e18]:
+          - generic [ref=e19]: Message / Caption
+          - textbox "Message / Caption" [ref=e20]:
+            - /placeholder: Type a message, or add an optional caption above a table…
+        - generic [ref=e21]:
+          - generic [ref=e22]: Paste Table (optional)
+          - textbox "Paste Table (optional)" [ref=e23]:
+            - /placeholder: Copy cells from Google Sheets or Excel, then paste them here…
+          - generic [ref=e24]:
+            - generic [ref=e25]: No table pasted
+            - text: 
+        - generic [ref=e26]:
+          - generic [ref=e27]: Quick Presets
+          - generic [ref=e28]:
+            - button "Look at the front screen" [ref=e29] [cursor=pointer]
+            - button "Stop and listen" [ref=e30] [cursor=pointer]
+            - button "Time's up" [ref=e31] [cursor=pointer]
+            - button "Great job!" [ref=e32] [cursor=pointer]
+            - button "Raise your hand if you need help" [ref=e33] [cursor=pointer]
+        - generic [ref=e34]:
+          - generic [ref=e35]: Message Color
+          - generic [ref=e36]:
+            - generic [ref=e37]:
+              - button "Instruction" [ref=e38] [cursor=pointer]
+              - generic [ref=e39]: Instruction
+            - generic [ref=e40]:
+              - button "Warning" [ref=e41] [cursor=pointer]
+              - generic [ref=e42]: Warning
+            - generic [ref=e43]:
+              - button "Praise" [ref=e44] [cursor=pointer]
+              - generic [ref=e45]: Praise
+            - generic [ref=e46]:
+              - button "Attention" [ref=e47] [cursor=pointer]
+              - generic [ref=e48]: Attention
+            - generic [ref=e49]:
+              - button "Neutral" [ref=e50] [cursor=pointer]
+              - generic [ref=e51]: Neutral
+            - generic [ref=e52]:
+              - button "Serious" [ref=e53] [cursor=pointer]
+              - generic [ref=e54]: Serious
+        - generic [ref=e55]:
+          - generic [ref=e56]: Background Image URL
+          - generic [ref=e57]:
+            - textbox "Background Image URL" [ref=e58]:
+              - /placeholder: https://i.imgur.com/… or Google Drive share link
+            - button "Apply" [ref=e59] [cursor=pointer]
+            - button " Clear" [ref=e60] [cursor=pointer]:
+              - generic [ref=e61]: 
+              - text: Clear
+          - paragraph [ref=e62]:
+            - text: Paste a public Imgur or Google Drive link. For Imgur, right-click the image and choose
+            - strong [ref=e63]: Copy image address
+            - text: for best results.
+        - generic [ref=e65]:
+          - generic [ref=e66]:
+            - generic [ref=e67]: Font Size
+            - generic [ref=e68]:
+              - button "Small" [ref=e69] [cursor=pointer]: S
+              - button "Medium" [ref=e70] [cursor=pointer]: M
+              - button "Large" [ref=e71] [cursor=pointer]: L
+              - button "Huge" [pressed] [ref=e72] [cursor=pointer]: XL
+          - generic [ref=e73]:
+            - generic [ref=e74]: Animation
+            - combobox "Animation style" [ref=e75] [cursor=pointer]:
+              - option "None" [selected]
+              - option "Pulse"
+              - option "Shake"
+              - option "Flash"
+        - generic [ref=e77]:
+          - generic [ref=e78]:
+            - generic [ref=e79]: Display copy button on broadcast
+            - generic [ref=e80]: Shows a copy button on student devices so they can copy the message text.
+          - generic "Display copy button on broadcast" [ref=e81]:
+            - checkbox "Display copy button on broadcast" [checked]
+            - generic [ref=e82] [cursor=pointer]
+        - generic [ref=e84]:
+          - generic [ref=e85]:
+            - generic [ref=e86]: Click table cells to copy
+            - generic [ref=e87]: Lets students copy one cell at a time by clicking it on the broadcast screen.
+          - generic "Click table cells to copy" [ref=e88]:
+            - checkbox "Click table cells to copy" [checked] [disabled]
+            - generic [ref=e89] [cursor=pointer]
+      - generic [ref=e90]:
+        - heading " Live Preview" [level=2] [ref=e91]:
+          - generic [ref=e92]: 
+          - text: Live Preview
+        - generic [ref=e95]:
+          - generic [ref=e96]: Your message preview…
+          - text: 
+        - paragraph [ref=e98]: Scaled preview — actual broadcast fills the entire screen
+        - generic [ref=e99]:
+          - button " Generate Broadcast Link" [ref=e100] [cursor=pointer]:
+            - generic [ref=e101]: 
+            - text: Generate Broadcast Link
+          - generic [ref=e102]:
+            - generic [ref=e103]: Broadcast Link
+            - generic [ref=e104]:
+              - textbox "Broadcast Link" [ref=e105]:
+                - /placeholder: Generate a link to share with student PCs…
+              - button "Copy link" [ref=e106] [cursor=pointer]:
+                - generic [ref=e107]: 
+            - generic [ref=e108]: Copied!
+          - generic [ref=e109]:
+            - heading " Recent Messages" [level=3] [ref=e110]:
+              - generic [ref=e111]: 
+              - text: Recent Messages
+            - generic [ref=e112]:
+              - generic [ref=e113]:
+                - button "Final link check" [ref=e114] [cursor=pointer]
+                - button "Remove message":
+                  - generic: 
+              - generic [ref=e116]:
+                - button "Final link check" [ref=e117] [cursor=pointer]
+                - button "Remove message":
+                  - generic: 
+              - generic [ref=e119]:
+                - button "Link test" [ref=e120] [cursor=pointer]
+                - button "Remove message":
+                  - generic: 
+              - generic [ref=e122]:
+                - button "Link test" [ref=e123] [cursor=pointer]
+                - button "Remove message":
+                  - generic: 
+              - generic [ref=e125]:
+                - button "Saved settings" [ref=e126] [cursor=pointer]
+                - button "Remove message":
+                  - generic: 
+  - contentinfo [ref=e128]:
+    - paragraph [ref=e130]: ESL Learning Platform © 2025 | Made for Teachers, by Teachers
+  - button "" [ref=e131] [cursor=pointer]
