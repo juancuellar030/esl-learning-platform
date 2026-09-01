@@ -189,6 +189,8 @@ const ShortcutExam = (() => {
     let submitInProgress = false;
     let suppressFullscreenLock = false;
     let suppressExitUntil = 0;
+    let leavePromptOpen = false;
+    let allowUnload = false;
 
     let timeRemainingMs = 0;
     let timerDeadline = 0;
@@ -261,6 +263,8 @@ const ShortcutExam = (() => {
         $('btn-retake-continue').addEventListener('click', continueRetake);
         $('btn-dismiss-question').addEventListener('click', dismissFunctionQuestion);
         $('btn-resume-exam').addEventListener('click', handleResumeClick);
+        $('btn-stay-exam').addEventListener('click', dismissLeavePrompt);
+        $('btn-leave-exam').addEventListener('click', confirmLeaveExam);
         $('btn-finish-test').addEventListener('click', () => finishExam('manual'));
         $('btn-change-theme').addEventListener('click', changeTheme);
         $('btn-close-result').addEventListener('click', () => window.close());
@@ -270,6 +274,7 @@ const ShortcutExam = (() => {
         document.addEventListener('webkitfullscreenchange', onFullscreenChange);
         document.addEventListener('visibilitychange', onVisibilityChange);
         window.addEventListener('blur', onWindowBlur);
+        window.addEventListener('beforeunload', onBeforeUnload);
         document.addEventListener('contextmenu', onContextMenu);
         document.addEventListener('click', onDocumentClick);
 
@@ -634,12 +639,15 @@ const ShortcutExam = (() => {
         ambientEnabled = true;
         suppressFullscreenLock = false;
         suppressExitUntil = 0;
+        leavePromptOpen = false;
+        allowUnload = false;
         timeRemainingMs = testData.timeLimitMinutes * 60 * 1000;
 
         $('shortcut-exam-container').classList.remove('modal-open');
         $('exam-content').inert = false;
         $('function-modal').style.display = 'none';
         $('lock-overlay').style.display = 'none';
+        $('leave-overlay').style.display = 'none';
         $('btn-finish-test').disabled = true;
         updateProgress();
         updateTimerDisplay();
@@ -736,6 +744,48 @@ const ShortcutExam = (() => {
         return event.key === 'F11' || event.code === 'F11';
     }
 
+    function isCloseTabShortcut(event) {
+        const key = String(event.key || '').toLowerCase();
+        const code = event.code;
+        const ctrlOrCmd = event.ctrlKey || event.metaKey;
+        if (ctrlOrCmd && (key === 'w' || code === 'KeyW')) return true;
+        if (ctrlOrCmd && (key === 'f4' || code === 'F4')) return true;
+        if (event.altKey && !ctrlOrCmd && (key === 'f4' || code === 'F4')) return true;
+        return false;
+    }
+
+    function onBeforeUnload(event) {
+        if (!examActive || allowUnload) return;
+        event.preventDefault();
+        event.returnValue = '';
+    }
+
+    function showLeavePrompt() {
+        if (!examActive || leavePromptOpen || submitInProgress) return;
+        leavePromptOpen = true;
+        pauseTimer();
+        hideContextMenu();
+        ambientEnabled = false;
+        $('leave-overlay').style.display = 'flex';
+        $('btn-stay-exam').focus();
+    }
+
+    function dismissLeavePrompt() {
+        if (!leavePromptOpen) return;
+        leavePromptOpen = false;
+        $('leave-overlay').style.display = 'none';
+        if (!examActive || examLocked) return;
+        ambientEnabled = !modalOpen;
+        startTimer();
+    }
+
+    function confirmLeaveExam() {
+        if (!leavePromptOpen) return;
+        leavePromptOpen = false;
+        $('leave-overlay').style.display = 'none';
+        finishExam('leave');
+    }
+
     function showLock(incrementExitCount) {
         if (!examActive || examLocked) return;
         examLocked = true;
@@ -772,7 +822,7 @@ const ShortcutExam = (() => {
     }
 
     function startTimer() {
-        if (!examActive || examLocked || timerInterval) return;
+        if (!examActive || examLocked || leavePromptOpen || timerInterval) return;
         timerDeadline = Date.now() + timeRemainingMs;
         updateTimerDisplay();
         timerInterval = window.setInterval(tickTimer, 250);
@@ -807,9 +857,20 @@ const ShortcutExam = (() => {
     function onAmbientKeydown(event) {
         if (!examActive || submitInProgress) return;
 
+        if (isCloseTabShortcut(event)) {
+            event.preventDefault();
+            event.stopPropagation();
+            showLeavePrompt();
+            return;
+        }
+
         if (event.key === 'Escape') {
             event.preventDefault();
             event.stopPropagation();
+            if (leavePromptOpen) {
+                dismissLeavePrompt();
+                return;
+            }
             showLock(true);
             return;
         }
@@ -817,6 +878,7 @@ const ShortcutExam = (() => {
         if (isF11Event(event) && isFullscreen()) {
             event.preventDefault();
             event.stopPropagation();
+            if (leavePromptOpen) return;
             markFullscreenShortcutHandled();
             restoreExamFullscreen();
 
@@ -964,11 +1026,14 @@ const ShortcutExam = (() => {
         submitInProgress = true;
         examActive = false;
         ambientEnabled = false;
+        leavePromptOpen = false;
+        allowUnload = true;
         pauseTimer();
         hideContextMenu();
         $('btn-finish-test').disabled = true;
         $('function-modal').style.display = 'none';
         $('lock-overlay').style.display = 'none';
+        $('leave-overlay').style.display = 'none';
         $('shortcut-exam-container').classList.remove('modal-open');
         $('exam-content').inert = false;
 

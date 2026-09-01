@@ -548,6 +548,19 @@
       color: var(--se-accent);
     }
 
+    #leave-overlay {
+      z-index: 250;
+    }
+
+    #leave-overlay .se-modal-card {
+      max-width: 470px;
+      text-align: center;
+    }
+
+    #leave-overlay .se-icon {
+      color: var(--se-accent);
+    }
+
     #retake-warning {
       z-index: 90;
     }
@@ -876,6 +889,18 @@
           <button class="se-btn se-btn-block" id="btn-resume-exam">
             <i class="fa-solid fa-expand"></i> Continue Exam
           </button>
+        </div>
+      </div>
+
+      <div class="se-overlay" id="leave-overlay" role="dialog" aria-modal="true" aria-labelledby="leave-title">
+        <div class="se-modal-card">
+          <div class="se-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+          <h2 id="leave-title">Leave this exam?</h2>
+          <p>Closing the tab will end your attempt. Stay to keep working, or leave to submit what you have so far.</p>
+          <div class="se-modal-actions">
+            <button class="se-btn se-btn-secondary" id="btn-stay-exam">Stay in Exam</button>
+            <button class="se-btn se-btn-danger" id="btn-leave-exam">Leave and Submit</button>
+          </div>
         </div>
       </div>
     </section>
