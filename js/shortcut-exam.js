@@ -226,7 +226,6 @@ const ShortcutExam = (() => {
     let testCode = '';
     let testData = null;
     let eligibleShortcuts = [];
-    let assignedShortcuts = [];
     let selectedGroup = '';
     let selectedStudents = [];
     let highlightedStudentIndex = -1;
@@ -313,36 +312,6 @@ const ShortcutExam = (() => {
             });
     }
 
-    function drawAssignedShortcuts() {
-        const shuffled = [...eligibleShortcuts];
-        for (let index = shuffled.length - 1; index > 0; index -= 1) {
-            const swapIndex = Math.floor(Math.random() * (index + 1));
-            [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
-        }
-        return shuffled.slice(0, TARGET_SHORTCUTS);
-    }
-
-    function resolveAssignedShortcuts(shortcutIds) {
-        if (!Array.isArray(shortcutIds) || shortcutIds.length !== TARGET_SHORTCUTS) return [];
-        const byId = new Map(eligibleShortcuts.map((shortcut) => [shortcut.id, shortcut]));
-        const resolved = shortcutIds.map((id) => byId.get(id)).filter(Boolean);
-        return resolved.length === TARGET_SHORTCUTS ? resolved : [];
-    }
-
-    function drawLegacyAssignedShortcuts(seed) {
-        const shuffled = [...eligibleShortcuts];
-        let state = Array.from(String(seed)).reduce(
-            (hash, character) => Math.imul(hash ^ character.charCodeAt(0), 16777619) >>> 0,
-            2166136261
-        );
-        for (let index = shuffled.length - 1; index > 0; index -= 1) {
-            state = (Math.imul(state, 1664525) + 1013904223) >>> 0;
-            const swapIndex = state % (index + 1);
-            [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
-        }
-        return shuffled.slice(0, TARGET_SHORTCUTS);
-    }
-
     function openVirtualKeyboard() {
         if (!examActive || examLocked || modalOpen || leavePromptOpen || submitInProgress) return;
         virtualKeyboardOpen = true;
@@ -392,7 +361,7 @@ const ShortcutExam = (() => {
         setKeyActive(key, isActive);
         restartVirtualKeyIdleTimer();
 
-        const matchedShortcut = assignedShortcuts
+        const matchedShortcut = eligibleShortcuts
             .filter((shortcut) => shortcut.inputChannel === 'virtual' && !creditedIds.has(shortcut.id))
             .find((shortcut) => {
                 const expectedKeys = ShortcutsData.comboCapKeys(shortcut);
@@ -485,14 +454,12 @@ const ShortcutExam = (() => {
         button.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Creating...';
 
         const createdAt = Date.now();
-        const sessionShortcuts = drawAssignedShortcuts();
         const metadata = {
             title: 'Keyboard Shortcut Exam',
             description: 'Standalone keyboard shortcut demonstration exam',
             examType: 'keyboard-shortcut',
             createdAt,
-            timeLimitMinutes: minutes,
-            assignedShortcutIds: sessionShortcuts.map((shortcut) => shortcut.id)
+            timeLimitMinutes: minutes
         };
 
         try {
@@ -604,10 +571,6 @@ const ShortcutExam = (() => {
 
             testData = data;
             testData.timeLimitMinutes = timeLimitMinutes;
-            assignedShortcuts = resolveAssignedShortcuts(data.assignedShortcutIds);
-            if (assignedShortcuts.length !== TARGET_SHORTCUTS) {
-                assignedShortcuts = drawLegacyAssignedShortcuts(testCode);
-            }
             showStudentScreen();
         } catch (error) {
             console.error('[ShortcutExam] Exam load failed:', error);
@@ -1075,7 +1038,7 @@ const ShortcutExam = (() => {
 
             if (examLocked || modalOpen || !ambientEnabled) return;
 
-            const fullscreenShortcut = assignedShortcuts.find(
+            const fullscreenShortcut = eligibleShortcuts.find(
                 (candidate) => candidate.id === 'fullscreen' && candidate.inputChannel === 'physical'
             );
             if (!fullscreenShortcut) return;
@@ -1086,7 +1049,7 @@ const ShortcutExam = (() => {
         if (examLocked || modalOpen || !ambientEnabled) return;
         if (isModifierOnlyEvent(event)) return;
 
-        const shortcut = assignedShortcuts.find(
+        const shortcut = eligibleShortcuts.find(
             (candidate) => candidate.inputChannel === 'physical' && matchesShortcutEvent(candidate, event)
         );
         if (!shortcut) return;

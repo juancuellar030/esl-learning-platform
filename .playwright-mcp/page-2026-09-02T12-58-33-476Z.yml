@@ -1,0 +1,23 @@
+- main [ref=f1e2]:
+  - text:         
+  - generic [ref=f1e50]:
+    - generic [ref=f1e51]:
+      - generic [ref=f1e52]:
+        - generic [ref=f1e53]: 0 / 10 shortcuts demonstrated
+        - generic [ref=f1e54]:
+          - generic [ref=f1e55]: 
+          - text: 19:59
+      - generic [ref=f1e57]:
+        - generic [ref=f1e58]: 
+        - heading "Demonstrate your shortcuts" [level=1] [ref=f1e59]
+        - paragraph [ref=f1e60]: Demonstrate any 10 different shortcuts. Use your physical keyboard for browser-detectable shortcuts and the virtual keyboard for browser- or system-reserved shortcuts.
+      - generic [ref=f1e61]:
+        - generic [ref=f1e62]: Right-click for theme options
+        - button " Finish Test" [disabled] [ref=f1e63]:
+          - generic [ref=f1e64]: 
+          - text: Finish Test
+    - button "Virtual Keyboard" [ref=f1e65] [cursor=pointer]:
+      - generic [aria-hidden] [ref=f1e66]: 
+    - text:        
+  - text:   
+  - button "" [ref=f1e6] [cursor=pointer]
