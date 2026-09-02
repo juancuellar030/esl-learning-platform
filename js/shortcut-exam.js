@@ -6,6 +6,7 @@ const ShortcutExam = (() => {
     'use strict';
 
     const TARGET_SHORTCUTS = 10;
+    const VIRTUAL_KEY_IDLE_MS = 4000;
     const DEFAULT_GROUPS = ['3A', '3B', '3C', '4A', '4B', '4C', '5A', '5B', '5C', '5D'];
     const STUDENT_DATA = typeof STUDENT_GROUPS !== 'undefined' ? STUDENT_GROUPS : {};
     const EXAM_SESSION_REGISTRY_KEY = 'shortcut_exam_sessions';
@@ -130,6 +131,61 @@ const ShortcutExam = (() => {
             options: ['Refresh [Actualizar]', 'Center [Centrar]', 'Align Right [Derecha]', 'Move Down [Bajar]'],
             correctIndex: 2
         },
+        'new-tab': {
+            prompt: FUNCTION_PROMPT,
+            options: ['Open New Tab [Abrir pestaña nueva]', 'Close Tab [Cerrar pestaña]', 'History [Historial]', 'Refresh [Actualizar]'],
+            correctIndex: 0
+        },
+        'close-tab': {
+            prompt: FUNCTION_PROMPT,
+            options: ['Open New Window [Abrir ventana nueva]', 'Close Tab [Cerrar pestaña]', 'Lock Computer [Bloquear computador]', 'Find [Buscar]'],
+            correctIndex: 1
+        },
+        'new-window': {
+            prompt: FUNCTION_PROMPT,
+            options: ['Reopen Closed Tab [Reabrir pestaña cerrada]', 'Open Private Window [Abrir ventana privada]', 'Open New Window [Abrir ventana nueva]', 'Show Desktop [Mostrar escritorio]'],
+            correctIndex: 2
+        },
+        'reopen-tab': {
+            prompt: FUNCTION_PROMPT,
+            options: ['Close App [Cerrar aplicación]', 'Reopen Closed Tab [Reabrir pestaña cerrada]', 'Open New Tab [Abrir pestaña nueva]', 'History [Historial]'],
+            correctIndex: 1
+        },
+        history: {
+            prompt: FUNCTION_PROMPT,
+            options: ['View History [Ver historial]', 'Open File Explorer [Abrir explorador de archivos]', 'Refresh [Actualizar]', 'Close Tab [Cerrar pestaña]'],
+            correctIndex: 0
+        },
+        'private-window': {
+            prompt: FUNCTION_PROMPT,
+            options: ['Open New Window [Abrir ventana nueva]', 'Switch Apps [Cambiar aplicaciones]', 'Open Private Window [Abrir ventana privada]', 'Lock Computer [Bloquear computador]'],
+            correctIndex: 2
+        },
+        'switch-app': {
+            prompt: FUNCTION_PROMPT,
+            options: ['Show Desktop [Mostrar escritorio]', 'Switch Apps [Cambiar aplicaciones]', 'Close App [Cerrar aplicación]', 'Open File Explorer [Abrir explorador de archivos]'],
+            correctIndex: 1
+        },
+        'show-desktop': {
+            prompt: FUNCTION_PROMPT,
+            options: ['Lock Computer [Bloquear computador]', 'Open New Window [Abrir ventana nueva]', 'Show Desktop [Mostrar escritorio]', 'Switch Apps [Cambiar aplicaciones]'],
+            correctIndex: 2
+        },
+        'file-explorer': {
+            prompt: FUNCTION_PROMPT,
+            options: ['Open File Explorer [Abrir explorador de archivos]', 'View History [Ver historial]', 'Open Private Window [Abrir ventana privada]', 'Find [Buscar]'],
+            correctIndex: 0
+        },
+        'close-app': {
+            prompt: FUNCTION_PROMPT,
+            options: ['Close Tab [Cerrar pestaña]', 'Show Desktop [Mostrar escritorio]', 'Close App [Cerrar aplicación]', 'Lock Computer [Bloquear computador]'],
+            correctIndex: 2
+        },
+        'lock-computer': {
+            prompt: FUNCTION_PROMPT,
+            options: ['Switch Apps [Cambiar aplicaciones]', 'Lock Computer [Bloquear computador]', 'Close App [Cerrar aplicación]', 'Open File Explorer [Abrir explorador de archivos]'],
+            correctIndex: 1
+        },
         find: {
             prompt: FUNCTION_PROMPT,
             options: ['Find [Buscar]', 'Open [Abrir]', 'Fullscreen [Pantalla completa]', 'Replace [Reemplazar]'],
@@ -170,6 +226,7 @@ const ShortcutExam = (() => {
     let testCode = '';
     let testData = null;
     let eligibleShortcuts = [];
+    let assignedShortcuts = [];
     let selectedGroup = '';
     let selectedStudents = [];
     let highlightedStudentIndex = -1;
@@ -191,6 +248,9 @@ const ShortcutExam = (() => {
     let suppressExitUntil = 0;
     let leavePromptOpen = false;
     let allowUnload = false;
+    let virtualKeyboardOpen = false;
+    let virtualActiveKeys = new Set();
+    let virtualKeyIdleTimer = null;
 
     let timeRemainingMs = 0;
     let timerDeadline = 0;
@@ -205,10 +265,15 @@ const ShortcutExam = (() => {
         if (darkToggle && container) container.appendChild(darkToggle);
 
         eligibleShortcuts = buildEligibleShortcuts();
+        ShortcutsData.renderVirtualKeyboard($('exam-virtual-keyboard'), {
+            paletteClass: 'keyboard--palette-gold-black',
+            includeNumpad: false
+        });
+        bindVirtualKeyboardKeys();
         bindStaticEvents();
 
         if (eligibleShortcuts.length < TARGET_SHORTCUTS) {
-            showError('Shortcut Data Error', `At least ${TARGET_SHORTCUTS} browser-detectable shortcuts are required.`);
+            showError('Shortcut Data Error', `At least ${TARGET_SHORTCUTS} eligible shortcuts are required.`);
             return;
         }
 
@@ -232,19 +297,12 @@ const ShortcutExam = (() => {
         if (!window.ShortcutsData || !Array.isArray(ShortcutsData.SHORTCUTS)) return [];
 
         return ShortcutsData.SHORTCUTS
-            .filter((shortcut) => shortcut.type === 'interactive')
-            .filter((shortcut) => {
-                if (shortcut.id === 'fullscreen') return true;
-                if (typeof ShortcutsData.isLiveFormatAllowed === 'function') {
-                    return ShortcutsData.isLiveFormatAllowed(shortcut);
-                }
-                const keys = shortcut.keys.map((key) => String(key).toLowerCase());
-                return !keys.includes('alt') && !keys.includes('win');
-            })
+            .filter((shortcut) => ShortcutsData.comboCapKeys(shortcut) !== null)
             .map((shortcut) => ({
                 id: shortcut.id,
                 keys: [...shortcut.keys],
                 label: shortcut.label,
+                inputChannel: ShortcutsData.isLiveFormatAllowed(shortcut) ? 'physical' : 'virtual',
                 functionQuestion: PLACEHOLDER_FUNCTION_QUESTIONS[shortcut.id]
             }))
             .filter((shortcut) => {
@@ -255,6 +313,124 @@ const ShortcutExam = (() => {
             });
     }
 
+    function drawAssignedShortcuts() {
+        const shuffled = [...eligibleShortcuts];
+        for (let index = shuffled.length - 1; index > 0; index -= 1) {
+            const swapIndex = Math.floor(Math.random() * (index + 1));
+            [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+        }
+        return shuffled.slice(0, TARGET_SHORTCUTS);
+    }
+
+    function resolveAssignedShortcuts(shortcutIds) {
+        if (!Array.isArray(shortcutIds) || shortcutIds.length !== TARGET_SHORTCUTS) return [];
+        const byId = new Map(eligibleShortcuts.map((shortcut) => [shortcut.id, shortcut]));
+        const resolved = shortcutIds.map((id) => byId.get(id)).filter(Boolean);
+        return resolved.length === TARGET_SHORTCUTS ? resolved : [];
+    }
+
+    function drawLegacyAssignedShortcuts(seed) {
+        const shuffled = [...eligibleShortcuts];
+        let state = Array.from(String(seed)).reduce(
+            (hash, character) => Math.imul(hash ^ character.charCodeAt(0), 16777619) >>> 0,
+            2166136261
+        );
+        for (let index = shuffled.length - 1; index > 0; index -= 1) {
+            state = (Math.imul(state, 1664525) + 1013904223) >>> 0;
+            const swapIndex = state % (index + 1);
+            [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+        }
+        return shuffled.slice(0, TARGET_SHORTCUTS);
+    }
+
+    function openVirtualKeyboard() {
+        if (!examActive || examLocked || modalOpen || leavePromptOpen || submitInProgress) return;
+        virtualKeyboardOpen = true;
+        ambientEnabled = false;
+        $('exam-content').inert = true;
+        $('shortcut-exam-container').classList.add('virtual-keyboard-open');
+        $('virtual-keyboard-panel').classList.add('open');
+        $('virtual-keyboard-panel').setAttribute('aria-hidden', 'false');
+        $('btn-virtual-keyboard').setAttribute('aria-expanded', 'true');
+        $('btn-close-virtual-keyboard').focus();
+    }
+
+    function closeVirtualKeyboard(restoreInput = true) {
+        clearVirtualKeySelection();
+        virtualKeyboardOpen = false;
+        $('virtual-keyboard-panel').classList.remove('open');
+        $('virtual-keyboard-panel').setAttribute('aria-hidden', 'true');
+        $('btn-virtual-keyboard').setAttribute('aria-expanded', 'false');
+        $('shortcut-exam-container').classList.remove('virtual-keyboard-open');
+        $('exam-content').inert = modalOpen;
+        if (restoreInput && examActive && !examLocked && !modalOpen && !leavePromptOpen) {
+            ambientEnabled = true;
+            $('btn-virtual-keyboard').focus();
+        }
+    }
+
+    function toggleVirtualKeyboard() {
+        if (virtualKeyboardOpen) closeVirtualKeyboard();
+        else openVirtualKeyboard();
+    }
+
+    function bindVirtualKeyboardKeys() {
+        $('exam-virtual-keyboard').querySelectorAll('[data-key]').forEach((keyElement) => {
+            keyElement.addEventListener('click', onVirtualKeyClick);
+        });
+    }
+
+    function onVirtualKeyClick(event) {
+        if (!examActive || !virtualKeyboardOpen || examLocked || modalOpen || submitInProgress) return;
+
+        const key = String(event.currentTarget.dataset.key || '').toLowerCase();
+        if (!key) return;
+
+        const isActive = !virtualActiveKeys.has(key);
+        if (isActive) virtualActiveKeys.add(key);
+        else virtualActiveKeys.delete(key);
+        setKeyActive(key, isActive);
+        restartVirtualKeyIdleTimer();
+
+        const matchedShortcut = assignedShortcuts
+            .filter((shortcut) => shortcut.inputChannel === 'virtual' && !creditedIds.has(shortcut.id))
+            .find((shortcut) => {
+                const expectedKeys = ShortcutsData.comboCapKeys(shortcut);
+                return ShortcutsData.isComboCorrect([...virtualActiveKeys], expectedKeys);
+            });
+
+        if (!matchedShortcut) return;
+
+        clearVirtualKeySelection();
+        closeVirtualKeyboard();
+        recordShortcutAttempt(matchedShortcut);
+    }
+
+    function setKeyActive(key, active) {
+        $('exam-virtual-keyboard').querySelectorAll('[data-key]').forEach((keyElement) => {
+            if (String(keyElement.dataset.key).toLowerCase() !== key) return;
+            keyElement.classList.toggle('active', active);
+            keyElement.setAttribute('aria-pressed', String(active));
+        });
+    }
+
+    function restartVirtualKeyIdleTimer() {
+        if (virtualKeyIdleTimer) clearTimeout(virtualKeyIdleTimer);
+        virtualKeyIdleTimer = window.setTimeout(clearVirtualKeySelection, VIRTUAL_KEY_IDLE_MS);
+    }
+
+    function clearVirtualKeySelection() {
+        if (virtualKeyIdleTimer) {
+            clearTimeout(virtualKeyIdleTimer);
+            virtualKeyIdleTimer = null;
+        }
+        virtualActiveKeys.clear();
+        $('exam-virtual-keyboard').querySelectorAll('[data-key].active').forEach((keyElement) => {
+            keyElement.classList.remove('active');
+            keyElement.setAttribute('aria-pressed', 'false');
+        });
+    }
+
     function bindStaticEvents() {
         $('btn-create-session').addEventListener('click', createExamSession);
         $('btn-copy-url').addEventListener('click', copyStudentUrl);
@@ -263,6 +439,8 @@ const ShortcutExam = (() => {
         $('btn-retake-continue').addEventListener('click', continueRetake);
         $('btn-dismiss-question').addEventListener('click', dismissFunctionQuestion);
         $('btn-resume-exam').addEventListener('click', handleResumeClick);
+        $('btn-virtual-keyboard').addEventListener('click', toggleVirtualKeyboard);
+        $('btn-close-virtual-keyboard').addEventListener('click', () => closeVirtualKeyboard());
         $('btn-stay-exam').addEventListener('click', dismissLeavePrompt);
         $('btn-leave-exam').addEventListener('click', confirmLeaveExam);
         $('btn-finish-test').addEventListener('click', () => finishExam('manual'));
@@ -307,12 +485,14 @@ const ShortcutExam = (() => {
         button.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Creating...';
 
         const createdAt = Date.now();
+        const sessionShortcuts = drawAssignedShortcuts();
         const metadata = {
             title: 'Keyboard Shortcut Exam',
             description: 'Standalone keyboard shortcut demonstration exam',
             examType: 'keyboard-shortcut',
             createdAt,
-            timeLimitMinutes: minutes
+            timeLimitMinutes: minutes,
+            assignedShortcutIds: sessionShortcuts.map((shortcut) => shortcut.id)
         };
 
         try {
@@ -424,6 +604,10 @@ const ShortcutExam = (() => {
 
             testData = data;
             testData.timeLimitMinutes = timeLimitMinutes;
+            assignedShortcuts = resolveAssignedShortcuts(data.assignedShortcutIds);
+            if (assignedShortcuts.length !== TARGET_SHORTCUTS) {
+                assignedShortcuts = drawLegacyAssignedShortcuts(testCode);
+            }
             showStudentScreen();
         } catch (error) {
             console.error('[ShortcutExam] Exam load failed:', error);
@@ -641,6 +825,8 @@ const ShortcutExam = (() => {
         suppressExitUntil = 0;
         leavePromptOpen = false;
         allowUnload = false;
+        virtualKeyboardOpen = false;
+        clearVirtualKeySelection();
         timeRemainingMs = testData.timeLimitMinutes * 60 * 1000;
 
         $('shortcut-exam-container').classList.remove('modal-open');
@@ -648,6 +834,9 @@ const ShortcutExam = (() => {
         $('function-modal').style.display = 'none';
         $('lock-overlay').style.display = 'none';
         $('leave-overlay').style.display = 'none';
+        $('virtual-keyboard-panel').classList.remove('open');
+        $('virtual-keyboard-panel').setAttribute('aria-hidden', 'true');
+        $('btn-virtual-keyboard').setAttribute('aria-expanded', 'false');
         $('btn-finish-test').disabled = true;
         updateProgress();
         updateTimerDisplay();
@@ -762,6 +951,7 @@ const ShortcutExam = (() => {
 
     function showLeavePrompt() {
         if (!examActive || leavePromptOpen || submitInProgress) return;
+        if (virtualKeyboardOpen) closeVirtualKeyboard(false);
         leavePromptOpen = true;
         pauseTimer();
         hideContextMenu();
@@ -788,6 +978,7 @@ const ShortcutExam = (() => {
 
     function showLock(incrementExitCount) {
         if (!examActive || examLocked) return;
+        if (virtualKeyboardOpen) closeVirtualKeyboard(false);
         examLocked = true;
         resumeRequested = false;
         ambientEnabled = false;
@@ -817,7 +1008,7 @@ const ShortcutExam = (() => {
         examLocked = false;
         resumeRequested = false;
         $('lock-overlay').style.display = 'none';
-        ambientEnabled = !modalOpen;
+        ambientEnabled = !modalOpen && !virtualKeyboardOpen;
         startTimer();
     }
 
@@ -884,7 +1075,9 @@ const ShortcutExam = (() => {
 
             if (examLocked || modalOpen || !ambientEnabled) return;
 
-            const fullscreenShortcut = eligibleShortcuts.find((candidate) => candidate.id === 'fullscreen');
+            const fullscreenShortcut = assignedShortcuts.find(
+                (candidate) => candidate.id === 'fullscreen' && candidate.inputChannel === 'physical'
+            );
             if (!fullscreenShortcut) return;
             recordShortcutAttempt(fullscreenShortcut);
             return;
@@ -893,7 +1086,9 @@ const ShortcutExam = (() => {
         if (examLocked || modalOpen || !ambientEnabled) return;
         if (isModifierOnlyEvent(event)) return;
 
-        const shortcut = eligibleShortcuts.find((candidate) => matchesShortcutEvent(candidate, event));
+        const shortcut = assignedShortcuts.find(
+            (candidate) => candidate.inputChannel === 'physical' && matchesShortcutEvent(candidate, event)
+        );
         if (!shortcut) return;
 
         event.preventDefault();
@@ -912,6 +1107,7 @@ const ShortcutExam = (() => {
         currentShortcut = shortcut;
         currentResult = {
             shortcutId: shortcut.id,
+            inputChannel: shortcut.inputChannel,
             keypressCorrect: true,
             mcCorrect: false,
             pointsEarned: 0.5
@@ -1005,7 +1201,7 @@ const ShortcutExam = (() => {
             finishExam('complete');
             return;
         }
-        if (examActive && !examLocked) ambientEnabled = true;
+        if (examActive && !examLocked && !virtualKeyboardOpen) ambientEnabled = true;
     }
 
     function updateProgress() {
@@ -1034,6 +1230,7 @@ const ShortcutExam = (() => {
         $('function-modal').style.display = 'none';
         $('lock-overlay').style.display = 'none';
         $('leave-overlay').style.display = 'none';
+        closeVirtualKeyboard(false);
         $('shortcut-exam-container').classList.remove('modal-open');
         $('exam-content').inert = false;
 
@@ -1045,6 +1242,7 @@ const ShortcutExam = (() => {
             shortcutsAttempted: attempted,
             shortcutResults: shortcutResults.map((result) => ({
                 shortcutId: result.shortcutId,
+                inputChannel: result.inputChannel,
                 keypressCorrect: result.keypressCorrect,
                 mcCorrect: result.mcCorrect,
                 pointsEarned: result.pointsEarned
@@ -1085,7 +1283,7 @@ const ShortcutExam = (() => {
     function onContextMenu(event) {
         if (!examActive) return;
         event.preventDefault();
-        if (modalOpen || examLocked) return;
+        if (modalOpen || examLocked || virtualKeyboardOpen) return;
 
         const menu = $('shortcut-context-menu');
         const menuWidth = 200;

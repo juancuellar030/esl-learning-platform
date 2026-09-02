@@ -1,0 +1,128 @@
+- main [ref=e2]:
+  - text:         
+  - generic [ref=e8]:
+    - generic:
+      - generic:
+        - generic: 0 / 10 shortcuts demonstrated
+        - generic:
+          - generic: 
+          - text: 19:39
+      - generic:
+        - generic:
+          - generic: 
+          - heading "Demonstrate your shortcuts" [level=1]
+          - paragraph: Use the physical keyboard to demonstrate 10 different shortcuts. Each recognized shortcut opens one question about its function.
+      - generic:
+        - generic: Right-click for theme options
+        - button " Finish Test" [disabled]:
+          - generic: 
+          - text: Finish Test
+    - button "Virtual Keyboard" [expanded] [ref=e23] [cursor=pointer]:
+      - generic [aria-hidden] [ref=e24]: 
+    - dialog [ref=e26]:
+      - generic [ref=e27]:
+        - generic [ref=e28]:
+          - heading "Virtual Keyboard" [level=2] [ref=e29]
+          - paragraph [ref=e30]: Use this keyboard for browser- and system-reserved shortcuts.
+        - button "Close virtual keyboard" [active] [ref=e31] [cursor=pointer]:
+          - generic [aria-hidden] [ref=e32]: 
+      - generic "Clickable virtual keyboard" [ref=e33]:
+        - generic [ref=e34]:
+          - generic [ref=e35]:
+            - button "Esc" [ref=e36] [cursor=pointer]
+            - button "F1" [ref=e37] [cursor=pointer]
+            - button "F2" [ref=e38] [cursor=pointer]
+            - button "F3" [ref=e39] [cursor=pointer]
+            - button "F4" [ref=e40] [cursor=pointer]
+            - button "F5" [ref=e41] [cursor=pointer]
+            - button "F6" [ref=e42] [cursor=pointer]
+            - button "F7" [ref=e43] [cursor=pointer]
+            - button "F8" [ref=e44] [cursor=pointer]
+            - button "F9" [ref=e45] [cursor=pointer]
+            - button "F10" [ref=e46] [cursor=pointer]
+            - button "F11" [ref=e47] [cursor=pointer]
+            - button "F12" [ref=e48] [cursor=pointer]
+          - generic [ref=e49]:
+            - 'button "`" [ref=e50] [cursor=pointer]'
+            - button "1" [ref=e51] [cursor=pointer]
+            - button "2" [ref=e52] [cursor=pointer]
+            - button "3" [ref=e53] [cursor=pointer]
+            - button "4" [ref=e54] [cursor=pointer]
+            - button "5" [ref=e55] [cursor=pointer]
+            - button "6" [ref=e56] [cursor=pointer]
+            - button "7" [ref=e57] [cursor=pointer]
+            - button "8" [ref=e58] [cursor=pointer]
+            - button "9" [ref=e59] [cursor=pointer]
+            - button "0" [ref=e60] [cursor=pointer]
+            - button "-" [ref=e61] [cursor=pointer]
+            - button "=" [ref=e62] [cursor=pointer]
+            - button "Backspace" [ref=e63] [cursor=pointer]
+          - generic [ref=e64]:
+            - button "Tab" [ref=e65] [cursor=pointer]
+            - button "Q" [ref=e66] [cursor=pointer]
+            - button "W" [ref=e67] [cursor=pointer]
+            - button "E" [ref=e68] [cursor=pointer]
+            - button "R" [ref=e69] [cursor=pointer]
+            - button "T" [ref=e70] [cursor=pointer]
+            - button "Y" [ref=e71] [cursor=pointer]
+            - button "U" [ref=e72] [cursor=pointer]
+            - button "I" [ref=e73] [cursor=pointer]
+            - button "O" [ref=e74] [cursor=pointer]
+            - button "P" [ref=e75] [cursor=pointer]
+            - button "[" [ref=e76] [cursor=pointer]
+            - button "]" [ref=e77] [cursor=pointer]
+            - button "\\" [ref=e78] [cursor=pointer]
+          - generic [ref=e79]:
+            - button "Caps Lock" [ref=e80] [cursor=pointer]
+            - button "A" [ref=e81] [cursor=pointer]
+            - button "S" [ref=e82] [cursor=pointer]
+            - button "D" [ref=e83] [cursor=pointer]
+            - button "F" [ref=e84] [cursor=pointer]
+            - button "G" [ref=e85] [cursor=pointer]
+            - button "H" [ref=e86] [cursor=pointer]
+            - button "J" [ref=e87] [cursor=pointer]
+            - button "K" [ref=e88] [cursor=pointer]
+            - button "L" [ref=e89] [cursor=pointer]
+            - button ";" [ref=e90] [cursor=pointer]
+            - button "'" [ref=e91] [cursor=pointer]
+            - button "Enter" [ref=e92] [cursor=pointer]
+          - generic [ref=e93]:
+            - button "Shift" [ref=e94] [cursor=pointer]:
+              - generic [ref=e95]:
+                - generic [aria-hidden]: 
+                - generic [ref=e96]: Shift
+            - button "Z" [ref=e97] [cursor=pointer]
+            - button "X" [ref=e98] [cursor=pointer]
+            - button "C" [ref=e99] [cursor=pointer]
+            - button "V" [ref=e100] [cursor=pointer]
+            - button "B" [ref=e101] [cursor=pointer]
+            - button "N" [ref=e102] [cursor=pointer]
+            - button "M" [ref=e103] [cursor=pointer]
+            - button "," [ref=e104] [cursor=pointer]
+            - button "." [ref=e105] [cursor=pointer]
+            - button / [ref=e106] [cursor=pointer]
+            - button "Shift" [ref=e107] [cursor=pointer]:
+              - generic [ref=e108]:
+                - generic [aria-hidden]: 
+                - generic [ref=e109]: Shift
+          - generic [ref=e110]:
+            - button "Ctrl" [ref=e111] [cursor=pointer]
+            - button "Win" [ref=e112] [cursor=pointer]:
+              - generic [ref=e113]:
+                - generic [aria-hidden]: 
+                - generic [ref=e114]: Win
+            - button "Alt" [ref=e115] [cursor=pointer]
+            - button "Space" [ref=e116] [cursor=pointer]
+            - button "Alt" [ref=e117] [cursor=pointer]
+            - button "Win" [ref=e118] [cursor=pointer]:
+              - generic [ref=e119]:
+                - generic [aria-hidden]: 
+                - generic [ref=e120]: Win
+            - button "Ctrl" [ref=e121] [cursor=pointer]
+            - button "←" [ref=e122] [cursor=pointer]
+            - button "↑" [ref=e123] [cursor=pointer]
+            - button "↓" [ref=e124] [cursor=pointer]
+            - button "→" [ref=e125] [cursor=pointer]
+    - text:   
+  - text:   
+  - button "" [ref=e6] [cursor=pointer]

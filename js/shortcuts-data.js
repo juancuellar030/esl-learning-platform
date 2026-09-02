@@ -37,9 +37,10 @@ window.ShortcutsData = (() => {
 
         { id: 'new-tab', category: 'Web Browser', keys: ['ctrl', 't'], label: 'Open New Tab', type: 'demo' },
         { id: 'close-tab', category: 'Web Browser', keys: ['ctrl', 'w'], label: 'Close Tab', type: 'demo' },
+        { id: 'new-window', category: 'Web Browser', keys: ['ctrl', 'n'], label: 'Open New Window', type: 'demo' },
         { id: 'reopen-tab', category: 'Web Browser', keys: ['ctrl', 'shift', 't'], label: 'Reopen Closed Tab', type: 'demo' },
         { id: 'history', category: 'Web Browser', keys: ['ctrl', 'h'], label: 'View History', type: 'demo' },
-        { id: 'private-window', category: 'Web Browser', keys: ['ctrl', 'shift', 'n / p'], label: 'Open Private Window', type: 'demo' },
+        { id: 'private-window', category: 'Web Browser', keys: ['ctrl', 'shift', 'n'], label: 'Open Private Window', type: 'demo' },
 
         { id: 'switch-app', category: 'Windows Actions', keys: ['alt', 'tab'], label: 'Switch Apps', type: 'interactive' },
         { id: 'show-desktop', category: 'Windows Actions', keys: ['win', 'd'], label: 'Show Desktop', type: 'interactive' },
