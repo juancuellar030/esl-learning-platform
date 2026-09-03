@@ -131,20 +131,70 @@
             .trim();
     }
 
+    function tokenizeLookup(value) {
+        return normalizeLookup(value).split(' ').filter(Boolean);
+    }
+
+    // Roster names are "SURNAMES GIVEN NAMES". Students type given name first,
+    // so each query token must prefix a distinct word, in any order.
+    function tokensMatchNameWords(words, tokens) {
+        const used = new Set();
+        return tokens.every(token => {
+            const idx = words.findIndex((word, i) => !used.has(i) && word.startsWith(token));
+            if (idx === -1) return false;
+            used.add(idx);
+            return true;
+        });
+    }
+
+    function nameMatchScore(words, tokens) {
+        let score = 0;
+        const used = new Set();
+        tokens.forEach(token => {
+            const exact = words.findIndex((word, i) => !used.has(i) && word === token);
+            if (exact !== -1) {
+                used.add(exact);
+                score += 3;
+                return;
+            }
+            const prefix = words.findIndex((word, i) => !used.has(i) && word.startsWith(token));
+            if (prefix !== -1) {
+                used.add(prefix);
+                score += 2;
+            }
+        });
+        return score;
+    }
+
     function getRosterMatches(query, group) {
-        const q = normalizeLookup(query);
-        if (q.length < 2) return [];
+        const tokens = tokenizeLookup(query);
+        if (!tokens.length || tokens.join(' ').length < 2) return [];
         return ALL_STUDENTS
             .filter(student => !group || student.group === group)
-            .filter(student => normalizeLookup(student.name).includes(q))
-            .slice(0, 8);
+            .map(student => {
+                const words = tokenizeLookup(student.name);
+                return { student, words, matched: tokensMatchNameWords(words, tokens) };
+            })
+            .filter(item => item.matched)
+            .sort((a, b) => {
+                const scoreDiff = nameMatchScore(b.words, tokens) - nameMatchScore(a.words, tokens);
+                if (scoreDiff) return scoreDiff;
+                return a.student.name.localeCompare(b.student.name, 'es');
+            })
+            .slice(0, 12)
+            .map(item => item.student);
     }
 
     function findRosterStudent(name, group) {
         const normalized = normalizeLookup(name);
+        const tokens = tokenizeLookup(name).slice().sort();
+        if (!normalized) return null;
         return ALL_STUDENTS.find(student => {
             if (group && student.group !== group) return false;
-            return normalizeLookup(student.name) === normalized;
+            const studentNorm = normalizeLookup(student.name);
+            if (studentNorm === normalized) return true;
+            const studentTokens = tokenizeLookup(student.name).slice().sort();
+            return studentTokens.length === tokens.length && studentTokens.every((token, i) => token === tokens[i]);
         }) || null;
     }
 

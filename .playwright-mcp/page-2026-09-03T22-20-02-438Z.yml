@@ -1,0 +1,52 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e3]:
+      - generic [ref=e4]: 
+      - heading "Autoevaluación" [level=1] [ref=e7]
+      - paragraph [ref=e8]: Reflexiona honestamente sobre tu desempeño este período
+    - generic [ref=e10]:
+      - heading " ¡Hola! ¿Cómo te llamas?" [level=2] [ref=e11]:
+        - generic [ref=e12]: 
+        - text: ¡Hola! ¿Cómo te llamas?
+      - paragraph [ref=e13]: Busca tu nombre en la lista, escribe tu clave y comienza la autoevaluación.
+      - generic [ref=e14]:
+        - generic [ref=e15]:
+          - generic [ref=e16]: 
+          - text: Tu nombre completo
+        - textbox " Tu nombre completo" [ref=e18]:
+          - /placeholder: Escribe tu nombre o apellido...
+          - text: SÁNCHEZ HERNÁNDEZ SALOMÉ
+      - generic [ref=e19]:
+        - generic [ref=e20]:
+          - generic [ref=e21]: 
+          - text: Tu grupo
+        - generic [ref=e22]:
+          - combobox " Tu grupo" [disabled] [ref=e23]:
+            - option "Se completa automáticamente..." [disabled]
+            - option "3A"
+            - option "3B"
+            - option "3C"
+            - option "4A"
+            - option "4B"
+            - option "4C"
+            - option "5A"
+            - option "5B"
+            - option "5C"
+            - option "5D" [selected]
+          - text: 
+      - generic [ref=e38]:
+        - generic [ref=e39]:
+          - generic [ref=e40]: 
+          - text: Tu clave personal
+        - textbox " Tu clave personal" [active] [ref=e41]:
+          - /placeholder: Escribe tu clave...
+        - paragraph [ref=e42]: Selecciona tu nombre de la lista y escribe la clave que te dio el profesor.
+      - button " ¡Comenzar mi autoevaluación!" [ref=e24] [cursor=pointer]:
+        - generic [ref=e25]: 
+        - text: ¡Comenzar mi autoevaluación!
+    - text:                     
+  - button " Temas" [ref=e26] [cursor=pointer]:
+    - generic [ref=e27]: 
+    - text: Temas
+  - text: 
+  - tooltip
