@@ -15,6 +15,34 @@
 
 <body class="behavior-tracker-page">
 
+    <!-- Shared subject-mark icons (hidden sprite; referenced via <use>) -->
+    <svg class="mark-icon-sprite" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+        <symbol id="mark-icon-ethics" viewBox="0 0 736.21 946.83">
+            <path fill="currentColor"
+                d="M238.9 446.6c-128.06-45.5-192.1-114.41-192.1-206.72 0-72.81 33.97-130.99 101.9-174.54C216.64 21.78 300.98 0 401.75 0c91.66 0 164.47 15.12 218.42 45.34 53.96 30.23 80.93 66.47 80.93 108.72 0 22.1-8.45 41.44-25.35 58.02-16.9 16.58-36.4 24.87-58.51 24.87-36.4 0-66.31-25.35-89.71-76.06-32.5-70.21-81.26-105.31-146.27-105.31-51.36 0-93.61 16.9-126.76 50.71-33.15 33.8-49.73 80.93-49.73 141.39 0 118.96 61.43 178.45 184.3 178.45 13 0 27.95-1.3 44.86-3.9 29.25-3.9 52.01-5.85 68.26-5.85 39.65 0 59.48 11.38 59.48 34.13 0 25.35-20.15 38.03-60.46 38.03-14.3 0-35.75-2.27-64.36-6.83-21.45-3.9-38.03-5.85-49.73-5.85-130.01 0-195.02 66.31-195.02 198.92 0 64.36 17.23 116.2 51.68 155.53 34.45 39.33 82.56 58.99 144.32 58.99 77.36 0 128.71-39.98 154.07-119.94 13-42.25 27.47-71.51 43.39-87.76 15.93-16.25 37.22-24.38 63.87-24.38 22.1 0 42.09 7.96 59.97 23.89 17.88 15.93 26.81 36.24 26.82 60.94 0 59.16-33.15 108.07-99.46 146.75-66.31 38.68-146.59 58.02-240.85 58.02-103.36 0-195.18-24.7-275.47-74.11C40.14 823.32 0 757.34 0 674.78c0-103.36 79.63-179.42 238.9-228.18z" />
+        </symbol>
+        <symbol id="mark-icon-arts" viewBox="0 0 472.63 472.63">
+            <path fill="currentColor" fill-rule="evenodd"
+                d="M236.31 472.63h0c-10.43 0-19.63-7.03-22.36-17.1-36.11-133.14-63.71-160.74-196.85-196.85C7.03 255.94 0 246.75 0 236.32c0-10.43 7.03-19.63 17.1-22.36 133.15-36.11 160.74-63.71 196.85-196.85C216.68 7.03 225.88 0 236.31 0c10.43 0 19.63 7.03 22.36 17.1 36.11 133.15 63.71 160.74 196.85 196.85 10.07 2.73 17.11 11.93 17.1 22.37 0 10.43-7.04 19.63-17.11 22.36-133.14 36.11-160.73 63.71-196.85 196.85-2.73 10.07-11.93 17.1-22.36 17.1zm-148.81-236.32c38.9 13.88 69.75 30.31 94.13 54.68s40.81 55.22 54.68 94.13c13.88-38.91 30.31-69.75 54.68-94.13 24.38-24.38 55.22-40.81 94.13-54.68-38.91-13.88-69.75-30.31-94.13-54.68-24.38-24.38-40.81-55.22-54.68-94.13-13.88 38.9-30.31 69.75-54.68 94.13-24.38 24.38-55.22 40.81-94.13 54.68z" />
+        </symbol>
+        <symbol id="mark-icon-ciencias" viewBox="0 0 173.52 69.8">
+            <path fill="currentColor"
+                d="M95.37 19.69c1.6 1.3 3.07 2.78 4.66 4.08 5.24 4.27 10.98 8.57 17.84 9.67 2.69.43 7.35.36 9.85-.66 7.51-3.08 12.39-12.69 13.56-20.36.14-.89.39-5.82.7-6.05l31.3 3.93c.3.19.25 4.86.2 5.59-1.24 18.48-10.2 38.52-26.67 48.09-18.08 10.51-41.1 5.62-57.65-5.46-11.34-7.59-22.21-21.48-36.55-22.46-8.58-.59-13.96 4.19-17.59 11.48-2.45 4.91-2.6 8.59-3.28 13.85-.05.37-.12 1.36-.43 1.47-1.65-.24-3.33-.31-4.98-.51-8.07-1-16.17-2.18-24.24-3.27-.77-.1-1.71.28-2.09-.69l.45-8.74C3.09 25.09 19.09 1.21 45.69.06c19.85-.86 34.83 7.55 49.68 19.63z" />
+        </symbol>
+        <symbol id="mark-icon-sociales" viewBox="0 0 432.71 432.71">
+            <path fill="currentColor" fill-rule="evenodd"
+                d="M432.71 432.71H0V0h432.71v432.71ZM60 372.71h312.71V60H60v312.71z" />
+        </symbol>
+        <symbol id="mark-icon-math" viewBox="0 0 1280 577.97">
+            <path fill="currentColor" fill-rule="evenodd"
+                d="M1280 270.35v35l-3.17 26.33c-26.41 169.03-191.19 277.04-357.99 237.37-103.09-24.52-191.66-110.6-263.78-184.18-2.74-2.8-11.47-14.68-15.31-14.35l-3.69 2.31c-86.74 88.08-178.53 181.29-306.72 201.22-152.43 23.7-289.6-62.01-321.85-214.52L.2 307.35c.46-11.27-.62-22.75 0-34C7.65 139.01 112.4 25.5 244.95 4.64c157.03-24.71 267.18 76.81 369.18 178.18 4.03 4.01 21.73 25.03 25.64 25.38l2.35-1.3C746.33 100.33 865.29-13.78 1027.53 1.36c147.1 13.72 244.4 123.42 252.47 268.99zm-1002.04-150.34c-173.59 13.56-211.83 263.6-57.47 328.88 98.74 41.76 195.74-19.45 266.65-83.67 20.95-18.97 53.76-48.68 71-69.99 1-1.24 3.16-3.17 2.82-4.88-41.19-39.19-80.28-82.93-125.91-117.06-46.57-34.83-97.32-57.96-157.09-53.29zm489.7 120.28c-16.17 15.7-31.72 31.9-47.62 47.86-3.13 4.54 1.16 5.05 3.58 7.52 84.73 86.47 203.88 214.42 337.77 148.89 150.07-73.46 115.4-313.81-54.86-324.85-96.91-6.28-173.92 57.51-238.87 120.57z" />
+        </symbol>
+        <symbol id="mark-icon-technology" viewBox="0 0 629 750">
+            <path fill="currentColor" fill-rule="evenodd"
+                d="M582 0c.9.91-3.6 21.97-4.27 25.23-11.71 57.42-26.02 114.55-36.62 172.11l1.39 1.66h85l1.5 1.5v94l-1.5 1.5h-102c-.19 0-3.23 1.3-3.47 1.53l-32.83 155.22 1.31 2.25h137l1.5 1.5v95.5l-158.53 1.97-42.47 196.03h-98l40.5-197h-184l-42 197H47l39.5-197H1.5L0 551.5v-96.5h106.5c.89 0 2.97-3.7 3.06-4.94 8.22-48.32 21.97-96.67 30.14-144.85.34-2.01 2.12-9.21-1.2-9.21H0v-97h158.5L204.5 0h95l-40 199h182L486.5 0h95.5zm-375 454h183.5c2.54-3.65,3.23-9.25,4.23-13.77 10.23-45.73 17.47-92.21 28.14-137.86v-5.27c-2.41-.66-4.8-1.01-7.33-1.15-55.95-3.16-114.83,2.49-171.09 0l-5.23 1.27-32.23 156.77z" />
+        </symbol>
+    </svg>
+
     <!-- Custom Alert Modal -->
     <div class="modal-overlay" id="customAlertModal"
         style="display: none; z-index: 10000; justify-content: center; align-items: center; background: rgba(0,0,0,0.6); position: fixed; top: 0; left: 0; right: 0; bottom: 0; backdrop-filter: blur(4px);">
@@ -23,8 +51,8 @@
             <div id="customAlertIcon" style="font-size: 3rem; margin-bottom: 15px;"></div>
             <h2 id="customAlertTitle" style="color: var(--indigo-velvet); margin-bottom: 15px; font-size: 1.5rem;">
                 Notice</h2>
-            <p id="customAlertMessage" style="color: #444; font-size: 1.1rem; margin-bottom: 25px; line-height: 1.5;">
-            </p>
+            <div id="customAlertMessage"
+                style="color: #444; font-size: 1.1rem; margin-bottom: 25px; line-height: 1.5;"></div>
             <button class="btn btn-save" id="customAlertBtn"
                 style="width: 100%; justify-content: center; padding: 12px; font-size: 1.1rem;">OK</button>
         </div>
@@ -40,6 +68,9 @@
                     <i class="fa-solid fa-arrow-left"></i> Back to Tools
                 </a>
                 <div class="week-selector-group">
+                    <select id="courseSelector" class="week-selector course-selector" aria-label="Course">
+                        <option value="4C">4° C</option>
+                    </select>
                     <select id="weekSelector" class="week-selector">
                         <option value="current">Current Week</option>
                     </select>
@@ -49,9 +80,13 @@
                 <button class="btn btn-clear" id="clearAll"><i class="fa-solid fa-broom"></i> Clear All</button>
                 <button class="btn btn-save" id="saveData"><i class="fa-solid fa-floppy-disk"></i> Save</button>
                 <button class="btn btn-load" id="loadData"><i class="fa-solid fa-folder-open"></i> Load</button>
+                <button class="btn btn-csv" id="importCsv"><i class="fa-solid fa-file-import"></i> Import CSV</button>
+                <button class="btn btn-csv-template" id="downloadCsvTemplate"><i class="fa-solid fa-file-arrow-down"></i>
+                    CSV Template</button>
                 <button class="btn btn-drive" id="openDrive"><i class="fa-brands fa-google-drive"></i> Drive</button>
                 <button class="btn btn-prize" id="openPrizeCalculator"><i class="fa-solid fa-gift"></i> Prizes</button>
                 <input type="file" id="fileInput" accept=".json" style="display: none;">
+                <input type="file" id="csvFileInput" accept=".csv,text/csv" style="display: none;">
                 <input type="file" id="prizeFilesInput" accept=".json" multiple style="display: none;">
             </div>
         </div>
@@ -67,28 +102,28 @@
                     <span class="pill-symbol mark-english">✖</span> English
                 </button>
                 <button class="subject-pill" data-subject="math" data-symbol="∞" data-label="Math/Geometría">
-                    <span class="pill-symbol mark-math">∞</span> Math
+                    <span class="pill-symbol mark-math"><svg class="mark-icon" aria-hidden="true" focusable="false"><use href="#mark-icon-math"></use></svg></span> Math
                 </button>
                 <button class="subject-pill" data-subject="science" data-symbol="△" data-label="Science">
                     <span class="pill-symbol mark-science">△</span> Science
                 </button>
                 <button class="subject-pill" data-subject="sociales" data-symbol="□" data-label="Sociales">
-                    <span class="pill-symbol mark-sociales">□</span> Sociales
+                    <span class="pill-symbol mark-sociales"><svg class="mark-icon" aria-hidden="true" focusable="false"><use href="#mark-icon-sociales"></use></svg></span> Sociales
                 </button>
                 <button class="subject-pill" data-subject="lenguaje" data-symbol="L" data-label="Lenguaje">
                     <span class="pill-symbol mark-lenguaje">L</span> Lenguaje
                 </button>
                 <button class="subject-pill" data-subject="technology" data-symbol="#" data-label="Technology">
-                    <span class="pill-symbol mark-technology">#</span> Technology
+                    <span class="pill-symbol mark-technology"><svg class="mark-icon" aria-hidden="true" focusable="false"><use href="#mark-icon-technology"></use></svg></span> Technology
                 </button>
                 <button class="subject-pill" data-subject="ethics" data-symbol="ε" data-label="Ethics">
-                    <span class="pill-symbol mark-ethics">ε</span> Ethics
+                    <span class="pill-symbol mark-ethics"><svg class="mark-icon" aria-hidden="true" focusable="false"><use href="#mark-icon-ethics"></use></svg></span> Ethics
                 </button>
                 <button class="subject-pill" data-subject="arts" data-symbol="✦" data-label="Arts">
-                    <span class="pill-symbol mark-arts">✦</span> Arts
+                    <span class="pill-symbol mark-arts"><svg class="mark-icon" aria-hidden="true" focusable="false"><use href="#mark-icon-arts"></use></svg></span> Arts
                 </button>
                 <button class="subject-pill" data-subject="ciencias" data-symbol="~" data-label="Ciencias Naturales">
-                    <span class="pill-symbol mark-ciencias">~</span> Ciencias
+                    <span class="pill-symbol mark-ciencias"><svg class="mark-icon" aria-hidden="true" focusable="false"><use href="#mark-icon-ciencias"></use></svg></span> Ciencias
                 </button>
                 <button class="subject-pill" data-subject="religion" data-symbol="◇" data-label="Religión">
                     <span class="pill-symbol mark-religion">◇</span> Religión
@@ -114,11 +149,31 @@
                 <thead>
                     <tr>
                         <th class="student-name">Student Name</th>
-                        <th colspan="5">Monday</th>
-                        <th colspan="5">Tuesday</th>
-                        <th colspan="5">Wednesday</th>
-                        <th colspan="5">Thursday</th>
-                        <th colspan="5">Friday</th>
+                        <th colspan="5">
+                            <div class="weekday-header"><span>Monday</span><input class="marked-by-input"
+                                    data-day="monday" type="text" maxlength="80" placeholder="Recorded by..."
+                                    aria-label="Monday recorded by"></div>
+                        </th>
+                        <th colspan="5">
+                            <div class="weekday-header"><span>Tuesday</span><input class="marked-by-input"
+                                    data-day="tuesday" type="text" maxlength="80" placeholder="Recorded by..."
+                                    aria-label="Tuesday recorded by"></div>
+                        </th>
+                        <th colspan="5">
+                            <div class="weekday-header"><span>Wednesday</span><input class="marked-by-input"
+                                    data-day="wednesday" type="text" maxlength="80" placeholder="Recorded by..."
+                                    aria-label="Wednesday recorded by"></div>
+                        </th>
+                        <th colspan="5">
+                            <div class="weekday-header"><span>Thursday</span><input class="marked-by-input"
+                                    data-day="thursday" type="text" maxlength="80" placeholder="Recorded by..."
+                                    aria-label="Thursday recorded by"></div>
+                        </th>
+                        <th colspan="5">
+                            <div class="weekday-header"><span>Friday</span><input class="marked-by-input"
+                                    data-day="friday" type="text" maxlength="80" placeholder="Recorded by..."
+                                    aria-label="Friday recorded by"></div>
+                        </th>
                     </tr>
                 </thead>
                 <tbody id="tableBody">
@@ -258,21 +313,26 @@
         </div>
     </footer>
 
+    <script src="js/student-groups-data.js"></script>
     <script src="js/students-data.js"></script>
     <script>
         // ── Subject definitions ─────────────────────────────────
         const SUBJECTS = {
             english: { symbol: '✖', cls: 'mark-english', label: 'English' },
-            math: { symbol: '∞', cls: 'mark-math', label: 'Math/Geometría' },
+            math: { symbol: '∞', iconId: 'mark-icon-math', cls: 'mark-math', label: 'Math/Geometría' },
             science: { symbol: '△', cls: 'mark-science', label: 'Science' },
-            sociales: { symbol: '□', cls: 'mark-sociales', label: 'Sociales' },
+            sociales: { symbol: '□', iconId: 'mark-icon-sociales', cls: 'mark-sociales', label: 'Sociales' },
             lenguaje: { symbol: 'L', cls: 'mark-lenguaje', label: 'Lenguaje' },
-            technology: { symbol: '#', cls: 'mark-technology', label: 'Technology' },
-            ethics: { symbol: 'ε', cls: 'mark-ethics', label: 'Ethics' },
-            arts: { symbol: '✦', cls: 'mark-arts', label: 'Arts' },
-            ciencias: { symbol: '~', cls: 'mark-ciencias', label: 'Ciencias Naturales' },
+            technology: { symbol: '#', iconId: 'mark-icon-technology', cls: 'mark-technology', label: 'Technology' },
+            ethics: { symbol: 'ε', iconId: 'mark-icon-ethics', cls: 'mark-ethics', label: 'Ethics' },
+            arts: { symbol: '✦', iconId: 'mark-icon-arts', cls: 'mark-arts', label: 'Arts' },
+            ciencias: { symbol: '~', iconId: 'mark-icon-ciencias', cls: 'mark-ciencias', label: 'Ciencias Naturales' },
             religion: { symbol: '◇', cls: 'mark-religion', label: 'Religión' },
         };
+
+        function markIconHtml(iconId) {
+            return `<svg class="mark-icon" aria-hidden="true" focusable="false"><use href="#${iconId}"></use></svg>`;
+        }
 
         // Legacy mark mapping (for backward compat with old saved files)
         const LEGACY_MARKS = {
@@ -280,13 +340,28 @@
             'O': { symbol: '●', cls: 'mark-circle' },
         };
 
-        const students = studentNames;
+        const PRIMARY_COURSE_ID = '4C';
+        const BEHAVIOR_STORAGE_KEY = 'esl_behavior_tracker_v2';
+        const DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'];
+        const SLOT_KEYS = DAYS.flatMap(day => Array.from({ length: 5 }, (_, index) => `${day}${index + 1}`));
+        const COURSES = (typeof CLASS_GROUPS !== 'undefined' ? CLASS_GROUPS : [])
+            .map(group => ({
+                id: group.id,
+                label: group.label,
+                // Preserve the behavior tracker's existing 4C names and ordering exactly.
+                students: group.id === PRIMARY_COURSE_ID ? [...studentNames] : [...group.students]
+            }));
 
+        let activeCourseId = PRIMARY_COURSE_ID;
+        let students = [];
         let selectedSubject = null; // key from SUBJECTS, or null = erase mode
         let weekCompleted = false;
         let behaviorData = {};
+        let markedBy = createEmptyMarkedBy();
+        let worksheetStore = {};
         let selectedWeek = null;
         let hasUnsavedData = false;
+        let stateRevision = 0;
 
         // ── Debug log ───────────────────────────────────────────
         function debugLog(message) {
@@ -333,6 +408,24 @@
 
         function showSuccess(message) { showNotification(message, 'success', 'Success'); }
 
+        function escapeHtml(value) {
+            const div = document.createElement('div');
+            div.textContent = String(value ?? '');
+            return div.innerHTML;
+        }
+
+        function showCustomAlert(title, messages) {
+            const modal = document.getElementById('customAlertModal');
+            const messageEl = document.getElementById('customAlertMessage');
+            document.getElementById('customAlertTitle').textContent = title;
+            document.getElementById('customAlertIcon').innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
+            messageEl.innerHTML = Array.isArray(messages)
+                ? `<div class="validation-summary"><p>Nothing was imported. Fix these issues and retry:</p><ul>${messages.map(message => `<li>${escapeHtml(message)}</li>`).join('')}</ul></div>`
+                : escapeHtml(messages);
+            modal.style.display = 'flex';
+            document.getElementById('customAlertBtn').onclick = () => { modal.style.display = 'none'; };
+        }
+
         // ── Custom Confirm Modal ───────────────────────────────
         function customConfirm(title, message, onConfirm) {
             const modal = document.getElementById('customConfirmModal');
@@ -377,100 +470,325 @@
         }
 
         // ── Data ────────────────────────────────────────────────
-        function initializeBehaviorData() {
+        function createEmptyMarkedBy() {
+            return DAYS.reduce((result, day) => {
+                result[day] = '';
+                return result;
+            }, {});
+        }
+
+        function createEmptyBehaviorData() {
+            const result = {};
             students.forEach(student => {
-                behaviorData[student] = {
-                    monday1: '', monday2: '', monday3: '', monday4: '', monday5: '',
-                    tuesday1: '', tuesday2: '', tuesday3: '', tuesday4: '', tuesday5: '',
-                    wednesday1: '', wednesday2: '', wednesday3: '', wednesday4: '', wednesday5: '',
-                    thursday1: '', thursday2: '', thursday3: '', thursday4: '', thursday5: '',
-                    friday1: '', friday2: '', friday3: '', friday4: '', friday5: ''
-                };
+                result[student] = SLOT_KEYS.reduce((slots, slot) => {
+                    slots[slot] = '';
+                    return slots;
+                }, {});
+            });
+            return result;
+        }
+
+        function initializeBehaviorData(source = {}) {
+            behaviorData = createEmptyBehaviorData();
+            students.forEach(student => {
+                if (!source[student]) return;
+                SLOT_KEYS.forEach(slot => {
+                    const value = source[student][slot] || '';
+                    behaviorData[student][slot] = SUBJECTS[value] || LEGACY_MARKS[value] ? value : '';
+                });
             });
         }
 
+        function getActiveCourse() {
+            return COURSES.find(course => course.id === activeCourseId) || COURSES.find(course => course.id === PRIMARY_COURSE_ID);
+        }
+
+        function getCourseStudents(courseId = activeCourseId) {
+            const course = COURSES.find(item => item.id === courseId);
+            return course ? [...course.students] : [];
+        }
+
+        function formatSecondaryStudentName(fullName) {
+            const parts = String(fullName).trim().split(/\s+/);
+            if (parts.length < 2) return fullName;
+            const firstGivenName = parts.length >= 3 ? parts[2] : parts[1];
+            return `${firstGivenName} ${parts[0].charAt(0)}.`;
+        }
+
+        function getStudentDisplayName(student) {
+            return activeCourseId === PRIMARY_COURSE_ID ? student : formatSecondaryStudentName(student);
+        }
+
+        function getStorageKey(courseId = activeCourseId, weekId = getSelectedWeekId()) {
+            return `${courseId}-${weekId}`;
+        }
+
+        function loadWorksheetStore() {
+            try {
+                const saved = localStorage.getItem(BEHAVIOR_STORAGE_KEY);
+                const parsed = saved ? JSON.parse(saved) : {};
+                worksheetStore = parsed.worksheets || parsed || {};
+            } catch (error) {
+                console.warn('Could not load behavior tracker storage', error);
+                worksheetStore = {};
+            }
+        }
+
+        function saveWorksheetStore() {
+            try {
+                localStorage.setItem(BEHAVIOR_STORAGE_KEY, JSON.stringify({ version: 2, worksheets: worksheetStore }));
+            } catch (error) {
+                console.warn('Could not save behavior tracker storage', error);
+            }
+        }
+
+        function persistCurrentWorksheet() {
+            if (!activeCourseId || !getSelectedWeekId()) return;
+            worksheetStore[getStorageKey()] = {
+                courseId: activeCourseId,
+                weekId: getSelectedWeekId(),
+                week: getSelectedWeek(),
+                weekCompleted,
+                markedBy: { ...markedBy },
+                behaviorData
+            };
+            saveWorksheetStore();
+            stateRevision++;
+        }
+
+        function updateFinishButton() {
+            const finishBtn = document.getElementById('finishWeek');
+            if (!finishBtn) return;
+            if (weekCompleted) {
+                finishBtn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Week Completed';
+                finishBtn.style.background = '#00b894';
+            } else {
+                finishBtn.innerHTML = '<i class="fa-solid fa-flag-checkered"></i> Finish Week';
+                finishBtn.style.background = '';
+            }
+        }
+
+        function renderMarkedBy() {
+            document.querySelectorAll('.marked-by-input').forEach(input => {
+                input.value = markedBy[input.dataset.day] || '';
+            });
+        }
+
+        function activateCurrentWorksheet() {
+            students = getCourseStudents();
+            const saved = worksheetStore[getStorageKey()] || {};
+            initializeBehaviorData(saved.behaviorData || {});
+            const savedMarkedBy = saved.markedBy && typeof saved.markedBy === 'object' && !Array.isArray(saved.markedBy)
+                ? saved.markedBy
+                : {};
+            markedBy = DAYS.reduce((result, day) => {
+                result[day] = typeof savedMarkedBy[day] === 'string' ? savedMarkedBy[day] : '';
+                return result;
+            }, {});
+            weekCompleted = saved.weekCompleted === true;
+            createTable();
+            updateTableDisplay();
+            renderMarkedBy();
+            updateFinishButton();
+            document.getElementById('currentWeek').textContent = getSelectedWeek();
+        }
+
+        function getFilenameBase() {
+            return `behavior-${getStorageKey()}`;
+        }
+
+        function fileMatchesCourseName(filename, courseId = activeCourseId) {
+            const lowerName = String(filename || '').toLowerCase();
+            const activePrefix = `behavior-${courseId.toLowerCase()}-`;
+            if (lowerName.startsWith(activePrefix)) return true;
+            if (courseId !== PRIMARY_COURSE_ID) return false;
+            const belongsToAnotherCourse = COURSES
+                .filter(course => course.id !== PRIMARY_COURSE_ID)
+                .some(course => lowerName.startsWith(`behavior-${course.id.toLowerCase()}-`));
+            return lowerName.startsWith('behavior-') && !belongsToAnotherCourse;
+        }
+
+        function hasCurrentWorksheetContent() {
+            // A stored blank sheet is intentional (for example, after Clear All)
+            // and must not be silently resurrected from an older Drive copy.
+            return Object.prototype.hasOwnProperty.call(worksheetStore, getStorageKey());
+        }
+
+        function parseDriveDataResponse(response) {
+            const rawData = response.body && typeof response.body === 'string'
+                ? response.body
+                : response.result;
+            if (typeof rawData === 'string') return JSON.parse(rawData);
+            if (rawData && typeof rawData === 'object') return rawData;
+            throw new Error('Drive file appears to be empty or unreadable.');
+        }
+
+        async function listAllDriveFiles(folderId, pageSize = 100) {
+            const files = [];
+            let pageToken = null;
+            do {
+                const response = await gapi.client.drive.files.list({
+                    q: `'${folderId}' in parents and trashed=false`,
+                    fields: 'nextPageToken, files(id, name, modifiedTime, size)',
+                    orderBy: 'modifiedTime desc',
+                    pageSize,
+                    pageToken: pageToken || undefined
+                });
+                files.push(...(response.result.files || []));
+                pageToken = response.result.nextPageToken || null;
+            } while (pageToken);
+            return files;
+        }
+
         function getBuildData() {
+            persistCurrentWorksheet();
+            const course = getActiveCourse();
             return {
+                tool: 'student-behavior-tracker',
+                courseId: activeCourseId,
+                courseLabel: course ? course.label : activeCourseId,
+                weekId: getSelectedWeekId(),
                 week: getSelectedWeek(),
                 savedDate: new Date().toISOString(),
                 weekCompleted: weekCompleted,
+                markedBy: { ...markedBy },
                 behaviorData: behaviorData
             };
         }
 
         // ── Week helpers ────────────────────────────────────────
-        function getCurrentWeek() {
-            const today = new Date();
-            const monday = new Date(today);
-            monday.setDate(today.getDate() - (today.getDay() === 0 ? 6 : today.getDay() - 1));
+        function getMonday(date = new Date()) {
+            const monday = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12);
+            monday.setDate(monday.getDate() - (monday.getDay() === 0 ? 6 : monday.getDay() - 1));
+            return monday;
+        }
+
+        function formatWeek(monday) {
             const friday = new Date(monday);
             friday.setDate(monday.getDate() + 4);
             const opts = { month: 'short', day: 'numeric' };
             return `${monday.toLocaleDateString('en-US', opts)} - ${friday.toLocaleDateString('en-US', opts)}`;
         }
 
+        function getIsoWeekId(monday) {
+            const thursday = new Date(monday);
+            thursday.setDate(monday.getDate() + 3);
+            const weekYear = thursday.getFullYear();
+            const firstThursday = new Date(weekYear, 0, 4, 12);
+            const firstMonday = getMonday(firstThursday);
+            const weekNumber = Math.round((monday - firstMonday) / 604800000) + 1;
+            return `${weekYear}-W${String(weekNumber).padStart(2, '0')}`;
+        }
+
+        function getCurrentWeek() {
+            return formatWeek(getMonday());
+        }
+
         function getSelectedWeek() {
-            return (selectedWeek && selectedWeek !== 'current') ? selectedWeek : getCurrentWeek();
+            const option = Array.from(document.querySelectorAll('#weekSelector option'))
+                .find(item => item.value === getSelectedWeekId());
+            return option ? option.dataset.label : getCurrentWeek();
+        }
+
+        function getSelectedWeekId() {
+            return selectedWeek || getIsoWeekId(getMonday());
         }
 
         function generateWeekOptions() {
             const sel = document.getElementById('weekSelector');
-            const cw = getCurrentWeek();
-            sel.innerHTML = `<option value="current">Current Week (${cw})</option>`;
+            sel.innerHTML = '';
+            const currentMonday = getMonday();
+            for (let offset = -4; offset <= 2; offset++) {
+                const monday = new Date(currentMonday);
+                monday.setDate(currentMonday.getDate() + offset * 7);
+                const weekId = getIsoWeekId(monday);
+                const label = formatWeek(monday);
+                const option = document.createElement('option');
+                option.value = weekId;
+                option.dataset.label = label;
+                option.textContent = offset === 0 ? `Current Week (${label})` : label;
+                sel.appendChild(option);
+            }
+            selectedWeek = getIsoWeekId(currentMonday);
+            sel.value = selectedWeek;
+        }
 
-            for (let i = 1; i <= 4; i++) {
-                const d = new Date(); d.setDate(d.getDate() - i * 7);
-                const mon = new Date(d); mon.setDate(d.getDate() - (d.getDay() === 0 ? 6 : d.getDay() - 1));
-                const fri = new Date(mon); fri.setDate(mon.getDate() + 4);
-                const opts = { month: 'short', day: 'numeric' };
-                const ws = `${mon.toLocaleDateString('en-US', opts)} - ${fri.toLocaleDateString('en-US', opts)}`;
-                const o = document.createElement('option'); o.value = ws; o.textContent = ws;
-                sel.appendChild(o);
-            }
-            for (let i = 1; i <= 2; i++) {
-                const d = new Date(); d.setDate(d.getDate() + i * 7);
-                const mon = new Date(d); mon.setDate(d.getDate() - (d.getDay() === 0 ? 6 : d.getDay() - 1));
-                const fri = new Date(mon); fri.setDate(mon.getDate() + 4);
-                const opts = { month: 'short', day: 'numeric' };
-                const ws = `${mon.toLocaleDateString('en-US', opts)} - ${fri.toLocaleDateString('en-US', opts)}`;
-                const o = document.createElement('option'); o.value = ws; o.textContent = ws;
-                sel.appendChild(o);
-            }
+        function populateCourseSelector() {
+            const selector = document.getElementById('courseSelector');
+            selector.innerHTML = '';
+            COURSES.forEach(course => {
+                const option = document.createElement('option');
+                option.value = course.id;
+                option.textContent = course.label;
+                selector.appendChild(option);
+            });
+            selector.value = activeCourseId;
         }
 
         let globalDriveService = null;
 
-        function handleWeekChange() {
-            selectedWeek = document.getElementById('weekSelector').value;
-            document.getElementById('currentWeek').textContent = getSelectedWeek();
-            debugLog(`Week: ${getSelectedWeek()}`);
+        function handleCourseChange() {
+            persistCurrentWorksheet();
+            activeCourseId = document.getElementById('courseSelector').value;
+            activateCurrentWorksheet();
+            debugLog(`Course: ${getActiveCourse().label} — ${students.length} students`);
+            autoLoadCurrentSheetFromDrive();
+        }
 
-            // Auto-load from Drive if connected
-            if (globalDriveService && globalDriveService.isSignedIn) {
-                const targetFilename = `behavior-${getSelectedWeek().replace(/[^a-zA-Z0-9]/g, '-')}.json`;
-                globalDriveService._getOrCreateFolder().then(folderId => {
-                    return gapi.client.drive.files.list({
-                        q: `'${folderId}' in parents and name='${targetFilename}' and trashed=false`,
+        function handleWeekChange() {
+            persistCurrentWorksheet();
+            selectedWeek = document.getElementById('weekSelector').value;
+            activateCurrentWorksheet();
+            debugLog(`Week: ${getSelectedWeek()} — ${getActiveCourse().label}`);
+            autoLoadCurrentSheetFromDrive();
+        }
+
+        async function autoLoadCurrentSheetFromDrive() {
+            if (!globalDriveService || !globalDriveService.isSignedIn) return;
+            const requestKey = getStorageKey();
+            const requestRevision = stateRevision;
+            const filenames = [`${getFilenameBase()}.json`];
+            if (activeCourseId === PRIMARY_COURSE_ID) {
+                filenames.push(`behavior-${getSelectedWeek().replace(/[^a-zA-Z0-9]/g, '-')}.json`);
+            }
+            try {
+                const folderId = await globalDriveService._getOrCreateFolder();
+                let match = null;
+                for (const filename of filenames) {
+                    const response = await gapi.client.drive.files.list({
+                        q: `'${folderId}' in parents and name='${filename}' and trashed=false`,
                         fields: 'files(id, name)',
-                        spaces: 'drive'
+                        spaces: 'drive',
+                        orderBy: 'modifiedTime desc',
+                        pageSize: 1
                     });
-                }).then(response => {
-                    const files = response.result.files;
-                    if (files && files.length > 0) {
-                        showNotification(`Found saved data for ${getSelectedWeek()}. Loading...`, 'info');
-                        // Call loadFile which will hydrate the data
-                        globalDriveService.loadFile(files[0].id, files[0].name);
+                    match = (response.result.files || [])[0];
+                    if (match) break;
+                }
+                if (requestKey !== getStorageKey() || requestRevision !== stateRevision) return;
+                if (match) {
+                    const response = await gapi.client.drive.files.get({ fileId: match.id, alt: 'media' });
+                    const loadedData = parseDriveDataResponse(response);
+                    if (requestKey !== getStorageKey() || requestRevision !== stateRevision) return;
+                    const contextError = getLoadedDataContextError(loadedData);
+                    if (contextError) throw new Error(contextError);
+                    const applyDriveData = () => {
+                        if (requestKey !== getStorageKey() || requestRevision !== stateRevision) return;
+                        loadDataFromObject(loadedData);
+                    };
+                    if (hasCurrentWorksheetContent()) {
+                        customConfirm(
+                            'Drive Data Found',
+                            `Replace locally stored data for ${getActiveCourse().label}, ${getSelectedWeek()} with the newest Drive file?`,
+                            applyDriveData
+                        );
                     } else {
-                        // Empty the table if no data is found for the week
-                        clearAllMarks(true, true);
-                        showNotification(`New blank sheet for ${getSelectedWeek()}`, 'info');
+                        applyDriveData();
                     }
-                }).catch(err => {
-                    console.error('Auto-load check failed:', err);
-                });
-            } else {
-                showNotification(`Please Sign In to Google Drive to auto-load marks for ${getSelectedWeek()}`, 'info');
-                clearAllMarks(true, true);
+                }
+            } catch (error) {
+                console.error('Auto-load check failed:', error);
+                showError('Could not auto-load Drive data', error);
             }
         }
 
@@ -478,20 +796,25 @@
         function createTable() {
             const tableBody = document.getElementById('tableBody');
             tableBody.innerHTML = '';
-            const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'];
             students.forEach(student => {
                 const row = document.createElement('tr');
-                let cells = `<td class="student-name-cell">${student}</td>`;
-                days.forEach(day => {
+                row.dataset.student = student;
+                const nameCell = document.createElement('td');
+                nameCell.className = 'student-name-cell';
+                nameCell.textContent = getStudentDisplayName(student);
+                if (activeCourseId !== PRIMARY_COURSE_ID) nameCell.title = student;
+                row.appendChild(nameCell);
+                DAYS.forEach(day => {
                     for (let i = 1; i <= 5; i++) {
-                        cells += `<td class="clickable-cell" data-student="${student}" data-day="${day}${i}"></td>`;
+                        const cell = document.createElement('td');
+                        cell.className = 'clickable-cell';
+                        cell.dataset.student = student;
+                        cell.dataset.day = `${day}${i}`;
+                        cell.addEventListener('click', handleCellClick);
+                        row.appendChild(cell);
                     }
                 });
-                row.innerHTML = cells;
                 tableBody.appendChild(row);
-            });
-            document.querySelectorAll('.clickable-cell').forEach(cell => {
-                cell.addEventListener('click', handleCellClick);
             });
         }
 
@@ -510,7 +833,11 @@
             }
             const subj = SUBJECTS[subjectKey];
             if (subj) {
-                cell.textContent = subj.symbol;
+                if (subj.iconId) {
+                    cell.innerHTML = markIconHtml(subj.iconId);
+                } else {
+                    cell.textContent = subj.symbol;
+                }
                 cell.className = `clickable-cell has-mark ${subj.cls}`;
             }
         }
@@ -537,10 +864,17 @@
                 applyMarkToCell(cell, selectedSubject || '');
             }
             updateRowStatus(student);
+            persistCurrentWorksheet();
+        }
+
+        function getStudentRow(student) {
+            return Array.from(document.querySelectorAll('#tableBody tr'))
+                .find(row => row.dataset.student === student);
         }
 
         function updateRowStatus(student) {
-            const row = document.querySelector(`[data-student="${student}"]`).closest('tr');
+            const row = getStudentRow(student);
+            if (!row || !behaviorData[student]) return;
             const markCount = Object.values(behaviorData[student]).filter(m => m !== '').length;
             const wasWeekCompleted = row.classList.contains('week-completed');
             row.classList.remove('status-clean', 'status-warning', 'status-alert', 'status-danger');
@@ -552,6 +886,9 @@
         }
 
         function updateTableDisplay() {
+            document.querySelectorAll('#tableBody tr').forEach(row => {
+                row.classList.toggle('week-completed', weekCompleted);
+            });
             document.querySelectorAll('.clickable-cell').forEach(cell => {
                 const student = cell.dataset.student;
                 const day = cell.dataset.day;
@@ -570,8 +907,8 @@
                     weekCompleted = false;
                     document.querySelectorAll('tbody tr').forEach(row => row.classList.remove('week-completed'));
                     students.forEach(student => updateRowStatus(student));
-                    document.getElementById('finishWeek').innerHTML = '<i class="fa-solid fa-flag-checkered"></i> Finish Week';
-                    document.getElementById('finishWeek').style.background = '';
+                    updateFinishButton();
+                    persistCurrentWorksheet();
                     showSuccess('Week status reset');
                 });
                 return;
@@ -581,14 +918,13 @@
                 let clean = 0;
                 students.forEach(student => {
                     const marks = Object.values(behaviorData[student]).filter(m => m !== '');
-                    const row = document.querySelector(`[data-student="${student}"]`).closest('tr');
+                    const row = getStudentRow(student);
                     row.classList.add('week-completed');
                     updateRowStatus(student);
                     if (marks.length === 0) clean++;
                 });
-                const btn = document.getElementById('finishWeek');
-                btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Week Completed';
-                btn.style.background = '#00b894';
+                updateFinishButton();
+                persistCurrentWorksheet();
                 showSuccess(`Week completed! ${clean} students had clean records.`);
             });
         }
@@ -597,19 +933,22 @@
             if (force === true) {
                 executeClearAllMarks(silent);
             } else {
-                customConfirm('Clear All', 'Are you sure you want to clear all marks and reset week status?', () => executeClearAllMarks(silent));
+                customConfirm('Clear All', 'Are you sure you want to clear all marks, recorder names, and reset week status?', () => executeClearAllMarks(silent));
             }
         }
 
         function executeClearAllMarks(silent) {
             weekCompleted = false;
             initializeBehaviorData();
+            markedBy = createEmptyMarkedBy();
             document.querySelectorAll('.clickable-cell').forEach(cell => {
                 cell.textContent = ''; cell.className = 'clickable-cell';
             });
             document.querySelectorAll('tbody tr').forEach(row => row.className = '');
-            document.getElementById('finishWeek').innerHTML = '<i class="fa-solid fa-flag-checkered"></i> Finish Week';
-            document.getElementById('finishWeek').style.background = '';
+            renderMarkedBy();
+            updateFinishButton();
+            persistCurrentWorksheet();
+            hasUnsavedData = true;
             if (!silent) showSuccess('All marks cleared');
         }
 
@@ -621,10 +960,11 @@
                 const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(blob);
-                link.download = `behavior-${getSelectedWeek().replace(/[^a-zA-Z0-9]/g, '-')}.json`;
+                link.download = `${getFilenameBase()}.json`;
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
+                URL.revokeObjectURL(link.href);
                 const btn = document.getElementById('saveData');
                 const orig = btn.innerHTML;
                 btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Saved!';
@@ -635,20 +975,126 @@
 
         function loadData() { document.getElementById('fileInput').click(); }
 
-        function loadDataFromObject(loadedData) {
-            if (!loadedData.behaviorData || !loadedData.week) { showError('Invalid file format'); return; }
-            behaviorData = loadedData.behaviorData;
-            weekCompleted = loadedData.weekCompleted || false;
-            updateTableDisplay();
-            const finishBtn = document.getElementById('finishWeek');
-            if (weekCompleted) {
-                finishBtn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Week Completed';
-                finishBtn.style.background = '#00b894';
-            } else {
-                finishBtn.innerHTML = '<i class="fa-solid fa-flag-checkered"></i> Finish Week';
-                finishBtn.style.background = '';
+        function resolveLoadedWeekId(loadedData) {
+            if (loadedData.weekId) return loadedData.weekId;
+            const matchingOption = Array.from(document.querySelectorAll('#weekSelector option'))
+                .find(option => option.dataset.label === loadedData.week);
+            if (matchingOption) return matchingOption.value;
+
+            const startMatch = String(loadedData.week || '').match(/^([A-Za-z]{3})\s+(\d{1,2})/);
+            const savedDate = loadedData.savedDate ? new Date(loadedData.savedDate) : new Date();
+            if (!startMatch || Number.isNaN(savedDate.getTime())) return null;
+            const candidates = [-1, 0, 1].map(offset => {
+                const year = savedDate.getFullYear() + offset;
+                return new Date(`${startMatch[1]} ${startMatch[2]}, ${year} 12:00:00`);
+            }).filter(candidate => !Number.isNaN(candidate.getTime()));
+            if (!candidates.length) return null;
+            candidates.sort((a, b) => Math.abs(a - savedDate) - Math.abs(b - savedDate));
+            return getIsoWeekId(getMonday(candidates[0]));
+        }
+
+        function ensureWeekOption(weekId, label) {
+            const selector = document.getElementById('weekSelector');
+            if (Array.from(selector.options).some(option => option.value === weekId)) return;
+            const option = document.createElement('option');
+            option.value = weekId;
+            option.dataset.label = label;
+            option.textContent = label;
+            selector.appendChild(option);
+        }
+
+        function getLoadedDataErrors(loadedData, { checkWeek = true } = {}) {
+            const errors = [];
+            if (!loadedData || !loadedData.behaviorData || !loadedData.week) {
+                return ['Invalid behavior tracker file format.'];
             }
-            showSuccess(`Data loaded from ${loadedData.week}`);
+            const loadedCourseId = loadedData.courseId || PRIMARY_COURSE_ID;
+            if (loadedCourseId !== activeCourseId) {
+                errors.push(`This file belongs to ${loadedCourseId}. Select that course before loading it.`);
+            }
+            const loadedWeekId = resolveLoadedWeekId(loadedData);
+            if (!loadedWeekId) {
+                errors.push(`Could not determine a week identifier for "${loadedData.week}".`);
+            } else if (checkWeek && loadedWeekId !== getSelectedWeekId()) {
+                errors.push(`This file belongs to ${loadedData.week} (${loadedWeekId}). Select that week before loading it.`);
+            }
+
+            if (loadedData.weekCompleted !== undefined && typeof loadedData.weekCompleted !== 'boolean') {
+                errors.push('Saved weekCompleted value must be true or false.');
+            }
+            if (loadedData.markedBy !== undefined) {
+                const markedByIsObject = loadedData.markedBy
+                    && typeof loadedData.markedBy === 'object'
+                    && !Array.isArray(loadedData.markedBy);
+                if (!markedByIsObject) {
+                    errors.push('Saved markedBy value must be a weekday object.');
+                } else {
+                    Object.keys(loadedData.markedBy).filter(day => !DAYS.includes(day)).forEach(day => {
+                        errors.push(`Saved markedBy contains unknown weekday "${day}".`);
+                    });
+                    DAYS.forEach(day => {
+                        if (loadedData.markedBy[day] !== undefined && typeof loadedData.markedBy[day] !== 'string') {
+                            errors.push(`Saved markedBy.${day} must be text.`);
+                        }
+                    });
+                }
+            }
+
+            const payloadNames = Object.keys(loadedData.behaviorData || {});
+            payloadNames.filter(name => !students.includes(name)).forEach(name => {
+                errors.push(`Saved student "${name}" is not in ${getActiveCourse().label}.`);
+            });
+            students.forEach(student => {
+                const slots = loadedData.behaviorData[student];
+                if (!slots || typeof slots !== 'object' || Array.isArray(slots)) {
+                    errors.push(`Saved data is missing the complete row for "${student}".`);
+                    return;
+                }
+                Object.keys(slots).filter(slot => !SLOT_KEYS.includes(slot)).forEach(slot => {
+                    errors.push(`Saved row "${student}" contains unknown column "${slot}".`);
+                });
+                SLOT_KEYS.forEach(slot => {
+                    if (!Object.prototype.hasOwnProperty.call(slots, slot)) {
+                        errors.push(`Saved row "${student}" is missing column "${slot}".`);
+                        return;
+                    }
+                    const value = slots[slot];
+                    if (value !== '' && !SUBJECTS[value] && !LEGACY_MARKS[value]) {
+                        errors.push(`Saved row "${student}", ${slot} contains unknown subject key "${value}".`);
+                    }
+                });
+            });
+            return errors;
+        }
+
+        function getLoadedDataContextError(loadedData) {
+            return getLoadedDataErrors(loadedData)[0] || '';
+        }
+
+        function loadDataFromObject(loadedData, { switchWeek = false } = {}) {
+            const validationErrors = getLoadedDataErrors(loadedData, { checkWeek: !switchWeek });
+            if (validationErrors.length) {
+                showCustomAlert('Load Data Errors', validationErrors);
+                return false;
+            }
+            const loadedWeekId = resolveLoadedWeekId(loadedData);
+            if (switchWeek && loadedWeekId !== getSelectedWeekId()) {
+                persistCurrentWorksheet();
+                ensureWeekOption(loadedWeekId, loadedData.week);
+                selectedWeek = loadedWeekId;
+                document.getElementById('weekSelector').value = loadedWeekId;
+                activateCurrentWorksheet();
+            }
+            initializeBehaviorData(loadedData.behaviorData);
+            markedBy = { ...createEmptyMarkedBy(), ...(loadedData.markedBy || {}) };
+            weekCompleted = loadedData.weekCompleted || false;
+            persistCurrentWorksheet();
+            updateTableDisplay();
+            renderMarkedBy();
+            updateFinishButton();
+            hasUnsavedData = false;
+            showSuccess(`Data loaded for ${getActiveCourse().label}, ${loadedData.week}`);
+            return true;
         }
 
         function handleFileSelect(event) {
@@ -659,8 +1105,17 @@
                 try {
                     const parsedData = JSON.parse(e.target.result);
                     if (parsedData.behaviorData && parsedData.week) {
-                        customConfirm('Load Data', `Load data from ${parsedData.week}?\nSaved: ${new Date(parsedData.savedDate).toLocaleDateString()}\n\nThis will replace current marks.`, () => {
-                            loadDataFromObject(parsedData);
+                        const validationErrors = getLoadedDataErrors(parsedData, { checkWeek: false });
+                        if (validationErrors.length) {
+                            showCustomAlert('Load Data Errors', validationErrors);
+                            return;
+                        }
+                        const savedDate = parsedData.savedDate ? new Date(parsedData.savedDate).toLocaleDateString() : 'Unknown';
+                        const weekNotice = resolveLoadedWeekId(parsedData) !== getSelectedWeekId()
+                            ? `\nThe tracker will switch to ${parsedData.week}.`
+                            : '';
+                        customConfirm('Load Data', `Load data for ${getActiveCourse().label}, ${parsedData.week}?\nSaved: ${savedDate}${weekNotice}\n\nThis will replace that week's marks and recorder names.`, () => {
+                            loadDataFromObject(parsedData, { switchWeek: true });
                         });
                     } else { showError('Invalid file format'); }
                 } catch (error) { showError('Error parsing file', error); }
@@ -669,12 +1124,193 @@
             event.target.value = '';
         }
 
+        // ── CSV template / import ───────────────────────────────
+        function getCsvHeaders() {
+            return ['Student Name', ...DAYS.flatMap(day => {
+                const dayLabel = day.charAt(0).toUpperCase() + day.slice(1);
+                return Array.from({ length: 5 }, (_, index) => `${dayLabel} ${index + 1}`);
+            })];
+        }
+
+        function csvEscape(value) {
+            const text = String(value ?? '');
+            return /[",\r\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+        }
+
+        function downloadCsv(filename, rows) {
+            const csv = rows.map(row => row.map(csvEscape).join(',')).join('\r\n');
+            const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            URL.revokeObjectURL(url);
+        }
+
+        function downloadCsvTemplate() {
+            const headers = getCsvHeaders();
+            const legend = [`# Valid subject keys: ${Object.keys(SUBJECTS).join(' | ')}`, ...SLOT_KEYS.map(() => '')];
+            const rows = [
+                headers,
+                legend,
+                ...students.map(student => [student, ...SLOT_KEYS.map(() => '')])
+            ];
+            downloadCsv(`${getFilenameBase()}-template.csv`, rows);
+            showSuccess(`CSV template downloaded for ${getActiveCourse().label}`);
+        }
+
+        function parseCsv(text) {
+            const rows = [];
+            let row = [];
+            let cell = '';
+            let inQuotes = false;
+            let closedQuote = false;
+            let malformedQuote = false;
+            const source = String(text || '').replace(/^\uFEFF/, '');
+
+            for (let index = 0; index < source.length; index++) {
+                const character = source[index];
+                const next = source[index + 1];
+                if (inQuotes) {
+                    if (character === '"' && next === '"') {
+                        cell += '"';
+                        index++;
+                    } else if (character === '"') {
+                        inQuotes = false;
+                        closedQuote = true;
+                    } else {
+                        cell += character;
+                    }
+                } else if (character === '"') {
+                    if (cell === '' && !closedQuote) {
+                        inQuotes = true;
+                    } else {
+                        malformedQuote = true;
+                        cell += character;
+                    }
+                } else if (character === ',') {
+                    row.push(cell);
+                    cell = '';
+                    closedQuote = false;
+                } else if (character === '\n' || character === '\r') {
+                    if (character === '\r' && next === '\n') index++;
+                    row.push(cell);
+                    if (row.some(value => String(value).trim() !== '')) rows.push(row);
+                    row = [];
+                    cell = '';
+                    closedQuote = false;
+                } else {
+                    if (closedQuote && !/\s/.test(character)) malformedQuote = true;
+                    cell += character;
+                }
+            }
+            row.push(cell);
+            if (row.some(value => String(value).trim() !== '')) rows.push(row);
+            return { rows, unclosedQuote: inQuotes, malformedQuote };
+        }
+
+        function normalizeRosterName(value) {
+            return String(value || '').trim().toLocaleUpperCase();
+        }
+
+        function validateCsvImport(text) {
+            const parsed = parseCsv(text);
+            const errors = [];
+            const headers = getCsvHeaders();
+            if (parsed.unclosedQuote) errors.push('The CSV contains an unclosed quoted field.');
+            if (parsed.malformedQuote) errors.push('The CSV contains a quote in an invalid position.');
+            if (!parsed.rows.length) return { errors: ['The CSV file is empty.'] };
+
+            const actualHeaders = parsed.rows[0].map(value => String(value).trim());
+            if (actualHeaders.length !== headers.length) {
+                errors.push(`Header row has ${actualHeaders.length} columns; expected ${headers.length}.`);
+            }
+            headers.forEach((header, index) => {
+                if ((actualHeaders[index] || '') !== header) {
+                    errors.push(`Header column ${index + 1} must be "${header}", not "${actualHeaders[index] || '(blank)'}".`);
+                }
+            });
+
+            const rosterLookup = new Map(students.map(student => [normalizeRosterName(student), student]));
+            const seenStudents = new Set();
+            const importedData = createEmptyBehaviorData();
+            let markCount = 0;
+
+            parsed.rows.slice(1).forEach((row, rowIndex) => {
+                const csvRowNumber = rowIndex + 2;
+                const rawName = String(row[0] || '').trim();
+                if (rawName.startsWith('#')) return;
+                if (row.length !== headers.length) {
+                    errors.push(`Row ${csvRowNumber} has ${row.length} columns; expected ${headers.length}.`);
+                }
+                const canonicalStudent = rosterLookup.get(normalizeRosterName(rawName));
+                if (!canonicalStudent) {
+                    errors.push(`Row ${csvRowNumber}: student "${rawName || '(blank)'}" is not in ${getActiveCourse().label}.`);
+                } else if (seenStudents.has(canonicalStudent)) {
+                    errors.push(`Row ${csvRowNumber}: student "${rawName}" appears more than once.`);
+                } else {
+                    seenStudents.add(canonicalStudent);
+                }
+
+                SLOT_KEYS.forEach((slot, slotIndex) => {
+                    const rawValue = String(row[slotIndex + 1] || '').trim();
+                    if (!rawValue) return;
+                    if (!Object.prototype.hasOwnProperty.call(SUBJECTS, rawValue)) {
+                        errors.push(`Row ${csvRowNumber}, ${headers[slotIndex + 1]}: "${rawValue}" is not a valid subject key.`);
+                    } else if (canonicalStudent) {
+                        importedData[canonicalStudent][slot] = rawValue;
+                        markCount++;
+                    }
+                });
+            });
+
+            students.forEach(student => {
+                if (!seenStudents.has(student)) {
+                    errors.push(`Missing roster row for "${student}".`);
+                }
+            });
+
+            return { errors, behaviorData: importedData, studentCount: seenStudents.size, markCount };
+        }
+
+        function handleCsvFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = () => {
+                const result = validateCsvImport(reader.result);
+                if (result.errors.length) {
+                    showCustomAlert('CSV Import Errors', result.errors);
+                    return;
+                }
+                customConfirm(
+                    'Import CSV',
+                    `Import ${result.markCount} marks for ${result.studentCount} students into ${getActiveCourse().label}, ${getSelectedWeek()}?\n\nThis will replace every existing mark for this course and week. Recorder names will be kept.`,
+                    () => {
+                        initializeBehaviorData(result.behaviorData);
+                        weekCompleted = false;
+                        hasUnsavedData = true;
+                        persistCurrentWorksheet();
+                        updateTableDisplay();
+                        updateFinishButton();
+                        showSuccess(`Imported ${result.markCount} marks from CSV`);
+                    }
+                );
+            };
+            reader.onerror = () => showError('Could not read the CSV file');
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
         // ── Initialize ──────────────────────────────────────────
         function initialize() {
+            loadWorksheetStore();
             generateWeekOptions();
-            document.getElementById('currentWeek').textContent = getSelectedWeek();
-            initializeBehaviorData();
-            createTable();
+            populateCourseSelector();
+            activateCurrentWorksheet();
             setupSubjectPills();
             debugLog('Ready — select a subject above, then click cells to mark');
         }
@@ -684,8 +1320,19 @@
             document.getElementById('clearAll').addEventListener('click', clearAllMarks);
             document.getElementById('saveData').addEventListener('click', saveData);
             document.getElementById('loadData').addEventListener('click', loadData);
+            document.getElementById('importCsv').addEventListener('click', () => document.getElementById('csvFileInput').click());
+            document.getElementById('downloadCsvTemplate').addEventListener('click', downloadCsvTemplate);
+            document.getElementById('courseSelector').addEventListener('change', handleCourseChange);
             document.getElementById('weekSelector').addEventListener('change', handleWeekChange);
             document.getElementById('fileInput').addEventListener('change', handleFileSelect);
+            document.getElementById('csvFileInput').addEventListener('change', handleCsvFileSelect);
+            document.querySelectorAll('.marked-by-input').forEach(input => {
+                input.addEventListener('input', () => {
+                    markedBy[input.dataset.day] = input.value;
+                    hasUnsavedData = true;
+                    persistCurrentWorksheet();
+                });
+            });
 
             let isNavigatingAway = false;
             let pendingNavigationUrl = null;
@@ -723,18 +1370,36 @@
                 folderName: 'ESL - Behavior Tracker',
                 fileExtension: '.json',
                 onSave: () => getBuildData(),
-                onLoad: (data) => loadDataFromObject(data),
+                onLoad: (data) => {
+                    const validationErrors = getLoadedDataErrors(data, { checkWeek: false });
+                    if (validationErrors.length) throw new Error(validationErrors.join(' '));
+                    loadDataFromObject(data, { switchWeek: true });
+                },
                 onNotify: (msg, type) => showNotification(msg, type === 'success' ? 'success' : type === 'error' ? 'error' : 'info')
             });
             globalDriveService = driveService;
+            driveService.listFiles = async function () {
+                if (!this.isSignedIn) return [];
+                try {
+                    const folderId = await this._getOrCreateFolder();
+                    const files = (await listAllDriveFiles(folderId))
+                        .filter(file => fileMatchesCourseName(file.name));
+                    this._renderFileList(files);
+                    return files;
+                } catch (error) {
+                    console.error('Error listing course files:', error);
+                    this.onNotify('Failed to list course files: ' + error.message, 'error');
+                    return [];
+                }
+            };
 
             document.getElementById('openDrive').addEventListener('click', () => {
                 driveService.openModal();
-                // Pre-fill filename with current week
+                // Pre-fill filename with the active course/week compound key.
                 setTimeout(() => {
                     const inp = document.getElementById('gds-filename');
-                    if (inp && !inp.value) {
-                        inp.value = `behavior-${getSelectedWeek().replace(/[^a-zA-Z0-9]/g, '-')}`;
+                    if (inp) {
+                        inp.value = getFilenameBase();
                     }
                 }, 400);
             });
@@ -765,6 +1430,10 @@
             let driveFilesAvailable = [];
             let currentPrizeReport = null; // Store final calculated report to save
 
+            function getDataCourseId(data) {
+                return data && data.courseId ? data.courseId : PRIMARY_COURSE_ID;
+            }
+
             // Second Google Drive Service instance just for saving prize reports
             const prizeReportDriveService = new GoogleDriveService({
                 folderName: 'ESL - Prize Reports',
@@ -791,21 +1460,39 @@
 
                 loadedPrizeData = [];
                 let filesProcessed = 0;
+                const fileErrors = [];
 
                 Array.from(files).forEach(file => {
                     const reader = new FileReader();
                     reader.onload = (event) => {
                         try {
                             const data = JSON.parse(event.target.result);
-                            if (data.behaviorData && data.week) {
+                            if (!data.behaviorData || !data.week) {
+                                fileErrors.push(`${file.name}: not a behavior tracker file.`);
+                            } else if (getDataCourseId(data) !== activeCourseId) {
+                                fileErrors.push(`${file.name}: belongs to ${getDataCourseId(data)}, not ${activeCourseId}.`);
+                            } else {
                                 loadedPrizeData.push(data);
                             }
                         } catch (err) {
-                            console.error('Error parsing prize file:', err);
+                            fileErrors.push(`${file.name}: invalid JSON.`);
                         }
                         filesProcessed++;
                         if (filesProcessed === files.length) {
-                            showPrizeSelectedFiles();
+                            if (fileErrors.length) {
+                                loadedPrizeData = [];
+                                showCustomAlert('Prize File Errors', fileErrors);
+                            } else {
+                                showPrizeSelectedFiles();
+                            }
+                        }
+                    };
+                    reader.onerror = () => {
+                        fileErrors.push(`${file.name}: could not be read.`);
+                        filesProcessed++;
+                        if (filesProcessed === files.length) {
+                            loadedPrizeData = [];
+                            showCustomAlert('Prize File Errors', fileErrors);
                         }
                     };
                     reader.readAsText(file);
@@ -832,20 +1519,10 @@
 
                 prizeDriveList.innerHTML = '<div class="gds-empty">Loading files...</div>';
 
-                // Just use driveService to list files from 'ESL - Behavior Tracker'
                 try {
-                    const files = await driveService.listFiles(); // Note: we need to temporarily hijack or manually call but driveService.listFiles() renders to main modal.
-                    // Actually, driveService.listFiles() returns the files.
-                    // Let's manually fetch them so we don't mess up its UI.
                     const folderId = await driveService._getOrCreateFolder();
-                    const response = await gapi.client.drive.files.list({
-                        q: `'${folderId}' in parents and trashed=false`,
-                        fields: 'files(id, name, modifiedTime)',
-                        orderBy: 'modifiedTime desc',
-                        pageSize: 50
-                    });
-
-                    driveFilesAvailable = response.result.files || [];
+                    driveFilesAvailable = (await listAllDriveFiles(folderId))
+                        .filter(file => fileMatchesCourseName(file.name));
                     renderPrizeDriveList();
                 } catch (err) {
                     console.error(err);
@@ -895,13 +1572,22 @@
 
                 loadedPrizeData = [];
                 let fetches = [];
+                const downloadErrors = [];
                 checkedNodes.forEach(node => {
                     fetches.push(gapi.client.drive.files.get({ fileId: node.value, alt: 'media' })
                         .then(res => {
-                            const data = typeof res.result === 'string' ? JSON.parse(res.result) : res.result;
-                            if (data.behaviorData) loadedPrizeData.push(data);
+                            const rawData = res.body && typeof res.body === 'string' ? res.body : res.result;
+                            const data = typeof rawData === 'string' ? JSON.parse(rawData) : rawData;
+                            const filename = node.dataset.name || 'Selected file';
+                            if (!data || !data.behaviorData || !data.week) {
+                                downloadErrors.push(`${filename}: not a behavior tracker file.`);
+                            } else if (getDataCourseId(data) !== activeCourseId) {
+                                downloadErrors.push(`${filename}: belongs to ${getDataCourseId(data)}, not ${activeCourseId}.`);
+                            } else {
+                                loadedPrizeData.push(data);
+                            }
                         })
-                        .catch(err => console.error('Failed to parse drive prize file', err))
+                        .catch(() => downloadErrors.push(`${node.dataset.name || 'Selected file'}: could not be loaded.`))
                     );
                 });
 
@@ -910,12 +1596,30 @@
                 prizeDriveConfirmBtn.innerHTML = 'Confirm Selection';
                 prizeDriveSection.style.display = 'none';
                 document.querySelector('.prize-input-section').style.display = 'block';
-                showPrizeSelectedFiles();
+                if (downloadErrors.length) {
+                    loadedPrizeData = [];
+                    showCustomAlert('Prize File Errors', downloadErrors);
+                } else {
+                    showPrizeSelectedFiles();
+                }
             });
 
             function showPrizeSelectedFiles() {
+                const seenWeeks = new Set();
+                const duplicateWeeks = [];
+                loadedPrizeData.forEach(data => {
+                    const identity = resolveLoadedWeekId(data) || String(data.week).trim().toLocaleLowerCase();
+                    if (seenWeeks.has(identity)) duplicateWeeks.push(data.week);
+                    seenWeeks.add(identity);
+                });
+                if (duplicateWeeks.length) {
+                    loadedPrizeData = [];
+                    prizeSelectedFiles.style.display = 'none';
+                    showCustomAlert('Prize File Errors', duplicateWeeks.map(week => `Week "${week}" was selected more than once.`));
+                    return;
+                }
                 prizeSelectedFiles.style.display = 'block';
-                prizeFilesList.innerHTML = loadedPrizeData.map(d => `<li><i class="fa-solid fa-check" style="color:#2ecc71;"></i> Week: ${d.week}</li>`).join('');
+                prizeFilesList.innerHTML = loadedPrizeData.map(d => `<li><i class="fa-solid fa-check" style="color:#2ecc71;"></i> ${escapeHtml(getActiveCourse().label)} — Week: ${escapeHtml(d.week)}</li>`).join('');
             }
 
             function resetPrizeModal() {
@@ -958,6 +1662,8 @@
                 // Prepare report data for saving
                 currentPrizeReport = {
                     reportDate: new Date().toISOString(),
+                    courseId: activeCourseId,
+                    courseLabel: getActiveCourse().label,
                     includedWeeks: loadedPrizeData.map(d => d.week).join(', '),
                     perfect: perfect,
                     eligible: eligible,
@@ -971,21 +1677,21 @@
 
                 prizePerfectList.innerHTML = perfect.map((w, index) => `
                     <div class="prize-student-card perfect-card" style="animation-delay: ${index * 0.05}s">
-                        <span class="prize-student-name">${w.name}</span>
+                        <span class="prize-student-name" title="${escapeHtml(w.name)}">${escapeHtml(getStudentDisplayName(w.name))}</span>
                         <span class="prize-student-marks marks-perfect">${w.marks} marks</span>
                     </div>
                 `).join('');
 
                 prizeEligibleList.innerHTML = eligible.map((w, index) => `
                     <div class="prize-student-card eligible-card" style="animation-delay: ${index * 0.05}s">
-                        <span class="prize-student-name">${w.name}</span>
+                        <span class="prize-student-name" title="${escapeHtml(w.name)}">${escapeHtml(getStudentDisplayName(w.name))}</span>
                         <span class="prize-student-marks marks-good">${w.marks} marks</span>
                     </div>
                 `).join('');
 
                 prizeLosersList.innerHTML = losers.map((l, index) => `
                     <div class="prize-student-card" style="animation-delay: ${index * 0.05}s">
-                        <span class="prize-student-name">${l.name}</span>
+                        <span class="prize-student-name" title="${escapeHtml(l.name)}">${escapeHtml(getStudentDisplayName(l.name))}</span>
                         <span class="prize-student-marks marks-bad">${l.marks} marks</span>
                     </div>
                 `).join('');
@@ -1022,7 +1728,7 @@
                     return;
                 }
 
-                const filename = `prize-report-${new Date().toISOString().split('T')[0]}`;
+                const filename = `prize-report-${activeCourseId}-${new Date().toISOString().split('T')[0]}`;
                 prizeReportDriveService.modalEl = prizeModal; // Trick the service so it doesn't open its own HTML modal if it has to
                 prizeReportDriveService.saveFile(filename);
             });

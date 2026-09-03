@@ -124,6 +124,24 @@ body.behavior-tracker-page {
     background: var(--indigo-velvet);
 }
 
+.btn-csv {
+    background: #00897b;
+    color: white;
+}
+
+.btn-csv:hover {
+    background: #00796b;
+}
+
+.btn-csv-template {
+    background: #546e7a;
+    color: white;
+}
+
+.btn-csv-template:hover {
+    background: #455a64;
+}
+
 .btn-sync {
     background: #8e44ad;
     color: white;
@@ -147,6 +165,10 @@ body.behavior-tracker-page {
     cursor: pointer;
     min-width: 150px;
     transition: all 0.3s ease;
+}
+
+.course-selector {
+    min-width: 105px;
 }
 
 .week-selector:hover {
@@ -213,6 +235,46 @@ th:after {
     right: 0;
     height: 3px;
     background: rgba(255, 255, 255, 0.3);
+}
+
+.weekday-header {
+    min-width: 165px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 7px;
+}
+
+.weekday-header>span {
+    line-height: 1;
+}
+
+.marked-by-input {
+    width: 100%;
+    min-width: 0;
+    padding: 6px 8px;
+    border: 1px solid rgba(255, 255, 255, 0.42);
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.14);
+    color: white;
+    font: inherit;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0;
+    text-align: center;
+    text-transform: none;
+    outline: none;
+    transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.marked-by-input::placeholder {
+    color: rgba(255, 255, 255, 0.68);
+}
+
+.marked-by-input:focus {
+    background: rgba(255, 255, 255, 0.23);
+    border-color: white;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.16);
 }
 
 .student-name {
@@ -408,6 +470,15 @@ tbody tr:nth-child(even) .student-name-cell {
         justify-content: center;
     }
 
+    .week-selector-group {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .weekday-header {
+        min-width: 145px;
+    }
+
     .table-container {
         padding: 15px;
     }
@@ -416,6 +487,27 @@ tbody tr:nth-child(even) .student-name-cell {
         padding: 10px 15px;
         font-size: 12px;
     }
+}
+
+.validation-summary {
+    max-height: 320px;
+    overflow-y: auto;
+    text-align: left;
+    font-size: 14px;
+}
+
+.validation-summary p {
+    margin-bottom: 10px;
+    font-weight: 700;
+}
+
+.validation-summary ul {
+    margin: 0;
+    padding-left: 22px;
+}
+
+.validation-summary li {
+    margin-bottom: 6px;
 }
 
 .week-info {
@@ -491,6 +583,34 @@ tbody tr:nth-child(even) .student-name-cell {
     }
 }
 
+/* Hidden sprite for <use href="#mark-icon-*"> — do not use display:none (breaks references) */
+.mark-icon-sprite {
+    position: absolute;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.mark-icon {
+    width: 22px;
+    height: 22px;
+    display: block;
+    flex-shrink: 0;
+    overflow: visible;
+}
+
+.clickable-cell .mark-icon {
+    width: 22px;
+    height: 22px;
+    margin: 0 auto;
+}
+
+.pill-symbol .mark-icon {
+    width: 16px;
+    height: 16px;
+}
+
 /* ===== SUBJECT MARK COLOURS ===== */
 .mark-english {
     color: #e74c3c;
@@ -528,7 +648,6 @@ tbody tr:nth-child(even) .student-name-cell {
 
 .mark-ethics {
     color: #c0392b;
-    font-style: italic;
     font-size: 22px;
 }
 
@@ -672,6 +791,12 @@ tbody tr:nth-child(even) .student-name-cell {
 .pill-symbol {
     font-size: 16px;
     line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
 }
 
 /* ===== STATUS LEGEND ROW ===== */
@@ -733,6 +858,15 @@ body.dark-mode .tracker-container {
 
 body.dark-mode .tracker-header {
     background: var(--indigo-velvet);
+}
+
+body.dark-mode #customAlertModal .modal-card {
+    background: #1e1e1e !important;
+}
+
+body.dark-mode #customAlertModal #customAlertTitle,
+body.dark-mode #customAlertModal #customAlertMessage {
+    color: #f5f5f5 !important;
 }
 
 body.dark-mode .subject-selector-bar {
