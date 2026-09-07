@@ -1,0 +1,200 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e3]:
+      - generic [ref=e4]:
+        - link " Tools" [ref=e5] [cursor=pointer]:
+          - /url: tools.html
+          - generic [ref=e6]: 
+          - text: Tools
+        - heading " Untitled Test" [level=1] [ref=e7]:
+          - generic [ref=e8]: 
+          - generic [ref=e9]: Untitled Test
+        - generic [ref=e10]:
+          - button " My Tests " [ref=e11]:
+            - generic [ref=e12]: 
+            - text: My Tests
+            - generic [ref=e13]: 
+          - text:    +
+      - generic [ref=e14]:
+        - button " Settings" [ref=e15] [cursor=pointer]:
+          - generic [ref=e16]: 
+          - generic [ref=e17]: Settings
+        - generic "Import quiz from JSON file" [ref=e18] [cursor=pointer]:
+          - generic [ref=e19]: 
+          - generic [ref=e20]: Import
+        - generic [ref=e21]:
+          - button " Export " [ref=e22] [cursor=pointer]:
+            - generic [ref=e23]: 
+            - generic [ref=e24]: Export
+            - generic [ref=e25]: 
+          - text:  
+        - button " Save" [ref=e26] [cursor=pointer]:
+          - generic [ref=e27]: 
+          - generic [ref=e28]: Save
+        - button " Drive" [ref=e29] [cursor=pointer]:
+          - generic [ref=e30]: 
+          - generic [ref=e31]: Drive
+        - button " Responses" [ref=e32] [cursor=pointer]:
+          - generic [ref=e33]: 
+          - generic [ref=e34]: Responses
+        - button " Share" [ref=e35] [cursor=pointer]:
+          - generic [ref=e36]: 
+          - generic [ref=e37]: Share
+    - generic [ref=e38]:
+      - generic [ref=e39]:
+        - heading "Questions" [level=3] [ref=e40]
+        - button "+" [ref=e41] [cursor=pointer]
+      - generic [ref=e44]:
+        - generic [ref=e45]: 
+        - text: Click + to add your first question
+    - generic [ref=e47]:
+      - generic [ref=e48]: 
+      - heading "No Question Selected" [level=2] [ref=e49]
+      - paragraph [ref=e50]: Add a question using the + button in the sidebar, or click an existing question to edit it.
+    - generic [ref=e51]:
+      - heading " Preview" [level=3] [ref=e53]:
+        - generic [ref=e54]: 
+        - text: Preview
+      - generic [ref=e56]:
+        - generic [ref=e57]: 
+        - paragraph [ref=e58]: Select a question to see a live preview
+  - generic:
+    - generic:
+      - generic:
+        - heading " Test Settings" [level=2]:
+          - generic: 
+          - text: Test Settings
+        - button ""
+      - generic:
+        - generic:
+          - heading "General" [level=4]
+          - generic:
+            - generic: Test Title
+            - textbox "Unit 3 Vocabulary Test"
+          - generic:
+            - generic: Description (optional)
+            - textbox "Instructions or description for students..."
+        - generic:
+          - heading "Behavior" [level=4]
+          - generic:
+            - generic: Time Limit (minutes, 0 = no limit)
+            - spinbutton "0"
+          - generic:
+            - generic: Shuffle questions
+            - generic:
+              - checkbox
+          - generic:
+            - generic: Shuffle answer options
+            - generic:
+              - checkbox
+          - generic:
+            - generic: Show results to students
+            - generic:
+              - checkbox
+          - generic:
+            - generic: Allow retake
+            - generic:
+              - checkbox
+        - generic:
+          - heading "Student Identification" [level=4]
+          - generic:
+            - generic: Collect student name
+            - generic:
+              - checkbox
+          - generic:
+            - generic: Collect course group
+            - generic:
+              - checkbox
+          - generic:
+            - generic: Course Groups
+            - generic:
+              - textbox "Add group (e.g. 6A)"
+              - button "Add"
+          - generic:
+            - generic: Allow pairs/trios (multiple students per test)
+            - generic:
+              - checkbox
+        - generic:
+          - heading "Anti-Cheating" [level=4]
+          - generic:
+            - generic: Full-screen mode (prevents tab switching)
+            - generic:
+              - checkbox
+        - generic:
+          - heading "Appearance" [level=4]
+          - generic:
+            - generic: Allow students to switch themes
+            - generic:
+              - checkbox
+        - generic:
+          - heading "Results & Grading" [level=4]
+          - generic:
+            - generic: Grade Drag & Drop per item (Partial Grading)
+            - generic:
+              - checkbox
+          - generic:
+            - generic: Allow students to review answers after test
+            - generic:
+              - checkbox
+      - generic:
+        - button " Save Settings":
+          - generic: 
+          - text: Save Settings
+  - generic:
+    - generic:
+      - generic:
+        - generic:
+          - heading " Student Responses" [level=2]:
+            - generic: 
+            - text: Student Responses
+        - generic:
+          - generic "Automatically save every new response to your Google Drive":
+            - generic: Auto-sync Drive
+            - generic:
+              - checkbox [checked]
+          - button " Clear Responses":
+            - generic: 
+            - text: Clear Responses
+          - button " Upload JSON":
+            - generic: 
+            - text: Upload JSON
+          - button " Export CSV":
+            - generic: 
+            - text: Export CSV
+          - button ""
+      - generic:
+        - generic:
+          - generic:
+            - generic:
+              - generic: 
+              - text: 0 Responses
+        - generic:
+          - generic:
+            - generic: "0"
+            - generic: Responses
+          - generic:
+            - generic: —
+            - generic: Avg Score
+          - generic:
+            - generic: —
+            - generic: Avg Time
+          - generic:
+            - generic: "0"
+            - generic: Total Violations
+        - generic:
+          - generic:
+            - generic: 
+            - paragraph: No responses yet. Share the test with your students to start collecting responses.
+  - generic:
+    - generic:
+      - generic:
+        - heading " Share Test" [level=2]:
+          - generic: 
+          - text: Share Test
+        - button ""
+      - generic:
+        - generic:
+          - paragraph: Publishing test...
+        - text:  
+  - text: 
+  - button "" [ref=e59] [cursor=pointer]

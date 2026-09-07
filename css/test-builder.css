@@ -2512,18 +2512,38 @@ body.dark-mode .ts-new-wrap {
 }
 
 .resp-code-select {
-    background: rgba(255, 255, 255, 0.12);
-    color: white;
-    border: 1px solid rgba(255, 255, 255, 0.25);
+    background: #fff;
+    color: #1f2430;
+    border: 1px solid #c5c9d4;
     border-radius: 8px;
-    padding: 5px 10px;
+    padding: 6px 10px;
     font-size: 0.85rem;
     font-family: inherit;
     cursor: pointer;
-    max-width: 280px;
+    min-width: 220px;
+    max-width: 320px;
+    color-scheme: light;
+}
+
+.resp-code-select:hover,
+.resp-code-select:focus {
+    border-color: var(--medium-slate-blue);
+    outline: none;
 }
 
 .resp-code-select option {
+    background: #fff;
+    color: #1f2430;
+}
+
+body.dark-mode .resp-code-select {
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.25);
+    color-scheme: dark;
+}
+
+body.dark-mode .resp-code-select option {
     background: #2a2a3e;
     color: #eee;
 }
