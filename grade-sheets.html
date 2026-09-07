@@ -18,7 +18,7 @@
             href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
         />
         <link rel="stylesheet" href="css/styles.css" />
-        <link rel="stylesheet" href="css/grade-sheets.css" />
+        <link rel="stylesheet" href="css/grade-sheets.css?v=col-copy" />
     </head>
 
     <body>
@@ -1319,11 +1319,29 @@
             ESL Learning Platform © 2025 | Made for Teachers, by Teachers
         </div>
 
+        <div
+            id="gs-col-actions-menu"
+            class="gs-col-menu"
+            hidden
+            role="menu"
+            aria-label="Column actions"
+        >
+            <button type="button" class="gs-col-menu-item" data-action="copy" role="menuitem">
+                <i class="fa-solid fa-copy"></i> Copy for Excel
+            </button>
+            <button type="button" class="gs-col-menu-item" data-action="hide" role="menuitem">
+                <i class="fa-solid fa-eye-slash"></i> Hide column
+            </button>
+            <button type="button" class="gs-col-menu-item gs-col-menu-danger" data-action="clear" role="menuitem">
+                <i class="fa-solid fa-eraser"></i> Clear grades
+            </button>
+        </div>
+
         <script src="js/student-groups-data.js"></script>
         <script src="js/darkmode.js"></script>
         <script src="https://accounts.google.com/gsi/client" async defer></script>
         <script src="https://apis.google.com/js/api.js" async defer></script>
         <script src="js/google-drive-service.js"></script>
-        <script src="js/grade-sheets.js"></script>
+        <script src="js/grade-sheets.js?v=col-copy"></script>
     </body>
 </html>

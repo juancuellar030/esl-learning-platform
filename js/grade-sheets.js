@@ -889,6 +889,7 @@
   //              GRID RENDERING (Phase 2 + 3)
   // ══════════════════════════════════════════════════════
   function renderGrid() {
+    closeColumnMenu();
     const sheet = getSheet();
     if (!sheet) return;
     const students = getStudentNames(sheet.group);
@@ -969,8 +970,7 @@
                     <span class="gs-col-num">${colNum}</span>
                     <div class="gs-col-max gs-act-settings-trigger${hasCustomScale ? " gs-has-custom-scale" : ""}" data-id="${act.id}" title="${scaleTitle}">${scaleLabel} <i class="fa-solid fa-gear gs-act-settings-icon"></i></div>
                     <button class="gs-col-delete" data-id="${act.id}" title="Remove column"><i class="fa-solid fa-xmark"></i></button>
-                    <button class="gs-col-hide" data-id="${act.id}" title="Hide column"><i class="fa-solid fa-eye-slash"></i></button>
-                    <button class="gs-col-clear" data-id="${act.id}" title="Clear grades in this column"><i class="fa-solid fa-eraser"></i></button>`;
+                    <button type="button" class="gs-col-menu-btn" data-id="${act.id}" title="Column actions" aria-haspopup="true" aria-expanded="false"><i class="fa-solid fa-ellipsis-vertical"></i></button>`;
           th.querySelector(".gs-act-settings-trigger").addEventListener(
             "click",
             (e) => openActivitySettings(e, act.id),
@@ -1088,18 +1088,14 @@
         removeActivity(btn.dataset.id);
       }),
     );
-    $thead.querySelectorAll(".gs-col-hide").forEach((btn) =>
+    $thead.querySelectorAll(".gs-col-menu-btn").forEach((btn) => {
+      btn.addEventListener("mousedown", (e) => e.stopPropagation());
       btn.addEventListener("click", (e) => {
+        e.preventDefault();
         e.stopPropagation();
-        toggleHideActivity(btn.dataset.id, true);
-      }),
-    );
-    $thead.querySelectorAll(".gs-col-clear").forEach((btn) =>
-      btn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        clearColumnGrades(btn.dataset.id);
-      }),
-    );
+        toggleColumnMenu(btn);
+      });
+    });
     restorePendingGradeFocus();
   }
 
@@ -1463,6 +1459,104 @@
     }
   }
 
+  function getColumnMenu() {
+    return $("gs-col-actions-menu");
+  }
+
+  function closeColumnMenu() {
+    const menu = getColumnMenu();
+    if (menu) {
+      menu.hidden = true;
+      delete menu.dataset.actId;
+    }
+    if ($thead) {
+      $thead
+        .querySelectorAll(".gs-act-th.gs-col-menu-open")
+        .forEach((th) => th.classList.remove("gs-col-menu-open"));
+      $thead
+        .querySelectorAll(".gs-col-menu-btn")
+        .forEach((btn) => btn.setAttribute("aria-expanded", "false"));
+    }
+  }
+
+  function toggleColumnMenu(btn) {
+    const menu = getColumnMenu();
+    if (!menu) return;
+    const actId = btn.dataset.id;
+    const alreadyOpen = !menu.hidden && menu.dataset.actId === actId;
+    closeColumnMenu();
+    if (alreadyOpen) return;
+
+    menu.dataset.actId = actId;
+    menu.hidden = false;
+    btn.setAttribute("aria-expanded", "true");
+    btn.closest(".gs-act-th")?.classList.add("gs-col-menu-open");
+
+    const rect = btn.getBoundingClientRect();
+    const menuWidth = Math.max(menu.offsetWidth, 176);
+    let left = rect.right - menuWidth;
+    if (left < 8) left = 8;
+    if (left + menuWidth > window.innerWidth - 8) {
+      left = window.innerWidth - menuWidth - 8;
+    }
+    let top = rect.bottom + 4;
+    if (top + menu.offsetHeight > window.innerHeight - 8) {
+      top = Math.max(8, rect.top - menu.offsetHeight - 4);
+    }
+    menu.style.left = `${left}px`;
+    menu.style.top = `${top}px`;
+  }
+
+  function getColumnDisplayValues(actId) {
+    return Array.from($tbody.querySelectorAll(".gs-grade-input"))
+      .filter((inp) => inp.dataset.actId === actId)
+      .map((inp) => String(inp.value ?? "").trim());
+  }
+
+  async function copyTextToClipboard(text) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.setAttribute("readonly", "");
+      ta.style.position = "fixed";
+      ta.style.left = "-9999px";
+      document.body.appendChild(ta);
+      ta.select();
+      const ok = document.execCommand("copy");
+      ta.remove();
+      return ok;
+    }
+  }
+
+  async function copyColumnForExcel(actId) {
+    const values = getColumnDisplayValues(actId);
+    if (!values.length) {
+      showToast("No grades to copy in this column.", "error");
+      return;
+    }
+    const text = values.join("\r\n");
+    const ok = await copyTextToClipboard(text);
+    if (ok) {
+      showToast(
+        `Copied ${values.length} value${values.length === 1 ? "" : "s"} for Excel.`,
+        "success",
+      );
+    } else {
+      showToast("Could not copy this column. Check clipboard permissions.", "error");
+    }
+  }
+
+  function onColumnMenuAction(action, actId) {
+    closeColumnMenu();
+    if (!actId) return;
+    if (action === "copy") copyColumnForExcel(actId);
+    if (action === "hide") toggleHideActivity(actId, true);
+    if (action === "clear") clearColumnGrades(actId);
+  }
+
   function openActivitySettings(e, actId) {
     e.stopPropagation();
     editingActId = actId;
@@ -1610,6 +1704,10 @@
   //              DRAG-TO-REORDER COLUMNS
   // ══════════════════════════════════════════════════════
   function onDragStart(e) {
+    if (e.target.closest("button, .gs-col-menu, .gs-act-settings-trigger")) {
+      e.preventDefault();
+      return;
+    }
     dragSrcColId = e.currentTarget.dataset.id;
     e.currentTarget.style.opacity = "0.5";
     e.dataTransfer.effectAllowed = "move";
@@ -2643,6 +2741,22 @@
         btn.addEventListener("click", () => addActivity(btn.dataset.cat)),
       );
 
+    const colMenu = getColumnMenu();
+    if (colMenu) {
+      colMenu.addEventListener("click", (e) => {
+        const item = e.target.closest(".gs-col-menu-item");
+        if (!item) return;
+        e.stopPropagation();
+        onColumnMenuAction(item.dataset.action, colMenu.dataset.actId);
+      });
+    }
+    document.addEventListener("click", (e) => {
+      if (e.target.closest(".gs-col-menu, .gs-col-menu-btn")) return;
+      closeColumnMenu();
+    });
+    window.addEventListener("resize", closeColumnMenu);
+    window.addEventListener("scroll", closeColumnMenu, true);
+
     // Phase 6 & 7 - Buttons
     if ($modeScoresBtn)
       $modeScoresBtn.addEventListener("click", () => setViewMode("scores"));
@@ -2781,6 +2895,7 @@
     // Keyboard
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") {
+        closeColumnMenu();
         if ($modalOverlay.style.display !== "none") closeNewSheetModal();
         if ($deleteOverlay.style.display !== "none") closeDeleteConfirm();
         if ($scaleOverlay.style.display !== "none") closeScaleConfig();
