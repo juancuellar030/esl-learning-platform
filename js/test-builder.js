@@ -264,6 +264,14 @@ const TestBuilder = (function () {
                 }
             }
 
+            const respExportWrap = document.getElementById('resp-export-wrap');
+            const respExportMenu = document.getElementById('resp-export-menu');
+            if (respExportMenu && respExportMenu.style.display === 'block') {
+                if (!respExportWrap || !respExportWrap.contains(e.target)) {
+                    _closeRespExportMenu();
+                }
+            }
+
             const zoomBtn = e.target.closest('.tt-zoom-btn');
             if (zoomBtn) {
                 const imgSrc = zoomBtn.dataset.img;
@@ -2357,6 +2365,8 @@ const TestBuilder = (function () {
         dom.responsesTabs = document.getElementById('responses-tabs');
         dom.responseBadge = document.getElementById('response-badge');
         dom.btnExportCsv = document.getElementById('btn-export-csv');
+        dom.respExportWrap = document.getElementById('resp-export-wrap');
+        dom.respExportMenu = document.getElementById('resp-export-menu');
         dom.statCount = document.getElementById('stat-count');
         dom.statCountLarge = document.getElementById('stat-count-large');
         dom.statAvgScore = document.getElementById('stat-avg-score');
@@ -2379,7 +2389,10 @@ const TestBuilder = (function () {
             if (e.target === dom.responsesOverlay) closeResponsesModal();
         });
         if (dom.btnExportCsv) {
-            dom.btnExportCsv.addEventListener('click', exportCsv);
+            dom.btnExportCsv.addEventListener('click', (e) => {
+                e.stopPropagation();
+                _toggleRespExportMenu();
+            });
         }
 
         if (dom.btnUploadJson && dom.uploadJsonInput) {
@@ -2830,18 +2843,25 @@ const TestBuilder = (function () {
         return d.innerHTML;
     }
 
-    function generateCsvContent(roster) {
+    function csvCell(value) {
+        return `"${String(value ?? '').replace(/"/g, '""')}"`;
+    }
+
+    function generateCsvContent(roster, options = {}) {
         if (!roster || roster.length === 0) return '';
 
-        const headers = [
+        const includeExamColumns = !!options.includeExamColumns;
+        const questions = options.questions !== undefined
+            ? options.questions
+            : (includeExamColumns ? [] : (testData.questions || []));
+
+        const headers = [];
+        if (includeExamColumns) headers.push('Exam Title', 'Exam Code');
+        headers.push(
             'Name', 'Group', 'Status', 'Score', 'Max Score', 'Percentage',
             'Time (s)', 'Started At', 'Completed At', 'Violations', 'Retake', 'Submitted At'
-        ];
-
-        // Add per-question headers
-        testData.questions.forEach((q, i) => {
-            headers.push(`Q${i + 1} Correct`);
-        });
+        );
+        questions.forEach((q, i) => headers.push(`Q${i + 1} Correct`));
 
         const rows = roster.map(r => {
             const isSub = r.status === 'submitted';
@@ -2849,9 +2869,13 @@ const TestBuilder = (function () {
             const totalPoints = getResponseTotalPoints(d);
             const pct = (isSub && totalPoints > 0) ? Math.round((d.score / totalPoints) * 100) : '';
 
-            const row = [
-                `"${(r.studentName || '').replace(/"/g, '""')}"`,
-                `"${(r.studentGroup || '').replace(/"/g, '""')}"`,
+            const row = [];
+            if (includeExamColumns) {
+                row.push(csvCell(r.examTitle || ''), csvCell(r.examCode || ''));
+            }
+            row.push(
+                csvCell(r.studentName || ''),
+                csvCell(r.studentGroup || ''),
                 isSub ? 'Submitted' : 'Pending',
                 isSub ? (d.score ?? 0) : '',
                 isSub ? totalPoints : '',
@@ -2862,16 +2886,15 @@ const TestBuilder = (function () {
                 isSub ? getResponseViolationCount(d) : '',
                 isSub ? ((r.hasRetake || d.isRetake) ? 'Yes' : 'No') : '',
                 isSub && d.submittedAt ? new Date(d.submittedAt).toISOString() : ''
-            ];
+            );
 
-            // Per-question correctness
-            testData.questions.forEach((q, i) => {
+            questions.forEach((q, i) => {
                 if (!isSub) {
                     row.push('');
-                } else {
-                    const ans = d.answers && d.answers[i];
-                    row.push(ans && ans.correct ? 1 : 0);
+                    return;
                 }
+                const ans = d.answers && d.answers[i];
+                row.push(ans && ans.correct ? 1 : 0);
             });
 
             return row.join(',');
@@ -2880,63 +2903,256 @@ const TestBuilder = (function () {
         return [headers.join(','), ...rows].join('\n');
     }
 
-    function _buildRosterForExport(rawResponses, filterGroup = 'all') {
+    function _buildRosterForExport(rawResponses, filterGroup = 'all', options = {}) {
+        const includePending = options.includePending !== false;
+        const examTitle = options.examTitle || '';
+        const examCode = options.examCode || '';
+        const list = Array.isArray(rawResponses) ? [...rawResponses].filter(Boolean) : [];
         const allRoster = [];
-        if (testData.settings && testData.settings.groupOptions) {
+
+        if (includePending && testData.settings && testData.settings.groupOptions) {
             testData.settings.groupOptions.forEach(groupCode => {
                 const students = STUDENT_DATA[groupCode] || [];
                 students.forEach(name => {
-                    allRoster.push({ isExpected: true, studentName: name, studentGroup: groupCode, status: 'pending', responseData: null, hasRetake: false });
+                    allRoster.push({
+                        isExpected: true,
+                        studentName: name,
+                        studentGroup: groupCode,
+                        status: 'pending',
+                        responseData: null,
+                        hasRetake: false,
+                        examTitle,
+                        examCode
+                    });
                 });
             });
         }
-        rawResponses.sort((a, b) => (a.submittedAt || 0) - (b.submittedAt || 0)).forEach(r => {
+
+        list.sort((a, b) => (a.submittedAt || 0) - (b.submittedAt || 0)).forEach(r => {
             const students = (r.coStudents && r.coStudents.length > 0) ? r.coStudents : [r.studentName || 'Unknown'];
             const group = r.studentGroup || r.group || 'No Group';
             students.forEach(sName => {
                 const match = allRoster.find(x => x.studentName === sName && x.studentGroup === group);
                 if (match) {
                     if (match.status === 'submitted') match.hasRetake = true;
-                    match.status = 'submitted'; match.responseData = r;
+                    match.status = 'submitted';
+                    match.responseData = r;
+                    match.examTitle = examTitle;
+                    match.examCode = examCode;
                 } else {
-                    allRoster.push({ isExpected: false, studentName: sName, studentGroup: group, status: 'submitted', responseData: r, hasRetake: false });
+                    allRoster.push({
+                        isExpected: false,
+                        studentName: sName,
+                        studentGroup: group,
+                        status: 'submitted',
+                        responseData: r,
+                        hasRetake: false,
+                        examTitle,
+                        examCode
+                    });
                 }
             });
         });
 
-        let displayRoster = filterGroup === 'all' ? allRoster : allRoster.filter(r => r.studentGroup === filterGroup);
-        if (filterGroup === 'all') {
-            displayRoster.sort((a, b) => {
-                if (a.studentGroup !== b.studentGroup) return (a.studentGroup || '').localeCompare(b.studentGroup || '');
-                return (a.studentName || '').localeCompare(b.studentName || '');
-            });
-        }
+        const displayRoster = filterGroup === 'all'
+            ? allRoster
+            : allRoster.filter(r => r.studentGroup === filterGroup);
+
+        displayRoster.sort((a, b) => {
+            if (a.examTitle !== b.examTitle) return (a.examTitle || '').localeCompare(b.examTitle || '');
+            if (a.examCode !== b.examCode) return (a.examCode || '').localeCompare(b.examCode || '');
+            if (a.studentGroup !== b.studentGroup) return (a.studentGroup || '').localeCompare(b.studentGroup || '');
+            return (a.studentName || '').localeCompare(b.studentName || '');
+        });
         return displayRoster;
     }
 
-    function exportCsv() {
-        const rawResponses = Object.values(responsesData);
-        const displayRoster = _buildRosterForExport(rawResponses, activeGroupTab);
+    function _titleForCode(code) {
+        const entry = _getResponsesRegistry().find(e => e.shareCode === code);
+        if (entry && entry.title) return entry.title;
+        if (code && testData && code === testData.shareCode) return testData.title || 'Untitled Test';
+        return code || 'Imported responses';
+    }
 
-        if (displayRoster.length === 0) {
-            showToast('No responses to export');
-            return;
-        }
+    function _safeFilenamePart(value, fallback) {
+        const cleaned = String(value || '').replace(/[^a-z0-9]+/gi, '_').replace(/^_+|_+$/g, '');
+        return cleaned || fallback;
+    }
 
-        const csvContent = generateCsvContent(displayRoster);
-        // Prepend BOM (\uFEFF) for Excel to read UTF-8 accents correctly
-        const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    function _downloadCsv(content, filename) {
+        const blob = new Blob(['\uFEFF' + content], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-
-        const baseName = (testData.title || 'test').replace(/[^a-z0-9]/gi, '_');
-        const groupSuffix = activeGroupTab === 'all' ? 'All' : activeGroupTab.replace(/[^a-z0-9]/gi, '');
-        link.download = `${baseName}_Responses_${groupSuffix}.csv`;
-
+        link.download = filename;
         link.click();
         URL.revokeObjectURL(url);
-        showToast('CSV exported!');
+    }
+
+    function _closeRespExportMenu() {
+        if (dom.respExportMenu) dom.respExportMenu.style.display = 'none';
+        if (dom.btnExportCsv) dom.btnExportCsv.setAttribute('aria-expanded', 'false');
+    }
+
+    function _toggleRespExportMenu() {
+        if (!dom.respExportMenu) return;
+        const opening = dom.respExportMenu.style.display !== 'block';
+        if (opening) _renderRespExportMenu();
+        dom.respExportMenu.style.display = opening ? 'block' : 'none';
+        if (dom.btnExportCsv) dom.btnExportCsv.setAttribute('aria-expanded', opening ? 'true' : 'false');
+    }
+
+    function _renderRespExportMenu() {
+        if (!dom.respExportMenu) return;
+        const groupLabel = activeGroupTab === 'all' ? 'All groups' : activeGroupTab;
+        const examLabel = _titleForCode(responsesCode || (testData && testData.shareCode) || '');
+        const items = [
+            {
+                examScope: 'current',
+                group: activeGroupTab,
+                icon: 'fa-file-csv',
+                label: `This exam · ${groupLabel}`,
+                hint: examLabel
+            }
+        ];
+        if (activeGroupTab !== 'all') {
+            items.push({
+                examScope: 'current',
+                group: 'all',
+                icon: 'fa-users',
+                label: 'This exam · All groups',
+                hint: examLabel
+            });
+        }
+        items.push({
+            examScope: 'all',
+            group: activeGroupTab,
+            icon: 'fa-layer-group',
+            label: `All exams · ${groupLabel}`,
+            hint: 'Every saved exam code'
+        });
+        if (activeGroupTab !== 'all') {
+            items.push({
+                examScope: 'all',
+                group: 'all',
+                icon: 'fa-globe',
+                label: 'All exams · All groups',
+                hint: 'Every saved exam code'
+            });
+        }
+
+        dom.respExportMenu.innerHTML = `
+            <div class="resp-export-heading">Download scores</div>
+            ${items.map(item => `
+                <button type="button" class="resp-export-item" data-exam-scope="${esc(item.examScope)}" data-group="${esc(item.group)}">
+                    <i class="fa-solid ${item.icon}"></i>
+                    <span class="resp-export-item-copy">
+                        <span>${esc(item.label)}</span>
+                        <span class="resp-export-item-hint">${esc(item.hint)}</span>
+                    </span>
+                </button>
+            `).join('')}
+        `;
+
+        dom.respExportMenu.querySelectorAll('.resp-export-item').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const examScope = btn.getAttribute('data-exam-scope');
+                const group = btn.getAttribute('data-group');
+                _closeRespExportMenu();
+                exportCsv({ examScope, group });
+            });
+        });
+    }
+
+    async function _getExamPayload(code) {
+        const title = _titleForCode(code);
+        if (!code) {
+            return {
+                code: '',
+                title: 'Imported responses',
+                questions: testData.questions || [],
+                responses: Object.values(responsesData || {}).filter(Boolean)
+            };
+        }
+        if (code === responsesCode) {
+            return {
+                code,
+                title,
+                questions: (testData && code === testData.shareCode) ? (testData.questions || []) : [],
+                responses: Object.values(responsesData || {}).filter(Boolean)
+            };
+        }
+        const test = await FirebaseService.getPublishedTest(code);
+        return {
+            code,
+            title: (test && test.title) || title,
+            questions: (test && test.questions) || [],
+            responses: (test && test.responses) ? Object.values(test.responses).filter(Boolean) : []
+        };
+    }
+
+    async function _fetchExamPayloads(examScope) {
+        await FirebaseService.init();
+        if (examScope !== 'all') {
+            const code = responsesCode || (testData && testData.shareCode) || '';
+            return [await _getExamPayload(code)];
+        }
+
+        const codes = [...new Set(_getResponsesRegistry().map(e => e.shareCode).filter(Boolean))];
+        if (!codes.length) {
+            const fallback = responsesCode || (testData && testData.shareCode) || '';
+            return [await _getExamPayload(fallback)];
+        }
+
+        return Promise.all(codes.map(async code => {
+            try {
+                return await _getExamPayload(code);
+            } catch (err) {
+                console.error('Failed to load responses for', code, err);
+                return { code, title: _titleForCode(code), questions: [], responses: [], error: true };
+            }
+        }));
+    }
+
+    async function exportCsv({ examScope = 'current', group = activeGroupTab } = {}) {
+        if (dom.btnExportCsv) dom.btnExportCsv.disabled = true;
+        try {
+            if (examScope === 'all') showToast('Collecting responses from all exams...');
+            const payloads = await _fetchExamPayloads(examScope);
+            const includeExamColumns = examScope === 'all';
+            const roster = [];
+
+            payloads.forEach(payload => {
+                const viewingShortcut = _isShortcutExamCode(payload.code)
+                    || payload.responses.some(r => Array.isArray(r.shortcutResults));
+                const includePending = examScope === 'current' && !viewingShortcut;
+                roster.push(..._buildRosterForExport(payload.responses, group, {
+                    includePending,
+                    examTitle: payload.title,
+                    examCode: payload.code
+                }));
+            });
+
+            if (!roster.length) {
+                showToast('No responses to export');
+                return;
+            }
+
+            const questions = (!includeExamColumns && payloads[0]) ? (payloads[0].questions || []) : [];
+            const csvContent = generateCsvContent(roster, { includeExamColumns, questions });
+            const groupSuffix = group === 'all' ? 'AllGroups' : _safeFilenamePart(group, 'Group');
+            const examSuffix = includeExamColumns
+                ? 'AllExams'
+                : _safeFilenamePart((payloads[0] && payloads[0].title) || testData.title || 'test', 'test');
+            _downloadCsv(csvContent, `${examSuffix}_Responses_${groupSuffix}.csv`);
+            showToast('CSV exported!');
+        } catch (err) {
+            console.error('CSV export failed:', err);
+            showToast('Error exporting CSV');
+        } finally {
+            if (dom.btnExportCsv) dom.btnExportCsv.disabled = false;
+        }
     }
 
     // ===== PUBLIC API =====

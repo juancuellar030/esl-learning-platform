@@ -14,7 +14,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Reddit+Sans:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="css/test-builder.css?v=resp-select-contrast">
+    <link rel="stylesheet" href="css/test-builder.css?v=resp-export-v2">
     <link rel="stylesheet" href="css/google-drive.css">
     <style>
         /* Override base styles for builder page */
@@ -280,12 +280,17 @@
                         <i class="fa-solid fa-trash-can"></i> Clear Responses
                     </button>
                     <input type="file" id="upload-json-input" accept=".json" style="display:none;">
-                    <button class="btn-add-option" id="btn-upload-json" style="padding:8px 16px;font-size:0.8rem;">
+                    <button type="button" class="resp-action-btn" id="btn-upload-json">
                         <i class="fa-solid fa-upload"></i> Upload JSON
                     </button>
-                    <button class="btn-add-option" id="btn-export-csv" style="padding:8px 16px;font-size:0.8rem;">
-                        <i class="fa-solid fa-download"></i> Export CSV
-                    </button>
+                    <div class="resp-export-wrap" id="resp-export-wrap">
+                        <button type="button" class="resp-action-btn resp-export-btn" id="btn-export-csv"
+                            aria-haspopup="true" aria-expanded="false">
+                            <i class="fa-solid fa-file-csv"></i> Export CSV
+                            <i class="fa-solid fa-caret-down resp-export-caret"></i>
+                        </button>
+                        <div class="resp-export-menu" id="resp-export-menu" style="display:none;"></div>
+                    </div>
                     <button class="close-btn" id="btn-close-responses"><i class="fa-solid fa-xmark"></i></button>
                 </div>
             </div>
@@ -409,7 +414,7 @@
     <script src="https://apis.google.com/js/api.js"></script>
     <script src="https://accounts.google.com/gsi/client"></script>
     <script src="js/google-drive-service.js"></script>
-    <script src="js/test-builder.js"></script>
+    <script src="js/test-builder.js?v=resp-export-v2"></script>
 </body>
 
 </html>
