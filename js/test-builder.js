@@ -21,6 +21,12 @@ const TestBuilder = (function () {
     ];
     const DEFAULT_GROUPS = ['3A', '3B', '3C', '4A', '4B', '4C', '5A', '5B', '5C', '5D'];
     const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const RT_COLORS = {
+        red: '#b33a3a',
+        amber: '#f7b801',
+        blue: '#7678ed'
+    };
+    const RT_COLOR_SET = new Set(Object.values(RT_COLORS));
 
     // ===== EMBEDDED STUDENT DATA (2026) =====
     const STUDENT_DATA = {
@@ -49,6 +55,7 @@ const TestBuilder = (function () {
         cacheDom();
         loadOrCreateTest();
         bindEvents();
+        initRichTextToolbar();
         initResponsesDom();
         initGoogleDrive();
         renderSidebar();
@@ -718,7 +725,7 @@ const TestBuilder = (function () {
 
         dom.questionList.innerHTML = questions.map((q, i) => {
             const typeInfo = QUESTION_TYPES.find(t => t.id === q.type) || { label: q.type, icon: 'fa-question' };
-            const previewText = q.prompt || '(No prompt yet)';
+            const previewText = stripRichText(q.prompt) || '(No prompt yet)';
             return `
                 <div class="question-item ${i === currentQuestionIndex ? 'active' : ''}"
                      data-index="${i}" draggable="true">
@@ -834,7 +841,7 @@ const TestBuilder = (function () {
                 <h3><i class="fa-solid ${QUESTION_TYPES.find(t => t.id === q.type)?.icon || 'fa-question'}"></i> ${typeInfo.label} — Question ${currentQuestionIndex + 1}</h3>
                 <div class="field-group">
                     <label>Question Prompt</label>
-                    <textarea id="editor-prompt" placeholder="Enter the question...">${escapeHtml(q.prompt)}</textarea>
+                    ${rtEditorHtml(q.prompt, { className: 'rt-prompt', placeholder: 'Enter the question...', multiline: true, extra: ' id="editor-prompt"' })}
                 </div>
                 <div class="field-group">
                     <label>Points</label>
@@ -856,8 +863,8 @@ const TestBuilder = (function () {
 
         // Bind prompt
         const promptEl = document.getElementById('editor-prompt');
-        promptEl.addEventListener('input', () => {
-            q.prompt = promptEl.value;
+        bindRichField(promptEl, (html) => {
+            q.prompt = html;
             renderPreview();
             renderSidebarPreviewText(currentQuestionIndex, q.prompt);
             autoSave();
@@ -881,7 +888,7 @@ const TestBuilder = (function () {
         const items = dom.questionList.querySelectorAll('.question-item');
         if (items[index]) {
             const previewEl = items[index].querySelector('.q-preview-text');
-            if (previewEl) previewEl.textContent = text || '(No prompt yet)';
+            if (previewEl) previewEl.textContent = stripRichText(text) || '(No prompt yet)';
         }
     }
 
@@ -913,7 +920,7 @@ const TestBuilder = (function () {
                     <i class="fa-solid fa-check"></i>
                 </span>
                 <div class="opt-content">
-                    <input type="text" value="${escapeHtml(opt)}" placeholder="Option ${LETTERS[i]}..." data-index="${i}" class="mc-option-input" />
+                    ${rtEditorHtml(opt, { className: 'mc-option-input', placeholder: `Option ${LETTERS[i]}...`, index: i })}
                     ${imgThumb}
                     <label class="opt-img-upload" data-index="${i}" title="Add image">
                         <i class="fa-solid fa-image"></i>
@@ -936,11 +943,11 @@ const TestBuilder = (function () {
             <div class="option-list" id="tf-options">
                 <div class="option-item ${q.correctAnswer === 0 ? 'correct' : ''}" data-index="0">
                     <span class="correct-toggle" data-index="0" title="Mark as correct"><i class="fa-solid fa-check"></i></span>
-                    ${q.customLabels ? `<input type="text" value="${escapeHtml(q.options[0])}" class="tf-label-input" data-index="0" placeholder="True" />` : `<span style="flex:1; padding:4px 0; font-size:0.95rem; color:#333;">True</span>`}
+                    ${q.customLabels ? rtEditorHtml(q.options[0], { className: 'tf-label-input', placeholder: 'True', index: 0 }) : `<span style="flex:1; padding:4px 0; font-size:0.95rem; color:#333;">True</span>`}
                 </div>
                 <div class="option-item ${q.correctAnswer === 1 ? 'correct' : ''}" data-index="1">
                     <span class="correct-toggle" data-index="1" title="Mark as correct"><i class="fa-solid fa-check"></i></span>
-                    ${q.customLabels ? `<input type="text" value="${escapeHtml(q.options[1])}" class="tf-label-input" data-index="1" placeholder="False" />` : `<span style="flex:1; padding:4px 0; font-size:0.95rem; color:#333;">False</span>`}
+                    ${q.customLabels ? rtEditorHtml(q.options[1], { className: 'tf-label-input', placeholder: 'False', index: 1 }) : `<span style="flex:1; padding:4px 0; font-size:0.95rem; color:#333;">False</span>`}
                 </div>
             </div>
             <div class="toggle-row">
@@ -963,7 +970,7 @@ const TestBuilder = (function () {
 
         const sentencesHTML = q.sentences.map((sentence, i) => `
             <div class="sentence-slot" style="display:flex; gap:10px; margin-bottom:8px;">
-                <input type="text" class="fb-sentence-input" value="${escapeHtml(sentence)}" placeholder="Sentence ${i + 1} (use ___ for blanks)" data-index="${i}" style="flex:1;" />
+                ${rtEditorHtml(sentence, { className: 'fb-sentence-input', placeholder: `Sentence ${i + 1} (use ___ for blanks)`, index: i, multiline: true })}
                 ${q.sentences.length > 1 ? `<button class="remove-option" data-index="${i}" data-action="remove-sentence"><i class="fa-solid fa-xmark"></i></button>` : ''}
             </div>
         `).join('');
@@ -1013,7 +1020,7 @@ const TestBuilder = (function () {
             return `
             <div class="pair-item" data-index="${i}">
                 <div class="pair-left-wrap">
-                    <input type="text" value="${escapeHtml(p.left)}" placeholder="Item ${i + 1}" class="match-left" data-index="${i}" />
+                    ${rtEditorHtml(p.left, { className: 'match-left', placeholder: `Item ${i + 1}`, index: i })}
                     ${leftImg}
                     <label class="opt-img-upload small" data-index="${i}" title="Add image">
                         <i class="fa-solid fa-image"></i>
@@ -1021,7 +1028,7 @@ const TestBuilder = (function () {
                     </label>
                 </div>
                 <span class="pair-arrow"><i class="fa-solid fa-arrows-left-right"></i></span>
-                <input type="text" value="${escapeHtml(p.right)}" placeholder="Match ${i + 1}" class="match-right" data-index="${i}" />
+                ${rtEditorHtml(p.right, { className: 'match-right', placeholder: `Match ${i + 1}`, index: i })}
                 ${q.pairs.length > 2 ? `<button class="remove-pair" data-index="${i}"><i class="fa-solid fa-xmark"></i></button>` : ''}
             </div>
         `}).join('');
@@ -1048,7 +1055,7 @@ const TestBuilder = (function () {
         return `
             <div class="field-group">
                 <label>Correct sentence (in order)</label>
-                <input type="text" id="uw-correct-sentence" value="${escapeHtml(q.correctSentence || '')}" placeholder="I like to eat pizza" />
+                ${rtEditorHtml(q.correctSentence || '', { className: '', placeholder: 'I like to eat pizza', extra: ' id="uw-correct-sentence"' })}
             </div>
             <div class="field-group">
                 <label>Words (auto-generated from sentence, or add manually)</label>
@@ -1073,7 +1080,7 @@ const TestBuilder = (function () {
             </div>
             <div class="field-group">
                 <label>Hint (optional)</label>
-                <input type="text" id="ul-hint" value="${escapeHtml(q.hint || '')}" placeholder="A fruit that's red or green" />
+                ${rtEditorHtml(q.hint || '', { className: '', placeholder: 'A fruit that\'s red or green', extra: ' id="ul-hint"' })}
             </div>
             <div class="toggle-row">
                 <span class="toggle-label">Show first-letter hint to students</span>
@@ -1111,7 +1118,7 @@ const TestBuilder = (function () {
             return `
                 <div class="category-block" data-cat="${ci}">
                     <div class="cat-header">
-                        <input type="text" value="${escapeHtml(cat.name)}" placeholder="Category name" class="cat-name-input" data-cat="${ci}" />
+                        ${rtEditorHtml(cat.name, { className: 'cat-name-input', placeholder: 'Category name', extra: ` data-cat="${ci}"` })}
                         ${q.categories.length > 2 ? `<button class="remove-pair" data-cat="${ci}" data-action="remove-cat"><i class="fa-solid fa-xmark"></i></button>` : ''}
                     </div>
                     <div class="cat-items">${chips}</div>
@@ -1139,7 +1146,7 @@ const TestBuilder = (function () {
                     <i class="fa-solid ${isCorrect ? 'fa-square-check' : 'fa-square'}"></i>
                 </span>
                 <div class="opt-content">
-                    <input type="text" value="${escapeHtml(opt)}" placeholder="Option ${LETTERS[i]}..." data-index="${i}" class="ms-option-input" />
+                    ${rtEditorHtml(opt, { className: 'ms-option-input', placeholder: `Option ${LETTERS[i]}...`, index: i })}
                 </div>
                 ${q.options.length > 2 ? `<button class="remove-option ms-remove-option" data-index="${i}" title="Remove"><i class="fa-solid fa-xmark"></i></button>` : ''}
             </div>
@@ -1161,8 +1168,8 @@ const TestBuilder = (function () {
     function bindMSEditor(q) {
         // Option text inputs
         document.querySelectorAll('.ms-option-input').forEach(input => {
-            input.addEventListener('input', () => {
-                q.options[parseInt(input.dataset.index)] = input.value;
+            bindRichField(input, (html) => {
+                q.options[parseInt(input.dataset.index)] = html;
                 renderPreview();
                 autoSave();
             });
@@ -1237,8 +1244,8 @@ const TestBuilder = (function () {
     function bindMCEditor(q) {
         // Option text inputs
         document.querySelectorAll('.mc-option-input').forEach(input => {
-            input.addEventListener('input', () => {
-                q.options[parseInt(input.dataset.index)] = input.value;
+            bindRichField(input, (html) => {
+                q.options[parseInt(input.dataset.index)] = html;
                 renderPreview();
                 autoSave();
             });
@@ -1334,8 +1341,8 @@ const TestBuilder = (function () {
 
         // Custom label text inputs
         document.querySelectorAll('.tf-label-input').forEach(input => {
-            input.addEventListener('input', () => {
-                q.options[parseInt(input.dataset.index)] = input.value;
+            bindRichField(input, (html) => {
+                q.options[parseInt(input.dataset.index)] = html;
                 renderPreview();
                 autoSave();
             });
@@ -1344,8 +1351,8 @@ const TestBuilder = (function () {
 
     function bindFBEditor(q) {
         document.querySelectorAll('.fb-sentence-input').forEach(input => {
-            input.addEventListener('input', () => {
-                q.sentences[parseInt(input.dataset.index)] = input.value;
+            bindRichField(input, (html) => {
+                q.sentences[parseInt(input.dataset.index)] = html;
                 renderPreview();
                 autoSave();
             });
@@ -1411,16 +1418,16 @@ const TestBuilder = (function () {
 
     function bindMatchEditor(q) {
         document.querySelectorAll('.match-left').forEach(input => {
-            input.addEventListener('input', () => {
-                q.pairs[parseInt(input.dataset.index)].left = input.value;
+            bindRichField(input, (html) => {
+                q.pairs[parseInt(input.dataset.index)].left = html;
                 renderPreview();
                 autoSave();
             });
         });
 
         document.querySelectorAll('.match-right').forEach(input => {
-            input.addEventListener('input', () => {
-                q.pairs[parseInt(input.dataset.index)].right = input.value;
+            bindRichField(input, (html) => {
+                q.pairs[parseInt(input.dataset.index)].right = html;
                 renderPreview();
                 autoSave();
             });
@@ -1487,15 +1494,16 @@ const TestBuilder = (function () {
 
     function bindUWEditor(q) {
         const sentenceEl = document.getElementById('uw-correct-sentence');
-        sentenceEl.addEventListener('input', () => {
-            q.correctSentence = sentenceEl.value;
+        bindRichField(sentenceEl, (html) => {
+            q.correctSentence = html;
             autoSave();
         });
 
         const genBtn = document.getElementById('btn-generate-words');
         genBtn.addEventListener('click', () => {
-            if (q.correctSentence.trim()) {
-                q.words = q.correctSentence.trim().split(/\s+/);
+            const plain = stripRichText(q.correctSentence).trim();
+            if (plain) {
+                q.words = plain.split(/\s+/);
                 renderEditor();
                 renderPreview();
                 autoSave();
@@ -1535,8 +1543,8 @@ const TestBuilder = (function () {
         });
 
         const hintEl = document.getElementById('ul-hint');
-        hintEl.addEventListener('input', () => {
-            q.hint = hintEl.value;
+        bindRichField(hintEl, (html) => {
+            q.hint = html;
             renderPreview();
             autoSave();
         });
@@ -1554,8 +1562,8 @@ const TestBuilder = (function () {
 
     function bindDDEditor(q) {
         document.querySelectorAll('.cat-name-input').forEach(input => {
-            input.addEventListener('input', () => {
-                q.categories[parseInt(input.dataset.cat)].name = input.value;
+            bindRichField(input, (html) => {
+                q.categories[parseInt(input.dataset.cat)].name = html;
                 renderPreview();
                 autoSave();
             });
@@ -1680,7 +1688,7 @@ const TestBuilder = (function () {
         dom.previewContent.innerHTML = `
             <div class="preview-phone-frame">
                 <div class="preview-question-number">Question ${currentQuestionIndex + 1} of ${testData.questions.length}</div>
-                <div class="preview-prompt">${escapeHtml(q.prompt) || '<span style="color:#ccc;font-style:italic;">Enter a question prompt...</span>'}</div>
+                <div class="preview-prompt">${renderRich(q.prompt, '<span style="color:#ccc;font-style:italic;">Enter a question prompt...</span>')}</div>
                 ${mediaHtml}
                 ${renderTypePreview(q)}
             </div>`;
@@ -1709,7 +1717,7 @@ const TestBuilder = (function () {
             return `
                 <div class="preview-option ${q.correctAnswer === i ? 'correct-answer' : ''}">
                     <span class="option-letter">${LETTERS[i]}</span>
-                    <span>${img}${escapeHtml(opt) || '<span style="color:#ccc;">—</span>'}</span>
+                    <span>${img}${renderRich(opt, '<span style="color:#ccc;">—</span>')}</span>
                 </div>`;
         }).join('')}
         </div>`;
@@ -1718,10 +1726,10 @@ const TestBuilder = (function () {
     function renderTFPreview(q) {
         return `<div class="preview-tf">
             <div class="preview-tf-btn ${q.correctAnswer === 0 ? 'correct-answer' : ''}">
-                <i class="fa-solid fa-check" style="margin-right:6px;"></i> True
+                <i class="fa-solid fa-check" style="margin-right:6px;"></i> ${renderRich(q.options[0], 'True')}
             </div>
             <div class="preview-tf-btn ${q.correctAnswer === 1 ? 'correct-answer' : ''}">
-                <i class="fa-solid fa-xmark" style="margin-right:6px;"></i> False
+                <i class="fa-solid fa-xmark" style="margin-right:6px;"></i> ${renderRich(q.options[1], 'False')}
             </div>
         </div>`;
     }
@@ -1736,13 +1744,13 @@ const TestBuilder = (function () {
 
         let blankIdx = 0;
         const sentencesHtml = sentences.map(s => {
-            let escaped = escapeHtml(s);
-            escaped = escaped.replace(/___/g, () => {
+            let html = sanitizeRichText(s);
+            html = html.replace(/___/g, () => {
                 const answer = q.blanks[blankIdx] || '?';
                 blankIdx++;
-                return `<span class="preview-blank-slot">${escapeHtml(answer)}</span>`;
+                return `<span class="preview-blank-slot">${escapeHtml(stripRichText(answer) || '?')}</span>`;
             });
-            return `<div class="preview-fill-blank">${escaped}</div>`;
+            return `<div class="preview-fill-blank">${html}</div>`;
         }).join('');
 
         return `<div class="tt-fb-card" style="background: white; padding: 16px; border-radius: 12px; border: 1px solid #e0e2e8; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 12px;">${sentencesHtml}</div>`;
@@ -1755,11 +1763,11 @@ const TestBuilder = (function () {
             const img = q.pairImages && q.pairImages[i]
                 ? `<img src="${q.pairImages[i]}" style="max-height:30px;border-radius:4px;margin-right:4px;vertical-align:middle;" />`
                 : '';
-            return `<div class="preview-match-item">${img}${escapeHtml(p.left) || '—'}</div>`;
+            return `<div class="preview-match-item">${img}${renderRich(p.left, '—')}</div>`;
         }).join('')}
             </div>
             <div class="preview-match-col">
-                ${q.pairs.map(p => `<div class="preview-match-item">${escapeHtml(p.right) || '—'}</div>`).join('')}
+                ${q.pairs.map(p => `<div class="preview-match-item">${renderRich(p.right, '—')}</div>`).join('')}
             </div>
         </div>`;
     }
@@ -1783,7 +1791,7 @@ const TestBuilder = (function () {
             ${shuffled.split('').map(l => `<span class="preview-unjumble-chip">${l.toUpperCase()}</span>`).join('')}
         </div>`;
         if (q.hint) {
-            html += `<div style="text-align:center;margin-top:12px;font-size:0.85rem;color:#888;font-style:italic;"><i class="fa-solid fa-lightbulb" style="margin-right:4px;"></i> Hint: ${escapeHtml(q.hint)}</div>`;
+            html += `<div style="text-align:center;margin-top:12px;font-size:0.85rem;color:#888;font-style:italic;"><i class="fa-solid fa-lightbulb" style="margin-right:4px;"></i> Hint: ${renderRich(q.hint)}</div>`;
         }
         return html;
     }
@@ -1794,7 +1802,7 @@ const TestBuilder = (function () {
             <div class="preview-categories">
                 ${q.categories.map(cat => `
                     <div class="preview-cat-box">
-                        <div class="cat-title">${escapeHtml(cat.name) || 'Untitled'}</div>
+                        <div class="cat-title">${renderRich(cat.name, 'Untitled')}</div>
                         <div class="preview-cat-items">
                             ${cat.items.map(it => {
             const hasImg = q.itemImages && q.itemImages[it];
@@ -1841,7 +1849,7 @@ const TestBuilder = (function () {
             return `
                 <div class="preview-ms-option ${isCorrect ? 'correct-answer' : ''}">
                     <span class="preview-ms-checkbox">${isCorrect ? '<i class="fa-solid fa-square-check"></i>' : '<i class="fa-regular fa-square"></i>'}</span>
-                    <span>${escapeHtml(opt) || '<span style="color:#ccc;">—</span>'}</span>
+                    <span>${renderRich(opt, '<span style="color:#ccc;">—</span>')}</span>
                 </div>`;
         }).join('')}
             ${correctCount === 0 ? '<div style="color:#f0a500;font-size:0.78rem;margin-top:6px;"><i class="fa-solid fa-triangle-exclamation"></i> No correct answers selected yet</div>' : ''}
@@ -1930,6 +1938,243 @@ const TestBuilder = (function () {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
+    }
+
+    function stripRichText(html) {
+        if (html == null || html === '') return '';
+        const div = document.createElement('div');
+        div.innerHTML = String(html);
+        return (div.textContent || '').replace(/\u00a0/g, ' ');
+    }
+
+    function hexToRgb(hex) {
+        const h = hex.replace('#', '');
+        return {
+            r: parseInt(h.slice(0, 2), 16),
+            g: parseInt(h.slice(2, 4), 16),
+            b: parseInt(h.slice(4, 6), 16)
+        };
+    }
+
+    function rgbToHex(r, g, b) {
+        return '#' + [r, g, b].map(n => Math.max(0, Math.min(255, n)).toString(16).padStart(2, '0')).join('');
+    }
+
+    function normalizeRtColor(value) {
+        if (!value) return '';
+        const v = String(value).trim().toLowerCase();
+        if (RT_COLOR_SET.has(v)) return v;
+        const shortHex = v.match(/^#([0-9a-f]{3})$/);
+        if (shortHex) {
+            const expanded = '#' + shortHex[1].split('').map(c => c + c).join('');
+            return RT_COLOR_SET.has(expanded) ? expanded : '';
+        }
+        const fullHex = v.match(/^#([0-9a-f]{6})$/);
+        if (fullHex) {
+            const hex = '#' + fullHex[1];
+            return RT_COLOR_SET.has(hex) ? hex : closestRtColor(hex);
+        }
+        const rgb = v.match(/^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/);
+        if (rgb) {
+            const hex = rgbToHex(Number(rgb[1]), Number(rgb[2]), Number(rgb[3]));
+            return RT_COLOR_SET.has(hex) ? hex : closestRtColor(hex);
+        }
+        return '';
+    }
+
+    function closestRtColor(hex) {
+        const rgb = hexToRgb(hex);
+        let best = '';
+        let bestDist = Infinity;
+        RT_COLOR_SET.forEach(c => {
+            const o = hexToRgb(c);
+            const d = (rgb.r - o.r) ** 2 + (rgb.g - o.g) ** 2 + (rgb.b - o.b) ** 2;
+            if (d < bestDist) {
+                bestDist = d;
+                best = c;
+            }
+        });
+        return bestDist <= 80 * 80 ? best : '';
+    }
+
+    function sanitizeRichText(html) {
+        if (html == null || html === '') return '';
+        const src = String(html);
+        if (!/<[a-zA-Z]/.test(src)) return escapeHtml(src);
+        const wrap = document.createElement('div');
+        wrap.innerHTML = src;
+        return sanitizeRtNode(wrap);
+    }
+
+    function sanitizeRtNode(node) {
+        let out = '';
+        node.childNodes.forEach(child => {
+            if (child.nodeType === Node.TEXT_NODE) {
+                out += escapeHtml(child.textContent);
+                return;
+            }
+            if (child.nodeType !== Node.ELEMENT_NODE) return;
+            const tag = child.tagName;
+            if (tag === 'BR') {
+                out += '<br>';
+                return;
+            }
+            if (tag === 'DIV' || tag === 'P') {
+                const inner = sanitizeRtNode(child);
+                if (out && !out.endsWith('<br>')) out += '<br>';
+                out += inner;
+                return;
+            }
+            if (tag === 'B' || tag === 'STRONG') {
+                out += '<strong>' + sanitizeRtNode(child) + '</strong>';
+                return;
+            }
+            if (tag === 'I' || tag === 'EM') {
+                out += '<em>' + sanitizeRtNode(child) + '</em>';
+                return;
+            }
+            if (tag === 'U') {
+                out += '<u>' + sanitizeRtNode(child) + '</u>';
+                return;
+            }
+            if (tag === 'SPAN' || tag === 'FONT') {
+                const rawColor = child.getAttribute('color') || child.style && child.style.color;
+                const color = normalizeRtColor(rawColor);
+                const inner = sanitizeRtNode(child);
+                out += color ? `<span style="color:${color}">${inner}</span>` : inner;
+                return;
+            }
+            out += sanitizeRtNode(child);
+        });
+        return out;
+    }
+
+    function renderRich(html, fallback) {
+        const clean = sanitizeRichText(html);
+        if (!stripRichText(clean).trim()) return fallback || '';
+        return clean;
+    }
+
+    function rtEditorHtml(value, opts) {
+        const o = opts || {};
+        const cls = o.className ? ' ' + o.className : '';
+        const placeholder = escapeHtml(o.placeholder || '');
+        const idx = o.index !== undefined && o.index !== '' ? ` data-index="${o.index}"` : '';
+        const extra = o.extra || '';
+        const ml = o.multiline ? ' data-rt-multiline="true"' : '';
+        const inner = sanitizeRichText(value);
+        return `<div class="rt-field${cls}" contenteditable="true" spellcheck="true" role="textbox" data-placeholder="${placeholder}"${ml}${idx}${extra}>${inner}</div>`;
+    }
+
+    function bindRichField(el, setter) {
+        if (!el) return;
+        const syncEmpty = () => {
+            el.classList.toggle('rt-empty', !stripRichText(el.innerHTML).trim());
+        };
+        syncEmpty();
+        el.addEventListener('input', () => {
+            setter(sanitizeRichText(el.innerHTML));
+            syncEmpty();
+        });
+        el.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !el.dataset.rtMultiline) e.preventDefault();
+        });
+        el.addEventListener('paste', (e) => {
+            e.preventDefault();
+            const html = e.clipboardData.getData('text/html');
+            const text = e.clipboardData.getData('text/plain');
+            if (html) document.execCommand('insertHTML', false, sanitizeRichText(html));
+            else document.execCommand('insertText', false, text);
+        });
+    }
+
+    let rtSavedRange = null;
+
+    function saveRtSelection() {
+        const sel = window.getSelection();
+        if (sel && sel.rangeCount > 0) rtSavedRange = sel.getRangeAt(0).cloneRange();
+    }
+
+    function restoreRtSelection() {
+        if (!rtSavedRange) return;
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(rtSavedRange);
+    }
+
+    function getRtFieldFromNode(node) {
+        if (!node) return null;
+        const el = node.nodeType === Node.ELEMENT_NODE ? node : node.parentElement;
+        return el ? el.closest('.rt-field') : null;
+    }
+
+    function initRichTextToolbar() {
+        const toolbar = document.getElementById('rt-toolbar');
+        const swatches = document.getElementById('rt-swatches');
+        if (!toolbar) return;
+
+        const hideToolbar = () => {
+            toolbar.hidden = true;
+            if (swatches) swatches.hidden = true;
+        };
+
+        const showToolbarForRange = (range) => {
+            toolbar.hidden = false;
+            const rect = range.getBoundingClientRect();
+            const tbRect = toolbar.getBoundingClientRect();
+            let top = rect.top - tbRect.height - 8;
+            if (top < 8) top = rect.bottom + 8;
+            let left = rect.left + (rect.width / 2) - (tbRect.width / 2);
+            left = Math.max(8, Math.min(left, window.innerWidth - tbRect.width - 8));
+            toolbar.style.top = `${top}px`;
+            toolbar.style.left = `${left}px`;
+        };
+
+        document.addEventListener('selectionchange', () => {
+            const sel = window.getSelection();
+            if (!sel || sel.rangeCount === 0 || sel.isCollapsed) {
+                if (!toolbar.matches(':hover')) hideToolbar();
+                return;
+            }
+            const field = getRtFieldFromNode(sel.anchorNode);
+            if (!field) {
+                hideToolbar();
+                return;
+            }
+            saveRtSelection();
+            showToolbarForRange(sel.getRangeAt(0));
+        });
+
+        toolbar.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+        });
+
+        toolbar.addEventListener('click', (e) => {
+            const swatch = e.target.closest('[data-rt-color]');
+            if (swatch) {
+                restoreRtSelection();
+                document.execCommand('foreColor', false, swatch.dataset.rtColor);
+                const field = getRtFieldFromNode(window.getSelection().anchorNode);
+                if (field) field.dispatchEvent(new Event('input', { bubbles: true }));
+                saveRtSelection();
+                if (swatches) swatches.hidden = true;
+                return;
+            }
+            const btn = e.target.closest('[data-rt-cmd]');
+            if (!btn) return;
+            const cmd = btn.dataset.rtCmd;
+            if (cmd === 'toggle-swatches') {
+                if (swatches) swatches.hidden = !swatches.hidden;
+                return;
+            }
+            restoreRtSelection();
+            document.execCommand(cmd, false, null);
+            const field = getRtFieldFromNode(window.getSelection().anchorNode);
+            if (field) field.dispatchEvent(new Event('input', { bubbles: true }));
+            saveRtSelection();
+        });
+
+        document.addEventListener('scroll', hideToolbar, true);
     }
 
     function shuffleArray(arr) {

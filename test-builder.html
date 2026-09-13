@@ -14,7 +14,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Reddit+Sans:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="css/test-builder.css?v=resp-export-v2">
+    <link rel="stylesheet" href="css/test-builder.css?v=rich-text-v1">
     <link rel="stylesheet" href="css/google-drive.css">
     <style>
         /* Override base styles for builder page */
@@ -404,6 +404,20 @@
     <!-- Toast -->
     <div class="toast" id="toast"></div>
 
+    <!-- Rich-text formatting toolbar -->
+    <div id="rt-toolbar" class="rt-toolbar" hidden>
+        <button type="button" class="rt-btn" data-rt-cmd="bold" title="Bold (Ctrl+B)"><b>B</b></button>
+        <button type="button" class="rt-btn" data-rt-cmd="italic" title="Italic (Ctrl+I)"><i>I</i></button>
+        <button type="button" class="rt-btn" data-rt-cmd="underline" title="Underline (Ctrl+U)"><u>U</u></button>
+        <span class="rt-sep"></span>
+        <button type="button" class="rt-btn rt-btn-swatch-toggle" data-rt-cmd="toggle-swatches" title="Highlight color">H</button>
+        <div class="rt-swatches" id="rt-swatches" hidden>
+            <button type="button" class="rt-swatch" data-rt-color="#b33a3a" title="Dark red" style="background:#b33a3a"></button>
+            <button type="button" class="rt-swatch" data-rt-color="#f7b801" title="Amber" style="background:#f7b801"></button>
+            <button type="button" class="rt-swatch" data-rt-color="#7678ed" title="Blue" style="background:#7678ed"></button>
+        </div>
+    </div>
+
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -414,7 +428,7 @@
     <script src="https://apis.google.com/js/api.js"></script>
     <script src="https://accounts.google.com/gsi/client"></script>
     <script src="js/google-drive-service.js"></script>
-    <script src="js/test-builder.js?v=resp-export-v2"></script>
+    <script src="js/test-builder.js?v=rich-text-v1"></script>
 </body>
 
 </html>
