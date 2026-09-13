@@ -2275,6 +2275,7 @@ body.dark-mode .q-acc-bar-wrap {
     align-items: center;
     gap: 8px;
     min-width: 0;
+    flex-wrap: wrap;
 }
 
 .opt-content input[type="text"] {
@@ -2349,6 +2350,7 @@ body.dark-mode .q-acc-bar-wrap {
     align-items: center;
     gap: 6px;
     flex: 1;
+    flex-wrap: wrap;
 }
 
 .pair-left-wrap input[type="text"] {
@@ -3006,4 +3008,52 @@ body.dark-mode .fb-chip.empty {
 body.dark-mode .fb-blank-warning {
     background: #3a3218;
     color: #f7d774;
+}
+
+.img-url-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    min-width: 0;
+}
+
+.img-url-input {
+    flex: 1;
+    min-width: 0;
+    padding: 6px 10px;
+    border: 1px solid #d0d2da;
+    border-radius: 8px;
+    font-size: 0.78rem;
+    font-family: inherit;
+    background: #fff;
+    color: #333;
+}
+
+.img-url-input:focus {
+    outline: none;
+    border-color: var(--medium-slate-blue);
+}
+
+.img-url-apply {
+    flex-shrink: 0;
+    padding: 6px 10px;
+    border: none;
+    border-radius: 8px;
+    background: var(--indigo-velvet);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.img-url-apply:hover {
+    background: var(--medium-slate-blue);
+}
+
+body.dark-mode .img-url-input {
+    background: #2d2d2d;
+    border-color: #555;
+    color: #eee;
 }

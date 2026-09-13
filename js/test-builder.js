@@ -928,6 +928,7 @@ const TestBuilder = (function () {
                         <i class="fa-solid fa-image"></i>
                         <input type="file" accept="image/*" data-index="${i}" class="mc-opt-img-input" style="display:none;" />
                     </label>
+                    ${imageUrlRowHtml('mc-img-url', `data-index="${i}"`)}
                 </div>
                 ${q.options.length > 2 ? `<button class="remove-option" data-index="${i}" title="Remove"><i class="fa-solid fa-xmark"></i></button>` : ''}
             </div>
@@ -1099,6 +1100,7 @@ const TestBuilder = (function () {
                         <i class="fa-solid fa-image"></i>
                         <input type="file" accept="image/*" data-index="${i}" class="pair-img-input" style="display:none;" />
                     </label>
+                    ${imageUrlRowHtml('pair-img-url', `data-index="${i}"`)}
                 </div>
                 <span class="pair-arrow"><i class="fa-solid fa-arrows-left-right"></i></span>
                 ${rtEditorHtml(p.right, { className: 'match-right', placeholder: `Match ${i + 1}`, index: i })}
@@ -1186,6 +1188,7 @@ const TestBuilder = (function () {
                         <i class="fa-solid fa-image"></i> Image
                         <input type="file" accept="image/*" class="dd-item-img-input" data-item="${escapeHtml(item)}" style="display:none;" />
                     </label>
+                    ${imageUrlRowHtml('dd-img-url', `data-item="${escapeHtml(item)}"`)}
                 </div>`;
             }).join('');
             return `
@@ -1385,6 +1388,16 @@ const TestBuilder = (function () {
                 renderPreview();
                 autoSave();
             });
+        });
+
+        bindImageUrlRows('.mc-img-url', (input, url) => {
+            const idx = parseInt(input.dataset.index);
+            if (!q.optionImages) q.optionImages = [];
+            q.optionImages[idx] = url;
+            renderEditor();
+            renderPreview();
+            autoSave();
+            showToast('Image URL applied');
         });
     }
 
@@ -1600,6 +1613,16 @@ const TestBuilder = (function () {
                 autoSave();
             });
         });
+
+        bindImageUrlRows('.pair-img-url', (input, url) => {
+            const idx = parseInt(input.dataset.index);
+            if (!q.pairImages) q.pairImages = [];
+            q.pairImages[idx] = url;
+            renderEditor();
+            renderPreview();
+            autoSave();
+            showToast('Image URL applied');
+        });
     }
 
     function bindUWEditor(q) {
@@ -1768,6 +1791,16 @@ const TestBuilder = (function () {
                 renderPreview();
                 autoSave();
             });
+        });
+
+        bindImageUrlRows('.dd-img-url', (input, url) => {
+            const itemtext = input.dataset.item;
+            if (!q.itemImages) q.itemImages = {};
+            q.itemImages[itemtext] = url;
+            renderEditor();
+            renderPreview();
+            autoSave();
+            showToast('Image URL applied');
         });
     }
 
@@ -2504,15 +2537,62 @@ const TestBuilder = (function () {
     }
 
     // ===== MEDIA UPLOAD =====
+    function imageUrlRowHtml(inputClass, extraAttrs) {
+        return `<div class="img-url-row">
+            <input type="url" class="img-url-input ${inputClass}" placeholder="Add image URL" ${extraAttrs} />
+            <button type="button" class="img-url-apply">Apply</button>
+        </div>`;
+    }
+
+    function applyNormalizedImageUrl(raw) {
+        if (typeof ImageUrl === 'undefined' || !ImageUrl.normalize) {
+            showToast('Image URL helper missing');
+            return null;
+        }
+        try {
+            const url = ImageUrl.normalize(raw);
+            if (!url) {
+                showToast('Enter an image URL');
+                return null;
+            }
+            return url;
+        } catch (err) {
+            showToast(err.message || 'Invalid image URL');
+            return null;
+        }
+    }
+
+    function bindImageUrlRows(inputSelector, onApply) {
+        document.querySelectorAll(inputSelector).forEach(input => {
+            const row = input.closest('.img-url-row');
+            const btn = row && row.querySelector('.img-url-apply');
+            const apply = () => {
+                const url = applyNormalizedImageUrl(input.value);
+                if (!url) return;
+                onApply(input, url);
+            };
+            if (btn) btn.addEventListener('click', apply);
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    apply();
+                }
+            });
+        });
+    }
+
     function renderMediaEditor(q) {
         let preview = '';
         if (q.media && q.media.data) {
             if (q.media.type === 'image') {
+                const mediaLabel = q.media.source === 'url'
+                    ? (q.media.data || q.media.filename || 'Image URL')
+                    : (q.media.filename || 'Uploaded image');
                 preview = `
                     <div class="media-preview">
-                        <img src="${q.media.data}" alt="Uploaded" />
+                        <img src="${escapeHtml(q.media.data)}" alt="Uploaded" referrerpolicy="no-referrer" />
                         <div class="media-info">
-                            <span class="media-filename"><i class="fa-solid fa-image"></i> ${escapeHtml(q.media.filename)}</span>
+                            <span class="media-filename"><i class="fa-solid fa-image"></i> ${escapeHtml(mediaLabel)}</span>
                             <button class="media-remove" id="btn-remove-media"><i class="fa-solid fa-trash"></i> Remove</button>
                         </div>
                     </div>`;
@@ -2534,7 +2614,11 @@ const TestBuilder = (function () {
                 <button class="btn-add-option" id="btn-upload-media" style="width:100%;">
                     <i class="fa-solid fa-cloud-arrow-up"></i> Upload image or audio
                 </button>
-                <p style="font-size:0.75rem;color:#aaa;margin-top:6px;text-align:center;">Images resized to max 800px. Audio up to 2MB.</p>
+                <div class="img-url-row" style="margin-top:8px;">
+                    <input type="url" id="media-url-input" class="img-url-input" placeholder="Or paste an image URL (Imgur, Drive, https://…)" />
+                    <button type="button" class="img-url-apply" id="btn-apply-media-url">Apply</button>
+                </div>
+                <p style="font-size:0.75rem;color:#aaa;margin-top:6px;text-align:center;">Images resized to max 800px. Audio up to 2MB. URLs are stored as links, not uploads.</p>
             </div>`;
     }
 
@@ -2545,6 +2629,27 @@ const TestBuilder = (function () {
 
         if (uploadBtn) {
             uploadBtn.addEventListener('click', () => fileInput.click());
+        }
+
+        const applyMediaUrlBtn = document.getElementById('btn-apply-media-url');
+        const mediaUrlInput = document.getElementById('media-url-input');
+        const applyMediaUrl = () => {
+            const url = applyNormalizedImageUrl(mediaUrlInput && mediaUrlInput.value);
+            if (!url) return;
+            q.media = { type: 'image', data: url, filename: url, source: 'url' };
+            renderEditor();
+            renderPreview();
+            autoSave();
+            showToast('Image URL applied');
+        };
+        if (applyMediaUrlBtn) applyMediaUrlBtn.addEventListener('click', applyMediaUrl);
+        if (mediaUrlInput) {
+            mediaUrlInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    applyMediaUrl();
+                }
+            });
         }
 
         if (fileInput) {
