@@ -1,0 +1,26 @@
+- generic [active] [ref=f8e1]:
+  - status [ref=f8e2]: Preview Mode — No Answers Recorded
+  - text:       
+  - generic [ref=f8e3]:
+    - generic [ref=f8e7]:
+      - generic [ref=f8e8]: 1 / 2
+      - text: 
+    - generic [ref=f8e9]:
+      - generic [ref=f8e10]: What color is the sky?
+      - generic [ref=f8e11]:
+        - generic [ref=f8e12] [cursor=pointer]:
+          - generic [ref=f8e13]: A
+          - generic [ref=f8e14]: Blue
+        - generic [ref=f8e15] [cursor=pointer]:
+          - generic [ref=f8e16]: B
+          - generic [ref=f8e17]: Green
+        - generic [ref=f8e18] [cursor=pointer]:
+          - generic [ref=f8e19]: C
+          - generic [ref=f8e20]: Red
+    - generic [ref=f8e21]:
+      - text: 
+      - button "Next " [ref=f8e22] [cursor=pointer]:
+        - text: Next
+        - generic [ref=f8e23]: 
+      - text:  
+  - text:                    

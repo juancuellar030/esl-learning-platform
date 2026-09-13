@@ -1,0 +1,25 @@
+- generic [active] [ref=f8e1]:
+  - status [ref=f8e2]: Preview Mode — No Answers Recorded
+  - text:       
+  - generic [ref=f8e3]:
+    - generic [ref=f8e7]:
+      - generic [ref=f8e8]: 2 / 2
+      - text: 
+    - generic [ref=f8e9]:
+      - generic [ref=f8e49]: Water is wet.
+      - generic [ref=f8e50]:
+        - generic [ref=f8e51] [cursor=pointer]:
+          - generic [ref=f8e52]: 
+          - generic [ref=f8e54]: "True"
+        - generic [ref=f8e55] [cursor=pointer]:
+          - generic [ref=f8e56]: 
+          - generic [ref=f8e58]: "False"
+    - generic [ref=f8e21]:
+      - button " Previous" [ref=f8e34] [cursor=pointer]:
+        - generic [ref=f8e35]: 
+        - text: Previous
+      - text:  
+      - button " End Preview" [ref=f8e36] [cursor=pointer]:
+        - generic [ref=f8e37]: 
+        - text: End Preview
+  - text:                    

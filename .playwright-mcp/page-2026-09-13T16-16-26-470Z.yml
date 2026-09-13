@@ -1,0 +1,227 @@
+- generic [ref=f6e1]:
+  - generic [ref=f6e2]:
+    - generic [ref=f6e3]:
+      - generic [ref=f6e4]:
+        - link " Tools" [ref=f6e5] [cursor=pointer]:
+          - /url: tools.html
+          - generic [ref=f6e6]: 
+          - text: Tools
+        - heading " Untitled Test" [level=1] [ref=f6e7]:
+          - generic [ref=f6e8]: 
+          - generic [ref=f6e9]: Untitled Test
+        - generic [ref=f6e10]:
+          - button " My Tests " [ref=f6e11] [cursor=pointer]:
+            - generic [ref=f6e12]: 
+            - text: My Tests
+            - generic [ref=f6e13]: 
+          - text:      +
+      - generic [ref=f6e14]:
+        - button " Settings" [ref=f6e15] [cursor=pointer]:
+          - generic [ref=f6e16]: 
+          - generic [ref=f6e17]: Settings
+        - generic "Import quiz from JSON file" [ref=f6e18] [cursor=pointer]:
+          - generic [ref=f6e19]: 
+          - generic [ref=f6e20]: Import
+        - generic [ref=f6e21]:
+          - button " Export " [ref=f6e22] [cursor=pointer]:
+            - generic [ref=f6e23]: 
+            - generic [ref=f6e24]: Export
+            - generic [ref=f6e25]: 
+          - text:  
+        - button " Save" [ref=f6e26] [cursor=pointer]:
+          - generic [ref=f6e27]: 
+          - generic [ref=f6e28]: Save
+        - button " Drive" [ref=f6e29] [cursor=pointer]:
+          - generic [ref=f6e30]: 
+          - generic [ref=f6e31]: Drive
+        - button " Responses" [ref=f6e32] [cursor=pointer]:
+          - generic [ref=f6e33]: 
+          - generic [ref=f6e34]: Responses
+        - button " Share" [ref=f6e35] [cursor=pointer]:
+          - generic [ref=f6e36]: 
+          - generic [ref=f6e37]: Share
+    - generic [ref=f6e38]:
+      - generic [ref=f6e39]:
+        - heading "Questions" [level=3] [ref=f6e40]
+        - button "+" [active] [ref=f6e41] [cursor=pointer]
+        - generic [ref=f6e62]:
+          - button " Multiple Choice" [ref=f6e63] [cursor=pointer]:
+            - generic [ref=f6e64]: 
+            - generic [ref=f6e65]: Multiple Choice
+          - button " True / False" [ref=f6e66] [cursor=pointer]:
+            - generic [ref=f6e67]: 
+            - generic [ref=f6e68]: True / False
+          - button " Fill in the Blank" [ref=f6e69] [cursor=pointer]:
+            - generic [ref=f6e70]: 
+            - generic [ref=f6e71]: Fill in the Blank
+          - button " Matching" [ref=f6e72] [cursor=pointer]:
+            - generic [ref=f6e73]: 
+            - generic [ref=f6e74]: Matching
+          - button " Unjumble Words" [ref=f6e75] [cursor=pointer]:
+            - generic [ref=f6e76]: 
+            - generic [ref=f6e77]: Unjumble Words
+          - button " Unjumble Letters" [ref=f6e78] [cursor=pointer]:
+            - generic [ref=f6e79]: 
+            - generic [ref=f6e80]: Unjumble Letters
+          - button " Drag & Drop" [ref=f6e81] [cursor=pointer]:
+            - generic [ref=f6e82]: 
+            - generic [ref=f6e83]: Drag & Drop
+          - button " Multiple Select" [ref=f6e84] [cursor=pointer]:
+            - generic [ref=f6e85]: 
+            - generic [ref=f6e86]: Multiple Select
+      - generic [ref=f6e44]:
+        - generic [ref=f6e45]: 
+        - text: Click + to add your first question
+    - generic [ref=f6e47]:
+      - generic [ref=f6e48]: 
+      - heading "No Question Selected" [level=2] [ref=f6e49]
+      - paragraph [ref=f6e50]: Add a question using the + button in the sidebar, or click an existing question to edit it.
+    - generic [ref=f6e51]:
+      - heading " Preview" [level=3] [ref=f6e53]:
+        - generic [ref=f6e54]: 
+        - text: Preview
+      - generic [ref=f6e56]:
+        - generic [ref=f6e57]: 
+        - paragraph [ref=f6e58]: Select a question to see a live preview
+  - generic:
+    - generic:
+      - generic:
+        - heading " Test Settings" [level=2]:
+          - generic: 
+          - text: Test Settings
+        - button ""
+      - generic:
+        - generic:
+          - heading "General" [level=4]
+          - generic:
+            - generic: Test Title
+            - textbox "Unit 3 Vocabulary Test"
+          - generic:
+            - generic: Description (optional)
+            - textbox "Instructions or description for students..."
+        - generic:
+          - heading "Behavior" [level=4]
+          - generic:
+            - generic: Time Limit (minutes, 0 = no limit)
+            - spinbutton "0"
+          - generic:
+            - generic: Shuffle questions
+            - generic:
+              - checkbox
+          - generic:
+            - generic: Shuffle answer options
+            - generic:
+              - checkbox
+          - generic:
+            - generic: Show results to students
+            - generic:
+              - checkbox
+          - generic:
+            - generic: Allow retake
+            - generic:
+              - checkbox
+        - generic:
+          - heading "Student Identification" [level=4]
+          - generic:
+            - generic: Collect student name
+            - generic:
+              - checkbox
+          - generic:
+            - generic: Collect course group
+            - generic:
+              - checkbox
+          - generic:
+            - generic: Course Groups
+            - generic:
+              - textbox "Add group (e.g. 6A)"
+              - button "Add"
+          - generic:
+            - generic: Allow pairs/trios (multiple students per test)
+            - generic:
+              - checkbox
+        - generic:
+          - heading "Anti-Cheating" [level=4]
+          - generic:
+            - generic: Full-screen mode (prevents tab switching)
+            - generic:
+              - checkbox
+        - generic:
+          - heading "Appearance" [level=4]
+          - generic:
+            - generic: Allow students to switch themes
+            - generic:
+              - checkbox
+        - generic:
+          - heading "Results & Grading" [level=4]
+          - generic:
+            - generic: Grade Drag & Drop per item (Partial Grading)
+            - generic:
+              - checkbox
+          - generic:
+            - generic: Allow students to review answers after test
+            - generic:
+              - checkbox
+      - generic:
+        - button " Save Settings":
+          - generic: 
+          - text: Save Settings
+  - generic:
+    - generic:
+      - generic:
+        - generic:
+          - heading " Student Responses" [level=2]:
+            - generic: 
+            - text: Student Responses
+        - generic:
+          - generic "Automatically save every new response to your Google Drive":
+            - generic: Auto-sync Drive
+            - generic:
+              - checkbox
+          - button " Clear Responses":
+            - generic: 
+            - text: Clear Responses
+          - button " Upload JSON":
+            - generic: 
+            - text: Upload JSON
+          - generic:
+            - button " Export CSV ":
+              - generic: 
+              - text: Export CSV
+              - generic: 
+          - button ""
+      - generic:
+        - generic:
+          - generic:
+            - generic:
+              - generic: 
+              - text: 0 Responses
+        - generic:
+          - generic:
+            - generic: "0"
+            - generic: Responses
+          - generic:
+            - generic: —
+            - generic: Avg Score
+          - generic:
+            - generic: —
+            - generic: Avg Time
+          - generic:
+            - generic: "0"
+            - generic: Total Violations
+        - generic:
+          - generic:
+            - generic: 
+            - paragraph: No responses yet. Share the test with your students to start collecting responses.
+  - generic:
+    - generic:
+      - generic:
+        - heading " Share Test" [level=2]:
+          - generic: 
+          - text: Share Test
+        - button ""
+      - generic:
+        - generic:
+          - paragraph: Publishing test...
+        - text:  
+  - text: 
+  - button "" [ref=f6e61] [cursor=pointer]
