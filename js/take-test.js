@@ -2,6 +2,124 @@
  * Take Test Module
  * Student-facing test-taking interface with fullscreen anti-cheat, timing, and answer collection.
  */
+const RT_COLORS = ['#b33a3a', '#f7b801', '#7678ed'];
+const RT_COLOR_SET = new Set(RT_COLORS);
+
+function escapeHtml(text) {
+    if (text == null || text === '') return '';
+    const div = document.createElement('div');
+    div.textContent = String(text);
+    return div.innerHTML;
+}
+
+function hexToRgb(hex) {
+    const h = hex.replace('#', '');
+    return {
+        r: parseInt(h.slice(0, 2), 16),
+        g: parseInt(h.slice(2, 4), 16),
+        b: parseInt(h.slice(4, 6), 16)
+    };
+}
+
+function rgbToHex(r, g, b) {
+    return '#' + [r, g, b].map(n => Math.max(0, Math.min(255, n)).toString(16).padStart(2, '0')).join('');
+}
+
+function closestRtColor(hex) {
+    const rgb = hexToRgb(hex);
+    let best = '';
+    let bestDist = Infinity;
+    RT_COLOR_SET.forEach(c => {
+        const o = hexToRgb(c);
+        const d = (rgb.r - o.r) ** 2 + (rgb.g - o.g) ** 2 + (rgb.b - o.b) ** 2;
+        if (d < bestDist) {
+            bestDist = d;
+            best = c;
+        }
+    });
+    return bestDist <= 80 * 80 ? best : '';
+}
+
+function normalizeRtColor(value) {
+    if (!value) return '';
+    const v = String(value).trim().toLowerCase();
+    if (RT_COLOR_SET.has(v)) return v;
+    const shortHex = v.match(/^#([0-9a-f]{3})$/);
+    if (shortHex) {
+        const expanded = '#' + shortHex[1].split('').map(c => c + c).join('');
+        return RT_COLOR_SET.has(expanded) ? expanded : '';
+    }
+    const fullHex = v.match(/^#([0-9a-f]{6})$/);
+    if (fullHex) {
+        const hex = '#' + fullHex[1];
+        return RT_COLOR_SET.has(hex) ? hex : closestRtColor(hex);
+    }
+    const rgb = v.match(/^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/);
+    if (rgb) {
+        const hex = rgbToHex(Number(rgb[1]), Number(rgb[2]), Number(rgb[3]));
+        return RT_COLOR_SET.has(hex) ? hex : closestRtColor(hex);
+    }
+    return '';
+}
+
+function sanitizeRtNode(node) {
+    let out = '';
+    node.childNodes.forEach(child => {
+        if (child.nodeType === Node.TEXT_NODE) {
+            out += escapeHtml(child.textContent);
+            return;
+        }
+        if (child.nodeType !== Node.ELEMENT_NODE) return;
+        const tag = child.tagName;
+        if (tag === 'BR') {
+            out += '<br>';
+            return;
+        }
+        if (tag === 'DIV' || tag === 'P') {
+            const inner = sanitizeRtNode(child);
+            if (out && !out.endsWith('<br>')) out += '<br>';
+            out += inner;
+            return;
+        }
+        if (tag === 'B' || tag === 'STRONG') {
+            out += '<strong>' + sanitizeRtNode(child) + '</strong>';
+            return;
+        }
+        if (tag === 'I' || tag === 'EM') {
+            out += '<em>' + sanitizeRtNode(child) + '</em>';
+            return;
+        }
+        if (tag === 'U') {
+            out += '<u>' + sanitizeRtNode(child) + '</u>';
+            return;
+        }
+        if (tag === 'SPAN' || tag === 'FONT') {
+            const rawColor = child.getAttribute('color') || (child.style && child.style.color);
+            const color = normalizeRtColor(rawColor);
+            const inner = sanitizeRtNode(child);
+            out += color ? `<span style="color:${color}">${inner}</span>` : inner;
+            return;
+        }
+        out += sanitizeRtNode(child);
+    });
+    return out;
+}
+
+function sanitizeRichText(html) {
+    if (html == null || html === '') return '';
+    const src = String(html);
+    if (!/<[a-zA-Z]/.test(src)) return escapeHtml(src);
+    const wrap = document.createElement('div');
+    wrap.innerHTML = src;
+    return sanitizeRtNode(wrap);
+}
+
+function renderRich(html, fallback) {
+    const clean = sanitizeRichText(html);
+    if (!clean) return fallback || '';
+    return clean;
+}
+
 const TakeTest = (function () {
     'use strict';
 
@@ -855,7 +973,7 @@ const TakeTest = (function () {
 
         // Prompt
         let html = `
-            <div class="tt-q-prompt">${escapeHtml(q.prompt)}</div>
+            <div class="tt-q-prompt">${renderRich(q.prompt)}</div>
             ${mediaHtml}
         `;
 
@@ -890,7 +1008,7 @@ const TakeTest = (function () {
                 : '';
             return `<div class="tt-option ${hasImages ? 'tt-option-card' : ''} ${selected}" data-idx="${i}">
                 <span class="tt-opt-letter">${LETTERS[i]}</span>
-                <span class="tt-opt-text">${img}${escapeHtml(opt)}</span>
+                <span class="tt-opt-text">${img}${renderRich(opt)}</span>
             </div>`;
         }).join('');
         return `<div class="tt-options ${gridClass}">${opts}</div>`;
@@ -906,7 +1024,7 @@ const TakeTest = (function () {
                     ? '<i class="fa-solid fa-square-check"></i>'
                     : '<i class="fa-regular fa-square"></i>'}
                 </span>
-                <span class="tt-ms-opt-text">${escapeHtml(opt)}</span>
+                <span class="tt-ms-opt-text">${renderRich(opt)}</span>
             </div>`;
         }).join('');
         return `
@@ -921,7 +1039,7 @@ const TakeTest = (function () {
             const icon = i === 0 ? 'fa-check' : 'fa-xmark';
             return `<div class="tt-option ${selected}" data-idx="${i}">
                 <span class="tt-opt-letter"><i class="fa-solid ${icon}"></i></span>
-                <span class="tt-opt-text">${escapeHtml(opt)}</span>
+                <span class="tt-opt-text">${renderRich(opt)}</span>
             </div>`;
         }).join('');
         return `<div class="tt-options">${opts}</div>`;
@@ -937,12 +1055,12 @@ const TakeTest = (function () {
 
         let blankIdx = 0;
         const sentencesHtml = sentences.map(s => {
-            let escaped = escapeHtml(s);
-            escaped = escaped.replace(/___/g, () => {
+            let html = sanitizeRichText(s);
+            html = html.replace(/___/g, () => {
                 const val = answers[currentQ] && answers[currentQ][blankIdx] ? answers[currentQ][blankIdx] : '';
                 return `<input type="text" class="tt-blank-input" data-blank="${blankIdx++}" value="${escapeHtml(val)}" placeholder="..." />`;
             });
-            return `<div class="tt-fill-blank-sentence">${escaped}</div>`;
+            return `<div class="tt-fill-blank-sentence">${html}</div>`;
         }).join('');
 
         let wordBankHtml = '';
@@ -979,13 +1097,13 @@ const TakeTest = (function () {
             const img = q.pairImages && q.pairImages[i]
                 ? `<img class="tt-match-img" src="${q.pairImages[i]}" alt="" data-preview="${q.pairImages[i]}" />`
                 : '';
-            return `<div class="tt-match-item tt-match-item-left ${isMatched ? 'matched' : ''}" data-idx="${i}">${img}${escapeHtml(p.left)}</div>`;
+            return `<div class="tt-match-item tt-match-item-left ${isMatched ? 'matched' : ''}" data-idx="${i}">${img}${renderRich(p.left)}</div>`;
         }).join('');
 
         const rightItems = rightOptions.map((r, i) => {
             const isMatched = currentMatches.includes(r);
             return `<div class="tt-match-item tt-match-item-right ${isMatched ? 'matched' : ''}" data-value="${escapeHtml(r)}" data-idx="${i}">
-                <span class="tt-match-text">${escapeHtml(r)}</span>
+                <span class="tt-match-text">${renderRich(r)}</span>
                 <button class="tt-match-clear" data-value="${escapeHtml(r)}"><i class="fa-solid fa-trash-can"></i></button>
             </div>`;
         }).join('');
@@ -1088,7 +1206,7 @@ const TakeTest = (function () {
                 return `<span class="tt-dd-item" data-cat="${ci}" data-item="${escapeHtml(item)}">${escapeHtml(item)}</span>`;
             }).join('');
             return `<div class="tt-dd-category" data-cat="${ci}">
-                <h4>${escapeHtml(cat.name)}</h4>
+                <h4>${renderRich(cat.name)}</h4>
                 <div class="tt-dd-cat-items">${chips}</div>
             </div>`;
         }).join('');
@@ -1738,14 +1856,6 @@ const TakeTest = (function () {
         }
     }
 
-    // ===== UTILITIES =====
-    function escapeHtml(text) {
-        if (!text) return '';
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-
     function showImageLightbox(src) {
         const lightbox = document.getElementById('image-lightbox');
         const img = document.getElementById('lightbox-img');
@@ -1947,13 +2057,6 @@ function buildAnswerReview() {
         'multi-select': 'fa-square-check'
     };
 
-    const escapeHtml = (text) => {
-        if (!text) return '';
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    };
-
     let html = '';
     questions.forEach((q, i) => {
         const g = graded[i];
@@ -1968,14 +2071,16 @@ function buildAnswerReview() {
         switch (q.type) {
             case 'multiple-choice':
                 const sa = studentAnswers[i];
-                studentAnswerText = (sa !== null && sa !== undefined && q.options) ? escapeHtml(q.options[sa]?.text || q.options[sa] || 'No answer') : 'No answer';
-                correctAnswerText = q.options ? escapeHtml(q.options[q.correctAnswer]?.text || q.options[q.correctAnswer] || '') : '';
+                studentAnswerText = (sa !== null && sa !== undefined && q.options) ? renderRich(q.options[sa]?.text || q.options[sa] || '', 'No answer') : 'No answer';
+                correctAnswerText = q.options ? renderRich(q.options[q.correctAnswer]?.text || q.options[q.correctAnswer] || '') : '';
                 break;
             case 'true-false':
                 const saT = studentAnswers[i];
-                const labels = q.trueLabel && q.falseLabel ? [q.trueLabel, q.falseLabel] : ['True', 'False'];
-                studentAnswerText = saT === 0 ? labels[0] : saT === 1 ? labels[1] : 'No answer';
-                correctAnswerText = q.correctAnswer === 0 ? labels[0] : labels[1];
+                const labels = (q.options && q.options.length >= 2)
+                    ? [q.options[0], q.options[1]]
+                    : (q.trueLabel && q.falseLabel ? [q.trueLabel, q.falseLabel] : ['True', 'False']);
+                studentAnswerText = saT === 0 ? renderRich(labels[0], 'True') : saT === 1 ? renderRich(labels[1], 'False') : 'No answer';
+                correctAnswerText = q.correctAnswer === 0 ? renderRich(labels[0], 'True') : renderRich(labels[1], 'False');
                 break;
             case 'multi-select': {
                 const msAns = studentAnswers[i];
@@ -1991,35 +2096,35 @@ function buildAnswerReview() {
                         else if (studentSelected && !wasCorrect) { chipClass = 'wrong'; chipIcon = '<i class="fa-solid fa-xmark"></i>'; }
                         else if (!studentSelected && wasCorrect) { chipClass = 'missing'; chipIcon = '<i class="fa-solid fa-ellipsis"></i>'; }
                         else return; // Not selected, not correct — skip
-                        studentAnswerText += `<span class="tt-review-dd-item ${chipClass}">${chipIcon} ${escapeHtml(opt)}</span>`;
+                        studentAnswerText += `<span class="tt-review-dd-item ${chipClass}">${chipIcon} ${renderRich(opt)}</span>`;
                     });
                     studentAnswerText += `</div>`;
-                    correctAnswerText = (q.correctAnswers || []).map(ci => escapeHtml(q.options[ci] || '')).join(', ');
+                    correctAnswerText = (q.correctAnswers || []).map(ci => renderRich(q.options[ci] || '')).join(', ');
                 } else {
                     studentAnswerText = 'No answer';
-                    correctAnswerText = (q.correctAnswers || []).map(ci => escapeHtml((q.options || [])[ci] || '')).join(', ');
+                    correctAnswerText = (q.correctAnswers || []).map(ci => renderRich((q.options || [])[ci] || '')).join(', ');
                 }
                 break;
             }
             case 'fill-blank':
                 const fbAns = studentAnswers[i];
-                studentAnswerText = Array.isArray(fbAns) ? fbAns.map(a => a || '(empty)').join(', ') : 'No answer';
-                correctAnswerText = (q.blanks || []).join(', ');
+                studentAnswerText = Array.isArray(fbAns) ? fbAns.map(a => escapeHtml(a || '(empty)')).join(', ') : 'No answer';
+                correctAnswerText = (q.blanks || []).map(b => escapeHtml(b)).join(', ');
                 break;
             case 'matching':
                 const mAns = studentAnswers[i];
-                studentAnswerText = Array.isArray(mAns) ? mAns.map(a => a || '(empty)').join(', ') : 'No answer';
-                correctAnswerText = (q.pairs || []).map(p => p.right).join(', ');
+                studentAnswerText = Array.isArray(mAns) ? mAns.map(a => renderRich(a, '(empty)')).join(', ') : 'No answer';
+                correctAnswerText = (q.pairs || []).map(p => renderRich(p.right, '(empty)')).join(', ');
                 break;
             case 'unjumble-words':
                 const uwAns = studentAnswers[i];
-                studentAnswerText = Array.isArray(uwAns) ? uwAns.join(' ') : 'No answer';
-                correctAnswerText = (q.words || []).join(' ');
+                studentAnswerText = Array.isArray(uwAns) ? escapeHtml(uwAns.join(' ')) : 'No answer';
+                correctAnswerText = escapeHtml((q.words || []).join(' '));
                 break;
             case 'unjumble-letters':
                 const ulAns = studentAnswers[i];
-                studentAnswerText = Array.isArray(ulAns) ? ulAns.join('') : 'No answer';
-                correctAnswerText = q.correctWord || '';
+                studentAnswerText = Array.isArray(ulAns) ? escapeHtml(ulAns.join('')) : 'No answer';
+                correctAnswerText = escapeHtml(q.correctWord || '');
                 break;
             case 'drag-drop-category':
                 const ddAns = studentAnswers[i];
@@ -2031,7 +2136,7 @@ function buildAnswerReview() {
 
                         studentAnswerText += `
                             <div class="tt-review-dd-cat">
-                                <span class="tt-review-dd-cat-name">${escapeHtml(cat.name)}</span>
+                                <span class="tt-review-dd-cat-name">${renderRich(cat.name)}</span>
                                 <div class="tt-review-dd-items">
                                     ${placed.map(item => {
                             const isCorrect = correctItems.includes(item);
@@ -2058,7 +2163,7 @@ function buildAnswerReview() {
                     correctAnswerText = "See breakdown above";
                 } else {
                     studentAnswerText = 'No answer';
-                    correctAnswerText = q.categories ? q.categories.map(cat => `${escapeHtml(cat.name)}: ${cat.items.map(it => escapeHtml(it)).join(', ')}`).join(' | ') : '';
+                    correctAnswerText = q.categories ? q.categories.map(cat => `${renderRich(cat.name)}: ${cat.items.map(it => escapeHtml(it)).join(', ')}`).join(' | ') : '';
                 }
                 break;
             default:
@@ -2071,7 +2176,7 @@ function buildAnswerReview() {
                     <span class="tt-review-q-num"><i class="fa-solid ${icon}"></i> Q${i + 1}</span>
                     <span class="tt-review-status">${statusIcon}</span>
                 </div>
-                <div class="tt-review-prompt">${escapeHtml(q.prompt || q.text || '')}</div>
+                <div class="tt-review-prompt">${renderRich(q.prompt || q.text || '')}</div>
                 <div class="tt-review-answer-row">
                     <div class="tt-review-student-answer">
                         <span class="tt-review-label">Your answer:</span>
