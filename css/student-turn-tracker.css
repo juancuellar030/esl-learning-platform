@@ -28,6 +28,9 @@
     flex-wrap: wrap;
     gap: 12px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    position: relative;
+    z-index: 20;
+    overflow: visible;
 }
 
 .tt-header h1 {
@@ -43,6 +46,122 @@
     align-items: center;
     gap: 10px;
     flex-wrap: wrap;
+}
+
+.tt-class-dropdown {
+    position: relative;
+    z-index: 30;
+}
+
+.tt-class-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 12px;
+    padding: 9px 14px;
+    color: white;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 0.88rem;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.tt-class-trigger:hover,
+.tt-class-dropdown.open .tt-class-trigger {
+    background: rgba(255, 255, 255, 0.24);
+}
+
+.tt-class-trigger:focus-visible {
+    outline: 2px solid var(--amber-flame);
+    outline-offset: 2px;
+}
+
+.tt-class-kicker {
+    opacity: 0.72;
+    font-weight: 600;
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.tt-class-value {
+    font-weight: 800;
+    letter-spacing: 0.02em;
+}
+
+.tt-class-caret {
+    font-size: 0.7rem;
+    opacity: 0.85;
+    margin-left: 2px;
+    transition: transform 0.2s ease;
+}
+
+.tt-class-dropdown.open .tt-class-caret {
+    transform: rotate(180deg);
+}
+
+.tt-class-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    min-width: 196px;
+    margin: 0;
+    padding: 8px;
+    list-style: none;
+    background: white;
+    border-radius: 14px;
+    box-shadow: 0 12px 32px rgba(61, 52, 139, 0.28);
+    border: 1px solid rgba(61, 52, 139, 0.12);
+    z-index: 40;
+}
+
+.tt-class-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    border: none;
+    background: transparent;
+    border-radius: 10px;
+    padding: 10px 12px;
+    color: var(--indigo-velvet);
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.tt-class-option i:first-child {
+    width: 16px;
+    text-align: center;
+    opacity: 0.7;
+    color: var(--medium-slate-blue);
+}
+
+.tt-class-option:hover,
+.tt-class-option:focus-visible {
+    background: rgba(118, 120, 237, 0.14);
+    outline: none;
+}
+
+.tt-class-option.selected {
+    background: var(--indigo-velvet);
+    color: white;
+}
+
+.tt-class-option.selected i {
+    color: white;
+    opacity: 1;
+}
+
+.tt-class-option .tt-class-check {
+    margin-left: auto;
+    font-size: 0.75rem;
 }
 
 .tt-btn {
@@ -187,12 +306,40 @@
     background: rgba(255, 255, 255, 0.25);
 }
 
+.tt-btn-reset-turns {
+    background: #ecf0f1;
+    color: #555;
+    font-size: 0.82rem;
+    padding: 7px 12px;
+}
+
+.tt-btn-reset-turns:hover {
+    background: #dfe4ea;
+    color: #333;
+}
+
+.tt-view-group {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    border-left: 2px solid #eee;
+    padding-left: 10px;
+    margin-left: 4px;
+}
+
 /* ── Student Grid ────────────────────────────── */
+.tt-student-panel {
+    background: white;
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
 .tt-student-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
     gap: 12px;
-    margin-bottom: 20px;
 }
 
 .tt-student-card {
@@ -902,22 +1049,72 @@
 /* =============================================
    DARK MODE
    ============================================= */
-body.dark-mode.turn-tracker-page {
-    background: #1a1a2e;
-}
-
 body.dark-mode .tt-header {
-    background: #16213e;
+    background: #1a1a1a;
 }
 
-body.dark-mode .tt-controls-bar {
-    background: #1e1e2e;
+body.dark-mode .tt-class-trigger {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: #444;
+}
+
+body.dark-mode .tt-class-trigger:hover,
+body.dark-mode .tt-class-dropdown.open .tt-class-trigger {
+    background: rgba(255, 255, 255, 0.14);
+}
+
+body.dark-mode .tt-class-menu {
+    background: #1e1e1e;
+    border-color: #333;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+}
+
+body.dark-mode .tt-class-option {
+    color: #eee;
+}
+
+body.dark-mode .tt-class-option i:first-child {
+    color: #aaa;
+}
+
+body.dark-mode .tt-class-option:hover,
+body.dark-mode .tt-class-option:focus-visible {
+    background: #2a2a2a;
+}
+
+body.dark-mode .tt-class-option.selected {
+    background: var(--indigo-velvet);
+    color: white;
+}
+
+body.dark-mode .tt-class-option.selected i {
+    color: white;
+}
+
+body.dark-mode .tt-controls-bar,
+body.dark-mode .tt-student-panel {
+    background: #1e1e1e;
     border: 1px solid #333;
+    box-shadow: none;
+}
+
+body.dark-mode .tt-view-group {
+    border-left-color: #333;
+}
+
+body.dark-mode .tt-btn-reset-turns {
+    background: #2a2a2a;
+    color: #ccc;
+}
+
+body.dark-mode .tt-btn-reset-turns:hover {
+    background: #333;
+    color: #fff;
 }
 
 body.dark-mode .tt-picker-btn {
-    background: #2a2a3e;
-    color: #c3c3ff;
+    background: #2a2a2a;
+    color: #ddd;
     border-color: #444;
 }
 
@@ -934,14 +1131,14 @@ body.dark-mode .tt-picker-btn.active {
 }
 
 body.dark-mode .tt-filter-btn {
-    background: #2a2a3e;
-    color: #aaa;
+    background: #2a2a2a;
+    color: #bbb;
     border-color: #444;
 }
 
 body.dark-mode .tt-filter-btn:hover {
     border-color: var(--medium-slate-blue);
-    color: #c3c3ff;
+    color: #eee;
 }
 
 body.dark-mode .tt-filter-btn.active {
@@ -951,8 +1148,8 @@ body.dark-mode .tt-filter-btn.active {
 }
 
 body.dark-mode .tt-student-card {
-    background: #1e1e2e;
-    border-color: #333;
+    background: #252525;
+    border-color: #3a3a3a;
 }
 
 body.dark-mode .tt-student-card:hover {
@@ -976,7 +1173,7 @@ body.dark-mode .tt-student-card.status-absent {
 }
 
 body.dark-mode .tt-student-name {
-    color: #c3c3ff;
+    color: #eee;
 }
 
 body.dark-mode .tt-turn-badge {
@@ -990,16 +1187,16 @@ body.dark-mode .tt-turn-badge.has-turns {
 }
 
 body.dark-mode .tt-slot-container {
-    background: #1e1e2e;
+    background: #1e1e1e;
 }
 
 body.dark-mode .tt-slot-machine {
-    background: #161622;
-    border-color: var(--medium-slate-blue);
+    background: #161616;
+    border-color: #444;
 }
 
 body.dark-mode .tt-slot-item {
-    color: #c3c3ff;
+    color: #eee;
 }
 
 body.dark-mode .tt-slot-close {
@@ -1017,11 +1214,11 @@ body.dark-mode .tt-absent-toggle {
 }
 
 body.dark-mode .tt-winner-card {
-    background: #1e1e2e;
+    background: #1e1e1e;
 }
 
 body.dark-mode .tt-winner-card .winner-name {
-    color: #c3c3ff;
+    color: #eee;
 }
 
 body.dark-mode .tt-winner-card .winner-subtitle {
@@ -1035,7 +1232,7 @@ body.dark-mode .tt-action-close {
 }
 
 body.dark-mode .tt-notification {
-    background: #1e1e2e;
+    background: #1e1e1e;
     border-color: #333;
 }
 
@@ -1290,9 +1487,9 @@ body.dark-mode .tt-cards-close {
 }
 
 body.dark-mode .tt-card-back {
-    background: #1a1a24;
+    background: #252525;
     color: white;
-    border-color: var(--medium-slate-blue);
+    border-color: #555;
 }
 
 .tt-cards-shuffle-btn {
@@ -1752,27 +1949,27 @@ body.dark-mode .tt-pinata-overlay {
 }
 
 body.dark-mode .tt-modes-container {
-    background: #1a1a2e;
+    background: #1e1e1e;
 }
 
 body.dark-mode .tt-modes-title {
-    color: #fff;
+    color: #fff !important;
 }
 
 body.dark-mode .tt-mode-card {
-    background: #2a2a4a;
+    background: #2a2a2a;
 }
 
 body.dark-mode .tt-mode-card h3 {
-    color: #fff;
+    color: #fff !important;
 }
 
 body.dark-mode .tt-mode-card p {
-    color: #aaa;
+    color: #aaa !important;
 }
 
 body.dark-mode .tt-modes-close {
-    background: #2a2a4a;
+    background: #2a2a2a;
     color: #fff;
 }
 

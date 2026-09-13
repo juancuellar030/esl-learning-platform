@@ -12,14 +12,6 @@
 </head>
 
 <body>
-    <!-- Header -->
-    <header class="main-header">
-        <div class="container">
-            <h1><i class="fa-solid fa-graduation-cap"></i> ESL Learning Platform</h1>
-            <p class="tagline">Teacher's Teaching Tools</p>
-        </div>
-    </header>
-
     <!-- Navigation -->
     <nav class="main-nav">
         <div class="container">
@@ -49,9 +41,6 @@
                         <i class="fa-solid fa-magnifying-glass search-icon" aria-hidden="true"></i>
                         <input type="search" id="tools-search" placeholder="Search for a tool…" autocomplete="off"
                             aria-label="Search for a tool">
-                        <button type="button" class="tools-search-btn" id="tools-search-btn">
-                            <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i> Search
-                        </button>
                     </div>
                     <p class="tools-search-empty" id="tools-search-empty" hidden>No tools match your search.</p>
                 </div>
@@ -147,8 +136,9 @@
                     <!-- Soundboard Card -->
                     <a href="soundboard.html" class="dashboard-card"
                         style="text-decoration: none; color: inherit; display: block;">
-                        <div class="card-icon">
-                            <i class="fa-solid fa-sliders"></i>
+                        <div class="card-icon card-icon--png">
+                            <img src="assets/images/teacher-tools-icons/soundboard.png"
+                                alt="Soundboard icon">
                         </div>
                         <h3>Soundboard</h3>
                         <p>Trigger overlapping classroom sound effects with per-slot play, pause, and stop</p>
@@ -156,8 +146,9 @@
                     <!-- Grading Scale Generator Card -->
                     <a href="grading-scale.html" class="dashboard-card"
                         style="text-decoration: none; color: inherit; display: block;">
-                        <div class="card-icon">
-                            <i class="fa-solid fa-scale-balanced"></i>
+                        <div class="card-icon card-icon--png">
+                            <img src="assets/images/teacher-tools-icons/grading-scale.png"
+                                alt="Grading scale generator icon">
                         </div>
                         <h3>Grading Scale Generator</h3>
                         <p>Generate custom grading scales, upload student lists, and export grades as CSV</p>
@@ -296,7 +287,7 @@
     </footer>
 
     <script src="js/students-data.js"></script>
-    <script src="js/tools-search.js"></script>
+    <script src="js/tools-search.js?v=no-search-btn"></script>
     <script src="js/darkmode.js"></script>
     <script src="js/birthday-notifications.js"></script>
     <script>

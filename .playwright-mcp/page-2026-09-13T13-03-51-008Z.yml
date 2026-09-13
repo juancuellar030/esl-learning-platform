@@ -1,0 +1,29 @@
+- generic [active] [ref=f2e1]:
+  - navigation [ref=f2e2]:
+    - link " Back to Tools" [ref=f2e4] [cursor=pointer]:
+      - /url: tools.html
+      - generic [ref=f2e5]: 
+      - text: Back to Tools
+  - main [ref=f2e6]:
+    - generic [ref=f2e8]:
+      - generic [ref=f2e9]:
+        - button " Clock" [ref=f2e10] [cursor=pointer]:
+          - generic [ref=f2e11]: 
+          - text: Clock
+        - button " Timer" [ref=f2e12] [cursor=pointer]:
+          - generic [ref=f2e13]: 
+          - text: Timer
+        - button " Stopwatch" [ref=f2e14] [cursor=pointer]:
+          - generic [ref=f2e15]: 
+          - text: Stopwatch
+      - generic [ref=f2e16]:
+        - heading " Current Time" [level=2] [ref=f2e17]:
+          - generic [ref=f2e18]: 
+          - text: Current Time
+        - generic [ref=f2e19]:
+          - generic [ref=f2e20]: 08:03:50
+          - generic [ref=f2e21]: Sunday, September 13, 2026
+      - text:            
+  - contentinfo [ref=f2e22]:
+    - paragraph [ref=f2e24]: ESL Learning Platform © 2025 | Made for Teachers, by Teachers
+  - button "" [ref=f2e25] [cursor=pointer]

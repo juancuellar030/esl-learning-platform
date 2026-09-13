@@ -2,7 +2,6 @@
 
 (function () {
     const $searchInput = document.getElementById('tools-search');
-    const $searchBtn = document.getElementById('tools-search-btn');
     const $emptyState = document.getElementById('tools-search-empty');
     const $grid = document.getElementById('tools-grid');
 
@@ -25,11 +24,4 @@
     }
 
     $searchInput.addEventListener('input', filterTools);
-    $searchBtn.addEventListener('click', filterTools);
-    $searchInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            filterTools();
-        }
-    });
 })();

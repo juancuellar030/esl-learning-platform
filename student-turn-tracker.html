@@ -10,7 +10,7 @@
         content="Track student participation with fun random pickers — roulette wheel, balloon pop, Plinko, and more.">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="css/student-turn-tracker.css?v=plinko3">
+    <link rel="stylesheet" href="css/student-turn-tracker.css?v=class-dd1">
     <link rel="stylesheet" href="css/google-drive.css">
     <!-- canvas-confetti for balloon pop effect -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
@@ -29,25 +29,26 @@
         <div class="tt-header">
             <h1><i class="fa-solid fa-users-viewfinder"></i> Student Turn Tracker</h1>
             <div class="tt-header-controls">
+                <div class="tt-class-dropdown" id="ttClassDropdown">
+                    <button type="button" class="tt-class-trigger" id="ttGroupSelectBtn"
+                        aria-haspopup="listbox" aria-expanded="false" aria-controls="ttGroupSelectMenu"
+                        title="Select class group">
+                        <i class="fa-solid fa-chalkboard-user"></i>
+                        <span class="tt-class-kicker">Class</span>
+                        <span class="tt-class-value" id="ttGroupSelectValue"></span>
+                        <i class="fa-solid fa-chevron-down tt-class-caret" aria-hidden="true"></i>
+                    </button>
+                    <div class="tt-class-menu" id="ttGroupSelectMenu" role="listbox" hidden></div>
+                </div>
                 <a href="tools.html" class="tt-btn tt-btn-back">
                     <i class="fa-solid fa-arrow-left"></i> Back
                 </a>
                 <button class="tt-btn tt-btn-drive" id="ttDriveBtn">
                     <i class="fa-brands fa-google-drive"></i> Drive
                 </button>
-                <button class="tt-btn tt-btn-reset" id="ttResetAll" title="Clear all data">
+                <button class="tt-btn tt-btn-reset" id="ttResetAll" title="Wipe turns, statuses, and absences for this class">
                     <i class="fa-solid fa-broom"></i> Clear All
                 </button>
-            </div>
-        </div>
-
-        <!-- ── Group Selector ────────────────────────────────── -->
-        <div class="tt-group-selector">
-            <span class="tt-group-label">
-                <i class="fa-solid fa-chalkboard-user"></i> Class:
-            </span>
-            <div class="tt-group-tabs" id="ttGroupTabs">
-                <!-- Tabs rendered by JS -->
             </div>
         </div>
 
@@ -79,16 +80,14 @@
                     <i class="fa-solid fa-circle-question" style="color:#bbb;"></i> Unselected <span
                         class="filter-count">0</span>
                 </button>
-                <button class="tt-btn" id="ttResetCategories"
-                    style="background:#ecf0f1; color:#555; font-size:0.82rem; padding:7px 12px;"
-                    title="Reset turn categories for a new activity">
+                <button class="tt-btn tt-btn-reset-turns" id="ttResetCategories"
+                    title="Reset turn status and counts for this group. Does not clear absences.">
                     <i class="fa-solid fa-rotate-left"></i> Reset Turns
                 </button>
             </div>
 
             <!-- View & Sort Toggles -->
-            <div class="tt-view-group"
-                style="display:flex; gap: 8px; align-items: center; border-left: 2px solid #eee; padding-left: 10px; margin-left: 4px;">
+            <div class="tt-view-group">
                 <button class="tt-filter-btn active" id="ttToggleNameMode" data-mode="full" title="Toggle Name Display">
                     <i class="fa-solid fa-id-card"></i> Full Name
                 </button>
@@ -99,8 +98,10 @@
         </div>
 
         <!-- ── Student Grid ────────────────────────────────── -->
-        <div class="tt-student-grid" id="ttStudentGrid">
-            <!-- Cards rendered by JS -->
+        <div class="tt-student-panel">
+            <div class="tt-student-grid" id="ttStudentGrid">
+                <!-- Cards rendered by JS -->
+            </div>
         </div>
 
     </div>
@@ -367,7 +368,7 @@
     <script src="js/student-groups-data.js"></script>
     <script src="js/students-data.js"></script>
     <script src="js/google-drive-service.js"></script>
-    <script src="js/student-turn-tracker.js?v=plinko3"></script>
+    <script src="js/student-turn-tracker.js?v=class-dd1"></script>
     <script src="js/darkmode.js"></script>
 </body>
 

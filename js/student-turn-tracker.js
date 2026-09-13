@@ -227,7 +227,7 @@
             const target = groups.find(g => g.id === data.groupId);
             if (target) {
                 activeGroupId = target.id;
-                renderGroupTabs();
+                renderGroupSelect();
             }
         }
         getGroupState(activeGroupId).turns = data.turns || {};
@@ -252,19 +252,75 @@
         }, 3500);
     }
 
-    // ── Group Tabs ────────────────────────────────────────
-    function renderGroupTabs() {
-        const container = document.getElementById('ttGroupTabs');
-        if (!container) return;
-        container.innerHTML = '';
+    // ── Group Select ──────────────────────────────────────
+    function isClassMenuOpen() {
+        return document.getElementById('ttClassDropdown')?.classList.contains('open');
+    }
 
+    function closeClassMenu() {
+        const dropdown = document.getElementById('ttClassDropdown');
+        const btn = document.getElementById('ttGroupSelectBtn');
+        const menu = document.getElementById('ttGroupSelectMenu');
+        if (!dropdown) return;
+        dropdown.classList.remove('open');
+        if (btn) btn.setAttribute('aria-expanded', 'false');
+        if (menu) menu.hidden = true;
+    }
+
+    function openClassMenu() {
+        const dropdown = document.getElementById('ttClassDropdown');
+        const btn = document.getElementById('ttGroupSelectBtn');
+        const menu = document.getElementById('ttGroupSelectMenu');
+        if (!dropdown || !menu) return;
+        dropdown.classList.add('open');
+        if (btn) btn.setAttribute('aria-expanded', 'true');
+        menu.hidden = false;
+        const selected = menu.querySelector('.tt-class-option.selected') || menu.querySelector('.tt-class-option');
+        selected?.focus();
+    }
+
+    function toggleClassMenu() {
+        if (isClassMenuOpen()) closeClassMenu();
+        else openClassMenu();
+    }
+
+    function renderGroupSelect() {
+        const valueEl = document.getElementById('ttGroupSelectValue');
+        const menu = document.getElementById('ttGroupSelectMenu');
+        if (!menu) return;
+        const active = getActiveGroup();
+        if (valueEl) valueEl.textContent = active ? active.label : '';
+
+        menu.innerHTML = '';
         getGroups().forEach(group => {
-            const btn = document.createElement('button');
-            btn.className = 'tt-group-tab' + (group.id === activeGroupId ? ' active' : '');
-            btn.dataset.groupId = group.id;
-            btn.innerHTML = `<i class="fa-solid fa-users"></i> ${group.label}`;
-            btn.addEventListener('click', () => switchGroup(group.id));
-            container.appendChild(btn);
+            const selected = group.id === activeGroupId;
+            const opt = document.createElement('button');
+            opt.type = 'button';
+            opt.className = 'tt-class-option' + (selected ? ' selected' : '');
+            opt.setAttribute('role', 'option');
+            opt.setAttribute('aria-selected', selected ? 'true' : 'false');
+            opt.dataset.groupId = group.id;
+
+            const icon = document.createElement('i');
+            icon.className = 'fa-solid fa-users';
+            icon.setAttribute('aria-hidden', 'true');
+
+            const label = document.createElement('span');
+            label.textContent = group.label;
+
+            opt.append(icon, label);
+            if (selected) {
+                const check = document.createElement('i');
+                check.className = 'fa-solid fa-check tt-class-check';
+                check.setAttribute('aria-hidden', 'true');
+                opt.appendChild(check);
+            }
+
+            opt.addEventListener('click', () => {
+                closeClassMenu();
+                switchGroup(group.id);
+            });
+            menu.appendChild(opt);
         });
     }
 
@@ -272,11 +328,59 @@
         if (groupId === activeGroupId) return;
         activeGroupId = groupId;
         saveToLocalStorage();
-        renderGroupTabs();
+        renderGroupSelect();
         renderGrid();
         updateFilterCounts();
         const group = getActiveGroup();
         showNotification(`Switched to ${group ? group.label : groupId}`, 'info');
+    }
+
+    function setupClassDropdown() {
+        const btn = document.getElementById('ttGroupSelectBtn');
+        const menu = document.getElementById('ttGroupSelectMenu');
+        if (!btn || !menu) return;
+
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleClassMenu();
+        });
+
+        document.addEventListener('click', (e) => {
+            const dropdown = document.getElementById('ttClassDropdown');
+            if (!dropdown || dropdown.contains(e.target)) return;
+            closeClassMenu();
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (!isClassMenuOpen()) {
+                if (e.key === 'ArrowDown' && document.activeElement === btn) {
+                    e.preventDefault();
+                    openClassMenu();
+                }
+                return;
+            }
+            const options = [...menu.querySelectorAll('.tt-class-option')];
+            const currentIndex = options.indexOf(document.activeElement);
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                closeClassMenu();
+                btn.focus();
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                const next = options[(currentIndex + 1) % options.length] || options[0];
+                next.focus();
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                const prev = options[(currentIndex - 1 + options.length) % options.length] || options[0];
+                prev.focus();
+            } else if (e.key === 'Home') {
+                e.preventDefault();
+                options[0]?.focus();
+            } else if (e.key === 'End') {
+                e.preventDefault();
+                options[options.length - 1]?.focus();
+            }
+        });
     }
 
     // ── Grid Rendering ────────────────────────────────────
@@ -2810,10 +2914,12 @@
     // ── Init ──────────────────────────────────────────────
     function init() {
         loadFromLocalStorage();
-        renderGroupTabs();
+        renderGroupSelect();
         renderGrid();
         updateFilterCounts();
         setupDrive();
+
+        setupClassDropdown();
 
         // Filter buttons
         document.querySelectorAll('.tt-filter-btn').forEach(btn => {

@@ -281,27 +281,6 @@ textarea {
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
 }
 
-.tools-search-btn {
-    padding: 14px 24px;
-    border: none;
-    border-radius: 50px;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    background: var(--indigo-velvet);
-    color: white;
-    transition: all 0.3s ease;
-    white-space: nowrap;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.tools-search-btn:hover {
-    background: var(--medium-slate-blue);
-    transform: scale(1.03);
-}
-
 .tools-search-empty {
     margin-top: 16px;
     text-align: center;
@@ -1522,7 +1501,8 @@ body.dark-mode .quiz-container,
 body.dark-mode .summary-container,
 body.dark-mode .grammar-content>div,
 body.dark-mode .grammar-infographic-card,
-body.dark-mode .exercise-container {
+body.dark-mode .exercise-container,
+body.dark-mode .tool-card {
     background-color: #1e1e1e !important;
     color: #f5f5f5 !important;
     border-color: #444 !important;

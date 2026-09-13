@@ -557,3 +557,72 @@ body.dark-mode .timer-display {
 body.dark-mode .timer-progress-bar {
     background: #1a1a1a;
 }
+
+body.dark-mode .tool-card {
+    background: #1e1e1e;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-mode .tab-navigation {
+    border-bottom-color: #444;
+}
+
+body.dark-mode .tab-btn {
+    color: #bbb;
+}
+
+body.dark-mode .tab-btn:hover {
+    color: var(--medium-slate-blue);
+    background: rgba(118, 120, 237, 0.12);
+}
+
+body.dark-mode .tab-btn.active {
+    color: #c5b8ff;
+    border-bottom-color: var(--medium-slate-blue);
+    background: rgba(118, 120, 237, 0.15);
+}
+
+body.dark-mode .tab-content h2 {
+    color: #c5b8ff;
+}
+
+body.dark-mode .timer-display-container.warning-50 {
+    background: #3a3218;
+}
+
+body.dark-mode .timer-display-container.warning-25 {
+    background: #3a2818;
+}
+
+body.dark-mode .timer-display-container.warning-10 {
+    background: #3a1c1c;
+}
+
+body.dark-mode .timer-display-container.finished {
+    background: #8b2e2e;
+}
+
+body.dark-mode .laps-container {
+    background: #2a2a2a;
+}
+
+body.dark-mode .laps-container h3,
+body.dark-mode .lap-number {
+    color: #c5b8ff;
+}
+
+body.dark-mode .lap-item {
+    background: #333;
+}
+
+body.dark-mode .lap-item.fastest {
+    background: linear-gradient(90deg, #1a3a22, #333);
+}
+
+body.dark-mode .lap-item.slowest {
+    background: linear-gradient(90deg, #3a1c1c, #333);
+}
+
+body.dark-mode .lap-time {
+    color: #eee;
+}

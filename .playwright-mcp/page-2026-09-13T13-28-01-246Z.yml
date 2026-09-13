@@ -1,0 +1,75 @@
+- generic [ref=f5e1]:
+  - navigation [ref=f5e2]:
+    - generic [ref=f5e3]:
+      - link " Back to Dashboard" [ref=f5e4] [cursor=pointer]:
+        - /url: index.html
+        - generic [ref=f5e5]: 
+        - text: Back to Dashboard
+      - group "Tool display style" [ref=f5e6]:
+        - button "" [pressed] [ref=f5e7] [cursor=pointer]
+        - button "" [ref=f5e9] [cursor=pointer]
+  - main [ref=f5e11]:
+    - generic [ref=f5e13]:
+      - heading "Welcome to your Teaching Tools" [level=2] [ref=f5e14]
+      - generic [ref=f5e16]:
+        - generic [aria-hidden]: 
+        - searchbox "Search for a tool" [active] [ref=f5e17]: clock
+      - generic [ref=f5e18]:
+        - link [ref=f5e19] [cursor=pointer]:
+          - /url: clock-timer.html
+          - img "Clock and timer icon" [ref=f5e21]
+          - heading "Clock & Timer" [level=3] [ref=f5e22]
+          - paragraph [ref=f5e23]: Real-time clock and classroom timer with visual alerts
+        - text:   
+  - contentinfo [ref=f5e134]:
+    - paragraph [ref=f5e136]: ESL Learning Platform © 2025 | Made for Teachers, by Teachers
+  - button "" [ref=f5e137] [cursor=pointer]
+  - button " 5" [ref=f5e139] [cursor=pointer]:
+    - generic [ref=f5e140]: 
+    - generic [ref=f5e141]: "5"
+  - generic:
+    - generic:
+      - heading "Share Birthday Link" [level=4]
+      - paragraph: "Choose a background effect:"
+      - generic:
+        - textbox
+        - button ""
+      - generic:
+        - button "Close"
+        - link "Preview":
+          - /url: "#"
+  - generic:
+    - generic:
+      - button ""
+      - heading " Sep 2026" [level=3]:
+        - generic: 
+        - text: Sep 2026
+      - button ""
+      - button ""
+    - generic:
+      - generic:
+        - generic: 
+        - generic:
+          - generic: EVA MARIA P.
+          - generic: Sep 19
+        - generic: In 8 days
+        - button ""
+      - generic:
+        - generic: 
+        - generic:
+          - generic: LAURA S.
+          - generic: Sep 28
+        - generic: In 15 days
+        - button ""
+      - generic:
+        - generic: 
+        - generic:
+          - generic: PABLO A.
+          - generic: Sep 29
+        - generic: In 16 days
+        - button ""
+  - generic:
+    - button ""
+    - generic:
+      - generic: 🎂
+      - generic: Happy Birthday!
