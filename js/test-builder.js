@@ -187,6 +187,7 @@ const TestBuilder = (function () {
         if (td.settings.partialGradingDragDrop === undefined) td.settings.partialGradingDragDrop = false;
         if (td.settings.autoSaveResponses === undefined) td.settings.autoSaveResponses = false;
         if (td.settings.allowMultiStudent === undefined) td.settings.allowMultiStudent = false;
+        if (Array.isArray(td.questions)) td.questions.forEach(migrateFillBlankQuestion);
         return td;
     }
 
@@ -640,7 +641,7 @@ const TestBuilder = (function () {
                 break;
             case 'fill-blank':
                 base.sentences = ['The ___ is blue.'];
-                base.blanks = ['sky'];
+                base.blanks = [['sky']];
                 base.wordBank = [];
                 base.useWordBank = false;
                 base.caseSensitive = false;
@@ -706,6 +707,7 @@ const TestBuilder = (function () {
 
     function selectQuestion(index) {
         currentQuestionIndex = index;
+        fbActiveBlank = 0;
         renderSidebar();
         renderEditor();
         renderPreview();
@@ -959,40 +961,111 @@ const TestBuilder = (function () {
             </div>`;
     }
 
-    // Fill in the Blank
-    function renderFBEditor(q) {
-        // Migration for older quizzes with a single sentence string
+    let fbActiveBlank = 0;
+
+    function normalizeBlankEntry(b) {
+        if (Array.isArray(b)) return b.map(s => String(s).trim()).filter(Boolean);
+        if (b == null || b === '') return [];
+        return [String(b).trim()].filter(Boolean);
+    }
+
+    function parseAcceptedAnswers(raw) {
+        return String(raw || '').split('|').map(s => s.trim()).filter(Boolean);
+    }
+
+    function formatBlankAnswers(b) {
+        return normalizeBlankEntry(b).join(' | ');
+    }
+
+    function formatBlankAnswersDisplay(b) {
+        const list = normalizeBlankEntry(b);
+        return list.length ? list.join('/') : '?';
+    }
+
+    function countSentenceBlanks(sentences) {
+        return (sentences || []).reduce((n, s) => n + ((stripRichText(s).match(/___/g) || []).length), 0);
+    }
+
+    function migrateFillBlankQuestion(q) {
+        if (!q || q.type !== 'fill-blank') return;
         if (q.sentence !== undefined && !q.sentences) {
             q.sentences = [q.sentence];
             delete q.sentence;
         }
-        if (!q.sentences) q.sentences = ['The ___ is blue.'];
+        if (!Array.isArray(q.sentences)) q.sentences = [''];
+        if (!Array.isArray(q.blanks)) q.blanks = [];
+        q.blanks = q.blanks.map(normalizeBlankEntry);
+    }
 
+    function syncFillBlanks(q) {
+        migrateFillBlankQuestion(q);
+        const count = countSentenceBlanks(q.sentences);
+        const prev = q.blanks.length;
+        const droppedFilled = [];
+        while (q.blanks.length < count) q.blanks.push([]);
+        while (q.blanks.length > count) {
+            const removed = q.blanks.pop();
+            if (normalizeBlankEntry(removed).length) droppedFilled.push(removed);
+        }
+        if (fbActiveBlank >= count) fbActiveBlank = Math.max(0, count - 1);
+        return { count, prev, droppedFilled };
+    }
+
+    function renderFbChipPreview(q) {
+        let blankIdx = 0;
+        const lines = (q.sentences || []).map(s => {
+            let html = sanitizeRichText(s);
+            html = html.replace(/___/g, () => {
+                const i = blankIdx++;
+                const filled = normalizeBlankEntry(q.blanks[i]).length > 0;
+                const active = i === fbActiveBlank ? ' active' : '';
+                const cls = filled ? 'filled' : 'empty';
+                return `<button type="button" class="fb-chip ${cls}${active}" data-blank="${i}">${i + 1}</button>`;
+            });
+            return `<div class="fb-chip-preview-line">${html || '&nbsp;'}</div>`;
+        });
+        return lines.join('');
+    }
+
+    function fbWarningText(sync) {
+        if (sync.count === 0) {
+            return 'Type ___ in the passage to add blanks. Answer fields stay in sync with those placeholders.';
+        }
+        if (sync.droppedFilled.length) {
+            return `Blank count dropped from ${sync.prev} to ${sync.count}. Answers for the removed blank(s) were discarded so they cannot go stale.`;
+        }
+        if (sync.prev !== sync.count && sync.count > sync.prev) {
+            return `Blank count is now ${sync.count}. Click a numbered chip to set accepted answers.`;
+        }
+        return '';
+    }
+
+    // Fill in the Blank
+    function renderFBEditor(q) {
+        const sync = syncFillBlanks(q);
+        const warning = fbWarningText(sync);
         const sentencesHTML = q.sentences.map((sentence, i) => `
-            <div class="sentence-slot" style="display:flex; gap:10px; margin-bottom:8px;">
-                ${rtEditorHtml(sentence, { className: 'fb-sentence-input', placeholder: `Sentence ${i + 1} (use ___ for blanks)`, index: i, multiline: true })}
+            <div class="sentence-slot" style="display:flex; gap:10px; margin-bottom:8px; align-items:flex-start;">
+                ${rtEditorHtml(sentence, { className: 'fb-sentence-input', placeholder: i === 0 ? 'Type a sentence or cloze paragraph. Use ___ for each blank.' : `Sentence ${i + 1} (use ___ for blanks)`, index: i, multiline: true })}
                 ${q.sentences.length > 1 ? `<button class="remove-option" data-index="${i}" data-action="remove-sentence"><i class="fa-solid fa-xmark"></i></button>` : ''}
             </div>
         `).join('');
 
-        const blanks = q.blanks.map((b, i) => `
-            <div class="blank-slot">
-                <span class="blank-number">${i + 1}</span>
-                <input type="text" value="${escapeHtml(b)}" placeholder="Correct answer for blank ${i + 1}" class="fb-blank-input" data-index="${i}" />
-                ${q.blanks.length > 1 ? `<button class="remove-option" data-index="${i}" data-action="remove-blank"><i class="fa-solid fa-xmark"></i></button>` : ''}
-            </div>
-        `).join('');
+        const hasBlanks = sync.count > 0;
+        const activeAnswers = formatBlankAnswers(q.blanks[fbActiveBlank]);
 
         return `
             <div class="field-group">
-                <label>Sentences (use ___ for blanks)</label>
+                <label>Passage (use ___ for blanks)</label>
                 <div id="fb-sentences">${sentencesHTML}</div>
                 <button class="btn-add-option" id="btn-add-sentence" style="margin-top:8px;"><i class="fa-solid fa-plus"></i> Add sentence</button>
+                <div class="fb-chip-preview" id="fb-chip-preview">${renderFbChipPreview(q)}</div>
+                <div class="fb-blank-warning" id="fb-blank-warning" ${warning ? '' : 'hidden'}>${escapeHtml(warning)}</div>
             </div>
-            <div class="field-group">
-                <label>Correct Answers</label>
-                <div class="blank-slots" id="fb-blanks">${blanks}</div>
-                <button class="btn-add-option" id="btn-add-blank" style="margin-top:8px;"><i class="fa-solid fa-plus"></i> Add blank</button>
+            <div class="field-group fb-answer-panel" id="fb-answer-panel" ${hasBlanks ? '' : 'hidden'}>
+                <label>Blank <span id="fb-active-num">${hasBlanks ? fbActiveBlank + 1 : 0}</span> accepted answers</label>
+                <input type="text" id="fb-active-answers" class="fb-blank-input" value="${escapeHtml(activeAnswers)}" placeholder="sky | the sky" />
+                <p class="fb-answer-hint">Separate multiple accepted answers with |</p>
             </div>
             <div class="toggle-row">
                 <span class="toggle-label">Case sensitive</span>
@@ -1349,10 +1422,52 @@ const TestBuilder = (function () {
         });
     }
 
+    function bindFbChipPreview(q) {
+        const preview = document.getElementById('fb-chip-preview');
+        if (!preview) return;
+        preview.querySelectorAll('.fb-chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                fbActiveBlank = parseInt(chip.dataset.blank, 10) || 0;
+                refreshFbAnswerPanel(q);
+                preview.querySelectorAll('.fb-chip').forEach(c => {
+                    c.classList.toggle('active', parseInt(c.dataset.blank, 10) === fbActiveBlank);
+                });
+                const input = document.getElementById('fb-active-answers');
+                if (input) input.focus();
+            });
+        });
+    }
+
+    function refreshFbAnswerPanel(q) {
+        const panel = document.getElementById('fb-answer-panel');
+        const numEl = document.getElementById('fb-active-num');
+        const input = document.getElementById('fb-active-answers');
+        const hasBlanks = (q.blanks || []).length > 0;
+        if (panel) panel.hidden = !hasBlanks;
+        if (!hasBlanks) return;
+        if (numEl) numEl.textContent = String(fbActiveBlank + 1);
+        if (input) input.value = formatBlankAnswers(q.blanks[fbActiveBlank]);
+    }
+
+    function refreshFbPassageUI(q, sync) {
+        const preview = document.getElementById('fb-chip-preview');
+        if (preview) preview.innerHTML = renderFbChipPreview(q);
+        bindFbChipPreview(q);
+        const warnEl = document.getElementById('fb-blank-warning');
+        const warning = fbWarningText(sync);
+        if (warnEl) {
+            warnEl.hidden = !warning;
+            warnEl.textContent = warning;
+        }
+        refreshFbAnswerPanel(q);
+    }
+
     function bindFBEditor(q) {
         document.querySelectorAll('.fb-sentence-input').forEach(input => {
             bindRichField(input, (html) => {
                 q.sentences[parseInt(input.dataset.index)] = html;
+                const sync = syncFillBlanks(q);
+                refreshFbPassageUI(q, sync);
                 renderPreview();
                 autoSave();
             });
@@ -1361,6 +1476,7 @@ const TestBuilder = (function () {
         document.querySelectorAll('[data-action="remove-sentence"]').forEach(btn => {
             btn.addEventListener('click', () => {
                 q.sentences.splice(parseInt(btn.dataset.index), 1);
+                syncFillBlanks(q);
                 renderEditor();
                 renderPreview();
                 autoSave();
@@ -1376,28 +1492,22 @@ const TestBuilder = (function () {
             });
         }
 
-        document.querySelectorAll('.fb-blank-input').forEach(input => {
-            input.addEventListener('input', () => {
-                q.blanks[parseInt(input.dataset.index)] = input.value;
-                renderPreview();
-                autoSave();
-            });
-        });
+        bindFbChipPreview(q);
 
-        document.querySelectorAll('[data-action="remove-blank"]').forEach(btn => {
-            btn.addEventListener('click', () => {
-                q.blanks.splice(parseInt(btn.dataset.index), 1);
-                renderEditor();
+        const activeInput = document.getElementById('fb-active-answers');
+        if (activeInput) {
+            activeInput.addEventListener('input', () => {
+                if (!q.blanks.length) return;
+                q.blanks[fbActiveBlank] = parseAcceptedAnswers(activeInput.value);
+                const preview = document.getElementById('fb-chip-preview');
+                if (preview) {
+                    const chip = preview.querySelector(`.fb-chip[data-blank="${fbActiveBlank}"]`);
+                    if (chip) {
+                        chip.classList.toggle('filled', q.blanks[fbActiveBlank].length > 0);
+                        chip.classList.toggle('empty', q.blanks[fbActiveBlank].length === 0);
+                    }
+                }
                 renderPreview();
-                autoSave();
-            });
-        });
-
-        const addBlankBtn = document.getElementById('btn-add-blank');
-        if (addBlankBtn) {
-            addBlankBtn.addEventListener('click', () => {
-                q.blanks.push('');
-                renderEditor();
                 autoSave();
             });
         }
@@ -1735,20 +1845,16 @@ const TestBuilder = (function () {
     }
 
     function renderFBPreview(q) {
-        // Migrate old single-sentence format
-        if (q.sentence !== undefined && !q.sentences) {
-            q.sentences = [q.sentence];
-            delete q.sentence;
-        }
+        migrateFillBlankQuestion(q);
         const sentences = q.sentences || [];
 
         let blankIdx = 0;
         const sentencesHtml = sentences.map(s => {
             let html = sanitizeRichText(s);
             html = html.replace(/___/g, () => {
-                const answer = q.blanks[blankIdx] || '?';
+                const answer = formatBlankAnswersDisplay(q.blanks[blankIdx] || []);
                 blankIdx++;
-                return `<span class="preview-blank-slot">${escapeHtml(stripRichText(answer) || '?')}</span>`;
+                return `<span class="preview-blank-slot">${escapeHtml(answer)}</span>`;
             });
             return `<div class="preview-fill-blank">${html}</div>`;
         }).join('');

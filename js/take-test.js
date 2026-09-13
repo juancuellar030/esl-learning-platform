@@ -120,6 +120,40 @@ function renderRich(html, fallback) {
     return clean;
 }
 
+function normalizeBlankEntry(b) {
+    if (Array.isArray(b)) return b.map(s => String(s).trim()).filter(Boolean);
+    if (b == null || b === '') return [];
+    return [String(b).trim()].filter(Boolean);
+}
+
+function migrateFillBlankQuestion(q) {
+    if (!q || q.type !== 'fill-blank') return;
+    if (q.sentence !== undefined && !q.sentences) {
+        q.sentences = [q.sentence];
+        delete q.sentence;
+    }
+    if (!Array.isArray(q.sentences)) q.sentences = [''];
+    if (!Array.isArray(q.blanks)) q.blanks = [];
+    q.blanks = q.blanks.map(normalizeBlankEntry);
+}
+
+function flattenBlankBank(blanks) {
+    return (blanks || []).flatMap(b => normalizeBlankEntry(b));
+}
+
+function blankAnswerMatches(student, accepted, caseSensitive) {
+    const ans = String(student || '').trim();
+    if (!ans) return false;
+    const list = normalizeBlankEntry(accepted);
+    if (!list.length) return false;
+    return list.some(b => caseSensitive ? ans === b : ans.toLowerCase() === b.toLowerCase());
+}
+
+function formatBlankAnswersDisplay(b) {
+    const list = normalizeBlankEntry(b);
+    return list.length ? list.join('/') : '?';
+}
+
 const TakeTest = (function () {
     'use strict';
 
@@ -437,6 +471,7 @@ const TakeTest = (function () {
             }
 
             testData = data;
+            (testData.questions || []).forEach(migrateFillBlankQuestion);
             fullscreenEnabled = testData.settings && testData.settings.enableFullscreen;
             answers = new Array(testData.questions.length).fill(null);
 
@@ -1046,11 +1081,7 @@ const TakeTest = (function () {
     }
 
     function renderFBQuestion(q) {
-        // Migrate old single-sentence format
-        if (q.sentence !== undefined && !q.sentences) {
-            q.sentences = [q.sentence];
-            delete q.sentence;
-        }
+        migrateFillBlankQuestion(q);
         const sentences = q.sentences || [];
 
         let blankIdx = 0;
@@ -1066,7 +1097,7 @@ const TakeTest = (function () {
         let wordBankHtml = '';
         if (q.useWordBank && q.blanks && q.blanks.length > 0) {
             const usedWords = answers[currentQ] || [];
-            const bankWords = [...q.blanks];
+            const bankWords = flattenBlankBank(q.blanks);
             if (q.wordBank) bankWords.push(...q.wordBank);
             shuffleArray(bankWords);
             wordBankHtml = `<div class="tt-word-bank">${bankWords.map(w => {
@@ -1652,10 +1683,8 @@ const TakeTest = (function () {
                     break;
                 case 'fill-blank':
                     if (Array.isArray(studentAnswer) && q.blanks) {
-                        const allCorrect = q.blanks.every((b, bi) => {
-                            const ans = studentAnswer[bi] || '';
-                            return q.caseSensitive ? ans === b : ans.toLowerCase() === b.toLowerCase();
-                        });
+                        migrateFillBlankQuestion(q);
+                        const allCorrect = q.blanks.every((b, bi) => blankAnswerMatches(studentAnswer[bi], b, q.caseSensitive));
                         if (allCorrect) earnedInQuestion = currentQPoints;
                     }
                     break;
@@ -2109,7 +2138,7 @@ function buildAnswerReview() {
             case 'fill-blank':
                 const fbAns = studentAnswers[i];
                 studentAnswerText = Array.isArray(fbAns) ? fbAns.map(a => escapeHtml(a || '(empty)')).join(', ') : 'No answer';
-                correctAnswerText = (q.blanks || []).map(b => escapeHtml(b)).join(', ');
+                correctAnswerText = (q.blanks || []).map(b => escapeHtml(formatBlankAnswersDisplay(b))).join(', ');
                 break;
             case 'matching':
                 const mAns = studentAnswers[i];
