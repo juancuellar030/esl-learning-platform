@@ -14,7 +14,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Reddit+Sans:wght@300;400;500;600;700;800&display=swap"
     rel="stylesheet" />
   <link rel="stylesheet" href="css/styles.css" />
-  <link rel="stylesheet" href="css/take-test.css?v=size-v1" />
+  <link rel="stylesheet" href="css/take-test.css?v=preview-v1" />
   <style>
     body {
       margin: 0;
@@ -32,6 +32,9 @@
 
 <body>
   <canvas id="tt-bg-canvas" style="position:fixed;inset:0;z-index:0;pointer-events:none;"></canvas>
+  <div class="tt-preview-badge" id="preview-badge" style="display: none" role="status">
+    Preview Mode — No Answers Recorded
+  </div>
   <!-- Loading -->
   <div class="tt-screen tt-loading" id="screen-loading">
     <div class="tt-loading-spinner"></div>
@@ -137,6 +140,24 @@
       <button class="tt-btn tt-btn-success" id="btn-submit-test" style="display: none">
         <i class="fa-solid fa-check"></i> Submit Test
       </button>
+      <button class="tt-btn tt-btn-primary" id="btn-end-preview" style="display: none">
+        <i class="fa-solid fa-flag-checkered"></i> End Preview
+      </button>
+    </div>
+  </div>
+
+  <!-- Preview end (no score) -->
+  <div class="tt-screen tt-preview-end" id="screen-preview-end" style="display: none">
+    <div class="tt-preview-end-card">
+      <i class="fa-solid fa-tv"></i>
+      <h2>End of preview</h2>
+      <p>No answers were recorded. This walkthrough was not graded or submitted.</p>
+      <div class="tt-preview-end-actions">
+        <button class="tt-btn tt-btn-secondary" id="btn-preview-restart">
+          <i class="fa-solid fa-arrow-left"></i> Back to Question 1
+        </button>
+        <button class="tt-btn tt-btn-primary" id="btn-preview-close">Close</button>
+      </div>
     </div>
   </div>
 
@@ -303,7 +324,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <script src="js/firebase-service.js"></script>
-  <script src="js/take-test.js?v=fill-blank-v1"></script>
+  <script src="js/take-test.js?v=preview-v1"></script>
 </body>
 
 </html>

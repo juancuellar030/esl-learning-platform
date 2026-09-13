@@ -87,6 +87,7 @@ const TestBuilder = (function () {
         dom.btnSettings = document.getElementById('btn-settings');
         dom.btnCloseSettings = document.getElementById('btn-close-settings');
         dom.btnSave = document.getElementById('btn-save');
+        dom.btnPreviewTest = document.getElementById('btn-preview-test');
         dom.btnExportToggle = document.getElementById('btn-export-toggle');
         dom.exportMenu = document.getElementById('export-menu');
         dom.exportDropdownWrap = document.getElementById('export-dropdown-wrap');
@@ -307,6 +308,19 @@ const TestBuilder = (function () {
             saveTest();
             showToast('Test saved!');
         });
+
+        // Student-view walkthrough — in-memory only, never scored or submitted
+        if (dom.btnPreviewTest) {
+            dom.btnPreviewTest.addEventListener('click', () => {
+                if (!testData.questions || testData.questions.length === 0) {
+                    showToast('Add at least one question to preview');
+                    return;
+                }
+                saveTest();
+                const url = `take-test.html?preview=1&testId=${encodeURIComponent(testData.id)}`;
+                window.open(url, '_blank');
+            });
+        }
 
         // Import JSON from local file
         if (dom.importJsonInput) {

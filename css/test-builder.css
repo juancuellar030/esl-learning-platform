@@ -96,6 +96,15 @@
     background: rgba(255, 255, 255, 0.25);
 }
 
+.btn-preview-test {
+    background: var(--amber-flame);
+    color: var(--indigo-velvet);
+}
+
+.btn-preview-test:hover {
+    filter: brightness(1.08);
+}
+
 .btn-share {
     background: var(--amber-flame);
     color: var(--indigo-velvet);

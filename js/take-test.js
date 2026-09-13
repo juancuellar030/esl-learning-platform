@@ -177,7 +177,9 @@ const TakeTest = (function () {
     let testData = null;
     let testCode = '';
     let currentQ = 0;
-    let answers = [];          // student's answers per question
+    let answers = [];          // student's answers per question (live tests only)
+    let isPreviewMode = false; // teacher walkthrough — never scores or submits
+    let previewAnswers = [];   // in-memory demo selections; never persisted
     let startedAt = 0;
     let violations = [];
     let fullscreenEnabled = false;
@@ -367,18 +369,26 @@ const TakeTest = (function () {
     });
 
     // ===== INITIALIZATION =====
+    function sessionAnswers() {
+        return isPreviewMode ? previewAnswers : answers;
+    }
+
     function init() {
         cacheScreens();
 
         // Check URL for code
         const params = new URLSearchParams(window.location.search);
-        const code = params.get('code');
-        if (code && code.length === 6) {
-            testCode = code.toUpperCase();
-            loadTest(testCode);
+        if (params.get('preview') === '1') {
+            loadPreviewTest(params.get('testId'));
         } else {
-            showScreen('code');
-            setupCodeEntry();
+            const code = params.get('code');
+            if (code && code.length === 6) {
+                testCode = code.toUpperCase();
+                loadTest(testCode);
+            } else {
+                showScreen('code');
+                setupCodeEntry();
+            }
         }
 
         // Global zoom listener
@@ -406,7 +416,8 @@ const TakeTest = (function () {
             code: document.getElementById('screen-code'),
             student: document.getElementById('screen-student'),
             question: document.getElementById('screen-question'),
-            results: document.getElementById('screen-results')
+            results: document.getElementById('screen-results'),
+            previewEnd: document.getElementById('screen-preview-end')
         };
     }
 
@@ -489,6 +500,82 @@ const TakeTest = (function () {
         document.getElementById('error-title').textContent = title;
         document.getElementById('error-message').textContent = message;
         showScreen('error');
+    }
+
+    // ===== PREVIEW MODE (draft from localStorage, never Firebase) =====
+    function loadPreviewTest(testId) {
+        isPreviewMode = true;
+        fullscreenEnabled = false;
+        document.body.classList.add('tt-preview-mode');
+        const badge = document.getElementById('preview-badge');
+        if (badge) badge.style.display = 'block';
+
+        if (typeof FirebaseService !== 'undefined') {
+            FirebaseService.submitTestResponse = async function () {
+                console.warn('[TakeTest] Blocked submitTestResponse in preview mode');
+            };
+            FirebaseService.getSubmittedNames = async function () {
+                console.warn('[TakeTest] Blocked getSubmittedNames in preview mode');
+                return [];
+            };
+            FirebaseService.getPublishedTest = async function () {
+                console.warn('[TakeTest] Blocked getPublishedTest in preview mode');
+                return null;
+            };
+        }
+
+        if (!testId) {
+            showError('Preview Unavailable', 'Missing test id. Open Preview from the test builder.');
+            return;
+        }
+
+        let raw;
+        try {
+            raw = localStorage.getItem('esl_test_' + testId);
+        } catch (e) {
+            showError('Preview Unavailable', 'Could not read this draft from the browser.');
+            return;
+        }
+
+        if (!raw) {
+            showError('Preview Unavailable', 'This draft was not found in this browser. Open Preview from the test builder on the same device.');
+            return;
+        }
+
+        let data;
+        try {
+            data = JSON.parse(raw);
+        } catch (e) {
+            showError('Preview Unavailable', 'The saved draft could not be read.');
+            return;
+        }
+
+        if (!data.questions || data.questions.length === 0) {
+            showError('Preview Unavailable', 'This test has no questions yet.');
+            return;
+        }
+
+        testData = data;
+        (testData.questions || []).forEach(migrateFillBlankQuestion);
+        answers = new Array(testData.questions.length).fill(null);
+        previewAnswers = new Array(testData.questions.length).fill(null);
+
+        applyTestTheme('default', false);
+        if (testData.settings && testData.settings.allowThemes) {
+            document.getElementById('btn-theme-fab').style.display = '';
+        }
+
+        const timerEl = document.getElementById('q-timer');
+        if (timerEl) timerEl.style.display = 'none';
+
+        setupNavigation();
+        currentQ = 0;
+        renderQuestion();
+        showScreen('question');
+    }
+
+    function showPreviewEnd() {
+        showScreen('previewEnd');
     }
 
     // ===== STUDENT ID SCREEN =====
@@ -743,6 +830,7 @@ const TakeTest = (function () {
 
     // ===== START TEST (with retake check) =====
     async function handleStartClick() {
+        if (isPreviewMode) return;
         console.log('[TakeTest] handleStartClick...');
         const settings = testData.settings || {};
 
@@ -794,6 +882,7 @@ const TakeTest = (function () {
     }
 
     function proceedToStart() {
+        if (isPreviewMode) return;
         console.log('[TakeTest] proceedToStart...');
         const settings = testData.settings || {};
 
@@ -839,6 +928,7 @@ const TakeTest = (function () {
 
     // ===== FULLSCREEN & ANTI-CHEAT =====
     function requestFullscreen() {
+        if (isPreviewMode) return;
         try {
             const el = document.documentElement;
             if (el.requestFullscreen) el.requestFullscreen();
@@ -850,6 +940,7 @@ const TakeTest = (function () {
     }
 
     function setupAntiCheat() {
+        if (isPreviewMode) return;
         // Monitor fullscreen exit
         document.addEventListener('fullscreenchange', onFullscreenChange);
         document.addEventListener('webkitfullscreenchange', onFullscreenChange);
@@ -859,6 +950,7 @@ const TakeTest = (function () {
     }
 
     function onFullscreenChange() {
+        if (isPreviewMode) return;
         const isFS = !!(document.fullscreenElement || document.webkitFullscreenElement);
         if (!isFS && fullscreenEnabled && screens.question.style.display !== 'none') {
             violations.push({ type: 'fullscreen-exit', timestamp: Date.now() });
@@ -869,6 +961,7 @@ const TakeTest = (function () {
     }
 
     function onVisibilityChange() {
+        if (isPreviewMode) return;
         if (document.hidden && fullscreenEnabled && screens.question.style.display !== 'none') {
             violations.push({ type: 'tab-switch', timestamp: Date.now() });
         }
@@ -913,6 +1006,7 @@ const TakeTest = (function () {
 
     // ===== TIMER =====
     function startTimer() {
+        if (isPreviewMode) return;
         const timerEl = document.getElementById('q-timer');
         const timerText = document.getElementById('timer-text');
         timerEl.style.display = 'inline-flex';
@@ -940,6 +1034,23 @@ const TakeTest = (function () {
         document.getElementById('btn-prev').addEventListener('click', prevQuestion);
         document.getElementById('btn-submit-test').addEventListener('click', submitTest);
 
+        const btnEndPreview = document.getElementById('btn-end-preview');
+        if (btnEndPreview) {
+            btnEndPreview.addEventListener('click', showPreviewEnd);
+        }
+        const btnPreviewRestart = document.getElementById('btn-preview-restart');
+        if (btnPreviewRestart) {
+            btnPreviewRestart.addEventListener('click', () => {
+                currentQ = 0;
+                renderQuestion();
+                showScreen('question');
+            });
+        }
+        const btnPreviewClose = document.getElementById('btn-preview-close');
+        if (btnPreviewClose) {
+            btnPreviewClose.addEventListener('click', () => window.close());
+        }
+
         // Incomplete question warning handlers
         document.getElementById('btn-go-back').addEventListener('click', () => {
             document.getElementById('incomplete-warning').style.display = 'none';
@@ -949,8 +1060,8 @@ const TakeTest = (function () {
             document.getElementById('incomplete-warning').style.display = 'none';
             if (pendingDirection === 'next') {
                 doNext();
-            } else if (pendingDirection === 'submit') {
-                submitTest(true);   // force submit
+            } else if (pendingDirection === 'submit' && !isPreviewMode) {
+                submitTest(true);   // force submit — unreachable in preview
             }
             pendingDirection = null;
         });
@@ -959,6 +1070,10 @@ const TakeTest = (function () {
     let pendingDirection = null;  // 'next' or 'submit' ΓÇö used by incomplete warning
 
     function nextQuestion() {
+        if (isPreviewMode) {
+            doNext();
+            return;
+        }
         if (!isQuestionAnswered()) {
             pendingDirection = 'next';
             document.getElementById('incomplete-warning').style.display = 'flex';
@@ -992,9 +1107,18 @@ const TakeTest = (function () {
         document.getElementById('q-counter').textContent = `${currentQ + 1} / ${total}`;
 
         // Nav buttons
+        const isLast = currentQ === total - 1;
         document.getElementById('btn-prev').style.display = currentQ > 0 ? 'inline-flex' : 'none';
-        document.getElementById('btn-next').style.display = currentQ < total - 1 ? 'inline-flex' : 'none';
-        document.getElementById('btn-submit-test').style.display = currentQ === total - 1 ? 'inline-flex' : 'none';
+        document.getElementById('btn-next').style.display = !isLast ? 'inline-flex' : 'none';
+        const btnSubmit = document.getElementById('btn-submit-test');
+        const btnEndPreview = document.getElementById('btn-end-preview');
+        if (isPreviewMode) {
+            btnSubmit.style.display = 'none';
+            if (btnEndPreview) btnEndPreview.style.display = isLast ? 'inline-flex' : 'none';
+        } else {
+            btnSubmit.style.display = isLast ? 'inline-flex' : 'none';
+            if (btnEndPreview) btnEndPreview.style.display = 'none';
+        }
 
         // Media
         let mediaHtml = '';
@@ -1037,7 +1161,7 @@ const TakeTest = (function () {
             : '';
 
         const opts = q.options.map((opt, i) => {
-            const selected = answers[currentQ] === i ? 'selected' : '';
+            const selected = sessionAnswers()[currentQ] === i ? 'selected' : '';
             const img = q.optionImages && q.optionImages[i]
                 ? `<img class="tt-option-img" src="${q.optionImages[i]}" alt="" data-preview="${q.optionImages[i]}" />`
                 : '';
@@ -1050,7 +1174,7 @@ const TakeTest = (function () {
     }
 
     function renderMSQuestion(q) {
-        const selectedArr = Array.isArray(answers[currentQ]) ? answers[currentQ] : [];
+        const selectedArr = Array.isArray(sessionAnswers()[currentQ]) ? sessionAnswers()[currentQ] : [];
         const opts = q.options.map((opt, i) => {
             const isSelected = selectedArr.includes(i);
             return `<div class="tt-ms-option ${isSelected ? 'ms-selected' : ''}" data-idx="${i}">
@@ -1070,7 +1194,7 @@ const TakeTest = (function () {
 
     function renderTFQuestion(q) {
         const opts = q.options.map((opt, i) => {
-            const selected = answers[currentQ] === i ? 'selected' : '';
+            const selected = sessionAnswers()[currentQ] === i ? 'selected' : '';
             const icon = i === 0 ? 'fa-check' : 'fa-xmark';
             return `<div class="tt-option ${selected}" data-idx="${i}">
                 <span class="tt-opt-letter"><i class="fa-solid ${icon}"></i></span>
@@ -1088,7 +1212,7 @@ const TakeTest = (function () {
         const sentencesHtml = sentences.map(s => {
             let html = sanitizeRichText(s);
             html = html.replace(/___/g, () => {
-                const val = answers[currentQ] && answers[currentQ][blankIdx] ? answers[currentQ][blankIdx] : '';
+                const val = sessionAnswers()[currentQ] && sessionAnswers()[currentQ][blankIdx] ? sessionAnswers()[currentQ][blankIdx] : '';
                 return `<input type="text" class="tt-blank-input" data-blank="${blankIdx++}" value="${escapeHtml(val)}" placeholder="..." />`;
             });
             return `<div class="tt-fill-blank-sentence">${html}</div>`;
@@ -1096,7 +1220,7 @@ const TakeTest = (function () {
 
         let wordBankHtml = '';
         if (q.useWordBank && q.blanks && q.blanks.length > 0) {
-            const usedWords = answers[currentQ] || [];
+            const usedWords = sessionAnswers()[currentQ] || [];
             const bankWords = flattenBlankBank(q.blanks);
             if (q.wordBank) bankWords.push(...q.wordBank);
             shuffleArray(bankWords);
@@ -1121,7 +1245,7 @@ const TakeTest = (function () {
         }
         const rightOptions = matchShuffleCache[currentQ];
 
-        const currentMatches = answers[currentQ] || [];
+        const currentMatches = sessionAnswers()[currentQ] || [];
 
         const leftItems = q.pairs.map((p, i) => {
             const isMatched = currentMatches[i] !== undefined && currentMatches[i] !== '';
@@ -1150,7 +1274,7 @@ const TakeTest = (function () {
     }
 
     function renderUWQuestion(q) {
-        const placed = answers[currentQ] || [];
+        const placed = sessionAnswers()[currentQ] || [];
         const words = [...q.words];
         shuffleArray(words);
 
@@ -1181,7 +1305,7 @@ const TakeTest = (function () {
     }
 
     function renderULQuestion(q) {
-        const placed = answers[currentQ] || [];
+        const placed = sessionAnswers()[currentQ] || [];
         const letters = (q.correctWord || '').split('');
         shuffleArray(letters);
 
@@ -1219,7 +1343,7 @@ const TakeTest = (function () {
         });
         shuffleArray(allItems);
 
-        const placedItems = answers[currentQ] || {}; // { catIndex: [items] }
+        const placedItems = sessionAnswers()[currentQ] || {}; // { catIndex: [items] }
 
         const cats = q.categories.map((cat, ci) => {
             const items = placedItems[ci] || [];
@@ -1272,7 +1396,7 @@ const TakeTest = (function () {
                     opt.addEventListener('click', (e) => {
                         // Don't select option if clicking preview image
                         if (e.target.closest('.tt-option-img')) return;
-                        answers[currentQ] = parseInt(opt.dataset.idx);
+                        sessionAnswers()[currentQ] = parseInt(opt.dataset.idx);
                         document.querySelectorAll('.tt-option').forEach(o => o.classList.remove('selected'));
                         opt.classList.add('selected');
                         opt.querySelector('.tt-opt-letter').style.transform = 'scale(1.1)';
@@ -1285,12 +1409,12 @@ const TakeTest = (function () {
                 document.querySelectorAll('.tt-ms-option').forEach(opt => {
                     opt.addEventListener('click', () => {
                         const idx = parseInt(opt.dataset.idx);
-                        if (!Array.isArray(answers[currentQ])) answers[currentQ] = [];
-                        const pos = answers[currentQ].indexOf(idx);
+                        if (!Array.isArray(sessionAnswers()[currentQ])) sessionAnswers()[currentQ] = [];
+                        const pos = sessionAnswers()[currentQ].indexOf(idx);
                         if (pos === -1) {
-                            answers[currentQ].push(idx);
+                            sessionAnswers()[currentQ].push(idx);
                         } else {
-                            answers[currentQ].splice(pos, 1);
+                            sessionAnswers()[currentQ].splice(pos, 1);
                         }
                         renderQuestion();
                     });
@@ -1300,8 +1424,8 @@ const TakeTest = (function () {
             case 'fill-blank':
                 document.querySelectorAll('.tt-blank-input').forEach(inp => {
                     inp.addEventListener('input', () => {
-                        if (!answers[currentQ]) answers[currentQ] = [];
-                        answers[currentQ][parseInt(inp.dataset.blank)] = inp.value;
+                        if (!sessionAnswers()[currentQ]) sessionAnswers()[currentQ] = [];
+                        sessionAnswers()[currentQ][parseInt(inp.dataset.blank)] = inp.value;
                     });
                 });
                 // Word bank click
@@ -1314,8 +1438,8 @@ const TakeTest = (function () {
                         for (let b of blanks) {
                             if (!b.value) {
                                 b.value = word;
-                                if (!answers[currentQ]) answers[currentQ] = [];
-                                answers[currentQ][parseInt(b.dataset.blank)] = word;
+                                if (!sessionAnswers()[currentQ]) sessionAnswers()[currentQ] = [];
+                                sessionAnswers()[currentQ][parseInt(b.dataset.blank)] = word;
                                 chip.classList.add('used');
                                 break;
                             }
@@ -1359,8 +1483,8 @@ const TakeTest = (function () {
             tile.addEventListener('click', () => {
                 if (tile.classList.contains('placed')) return;
                 const value = mode === 'word' ? tile.dataset.word : tile.dataset.letter;
-                if (!answers[currentQ]) answers[currentQ] = [];
-                answers[currentQ].push(value);
+                if (!sessionAnswers()[currentQ]) sessionAnswers()[currentQ] = [];
+                sessionAnswers()[currentQ].push(value);
                 tile.classList.add('placed');
                 renderQuestion();
             });
@@ -1395,8 +1519,8 @@ const TakeTest = (function () {
                 answerZone.classList.remove('drag-over');
                 const value = e.dataTransfer.getData('text/plain');
                 if (value) {
-                    if (!answers[currentQ]) answers[currentQ] = [];
-                    answers[currentQ].push(value);
+                    if (!sessionAnswers()[currentQ]) sessionAnswers()[currentQ] = [];
+                    sessionAnswers()[currentQ].push(value);
                     renderQuestion();
                 }
             });
@@ -1407,8 +1531,8 @@ const TakeTest = (function () {
             // Click to remove
             chip.addEventListener('click', () => {
                 const idx = parseInt(chip.dataset.idx);
-                if (answers[currentQ]) {
-                    answers[currentQ].splice(idx, 1);
+                if (sessionAnswers()[currentQ]) {
+                    sessionAnswers()[currentQ].splice(idx, 1);
                 }
                 renderQuestion();
             });
@@ -1424,8 +1548,8 @@ const TakeTest = (function () {
                 chip.classList.remove('dragging');
                 if (e.dataTransfer.dropEffect === 'none') {
                     const idx = parseInt(chip.dataset.idx);
-                    if (answers[currentQ]) {
-                        answers[currentQ].splice(idx, 1);
+                    if (sessionAnswers()[currentQ]) {
+                        sessionAnswers()[currentQ].splice(idx, 1);
                         renderQuestion();
                     }
                 }
@@ -1462,9 +1586,9 @@ const TakeTest = (function () {
             cat.addEventListener('click', () => {
                 if (!selectedItem) return;
                 const ci = parseInt(cat.dataset.cat);
-                if (!answers[currentQ]) answers[currentQ] = {};
-                if (!answers[currentQ][ci]) answers[currentQ][ci] = [];
-                answers[currentQ][ci].push(selectedItem);
+                if (!sessionAnswers()[currentQ]) sessionAnswers()[currentQ] = {};
+                if (!sessionAnswers()[currentQ][ci]) sessionAnswers()[currentQ][ci] = [];
+                sessionAnswers()[currentQ][ci].push(selectedItem);
                 selectedItem = null;
                 renderQuestion();
             });
@@ -1484,9 +1608,9 @@ const TakeTest = (function () {
                 const itemValue = e.dataTransfer.getData('text/plain');
                 if (!itemValue) return;
                 const ci = parseInt(cat.dataset.cat);
-                if (!answers[currentQ]) answers[currentQ] = {};
-                if (!answers[currentQ][ci]) answers[currentQ][ci] = [];
-                answers[currentQ][ci].push(itemValue);
+                if (!sessionAnswers()[currentQ]) sessionAnswers()[currentQ] = {};
+                if (!sessionAnswers()[currentQ][ci]) sessionAnswers()[currentQ][ci] = [];
+                sessionAnswers()[currentQ][ci].push(itemValue);
                 selectedItem = null;
                 renderQuestion();
             });
@@ -1498,9 +1622,9 @@ const TakeTest = (function () {
                 e.stopPropagation();
                 const ci = parseInt(item.dataset.cat);
                 const val = item.dataset.item;
-                if (answers[currentQ] && answers[currentQ][ci]) {
-                    const idx = answers[currentQ][ci].indexOf(val);
-                    if (idx >= 0) answers[currentQ][ci].splice(idx, 1);
+                if (sessionAnswers()[currentQ] && sessionAnswers()[currentQ][ci]) {
+                    const idx = sessionAnswers()[currentQ][ci].indexOf(val);
+                    if (idx >= 0) sessionAnswers()[currentQ][ci].splice(idx, 1);
                 }
                 renderQuestion();
             });
@@ -1511,7 +1635,7 @@ const TakeTest = (function () {
     let activeLeftIdx = null;
 
     function bindMatchInteractions(q) {
-        if (!answers[currentQ]) answers[currentQ] = [];
+        if (!sessionAnswers()[currentQ]) sessionAnswers()[currentQ] = [];
 
         // Draw lines for existing matches
         setTimeout(() => renderMatchLines(), 50);
@@ -1535,7 +1659,7 @@ const TakeTest = (function () {
                 const rightValue = item.dataset.value;
 
                 // Set the match
-                answers[currentQ][activeLeftIdx] = rightValue;
+                sessionAnswers()[currentQ][activeLeftIdx] = rightValue;
                 activeLeftIdx = null;
                 renderQuestion();
             });
@@ -1546,8 +1670,8 @@ const TakeTest = (function () {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 const val = btn.dataset.value;
-                const idx = answers[currentQ].indexOf(val);
-                if (idx >= 0) answers[currentQ][idx] = '';
+                const idx = sessionAnswers()[currentQ].indexOf(val);
+                if (idx >= 0) sessionAnswers()[currentQ][idx] = '';
                 renderQuestion();
             });
         });
@@ -1560,7 +1684,7 @@ const TakeTest = (function () {
         const container = svg.closest('.tt-match-container');
         if (!container) return;
 
-        const currentMatches = answers[currentQ] || [];
+        const currentMatches = sessionAnswers()[currentQ] || [];
         const leftItems = container.querySelectorAll('.tt-match-item-left');
         const rightItems = container.querySelectorAll('.tt-match-item-right');
         const containerRect = container.getBoundingClientRect();
@@ -1617,6 +1741,10 @@ const TakeTest = (function () {
 
     // ===== SUBMIT TEST =====
     async function submitTest(force) {
+        if (isPreviewMode) {
+            showPreviewEnd();
+            return;
+        }
         console.log('[TakeTest] submitTest called, force:', force);
         // If not forced, check if current question is answered
         if (force !== true && !isQuestionAnswered()) {
@@ -1758,7 +1886,11 @@ const TakeTest = (function () {
             submittedAt: Date.now()
         };
 
-        // Submit to Firebase
+        // Submit to Firebase — structurally unreachable in preview (submitTest returns first)
+        if (isPreviewMode) {
+            showPreviewEnd();
+            return;
+        }
         try {
             await FirebaseService.submitTestResponse(testCode, response);
         } catch (e) {
@@ -1784,6 +1916,7 @@ const TakeTest = (function () {
 
     // ===== RESULTS =====
     function showResults(response, graded) {
+        if (isPreviewMode) return;
         lastGraded = graded;
 
         const scoreRingFill = document.getElementById('score-ring-fill');
@@ -1858,6 +1991,7 @@ const TakeTest = (function () {
     }
 
     function showResultsMinimal() {
+        if (isPreviewMode) return;
         document.getElementById('score-value').textContent = 'Γ£ô';
         document.getElementById('score-circle').style.borderColor = '#34d399';
         document.getElementById('results-details').innerHTML = `
@@ -1903,7 +2037,16 @@ const TakeTest = (function () {
     }
 
     // ===== PUBLIC =====
-    return { init };
+    return {
+        init,
+        _previewDebug: function () {
+            return {
+                isPreviewMode,
+                previewAnswers,
+                answers
+            };
+        }
+    };
 })();
 
 // ===== THEME & REVIEW EVENT BINDINGS (outside IIFE for DOM access) =====
@@ -2066,6 +2209,7 @@ window.addEventListener('test-theme-changed', (e) => {
 
 // ===== ANSWER REVIEW =====
 function buildAnswerReview() {
+    if (document.body.classList.contains('tt-preview-mode')) return;
     const reviewList = document.getElementById('review-list');
     if (!reviewList) return;
 
