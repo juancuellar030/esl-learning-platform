@@ -954,15 +954,14 @@ body.tt-preview-mode #btn-submit-test {
 .tt-word-bank-chip {
     padding: 8px 16px;
     border-radius: 8px;
-    background: var(--tt-primary, var(--indigo-velvet, #2c1f56));
-    color: white;
-    font-size: 1rem;
+    background: #a0a3dc;
+    color: black;
+    font-size: 1.35rem;
     cursor: pointer;
     transition: all 0.2s;
 }
 
 .tt-word-bank-chip:hover {
-    background: var(--tt-secondary, var(--medium-slate-blue, #7b68ee));
     transform: scale(1.05);
 }
 
