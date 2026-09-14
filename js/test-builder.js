@@ -32,14 +32,16 @@ const TestBuilder = (function () {
 
     function getOptionsLayout(q) {
         const v = q && q.optionsLayout;
-        if (v === 'row' || v === 'grid-2x2' || v === 'cards' || v === 'stack') return v;
+        if (v === 'row' || v === 'grid-2x2' || v === 'grid-3' || v === 'grid-4' || v === 'cards' || v === 'stack') return v;
         return 'stack';
     }
 
     function previewOptionsLayoutClass(q) {
         const layout = getOptionsLayout(q);
         if (layout === 'row') return 'preview-ol-row';
-        if (layout === 'grid-2x2') return 'preview-ol-grid';
+        if (layout === 'grid-2x2') return 'preview-ol-grid preview-ol-cols-2';
+        if (layout === 'grid-3') return 'preview-ol-grid preview-ol-cols-3';
+        if (layout === 'grid-4') return 'preview-ol-grid preview-ol-cols-4';
         if (layout === 'cards') return 'preview-ol-cards';
         if (layout === 'stack' && q.optionsLayout === 'stack' && q.type === 'multi-select') return 'preview-ol-stack';
         return '';
@@ -953,6 +955,12 @@ const TestBuilder = (function () {
         if (kind === 'lp-opt-grid') {
             return '<span class="lp-cell"></span><span class="lp-cell"></span><span class="lp-cell"></span><span class="lp-cell"></span>';
         }
+        if (kind === 'lp-opt-grid-3') {
+            return '<span class="lp-cell"></span><span class="lp-cell"></span><span class="lp-cell"></span><span class="lp-cell"></span><span class="lp-cell"></span><span class="lp-cell"></span>';
+        }
+        if (kind === 'lp-opt-grid-4') {
+            return '<span class="lp-cell"></span><span class="lp-cell"></span><span class="lp-cell"></span><span class="lp-cell"></span>';
+        }
         if (kind === 'lp-opt-cards') {
             return '<span class="lp-tile"></span><span class="lp-tile"></span><span class="lp-tile"></span><span class="lp-tile"></span>';
         }
@@ -986,7 +994,9 @@ const TestBuilder = (function () {
                         <div class="layout-presets">
                             ${layoutPresetCard('optionsLayout', 'stack', 'Stack', 'lp-opt-stack', opts === 'stack')}
                             ${layoutPresetCard('optionsLayout', 'row', 'Row', 'lp-opt-row', opts === 'row')}
-                            ${layoutPresetCard('optionsLayout', 'grid-2x2', '2 × 2', 'lp-opt-grid', opts === 'grid-2x2')}
+                            ${layoutPresetCard('optionsLayout', 'grid-2x2', '2 col', 'lp-opt-grid', opts === 'grid-2x2')}
+                            ${layoutPresetCard('optionsLayout', 'grid-3', '3 col', 'lp-opt-grid-3', opts === 'grid-3')}
+                            ${layoutPresetCard('optionsLayout', 'grid-4', '4 col', 'lp-opt-grid-4', opts === 'grid-4')}
                             ${layoutPresetCard('optionsLayout', 'cards', 'Cards', 'lp-opt-cards', opts === 'cards')}
                         </div>
                     </div>

@@ -1,0 +1,31 @@
+- generic [ref=f3e1]:
+  - status [ref=f3e2]: Preview Mode — No Answers Recorded
+  - text:       
+  - generic [ref=f3e3]:
+    - generic [ref=f3e7]:
+      - generic [ref=f3e8]: 5 / 6
+      - text: 
+    - generic [ref=f3e9]:
+      - generic [ref=f3e116]: 4 col grid
+      - generic [ref=f3e117]:
+        - generic [ref=f3e118] [cursor=pointer]:
+          - generic [ref=f3e119]: A
+          - generic [ref=f3e120]: A
+        - generic [ref=f3e121] [cursor=pointer]:
+          - generic [ref=f3e122]: B
+          - generic [ref=f3e123]: B
+        - generic [ref=f3e124] [cursor=pointer]:
+          - generic [ref=f3e125]: C
+          - generic [ref=f3e126]: C
+        - generic [ref=f3e127] [cursor=pointer]:
+          - generic [ref=f3e128]: D
+          - generic [ref=f3e129]: D
+    - generic [ref=f3e27]:
+      - button " Previous" [ref=f3e49] [cursor=pointer]:
+        - generic [ref=f3e50]: 
+        - text: Previous
+      - button "Next " [active] [ref=f3e28] [cursor=pointer]:
+        - text: Next
+        - generic [ref=f3e29]: 
+      - text:  
+  - text:                    

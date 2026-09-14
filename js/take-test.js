@@ -171,7 +171,7 @@ const TakeTest = (function () {
 
     function getOptionsLayout(q) {
         const v = q && q.optionsLayout;
-        if (v === 'row' || v === 'grid-2x2' || v === 'cards' || v === 'stack') return v;
+        if (v === 'row' || v === 'grid-2x2' || v === 'grid-3' || v === 'grid-4' || v === 'cards' || v === 'stack') return v;
         return 'stack';
     }
 
@@ -191,7 +191,9 @@ const TakeTest = (function () {
         const layout = getOptionsLayout(q);
         const parts = [];
         if (layout === 'row') parts.push('tt-ol-row');
-        else if (layout === 'grid-2x2') parts.push('tt-ol-grid');
+        else if (layout === 'grid-2x2') parts.push('tt-ol-grid', 'tt-ol-cols-2');
+        else if (layout === 'grid-3') parts.push('tt-ol-grid', 'tt-ol-cols-3');
+        else if (layout === 'grid-4') parts.push('tt-ol-grid', 'tt-ol-cols-4');
         else if (layout === 'cards') parts.push('tt-ol-cards');
         else if (q.optionsLayout === 'stack' && q.type === 'multi-select') parts.push('tt-ol-stack');
         else if (layout === 'stack' && hasOptionImages(q) && q.type === 'multiple-choice') {

@@ -1,0 +1,33 @@
+- generic [ref=f3e1]:
+  - status [ref=f3e2]: Preview Mode — No Answers Recorded
+  - text:       
+  - generic [ref=f3e3]:
+    - generic [ref=f3e7]:
+      - generic [ref=f3e8]: 2 / 6
+      - text: 
+    - generic [ref=f3e30]:
+      - img "Question image" [ref=f3e33]
+      - generic [ref=f3e34]:
+        - generic [ref=f3e35]: Left image
+        - generic [ref=f3e36]:
+          - generic [ref=f3e37] [cursor=pointer]:
+            - generic [ref=f3e38]: A
+            - generic [ref=f3e39]: A
+          - generic [ref=f3e40] [cursor=pointer]:
+            - generic [ref=f3e41]: B
+            - generic [ref=f3e42]: B
+          - generic [ref=f3e43] [cursor=pointer]:
+            - generic [ref=f3e44]: C
+            - generic [ref=f3e45]: C
+          - generic [ref=f3e46] [cursor=pointer]:
+            - generic [ref=f3e47]: D
+            - generic [ref=f3e48]: D
+    - generic [ref=f3e27]:
+      - button " Previous" [ref=f3e49] [cursor=pointer]:
+        - generic [ref=f3e50]: 
+        - text: Previous
+      - button "Next " [active] [ref=f3e28] [cursor=pointer]:
+        - text: Next
+        - generic [ref=f3e29]: 
+      - text:  
+  - text:                    
