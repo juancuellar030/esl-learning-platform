@@ -1283,11 +1283,18 @@ const TakeTest = (function () {
         let wordBankHtml = '';
         if (q.useWordBank && q.blanks && q.blanks.length > 0) {
             const usedWords = sessionAnswers()[currentQ] || [];
+            const usedCounts = {};
+            usedWords.forEach(a => {
+                const w = String(a == null ? '' : a).trim();
+                if (!w) return;
+                usedCounts[w] = (usedCounts[w] || 0) + 1;
+            });
             const bankWords = flattenBlankBank(q.blanks);
             if (q.wordBank) bankWords.push(...q.wordBank);
             shuffleArray(bankWords);
             wordBankHtml = `<div class="tt-word-bank">${bankWords.map(w => {
-                const used = usedWords.includes(w) ? 'used' : '';
+                const used = usedCounts[w] > 0 ? 'used' : '';
+                if (used) usedCounts[w]--;
                 return `<span class="tt-word-bank-chip ${used}" data-word="${escapeHtml(w)}">${escapeHtml(w)}</span>`;
             }).join('')}</div>`;
         }
@@ -1449,6 +1456,25 @@ const TakeTest = (function () {
             <div class="tt-dd-pool">${pool}</div>`;
     }
 
+    function syncWordBankChips() {
+        const answers = sessionAnswers()[currentQ] || [];
+        const usedCounts = {};
+        answers.forEach(a => {
+            const w = String(a == null ? '' : a).trim();
+            if (!w) return;
+            usedCounts[w] = (usedCounts[w] || 0) + 1;
+        });
+        document.querySelectorAll('.tt-word-bank-chip').forEach(chip => {
+            const w = chip.dataset.word;
+            if (usedCounts[w] > 0) {
+                chip.classList.add('used');
+                usedCounts[w]--;
+            } else {
+                chip.classList.remove('used');
+            }
+        });
+    }
+
     // ===== BIND INTERACTIONS =====
     function bindQuestionInteractions(q) {
         switch (q.type) {
@@ -1488,21 +1514,20 @@ const TakeTest = (function () {
                     inp.addEventListener('input', () => {
                         if (!sessionAnswers()[currentQ]) sessionAnswers()[currentQ] = [];
                         sessionAnswers()[currentQ][parseInt(inp.dataset.blank)] = inp.value;
+                        syncWordBankChips();
                     });
                 });
-                // Word bank click
                 document.querySelectorAll('.tt-word-bank-chip').forEach(chip => {
                     chip.addEventListener('click', () => {
                         if (chip.classList.contains('used')) return;
                         const word = chip.dataset.word;
-                        // Fill first empty blank
                         const blanks = document.querySelectorAll('.tt-blank-input');
                         for (let b of blanks) {
-                            if (!b.value) {
+                            if (!b.value.trim()) {
                                 b.value = word;
                                 if (!sessionAnswers()[currentQ]) sessionAnswers()[currentQ] = [];
                                 sessionAnswers()[currentQ][parseInt(b.dataset.blank)] = word;
-                                chip.classList.add('used');
+                                syncWordBankChips();
                                 break;
                             }
                         }

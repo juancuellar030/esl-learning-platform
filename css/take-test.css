@@ -560,7 +560,7 @@ body.tt-preview-mode #btn-submit-test {
 .tt-question-body {
     flex: 1;
     width: 100%;
-    max-width: 960px;
+    max-width: min(1400px, 92vw);
     margin: 0 auto;
     padding: 32px;
     overflow-y: auto;
@@ -588,8 +588,16 @@ body.tt-preview-mode #btn-submit-test {
     background: white;
     border-top: 1px solid #e8eaef;
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
+    align-items: center;
+}
+
+.tt-footer-nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     gap: 12px;
+    flex-wrap: wrap;
 }
 
 /* Question content */
@@ -646,7 +654,7 @@ body.tt-preview-mode #btn-submit-test {
 /* Split media column can be taller */
 .tt-question-body.tt-media-left,
 .tt-question-body.tt-media-right {
-    max-width: 1100px;
+    max-width: min(1480px, 94vw);
 }
 
 .tt-q-split {
@@ -902,6 +910,7 @@ body.tt-preview-mode #btn-submit-test {
 .tt-word-bank {
     display: flex;
     flex-wrap: wrap;
+    justify-content: center;
     gap: 8px;
     margin-bottom: 24px;
     padding: 16px;

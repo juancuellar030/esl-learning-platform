@@ -1,0 +1,25 @@
+- generic [active] [ref=f2e1]:
+  - status [ref=f2e2]: Preview Mode — No Answers Recorded
+  - text:       
+  - generic [ref=f2e3]:
+    - generic [ref=f2e7]:
+      - generic [ref=f2e8]: 1 / 2
+      - text: 
+    - generic [ref=f2e9]:
+      - generic [ref=f2e10]: Fill
+      - generic [ref=f2e11]:
+        - generic [ref=f2e12] [cursor=pointer]: sky
+        - generic [ref=f2e13] [cursor=pointer]: green
+      - generic [ref=f2e15]:
+        - text: The
+        - textbox "..." [ref=f2e16]
+        - text: is blue and the grass is
+        - textbox "..." [ref=f2e17]
+        - text: .
+    - generic [ref=f2e19]:
+      - text: 
+      - button "Next " [ref=f2e20] [cursor=pointer]:
+        - text: Next
+        - generic [ref=f2e21]: 
+      - text:  
+  - text:                    
