@@ -19,6 +19,31 @@ const TestBuilder = (function () {
         { id: 'drag-drop-category', label: 'Drag & Drop', icon: 'fa-layer-group' },
         { id: 'multi-select', label: 'Multiple Select', icon: 'fa-square-check' }
     ];
+    const CHOICE_TYPES = ['multiple-choice', 'true-false', 'multi-select'];
+
+    function isChoiceType(q) {
+        return !!(q && CHOICE_TYPES.indexOf(q.type) !== -1);
+    }
+
+    function getMediaLayout(q) {
+        if (q && (q.mediaLayout === 'media-left' || q.mediaLayout === 'media-right')) return q.mediaLayout;
+        return 'default';
+    }
+
+    function getOptionsLayout(q) {
+        const v = q && q.optionsLayout;
+        if (v === 'row' || v === 'grid-2x2' || v === 'cards' || v === 'stack') return v;
+        return 'stack';
+    }
+
+    function previewOptionsLayoutClass(q) {
+        const layout = getOptionsLayout(q);
+        if (layout === 'row') return 'preview-ol-row';
+        if (layout === 'grid-2x2') return 'preview-ol-grid';
+        if (layout === 'cards') return 'preview-ol-cards';
+        if (layout === 'stack' && q.optionsLayout === 'stack' && q.type === 'multi-select') return 'preview-ol-stack';
+        return '';
+    }
     const DEFAULT_GROUPS = ['3A', '3B', '3C', '4A', '4B', '4C', '5A', '5B', '5C', '5D'];
     const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     const RT_COLORS = {
@@ -647,11 +672,15 @@ const TestBuilder = (function () {
                 base.options = ['', '', '', ''];
                 base.correctAnswer = 0;
                 base.multiSelect = false;
+                base.mediaLayout = 'default';
+                base.optionsLayout = 'stack';
                 break;
             case 'true-false':
                 base.options = ['True', 'False'];
                 base.correctAnswer = 0;
                 base.customLabels = false;
+                base.mediaLayout = 'default';
+                base.optionsLayout = 'stack';
                 break;
             case 'fill-blank':
                 base.sentences = ['The ___ is blue.'];
@@ -688,6 +717,8 @@ const TestBuilder = (function () {
                 base.options = ['', '', '', ''];
                 base.correctAnswers = [];   // array of correct option indices
                 base.partialCredit = false; // if true, award proportional points
+                base.mediaLayout = 'default';
+                base.optionsLayout = 'stack';
                 break;
         }
 
@@ -870,6 +901,7 @@ const TestBuilder = (function () {
                 <h3><i class="fa-solid fa-image"></i> Media (optional)</h3>
                 ${renderMediaEditor(q)}
             </div>
+            ${isChoiceType(q) ? renderLayoutPicker(q) : ''}
             <div class="editor-card">
                 <h3>Answer Configuration</h3>
                 ${renderTypeEditor(q)}
@@ -896,8 +928,85 @@ const TestBuilder = (function () {
         // Bind media upload
         bindMediaEditor(q);
 
+        if (isChoiceType(q)) bindLayoutPicker(q);
+
         // Bind type-specific editors
         bindTypeEditor(q);
+    }
+
+    function layoutThumb(kind) {
+        if (kind === 'lp-media-default') {
+            return '<span class="lp-media"></span><span class="lp-bar"></span><span class="lp-bar"></span>';
+        }
+        if (kind === 'lp-media-left') {
+            return '<span class="lp-media"></span><span class="lp-lines"><span class="lp-bar"></span><span class="lp-bar"></span><span class="lp-bar"></span></span>';
+        }
+        if (kind === 'lp-media-right') {
+            return '<span class="lp-lines"><span class="lp-bar"></span><span class="lp-bar"></span><span class="lp-bar"></span></span><span class="lp-media"></span>';
+        }
+        if (kind === 'lp-opt-stack') {
+            return '<span class="lp-bar"></span><span class="lp-bar"></span><span class="lp-bar"></span>';
+        }
+        if (kind === 'lp-opt-row') {
+            return '<span class="lp-vbar"></span><span class="lp-vbar"></span><span class="lp-vbar"></span>';
+        }
+        if (kind === 'lp-opt-grid') {
+            return '<span class="lp-cell"></span><span class="lp-cell"></span><span class="lp-cell"></span><span class="lp-cell"></span>';
+        }
+        if (kind === 'lp-opt-cards') {
+            return '<span class="lp-tile"></span><span class="lp-tile"></span><span class="lp-tile"></span><span class="lp-tile"></span>';
+        }
+        return '';
+    }
+
+    function layoutPresetCard(key, value, label, thumbClass, selected) {
+        return `<button type="button" class="layout-preset ${selected ? 'selected' : ''}" data-layout-key="${key}" data-layout-value="${value}">
+            <div class="lp-thumb ${thumbClass}" aria-hidden="true">${layoutThumb(thumbClass)}</div>
+            <span class="lp-name">${label}</span>
+        </button>`;
+    }
+
+    function renderLayoutPicker(q) {
+        const media = getMediaLayout(q);
+        const opts = getOptionsLayout(q);
+        return `
+            <div class="editor-card layout-picker-card">
+                <h3><i class="fa-solid fa-table-cells-large"></i> Layout</h3>
+                <div class="layout-picker">
+                    <div class="layout-picker-group">
+                        <span class="layout-picker-label">Media layout</span>
+                        <div class="layout-presets">
+                            ${layoutPresetCard('mediaLayout', 'default', 'Stacked', 'lp-media-default', media === 'default')}
+                            ${layoutPresetCard('mediaLayout', 'media-left', 'Image left', 'lp-media-left', media === 'media-left')}
+                            ${layoutPresetCard('mediaLayout', 'media-right', 'Image right', 'lp-media-right', media === 'media-right')}
+                        </div>
+                    </div>
+                    <div class="layout-picker-group">
+                        <span class="layout-picker-label">Options layout</span>
+                        <div class="layout-presets">
+                            ${layoutPresetCard('optionsLayout', 'stack', 'Stack', 'lp-opt-stack', opts === 'stack')}
+                            ${layoutPresetCard('optionsLayout', 'row', 'Row', 'lp-opt-row', opts === 'row')}
+                            ${layoutPresetCard('optionsLayout', 'grid-2x2', '2 × 2', 'lp-opt-grid', opts === 'grid-2x2')}
+                            ${layoutPresetCard('optionsLayout', 'cards', 'Cards', 'lp-opt-cards', opts === 'cards')}
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+    }
+
+    function bindLayoutPicker(q) {
+        document.querySelectorAll('.layout-preset').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const key = btn.dataset.layoutKey;
+                const value = btn.dataset.layoutValue;
+                q[key] = value;
+                btn.parentElement.querySelectorAll('.layout-preset').forEach(b => {
+                    b.classList.toggle('selected', b === btn);
+                });
+                renderPreview();
+                autoSave();
+            });
+        });
     }
 
     function renderSidebarPreviewText(index, text) {
@@ -960,11 +1069,11 @@ const TestBuilder = (function () {
             <div class="option-list" id="tf-options">
                 <div class="option-item ${q.correctAnswer === 0 ? 'correct' : ''}" data-index="0">
                     <span class="correct-toggle" data-index="0" title="Mark as correct"><i class="fa-solid fa-check"></i></span>
-                    ${q.customLabels ? rtEditorHtml(q.options[0], { className: 'tf-label-input', placeholder: 'True', index: 0 }) : `<span style="flex:1; padding:4px 0; font-size:0.95rem; color:#333;">True</span>`}
+                    ${q.customLabels ? rtEditorHtml(q.options[0], { className: 'tf-label-input', placeholder: 'True', index: 0 }) : `<span class="tf-default-label">True</span>`}
                 </div>
                 <div class="option-item ${q.correctAnswer === 1 ? 'correct' : ''}" data-index="1">
                     <span class="correct-toggle" data-index="1" title="Mark as correct"><i class="fa-solid fa-check"></i></span>
-                    ${q.customLabels ? rtEditorHtml(q.options[1], { className: 'tf-label-input', placeholder: 'False', index: 1 }) : `<span style="flex:1; padding:4px 0; font-size:0.95rem; color:#333;">False</span>`}
+                    ${q.customLabels ? rtEditorHtml(q.options[1], { className: 'tf-label-input', placeholder: 'False', index: 1 }) : `<span class="tf-default-label">False</span>`}
                 </div>
             </div>
             <div class="toggle-row">
@@ -1842,12 +1951,22 @@ const TestBuilder = (function () {
                 mediaHtml = `<div class="preview-media"><audio controls src="${q.media.data}"></audio></div>`;
             }
         }
+        const promptHtml = `<div class="preview-prompt">${renderRich(q.prompt, '<span style="color:#ccc;font-style:italic;">Enter a question prompt...</span>')}</div>`;
+        const typeHtml = renderTypePreview(q);
+        const mediaLayout = getMediaLayout(q);
+        const split = isChoiceType(q) && mediaHtml && (mediaLayout === 'media-left' || mediaLayout === 'media-right');
+        const bodyHtml = split
+            ? `<div class="preview-split preview-split-${mediaLayout}">
+                    <div class="preview-media-col">${mediaHtml}</div>
+                    <div class="preview-content-col">${promptHtml}${typeHtml}</div>
+               </div>`
+            : `${promptHtml}${mediaHtml}${typeHtml}`;
+        const optCount = isChoiceType(q) ? ` preview-${(q.options || []).length <= 2 ? 'opt-count-2' : (q.options || []).length === 3 ? 'opt-count-3' : (q.options || []).length === 4 ? 'opt-count-4' : 'opt-count-5-plus'}` : '';
+        const mediaClass = mediaLayout === 'default' ? 'preview-media-default' : mediaLayout === 'media-left' ? 'preview-media-left' : 'preview-media-right';
         dom.previewContent.innerHTML = `
-            <div class="preview-phone-frame">
+            <div class="preview-phone-frame ${mediaClass}${optCount}">
                 <div class="preview-question-number">Question ${currentQuestionIndex + 1} of ${testData.questions.length}</div>
-                <div class="preview-prompt">${renderRich(q.prompt, '<span style="color:#ccc;font-style:italic;">Enter a question prompt...</span>')}</div>
-                ${mediaHtml}
-                ${renderTypePreview(q)}
+                ${bodyHtml}
             </div>`;
     }
 
@@ -1866,7 +1985,8 @@ const TestBuilder = (function () {
     }
 
     function renderMCPreview(q) {
-        return `<div class="preview-options">
+        const ol = previewOptionsLayoutClass(q);
+        return `<div class="preview-options ${ol}">
             ${q.options.map((opt, i) => {
             const img = q.optionImages && q.optionImages[i]
                 ? `<img src="${q.optionImages[i]}" style="max-height:40px;border-radius:4px;margin-right:6px;vertical-align:middle;" />`
@@ -1881,7 +2001,21 @@ const TestBuilder = (function () {
     }
 
     function renderTFPreview(q) {
-        return `<div class="preview-tf">
+        const ol = previewOptionsLayoutClass(q);
+        const stacked = getOptionsLayout(q) === 'stack';
+        if (stacked) {
+            return `<div class="preview-options ${ol}">
+                <div class="preview-option ${q.correctAnswer === 0 ? 'correct-answer' : ''}">
+                    <span class="option-letter"><i class="fa-solid fa-check"></i></span>
+                    <span>${renderRich(q.options[0], 'True')}</span>
+                </div>
+                <div class="preview-option ${q.correctAnswer === 1 ? 'correct-answer' : ''}">
+                    <span class="option-letter"><i class="fa-solid fa-xmark"></i></span>
+                    <span>${renderRich(q.options[1], 'False')}</span>
+                </div>
+            </div>`;
+        }
+        return `<div class="preview-tf ${ol}">
             <div class="preview-tf-btn ${q.correctAnswer === 0 ? 'correct-answer' : ''}">
                 <i class="fa-solid fa-check" style="margin-right:6px;"></i> ${renderRich(q.options[0], 'True')}
             </div>
@@ -1996,7 +2130,7 @@ const TestBuilder = (function () {
     function renderMSPreview(q) {
         if (!Array.isArray(q.correctAnswers)) q.correctAnswers = [];
         const correctCount = q.correctAnswers.length;
-        return `<div class="preview-ms-options">
+        return `<div class="preview-ms-options ${previewOptionsLayoutClass(q)}">
             ${q.options.map((opt, i) => {
             const isCorrect = q.correctAnswers.includes(i);
             return `

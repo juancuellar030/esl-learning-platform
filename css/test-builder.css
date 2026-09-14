@@ -982,10 +982,14 @@
 
 .preview-prompt {
     font-size: 1.1rem;
-    font-weight: 600;
+    font-weight: 400;
     color: #333;
     margin-bottom: 20px;
     line-height: 1.5;
+}
+
+.preview-prompt strong {
+    font-weight: 700;
 }
 
 /* Preview: MC options */
@@ -993,6 +997,87 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
+}
+
+.preview-options.preview-ol-stack,
+.preview-ms-options.preview-ol-stack {
+    display: flex;
+    flex-direction: column;
+    grid-template-columns: none;
+}
+
+.preview-options.preview-ol-row,
+.preview-tf.preview-ol-row,
+.preview-ms-options.preview-ol-row {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+    grid-template-columns: none;
+}
+
+.preview-ol-row .preview-option,
+.preview-ol-row .preview-tf-btn,
+.preview-ol-row .preview-ms-option {
+    flex: 1 1 80px;
+    min-width: 80px;
+}
+
+.preview-options.preview-ol-grid,
+.preview-tf.preview-ol-grid,
+.preview-ms-options.preview-ol-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.preview-options.preview-ol-cards,
+.preview-tf.preview-ol-cards,
+.preview-ms-options.preview-ol-cards {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
+
+.preview-ol-cards .preview-option,
+.preview-ol-cards .preview-tf-btn,
+.preview-ol-cards .preview-ms-option {
+    aspect-ratio: 1;
+    justify-content: center;
+    text-align: center;
+    min-height: 72px;
+}
+
+.preview-split {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+}
+
+.preview-split-media-right {
+    flex-direction: row-reverse;
+}
+
+.preview-media-col {
+    flex: 0 0 38%;
+    min-width: 0;
+}
+
+.preview-content-col {
+    flex: 1;
+    min-width: 0;
+}
+
+.preview-media-col .preview-media {
+    margin: 0;
+}
+
+.preview-phone-frame.preview-opt-count-2 .preview-media img {
+    max-height: 220px;
+}
+
+.preview-phone-frame.preview-opt-count-5-plus .preview-media img {
+    max-height: 120px;
 }
 
 .preview-option {
@@ -1080,8 +1165,12 @@
     border-radius: 12px;
     text-align: center;
     font-size: 1rem;
-    font-weight: 600;
+    font-weight: 500;
     color: #555;
+}
+
+.preview-tf-btn strong {
+    font-weight: 700;
 }
 
 .preview-tf-btn.correct-answer {
@@ -1885,7 +1974,7 @@ body.dark-mode .preview-fill-blank {
     max-height: 180px;
     object-fit: contain;
     display: block;
-    background: #f5f5f5;
+    background: transparent;
     border-radius: 8px;
 }
 
@@ -1894,7 +1983,8 @@ body.dark-mode .preview-fill-blank {
     margin-top: 4px;
 }
 
-/* T/F custom label inputs */
+/* T/F labels (default True/False and custom inputs) */
+.tf-default-label,
 .tf-label-input {
     flex: 1;
     border: none;
@@ -1927,12 +2017,13 @@ body.dark-mode .media-filename {
     color: #aaa;
 }
 
+body.dark-mode .tf-default-label,
 body.dark-mode .tf-label-input {
-    color: #e0e0e0;
+    color: #eee;
 }
 
 body.dark-mode .preview-media img {
-    background: #2a2a2a;
+    background: transparent;
 }
 
 /* ===== RESPONSE DASHBOARD (Phase 4) ===== */
@@ -2811,6 +2902,11 @@ body.dark-mode .resp-export-item-hint {
 
 .rt-prompt {
     width: 100%;
+    font-weight: 400;
+}
+
+.rt-prompt strong {
+    font-weight: 700;
 }
 
 .option-item .rt-field,
@@ -3065,4 +3161,163 @@ body.dark-mode .img-url-input {
     background: #2d2d2d;
     border-color: #555;
     color: #eee;
+}
+
+/* ===== LAYOUT PICKER ===== */
+.layout-picker-card h3 {
+    margin-bottom: 12px;
+}
+
+.layout-picker-group {
+    margin-bottom: 14px;
+}
+
+.layout-picker-group:last-child {
+    margin-bottom: 0;
+}
+
+.layout-picker-label {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #888;
+    margin-bottom: 8px;
+}
+
+.layout-presets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.layout-preset {
+    width: 82px;
+    padding: 8px 6px 6px;
+    border: 2px solid #e0e2e8;
+    border-radius: 10px;
+    background: #fafafa;
+    cursor: pointer;
+    font-family: inherit;
+    color: inherit;
+}
+
+.layout-preset:hover {
+    border-color: var(--medium-slate-blue);
+}
+
+.layout-preset.selected {
+    border-color: var(--medium-slate-blue);
+    background: #eeebff;
+    box-shadow: 0 0 0 1px var(--medium-slate-blue);
+}
+
+.layout-preset .lp-name {
+    display: block;
+    margin-top: 6px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: #555;
+}
+
+.lp-thumb {
+    height: 42px;
+    display: flex;
+    gap: 3px;
+    padding: 2px;
+}
+
+.lp-thumb.lp-media-default,
+.lp-thumb.lp-opt-stack {
+    flex-direction: column;
+}
+
+.lp-thumb.lp-media-left,
+.lp-thumb.lp-media-right,
+.lp-thumb.lp-opt-row {
+    flex-direction: row;
+    align-items: stretch;
+}
+
+.lp-thumb.lp-opt-grid,
+.lp-thumb.lp-opt-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 3px;
+}
+
+.lp-thumb .lp-media {
+    background: #b8bcc8;
+    border-radius: 3px;
+    min-height: 12px;
+    flex: 1;
+}
+
+.lp-thumb.lp-media-left .lp-media,
+.lp-thumb.lp-media-right .lp-media {
+    flex: 0 0 38%;
+}
+
+.lp-thumb .lp-lines {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.lp-thumb .lp-bar {
+    height: 7px;
+    background: #d4d7e0;
+    border-radius: 2px;
+    flex: 1;
+}
+
+.lp-thumb .lp-vbar {
+    flex: 1;
+    background: #d4d7e0;
+    border-radius: 2px;
+}
+
+.lp-thumb .lp-cell,
+.lp-thumb .lp-tile {
+    background: #d4d7e0;
+    border-radius: 3px;
+    min-height: 0;
+}
+
+.lp-thumb .lp-tile {
+    border-radius: 4px;
+}
+
+body.dark-mode .layout-picker-label {
+    color: #999;
+}
+
+body.dark-mode .layout-preset {
+    background: #2a2a2a;
+    border-color: #444;
+}
+
+body.dark-mode .layout-preset:hover,
+body.dark-mode .layout-preset.selected {
+    border-color: var(--medium-slate-blue);
+    background: #2f2a4a;
+}
+
+body.dark-mode .layout-preset .lp-name {
+    color: #ddd;
+}
+
+body.dark-mode .lp-thumb .lp-media {
+    background: #666;
+}
+
+body.dark-mode .lp-thumb .lp-bar,
+body.dark-mode .lp-thumb .lp-vbar,
+body.dark-mode .lp-thumb .lp-cell,
+body.dark-mode .lp-thumb .lp-tile {
+    background: #555;
 }

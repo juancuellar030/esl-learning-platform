@@ -158,6 +158,55 @@ const TakeTest = (function () {
     'use strict';
 
     const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const CHOICE_TYPES = ['multiple-choice', 'true-false', 'multi-select'];
+
+    function isChoiceType(q) {
+        return !!(q && CHOICE_TYPES.indexOf(q.type) !== -1);
+    }
+
+    function getMediaLayout(q) {
+        if (q && (q.mediaLayout === 'media-left' || q.mediaLayout === 'media-right')) return q.mediaLayout;
+        return 'default';
+    }
+
+    function getOptionsLayout(q) {
+        const v = q && q.optionsLayout;
+        if (v === 'row' || v === 'grid-2x2' || v === 'cards' || v === 'stack') return v;
+        return 'stack';
+    }
+
+    function optionCountClass(q) {
+        const n = (q.options || []).length;
+        if (n <= 2) return 'opt-count-2';
+        if (n === 3) return 'opt-count-3';
+        if (n === 4) return 'opt-count-4';
+        return 'opt-count-5-plus';
+    }
+
+    function hasOptionImages(q) {
+        return !!(q.optionImages && q.optionImages.some(img => img));
+    }
+
+    function optionsContainerClass(q) {
+        const layout = getOptionsLayout(q);
+        const parts = [];
+        if (layout === 'row') parts.push('tt-ol-row');
+        else if (layout === 'grid-2x2') parts.push('tt-ol-grid');
+        else if (layout === 'cards') parts.push('tt-ol-cards');
+        else if (q.optionsLayout === 'stack' && q.type === 'multi-select') parts.push('tt-ol-stack');
+        else if (layout === 'stack' && hasOptionImages(q) && q.type === 'multiple-choice') {
+            parts.push('tt-options-img-grid');
+            if ((q.options || []).length <= 3) parts.push('tt-img-row');
+        }
+        if (q.type === 'true-false' && layout === 'row') parts.push('tt-tf-options');
+        return parts.join(' ');
+    }
+
+    function optionItemClass(q) {
+        const layout = getOptionsLayout(q);
+        if (layout === 'cards' || hasOptionImages(q)) return 'tt-option-card';
+        return '';
+    }
 
     // ===== EMBEDDED STUDENT DATA (2026) =====
     const STUDENT_DATA = {
@@ -1130,23 +1179,35 @@ const TakeTest = (function () {
             }
         }
 
-        // Prompt
-        let html = `
-            <div class="tt-q-prompt">${renderRich(q.prompt)}</div>
-            ${mediaHtml}
-        `;
+        const promptHtml = `<div class="tt-q-prompt">${renderRich(q.prompt)}</div>`;
 
-        // Question body by type
+        let optionsHtml = '';
         switch (q.type) {
-            case 'multiple-choice': html += renderMCQuestion(q); break;
-            case 'true-false': html += renderTFQuestion(q); break;
-            case 'fill-blank': html += renderFBQuestion(q); break;
-            case 'matching': html += renderMatchQuestion(q); break;
-            case 'unjumble-words': html += renderUWQuestion(q); break;
-            case 'unjumble-letters': html += renderULQuestion(q); break;
-            case 'drag-drop-category': html += renderDDQuestion(q); break;
-            case 'multi-select': html += renderMSQuestion(q); break;
+            case 'multiple-choice': optionsHtml = renderMCQuestion(q); break;
+            case 'true-false': optionsHtml = renderTFQuestion(q); break;
+            case 'fill-blank': optionsHtml = renderFBQuestion(q); break;
+            case 'matching': optionsHtml = renderMatchQuestion(q); break;
+            case 'unjumble-words': optionsHtml = renderUWQuestion(q); break;
+            case 'unjumble-letters': optionsHtml = renderULQuestion(q); break;
+            case 'drag-drop-category': optionsHtml = renderDDQuestion(q); break;
+            case 'multi-select': optionsHtml = renderMSQuestion(q); break;
         }
+
+        body.className = 'tt-question-body';
+        if (isChoiceType(q)) {
+            const mediaLayout = getMediaLayout(q);
+            body.classList.add(mediaLayout === 'default' ? 'tt-media-default' : mediaLayout === 'media-left' ? 'tt-media-left' : 'tt-media-right');
+            body.classList.add(optionCountClass(q));
+        }
+
+        const mediaLayout = getMediaLayout(q);
+        const split = isChoiceType(q) && mediaHtml && (mediaLayout === 'media-left' || mediaLayout === 'media-right');
+        const html = split
+            ? `<div class="tt-q-split tt-q-split-${mediaLayout}">
+                    <div class="tt-q-media-col">${mediaHtml}</div>
+                    <div class="tt-q-content-col">${promptHtml}${optionsHtml}</div>
+               </div>`
+            : `${promptHtml}${mediaHtml}${optionsHtml}`;
 
         body.innerHTML = html;
 
@@ -1155,26 +1216,25 @@ const TakeTest = (function () {
     }
 
     function renderMCQuestion(q) {
-        const hasImages = q.optionImages && q.optionImages.some(img => img);
-        const gridClass = hasImages
-            ? (q.options.length <= 3 ? 'tt-options-img-grid tt-img-row' : 'tt-options-img-grid')
-            : '';
+        const layoutClass = optionsContainerClass(q);
+        const cardClass = optionItemClass(q);
 
         const opts = q.options.map((opt, i) => {
             const selected = sessionAnswers()[currentQ] === i ? 'selected' : '';
             const img = q.optionImages && q.optionImages[i]
                 ? `<img class="tt-option-img" src="${q.optionImages[i]}" alt="" data-preview="${q.optionImages[i]}" />`
                 : '';
-            return `<div class="tt-option ${hasImages ? 'tt-option-card' : ''} ${selected}" data-idx="${i}">
+            return `<div class="tt-option ${cardClass} ${selected}" data-idx="${i}">
                 <span class="tt-opt-letter">${LETTERS[i]}</span>
                 <span class="tt-opt-text">${img}${renderRich(opt)}</span>
             </div>`;
         }).join('');
-        return `<div class="tt-options ${gridClass}">${opts}</div>`;
+        return `<div class="tt-options ${layoutClass}">${opts}</div>`;
     }
 
     function renderMSQuestion(q) {
         const selectedArr = Array.isArray(sessionAnswers()[currentQ]) ? sessionAnswers()[currentQ] : [];
+        const layoutClass = optionsContainerClass(q);
         const opts = q.options.map((opt, i) => {
             const isSelected = selectedArr.includes(i);
             return `<div class="tt-ms-option ${isSelected ? 'ms-selected' : ''}" data-idx="${i}">
@@ -1188,20 +1248,22 @@ const TakeTest = (function () {
         }).join('');
         return `
             <div class="tt-ms-hint"><i class="fa-solid fa-circle-info"></i> Select all that apply</div>
-            <div class="tt-ms-options">${opts}</div>
+            <div class="tt-ms-options ${layoutClass}">${opts}</div>
         `;
     }
 
     function renderTFQuestion(q) {
+        const layoutClass = optionsContainerClass(q);
+        const cardClass = optionItemClass(q);
         const opts = q.options.map((opt, i) => {
             const selected = sessionAnswers()[currentQ] === i ? 'selected' : '';
             const icon = i === 0 ? 'fa-check' : 'fa-xmark';
-            return `<div class="tt-option ${selected}" data-idx="${i}">
+            return `<div class="tt-option ${cardClass} ${selected}" data-idx="${i}">
                 <span class="tt-opt-letter"><i class="fa-solid ${icon}"></i></span>
                 <span class="tt-opt-text">${renderRich(opt)}</span>
             </div>`;
         }).join('');
-        return `<div class="tt-options">${opts}</div>`;
+        return `<div class="tt-options ${layoutClass}">${opts}</div>`;
     }
 
     function renderFBQuestion(q) {

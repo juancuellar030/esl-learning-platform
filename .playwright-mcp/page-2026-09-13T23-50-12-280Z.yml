@@ -1,0 +1,253 @@
+- generic [active] [ref=f1e1]:
+  - generic [ref=f1e2]:
+    - generic [ref=f1e3]:
+      - generic [ref=f1e4]:
+        - link " Tools" [ref=f1e5] [cursor=pointer]:
+          - /url: tools.html
+          - generic [ref=f1e6]: 
+          - text: Tools
+        - heading " Untitled Test" [level=1] [ref=f1e7]:
+          - generic [ref=f1e8]: 
+          - generic [ref=f1e9]: Untitled Test
+        - generic [ref=f1e10]:
+          - button " My Tests " [ref=f1e11] [cursor=pointer]:
+            - generic [ref=f1e12]: 
+            - text: My Tests
+            - generic [ref=f1e13]: 
+          - text:       +
+      - generic [ref=f1e14]:
+        - button " Settings" [ref=f1e15] [cursor=pointer]:
+          - generic [ref=f1e16]: 
+          - generic [ref=f1e17]: Settings
+        - generic "Import quiz from JSON file" [ref=f1e18] [cursor=pointer]:
+          - generic [ref=f1e19]: 
+          - generic [ref=f1e20]: Import
+        - generic [ref=f1e21]:
+          - button " Export " [ref=f1e22] [cursor=pointer]:
+            - generic [ref=f1e23]: 
+            - generic [ref=f1e24]: Export
+            - generic [ref=f1e25]: 
+          - text:  
+        - button " Save" [ref=f1e26] [cursor=pointer]:
+          - generic [ref=f1e27]: 
+          - generic [ref=f1e28]: Save
+        - button " Preview Test" [ref=f1e29] [cursor=pointer]:
+          - generic [ref=f1e30]: 
+          - generic [ref=f1e31]: Preview Test
+        - button " Drive" [ref=f1e32] [cursor=pointer]:
+          - generic [ref=f1e33]: 
+          - generic [ref=f1e34]: Drive
+        - button " Responses" [ref=f1e35] [cursor=pointer]:
+          - generic [ref=f1e36]: 
+          - generic [ref=f1e37]: Responses
+        - button " Share" [ref=f1e38] [cursor=pointer]:
+          - generic [ref=f1e39]: 
+          - generic [ref=f1e40]: Share
+    - generic [ref=f1e41]:
+      - generic [ref=f1e42]:
+        - heading "Questions" [level=3] [ref=f1e43]
+        - button "+" [ref=f1e44] [cursor=pointer]
+      - generic [ref=f1e47] [cursor=pointer]:
+        - generic [ref=f1e48]: 
+        - generic [ref=f1e50]: "1"
+        - generic [ref=f1e51]:
+          - generic [ref=f1e52]:
+            - generic [ref=f1e53]: 
+            - text: True / False
+          - generic [ref=f1e54]: (No prompt yet)
+        - generic [ref=f1e55]:
+          - button "" [ref=f1e56]
+          - button "" [ref=f1e58]
+    - generic [ref=f1e60]:
+      - generic [ref=f1e61]:
+        - heading " True / False — Question 1" [level=3] [ref=f1e62]:
+          - generic [ref=f1e63]: 
+          - text: True / False — Question 1
+        - generic [ref=f1e64]:
+          - generic [ref=f1e65]: Question Prompt
+          - textbox [ref=f1e66]: Enter the question...
+        - generic [ref=f1e67]:
+          - generic [ref=f1e68]: Points
+          - spinbutton [ref=f1e70]: "1"
+      - generic [ref=f1e71]:
+        - heading " Media (optional)" [level=3] [ref=f1e72]:
+          - generic [ref=f1e73]: 
+          - text: Media (optional)
+        - generic [ref=f1e74]:
+          - button " Upload image or audio" [ref=f1e75] [cursor=pointer]:
+            - generic [ref=f1e76]: 
+            - text: Upload image or audio
+          - generic [ref=f1e77]:
+            - textbox "Or paste an image URL (Imgur, Drive, https://…)" [ref=f1e78]
+            - button "Apply" [ref=f1e79] [cursor=pointer]
+          - paragraph [ref=f1e80]: Images resized to max 800px. Audio up to 2MB. URLs are stored as links, not uploads.
+      - generic [ref=f1e81]:
+        - heading "Answer Configuration" [level=3] [ref=f1e82]
+        - generic [ref=f1e83]:
+          - generic [ref=f1e84]:
+            - generic "Mark as correct" [ref=f1e85] [cursor=pointer]: 
+            - generic [ref=f1e87]: "True"
+          - generic [ref=f1e88]:
+            - generic "Mark as correct" [ref=f1e89] [cursor=pointer]: 
+            - generic [ref=f1e91]: "False"
+        - generic [ref=f1e92]:
+          - generic [ref=f1e93]: Custom labels (e.g. Correct/Incorrect)
+          - generic [ref=f1e94]:
+            - checkbox
+            - generic [ref=f1e95] [cursor=pointer]
+    - generic [ref=f1e96]:
+      - heading " Preview" [level=3] [ref=f1e98]:
+        - generic [ref=f1e99]: 
+        - text: Preview
+      - generic [ref=f1e101]:
+        - generic [ref=f1e102]: Question 1 of 1
+        - generic [ref=f1e103]: Enter a question prompt...
+        - generic [ref=f1e104]:
+          - generic [ref=f1e105]:
+            - generic [ref=f1e106]: 
+            - text: "True"
+          - generic [ref=f1e107]:
+            - generic [ref=f1e108]: 
+            - text: "False"
+  - generic:
+    - generic:
+      - generic:
+        - heading " Test Settings" [level=2]:
+          - generic: 
+          - text: Test Settings
+        - button ""
+      - generic:
+        - generic:
+          - heading "General" [level=4]
+          - generic:
+            - generic: Test Title
+            - textbox "Unit 3 Vocabulary Test"
+          - generic:
+            - generic: Description (optional)
+            - textbox "Instructions or description for students..."
+        - generic:
+          - heading "Behavior" [level=4]
+          - generic:
+            - generic: Time Limit (minutes, 0 = no limit)
+            - spinbutton "0"
+          - generic:
+            - generic: Shuffle questions
+            - generic:
+              - checkbox
+          - generic:
+            - generic: Shuffle answer options
+            - generic:
+              - checkbox
+          - generic:
+            - generic: Show results to students
+            - generic:
+              - checkbox
+          - generic:
+            - generic: Allow retake
+            - generic:
+              - checkbox
+        - generic:
+          - heading "Student Identification" [level=4]
+          - generic:
+            - generic: Collect student name
+            - generic:
+              - checkbox
+          - generic:
+            - generic: Collect course group
+            - generic:
+              - checkbox
+          - generic:
+            - generic: Course Groups
+            - generic:
+              - textbox "Add group (e.g. 6A)"
+              - button "Add"
+          - generic:
+            - generic: Allow pairs/trios (multiple students per test)
+            - generic:
+              - checkbox
+        - generic:
+          - heading "Anti-Cheating" [level=4]
+          - generic:
+            - generic: Full-screen mode (prevents tab switching)
+            - generic:
+              - checkbox
+        - generic:
+          - heading "Appearance" [level=4]
+          - generic:
+            - generic: Allow students to switch themes
+            - generic:
+              - checkbox
+        - generic:
+          - heading "Results & Grading" [level=4]
+          - generic:
+            - generic: Grade Drag & Drop per item (Partial Grading)
+            - generic:
+              - checkbox
+          - generic:
+            - generic: Allow students to review answers after test
+            - generic:
+              - checkbox
+      - generic:
+        - button " Save Settings":
+          - generic: 
+          - text: Save Settings
+  - generic:
+    - generic:
+      - generic:
+        - generic:
+          - heading " Student Responses" [level=2]:
+            - generic: 
+            - text: Student Responses
+        - generic:
+          - generic "Automatically save every new response to your Google Drive":
+            - generic: Auto-sync Drive
+            - generic:
+              - checkbox
+          - button " Clear Responses":
+            - generic: 
+            - text: Clear Responses
+          - button " Upload JSON":
+            - generic: 
+            - text: Upload JSON
+          - generic:
+            - button " Export CSV ":
+              - generic: 
+              - text: Export CSV
+              - generic: 
+          - button ""
+      - generic:
+        - generic:
+          - generic:
+            - generic:
+              - generic: 
+              - text: 0 Responses
+        - generic:
+          - generic:
+            - generic: "0"
+            - generic: Responses
+          - generic:
+            - generic: —
+            - generic: Avg Score
+          - generic:
+            - generic: —
+            - generic: Avg Time
+          - generic:
+            - generic: "0"
+            - generic: Total Violations
+        - generic:
+          - generic:
+            - generic: 
+            - paragraph: No responses yet. Share the test with your students to start collecting responses.
+  - generic:
+    - generic:
+      - generic:
+        - heading " Share Test" [level=2]:
+          - generic: 
+          - text: Share Test
+        - button ""
+      - generic:
+        - generic:
+          - paragraph: Publishing test...
+        - text:  
+  - text: 
+  - button "" [ref=f1e109] [cursor=pointer]
