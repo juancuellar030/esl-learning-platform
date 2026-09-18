@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="assets/graduation-cap-icon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parent Conference Grade Viewer - ESL Learning Platform</title>
+    <meta name="description"
+        content="Look up a student's period grades, tiers, and year trajectory during parent conferences.">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/grade-viewer.css">
+</head>
+
+<body class="gv-page">
+    <nav class="main-nav">
+        <div class="container">
+            <a href="tools.html" class="nav-btn" style="text-decoration: none;">
+                <i class="fa-solid fa-arrow-left"></i> Back to Tools
+            </a>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="container gv-container">
+            <section class="content-section active gv-shell" aria-labelledby="gv-page-title">
+                <div class="gv-heading">
+                    <div>
+                        <p class="cc-eyebrow">Parent conference tool</p>
+                        <h2 id="gv-page-title"><i class="fa-solid fa-clipboard-list"></i> Grade Viewer</h2>
+                        <p>Search a student, review period grades by subject, and compare the year so far. Entry is
+                            separate from this parent-facing view.</p>
+                    </div>
+                    <div class="cc-primary-actions">
+                        <button type="button" class="btn-primary" id="gv-manage-btn">
+                            <i class="fa-solid fa-table"></i> Manage Grades
+                        </button>
+                        <button type="button" class="btn-secondary" id="gv-parent-btn" hidden>
+                            <i class="fa-solid fa-comments"></i> Parent View
+                        </button>
+                        <button type="button" class="btn-secondary" id="gv-export-btn">
+                            <i class="fa-solid fa-file-export"></i> Export Grades
+                        </button>
+                        <button type="button" class="btn-secondary" id="gv-import-btn">
+                            <i class="fa-solid fa-file-import"></i> Import Grades
+                        </button>
+                        <input type="file" id="gv-import-input" class="cc-visually-hidden" accept=".json,application/json"
+                            aria-label="Choose a grade viewer backup file">
+                    </div>
+                </div>
+
+                <div id="gv-status" class="cc-status" role="status" aria-live="polite" hidden></div>
+
+                <!-- ==================== PARENT VIEW ==================== -->
+                <div id="gv-parent-view">
+                    <div class="gv-search-panel">
+                        <label for="gv-student-search">Student</label>
+                        <div class="gv-autocomplete-wrap">
+                            <input type="search" id="gv-student-search" placeholder="Type a student name…"
+                                autocomplete="off" aria-autocomplete="list" aria-controls="gv-student-suggestions"
+                                aria-expanded="false">
+                            <ul id="gv-student-suggestions" class="gv-suggestions" role="listbox" hidden></ul>
+                        </div>
+                        <p class="gv-hint">Search the school roster. Names match in any order (given name or surnames).
+                        </p>
+                    </div>
+
+                    <div id="gv-parent-empty" class="gv-empty-card">
+                        <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                        <h3>Select a student to begin</h3>
+                        <p>Once a name is chosen, you will see that student's subjects, color-coded tiers, PROM, and
+                            lost subjects for the selected period.</p>
+                    </div>
+
+                    <div id="gv-parent-detail" hidden>
+                        <div class="gv-selected-bar">
+                            <div>
+                                <p class="cc-eyebrow">Selected student</p>
+                                <h3 id="gv-selected-name"></h3>
+                                <p id="gv-selected-meta" class="gv-selected-meta"></p>
+                            </div>
+                            <button type="button" class="btn-secondary" id="gv-clear-student">
+                                <i class="fa-solid fa-xmark"></i> Clear
+                            </button>
+                        </div>
+
+                        <div class="gv-parent-toolbar">
+                            <div class="gv-field">
+                                <label for="gv-parent-term">Term</label>
+                                <select id="gv-parent-term"></select>
+                            </div>
+                            <div class="gv-field">
+                                <label for="gv-tier-filter">Show subjects</label>
+                                <select id="gv-tier-filter">
+                                    <option value="all">All subjects</option>
+                                    <option value="superior">Superior only</option>
+                                    <option value="alto">Alto only</option>
+                                    <option value="basico">Básico only</option>
+                                    <option value="bajo">Bajo only</option>
+                                    <option value="basico-below">Básico or below</option>
+                                    <option value="alto-below">Alto or below</option>
+                                </select>
+                            </div>
+                            <div class="gv-tabs" role="tablist" aria-label="Student grade views">
+                                <button type="button" class="gv-tab active" id="gv-tab-snapshot" role="tab"
+                                    aria-selected="true" aria-controls="gv-panel-snapshot" data-panel="snapshot">
+                                    This term
+                                </button>
+                                <button type="button" class="gv-tab" id="gv-tab-compare" role="tab" aria-selected="false"
+                                    aria-controls="gv-panel-compare" data-panel="compare">
+                                    All terms
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="gv-legend" aria-label="Grading scale">
+                            <span class="gv-chip gv-tier-superior">Superior 4.7–5.0</span>
+                            <span class="gv-chip gv-tier-alto">Alto 4.0–4.6</span>
+                            <span class="gv-chip gv-tier-basico">Básico 3.5–3.9</span>
+                            <span class="gv-chip gv-tier-bajo">Bajo 1.0–3.4</span>
+                        </div>
+
+                        <section id="gv-panel-snapshot" class="gv-panel" role="tabpanel"
+                            aria-labelledby="gv-tab-snapshot">
+                            <div class="gv-summary" id="gv-summary"></div>
+                            <div id="gv-subject-grid" class="gv-subject-grid"></div>
+                        </section>
+
+                        <section id="gv-panel-compare" class="gv-panel" role="tabpanel" aria-labelledby="gv-tab-compare"
+                            hidden>
+                            <div id="gv-compare-host" class="gv-compare-host"></div>
+                        </section>
+                    </div>
+                </div>
+
+                <!-- ==================== MANAGE VIEW ==================== -->
+                <div id="gv-manage-view" hidden>
+                    <div class="gv-manage-toolbar">
+                        <div class="gv-field">
+                            <label for="gv-manage-term">Term</label>
+                            <select id="gv-manage-term"></select>
+                        </div>
+                        <button type="button" class="btn-secondary" id="gv-create-term-btn">
+                            <i class="fa-solid fa-plus"></i> New Term
+                        </button>
+                        <button type="button" class="btn-secondary" id="gv-delete-term-btn">
+                            <i class="fa-solid fa-trash-can"></i> Delete Term
+                        </button>
+                        <div class="gv-field">
+                            <label for="gv-manage-group">Class group</label>
+                            <select id="gv-manage-group"></select>
+                        </div>
+                        <button type="button" class="btn-secondary" id="gv-add-group-btn">
+                            <i class="fa-solid fa-users"></i> Add Group to Roster
+                        </button>
+                        <button type="button" class="btn-primary" id="gv-save-term-btn">
+                            <i class="fa-solid fa-floppy-disk"></i> Save Term
+                        </button>
+                    </div>
+
+                    <div class="gv-manage-add">
+                        <div class="gv-field gv-field-grow">
+                            <label for="gv-add-student-search">Add student</label>
+                            <div class="gv-autocomplete-wrap">
+                                <input type="search" id="gv-add-student-search"
+                                    placeholder="Search roster or type a full name to add…" autocomplete="off"
+                                    aria-autocomplete="list" aria-controls="gv-add-student-suggestions">
+                                <ul id="gv-add-student-suggestions" class="gv-suggestions" role="listbox" hidden></ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <p class="gv-hint">Type report values as printed (47) or as decimals (4.7). Both store as 4.7.
+                        Leave a cell blank when there is no grade or no Recuperación. Tab and arrow keys move between
+                        cells.</p>
+
+                    <div id="gv-grid-host" class="gv-grid-host"></div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <div class="modal-backdrop cc-modal-backdrop" id="gv-term-modal" role="dialog" aria-modal="true"
+        aria-labelledby="gv-term-modal-title" hidden>
+        <div class="modal-card cc-event-modal-card">
+            <div class="cc-modal-header">
+                <div>
+                    <p class="cc-eyebrow">Grade viewer</p>
+                    <h2 id="gv-term-modal-title">New Term</h2>
+                </div>
+                <button type="button" class="cc-icon-btn" id="gv-close-term-modal" aria-label="Close new term form">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <form id="gv-term-form" novalidate>
+                <div class="cc-form-grid">
+                    <div class="cc-form-group">
+                        <label for="gv-term-period">Period <span aria-hidden="true">*</span></label>
+                        <select id="gv-term-period" required>
+                            <option value="1">Período 1</option>
+                            <option value="2">Período 2</option>
+                            <option value="3" selected>Período 3</option>
+                            <option value="4">Período 4</option>
+                        </select>
+                    </div>
+                    <div class="cc-form-group">
+                        <label for="gv-term-year">Year <span aria-hidden="true">*</span></label>
+                        <input type="number" id="gv-term-year" min="2000" max="2100" step="1" required>
+                    </div>
+                    <div class="cc-form-group cc-form-span-2">
+                        <label for="gv-term-label">Label <span class="cc-optional">(optional)</span></label>
+                        <input type="text" id="gv-term-label" maxlength="80" placeholder="Período 3, 2026"
+                            autocomplete="off">
+                        <small>Leave blank to use “Período N, year”.</small>
+                    </div>
+                </div>
+                <p class="cc-form-error" id="gv-term-form-error" role="alert" hidden></p>
+                <div class="cc-modal-footer">
+                    <button type="button" class="btn-secondary" id="gv-cancel-term">Cancel</button>
+                    <button type="submit" class="btn-primary">
+                        <i class="fa-solid fa-plus"></i> Create Term
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer class="main-footer">
+        <div class="container">
+            <p>ESL Learning Platform © 2025 | Made for Teachers, by Teachers</p>
+        </div>
+    </footer>
+
+    <script src="js/student-groups-data.js"></script>
+    <script src="js/students-data.js"></script>
+    <script src="js/grade-viewer.js"></script>
+    <script src="js/darkmode.js"></script>
+</body>
+
+</html>

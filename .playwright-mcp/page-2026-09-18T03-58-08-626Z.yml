@@ -1,0 +1,74 @@
+- generic [active] [ref=e1]:
+  - navigation [ref=e2]:
+    - link " Back to Tools" [ref=e4] [cursor=pointer]:
+      - /url: tools.html
+      - generic [ref=e5]: 
+      - text: Back to Tools
+  - main [ref=e6]:
+    - region [ref=e8]:
+      - generic [ref=e9]:
+        - generic [ref=e10]:
+          - paragraph [ref=e11]: Parent conference tool
+          - heading " Grade Viewer" [level=2] [ref=e12]:
+            - generic [ref=e13]: 
+            - text: Grade Viewer
+          - paragraph [ref=e14]: Search a student, review period grades by subject, and compare the year so far. Entry is separate from this parent-facing view.
+        - generic [ref=e15]:
+          - button " Manage Grades" [ref=e16] [cursor=pointer]:
+            - generic [ref=e17]: 
+            - text: Manage Grades
+          - button " Parent View" [ref=e18] [cursor=pointer]:
+            - generic [ref=e19]: 
+            - text: Parent View
+          - button " Export Grades" [ref=e20] [cursor=pointer]:
+            - generic [ref=e21]: 
+            - text: Export Grades
+          - button " Import Grades" [ref=e22] [cursor=pointer]:
+            - generic [ref=e23]: 
+            - text: Import Grades
+          - button "Choose a grade viewer backup file" [ref=e24]
+      - text:  
+      - generic [ref=e40]:
+        - generic [ref=e41]:
+          - generic [ref=e42]:
+            - generic [ref=e43]: Term
+            - combobox "Term" [disabled] [ref=e44]:
+              - option "No terms yet" [selected]
+          - button "+ New Term" [ref=e45] [cursor=pointer]:
+            - generic [ref=e46]: +
+            - text: New Term
+          - button " Delete Term" [ref=e47] [cursor=pointer]:
+            - generic [ref=e48]: 
+            - text: Delete Term
+          - generic [ref=e49]:
+            - generic [ref=e50]: Class group
+            - combobox "Class group" [ref=e51]:
+              - option "3° A"
+              - option "3° B"
+              - option "3° C"
+              - option "4° A"
+              - option "4° B"
+              - option "4° C" [selected]
+              - option "5° A"
+              - option "5° B"
+              - option "5° C"
+              - option "5° D"
+              - option "All students in file"
+              - option "Other / not in a group"
+          - button " Add Group to Roster" [ref=e52] [cursor=pointer]:
+            - generic [ref=e53]: 
+            - text: Add Group to Roster
+          - button " Save Term" [ref=e54] [cursor=pointer]:
+            - generic [ref=e55]: 
+            - text: Save Term
+        - generic [ref=e57]:
+          - generic [ref=e58]: Add student
+          - searchbox "Add student" [ref=e60]
+        - paragraph [ref=e61]: Type report values as printed (47) or as decimals (4.7). Both store as 4.7. Leave a cell blank when there is no grade or no Recuperación. Tab and arrow keys move between cells.
+        - generic [ref=e63]:
+          - heading "Create a term first" [level=3] [ref=e64]
+          - paragraph [ref=e65]: Use New Term to add Período 1–4 for any year, then add a class group.
+  - text:  +
+  - contentinfo [ref=e35]:
+    - paragraph [ref=e37]: ESL Learning Platform © 2025 | Made for Teachers, by Teachers
+  - button "" [ref=e38] [cursor=pointer]

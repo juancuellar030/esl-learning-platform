@@ -1,0 +1,44 @@
+- generic [active] [ref=e1]:
+  - navigation [ref=e2]:
+    - link " Back to Tools" [ref=e4] [cursor=pointer]:
+      - /url: tools.html
+      - generic [ref=e5]: 
+      - text: Back to Tools
+  - main [ref=e6]:
+    - region [ref=e8]:
+      - generic [ref=e9]:
+        - generic [ref=e10]:
+          - paragraph [ref=e11]: Parent conference tool
+          - heading " Grade Viewer" [level=2] [ref=e12]:
+            - generic [ref=e13]: 
+            - text: Grade Viewer
+          - paragraph [ref=e14]: Search a student, review period grades by subject, and compare the year so far. Entry is separate from this parent-facing view.
+        - generic [ref=e15]:
+          - button " Manage Grades" [ref=e16] [cursor=pointer]:
+            - generic [ref=e17]: 
+            - text: Manage Grades
+          - button " Parent View" [ref=e18] [cursor=pointer]:
+            - generic [ref=e19]: 
+            - text: Parent View
+          - button " Export Grades" [ref=e20] [cursor=pointer]:
+            - generic [ref=e21]: 
+            - text: Export Grades
+          - button " Import Grades" [ref=e22] [cursor=pointer]:
+            - generic [ref=e23]: 
+            - text: Import Grades
+          - button "Choose a grade viewer backup file" [ref=e24]
+      - generic [ref=e25]:
+        - generic [ref=e26]:
+          - generic [ref=e27]: Student
+          - searchbox "Student" [ref=e29]
+          - paragraph [ref=e30]: Search the school roster. Names match in any order (given name or surnames).
+        - generic [ref=e31]:
+          - generic [aria-hidden] [ref=e32]: 
+          - heading "Select a student to begin" [level=3] [ref=e33]
+          - paragraph [ref=e34]: Once a name is chosen, you will see that student's subjects, color-coded tiers, PROM, and lost subjects for the selected period.
+        - text: 
+      - text: +   
+  - text:  +
+  - contentinfo [ref=e35]:
+    - paragraph [ref=e37]: ESL Learning Platform © 2025 | Made for Teachers, by Teachers
+  - button "" [ref=e38] [cursor=pointer]

@@ -1,0 +1,42 @@
+- generic [active] [ref=f1e1]:
+  - navigation [ref=f1e2]:
+    - link " Back to Tools" [ref=f1e4] [cursor=pointer]:
+      - /url: tools.html
+      - generic [ref=f1e5]: 
+      - text: Back to Tools
+  - main [ref=f1e6]:
+    - region [ref=f1e8]:
+      - generic [ref=f1e9]:
+        - generic [ref=f1e10]:
+          - paragraph [ref=f1e11]: Parent conference tool
+          - heading " Grade Viewer" [level=2] [ref=f1e12]:
+            - generic [ref=f1e13]: 
+            - text: Grade Viewer
+          - paragraph [ref=f1e14]: Search a student, review period grades by subject, and compare the year so far. Entry is separate from this parent-facing view.
+        - generic [ref=f1e15]:
+          - button " Manage Grades" [ref=f1e16] [cursor=pointer]:
+            - generic [ref=f1e17]: 
+            - text: Manage Grades
+          - text: 
+          - button " Export Grades" [ref=f1e18] [cursor=pointer]:
+            - generic [ref=f1e19]: 
+            - text: Export Grades
+          - button " Import Grades" [ref=f1e20] [cursor=pointer]:
+            - generic [ref=f1e21]: 
+            - text: Import Grades
+          - button "Choose a grade viewer backup file" [ref=f1e22]
+      - generic [ref=f1e23]:
+        - generic [ref=f1e24]:
+          - generic [ref=f1e25]: Student
+          - searchbox "Student" [ref=f1e27]
+          - paragraph [ref=f1e28]: Search the school roster. Names match in any order (given name or surnames).
+        - generic [ref=f1e29]:
+          - generic [aria-hidden] [ref=f1e30]: 
+          - heading "Select a student to begin" [level=3] [ref=f1e31]
+          - paragraph [ref=f1e32]: Once a name is chosen, you will see that student's subjects, color-coded tiers, PROM, and lost subjects for the selected period.
+        - text: 
+      - text: +   
+  - text:  +
+  - contentinfo [ref=f1e33]:
+    - paragraph [ref=f1e35]: ESL Learning Platform © 2025 | Made for Teachers, by Teachers
+  - button "" [ref=f1e36] [cursor=pointer]

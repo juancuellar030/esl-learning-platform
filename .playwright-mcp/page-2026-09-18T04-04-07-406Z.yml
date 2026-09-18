@@ -1,0 +1,262 @@
+- generic [ref=f3e1]:
+  - navigation [ref=f3e2]:
+    - link " Back to Tools" [ref=f3e4] [cursor=pointer]:
+      - /url: tools.html
+      - generic [ref=f3e5]: 
+      - text: Back to Tools
+  - main [ref=f3e6]:
+    - region [ref=f3e8]:
+      - generic [ref=f3e9]:
+        - generic [ref=f3e10]:
+          - paragraph [ref=f3e11]: Parent conference tool
+          - heading " Grade Viewer" [level=2] [ref=f3e12]:
+            - generic [ref=f3e13]: 
+            - text: Grade Viewer
+          - paragraph [ref=f3e14]: Search a student, review period grades by subject, and compare the year so far. Entry is separate from this parent-facing view.
+        - generic [ref=f3e15]:
+          - button " Manage Grades" [ref=f3e16] [cursor=pointer]:
+            - generic [ref=f3e17]: 
+            - text: Manage Grades
+          - text: 
+          - button " Export Grades" [ref=f3e18] [cursor=pointer]:
+            - generic [ref=f3e19]: 
+            - text: Export Grades
+          - button " Import Grades" [ref=f3e20] [cursor=pointer]:
+            - generic [ref=f3e21]: 
+            - text: Import Grades
+          - button "Choose a grade viewer backup file" [ref=f3e22]
+      - generic [ref=f3e23]:
+        - generic [ref=f3e24]:
+          - generic [ref=f3e25]: Student
+          - searchbox "Student" [active] [ref=f3e27]: TEST STUDENT
+          - paragraph [ref=f3e28]: Search the school roster. Names match in any order (given name or surnames).
+        - text: 
+        - generic [ref=f3e48]:
+          - generic [ref=f3e49]:
+            - generic [ref=f3e50]:
+              - paragraph [ref=f3e51]: Selected student
+              - heading "TEST STUDENT" [level=3] [ref=f3e9836]
+              - paragraph [ref=f3e53]: Not linked to a class group
+            - button " Clear" [ref=f3e54] [cursor=pointer]:
+              - generic [ref=f3e55]: 
+              - text: Clear
+          - generic [ref=f3e56]:
+            - generic [ref=f3e57]:
+              - generic [ref=f3e58]: Term
+              - combobox "Term" [ref=f3e59]:
+                - option "Período 1, 2025" [selected]
+            - generic [ref=f3e60]:
+              - generic [ref=f3e61]: Show subjects
+              - combobox "Show subjects" [ref=f3e62]:
+                - option "All subjects"
+                - option "Superior only"
+                - option "Alto only"
+                - option "Básico only"
+                - option "Bajo only"
+                - option "Básico or below" [selected]
+                - option "Alto or below"
+            - tablist "Student grade views" [ref=f3e63]:
+              - tab "This term" [ref=f3e64] [cursor=pointer]
+              - tab "All terms" [selected] [ref=f3e65] [cursor=pointer]
+          - generic "Grading scale" [ref=f3e66]:
+            - generic [ref=f3e67]: Superior 4.7–5.0
+            - generic [ref=f3e68]: Alto 4.0–4.6
+            - generic [ref=f3e69]: Básico 3.5–3.9
+            - generic [ref=f3e70]: Bajo 1.0–3.4
+          - tabpanel "All terms" [ref=f3e430]:
+            - table [ref=f3e9837]:
+              - rowgroup [ref=f3e9838]:
+                - row [ref=f3e9839]:
+                  - columnheader "Subject" [ref=f3e9840]
+                  - columnheader "Período 1, 2025" [ref=f3e9841]
+                - row [ref=f3e9842]:
+                  - columnheader "S1" [ref=f3e9843]
+                  - columnheader "S2" [ref=f3e9844]
+                  - columnheader "S3" [ref=f3e9845]
+                  - columnheader "D" [ref=f3e9846]
+              - rowgroup [ref=f3e9847]:
+                - row [ref=f3e9848]:
+                  - rowheader "ART" [ref=f3e9849]
+                  - cell [ref=f3e9850]:
+                    - strong [ref=f3e9851]: "4.0"
+                  - cell [ref=f3e9852]:
+                    - strong [ref=f3e9853]: —
+                  - cell [ref=f3e9854]:
+                    - strong [ref=f3e9855]: —
+                  - cell [ref=f3e9856]:
+                    - strong [ref=f3e9857]: "4.0"
+                - row [ref=f3e9858]:
+                  - rowheader "CATEDRA" [ref=f3e9859]
+                  - cell [ref=f3e9860]:
+                    - strong [ref=f3e9861]: —
+                  - cell [ref=f3e9862]:
+                    - strong [ref=f3e9863]: —
+                  - cell [ref=f3e9864]:
+                    - strong [ref=f3e9865]: —
+                  - cell [ref=f3e9866]:
+                    - strong [ref=f3e9867]: —
+                - row [ref=f3e9868]:
+                  - rowheader "CN" [ref=f3e9869]
+                  - cell [ref=f3e9870]:
+                    - strong [ref=f3e9871]: —
+                  - cell [ref=f3e9872]:
+                    - strong [ref=f3e9873]: —
+                  - cell [ref=f3e9874]:
+                    - strong [ref=f3e9875]: —
+                  - cell [ref=f3e9876]:
+                    - strong [ref=f3e9877]: —
+                - row [ref=f3e9878]:
+                  - rowheader "CS" [ref=f3e9879]
+                  - cell [ref=f3e9880]:
+                    - strong [ref=f3e9881]: —
+                  - cell [ref=f3e9882]:
+                    - strong [ref=f3e9883]: —
+                  - cell [ref=f3e9884]:
+                    - strong [ref=f3e9885]: —
+                  - cell [ref=f3e9886]:
+                    - strong [ref=f3e9887]: —
+                - row [ref=f3e9888]:
+                  - rowheader "EFIS" [ref=f3e9889]
+                  - cell [ref=f3e9890]:
+                    - strong [ref=f3e9891]: —
+                  - cell [ref=f3e9892]:
+                    - strong [ref=f3e9893]: —
+                  - cell [ref=f3e9894]:
+                    - strong [ref=f3e9895]: —
+                  - cell [ref=f3e9896]:
+                    - strong [ref=f3e9897]: —
+                - row [ref=f3e9898]:
+                  - rowheader "ESP" [ref=f3e9899]
+                  - cell [ref=f3e9900]:
+                    - strong [ref=f3e9901]: —
+                  - cell [ref=f3e9902]:
+                    - strong [ref=f3e9903]: —
+                  - cell [ref=f3e9904]:
+                    - strong [ref=f3e9905]: —
+                  - cell [ref=f3e9906]:
+                    - strong [ref=f3e9907]: —
+                - row [ref=f3e9908]:
+                  - rowheader "ETI" [ref=f3e9909]
+                  - cell [ref=f3e9910]:
+                    - strong [ref=f3e9911]: —
+                  - cell [ref=f3e9912]:
+                    - strong [ref=f3e9913]: —
+                  - cell [ref=f3e9914]:
+                    - strong [ref=f3e9915]: —
+                  - cell [ref=f3e9916]:
+                    - strong [ref=f3e9917]: —
+                - row [ref=f3e9918]:
+                  - rowheader "GEO" [ref=f3e9919]
+                  - cell [ref=f3e9920]:
+                    - strong [ref=f3e9921]: —
+                  - cell [ref=f3e9922]:
+                    - strong [ref=f3e9923]: —
+                  - cell [ref=f3e9924]:
+                    - strong [ref=f3e9925]: —
+                  - cell [ref=f3e9926]:
+                    - strong [ref=f3e9927]: —
+                - row [ref=f3e9928]:
+                  - rowheader "GRA" [ref=f3e9929]
+                  - cell [ref=f3e9930]:
+                    - strong [ref=f3e9931]: —
+                  - cell [ref=f3e9932]:
+                    - strong [ref=f3e9933]: —
+                  - cell [ref=f3e9934]:
+                    - strong [ref=f3e9935]: —
+                  - cell [ref=f3e9936]:
+                    - strong [ref=f3e9937]: —
+                - row [ref=f3e9938]:
+                  - rowheader "LIS" [ref=f3e9939]
+                  - cell [ref=f3e9940]:
+                    - strong [ref=f3e9941]: —
+                  - cell [ref=f3e9942]:
+                    - strong [ref=f3e9943]: —
+                  - cell [ref=f3e9944]:
+                    - strong [ref=f3e9945]: —
+                  - cell [ref=f3e9946]:
+                    - strong [ref=f3e9947]: —
+                - row [ref=f3e9948]:
+                  - rowheader "MAT" [ref=f3e9949]
+                  - cell [ref=f3e9950]:
+                    - strong [ref=f3e9951]: —
+                  - cell [ref=f3e9952]:
+                    - strong [ref=f3e9953]: —
+                  - cell [ref=f3e9954]:
+                    - strong [ref=f3e9955]: —
+                  - cell [ref=f3e9956]:
+                    - strong [ref=f3e9957]: —
+                - row [ref=f3e9958]:
+                  - rowheader "PLEC" [ref=f3e9959]
+                  - cell [ref=f3e9960]:
+                    - strong [ref=f3e9961]: —
+                  - cell [ref=f3e9962]:
+                    - strong [ref=f3e9963]: —
+                  - cell [ref=f3e9964]:
+                    - strong [ref=f3e9965]: —
+                  - cell [ref=f3e9966]:
+                    - strong [ref=f3e9967]: —
+                - row [ref=f3e9968]:
+                  - rowheader "REA" [ref=f3e9969]
+                  - cell [ref=f3e9970]:
+                    - strong [ref=f3e9971]: —
+                  - cell [ref=f3e9972]:
+                    - strong [ref=f3e9973]: —
+                  - cell [ref=f3e9974]:
+                    - strong [ref=f3e9975]: —
+                  - cell [ref=f3e9976]:
+                    - strong [ref=f3e9977]: —
+                - row [ref=f3e9978]:
+                  - rowheader "REL" [ref=f3e9979]
+                  - cell [ref=f3e9980]:
+                    - strong [ref=f3e9981]: —
+                  - cell [ref=f3e9982]:
+                    - strong [ref=f3e9983]: —
+                  - cell [ref=f3e9984]:
+                    - strong [ref=f3e9985]: —
+                  - cell [ref=f3e9986]:
+                    - strong [ref=f3e9987]: —
+                - row [ref=f3e9988]:
+                  - rowheader "SC" [ref=f3e9989]
+                  - cell [ref=f3e9990]:
+                    - strong [ref=f3e9991]: —
+                  - cell [ref=f3e9992]:
+                    - strong [ref=f3e9993]: —
+                  - cell [ref=f3e9994]:
+                    - strong [ref=f3e9995]: —
+                  - cell [ref=f3e9996]:
+                    - strong [ref=f3e9997]: —
+                - row [ref=f3e9998]:
+                  - rowheader "SPE" [ref=f3e9999]
+                  - cell [ref=f3e10000]:
+                    - strong [ref=f3e10001]: —
+                  - cell [ref=f3e10002]:
+                    - strong [ref=f3e10003]: —
+                  - cell [ref=f3e10004]:
+                    - strong [ref=f3e10005]: —
+                  - cell [ref=f3e10006]:
+                    - strong [ref=f3e10007]: —
+                - row [ref=f3e10008]:
+                  - rowheader "TECH" [ref=f3e10009]
+                  - cell [ref=f3e10010]:
+                    - strong [ref=f3e10011]: —
+                  - cell [ref=f3e10012]:
+                    - strong [ref=f3e10013]: —
+                  - cell [ref=f3e10014]:
+                    - strong [ref=f3e10015]: —
+                  - cell [ref=f3e10016]:
+                    - strong [ref=f3e10017]: —
+                - row [ref=f3e10018]:
+                  - rowheader "WRI" [ref=f3e10019]
+                  - cell [ref=f3e10020]:
+                    - strong [ref=f3e10021]: —
+                  - cell [ref=f3e10022]:
+                    - strong [ref=f3e10023]: —
+                  - cell [ref=f3e10024]:
+                    - strong [ref=f3e10025]: —
+                  - cell [ref=f3e10026]:
+                    - strong [ref=f3e10027]: —
+      - text: +   
+  - text:  +
+  - contentinfo [ref=f3e33]:
+    - paragraph [ref=f3e35]: ESL Learning Platform © 2025 | Made for Teachers, by Teachers
+  - button "" [ref=f3e36] [cursor=pointer]

@@ -1,0 +1,390 @@
+- generic [ref=f3e1]:
+  - navigation [ref=f3e2]:
+    - link " Back to Tools" [ref=f3e4] [cursor=pointer]:
+      - /url: tools.html
+      - generic [ref=f3e5]: 
+      - text: Back to Tools
+  - main [ref=f3e6]:
+    - region [ref=f3e8]:
+      - generic [ref=f3e9]:
+        - generic [ref=f3e10]:
+          - paragraph [ref=f3e11]: Parent conference tool
+          - heading " Grade Viewer" [level=2] [ref=f3e12]:
+            - generic [ref=f3e13]: 
+            - text: Grade Viewer
+          - paragraph [ref=f3e14]: Search a student, review period grades by subject, and compare the year so far. Entry is separate from this parent-facing view.
+        - generic [ref=f3e15]:
+          - button " Manage Grades" [ref=f3e16] [cursor=pointer]:
+            - generic [ref=f3e17]: 
+            - text: Manage Grades
+          - text: 
+          - button " Export Grades" [ref=f3e18] [cursor=pointer]:
+            - generic [ref=f3e19]: 
+            - text: Export Grades
+          - button " Import Grades" [ref=f3e20] [cursor=pointer]:
+            - generic [ref=f3e21]: 
+            - text: Import Grades
+          - button "Choose a grade viewer backup file" [ref=f3e22]
+      - generic [ref=f3e23]:
+        - generic [ref=f3e24]:
+          - generic [ref=f3e25]: Student
+          - searchbox "Student" [active] [ref=f3e27]: ALEGRÍA PLAZAS PABLO JOSÉ
+          - paragraph [ref=f3e28]: Search the school roster. Names match in any order (given name or surnames).
+        - text: 
+        - generic [ref=f3e48]:
+          - generic [ref=f3e49]:
+            - generic [ref=f3e50]:
+              - paragraph [ref=f3e51]: Selected student
+              - heading "ALEGRÍA PLAZAS PABLO JOSÉ" [level=3] [ref=f3e52]
+              - paragraph [ref=f3e53]: Group 4° C
+            - button " Clear" [ref=f3e54] [cursor=pointer]:
+              - generic [ref=f3e55]: 
+              - text: Clear
+          - generic [ref=f3e56]:
+            - generic [ref=f3e57]:
+              - generic [ref=f3e58]: Term
+              - combobox "Term" [ref=f3e59]:
+                - option "Período 2, 2026"
+                - option "Período 3, 2026" [selected]
+            - generic [ref=f3e60]:
+              - generic [ref=f3e61]: Show subjects
+              - combobox "Show subjects" [ref=f3e62]:
+                - option "All subjects" [selected]
+                - option "Superior only"
+                - option "Alto only"
+                - option "Básico only"
+                - option "Bajo only"
+                - option "Básico or below"
+                - option "Alto or below"
+            - tablist "Student grade views" [ref=f3e63]:
+              - tab "This term" [selected] [ref=f3e64] [cursor=pointer]
+              - tab "All terms" [ref=f3e65] [cursor=pointer]
+          - generic "Grading scale" [ref=f3e66]:
+            - generic [ref=f3e67]: Superior 4.7–5.0
+            - generic [ref=f3e68]: Alto 4.0–4.6
+            - generic [ref=f3e69]: Básico 3.5–3.9
+            - generic [ref=f3e70]: Bajo 1.0–3.4
+          - tabpanel "This term" [ref=f3e71]:
+            - generic [ref=f3e72]:
+              - article [ref=f3e73]:
+                - generic [ref=f3e74]: PROM
+                - generic [ref=f3e75]: "3.9"
+              - article [ref=f3e76]:
+                - generic [ref=f3e77]: Perd
+                - generic [ref=f3e78]: "1"
+              - article [ref=f3e79]:
+                - generic [ref=f3e80]: Term
+                - generic [ref=f3e81]: Período 3, 2026
+            - generic [ref=f3e82]:
+              - article [ref=f3e83]:
+                - heading "ART Arts" [level=4] [ref=f3e84]:
+                  - text: ART
+                  - generic [ref=f3e85]: Arts
+                - generic [ref=f3e86]:
+                  - generic [ref=f3e87]:
+                    - generic [ref=f3e88]: S1
+                    - generic [ref=f3e89]: "4.7"
+                  - generic [ref=f3e90]:
+                    - generic [ref=f3e91]: S2
+                    - generic [ref=f3e92]: "4.2"
+                  - generic [ref=f3e93]:
+                    - generic [ref=f3e94]: S3
+                    - generic [ref=f3e95]: "4.0"
+                  - generic [ref=f3e96]:
+                    - generic [ref=f3e97]: D
+                    - generic [ref=f3e98]: "4.4"
+              - article [ref=f3e99]:
+                - heading "CATEDRA Cátedra por la Paz" [level=4] [ref=f3e100]:
+                  - text: CATEDRA
+                  - generic [ref=f3e101]: Cátedra por la Paz
+                - generic [ref=f3e102]:
+                  - generic [ref=f3e103]:
+                    - generic [ref=f3e104]: S1
+                    - generic [ref=f3e105]: —
+                  - generic [ref=f3e106]:
+                    - generic [ref=f3e107]: S2
+                    - generic [ref=f3e108]: —
+                  - generic [ref=f3e109]:
+                    - generic [ref=f3e110]: S3
+                    - generic [ref=f3e111]: —
+                  - generic [ref=f3e112]:
+                    - generic [ref=f3e113]: D
+                    - generic [ref=f3e114]: —
+              - article [ref=f3e115]:
+                - heading "CN Ciencias Naturales" [level=4] [ref=f3e116]:
+                  - text: CN
+                  - generic [ref=f3e117]: Ciencias Naturales
+                - generic [ref=f3e118]:
+                  - generic [ref=f3e119]:
+                    - generic [ref=f3e120]: S1
+                    - generic [ref=f3e121]: "3.8"
+                  - generic [ref=f3e122]:
+                    - generic [ref=f3e123]: S2
+                    - generic [ref=f3e124]: "3.6"
+                  - generic [ref=f3e125]:
+                    - generic [ref=f3e126]: S3
+                    - generic [ref=f3e127]: "3.5"
+                  - generic [ref=f3e128]:
+                    - generic [ref=f3e129]: D
+                    - generic [ref=f3e130]: "3.6"
+              - article [ref=f3e131]:
+                - heading "CS Ciencias Sociales" [level=4] [ref=f3e132]:
+                  - text: CS
+                  - generic [ref=f3e133]: Ciencias Sociales
+                - generic [ref=f3e134]:
+                  - generic [ref=f3e135]:
+                    - generic [ref=f3e136]: S1
+                    - generic [ref=f3e137]: —
+                  - generic [ref=f3e138]:
+                    - generic [ref=f3e139]: S2
+                    - generic [ref=f3e140]: —
+                  - generic [ref=f3e141]:
+                    - generic [ref=f3e142]: S3
+                    - generic [ref=f3e143]: —
+                  - generic [ref=f3e144]:
+                    - generic [ref=f3e145]: D
+                    - generic [ref=f3e146]: —
+              - article [ref=f3e147]:
+                - heading "EFIS Educación Física" [level=4] [ref=f3e148]:
+                  - text: EFIS
+                  - generic [ref=f3e149]: Educación Física
+                - generic [ref=f3e150]:
+                  - generic [ref=f3e151]:
+                    - generic [ref=f3e152]: S1
+                    - generic [ref=f3e153]: —
+                  - generic [ref=f3e154]:
+                    - generic [ref=f3e155]: S2
+                    - generic [ref=f3e156]: —
+                  - generic [ref=f3e157]:
+                    - generic [ref=f3e158]: S3
+                    - generic [ref=f3e159]: —
+                  - generic [ref=f3e160]:
+                    - generic [ref=f3e161]: D
+                    - generic [ref=f3e162]: —
+              - article [ref=f3e163]:
+                - heading "ESP Lenguaje" [level=4] [ref=f3e164]:
+                  - text: ESP
+                  - generic [ref=f3e165]: Lenguaje
+                - generic [ref=f3e166]:
+                  - generic [ref=f3e167]:
+                    - generic [ref=f3e168]: S1
+                    - generic [ref=f3e169]: —
+                  - generic [ref=f3e170]:
+                    - generic [ref=f3e171]: S2
+                    - generic [ref=f3e172]: —
+                  - generic [ref=f3e173]:
+                    - generic [ref=f3e174]: S3
+                    - generic [ref=f3e175]: —
+                  - generic [ref=f3e176]:
+                    - generic [ref=f3e177]: D
+                    - generic [ref=f3e178]: —
+              - article [ref=f3e179]:
+                - heading "ETI Ethics" [level=4] [ref=f3e180]:
+                  - text: ETI
+                  - generic [ref=f3e181]: Ethics
+                - generic [ref=f3e182]:
+                  - generic [ref=f3e183]:
+                    - generic [ref=f3e184]: S1
+                    - generic [ref=f3e185]: —
+                  - generic [ref=f3e186]:
+                    - generic [ref=f3e187]: S2
+                    - generic [ref=f3e188]: —
+                  - generic [ref=f3e189]:
+                    - generic [ref=f3e190]: S3
+                    - generic [ref=f3e191]: —
+                  - generic [ref=f3e192]:
+                    - generic [ref=f3e193]: D
+                    - generic [ref=f3e194]: —
+              - article [ref=f3e195]:
+                - heading "GEO Geometry" [level=4] [ref=f3e196]:
+                  - text: GEO
+                  - generic [ref=f3e197]: Geometry
+                - generic [ref=f3e198]:
+                  - generic [ref=f3e199]:
+                    - generic [ref=f3e200]: S1
+                    - generic [ref=f3e201]: —
+                  - generic [ref=f3e202]:
+                    - generic [ref=f3e203]: S2
+                    - generic [ref=f3e204]: —
+                  - generic [ref=f3e205]:
+                    - generic [ref=f3e206]: S3
+                    - generic [ref=f3e207]: —
+                  - generic [ref=f3e208]:
+                    - generic [ref=f3e209]: D
+                    - generic [ref=f3e210]: —
+              - article [ref=f3e211]:
+                - heading "GRA Grammar" [level=4] [ref=f3e212]:
+                  - text: GRA
+                  - generic [ref=f3e213]: Grammar
+                - generic [ref=f3e214]:
+                  - generic [ref=f3e215]:
+                    - generic [ref=f3e216]: S1
+                    - generic [ref=f3e217]: "3.5"
+                    - generic [ref=f3e218]: Rec 4.0
+                  - generic [ref=f3e219]:
+                    - generic [ref=f3e220]: S2
+                    - generic [ref=f3e221]: "3.4"
+                  - generic [ref=f3e222]:
+                    - generic [ref=f3e223]: S3
+                    - generic [ref=f3e224]: "3.6"
+                  - generic [ref=f3e225]:
+                    - generic [ref=f3e226]: D
+                    - generic [ref=f3e227]: "3.5"
+              - article [ref=f3e228]:
+                - heading "LIS Listening" [level=4] [ref=f3e229]:
+                  - text: LIS
+                  - generic [ref=f3e230]: Listening
+                - generic [ref=f3e231]:
+                  - generic [ref=f3e232]:
+                    - generic [ref=f3e233]: S1
+                    - generic [ref=f3e234]: —
+                  - generic [ref=f3e235]:
+                    - generic [ref=f3e236]: S2
+                    - generic [ref=f3e237]: —
+                  - generic [ref=f3e238]:
+                    - generic [ref=f3e239]: S3
+                    - generic [ref=f3e240]: —
+                  - generic [ref=f3e241]:
+                    - generic [ref=f3e242]: D
+                    - generic [ref=f3e243]: —
+              - article [ref=f3e244]:
+                - heading "MAT Matemáticas" [level=4] [ref=f3e245]:
+                  - text: MAT
+                  - generic [ref=f3e246]: Matemáticas
+                - generic [ref=f3e247]:
+                  - generic [ref=f3e248]:
+                    - generic [ref=f3e249]: S1
+                    - generic [ref=f3e250]: "3.2"
+                  - generic [ref=f3e251]:
+                    - generic [ref=f3e252]: S2
+                    - generic [ref=f3e253]: "3.0"
+                  - generic [ref=f3e254]:
+                    - generic [ref=f3e255]: S3
+                    - generic [ref=f3e256]: "3.4"
+                  - generic [ref=f3e257]:
+                    - generic [ref=f3e258]: D
+                    - generic [ref=f3e259]: "3.2"
+              - article [ref=f3e260]:
+                - heading "PLEC Plan Lector" [level=4] [ref=f3e261]:
+                  - text: PLEC
+                  - generic [ref=f3e262]: Plan Lector
+                - generic [ref=f3e263]:
+                  - generic [ref=f3e264]:
+                    - generic [ref=f3e265]: S1
+                    - generic [ref=f3e266]: —
+                  - generic [ref=f3e267]:
+                    - generic [ref=f3e268]: S2
+                    - generic [ref=f3e269]: —
+                  - generic [ref=f3e270]:
+                    - generic [ref=f3e271]: S3
+                    - generic [ref=f3e272]: —
+                  - generic [ref=f3e273]:
+                    - generic [ref=f3e274]: D
+                    - generic [ref=f3e275]: —
+              - article [ref=f3e276]:
+                - heading "REA Reading" [level=4] [ref=f3e277]:
+                  - text: REA
+                  - generic [ref=f3e278]: Reading
+                - generic [ref=f3e279]:
+                  - generic [ref=f3e280]:
+                    - generic [ref=f3e281]: S1
+                    - generic [ref=f3e282]: —
+                  - generic [ref=f3e283]:
+                    - generic [ref=f3e284]: S2
+                    - generic [ref=f3e285]: —
+                  - generic [ref=f3e286]:
+                    - generic [ref=f3e287]: S3
+                    - generic [ref=f3e288]: —
+                  - generic [ref=f3e289]:
+                    - generic [ref=f3e290]: D
+                    - generic [ref=f3e291]: —
+              - article [ref=f3e292]:
+                - heading "REL Religión" [level=4] [ref=f3e293]:
+                  - text: REL
+                  - generic [ref=f3e294]: Religión
+                - generic [ref=f3e295]:
+                  - generic [ref=f3e296]:
+                    - generic [ref=f3e297]: S1
+                    - generic [ref=f3e298]: —
+                  - generic [ref=f3e299]:
+                    - generic [ref=f3e300]: S2
+                    - generic [ref=f3e301]: —
+                  - generic [ref=f3e302]:
+                    - generic [ref=f3e303]: S3
+                    - generic [ref=f3e304]: —
+                  - generic [ref=f3e305]:
+                    - generic [ref=f3e306]: D
+                    - generic [ref=f3e307]: —
+              - article [ref=f3e308]:
+                - heading "SC Science" [level=4] [ref=f3e309]:
+                  - text: SC
+                  - generic [ref=f3e310]: Science
+                - generic [ref=f3e311]:
+                  - generic [ref=f3e312]:
+                    - generic [ref=f3e313]: S1
+                    - generic [ref=f3e314]: "5.0"
+                  - generic [ref=f3e315]:
+                    - generic [ref=f3e316]: S2
+                    - generic [ref=f3e317]: "4.8"
+                  - generic [ref=f3e318]:
+                    - generic [ref=f3e319]: S3
+                    - generic [ref=f3e320]: "4.9"
+                  - generic [ref=f3e321]:
+                    - generic [ref=f3e322]: D
+                    - generic [ref=f3e323]: "4.9"
+              - article [ref=f3e324]:
+                - heading "SPE Speaking" [level=4] [ref=f3e325]:
+                  - text: SPE
+                  - generic [ref=f3e326]: Speaking
+                - generic [ref=f3e327]:
+                  - generic [ref=f3e328]:
+                    - generic [ref=f3e329]: S1
+                    - generic [ref=f3e330]: —
+                  - generic [ref=f3e331]:
+                    - generic [ref=f3e332]: S2
+                    - generic [ref=f3e333]: —
+                  - generic [ref=f3e334]:
+                    - generic [ref=f3e335]: S3
+                    - generic [ref=f3e336]: —
+                  - generic [ref=f3e337]:
+                    - generic [ref=f3e338]: D
+                    - generic [ref=f3e339]: —
+              - article [ref=f3e340]:
+                - heading "TECH Technology" [level=4] [ref=f3e341]:
+                  - text: TECH
+                  - generic [ref=f3e342]: Technology
+                - generic [ref=f3e343]:
+                  - generic [ref=f3e344]:
+                    - generic [ref=f3e345]: S1
+                    - generic [ref=f3e346]: —
+                  - generic [ref=f3e347]:
+                    - generic [ref=f3e348]: S2
+                    - generic [ref=f3e349]: —
+                  - generic [ref=f3e350]:
+                    - generic [ref=f3e351]: S3
+                    - generic [ref=f3e352]: —
+                  - generic [ref=f3e353]:
+                    - generic [ref=f3e354]: D
+                    - generic [ref=f3e355]: —
+              - article [ref=f3e356]:
+                - heading "WRI Writing" [level=4] [ref=f3e357]:
+                  - text: WRI
+                  - generic [ref=f3e358]: Writing
+                - generic [ref=f3e359]:
+                  - generic [ref=f3e360]:
+                    - generic [ref=f3e361]: S1
+                    - generic [ref=f3e362]: "4.0"
+                  - generic [ref=f3e363]:
+                    - generic [ref=f3e364]: S2
+                    - generic [ref=f3e365]: "4.1"
+                  - generic [ref=f3e366]:
+                    - generic [ref=f3e367]: S3
+                    - generic [ref=f3e368]: "3.9"
+                  - generic [ref=f3e369]:
+                    - generic [ref=f3e370]: D
+                    - generic [ref=f3e371]: "4.0"
+      - text: +   
+  - text:  +
+  - contentinfo [ref=f3e33]:
+    - paragraph [ref=f3e35]: ESL Learning Platform © 2025 | Made for Teachers, by Teachers
+  - button "" [ref=f3e36] [cursor=pointer]

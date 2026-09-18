@@ -1,0 +1,135 @@
+- generic [ref=f3e1]:
+  - navigation [ref=f3e2]:
+    - link " Back to Tools" [ref=f3e4] [cursor=pointer]:
+      - /url: tools.html
+      - generic [ref=f3e5]: 
+      - text: Back to Tools
+  - main [ref=f3e6]:
+    - region [ref=f3e8]:
+      - generic [ref=f3e9]:
+        - generic [ref=f3e10]:
+          - paragraph [ref=f3e11]: Parent conference tool
+          - heading " Grade Viewer" [level=2] [ref=f3e12]:
+            - generic [ref=f3e13]: 
+            - text: Grade Viewer
+          - paragraph [ref=f3e14]: Search a student, review period grades by subject, and compare the year so far. Entry is separate from this parent-facing view.
+        - generic [ref=f3e15]:
+          - button " Manage Grades" [ref=f3e16] [cursor=pointer]:
+            - generic [ref=f3e17]: 
+            - text: Manage Grades
+          - text: 
+          - button " Export Grades" [ref=f3e18] [cursor=pointer]:
+            - generic [ref=f3e19]: 
+            - text: Export Grades
+          - button " Import Grades" [ref=f3e20] [cursor=pointer]:
+            - generic [ref=f3e21]: 
+            - text: Import Grades
+          - button "Choose a grade viewer backup file" [ref=f3e22]
+      - generic [ref=f3e23]:
+        - generic [ref=f3e24]:
+          - generic [ref=f3e25]: Student
+          - searchbox "Student" [ref=f3e27]: ALEGRÍA PLAZAS PABLO JOSÉ
+          - paragraph [ref=f3e28]: Search the school roster. Names match in any order (given name or surnames).
+        - text: 
+        - generic [ref=f3e48]:
+          - generic [ref=f3e49]:
+            - generic [ref=f3e50]:
+              - paragraph [ref=f3e51]: Selected student
+              - heading "ALEGRÍA PLAZAS PABLO JOSÉ" [level=3] [ref=f3e52]
+              - paragraph [ref=f3e53]: Group 4° C
+            - button " Clear" [ref=f3e54] [cursor=pointer]:
+              - generic [ref=f3e55]: 
+              - text: Clear
+          - generic [ref=f3e56]:
+            - generic [ref=f3e57]:
+              - generic [ref=f3e58]: Term
+              - combobox "Term" [active] [ref=f3e59]:
+                - option "Período 2, 2026"
+                - option "Período 3, 2026" [selected]
+            - generic [ref=f3e60]:
+              - generic [ref=f3e61]: Show subjects
+              - combobox "Show subjects" [ref=f3e62]:
+                - option "All subjects"
+                - option "Superior only"
+                - option "Alto only"
+                - option "Básico only"
+                - option "Bajo only"
+                - option "Básico or below" [selected]
+                - option "Alto or below"
+            - tablist "Student grade views" [ref=f3e63]:
+              - tab "This term" [selected] [ref=f3e64] [cursor=pointer]
+              - tab "All terms" [ref=f3e65] [cursor=pointer]
+          - generic "Grading scale" [ref=f3e66]:
+            - generic [ref=f3e67]: Superior 4.7–5.0
+            - generic [ref=f3e68]: Alto 4.0–4.6
+            - generic [ref=f3e69]: Básico 3.5–3.9
+            - generic [ref=f3e70]: Bajo 1.0–3.4
+          - tabpanel "This term" [ref=f3e71]:
+            - generic [ref=f3e72]:
+              - article [ref=f3e372]:
+                - generic [ref=f3e373]: PROM
+                - generic [ref=f3e374]: "3.9"
+              - article [ref=f3e375]:
+                - generic [ref=f3e376]: Perd
+                - generic [ref=f3e377]: "1"
+              - article [ref=f3e378]:
+                - generic [ref=f3e379]: Term
+                - generic [ref=f3e380]: Período 3, 2026
+            - generic [ref=f3e82]:
+              - article [ref=f3e381]:
+                - heading "CN Ciencias Naturales" [level=4] [ref=f3e382]:
+                  - text: CN
+                  - generic [ref=f3e383]: Ciencias Naturales
+                - generic [ref=f3e384]:
+                  - generic [ref=f3e385]:
+                    - generic [ref=f3e386]: S1
+                    - generic [ref=f3e387]: "3.8"
+                  - generic [ref=f3e388]:
+                    - generic [ref=f3e389]: S2
+                    - generic [ref=f3e390]: "3.6"
+                  - generic [ref=f3e391]:
+                    - generic [ref=f3e392]: S3
+                    - generic [ref=f3e393]: "3.5"
+                  - generic [ref=f3e394]:
+                    - generic [ref=f3e395]: D
+                    - generic [ref=f3e396]: "3.6"
+              - article [ref=f3e397]:
+                - heading "GRA Grammar" [level=4] [ref=f3e398]:
+                  - text: GRA
+                  - generic [ref=f3e399]: Grammar
+                - generic [ref=f3e400]:
+                  - generic [ref=f3e401]:
+                    - generic [ref=f3e402]: S1
+                    - generic [ref=f3e403]: "3.5"
+                    - generic [ref=f3e404]: Rec 4.0
+                  - generic [ref=f3e405]:
+                    - generic [ref=f3e406]: S2
+                    - generic [ref=f3e407]: "3.4"
+                  - generic [ref=f3e408]:
+                    - generic [ref=f3e409]: S3
+                    - generic [ref=f3e410]: "3.6"
+                  - generic [ref=f3e411]:
+                    - generic [ref=f3e412]: D
+                    - generic [ref=f3e413]: "3.5"
+              - article [ref=f3e414]:
+                - heading "MAT Matemáticas" [level=4] [ref=f3e415]:
+                  - text: MAT
+                  - generic [ref=f3e416]: Matemáticas
+                - generic [ref=f3e417]:
+                  - generic [ref=f3e418]:
+                    - generic [ref=f3e419]: S1
+                    - generic [ref=f3e420]: "3.2"
+                  - generic [ref=f3e421]:
+                    - generic [ref=f3e422]: S2
+                    - generic [ref=f3e423]: "3.0"
+                  - generic [ref=f3e424]:
+                    - generic [ref=f3e425]: S3
+                    - generic [ref=f3e426]: "3.4"
+                  - generic [ref=f3e427]:
+                    - generic [ref=f3e428]: D
+                    - generic [ref=f3e429]: "3.2"
+      - text: +   
+  - text:  +
+  - contentinfo [ref=f3e33]:
+    - paragraph [ref=f3e35]: ESL Learning Platform © 2025 | Made for Teachers, by Teachers
+  - button "" [ref=f3e36] [cursor=pointer]
