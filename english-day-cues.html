@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Day Cues</title>
+    <link rel="icon" type="image/png" href="assets/graduation-cap-icon.png">
+    <style>
+        :root {
+            --bg: #12151c;
+            --text: #f4f7fb;
+            --muted: #c5ceda;
+            --line: #2c3544;
+            --amber: #f7b801;
+            --ink: #1a1200;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: "Segoe UI", system-ui, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+        }
+
+        .shell {
+            display: grid;
+            grid-template-columns: 108px minmax(0, 1fr) 108px;
+            min-height: 100vh;
+            align-items: start;
+        }
+
+        .frame {
+            max-width: 920px;
+            margin: 0 auto;
+            padding: 0 1.25rem 2rem;
+            width: 100%;
+        }
+
+        .top {
+            position: sticky;
+            top: 0;
+            z-index: 5;
+            background: var(--bg);
+            padding: 1rem 0 0.85rem;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .kicker {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 1rem;
+            color: var(--muted);
+            font-size: 1.05rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            margin: 0.2rem 0 0.85rem;
+            font-size: clamp(2rem, 4.2vw, 3.15rem);
+            line-height: 1.05;
+            font-weight: 800;
+        }
+
+        #ambient-wrap[hidden] {
+            display: none;
+        }
+
+        #ambient-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.85rem;
+            min-height: 72px;
+            padding: 0.65rem 1.15rem 0.65rem 0.9rem;
+            background: transparent;
+            color: var(--text);
+            border: 3px solid var(--text);
+            border-radius: 14px;
+            font: inherit;
+            font-weight: 800;
+            cursor: pointer;
+            text-align: left;
+        }
+
+        #ambient-btn .ambient-icon {
+            display: flex;
+            width: 34px;
+            height: 34px;
+        }
+
+        #ambient-btn .ambient-icon svg {
+            width: 34px;
+            height: 34px;
+            display: block;
+        }
+
+        #ambient-btn .ambient-label {
+            display: block;
+            font-size: clamp(1.4rem, 2.2vw, 1.75rem);
+            line-height: 1.1;
+        }
+
+        #ambient-btn .ambient-file {
+            display: block;
+            margin-top: 0.15rem;
+            font-size: 0.95rem;
+            font-weight: 650;
+            opacity: 0.75;
+        }
+
+        #ambient-btn.is-on {
+            background: #3ddc84;
+            color: #06210f;
+            border-color: #d8ffe8;
+        }
+
+        #ambient-btn.is-fading {
+            background: #1d4d32;
+            color: #e9fff2;
+            border-color: #3ddc84;
+        }
+
+        #ambient-btn:focus-visible,
+        .cue:focus-visible,
+        .nav-btn:focus-visible {
+            outline: 4px solid #ffffff;
+            outline-offset: 3px;
+        }
+
+        .status {
+            margin: 0.75rem 0 0;
+            color: #ffb4b4;
+            font-size: 1.15rem;
+            font-weight: 700;
+        }
+
+        .status[hidden] {
+            display: none;
+        }
+
+        .script {
+            padding-top: 0.4rem;
+        }
+
+        .line {
+            padding: 0.95rem 0 1.05rem;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .who {
+            font-size: clamp(1.2rem, 2.2vw, 1.55rem);
+            font-weight: 800;
+            letter-spacing: 0.03em;
+        }
+
+        .say {
+            margin: 0.25rem 0 0;
+            font-size: clamp(1.85rem, 3.5vw, 2.75rem);
+            line-height: 1.25;
+            font-weight: 700;
+        }
+
+        .cue {
+            display: flex;
+            align-items: center;
+            gap: 0.9rem;
+            width: 100%;
+            margin: 0.9rem 0;
+            padding: 1rem 1.15rem;
+            background: var(--amber);
+            color: var(--ink);
+            border: 3px solid #ffe08a;
+            border-radius: 14px;
+            font: inherit;
+            font-weight: 800;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .cue-icon {
+            display: flex;
+            flex: 0 0 auto;
+        }
+
+        .cue-icon svg {
+            width: 32px;
+            height: 32px;
+            display: block;
+        }
+
+        .cue-label {
+            display: block;
+            font-size: clamp(1.55rem, 2.6vw, 2rem);
+            line-height: 1.1;
+        }
+
+        .cue-file {
+            display: block;
+            margin-top: 0.15rem;
+            font-size: 0.95rem;
+            font-weight: 700;
+            opacity: 0.75;
+        }
+
+        .cue.is-hot {
+            animation: cue-glow 1.6s ease-out;
+        }
+
+        @keyframes cue-glow {
+            0% {
+                background: #ffffff;
+                box-shadow: 0 0 0 6px #ffffff, 0 0 32px 8px rgba(255, 244, 180, 0.95);
+            }
+
+            35% {
+                background: #ffe566;
+                box-shadow: 0 0 0 8px #f7b801, 0 0 40px 12px rgba(247, 184, 1, 0.75);
+            }
+
+            100% {
+                background: #f7b801;
+                box-shadow: 0 0 0 0 rgba(247, 184, 1, 0);
+            }
+        }
+
+        .nav-btn {
+            position: sticky;
+            top: calc(50vh - 84px);
+            z-index: 6;
+            width: 84px;
+            height: 168px;
+            margin: 0 auto;
+            background: #f4f7fb;
+            color: #111418;
+            border: none;
+            border-radius: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-btn svg {
+            width: 48px;
+            height: 48px;
+            display: block;
+        }
+
+        .nav-btn.prev {
+            grid-column: 1;
+            grid-row: 1;
+        }
+
+        .nav-btn.next {
+            grid-column: 3;
+            grid-row: 1;
+        }
+
+        .frame {
+            grid-column: 2;
+            grid-row: 1;
+        }
+
+        .nav-btn:disabled {
+            background: #2a3140;
+            color: #667084;
+            cursor: default;
+        }
+
+        @media (max-width: 760px) {
+            .shell {
+                grid-template-columns: 1fr 1fr;
+                grid-template-rows: minmax(0, 1fr) 84px;
+                height: 100vh;
+                height: 100dvh;
+                min-height: 0;
+                overflow: hidden;
+                align-items: stretch;
+            }
+
+            .frame {
+                grid-column: 1 / -1;
+                grid-row: 1;
+                max-width: none;
+                height: 100%;
+                min-height: 0;
+                overflow: auto;
+                padding: 0 1rem 1.25rem;
+            }
+
+            .nav-btn {
+                position: static;
+                width: 100%;
+                height: 84px;
+                margin: 0;
+                border-radius: 0;
+            }
+
+            .nav-btn.prev {
+                grid-column: 1;
+                grid-row: 2;
+            }
+
+            .nav-btn.next {
+                grid-column: 2;
+                grid-row: 2;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="shell">
+    <button id="prev" type="button" class="nav-btn prev" aria-label="Previous scene">
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">
+            <path d="M15.4 4.6 8 12l7.4 7.4-1.8 1.8L4.4 12 13.6 2.8z" />
+        </svg>
+    </button>
+    <div class="frame">
+        <header class="top">
+            <div class="kicker">
+                <span id="scene-index">Scene 1 of 7</span>
+                <span>Arrow keys change scene</span>
+            </div>
+            <h1 id="scene-title">Wendy's Bedroom</h1>
+            <div id="ambient-wrap">
+                <button id="ambient-btn" type="button" aria-pressed="false">
+                    <span class="ambient-icon" aria-hidden="true"></span>
+                    <span>
+                        <span class="ambient-label">Play ambient</span>
+                        <span class="ambient-file"></span>
+                    </span>
+                </button>
+            </div>
+            <p id="status" class="status" role="status" hidden></p>
+        </header>
+        <main class="script" id="script"></main>
+    </div>
+    <button id="next" type="button" class="nav-btn next" aria-label="Next scene">
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">
+            <path d="M8.6 4.6 16 12l-7.4 7.4 1.8 1.8 9.2-9.2L10.4 2.8z" />
+        </svg>
+    </button>
+    </div>
+
+    <script>
+        // Drop the event mp3s in assets/audio/english-day/ using these exact filenames.
+        const AUDIO_BASE = "assets/audio/english-day/";
+        const AMBIENT_VOL = 0.3;
+        const FADE_MS = 1300;
+
+        const SPEAKER_COLOR = {
+            "WENDY": "#ffb703",
+            "PETER PAN": "#5ee07a",
+            "SARA": "#7cb7ff",
+            "MIA": "#5ce1e6",
+            "LUCIANO": "#c4b5fd",
+            "LORENZO": "#7dd3fc",
+            "SAMUEL": "#a5b4fc",
+            "PABLO": "#22d3ee",
+            "MATIAS": "#93c5fd",
+            "LOST BOYS": "#67e8f9",
+            "EVA": "#f0abfc",
+            "SAMANTHA": "#f9a8d4",
+            "DANNA": "#d8b4fe",
+            "ANTONELLA": "#fda4af",
+            "BRIANA": "#e879f9",
+            "FAIRIES": "#f5d0fe",
+            "CAPITÁN GARFIO": "#ff6b6b",
+            "LAURA BERNAL": "#fdba74",
+            "ALEJANDRA PRO": "#fed7aa",
+            "ERMES": "#fb923c",
+            "PAULA V": "#fb7185",
+            "SANTIAGO OTÁLORA": "#fca5a5",
+            "JUAN SARRIAS": "#fd7e14",
+            "DANIEL": "#fde047",
+            "PIRATES": "#ff8787",
+            "ALL CAST": "#ffe08a"
+        };
+
+        const VOLUME_SVG = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3a4.5 4.5 0 0 0-2.5-4.03v8.06A4.5 4.5 0 0 0 16.5 12zM14 3.23v2.06a7 7 0 0 1 0 13.42v2.06a9 9 0 0 0 0-17.54z"/></svg>';
+        const PLAY_SVG = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l12-7z"/></svg>';
+        const STOP_SVG = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 6h12v12H6z"/></svg>';
+
+        const SCENES = [
+            {
+                title: "Wendy's Bedroom",
+                ambient: "ambient-scene1.mp3",
+                items: [
+                    { speaker: "WENDY", text: "Shh... everyone's asleep. I love telling stories before bed." },
+                    { cue: true, src: "sfx-opening-window.mp3", label: "Opening window" },
+                    { speaker: "PETER PAN", text: "Psst! Wendy!" },
+                    { speaker: "WENDY", text: "Who's there?" },
+                    { speaker: "PETER PAN", text: "It's me - Peter Pan!" },
+                    { speaker: "WENDY", text: "Peter Pan?! You're real?!" },
+                    { speaker: "PETER PAN", text: "Of course I'm real! I came back for my shadow... and I heard your stories through the window." },
+                    { cue: true, src: "sfx-chime-sparkle.mp3", label: "Sparkle" },
+                    { speaker: "WENDY", text: "Who was that?" },
+                    { speaker: "PETER PAN", text: "That's Tinker Bell. She's a little jealous, so be careful." },
+                    { cue: true, src: "sfx-chime-annoyed.mp3", label: "Annoyed chime" },
+                    { speaker: "PETER PAN", text: "See? Told you." },
+                    { speaker: "WENDY", text: "Where do you live, Peter?" },
+                    { speaker: "PETER PAN", text: "Neverland! Where children never grow up. Want to come?" },
+                    { speaker: "WENDY", text: "Neverland... Can I bring my brothers?" },
+                    { speaker: "PETER PAN", text: "Sure! Just think happy thoughts... and believe." }
+                ]
+            },
+            {
+                title: "Flying to Neverland",
+                ambient: "ambient-scene2.mp3",
+                items: [
+                    { speaker: "WENDY", text: "I'm flying! I'm really flying!" },
+                    { speaker: "PETER PAN", text: "Follow me! Second star to the right, and straight on till morning!" },
+                    { cue: true, src: "sfx-chime-sparkle.mp3", label: "Sparkle" },
+                    { speaker: "WENDY", text: "It's beautiful up here!" },
+                    { speaker: "PETER PAN", text: "Welcome... to Neverland!" }
+                ]
+            },
+            {
+                title: "Meeting the Lost Boys",
+                ambient: "ambient-scene3.mp3",
+                items: [
+                    { speaker: "SARA", text: "Someone's coming! Everybody hide!" },
+                    { speaker: "MIA", text: "Wait - it's Peter! He's back!" },
+                    { speaker: "LUCIANO", text: "And he brought someone with him!" },
+                    { speaker: "LORENZO", text: "A new friend! Come on, come see our hideout!" },
+                    { speaker: "SAMUEL", text: "Hi, I'm Samuel! Welcome to our hideout!" },
+                    { speaker: "PABLO", text: "I'm Pablo. Are you going to stay with us?" },
+                    { speaker: "MATIAS", text: "This is the best island in the whole world, you'll see!" },
+                    { speaker: "WENDY", text: "Hello, everyone! I'm Wendy. Peter says you need someone to tell you stories." },
+                    { speaker: "LOST BOYS", together: true, text: "Yes! Please, please, please!" },
+                    { speaker: "PETER PAN", text: "See, Wendy? Everyone loves a good story here." }
+                ]
+            },
+            {
+                title: "The Fairies' Warning",
+                ambient: null,
+                items: [
+                    { speaker: "EVA", text: "Psst... Wendy... watch out." },
+                    { speaker: "SAMANTHA", text: "The pirates come this way sometimes." },
+                    { speaker: "DANNA", text: "Captain Hook never stops looking for Peter." },
+                    { speaker: "ANTONELLA", text: "He wants revenge for his hand!" },
+                    { speaker: "BRIANA", text: "A crocodile ate it - and now it follows him everywhere!" },
+                    { speaker: "FAIRIES", together: true, text: "Tick... tock... tick... tock..." },
+                    { speaker: "PETER PAN", text: "Don't worry, Wendy. I'm not afraid of Hook." }
+                ]
+            },
+            {
+                title: "The Pirates Arrive",
+                ambient: "ambient-scene5.mp3",
+                items: [
+                    { speaker: "CAPITÁN GARFIO", text: "Where is that insufferable boy... Peter Pan!" },
+                    { speaker: "LAURA BERNAL", text: "Captain, we found footprints near the lagoon!" },
+                    { speaker: "ALEJANDRA PRO", text: "Fresh ones, Captain - someone's close." },
+                    { speaker: "ERMES", text: "Should we search the whole island?" },
+                    { speaker: "PAULA V", text: "I heard children's laughter over there!" },
+                    { speaker: "SANTIAGO OTÁLORA", text: "It must be that Pan boy and his little gang." },
+                    { speaker: "JUAN SARRIAS", text: "What's the plan, Captain?" },
+                    { speaker: "DANIEL", text: "We could set a trap by the cove!" },
+                    { speaker: "CAPITÁN GARFIO", text: "Excellent idea, Daniel! Set the trap - Peter Pan will be mine at last!" },
+                    { speaker: "PIRATES", together: true, text: "Aye, aye, Captain!" }
+                ]
+            },
+            {
+                title: "The Confrontation",
+                ambient: "ambient-scene6.mp3",
+                items: [
+                    { speaker: "PETER PAN", text: "Looking for me, Hook?" },
+                    { speaker: "CAPITÁN GARFIO", text: "Peter Pan! At last!" },
+                    { speaker: "PETER PAN", text: "You'll never catch me - you never have!" },
+                    { speaker: "CAPITÁN GARFIO", text: "This time is different, boy!" },
+                    { cue: true, src: "sfx-croc-clock.mp3", label: "Crocodile clock" },
+                    { speaker: "CAPITÁN GARFIO", text: "That sound... no... not the crocodile!" },
+                    { speaker: "PETER PAN", text: "Sounds like your old friend is hungry, Hook!" },
+                    { speaker: "CAPITÁN GARFIO", text: "Retreat! Everyone, retreat to the ship!" },
+                    { speaker: "PIRATES", together: true, text: "Aye, Captain! Run!" },
+                    { cue: true, src: "sfx-running-away.mp3", label: "Running away" }
+                ]
+            },
+            {
+                title: "Ending",
+                ambient: "ambient-scene7.mp3",
+                items: [
+                    { speaker: "WENDY", text: "We did it! Neverland is safe again!" },
+                    { speaker: "LOST BOYS", together: true, text: "Hooray for Peter Pan!" },
+                    { cue: true, src: "sfx-chime-happy-long.mp3", label: "Happy chime" },
+                    { speaker: "PETER PAN", text: "Wendy, will you stay a little longer?" },
+                    { speaker: "WENDY", text: "I wish I could, Peter... but my brothers and I need to go home." },
+                    { speaker: "PETER PAN", text: "Then I'll fly you back myself. Second star to the right..." },
+                    { speaker: "WENDY", text: "...and straight on till morning." },
+                    { speaker: "ALL CAST", together: true, text: "The End!" },
+                    { cue: true, src: "sfx-the-end.mp3", label: "The End" }
+                ]
+            }
+        ];
+
+        const sceneIndexEl = document.getElementById("scene-index");
+        const sceneTitleEl = document.getElementById("scene-title");
+        const ambientWrap = document.getElementById("ambient-wrap");
+        const ambientBtn = document.getElementById("ambient-btn");
+        const ambientLabel = ambientBtn.querySelector(".ambient-label");
+        const ambientFile = ambientBtn.querySelector(".ambient-file");
+        const ambientIcon = ambientBtn.querySelector(".ambient-icon");
+        const statusEl = document.getElementById("status");
+        const scriptEl = document.getElementById("script");
+        const frameEl = document.querySelector(".frame");
+        const prevBtn = document.getElementById("prev");
+        const nextBtn = document.getElementById("next");
+
+        const tracks = new Map();
+        const cueCache = new Map();
+        let index = 0;
+        let activeSrc = null;
+
+        function ensureTrack(src) {
+            let track = tracks.get(src);
+            if (!track) {
+                const audio = new Audio(AUDIO_BASE + src);
+                audio.preload = "auto";
+                audio.loop = true;
+                audio.volume = AMBIENT_VOL;
+                track = { audio: audio, src: src, token: 0, fading: false, rafId: 0 };
+                tracks.set(src, track);
+            }
+            return track;
+        }
+
+        function showError(message) {
+            statusEl.hidden = false;
+            statusEl.textContent = message;
+        }
+
+        function syncAmbientButton() {
+            const scene = SCENES[index];
+            if (!scene.ambient) return;
+            const track = tracks.get(scene.ambient);
+            const fading = !!(track && track.fading);
+            const on = activeSrc === scene.ambient && !fading;
+            ambientBtn.classList.toggle("is-on", on);
+            ambientBtn.classList.toggle("is-fading", fading);
+            ambientBtn.setAttribute("aria-pressed", on || fading ? "true" : "false");
+            if (fading) ambientLabel.textContent = "Fading…";
+            else if (on) ambientLabel.textContent = "Stop ambient";
+            else ambientLabel.textContent = "Play ambient";
+            ambientIcon.innerHTML = on || fading ? STOP_SVG : PLAY_SVG;
+        }
+
+        function fadeOut(src) {
+            const track = tracks.get(src);
+            if (!track || track.fading) return;
+            const audio = track.audio;
+            const token = ++track.token;
+            track.fading = true;
+            if (activeSrc === src) activeSrc = null;
+            cancelAnimationFrame(track.rafId);
+            const startVol = audio.volume;
+            const t0 = performance.now();
+
+            function frame(now) {
+                if (track.token !== token) return;
+                const t = Math.min(1, (now - t0) / FADE_MS);
+                audio.volume = startVol * (1 - t);
+                if (t < 1) {
+                    track.rafId = requestAnimationFrame(frame);
+                } else {
+                    audio.volume = 0;
+                    audio.pause();
+                    try { audio.currentTime = 0; } catch (err) { /* not loaded yet */ }
+                    audio.volume = AMBIENT_VOL;
+                    track.fading = false;
+                    track.rafId = 0;
+                }
+                syncAmbientButton();
+            }
+
+            track.rafId = requestAnimationFrame(frame);
+            syncAmbientButton();
+        }
+
+        function startAmbient(src) {
+            const track = ensureTrack(src);
+            if (track.fading) {
+                cancelAnimationFrame(track.rafId);
+                track.rafId = 0;
+                track.fading = false;
+                track.token++;
+            }
+            if (activeSrc && activeSrc !== src) fadeOut(activeSrc);
+            const token = ++track.token;
+            track.audio.loop = true;
+            track.audio.volume = AMBIENT_VOL;
+            activeSrc = src;
+            syncAmbientButton();
+            const pending = track.audio.play();
+            if (pending && typeof pending.then === "function") {
+                pending.then(function () {
+                    if (track.token !== token || track.fading) return;
+                    track.audio.volume = AMBIENT_VOL;
+                    activeSrc = src;
+                    syncAmbientButton();
+                }).catch(function () {
+                    if (track.token !== token) return;
+                    if (activeSrc === src) activeSrc = null;
+                    syncAmbientButton();
+                    showError("Could not play " + src + ". Put the file in " + AUDIO_BASE);
+                });
+            }
+        }
+
+        function playCue(src, btn) {
+            let audio = cueCache.get(src);
+            if (!audio) {
+                audio = new Audio(AUDIO_BASE + src);
+                audio.preload = "auto";
+                cueCache.set(src, audio);
+            }
+            audio.loop = false;
+            audio.volume = 1;
+            try { audio.currentTime = 0; } catch (err) { /* not loaded yet */ }
+            const pending = audio.play();
+            if (pending && typeof pending.catch === "function") {
+                pending.then(function () {
+                    if (statusEl.textContent.indexOf(src) !== -1) {
+                        statusEl.hidden = true;
+                        statusEl.textContent = "";
+                    }
+                }).catch(function () {
+                    showError("Could not play " + src + ". Put the file in " + AUDIO_BASE);
+                });
+            }
+            btn.classList.remove("is-hot");
+            void btn.offsetWidth;
+            btn.classList.add("is-hot");
+        }
+
+        function renderItem(item) {
+            if (item.cue) {
+                const btn = document.createElement("button");
+                btn.type = "button";
+                btn.className = "cue";
+                btn.dataset.kind = "cue";
+                btn.dataset.src = item.src;
+                btn.setAttribute("aria-label", "Play cue " + item.label);
+                const icon = document.createElement("span");
+                icon.className = "cue-icon";
+                icon.innerHTML = VOLUME_SVG;
+                const copy = document.createElement("span");
+                const label = document.createElement("span");
+                label.className = "cue-label";
+                label.textContent = item.label;
+                const file = document.createElement("span");
+                file.className = "cue-file";
+                file.textContent = item.src;
+                copy.append(label, file);
+                btn.append(icon, copy);
+                btn.addEventListener("click", function () {
+                    playCue(item.src, btn);
+                });
+                return btn;
+            }
+
+            const row = document.createElement("div");
+            row.className = "line";
+            row.dataset.kind = "line";
+            row.dataset.speaker = item.speaker;
+            const who = document.createElement("div");
+            who.className = "who";
+            who.style.color = SPEAKER_COLOR[item.speaker] || "#ffffff";
+            who.textContent = item.together ? item.speaker + " (together)" : item.speaker;
+            const say = document.createElement("p");
+            say.className = "say";
+            say.textContent = item.text;
+            row.append(who, say);
+            return row;
+        }
+
+        function render() {
+            const scene = SCENES[index];
+            document.title = "Scene " + (index + 1) + " — " + scene.title;
+            sceneIndexEl.textContent = "Scene " + (index + 1) + " of " + SCENES.length;
+            sceneTitleEl.textContent = scene.title;
+            statusEl.hidden = true;
+            statusEl.textContent = "";
+            if (scene.ambient) {
+                ambientWrap.hidden = false;
+                ambientFile.textContent = scene.ambient;
+                syncAmbientButton();
+            } else {
+                ambientWrap.hidden = true;
+            }
+            scriptEl.replaceChildren.apply(scriptEl, scene.items.map(renderItem));
+            prevBtn.disabled = index === 0;
+            nextBtn.disabled = index === SCENES.length - 1;
+            window.scrollTo(0, 0);
+            frameEl.scrollTop = 0;
+        }
+
+        function go(delta) {
+            const next = index + delta;
+            if (next < 0 || next >= SCENES.length) return;
+            if (activeSrc) fadeOut(activeSrc);
+            index = next;
+            render();
+        }
+
+        ambientBtn.addEventListener("click", function () {
+            const scene = SCENES[index];
+            if (!scene.ambient) return;
+            const track = tracks.get(scene.ambient);
+            const playing = !!(track && activeSrc === scene.ambient && !track.fading);
+            if (playing) fadeOut(scene.ambient);
+            else startAmbient(scene.ambient);
+        });
+
+        prevBtn.addEventListener("click", function () { go(-1); });
+        nextBtn.addEventListener("click", function () { go(1); });
+
+        window.addEventListener("keydown", function (e) {
+            if (e.altKey || e.ctrlKey || e.metaKey || e.repeat) return;
+            if (e.key === "ArrowRight") {
+                e.preventDefault();
+                go(1);
+            } else if (e.key === "ArrowLeft") {
+                e.preventDefault();
+                go(-1);
+            }
+        });
+
+        render();
+    </script>
+</body>
+
+</html>

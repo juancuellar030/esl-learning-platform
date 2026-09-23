@@ -1,0 +1,65 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e5]: Scene 1 of 7
+        - generic [ref=e6]: Arrow keys change scene
+      - heading "Wendy's Bedroom" [level=1] [ref=e7]
+      - button "Play ambient ambient-scene1.mp3" [ref=e9] [cursor=pointer]:
+        - generic [ref=e13]:
+          - generic [ref=e14]: Play ambient
+          - generic [ref=e15]: ambient-scene1.mp3
+    - main [ref=e16]:
+      - generic [ref=e17]:
+        - generic [ref=e18]: WENDY
+        - paragraph [ref=e19]: Shh... everyone's asleep. I love telling stories before bed.
+      - generic [ref=e20]:
+        - generic [ref=e21]: PETER PAN
+        - paragraph [ref=e22]: Psst! Wendy!
+      - button "Play cue Opening window" [ref=e23] [cursor=pointer]:
+        - generic [ref=e27]:
+          - generic [ref=e28]: Opening window
+          - generic [ref=e29]: sfx-opening-window.mp3
+      - generic [ref=e30]:
+        - generic [ref=e31]: WENDY
+        - paragraph [ref=e32]: Who's there?
+      - generic [ref=e33]:
+        - generic [ref=e34]: PETER PAN
+        - paragraph [ref=e35]: It's me - Peter Pan!
+      - generic [ref=e36]:
+        - generic [ref=e37]: WENDY
+        - paragraph [ref=e38]: Peter Pan?! You're real?!
+      - generic [ref=e39]:
+        - generic [ref=e40]: PETER PAN
+        - paragraph [ref=e41]: Of course I'm real! I came back for my shadow... and I heard your stories through the window.
+      - button "Play cue Sparkle" [ref=e42] [cursor=pointer]:
+        - generic [ref=e46]:
+          - generic [ref=e47]: Sparkle
+          - generic [ref=e48]: sfx-chime-sparkle.mp3
+      - generic [ref=e49]:
+        - generic [ref=e50]: WENDY
+        - paragraph [ref=e51]: Who was that?
+      - generic [ref=e52]:
+        - generic [ref=e53]: PETER PAN
+        - paragraph [ref=e54]: That's Tinker Bell. She's a little jealous, so be careful.
+      - button "Play cue Annoyed chime" [ref=e55] [cursor=pointer]:
+        - generic [ref=e59]:
+          - generic [ref=e60]: Annoyed chime
+          - generic [ref=e61]: sfx-chime-annoyed.mp3
+      - generic [ref=e62]:
+        - generic [ref=e63]: PETER PAN
+        - paragraph [ref=e64]: See? Told you.
+      - generic [ref=e65]:
+        - generic [ref=e66]: WENDY
+        - paragraph [ref=e67]: Where do you live, Peter?
+      - generic [ref=e68]:
+        - generic [ref=e69]: PETER PAN
+        - paragraph [ref=e70]: Neverland! Where children never grow up. Want to come?
+      - generic [ref=e71]:
+        - generic [ref=e72]: WENDY
+        - paragraph [ref=e73]: Neverland... Can I bring my brothers?
+      - generic [ref=e74]:
+        - generic [ref=e75]: PETER PAN
+        - paragraph [ref=e76]: Sure! Just think happy thoughts... and believe.
+  - button "Previous scene" [disabled] [ref=e77]
+  - button "Next scene" [ref=e80] [cursor=pointer]
