@@ -1,0 +1,34 @@
+- generic [active] [ref=f1e1]:
+  - status [ref=f1e2]: Preview Mode — No Answers Recorded
+  - text:       
+  - generic [ref=f1e3]:
+    - generic [ref=f1e7]:
+      - generic [ref=f1e8]: 1 / 6
+      - text: 
+    - generic [ref=f1e9]:
+      - generic [ref=f1e10]: Centered image
+      - img "Question image" [ref=f1e12]
+      - generic [ref=f1e13]:
+        - generic [ref=f1e14] [cursor=pointer]:
+          - generic [ref=f1e15]: A
+          - generic [ref=f1e16]: A
+        - generic [ref=f1e17] [cursor=pointer]:
+          - generic [ref=f1e18]: B
+          - generic [ref=f1e19]: B
+        - generic [ref=f1e20] [cursor=pointer]:
+          - generic [ref=f1e21]: C
+          - generic [ref=f1e22]: C
+        - generic [ref=f1e23] [cursor=pointer]:
+          - generic [ref=f1e24]: D
+          - generic [ref=f1e25]: D
+    - generic [ref=f1e27]:
+      - text: 
+      - button "Next " [ref=f1e28] [cursor=pointer]:
+        - text: Next
+        - generic [ref=f1e29]: 
+      - text:  
+  - text:            
+  - button " Themes" [ref=f1e30] [cursor=pointer]:
+    - generic [ref=f1e31]: 
+    - text: Themes
+  - text:       

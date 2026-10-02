@@ -2975,6 +2975,15 @@ body.dark-mode .resp-export-item-hint {
     padding: 8px 12px;
 }
 
+mark.rt-hl {
+    background-color: #111111 !important;
+    color: #fff6cc !important;
+    padding: 0 0.16em;
+    border-radius: 0.18em;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+}
+
 .rt-toolbar {
     position: fixed;
     z-index: 4000;

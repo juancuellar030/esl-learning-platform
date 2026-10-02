@@ -93,11 +93,11 @@ function sanitizeRtNode(node) {
             out += '<u>' + sanitizeRtNode(child) + '</u>';
             return;
         }
-        if (tag === 'SPAN' || tag === 'FONT') {
+        if (tag === 'MARK' || tag === 'SPAN' || tag === 'FONT') {
             const rawColor = child.getAttribute('color') || (child.style && child.style.color);
-            const color = normalizeRtColor(rawColor);
+            const highlighted = tag === 'MARK' || child.classList.contains('rt-hl') || !!normalizeRtColor(rawColor);
             const inner = sanitizeRtNode(child);
-            out += color ? `<span style="color:${color}">${inner}</span>` : inner;
+            out += highlighted ? `<mark class="rt-hl">${inner}</mark>` : inner;
             return;
         }
         out += sanitizeRtNode(child);
@@ -251,36 +251,64 @@ const TakeTest = (function () {
     let bgParticles = [];
 
     // ===== THEME DEFINITIONS =====
+    // Same palettes as quiz-game / keyboard-shortcuts. `bg` is the page fill.
     const TT_THEMES = {
         'default': {
-            '--tt-bg-from': '#3d348b', '--tt-bg-to': '#7678ed',
-            dark: { '--tt-bg-from': '#1a1530', '--tt-bg-to': '#2c2a5a' }
+            label: 'Classic', swatch: ['#3d348b', '#7678ed', '#f7b801'],
+            bg: '#7678ed', text: '#ffffff', accent: '#f7b801', particle: 'rgba(255,255,255,0.08)',
+            dark: { bg: '#1a1530', text: '#ffffff', accent: '#f7b801', particle: 'rgba(255,255,255,0.10)' }
+        },
+        'gold-black': {
+            label: 'Gold Black', swatch: ['#0B0B0C', '#D4AF37', '#F5E6C8'],
+            bg: '#0B0B0C', text: '#F5E6C8', accent: '#D4AF37', particle: 'rgba(212,175,55,0.18)',
+            dark: { bg: '#0B0B0C', text: '#F5E6C8', accent: '#D4AF37', particle: 'rgba(245,230,200,0.12)' }
+        },
+        'retro-arcade': {
+            label: 'Retro Arcade', light: true, swatch: ['#EBE0CA', '#8F2F2B', '#221B17'],
+            bg: '#EBE0CA', text: '#221B17', accent: '#8F2F2B', particle: 'rgba(143,47,43,0.22)',
+            dark: { bg: '#1A1625', text: '#F8F9FA', accent: '#FF4757', particle: 'rgba(255,71,87,0.10)' }
+        },
+        'kawaii-pastel': {
+            label: 'Kawaii Pastel', light: true, swatch: ['#ffffb0', '#ffabde', '#dbafff', '#afd0ff'],
+            bg: '#FFFDCF', text: '#3a2450', accent: '#7a4a9e', particle: 'rgba(219,175,255,0.32)',
+            dark: { bg: '#3a2450', text: '#ffffb0', accent: '#ffabde', particle: 'rgba(255,171,222,0.18)' }
+        },
+        'mint-pop': {
+            label: 'Mint Pop', light: true, swatch: ['#D9FFEC', '#5EEAD4', '#0F766E'],
+            bg: '#D9FFEC', text: '#0F766E', accent: '#0F766E', particle: 'rgba(15,118,110,0.18)',
+            dark: { bg: '#0a4a46', text: '#F8FAFC', accent: '#5EEAD4', particle: 'rgba(94,234,212,0.16)' }
+        },
+        'peach-cream': {
+            label: 'Peach Cream', light: true, swatch: ['#FFEBD1', '#fe90a0', '#ff6632'],
+            bg: '#FFEBD1', text: '#5c2210', accent: '#ff6632', particle: 'rgba(255,102,50,0.22)',
+            dark: { bg: '#5c2210', text: '#fff0e1', accent: '#ffbab3', particle: 'rgba(255,186,179,0.16)' }
+        },
+        'pink-pop': {
+            label: 'Pink Pop', light: true, swatch: ['#FFD6E1', '#FF8FAB', '#FB6F92'],
+            bg: '#FFD6E1', text: '#6c2944', accent: '#FB6F92', particle: 'rgba(251,111,146,0.24)',
+            dark: { bg: '#6c2944', text: '#FFE1E9', accent: '#FFB3C6', particle: 'rgba(255,177,198,0.18)' }
+        },
+        'frost-white': {
+            label: 'Frost White', light: true, swatch: ['#F8F8F8', '#BDBDBD', '#6A6A6A'],
+            bg: '#F8F8F8', text: '#3a3a3a', accent: '#6A6A6A', particle: 'rgba(106,106,106,0.20)',
+            dark: { bg: '#161717', text: '#F8F8F8', accent: '#E2E2E2', particle: 'rgba(226,226,226,0.16)' }
+        },
+        'lego': {
+            label: 'LEGO', light: true, swatch: ['#FFD700', '#DA291C', '#006CB7'],
+            bg: '#FFD700', text: '#000000', accent: '#DA291C', particle: 'rgba(183,150,0,0.22)',
+            dark: { bg: '#000000', text: '#FFD700', accent: '#DA291C', particle: 'rgba(255,215,0,0.16)' }
         },
         'neon': {
-            '--tt-bg-from': '#0a6e7a', '--tt-bg-to': '#00b4d8',
-            dark: { '--tt-bg-from': '#05050f', '--tt-bg-to': '#0d0d2b' }
+            label: 'Neon', disableDark: true, swatch: ['#09090e', '#B026FF', '#00FFD5', '#FFF200'],
+            bg: '#09090e', text: '#00FFD5', accent: '#B026FF', particle: 'rgba(0,255,213,0.22)'
         },
-        'forest': {
-            '--tt-bg-from': '#1a3d2b', '--tt-bg-to': '#2d6a4f',
-            dark: { '--tt-bg-from': '#0a1a11', '--tt-bg-to': '#152d1e' }
-        },
-        'winter': {
-            '--tt-bg-from': '#4a9bbe', '--tt-bg-to': '#2a7fa8',
-            dark: { '--tt-bg-from': '#0a2233', '--tt-bg-to': '#1a3a55' }
-        },
-        'candy': {
-            '--tt-bg-from': '#a8005a', '--tt-bg-to': '#6a00c0',
-            dark: { '--tt-bg-from': '#3d0030', '--tt-bg-to': '#28004a' }
-        },
-        'pastel': {
-            '--tt-bg-from': '#b57bee', '--tt-bg-to': '#ee88b5',
-            dark: { '--tt-bg-from': '#3d1f5a', '--tt-bg-to': '#5a1f3a' }
-        },
-        'ocean': {
-            '--tt-bg-from': '#023e8a', '--tt-bg-to': '#0077b6',
-            dark: { '--tt-bg-from': '#03045e', '--tt-bg-to': '#023e8a' }
+        'citrus': {
+            label: 'Citrus', light: true, swatch: ['#FDD69B', '#FCC92F', '#608336', '#A74900'],
+            bg: '#FDD69B', text: '#3f5a22', accent: '#A74900', particle: 'rgba(96,131,54,0.22)',
+            dark: { bg: '#3f5a22', text: '#FDD69B', accent: '#FCC92F', particle: 'rgba(253,240,93,0.16)' }
         }
     };
+    window.TT_THEMES = TT_THEMES;
 
     // ===== DOM CACHE =====
     let screens = {};
@@ -301,30 +329,9 @@ const TakeTest = (function () {
 
         const ctx = canvas.getContext('2d');
         const themeData = TT_THEMES[theme] || TT_THEMES['default'];
-
-        // Define particle colors based on theme if not explicitly defined
-        const defaultParticles = {
-            'default': 'rgba(255,255,255,0.08)',
-            'neon': 'rgba(0,245,255,0.16)',
-            'forest': 'rgba(82,183,136,0.12)',
-            'winter': 'rgba(255,255,255,0.18)',
-            'candy': 'rgba(255,157,226,0.14)',
-            'pastel': 'rgba(255,255,255,0.14)',
-            'ocean': 'rgba(144,224,239,0.14)'
-        };
-        const particleColor = defaultParticles[theme] || 'rgba(255,255,255,0.1)';
-
-        // Particle configs per theme
-        const configs = {
-            default: { count: 18, speed: 0.25, size: [3, 10], shape: 'circle' },
-            neon: { count: 20, speed: 0.5, size: [6, 12], shape: 'line' },
-            forest: { count: 14, speed: 0.2, size: [6, 12], shape: 'circle' },
-            winter: { count: 25, speed: 0.4, size: [5, 15], shape: 'snow' },
-            candy: { count: 16, speed: 0.3, size: [5, 15], shape: 'circle' },
-            pastel: { count: 15, speed: 0.22, size: [6, 12], shape: 'circle' },
-            ocean: { count: 18, speed: 0.3, size: [5, 15], shape: 'wave' }
-        };
-        const cfg = configs[theme] || configs['default'];
+        const palette = isDark && themeData.dark ? Object.assign({}, themeData, themeData.dark) : themeData;
+        const particleColor = palette.particle || 'rgba(255,255,255,0.1)';
+        const cfg = { count: 18, speed: 0.28, size: [3, 10], shape: 'circle' };
 
         // Build particles
         for (let i = 0; i < cfg.count; i++) {
@@ -333,7 +340,7 @@ const TakeTest = (function () {
                 y: Math.random() * canvas.height,
                 r: cfg.size[0] + Math.random() * (cfg.size[1] - cfg.size[0]),
                 vx: (Math.random() - 0.5) * cfg.speed,
-                vy: theme === 'winter' ? (Math.random() * cfg.speed + 0.15) : (Math.random() - 0.5) * cfg.speed,
+                vy: (Math.random() - 0.5) * cfg.speed,
                 opacity: 0.3 + Math.random() * 0.5,
                 phase: Math.random() * Math.PI * 2,
                 shape: cfg.shape
@@ -2157,7 +2164,20 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Theme swatch clicks
+    const swatchBox = document.getElementById('tt-theme-swatches');
+    const themes = window.TT_THEMES || {};
+    if (swatchBox) {
+        swatchBox.innerHTML = Object.keys(themes).map(id => {
+            const t = themes[id];
+            const segs = (t.swatch || [t.bg]).map(c => `<span style="background:${c}"></span>`).join('');
+            const active = id === 'default' ? ' active' : '';
+            return `<button type="button" class="tt-theme-swatch${active}" data-theme="${id}" title="${t.label}">
+                <span class="tt-theme-swatch-bar" aria-hidden="true">${segs}</span>
+                <span class="tt-theme-swatch-name">${t.label}</span>
+            </button>`;
+        }).join('');
+    }
+
     document.querySelectorAll('.tt-theme-swatch').forEach(btn => {
         btn.addEventListener('click', () => {
             applyTestTheme(btn.dataset.theme, document.body.classList.contains('tt-dark'));
@@ -2219,61 +2239,44 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ===== THEME ENGINE =====
+function inkFor(hex) {
+    const h = String(hex || '').replace('#', '');
+    if (h.length !== 6) return '#ffffff';
+    const r = parseInt(h.slice(0, 2), 16);
+    const g = parseInt(h.slice(2, 4), 16);
+    const b = parseInt(h.slice(4, 6), 16);
+    return (r * 299 + g * 587 + b * 114) / 1000 > 150 ? '#111111' : '#ffffff';
+}
+
 function applyTestTheme(theme, isDark) {
-    const TT_THEMES = {
-        'default': {
-            '--tt-bg-from': '#3d348b', '--tt-bg-to': '#7678ed',
-            dark: { '--tt-bg-from': '#1a1530', '--tt-bg-to': '#2c2a5a' }
-        },
-        'neon': {
-            '--tt-bg-from': '#0a6e7a', '--tt-bg-to': '#00b4d8',
-            dark: { '--tt-bg-from': '#05050f', '--tt-bg-to': '#0d0d2b' }
-        },
-        'forest': {
-            '--tt-bg-from': '#1a3d2b', '--tt-bg-to': '#2d6a4f',
-            dark: { '--tt-bg-from': '#0a1a11', '--tt-bg-to': '#152d1e' }
-        },
-        'winter': {
-            '--tt-bg-from': '#4a9bbe', '--tt-bg-to': '#2a7fa8',
-            dark: { '--tt-bg-from': '#0a2233', '--tt-bg-to': '#1a3a55' }
-        },
-        'candy': {
-            '--tt-bg-from': '#a8005a', '--tt-bg-to': '#6a00c0',
-            dark: { '--tt-bg-from': '#3d0030', '--tt-bg-to': '#28004a' }
-        },
-        'pastel': {
-            '--tt-bg-from': '#b57bee', '--tt-bg-to': '#ee88b5',
-            dark: { '--tt-bg-from': '#3d1f5a', '--tt-bg-to': '#5a1f3a' }
-        },
-        'ocean': {
-            '--tt-bg-from': '#023e8a', '--tt-bg-to': '#0077b6',
-            dark: { '--tt-bg-from': '#03045e', '--tt-bg-to': '#023e8a' }
-        }
-    };
+    const themes = window.TT_THEMES || {};
+    const themeData = themes[theme] || themes['default'];
+    if (!themeData) return;
+    if (themeData.disableDark) isDark = false;
+    const vars = isDark && themeData.dark ? Object.assign({}, themeData, themeData.dark) : themeData;
 
-    const themeData = TT_THEMES[theme] || TT_THEMES['default'];
-    const vars = isDark ? Object.assign({}, themeData, themeData.dark || {}) : themeData;
+    document.body.style.setProperty('--tt-bg', vars.bg);
+    document.body.style.setProperty('--tt-text', vars.text);
+    document.body.style.backgroundColor = vars.bg;
+    document.body.style.color = vars.text;
+    document.body.style.setProperty('--tt-accent', vars.accent);
+    document.body.style.setProperty('--tt-secondary', vars.accent);
+    document.body.style.setProperty('--tt-fab-bg', vars.accent);
+    document.body.style.setProperty('--tt-fab-ink', inkFor(vars.accent));
 
-    // Apply CSS variables to body
-    document.body.style.setProperty('--tt-bg-from', vars['--tt-bg-from']);
-    document.body.style.setProperty('--tt-bg-to', vars['--tt-bg-to']);
+    document.body.classList.toggle('tt-dark', !!isDark);
+    document.body.classList.toggle('tt-theme-light', !isDark && !!themeData.light);
 
-    // Toggle dark class
-    if (isDark) {
-        document.body.classList.add('tt-dark');
-    } else {
-        document.body.classList.remove('tt-dark');
-    }
-
-    // Update active swatch
     document.querySelectorAll('.tt-theme-swatch').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.theme === theme);
     });
 
-    // Update dark icon
     const icon = document.getElementById('tt-dark-icon');
-    if (icon) {
-        icon.className = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+    if (icon) icon.className = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+    const darkToggle = document.getElementById('tt-dark-toggle');
+    if (darkToggle) {
+        darkToggle.disabled = !!themeData.disableDark;
+        darkToggle.title = themeData.disableDark ? 'This theme is already dark' : 'Toggle dark mode';
     }
 
     // Update canvas animations via the exposed global function
@@ -2295,6 +2298,11 @@ function applyTestTheme(theme, isDark) {
 window.addEventListener('test-theme-changed', (e) => {
     // Reconfigure the internal global startBgAnimation function if we had exposed it.
 });
+
+function formatReviewPoints(n) {
+    const v = Math.round((Number(n) || 0) * 100) / 100;
+    return Number.isInteger(v) ? String(v) : String(v);
+}
 
 // ===== ANSWER REVIEW =====
 function buildAnswerReview() {
@@ -2321,11 +2329,19 @@ function buildAnswerReview() {
 
     let html = '';
     questions.forEach((q, i) => {
-        const g = graded[i];
+        const g = graded[i] || {};
         const icon = typeIcons[q.type] || 'fa-question';
-        const isCorrect = g.correct;
-        const statusClass = isCorrect ? 'tt-review-correct' : 'tt-review-wrong';
-        const statusIcon = isCorrect ? '<i class="fa-solid fa-circle-check"></i>' : '<i class="fa-solid fa-circle-xmark"></i>';
+        const earned = Number(g.points) || 0;
+        const max = Number(g.maxPoints) || 0;
+        const isCorrect = max > 0 ? earned >= max - 0.001 : !!g.correct;
+        const isPartial = !isCorrect && earned > 0;
+        const statusClass = isCorrect ? 'tt-review-correct' : isPartial ? 'tt-review-partial' : 'tt-review-wrong';
+        const statusIcon = isCorrect
+            ? '<i class="fa-solid fa-circle-check"></i>'
+            : isPartial
+                ? '<i class="fa-solid fa-circle-half-stroke"></i>'
+                : '<i class="fa-solid fa-circle-xmark"></i>';
+        const pointsLabel = `${formatReviewPoints(earned)} / ${formatReviewPoints(max)}`;
 
         let studentAnswerText = '';
         let correctAnswerText = '';
@@ -2436,6 +2452,7 @@ function buildAnswerReview() {
             <div class="tt-review-card ${statusClass}">
                 <div class="tt-review-card-header">
                     <span class="tt-review-q-num"><i class="fa-solid ${icon}"></i> Q${i + 1}</span>
+                    <span class="tt-review-points">${pointsLabel} pts</span>
                     <span class="tt-review-status">${statusIcon}</span>
                 </div>
                 <div class="tt-review-prompt">${renderRich(q.prompt || q.text || '')}</div>

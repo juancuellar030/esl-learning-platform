@@ -2334,11 +2334,11 @@ const TestBuilder = (function () {
                 out += '<u>' + sanitizeRtNode(child) + '</u>';
                 return;
             }
-            if (tag === 'SPAN' || tag === 'FONT') {
-                const rawColor = child.getAttribute('color') || child.style && child.style.color;
-                const color = normalizeRtColor(rawColor);
+            if (tag === 'MARK' || tag === 'SPAN' || tag === 'FONT') {
+                const rawColor = child.getAttribute('color') || (child.style && child.style.color);
+                const highlighted = tag === 'MARK' || child.classList.contains('rt-hl') || !!normalizeRtColor(rawColor);
                 const inner = sanitizeRtNode(child);
-                out += color ? `<span style="color:${color}">${inner}</span>` : inner;
+                out += highlighted ? `<mark class="rt-hl">${inner}</mark>` : inner;
                 return;
             }
             out += sanitizeRtNode(child);
@@ -2405,6 +2405,38 @@ const TestBuilder = (function () {
         return el ? el.closest('.rt-field') : null;
     }
 
+    function unwrapRtNode(node) {
+        const parent = node.parentNode;
+        if (!parent) return;
+        while (node.firstChild) parent.insertBefore(node.firstChild, node);
+        parent.removeChild(node);
+    }
+
+    function toggleRtHighlight() {
+        restoreRtSelection();
+        const sel = window.getSelection();
+        if (!sel || sel.rangeCount === 0 || sel.isCollapsed) return;
+        const range = sel.getRangeAt(0);
+        const field = getRtFieldFromNode(range.commonAncestorContainer);
+        if (!field) return;
+        const host = range.commonAncestorContainer.nodeType === Node.ELEMENT_NODE
+            ? range.commonAncestorContainer
+            : range.commonAncestorContainer.parentElement;
+        const existing = host && host.closest('mark.rt-hl');
+        if (existing && field.contains(existing)) {
+            unwrapRtNode(existing);
+        } else {
+            const mark = document.createElement('mark');
+            mark.className = 'rt-hl';
+            const frag = range.extractContents();
+            frag.querySelectorAll('mark.rt-hl').forEach(unwrapRtNode);
+            mark.appendChild(frag);
+            range.insertNode(mark);
+        }
+        field.dispatchEvent(new Event('input', { bubbles: true }));
+        saveRtSelection();
+    }
+
     function initRichTextToolbar() {
         const toolbar = document.getElementById('rt-toolbar');
         const swatches = document.getElementById('rt-swatches');
@@ -2460,8 +2492,8 @@ const TestBuilder = (function () {
             const btn = e.target.closest('[data-rt-cmd]');
             if (!btn) return;
             const cmd = btn.dataset.rtCmd;
-            if (cmd === 'toggle-swatches') {
-                if (swatches) swatches.hidden = !swatches.hidden;
+            if (cmd === 'highlight') {
+                toggleRtHighlight();
                 return;
             }
             restoreRtSelection();
