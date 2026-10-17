@@ -154,6 +154,107 @@ function formatBlankAnswersDisplay(b) {
     return list.length ? list.join('/') : '?';
 }
 
+function shareOfPoints(correctCount, totalCount, points) {
+    const pts = isNaN(parseFloat(points)) ? 1 : parseFloat(points);
+    if (totalCount <= 0 || correctCount <= 0) return 0;
+    if (correctCount >= totalCount) return pts;
+    return Math.round((correctCount / totalCount) * pts * 100) / 100;
+}
+
+function gradeQuestionAnswer(q, studentAnswer) {
+    const pts = parseFloat(q && q.points);
+    const currentQPoints = isNaN(pts) ? 1 : pts;
+    let earnedInQuestion = 0;
+
+    switch (q.type) {
+        case 'multiple-choice':
+        case 'true-false':
+            if (studentAnswer === q.correctAnswer) earnedInQuestion = currentQPoints;
+            break;
+        case 'multi-select': {
+            const correctSet = new Set(q.correctAnswers || []);
+            const studentSet = new Set(Array.isArray(studentAnswer) ? studentAnswer : []);
+            if (correctSet.size > 0) {
+                let correctlySelected = 0;
+                let incorrectlySelected = 0;
+                studentSet.forEach(idx => {
+                    if (correctSet.has(idx)) correctlySelected++;
+                    else incorrectlySelected++;
+                });
+                const net = Math.max(0, correctlySelected - incorrectlySelected);
+                earnedInQuestion = shareOfPoints(net, correctSet.size, currentQPoints);
+            }
+            break;
+        }
+        case 'fill-blank': {
+            migrateFillBlankQuestion(q);
+            const blanks = q.blanks || [];
+            const student = Array.isArray(studentAnswer) ? studentAnswer : [];
+            let correct = 0;
+            blanks.forEach((b, bi) => {
+                if (blankAnswerMatches(student[bi], b, q.caseSensitive)) correct++;
+            });
+            earnedInQuestion = shareOfPoints(correct, blanks.length, currentQPoints);
+            break;
+        }
+        case 'matching': {
+            const pairs = q.pairs || [];
+            const student = Array.isArray(studentAnswer) ? studentAnswer : [];
+            let correct = 0;
+            pairs.forEach((p, pi) => {
+                if (student[pi] === p.right) correct++;
+            });
+            earnedInQuestion = shareOfPoints(correct, pairs.length, currentQPoints);
+            break;
+        }
+        case 'unjumble-words': {
+            const words = q.words || [];
+            const student = Array.isArray(studentAnswer) ? studentAnswer : [];
+            let correct = 0;
+            words.forEach((w, i) => {
+                if (student[i] === w) correct++;
+            });
+            earnedInQuestion = shareOfPoints(correct, words.length, currentQPoints);
+            break;
+        }
+        case 'unjumble-letters': {
+            if (!q.correctWord) break;
+            const letters = String(q.correctWord).split('');
+            const student = Array.isArray(studentAnswer) ? studentAnswer : [];
+            let correct = 0;
+            letters.forEach((ch, i) => {
+                if (student[i] === ch) correct++;
+            });
+            earnedInQuestion = shareOfPoints(correct, letters.length, currentQPoints);
+            break;
+        }
+        case 'drag-drop-category': {
+            const categories = q.categories || [];
+            const placedByCat = studentAnswer && typeof studentAnswer === 'object' ? studentAnswer : {};
+            let totalItems = 0;
+            let correctlyPlaced = 0;
+            categories.forEach((cat, ci) => {
+                const items = cat.items || [];
+                totalItems += items.length;
+                const placed = placedByCat[ci] || [];
+                items.forEach(item => {
+                    if (placed.includes(item)) correctlyPlaced++;
+                });
+            });
+            earnedInQuestion = shareOfPoints(correctlyPlaced, totalItems, currentQPoints);
+            break;
+        }
+    }
+
+    return {
+        questionId: q.id,
+        answer: studentAnswer,
+        correct: currentQPoints > 0 ? earnedInQuestion === currentQPoints : true,
+        points: earnedInQuestion,
+        maxPoints: currentQPoints
+    };
+}
+
 const TakeTest = (function () {
     'use strict';
 
@@ -1860,109 +1961,15 @@ const TakeTest = (function () {
         let totalPoints = 0;
         let earnedPoints = 0;
 
-        // Pre-calculate total points to ensure robustness
         testData.questions.forEach(q => {
-            if (q.type === 'drag-drop-category' && testData.settings.partialGradingDragDrop) {
-                // If partial grading, total points for THIS question is the number of items
-                totalPoints += (q.categories || []).reduce((acc, cat) => acc + (cat.items || []).length, 0);
-            } else {
-                // Otherwise points for this question is the specified points (default 1)
-                const pts = parseFloat(q.points);
-                totalPoints += isNaN(pts) ? 1 : pts;
-            }
+            const pts = parseFloat(q.points);
+            totalPoints += isNaN(pts) ? 1 : pts;
         });
 
         const graded = testData.questions.map((q, i) => {
-            const studentAnswer = answers[i];
-            let earnedInQuestion = 0;
-            const pts = parseFloat(q.points);
-            let currentQPoints = isNaN(pts) ? 1 : pts;
-
-            switch (q.type) {
-                case 'multiple-choice':
-                case 'true-false':
-                    if (studentAnswer === q.correctAnswer) earnedInQuestion = currentQPoints;
-                    break;
-                case 'multi-select':
-                    if (Array.isArray(studentAnswer) && Array.isArray(q.correctAnswers) && q.correctAnswers.length > 0) {
-                        const correctSet = new Set(q.correctAnswers);
-                        const studentSet = new Set(studentAnswer);
-                        // Check exact match (student selected all correct and no wrong)
-                        const exactMatch = correctSet.size === studentSet.size &&
-                            [...correctSet].every(c => studentSet.has(c));
-                        if (exactMatch) {
-                            earnedInQuestion = currentQPoints;
-                        } else if (q.partialCredit) {
-                            // Partial: (correctly selected - incorrectly selected) / total correct
-                            let correctlySelected = 0;
-                            let incorrectlySelected = 0;
-                            studentAnswer.forEach(idx => {
-                                if (correctSet.has(idx)) correctlySelected++;
-                                else incorrectlySelected++;
-                            });
-                            const ratio = Math.max(0, (correctlySelected - incorrectlySelected) / correctSet.size);
-                            earnedInQuestion = Math.round(ratio * currentQPoints * 100) / 100;
-                        }
-                    }
-                    break;
-                case 'fill-blank':
-                    if (Array.isArray(studentAnswer) && q.blanks) {
-                        migrateFillBlankQuestion(q);
-                        const allCorrect = q.blanks.every((b, bi) => blankAnswerMatches(studentAnswer[bi], b, q.caseSensitive));
-                        if (allCorrect) earnedInQuestion = currentQPoints;
-                    }
-                    break;
-                case 'matching':
-                    if (Array.isArray(studentAnswer) && q.pairs) {
-                        const allCorrect = q.pairs.every((p, pi) => studentAnswer[pi] === p.right);
-                        if (allCorrect) earnedInQuestion = currentQPoints;
-                    }
-                    break;
-                case 'unjumble-words':
-                    if (Array.isArray(studentAnswer) && q.words) {
-                        const allCorrect = JSON.stringify(studentAnswer) === JSON.stringify(q.words);
-                        if (allCorrect) earnedInQuestion = currentQPoints;
-                    }
-                    break;
-                case 'unjumble-letters':
-                    if (Array.isArray(studentAnswer) && q.correctWord) {
-                        const allCorrect = studentAnswer.join('') === q.correctWord;
-                        if (allCorrect) earnedInQuestion = currentQPoints;
-                    }
-                    break;
-                case 'drag-drop-category':
-                    if (studentAnswer && typeof studentAnswer === 'object' && q.categories) {
-                        if (testData.settings.partialGradingDragDrop) {
-                            let totalItems = 0;
-                            let correctlyPlaced = 0;
-                            q.categories.forEach((cat, ci) => {
-                                totalItems += (cat.items || []).length;
-                                const placed = studentAnswer[ci] || [];
-                                placed.forEach(item => {
-                                    if (cat.items.includes(item)) correctlyPlaced++;
-                                });
-                            });
-                            earnedInQuestion = correctlyPlaced;
-                            currentQPoints = totalItems;
-                        } else {
-                            const allCorrect = q.categories.every((cat, ci) => {
-                                const placed = studentAnswer[ci] || [];
-                                return cat.items.length === placed.length && cat.items.every(item => placed.includes(item));
-                            });
-                            if (allCorrect) earnedInQuestion = currentQPoints;
-                        }
-                    }
-                    break;
-            }
-
-            earnedPoints += earnedInQuestion;
-            return {
-                questionId: q.id,
-                answer: studentAnswer,
-                correct: currentQPoints > 0 ? (earnedInQuestion === currentQPoints) : true,
-                points: earnedInQuestion,
-                maxPoints: currentQPoints
-            };
+            const row = gradeQuestionAnswer(q, answers[i]);
+            earnedPoints += row.points;
+            return row;
         });
 
         const response = {

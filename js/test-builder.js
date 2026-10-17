@@ -1365,11 +1365,8 @@ const TestBuilder = (function () {
             <div style="font-size:0.8rem;color:#888;margin-bottom:10px;"><i class="fa-solid fa-circle-info" style="margin-right:4px;"></i>Click the checkbox icon to toggle correct answers. Multiple answers can be correct.</div>
             <div class="option-list" id="ms-options">${options}</div>
             ${q.options.length < 8 ? '<button class="btn-add-option" id="btn-add-ms-option"><i class="fa-solid fa-plus"></i> Add option</button>' : ''}
-            <div style="margin-top:14px;padding:10px 12px;background:var(--surface-2, #f5f5f7);border-radius:8px;">
-                <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:0.9rem;">
-                    <input type="checkbox" id="ms-partial-credit" ${q.partialCredit ? 'checked' : ''} />
-                    <span><b>Allow partial credit</b> <span style="color:#888;font-size:0.82em;">(award proportional points for partially correct answers)</span></span>
-                </label>
+            <div style="margin-top:14px;padding:10px 12px;background:var(--surface-2, #f5f5f7);border-radius:8px;font-size:0.85rem;color:#666;">
+                Each correct selection earns its share of this question's points. An extra wrong selection cancels one correct one, so choosing every option does not score full marks.
             </div>
         `;
     }
@@ -1426,14 +1423,6 @@ const TestBuilder = (function () {
             });
         }
 
-        // Partial credit toggle
-        const partialEl = document.getElementById('ms-partial-credit');
-        if (partialEl) {
-            partialEl.addEventListener('change', () => {
-                q.partialCredit = partialEl.checked;
-                autoSave();
-            });
-        }
     }
 
     // ===== BIND TYPE-SPECIFIC EDITORS =====
@@ -3493,6 +3482,75 @@ const TestBuilder = (function () {
         return `"${String(value ?? '').replace(/"/g, '""')}"`;
     }
 
+    function choiceText(q, index) {
+        const letter = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[index] || '';
+        const opt = q && q.options && q.options[index];
+        let text = '';
+        if (typeof opt === 'string') text = stripRichText(opt).replace(/\s+/g, ' ').trim();
+        else if (opt && opt.text) text = stripRichText(opt.text).replace(/\s+/g, ' ').trim();
+        if (q && q.type === 'true-false' && !text) text = index === 0 ? 'True' : index === 1 ? 'False' : '';
+        if (letter && text && q && q.type !== 'true-false') return `${letter}. ${text}`;
+        return text || letter || String(index);
+    }
+
+    function formatPointsCell(stored) {
+        if (!stored || stored.points == null || stored.maxPoints == null) return '';
+        const earned = Number(stored.points);
+        const max = Number(stored.maxPoints);
+        if (!Number.isFinite(earned) || !Number.isFinite(max)) return '';
+        const tidy = (n) => Number.isInteger(n) ? String(n) : String(Math.round(n * 100) / 100);
+        return `${tidy(earned)}/${tidy(max)}`;
+    }
+
+    function formatStudentAnswer(q, stored) {
+        if (!stored || stored.answer == null || stored.answer === '') return '';
+        const raw = stored.answer;
+        if (!q) return typeof raw === 'string' ? raw : JSON.stringify(raw);
+
+        switch (q.type) {
+            case 'multiple-choice':
+            case 'true-false': {
+                const index = Number(raw);
+                return Number.isInteger(index) ? choiceText(q, index) : String(raw);
+            }
+            case 'multi-select': {
+                const idxs = Array.isArray(raw) ? raw : [];
+                return idxs.map(i => choiceText(q, i)).join(' | ');
+            }
+            case 'fill-blank': {
+                const parts = Array.isArray(raw) ? raw : [];
+                return parts.map((v, i) => {
+                    const text = v == null ? '' : String(v).trim();
+                    return `Blank ${i + 1}: ${text || '(blank)'}`;
+                }).join(' | ');
+            }
+            case 'matching': {
+                const pairs = q.pairs || [];
+                const chosen = Array.isArray(raw) ? raw : [];
+                return pairs.map((p, i) => {
+                    const left = stripRichText(p.left || '').replace(/\s+/g, ' ').trim() || `Item ${i + 1}`;
+                    const right = chosen[i] ? stripRichText(chosen[i]).replace(/\s+/g, ' ').trim() : '(blank)';
+                    return `${left} → ${right}`;
+                }).join(' | ');
+            }
+            case 'unjumble-words':
+                return Array.isArray(raw) ? raw.join(' ') : String(raw);
+            case 'unjumble-letters':
+                return Array.isArray(raw) ? raw.join('') : String(raw);
+            case 'drag-drop-category': {
+                const placed = raw && typeof raw === 'object' ? raw : {};
+                return (q.categories || []).map((cat, ci) => {
+                    const name = stripRichText(cat.name || '').replace(/\s+/g, ' ').trim() || `Category ${ci + 1}`;
+                    const items = placed[ci] || placed[String(ci)] || [];
+                    const list = (Array.isArray(items) ? items : []).join(', ');
+                    return `${name}: ${list || '(empty)'}`;
+                }).join(' | ');
+            }
+            default:
+                return typeof raw === 'string' ? raw : JSON.stringify(raw);
+        }
+    }
+
     function generateCsvContent(roster, options = {}) {
         if (!roster || roster.length === 0) return '';
 
@@ -3507,7 +3565,9 @@ const TestBuilder = (function () {
             'Name', 'Group', 'Status', 'Score', 'Max Score', 'Percentage',
             'Time (s)', 'Started At', 'Completed At', 'Violations', 'Retake', 'Submitted At'
         );
-        questions.forEach((q, i) => headers.push(`Q${i + 1} Correct`));
+        questions.forEach((q, i) => {
+            headers.push(`Q${i + 1} Answer`, `Q${i + 1} Points`, `Q${i + 1} Correct`);
+        });
 
         const rows = roster.map(r => {
             const isSub = r.status === 'submitted';
@@ -3536,11 +3596,15 @@ const TestBuilder = (function () {
 
             questions.forEach((q, i) => {
                 if (!isSub) {
-                    row.push('');
+                    row.push('', '', '');
                     return;
                 }
                 const ans = d.answers && d.answers[i];
-                row.push(ans && ans.correct ? 1 : 0);
+                row.push(
+                    csvCell(formatStudentAnswer(q, ans)),
+                    csvCell(formatPointsCell(ans)),
+                    ans && ans.correct ? 1 : 0
+                );
             });
 
             return row.join(',');
@@ -3802,11 +3866,13 @@ const TestBuilder = (function () {
     }
 
     // ===== PUBLIC API =====
-    return { init };
+    return { init, _generateCsvContent: generateCsvContent };
 })();
 
 
 // Initialize when DOM is ready
+window.TestBuilder = TestBuilder;
+
 document.addEventListener('DOMContentLoaded', () => {
     TestBuilder.init();
 });
