@@ -1608,13 +1608,18 @@ const TakeTest = (function () {
                     opt.addEventListener('click', () => {
                         const idx = parseInt(opt.dataset.idx);
                         if (!Array.isArray(sessionAnswers()[currentQ])) sessionAnswers()[currentQ] = [];
-                        const pos = sessionAnswers()[currentQ].indexOf(idx);
+                        const arr = sessionAnswers()[currentQ];
+                        const pos = arr.indexOf(idx);
+                        const box = opt.querySelector('.tt-ms-checkbox');
                         if (pos === -1) {
-                            sessionAnswers()[currentQ].push(idx);
+                            arr.push(idx);
+                            opt.classList.add('ms-selected');
+                            if (box) box.innerHTML = '<i class="fa-solid fa-square-check"></i>';
                         } else {
-                            sessionAnswers()[currentQ].splice(pos, 1);
+                            arr.splice(pos, 1);
+                            opt.classList.remove('ms-selected');
+                            if (box) box.innerHTML = '<i class="fa-regular fa-square"></i>';
                         }
-                        renderQuestion();
                     });
                 });
                 break;
@@ -2273,6 +2278,10 @@ function applyTestTheme(theme, isDark) {
 
     document.body.classList.toggle('tt-dark', !!isDark);
     document.body.classList.toggle('tt-theme-light', !isDark && !!themeData.light);
+    [...document.body.classList].forEach(cls => {
+        if (cls.startsWith('tt-theme-') && cls !== 'tt-theme-light') document.body.classList.remove(cls);
+    });
+    document.body.classList.add('tt-theme-' + (themes[theme] ? theme : 'default'));
 
     document.querySelectorAll('.tt-theme-swatch').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.theme === theme);
