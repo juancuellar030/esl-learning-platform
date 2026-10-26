@@ -18,77 +18,6 @@ const FONT_SIZES = {
 
 const PLACEHOLDER_TEXT = 'Waiting for message…';
 const BG_OVERLAY_OPACITY = 0.72;
-const URL_PATTERN = /\b(?:https?:\/\/|www\.)[^\s<>"'`]+/gi;
-
-function splitUrlMatch(raw) {
-    let hrefText = raw;
-    let trailing = '';
-
-    while (hrefText.length) {
-        const last = hrefText.slice(-1);
-        if ('. ,;:!?'.includes(last)) {
-            trailing = last + trailing;
-            hrefText = hrefText.slice(0, -1);
-            continue;
-        }
-        if (last === ')' && (hrefText.match(/\(/g) || []).length < (hrefText.match(/\)/g) || []).length) {
-            trailing = last + trailing;
-            hrefText = hrefText.slice(0, -1);
-            continue;
-        }
-        break;
-    }
-
-    return { hrefText, trailing };
-}
-
-function toSafeHref(detected) {
-    const candidate = /^https?:\/\//i.test(detected) ? detected : `https://${detected}`;
-    try {
-        const url = new URL(candidate);
-        if (url.protocol !== 'http:' && url.protocol !== 'https:') return null;
-        return url.href;
-    } catch {
-        return null;
-    }
-}
-
-function renderTextWithLinks(el, text) {
-    el.textContent = '';
-    if (!text) return;
-
-    const pattern = new RegExp(URL_PATTERN.source, 'gi');
-    let lastIndex = 0;
-    let match;
-
-    while ((match = pattern.exec(text)) !== null) {
-        if (match.index > lastIndex) {
-            el.appendChild(document.createTextNode(text.slice(lastIndex, match.index)));
-        }
-
-        const { hrefText, trailing } = splitUrlMatch(match[0]);
-        const safeHref = toSafeHref(hrefText);
-        if (safeHref) {
-            const a = document.createElement('a');
-            a.href = safeHref;
-            a.textContent = hrefText;
-            a.target = '_blank';
-            a.rel = 'noopener noreferrer';
-            a.className = 'broadcast-inline-link';
-            el.appendChild(a);
-        } else {
-            el.appendChild(document.createTextNode(hrefText));
-        }
-        if (trailing) {
-            el.appendChild(document.createTextNode(trailing));
-        }
-        lastIndex = match.index + match[0].length;
-    }
-
-    if (lastIndex < text.length) {
-        el.appendChild(document.createTextNode(text.slice(lastIndex)));
-    }
-}
 
 let broadcastText = '';
 
@@ -101,8 +30,11 @@ function tableToTsv(table) {
 
 function buildBroadcastPlainText(text, table) {
     const parts = [];
-    if (text) parts.push(text);
-    if (table.length) parts.push(tableToTsv(table));
+    if (text) parts.push(MaskedText.reveal(text));
+    if (table.length) {
+        const revealed = table.map(row => row.map(cell => MaskedText.reveal(cell)));
+        parts.push(tableToTsv(revealed));
+    }
     return parts.join('\n\n');
 }
 
@@ -123,11 +55,16 @@ function renderBroadcastTable(container, rows, copyCells, feedback) {
         const tr = document.createElement('tr');
         row.forEach(value => {
             const td = document.createElement('td');
-            td.textContent = value;
+            MaskedText.render(td, value, { links: false });
             if (copyCells) {
+                const hidden = MaskedText.reveal(value) !== value;
                 td.tabIndex = 0;
-                td.setAttribute('role', 'button');
-                td.setAttribute('aria-label', value ? `Copy ${value}` : 'Copy blank cell');
+                if (hidden) {
+                    td.setAttribute('aria-label', 'Copy cell');
+                } else {
+                    td.setAttribute('role', 'button');
+                    td.setAttribute('aria-label', value ? `Copy ${value}` : 'Copy blank cell');
+                }
             }
             tr.appendChild(td);
         });
@@ -143,17 +80,19 @@ function renderBroadcastTable(container, rows, copyCells, feedback) {
 
     if (!copyCells) return;
     const copyCell = async cell => {
-        await writeClipboardText(cell.textContent || '');
+        await writeClipboardText(MaskedText.textFromElement(cell));
         cell.classList.add('copied');
         showCopyFeedback(feedback, 'Cell copied!');
         setTimeout(() => cell.classList.remove('copied'), 900);
     };
     container.addEventListener('click', event => {
+        if (event.target.closest('.masked-password')) return;
         const cell = event.target.closest('td');
         if (cell) void copyCell(cell);
     });
     container.addEventListener('keydown', event => {
         if (event.key !== 'Enter' && event.key !== ' ') return;
+        if (event.target.closest('.masked-password')) return;
         const cell = event.target.closest('td');
         if (!cell) return;
         event.preventDefault();
@@ -228,9 +167,16 @@ async function init() {
     $screen.classList.toggle('has-bg-image', Boolean(bgImage));
     $screen.classList.toggle('has-table', table.length > 0);
     $screen.style.color = theme.text;
+    MaskedText.setCopyHandler(async (secret, button) => {
+        await writeClipboardText(secret);
+        button.classList.add('copied');
+        showCopyFeedback($copyFeedback, 'Password copied!');
+        setTimeout(() => button.classList.remove('copied'), 900);
+    });
+
     if (text) {
         $text.hidden = false;
-        renderTextWithLinks($text, text);
+        MaskedText.render($text, text);
     } else {
         $text.hidden = true;
     }

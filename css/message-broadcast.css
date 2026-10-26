@@ -94,6 +94,41 @@ body {
     text-decoration-thickness: 0.12em;
 }
 
+.masked-password {
+    display: inline-block;
+    margin: 0;
+    padding: 0.02em 0.28em;
+    border: 0;
+    border-radius: 0.28em;
+    background: color-mix(in srgb, currentColor 18%, transparent);
+    color: inherit;
+    font: inherit;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    line-height: 1;
+    white-space: nowrap;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: clip;
+    vertical-align: baseline;
+    cursor: pointer;
+    user-select: none;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.masked-password:hover,
+.masked-password:focus-visible {
+    background: color-mix(in srgb, currentColor 32%, transparent);
+    outline: 0.08em solid currentColor;
+    outline-offset: 0.08em;
+}
+
+.masked-password.copied {
+    background: #dff7e5;
+    color: #195f2b;
+}
+
 .broadcast-table-wrap {
     max-width: 100%;
     min-width: 0;

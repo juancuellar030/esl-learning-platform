@@ -35,6 +35,9 @@
                             <textarea id="message-text"
                                 placeholder="Type a message, or add an optional caption above a table…"
                                 rows="4"></textarea>
+                            <p class="bg-upload-hint">Hide a password by wrapping it in dashes, in the message or a table
+                                cell: <code>-secret-</code> or <code>-my-pass-</code>. The broadcast shows dots, and
+                                clicking those dots copies the password.</p>
                         </div>
 
                         <div class="form-group table-paste-group">
@@ -187,6 +190,7 @@
     </footer>
 
     <script src="js/broadcast-payload.js"></script>
+    <script src="js/masked-text.js"></script>
     <script src="js/image-url.js"></script>
     <script src="js/message-composer.js"></script>
     <script src="js/darkmode.js"></script>

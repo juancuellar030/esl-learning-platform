@@ -36,77 +36,6 @@ const BG_OVERLAY_OPACITY = 0.72;
 const TABLE_ROW_WARNING_LIMIT = 20;
 const TABLE_COLUMN_WARNING_LIMIT = 8;
 const MAX_BROADCAST_URL_LENGTH = 12000;
-const URL_PATTERN = /\b(?:https?:\/\/|www\.)[^\s<>"'`]+/gi;
-
-function splitUrlMatch(raw) {
-    let hrefText = raw;
-    let trailing = '';
-
-    while (hrefText.length) {
-        const last = hrefText.slice(-1);
-        if ('. ,;:!?'.includes(last)) {
-            trailing = last + trailing;
-            hrefText = hrefText.slice(0, -1);
-            continue;
-        }
-        if (last === ')' && (hrefText.match(/\(/g) || []).length < (hrefText.match(/\)/g) || []).length) {
-            trailing = last + trailing;
-            hrefText = hrefText.slice(0, -1);
-            continue;
-        }
-        break;
-    }
-
-    return { hrefText, trailing };
-}
-
-function toSafeHref(detected) {
-    const candidate = /^https?:\/\//i.test(detected) ? detected : `https://${detected}`;
-    try {
-        const url = new URL(candidate);
-        if (url.protocol !== 'http:' && url.protocol !== 'https:') return null;
-        return url.href;
-    } catch {
-        return null;
-    }
-}
-
-function renderTextWithLinks(el, text) {
-    el.textContent = '';
-    if (!text) return;
-
-    const pattern = new RegExp(URL_PATTERN.source, 'gi');
-    let lastIndex = 0;
-    let match;
-
-    while ((match = pattern.exec(text)) !== null) {
-        if (match.index > lastIndex) {
-            el.appendChild(document.createTextNode(text.slice(lastIndex, match.index)));
-        }
-
-        const { hrefText, trailing } = splitUrlMatch(match[0]);
-        const safeHref = toSafeHref(hrefText);
-        if (safeHref) {
-            const a = document.createElement('a');
-            a.href = safeHref;
-            a.textContent = hrefText;
-            a.target = '_blank';
-            a.rel = 'noopener noreferrer';
-            a.className = 'broadcast-inline-link';
-            el.appendChild(a);
-        } else {
-            el.appendChild(document.createTextNode(hrefText));
-        }
-        if (trailing) {
-            el.appendChild(document.createTextNode(trailing));
-        }
-        lastIndex = match.index + match[0].length;
-    }
-
-    if (lastIndex < text.length) {
-        el.appendChild(document.createTextNode(text.slice(lastIndex)));
-    }
-}
 
 let selectedColor = 'blue';
 let selectedSize = 'huge';
@@ -150,8 +79,28 @@ const $cellCopySettingPanel = document.getElementById('cell-copy-setting');
 
 const PREVIEW_ANIM_CLASSES = ['anim-pulse', 'anim-shake', 'anim-flash'];
 
+async function copyMaskedPassword(secret, button) {
+    try {
+        await navigator.clipboard.writeText(secret);
+    } catch {
+        const textarea = document.createElement('textarea');
+        textarea.value = secret;
+        textarea.setAttribute('readonly', '');
+        textarea.style.position = 'fixed';
+        textarea.style.left = '-9999px';
+        document.body.appendChild(textarea);
+        textarea.select();
+        const copied = document.execCommand('copy');
+        document.body.removeChild(textarea);
+        if (!copied) return;
+    }
+    button.classList.add('copied');
+    setTimeout(() => button.classList.remove('copied'), 900);
+}
+
 function init() {
     loadSettings();
+    MaskedText.setCopyHandler(copyMaskedPassword);
     renderPresets();
     renderColorSwatches();
     renderSizeOptions();
@@ -418,7 +367,7 @@ function renderPreviewTable(rows) {
         const tr = document.createElement('tr');
         row.forEach(value => {
             const td = document.createElement('td');
-            td.textContent = value;
+            MaskedText.render(td, value, { links: false });
             tr.appendChild(td);
         });
         tbody.appendChild(tr);
@@ -433,8 +382,11 @@ function renderPreviewTable(rows) {
 
 function getBroadcastPlainText(state) {
     const parts = [];
-    if (state.text) parts.push(state.text);
-    if (state.table && state.table.length) parts.push(tableToTsv(state.table));
+    if (state.text) parts.push(MaskedText.reveal(state.text));
+    if (state.table && state.table.length) {
+        const revealed = state.table.map(row => row.map(cell => MaskedText.reveal(cell)));
+        parts.push(tableToTsv(revealed));
+    }
     return parts.join('\n\n');
 }
 
@@ -646,7 +598,7 @@ function updatePreview() {
     $previewScreen.style.color = theme.text;
     if (text) {
         $previewMessage.hidden = false;
-        renderTextWithLinks($previewMessage, text);
+        MaskedText.render($previewMessage, text);
     } else if (hasTable) {
         $previewMessage.hidden = true;
         $previewMessage.textContent = '';
@@ -1049,10 +1001,11 @@ function bindEvents() {
 
     $previewTableWrap.addEventListener('click', async (event) => {
         if (!settings.copyTableCells) return;
+        if (event.target.closest('.masked-password')) return;
         const cell = event.target.closest('td');
         if (!cell) return;
         try {
-            await navigator.clipboard.writeText(cell.textContent || '');
+            await navigator.clipboard.writeText(MaskedText.textFromElement(cell));
             cell.classList.add('copied');
             setTimeout(() => cell.classList.remove('copied'), 800);
         } catch {
