@@ -624,12 +624,64 @@ body.tt-preview-mode #btn-submit-test {
 
 .tt-question-footer {
     width: 100%;
-    padding: 16px 24px;
+    padding: 16px 24px 16px 78px;
     background: white;
     border-top: 1px solid #e8eaef;
     display: flex;
     justify-content: center;
     align-items: center;
+    position: relative;
+}
+
+.tt-size-toggle {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    border: 2px solid #d5d7de;
+    background: #fff;
+    color: #2c1f56;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    cursor: pointer;
+    z-index: 2;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.tt-size-toggle:hover {
+    border-color: var(--tt-accent, #7678ed);
+}
+
+.tt-size-toggle[aria-pressed="true"] {
+    background: var(--tt-accent, #3d348b);
+    color: var(--tt-fab-ink, #fff);
+    border-color: transparent;
+}
+
+.tt-dark .tt-size-toggle {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.22);
+}
+
+.tt-dark .tt-size-toggle[aria-pressed="true"] {
+    background: var(--tt-accent, #f7b801);
+    color: var(--tt-fab-ink, #111);
+    border-color: transparent;
+}
+
+body.tt-large #question-body,
+body.tt-large .tt-code-card,
+body.tt-large .tt-student-card,
+body.tt-large .tt-results-card,
+body.tt-large .tt-answer-review,
+body.tt-large .tt-preview-end-card {
+    zoom: 1.32;
 }
 
 .tt-footer-nav {
@@ -1096,6 +1148,7 @@ mark.rt-hl {
     width: 100%;
     height: 100%;
     z-index: 1;
+    overflow: visible;
     pointer-events: none;
 }
 
@@ -1298,7 +1351,7 @@ mark.rt-hl {
     color: white;
     font-size: 1rem;
     margin-bottom: 4px;
-    cursor: pointer;
+    cursor: grab;
 }
 
 .tt-dd-item.tt-dd-card {
@@ -1311,6 +1364,13 @@ mark.rt-hl {
     flex-wrap: wrap;
     gap: 8px;
     justify-content: center;
+    min-height: 64px;
+    border-radius: 12px;
+}
+
+.tt-dd-pool.drag-over {
+    background: rgba(255, 255, 255, 0.28);
+    box-shadow: inset 0 0 0 2px var(--tt-accent, #7678ed);
 }
 
 .tt-dd-pool-item {
@@ -1920,6 +1980,17 @@ img[data-preview]:hover {
         right: 12px;
         padding: 0 12px;
         font-size: 0.85rem;
+    }
+
+    .tt-question-footer {
+        padding-left: 64px;
+    }
+
+    .tt-size-toggle {
+        left: 10px;
+        width: 40px;
+        height: 40px;
+        font-size: 0.9rem;
     }
 
     .tt-review-card {

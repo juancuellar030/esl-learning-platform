@@ -532,6 +532,14 @@ const TakeTest = (function () {
         return isPreviewMode ? previewAnswers : answers;
     }
 
+    function applyLargeText(on) {
+        document.body.classList.toggle('tt-large', !!on);
+        const btn = document.getElementById('btn-size-toggle');
+        if (!btn) return;
+        btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+        btn.title = on ? 'Normal size' : 'Larger text and cards';
+    }
+
     function init() {
         cacheScreens();
 
@@ -548,6 +556,18 @@ const TakeTest = (function () {
                 showScreen('code');
                 setupCodeEntry();
             }
+        }
+
+        const sizeBtn = document.getElementById('btn-size-toggle');
+        const largeOn = localStorage.getItem('tt-large-text') === '1';
+        applyLargeText(largeOn);
+        if (sizeBtn) {
+            sizeBtn.addEventListener('click', () => {
+                const next = !document.body.classList.contains('tt-large');
+                localStorage.setItem('tt-large-text', next ? '1' : '0');
+                applyLargeText(next);
+                if (document.getElementById('match-svg')) scheduleMatchLines();
+            });
         }
 
         // Global zoom listener
@@ -1587,6 +1607,7 @@ const TakeTest = (function () {
 
     // ===== BIND INTERACTIONS =====
     function bindQuestionInteractions(q) {
+        clearMatchResize();
         switch (q.type) {
             case 'multiple-choice':
             case 'true-false':
@@ -1760,121 +1781,200 @@ const TakeTest = (function () {
     }
 
     function bindDragDrop(q) {
-        // === Click-to-place: click pool item, then click category ===
-        let selectedItem = null;
+        let selectedItemEl = null;
+        let suppressClick = false;
 
-        document.querySelectorAll('.tt-dd-pool-item').forEach(item => {
-            item.addEventListener('click', () => {
-                if (item.classList.contains('placed')) return;
-                document.querySelectorAll('.tt-dd-pool-item').forEach(i => i.classList.remove('dd-selected'));
-                item.classList.add('dd-selected');
-                selectedItem = item.dataset.item;
-            });
+        function answers() {
+            if (!sessionAnswers()[currentQ]) sessionAnswers()[currentQ] = {};
+            return sessionAnswers()[currentQ];
+        }
 
-            // === Mouse drag support ===
+        function removeFromCategory(val, ci) {
+            const ans = sessionAnswers()[currentQ];
+            if (!ans || !ans[ci]) return;
+            const idx = ans[ci].indexOf(val);
+            if (idx >= 0) ans[ci].splice(idx, 1);
+        }
+
+        function moveItemToCategory(itemEl, catEl) {
+            const val = itemEl.dataset.item;
+            const sourceCat = itemEl.closest('.tt-dd-category');
+            const sourceCi = sourceCat ? parseInt(sourceCat.dataset.cat, 10) : null;
+            const targetCi = parseInt(catEl.dataset.cat, 10);
+            if (sourceCi === targetCi) return;
+            if (sourceCi !== null) removeFromCategory(val, sourceCi);
+            const ans = answers();
+            if (!ans[targetCi]) ans[targetCi] = [];
+            if (ans[targetCi].indexOf(val) === -1) ans[targetCi].push(val);
+            itemEl.classList.remove('tt-dd-pool-item', 'dd-selected', 'dragging');
+            itemEl.classList.add('tt-dd-item');
+            itemEl.dataset.cat = String(targetCi);
+            catEl.querySelector('.tt-dd-cat-items').appendChild(itemEl);
+            selectedItemEl = null;
+        }
+
+        function moveItemToPool(itemEl) {
+            const sourceCat = itemEl.closest('.tt-dd-category');
+            if (!sourceCat) return;
+            removeFromCategory(itemEl.dataset.item, parseInt(sourceCat.dataset.cat, 10));
+            itemEl.classList.remove('tt-dd-item', 'dragging', 'dd-selected');
+            itemEl.classList.add('tt-dd-pool-item');
+            delete itemEl.dataset.cat;
+            document.querySelector('.tt-dd-pool').appendChild(itemEl);
+        }
+
+        document.querySelectorAll('.tt-dd-pool-item, .tt-dd-item').forEach(item => {
+            item.setAttribute('draggable', 'true');
             item.addEventListener('dragstart', (e) => {
-                if (item.classList.contains('placed')) { e.preventDefault(); return; }
+                if (e.target.closest('.tt-zoom-btn')) { e.preventDefault(); return; }
+                suppressClick = true;
                 item.classList.add('dragging');
                 e.dataTransfer.setData('text/plain', item.dataset.item);
                 e.dataTransfer.effectAllowed = 'move';
             });
             item.addEventListener('dragend', () => {
                 item.classList.remove('dragging');
+                document.querySelectorAll('.drag-over-cat, .tt-dd-pool.drag-over').forEach(el => {
+                    el.classList.remove('drag-over-cat', 'drag-over');
+                });
+                setTimeout(() => { suppressClick = false; }, 0);
+            });
+            item.addEventListener('click', (e) => {
+                if (e.target.closest('.tt-zoom-btn')) return;
+                if (suppressClick) { suppressClick = false; return; }
+                e.stopPropagation();
+                if (item.closest('.tt-dd-category')) {
+                    moveItemToPool(item);
+                    return;
+                }
+                document.querySelectorAll('.tt-dd-pool-item').forEach(i => i.classList.remove('dd-selected'));
+                item.classList.add('dd-selected');
+                selectedItemEl = item;
             });
         });
 
         document.querySelectorAll('.tt-dd-category').forEach(cat => {
-            // Click-to-place
             cat.addEventListener('click', () => {
-                if (!selectedItem) return;
-                const ci = parseInt(cat.dataset.cat);
-                if (!sessionAnswers()[currentQ]) sessionAnswers()[currentQ] = {};
-                if (!sessionAnswers()[currentQ][ci]) sessionAnswers()[currentQ][ci] = [];
-                sessionAnswers()[currentQ][ci].push(selectedItem);
-                selectedItem = null;
-                renderQuestion();
+                if (!selectedItemEl || !selectedItemEl.classList.contains('tt-dd-pool-item')) return;
+                moveItemToCategory(selectedItemEl, cat);
             });
-
-            // Drag-over highlight
             cat.addEventListener('dragover', (e) => {
                 e.preventDefault();
                 e.dataTransfer.dropEffect = 'move';
                 cat.classList.add('drag-over-cat');
             });
-            cat.addEventListener('dragleave', () => {
+            cat.addEventListener('dragleave', (e) => {
+                if (cat.contains(e.relatedTarget)) return;
                 cat.classList.remove('drag-over-cat');
             });
             cat.addEventListener('drop', (e) => {
                 e.preventDefault();
                 cat.classList.remove('drag-over-cat');
-                const itemValue = e.dataTransfer.getData('text/plain');
-                if (!itemValue) return;
-                const ci = parseInt(cat.dataset.cat);
-                if (!sessionAnswers()[currentQ]) sessionAnswers()[currentQ] = {};
-                if (!sessionAnswers()[currentQ][ci]) sessionAnswers()[currentQ][ci] = [];
-                sessionAnswers()[currentQ][ci].push(itemValue);
-                selectedItem = null;
-                renderQuestion();
+                const itemEl = document.querySelector('.tt-dd-pool-item.dragging, .tt-dd-item.dragging');
+                if (itemEl) moveItemToCategory(itemEl, cat);
             });
         });
 
-        // Remove from category (click placed item)
-        document.querySelectorAll('.tt-dd-item').forEach(item => {
-            item.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const ci = parseInt(item.dataset.cat);
-                const val = item.dataset.item;
-                if (sessionAnswers()[currentQ] && sessionAnswers()[currentQ][ci]) {
-                    const idx = sessionAnswers()[currentQ][ci].indexOf(val);
-                    if (idx >= 0) sessionAnswers()[currentQ][ci].splice(idx, 1);
-                }
-                renderQuestion();
+        const pool = document.querySelector('.tt-dd-pool');
+        if (pool) {
+            pool.addEventListener('dragover', (e) => {
+                if (!document.querySelector('.tt-dd-item.dragging')) return;
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                pool.classList.add('drag-over');
             });
-        });
+            pool.addEventListener('dragleave', (e) => {
+                if (pool.contains(e.relatedTarget)) return;
+                pool.classList.remove('drag-over');
+            });
+            pool.addEventListener('drop', (e) => {
+                e.preventDefault();
+                pool.classList.remove('drag-over');
+                const itemEl = document.querySelector('.tt-dd-item.dragging');
+                if (itemEl) moveItemToPool(itemEl);
+            });
+        }
     }
 
     // ===== MATCHING: CLICK-TO-CONNECT =====
     let activeLeftIdx = null;
+    let matchResizeObserver = null;
+
+    function clearMatchResize() {
+        if (matchResizeObserver) {
+            matchResizeObserver.disconnect();
+            matchResizeObserver = null;
+        }
+    }
+
+    function syncMatchClasses() {
+        const answers = sessionAnswers()[currentQ] || [];
+        document.querySelectorAll('.tt-match-item-left').forEach(el => {
+            const i = parseInt(el.dataset.idx, 10);
+            const matched = answers[i] !== undefined && answers[i] !== '';
+            el.classList.toggle('matched', matched);
+            if (matched) el.classList.remove('active');
+        });
+        document.querySelectorAll('.tt-match-item-right').forEach(el => {
+            el.classList.toggle('matched', answers.indexOf(el.dataset.value) !== -1);
+        });
+    }
+
+    function scheduleMatchLines() {
+        const root = document.querySelector('.tt-matching');
+        const draw = () => requestAnimationFrame(() => renderMatchLines());
+        const pending = root && root.getAnimations
+            ? root.getAnimations().filter(a => a.playState === 'running')
+            : [];
+        if (pending.length) {
+            Promise.all(pending.map(a => a.finished.catch(() => {}))).then(draw);
+            return;
+        }
+        draw();
+    }
 
     function bindMatchInteractions(q) {
         if (!sessionAnswers()[currentQ]) sessionAnswers()[currentQ] = [];
+        clearMatchResize();
 
-        // Draw lines for existing matches
-        setTimeout(() => renderMatchLines(), 50);
+        const container = document.querySelector('.tt-match-container');
+        if (container && window.ResizeObserver) {
+            matchResizeObserver = new ResizeObserver(() => renderMatchLines());
+            matchResizeObserver.observe(container);
+        }
+        scheduleMatchLines();
 
-        // Left column click ΓÇö select
+        // Left column click — select
         document.querySelectorAll('.tt-match-item-left').forEach(item => {
             item.addEventListener('click', () => {
                 if (item.classList.contains('matched')) return;
                 document.querySelectorAll('.tt-match-item-left').forEach(el => el.classList.remove('active'));
                 item.classList.add('active');
-                activeLeftIdx = parseInt(item.dataset.idx);
+                activeLeftIdx = parseInt(item.dataset.idx, 10);
             });
         });
 
-        // Right column click ΓÇö connect
+        // Right column click — connect, without rebuilding the question
         document.querySelectorAll('.tt-match-item-right').forEach(item => {
             item.addEventListener('click', (e) => {
-                if (e.target.closest('.tt-match-clear')) return; // handled separately
+                if (e.target.closest('.tt-match-clear')) return;
                 if (activeLeftIdx === null) return;
                 if (item.classList.contains('matched')) return;
-                const rightValue = item.dataset.value;
-
-                // Set the match
-                sessionAnswers()[currentQ][activeLeftIdx] = rightValue;
+                sessionAnswers()[currentQ][activeLeftIdx] = item.dataset.value;
                 activeLeftIdx = null;
-                renderQuestion();
+                syncMatchClasses();
+                renderMatchLines();
             });
         });
 
-        // Clear button ΓÇö undo match
+        // Clear button — undo match
         document.querySelectorAll('.tt-match-clear').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                const val = btn.dataset.value;
-                const idx = sessionAnswers()[currentQ].indexOf(val);
+                const idx = sessionAnswers()[currentQ].indexOf(btn.dataset.value);
                 if (idx >= 0) sessionAnswers()[currentQ][idx] = '';
-                renderQuestion();
+                syncMatchClasses();
+                renderMatchLines();
             });
         });
     }
@@ -1885,6 +1985,12 @@ const TakeTest = (function () {
         svg.innerHTML = '';
         const container = svg.closest('.tt-match-container');
         if (!container) return;
+
+        const width = container.clientWidth;
+        const height = container.clientHeight;
+        svg.setAttribute('viewBox', '0 0 ' + width + ' ' + height);
+        svg.setAttribute('width', String(width));
+        svg.setAttribute('height', String(height));
 
         const currentMatches = sessionAnswers()[currentQ] || [];
         const leftItems = container.querySelectorAll('.tt-match-item-left');
@@ -1899,11 +2005,14 @@ const TakeTest = (function () {
 
             const lr = leftEl.getBoundingClientRect();
             const rr = rightEl.getBoundingClientRect();
+            const scaleX = containerRect.width ? width / containerRect.width : 1;
+            const scaleY = containerRect.height ? height / containerRect.height : 1;
 
-            const x1 = lr.right - containerRect.left;
-            const y1 = lr.top + lr.height / 2 - containerRect.top;
-            const x2 = rr.left - containerRect.left;
-            const y2 = rr.top + rr.height / 2 - containerRect.top;
+            // Tuck the ends under the cards so the stroke meets the border, not the gap.
+            const x1 = (lr.right - containerRect.left) * scaleX - 2;
+            const y1 = (lr.top + lr.height / 2 - containerRect.top) * scaleY;
+            const x2 = (rr.left - containerRect.left) * scaleX + 2;
+            const y2 = (rr.top + rr.height / 2 - containerRect.top) * scaleY;
 
             const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
             line.setAttribute('x1', x1);
