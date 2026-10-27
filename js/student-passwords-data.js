@@ -6,9 +6,10 @@
  * symbol, so removing or reordering someone cannot change another student's
  * password. A student added later gets a symbol from their own name.
  *
- * 3C and 5B keep the original cards. Alan Franco and Dylan Sanchez left
- * 3C, and Antonella Esquivel left 5B, after the cards were printed.
- * Students listed after them still use those earlier slots.
+ * 3A, 3C, and 5B keep the original cards. Isabella Castañeda left 3A,
+ * Alan Franco and Dylan Sanchez left 3C, and Antonella Esquivel left 5B,
+ * after the cards were printed. Students listed after them still use
+ * those earlier slots.
  */
 const STUDENT_PASSWORD_SPECIALS = ['/', '*', '%', '#', '$'];
 
@@ -18,26 +19,26 @@ const PASSWORD_SLOTS = {
     "CABRERA BARRERO JULIETA": 2,
     "CAMACHO SALAZAR JULIANA": 3,
     "CAMERO PERDOMO JOSÉ MIGUEL": 4,
-    "CHACÓN RAMÍREZ THOMAS": 5,
-    "CORTES LOSADA ARIADNA VALENTINA": 6,
-    "GOMEZ GONZALEZ AARON": 7,
-    "GRANJA PABÓN THIAGO": 8,
-    "GUEVARA ORTIZ JUAN ÁLVARO": 9,
-    "HERNANDEZ CELEITA MARIA ANTONIA": 10,
-    "MACIAS IBÁÑEZ SAMUEL ANDRÉS": 11,
-    "MOGOLLÓN RODRÍGUEZ MELISSA": 12,
-    "NIÑO GALINDO SAMANTHA VICTORIA": 13,
-    "PATIÑO CLAROS GABRIELA": 14,
-    "RAMOS MORA VALENTINA ESTRELLITA": 15,
-    "RIVERA HERRERA MAYTE": 16,
-    "RUGELES CASTAÑEDA DYLAN THOMAS": 17,
-    "SAAVEDRA OYOLA EIDER IVAN": 18,
-    "SÁNCHEZ LUCUARA CELESTE": 19,
-    "SERRATO MORENO EMILIANO": 20,
-    "TAMAYO CASTAÑEDA SAMUEL": 21,
-    "TORRES SARRIA ANTONELLA": 22,
-    "VÁSQUEZ PEREZ EMILIANO": 23,
-    "YASNO ÁVILA MATIAS": 24,
+    "CHACÓN RAMÍREZ THOMAS": 6,
+    "CORTES LOSADA ARIADNA VALENTINA": 7,
+    "GOMEZ GONZALEZ AARON": 8,
+    "GRANJA PABÓN THIAGO": 9,
+    "GUEVARA ORTIZ JUAN ÁLVARO": 10,
+    "HERNANDEZ CELEITA MARIA ANTONIA": 11,
+    "MACIAS IBÁÑEZ SAMUEL ANDRÉS": 12,
+    "MOGOLLÓN RODRÍGUEZ MELISSA": 13,
+    "NIÑO GALINDO SAMANTHA VICTORIA": 14,
+    "PATIÑO CLAROS GABRIELA": 15,
+    "RAMOS MORA VALENTINA ESTRELLITA": 16,
+    "RIVERA HERRERA MAYTE": 17,
+    "RUGELES CASTAÑEDA DYLAN THOMAS": 18,
+    "SAAVEDRA OYOLA EIDER IVAN": 19,
+    "SÁNCHEZ LUCUARA CELESTE": 20,
+    "SERRATO MORENO EMILIANO": 21,
+    "TAMAYO CASTAÑEDA SAMUEL": 22,
+    "TORRES SARRIA ANTONELLA": 23,
+    "VÁSQUEZ PEREZ EMILIANO": 24,
+    "YASNO ÁVILA MATIAS": 25,
     "ARIAS MAJE GABRIEL MATIAS": 0,
     "BALLESTEROS COLLAZOS CRISTOBAL": 1,
     "BORRERO CORREA ANNIE DANIELA": 2,
