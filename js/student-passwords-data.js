@@ -6,8 +6,9 @@
  * symbol, so removing or reordering someone cannot change another student's
  * password. A student added later gets a symbol from their own name.
  *
- * 5B keeps the original cards. Antonella Esquivel held slot 8; everyone
- * listed after her still uses that earlier slot.
+ * 3C and 5B keep the original cards. Alan Franco and Dylan Sanchez left
+ * 3C, and Antonella Esquivel left 5B, after the cards were printed.
+ * Students listed after them still use those earlier slots.
  */
 const STUDENT_PASSWORD_SPECIALS = ['/', '*', '%', '#', '$'];
 
@@ -73,19 +74,19 @@ const PASSWORD_SLOTS = {
     "CALLEJAS SOSA EMILIA": 7,
     "CASTILLO ROJAS GABRIELA": 8,
     "DIAZ CARVAJAL ARTURO": 9,
-    "JIMÉNEZ BOHADA EMILIANO": 10,
-    "MEJÍA BORRERO MARIANA": 11,
-    "MORALES FARFÁN MARTINA": 12,
-    "OSORIO RUIZ JUAN ANDRÉS": 13,
-    "ROBLEDO SANTANA SALOME": 14,
-    "RODRIGUEZ ALVAREZ MARTIN ANDRES": 15,
-    "ROJAS CLAROS SELENE": 16,
-    "ROJAS SANDOVAL AVRIL CATALINA": 17,
-    "SANCHEZ HERNANDEZ ISAAC": 18,
-    "SILVA BAHAMÓN MANUEL FELIPE": 19,
-    "SOTELO BRAVO JUAN JOSE": 20,
-    "TOVAR VARGAS GABRIELA": 21,
-    "TRIVIÑO GARCÍA YULIANY": 22,
+    "JIMÉNEZ BOHADA EMILIANO": 11,
+    "MEJÍA BORRERO MARIANA": 12,
+    "MORALES FARFÁN MARTINA": 13,
+    "OSORIO RUIZ JUAN ANDRÉS": 14,
+    "ROBLEDO SANTANA SALOME": 15,
+    "RODRIGUEZ ALVAREZ MARTIN ANDRES": 16,
+    "ROJAS CLAROS SELENE": 17,
+    "ROJAS SANDOVAL AVRIL CATALINA": 18,
+    "SANCHEZ HERNANDEZ ISAAC": 19,
+    "SILVA BAHAMÓN MANUEL FELIPE": 21,
+    "SOTELO BRAVO JUAN JOSE": 22,
+    "TOVAR VARGAS GABRIELA": 23,
+    "TRIVIÑO GARCÍA YULIANY": 24,
     "ALMARIO URREGO JERONIMO": 0,
     "ARISTIZABAL ALVARADO ISABELLA": 1,
     "ASTAIZA MONTEALEGRE SALOMÉ": 2,
