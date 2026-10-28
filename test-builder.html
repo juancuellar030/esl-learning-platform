@@ -15,7 +15,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Reddit+Sans:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="css/test-builder.css?v=partial-score-v1">
+    <link rel="stylesheet" href="css/test-builder.css?v=share-file-v1">
     <link rel="stylesheet" href="css/google-drive.css">
     <style>
         /* Override base styles for builder page */
@@ -53,33 +53,30 @@
                 <button class="header-btn btn-settings" id="btn-settings">
                     <i class="fa-solid fa-gear"></i> <span>Settings</span>
                 </button>
-                <label class="header-btn" id="btn-import-json" title="Import quiz from JSON file"
-                    style="cursor:pointer;">
-                    <i class="fa-solid fa-file-import"></i> <span>Import</span>
-                    <input type="file" id="import-json-input" accept=".json,application/json" style="display:none;" />
-                </label>
                 <div class="export-dropdown-wrap" id="export-dropdown-wrap">
-                    <button class="header-btn" id="btn-export-toggle" title="Export options">
-                        <i class="fa-solid fa-file-export"></i> <span>Export</span> <i class="fa-solid fa-caret-down"
+                    <button class="header-btn" id="btn-export-toggle" title="Import, export, and Google Drive">
+                        <i class="fa-solid fa-folder-open"></i> <span>File</span> <i class="fa-solid fa-caret-down"
                             style="font-size:0.7em;margin-left:2px;opacity:0.7;"></i>
                     </button>
                     <div class="export-menu" id="export-menu" style="display:none;">
+                        <label class="export-menu-item" id="btn-import-json">
+                            <i class="fa-solid fa-file-import"></i> Import JSON
+                            <input type="file" id="import-json-input" accept=".json,application/json" style="display:none;" />
+                        </label>
                         <button class="export-menu-item" id="btn-download-json">
                             <i class="fa-solid fa-download"></i> Download JSON
                         </button>
+                        <div class="export-menu-divider"></div>
                         <button class="export-menu-item" id="btn-export-to-drive">
                             <i class="fa-brands fa-google-drive"></i> Save to Drive
                         </button>
+                        <button class="export-menu-item" id="btn-google-drive">
+                            <i class="fa-solid fa-cloud-arrow-down"></i> Open from Drive
+                        </button>
                     </div>
                 </div>
-                <button class="header-btn btn-save" id="btn-save">
-                    <i class="fa-solid fa-floppy-disk"></i> <span>Save</span>
-                </button>
                 <button class="header-btn btn-preview-test" id="btn-preview-test" title="Open a student-view walkthrough. Nothing is scored or submitted.">
                     <i class="fa-solid fa-tv"></i> <span>Preview Test</span>
-                </button>
-                <button class="header-btn" id="btn-google-drive" title="Google Drive">
-                    <i class="fa-brands fa-google-drive"></i> <span>Drive</span>
                 </button>
                 <button class="header-btn btn-responses" id="btn-responses">
                     <i class="fa-solid fa-chart-bar"></i> <span>Responses</span>
@@ -92,8 +89,11 @@
         </div>
 
         <!-- Sidebar: Question List -->
-        <div class="sidebar-panel">
+        <div class="sidebar-panel" id="sidebar-panel">
             <div class="sidebar-header" style="position:relative;">
+                <button type="button" class="panel-collapse-btn" id="btn-collapse-questions" title="Collapse questions">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
                 <h3>Questions</h3>
                 <button class="btn-add-question" id="btn-add-question" title="Add Question">
                     <i class="fa-solid fa-plus"></i>
@@ -106,12 +106,17 @@
         <!-- Main Editor -->
         <div class="editor-panel" id="editor-panel"></div>
 
-        <!-- Preview -->
-        <div class="preview-panel">
+        <!-- Preview: the current question, rendered the way a student sees it -->
+        <div class="preview-panel" id="preview-panel">
             <div class="preview-header">
                 <h3><i class="fa-solid fa-eye"></i> Preview</h3>
+                <button type="button" class="panel-collapse-btn" id="btn-collapse-preview" title="Hide preview">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
             </div>
-            <div class="preview-content" id="preview-content"></div>
+            <div class="preview-content" id="preview-content">
+                <iframe id="preview-live-frame" class="preview-live-frame" title="Current question, as a student will see it"></iframe>
+            </div>
         </div>
     </div>
 
@@ -372,18 +377,16 @@
                     </div>
                     <div class="field-group" style="text-align:left;margin-top:20px;">
                         <label>Direct Link</label>
-                        <div style="display:flex;gap:8px;">
+                        <div style="display:flex;gap:8px;align-items:center;">
                             <input type="text" id="share-url" readonly style="flex:1;font-size:0.85rem;" />
-                            <button class="btn-add-option" id="btn-copy-url" style="white-space:nowrap;"><i
-                                    class="fa-solid fa-copy"></i> Copy</button>
+                            <button type="button" class="share-action share-action-copy" id="btn-copy-url">
+                                <i class="fa-solid fa-copy"></i> Copy
+                            </button>
                         </div>
                     </div>
-                    <div style="margin-top:16px;">
-                        <canvas id="share-qr" style="max-width:180px;margin:0 auto;"></canvas>
-                    </div>
-                    <button class="btn-add-option" id="btn-deactivate-test"
-                        style="margin-top:16px;color:var(--cayenne-red);border-color:var(--cayenne-red);"><i
-                            class="fa-solid fa-ban"></i> Deactivate Test</button>
+                    <button type="button" class="share-action share-action-stop" id="btn-deactivate-test">
+                        <i class="fa-solid fa-ban"></i> Deactivate Test
+                    </button>
                 </div>
             </div>
         </div>
@@ -422,7 +425,7 @@
     <script src="https://apis.google.com/js/api.js"></script>
     <script src="https://accounts.google.com/gsi/client"></script>
     <script src="js/google-drive-service.js"></script>
-    <script src="js/test-builder.js?v=csv-answers-v1"></script>
+    <script src="js/test-builder.js?v=share-file-v1"></script>
 </body>
 
 </html>

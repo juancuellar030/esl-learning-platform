@@ -57,6 +57,35 @@ body.tt-preview-mode #screen-error {
     top: 36px;
 }
 
+body.tt-embed.tt-preview-mode #screen-question {
+    top: 0;
+}
+
+body.tt-embed .tt-preview-badge,
+body.tt-embed .tt-theme-fab,
+body.tt-embed .tt-theme-picker,
+body.tt-embed .tt-question-header,
+body.tt-embed .tt-question-footer {
+    display: none !important;
+}
+
+body.tt-embed .tt-question-body,
+body.tt-embed .tt-question-body .tt-q-prompt,
+body.tt-embed .tt-question-body .tt-q-media,
+body.tt-embed .tt-question-body .tt-ms-hint,
+body.tt-embed .tt-question-body .tt-fb-card,
+body.tt-embed .tt-question-body .tt-word-bank,
+body.tt-embed .tt-question-body .tt-matching,
+body.tt-embed .tt-question-body .tt-option,
+body.tt-embed .tt-question-body .tt-ms-option {
+    animation: none;
+}
+
+body.tt-embed .tt-question-body {
+    max-width: none;
+    padding: 28px 22px;
+}
+
 body.tt-preview-mode #q-timer,
 body.tt-preview-mode #fs-warning,
 body.tt-preview-mode #incomplete-warning,

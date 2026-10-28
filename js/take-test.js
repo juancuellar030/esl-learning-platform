@@ -546,6 +546,10 @@ const TakeTest = (function () {
         // Check URL for code
         const params = new URLSearchParams(window.location.search);
         if (params.get('preview') === '1') {
+            if (params.get('embed') === '1') {
+                document.body.classList.add('tt-embed');
+                enableEmbedSync();
+            }
             loadPreviewTest(params.get('testId'));
         } else {
             const code = params.get('code');
@@ -558,8 +562,9 @@ const TakeTest = (function () {
             }
         }
 
+        const embedMode = new URLSearchParams(window.location.search).get('embed') === '1';
         const sizeBtn = document.getElementById('btn-size-toggle');
-        const largeOn = localStorage.getItem('tt-large-text') === '1';
+        const largeOn = !embedMode && localStorage.getItem('tt-large-text') === '1';
         applyLargeText(largeOn);
         if (sizeBtn) {
             sizeBtn.addEventListener('click', () => {
@@ -717,6 +722,10 @@ const TakeTest = (function () {
         }
 
         if (!raw) {
+            if (new URLSearchParams(window.location.search).get('embed') === '1') {
+                showEmbedEmpty();
+                return;
+            }
             showError('Preview Unavailable', 'This draft was not found in this browser. Open Preview from the test builder on the same device.');
             return;
         }
@@ -729,7 +738,14 @@ const TakeTest = (function () {
             return;
         }
 
+        const embed = new URLSearchParams(window.location.search).get('embed') === '1';
+        if (embed) {
+            document.body.classList.add('tt-embed');
+            enableEmbedSync();
+        }
+
         if (!data.questions || data.questions.length === 0) {
+            if (embed) { showEmbedEmpty(); return; }
             showError('Preview Unavailable', 'This test has no questions yet.');
             return;
         }
@@ -740,7 +756,7 @@ const TakeTest = (function () {
         previewAnswers = new Array(testData.questions.length).fill(null);
 
         applyTestTheme('default', false);
-        if (testData.settings && testData.settings.allowThemes) {
+        if (!embed && testData.settings && testData.settings.allowThemes) {
             document.getElementById('btn-theme-fab').style.display = '';
         }
 
@@ -748,7 +764,52 @@ const TakeTest = (function () {
         if (timerEl) timerEl.style.display = 'none';
 
         setupNavigation();
-        currentQ = 0;
+        let startQ = parseInt(new URLSearchParams(window.location.search).get('q') || '0', 10);
+        if (!Number.isFinite(startQ) || startQ < 0 || startQ >= testData.questions.length) startQ = 0;
+        currentQ = startQ;
+        renderQuestion();
+        showScreen('question');
+    }
+
+    let embedListening = false;
+    function enableEmbedSync() {
+        if (embedListening) return;
+        embedListening = true;
+        window.addEventListener('message', (event) => {
+            if (event.origin !== window.location.origin) return;
+            const msg = event.data;
+            if (!msg || msg.type !== 'tt-embed-sync') return;
+            applyEmbedQuestion(msg.testId, msg.questionIndex, msg.test);
+        });
+    }
+
+    function showEmbedEmpty() {
+        showScreen('question');
+        const body = document.getElementById('question-body');
+        if (body) {
+            body.className = 'tt-question-body';
+            body.innerHTML = '<div class="tt-q-prompt">This question will appear here as you build it.</div>';
+        }
+    }
+
+    function applyEmbedQuestion(testId, questionIndex, liveTest) {
+        let data = liveTest;
+        if (!data) {
+            let raw;
+            try { raw = localStorage.getItem('esl_test_' + testId); } catch (e) { return; }
+            if (!raw) { showEmbedEmpty(); return; }
+            try { data = JSON.parse(raw); } catch (e) { return; }
+        }
+        if (!data.questions || data.questions.length === 0) { showEmbedEmpty(); return; }
+        testData = data;
+        (testData.questions || []).forEach(migrateFillBlankQuestion);
+        if (!previewAnswers || previewAnswers.length !== testData.questions.length) {
+            answers = new Array(testData.questions.length).fill(null);
+            previewAnswers = new Array(testData.questions.length).fill(null);
+        }
+        let q = parseInt(questionIndex, 10);
+        if (!Number.isFinite(q) || q < 0 || q >= testData.questions.length) q = 0;
+        currentQ = q;
         renderQuestion();
         showScreen('question');
     }

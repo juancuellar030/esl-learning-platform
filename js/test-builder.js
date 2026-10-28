@@ -149,7 +149,7 @@ const TestBuilder = (function () {
         dom.shareCodeDisplay = document.getElementById('share-code-display');
         dom.shareUrl = document.getElementById('share-url');
         dom.btnCopyUrl = document.getElementById('btn-copy-url');
-        dom.shareQr = document.getElementById('share-qr');
+        dom.shareQr = null;
         dom.btnDeactivate = document.getElementById('btn-deactivate-test');
         // Responses modal elements
         dom.autoSaveDriveToggle = document.getElementById('setting-auto-save-drive');
@@ -283,7 +283,48 @@ const TestBuilder = (function () {
     }
 
     // ===== EVENT BINDING =====
+    function applyPanelLayout() {
+        const root = document.querySelector('.builder-container');
+        if (!root) return;
+        const side = localStorage.getItem('tb-sidebar-collapsed') === '1';
+        const prev = localStorage.getItem('tb-preview-collapsed') === '1';
+        root.classList.toggle('sidebar-collapsed', side);
+        root.classList.toggle('preview-collapsed', prev);
+        const sideBtn = document.getElementById('btn-collapse-questions');
+        const prevBtn = document.getElementById('btn-collapse-preview');
+        if (sideBtn) {
+            sideBtn.title = side ? 'Show questions' : 'Collapse questions';
+            const icon = sideBtn.querySelector('i');
+            if (icon) icon.className = side ? 'fa-solid fa-chevron-right' : 'fa-solid fa-chevron-left';
+        }
+        if (prevBtn) {
+            prevBtn.title = prev ? 'Show preview' : 'Hide preview';
+            const icon = prevBtn.querySelector('i');
+            if (icon) icon.className = prev ? 'fa-solid fa-chevron-left' : 'fa-solid fa-chevron-right';
+        }
+    }
+
     function bindEvents() {
+        applyPanelLayout();
+        const sideBtn = document.getElementById('btn-collapse-questions');
+        const prevBtn = document.getElementById('btn-collapse-preview');
+        if (sideBtn) {
+            sideBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const next = !document.querySelector('.builder-container').classList.contains('sidebar-collapsed');
+                localStorage.setItem('tb-sidebar-collapsed', next ? '1' : '0');
+                applyPanelLayout();
+            });
+        }
+        if (prevBtn) {
+            prevBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const next = !document.querySelector('.builder-container').classList.contains('preview-collapsed');
+                localStorage.setItem('tb-preview-collapsed', next ? '1' : '0');
+                applyPanelLayout();
+            });
+        }
+
         // Add question dropdown
         dom.btnAddQuestion.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -330,11 +371,8 @@ const TestBuilder = (function () {
             if (e.target === dom.settingsOverlay) closeSettings();
         });
 
-        // Save
-        dom.btnSave.addEventListener('click', () => {
-            saveTest();
-            showToast('Test saved!');
-        });
+        // Ctrl+S still writes immediately. The header Save button was removed
+        // because every edit already lands in localStorage.
 
         // Student-view walkthrough — in-memory only, never scored or submitted
         if (dom.btnPreviewTest) {
@@ -346,6 +384,15 @@ const TestBuilder = (function () {
                 saveTest();
                 const url = `take-test.html?preview=1&testId=${encodeURIComponent(testData.id)}`;
                 window.open(url, '_blank');
+            });
+        }
+
+        const importLabel = document.getElementById('btn-import-json');
+        if (importLabel) {
+            importLabel.addEventListener('click', () => {
+                setTimeout(() => {
+                    if (dom.exportMenu) dom.exportMenu.style.display = 'none';
+                }, 0);
             });
         }
 
@@ -765,7 +812,7 @@ const TestBuilder = (function () {
         const questions = testData.questions;
         if (questions.length === 0) {
             dom.questionList.innerHTML = `
-                <div style="text-align:center; padding:30px 10px; color:#bbb; font-size:0.85rem;">
+                <div class="sidebar-empty" style="text-align:center; padding:30px 10px; color:#bbb; font-size:0.85rem;">
                     <i class="fa-solid fa-plus-circle" style="font-size:2rem; display:block; margin-bottom:10px; color:#ddd;"></i>
                     Click <b>+</b> to add your first question
                 </div>`;
@@ -1928,45 +1975,33 @@ const TestBuilder = (function () {
 
     // ===== PREVIEW RENDERING =====
     function renderPreviewEmpty() {
-        dom.previewContent.innerHTML = `
-            <div class="preview-empty">
-                <i class="fa-solid fa-eye"></i>
-                <p>Select a question to see a live preview</p>
-            </div>`;
+        syncLivePreview(-1);
+    }
+
+    function syncLivePreview(forcedIndex) {
+        if (!testData || !testData.id) return;
+        const frame = document.getElementById('preview-live-frame');
+        if (!frame) return;
+        if (!frame.dataset.srcSet) {
+            frame.dataset.srcSet = '1';
+            frame.src = 'take-test.html?preview=1&embed=1&testId=' + encodeURIComponent(testData.id) + '&q=0';
+        }
+        const payload = {
+            type: 'tt-embed-sync',
+            testId: testData.id,
+            test: testData,
+            questionIndex: forcedIndex === undefined ? currentQuestionIndex : forcedIndex
+        };
+        const send = () => {
+            if (!frame.contentWindow) return;
+            try { frame.contentWindow.postMessage(payload, window.location.origin); } catch (e) { /* clone failed */ }
+        };
+        if (frame.dataset.ready === '1') send();
+        else frame.addEventListener('load', () => { frame.dataset.ready = '1'; send(); }, { once: true });
     }
 
     function renderPreview() {
-        if (currentQuestionIndex < 0 || currentQuestionIndex >= testData.questions.length) {
-            renderPreviewEmpty();
-            return;
-        }
-
-        const q = testData.questions[currentQuestionIndex];
-        let mediaHtml = '';
-        if (q.media && q.media.data) {
-            if (q.media.type === 'image') {
-                mediaHtml = `<div class="preview-media"><img src="${q.media.data}" alt="Question media" /></div>`;
-            } else if (q.media.type === 'audio') {
-                mediaHtml = `<div class="preview-media"><audio controls src="${q.media.data}"></audio></div>`;
-            }
-        }
-        const promptHtml = `<div class="preview-prompt">${renderRich(q.prompt, '<span style="color:#ccc;font-style:italic;">Enter a question prompt...</span>')}</div>`;
-        const typeHtml = renderTypePreview(q);
-        const mediaLayout = getMediaLayout(q);
-        const split = isChoiceType(q) && mediaHtml && (mediaLayout === 'media-left' || mediaLayout === 'media-right');
-        const bodyHtml = split
-            ? `<div class="preview-split preview-split-${mediaLayout}">
-                    <div class="preview-media-col">${mediaHtml}</div>
-                    <div class="preview-content-col">${promptHtml}${typeHtml}</div>
-               </div>`
-            : `${promptHtml}${mediaHtml}${typeHtml}`;
-        const optCount = isChoiceType(q) ? ` preview-${(q.options || []).length <= 2 ? 'opt-count-2' : (q.options || []).length === 3 ? 'opt-count-3' : (q.options || []).length === 4 ? 'opt-count-4' : 'opt-count-5-plus'}` : '';
-        const mediaClass = mediaLayout === 'default' ? 'preview-media-default' : mediaLayout === 'media-left' ? 'preview-media-left' : 'preview-media-right';
-        dom.previewContent.innerHTML = `
-            <div class="preview-phone-frame ${mediaClass}${optCount}">
-                <div class="preview-question-number">Question ${currentQuestionIndex + 1} of ${testData.questions.length}</div>
-                ${bodyHtml}
-            </div>`;
+        syncLivePreview();
     }
 
     function renderTypePreview(q) {
@@ -2546,9 +2581,6 @@ const TestBuilder = (function () {
             const fullUrl = baseUrl + '?code=' + code;
             dom.shareUrl.value = fullUrl;
 
-            // Generate QR code on canvas
-            generateQR(dom.shareQr, fullUrl);
-
             dom.shareContentLoading.style.display = 'none';
             dom.shareContentReady.style.display = 'block';
 
@@ -2941,7 +2973,10 @@ const TestBuilder = (function () {
             onNotify: (msg, type) => showToast(msg)
         });
 
-        driveBtn.addEventListener('click', () => driveService.openModal());
+        driveBtn.addEventListener('click', () => {
+            if (dom.exportMenu) dom.exportMenu.style.display = 'none';
+            driveService.openModal();
+        });
     }
 
     let driveSyncTimer = null; // Renamed from syncTimeout to avoid conflict and be more descriptive
