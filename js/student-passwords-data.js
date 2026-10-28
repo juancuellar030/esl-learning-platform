@@ -312,6 +312,12 @@ function stableStudentNumber(name, group) {
     return String((hash % 90) + 10).padStart(2, '0');
 }
 
+// Printed cards stay valid when a roster string is corrected.
+// Gutierrez is still Samuel; adding DAVID would otherwise change 63 to 95.
+const FROZEN_PASSWORD_NUMBERS = {
+    "GUTIERREZ HUELGO SAMUEL DAVID": "63",
+};
+
 function specialForStudent(name, group) {
     const slot = Object.prototype.hasOwnProperty.call(PASSWORD_SLOTS, name)
         ? PASSWORD_SLOTS[name]
@@ -324,7 +330,10 @@ function buildStudentPasswords(groups) {
     Object.keys(groups || {}).forEach(group => {
         (groups[group] || []).forEach(name => {
             const firstName = getStudentFirstName(name);
-            passwords[name] = `${firstName}${specialForStudent(name, group)}${stableStudentNumber(name, group)}`;
+            const number = Object.prototype.hasOwnProperty.call(FROZEN_PASSWORD_NUMBERS, name)
+                ? FROZEN_PASSWORD_NUMBERS[name]
+                : stableStudentNumber(name, group);
+            passwords[name] = `${firstName}${specialForStudent(name, group)}${number}`;
         });
     });
     return passwords;
