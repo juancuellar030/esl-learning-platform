@@ -34,7 +34,7 @@ const STUDENTS_DATA = [
     { name: 'PABLO A.', birthdate: '09-29', gender: 'boy' },  // ALEGRÍA PLAZAS PABLO JOSÉ
     { name: 'PAULA V.', birthdate: '03-13', gender: 'girl' },  // VICTORIA HERNANDEZ PAULA ANDREA
     { name: 'SAMANTHA C', birthdate: '03-27', gender: 'girl' },  // CÉSPEDEZ CORTES SAMANTHA
-    { name: 'SAMUEL G.', birthdate: '08-09', gender: 'boy' },  // GUTIERREZ HUELGO SAMUEL
+    { name: 'SAMUEL DAVID G.', birthdate: '08-09', gender: 'boy' },  // GUTIERREZ HUELGO SAMUEL DAVID
     { name: 'SANTIAGO O.', birthdate: '02-11', gender: 'boy' },  // OTALORA BARBOSA SANTIAGO ANDRÉS
     { name: 'SARA LUCÍA V.', birthdate: '04-19', gender: 'girl' },  // VANEGAS TORRES SARA LUCÍA
     { name: 'TOMÁS C.', birthdate: '04-11', gender: 'boy' },  // CERQUERA MONTEALEGRE TOMÁS
