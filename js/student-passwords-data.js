@@ -101,7 +101,7 @@ const PASSWORD_SLOTS = {
     "DURAN SANCHEZ SALOMÉ": 10,
     "FONSECA PEÑA LUCIANA": 11,
     "GONZALEZ CORAL NICOLAS": 12,
-    "GURTIERREZ REYES MANUELA": 13,
+    "GUTIÉRREZ REYES MANUELA": 13,
     "JOAQUI CARDOZO WILLIAM SANTIAGO": 14,
     "LEÓN NIÑO SARA MARIA": 15,
     "LEYVA GONZALEZ ANA LUCÍA": 16,
@@ -314,8 +314,10 @@ function stableStudentNumber(name, group) {
 
 // Printed cards stay valid when a roster string is corrected.
 // Gutierrez is still Samuel; adding DAVID would otherwise change 63 to 95.
+// Reyes is still Manuela; GUTIÉRREZ would otherwise change 13 to 73.
 const FROZEN_PASSWORD_NUMBERS = {
     "GUTIERREZ HUELGO SAMUEL DAVID": "63",
+    "GUTIÉRREZ REYES MANUELA": "13",
 };
 
 function specialForStudent(name, group) {

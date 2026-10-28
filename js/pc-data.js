@@ -96,7 +96,7 @@ const PC_ASSIGNMENTS = {
       { name: "DURAN SANCHEZ SALOMÉ", pc: 6 },
       { name: "FONSECA PEÑA LUCIANA", pc: 25 },
       { name: "GONZALEZ CORAL NICOLAS", pc: 19 },
-      { name: "GURTIERREZ REYES MANUELA", pc: 5 },
+      { name: "GUTIÉRREZ REYES MANUELA", pc: 5 },
       { name: "JOAQUI CARDOZO WILLIAM SANTIAGO", pc: 12 },
       { name: "LEÓN NIÑO SARA MARIA", pc: 13 },
       { name: "LEYVA GONZALEZ ANA LUCÍA", pc: 8 },
