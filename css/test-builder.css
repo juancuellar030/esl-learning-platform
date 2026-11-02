@@ -2977,6 +2977,42 @@ body.dark-mode .resp-code-select option {
     color: #888;
 }
 
+.resp-export-scope {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+    margin: 2px 6px 0;
+    padding: 4px;
+    background: #f3f4f8;
+    border-radius: 9px;
+}
+
+.resp-export-scope-btn {
+    border: none;
+    border-radius: 7px;
+    padding: 7px 8px;
+    background: transparent;
+    color: #555;
+    font-family: inherit;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.resp-export-scope-btn.active {
+    background: #fff;
+    color: var(--indigo-velvet);
+    box-shadow: 0 1px 3px rgba(20, 18, 50, 0.12);
+}
+
+.resp-export-scope-note {
+    margin: 6px 12px 4px;
+    font-size: 0.72rem;
+    font-weight: 500;
+    line-height: 1.35;
+    color: #777;
+}
+
 .resp-export-item {
     display: flex;
     align-items: flex-start;
@@ -3044,6 +3080,23 @@ body.dark-mode .resp-export-menu {
 }
 
 body.dark-mode .resp-export-heading {
+    color: #999;
+}
+
+body.dark-mode .resp-export-scope {
+    background: #2a2a2a;
+}
+
+body.dark-mode .resp-export-scope-btn {
+    color: #ccc;
+}
+
+body.dark-mode .resp-export-scope-btn.active {
+    background: #3a3a3a;
+    color: #d7d2ff;
+}
+
+body.dark-mode .resp-export-scope-note {
     color: #999;
 }
 

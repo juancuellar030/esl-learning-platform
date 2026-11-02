@@ -3025,6 +3025,7 @@ const TestBuilder = (function () {
     let responsesPollInterval = null;
     let responsesCode = null;    // the active share code being monitored
     let activeGroupTab = 'all';
+    let csvRosterScope = 'group';
 
     function initResponsesDom() {
         dom.btnResponses = document.getElementById('btn-responses');
@@ -3655,8 +3656,12 @@ const TestBuilder = (function () {
         const list = Array.isArray(rawResponses) ? [...rawResponses].filter(Boolean) : [];
         const allRoster = [];
 
-        if (includePending && testData.settings && testData.settings.groupOptions) {
-            testData.settings.groupOptions.forEach(groupCode => {
+        const groupOptions = Array.isArray(options.groupOptions)
+            ? options.groupOptions
+            : ((testData.settings && testData.settings.groupOptions) || []);
+
+        if (includePending) {
+            groupOptions.forEach(groupCode => {
                 const students = STUDENT_DATA[groupCode] || [];
                 students.forEach(name => {
                     allRoster.push({
@@ -3786,10 +3791,20 @@ const TestBuilder = (function () {
             });
         }
 
+        const scopeNote = csvRosterScope === 'responded'
+            ? 'Leaves out students who did not submit.'
+            : 'Includes every student on the group roster, even with no submission.';
+
         dom.respExportMenu.innerHTML = `
+            <div class="resp-export-heading">Who to include</div>
+            <div class="resp-export-scope" role="radiogroup" aria-label="Who to include">
+                <button type="button" class="resp-export-scope-btn ${csvRosterScope === 'responded' ? 'active' : ''}" data-set-roster-scope="responded" role="radio" aria-checked="${csvRosterScope === 'responded'}">Who responded</button>
+                <button type="button" class="resp-export-scope-btn ${csvRosterScope === 'group' ? 'active' : ''}" data-set-roster-scope="group" role="radio" aria-checked="${csvRosterScope === 'group'}">Whole group</button>
+            </div>
+            <p class="resp-export-scope-note">${esc(scopeNote)}</p>
             <div class="resp-export-heading">Download scores</div>
             ${items.map(item => `
-                <button type="button" class="resp-export-item" data-exam-scope="${esc(item.examScope)}" data-group="${esc(item.group)}">
+                <button type="button" class="resp-export-item" data-exam-scope="${esc(item.examScope)}" data-group="${esc(item.group)}" data-roster-scope="${esc(csvRosterScope)}">
                     <i class="fa-solid ${item.icon}"></i>
                     <span class="resp-export-item-copy">
                         <span>${esc(item.label)}</span>
@@ -3799,13 +3814,24 @@ const TestBuilder = (function () {
             `).join('')}
         `;
 
+        dom.respExportMenu.querySelectorAll('[data-set-roster-scope]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const next = btn.getAttribute('data-set-roster-scope');
+                if (next !== 'responded' && next !== 'group') return;
+                if (next === csvRosterScope) return;
+                csvRosterScope = next;
+                _renderRespExportMenu();
+            });
+        });
+
         dom.respExportMenu.querySelectorAll('.resp-export-item').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 const examScope = btn.getAttribute('data-exam-scope');
                 const group = btn.getAttribute('data-group');
                 _closeRespExportMenu();
-                exportCsv({ examScope, group });
+                exportCsv({ examScope, group, rosterScope: csvRosterScope });
             });
         });
     }
@@ -3817,23 +3843,32 @@ const TestBuilder = (function () {
                 code: '',
                 title: 'Imported responses',
                 questions: testData.questions || [],
-                responses: Object.values(responsesData || {}).filter(Boolean)
+                responses: Object.values(responsesData || {}).filter(Boolean),
+                groupOptions: (testData.settings && testData.settings.groupOptions) || []
             };
         }
-        if (code === responsesCode) {
+        const openTestGroups = (testData.settings && testData.settings.groupOptions) || [];
+        if (code === responsesCode && testData && code === testData.shareCode) {
             return {
                 code,
                 title,
-                questions: (testData && code === testData.shareCode) ? (testData.questions || []) : [],
-                responses: Object.values(responsesData || {}).filter(Boolean)
+                questions: testData.questions || [],
+                responses: Object.values(responsesData || {}).filter(Boolean),
+                groupOptions: openTestGroups
             };
         }
         const test = await FirebaseService.getPublishedTest(code);
+        const useLiveResponses = code === responsesCode;
         return {
             code,
             title: (test && test.title) || title,
             questions: (test && test.questions) || [],
-            responses: (test && test.responses) ? Object.values(test.responses).filter(Boolean) : []
+            responses: useLiveResponses
+                ? Object.values(responsesData || {}).filter(Boolean)
+                : ((test && test.responses) ? Object.values(test.responses).filter(Boolean) : []),
+            groupOptions: (test && test.settings && Array.isArray(test.settings.groupOptions))
+                ? test.settings.groupOptions
+                : (useLiveResponses ? openTestGroups : [])
         };
     }
 
@@ -3855,32 +3890,37 @@ const TestBuilder = (function () {
                 return await _getExamPayload(code);
             } catch (err) {
                 console.error('Failed to load responses for', code, err);
-                return { code, title: _titleForCode(code), questions: [], responses: [], error: true };
+                return { code, title: _titleForCode(code), questions: [], responses: [], groupOptions: [], error: true };
             }
         }));
     }
 
-    async function exportCsv({ examScope = 'current', group = activeGroupTab } = {}) {
+    async function exportCsv({ examScope = 'current', group = activeGroupTab, rosterScope = csvRosterScope } = {}) {
         if (dom.btnExportCsv) dom.btnExportCsv.disabled = true;
         try {
+            const wantFullGroup = rosterScope !== 'responded';
             if (examScope === 'all') showToast('Collecting responses from all exams...');
             const payloads = await _fetchExamPayloads(examScope);
             const includeExamColumns = examScope === 'all';
             const roster = [];
+            let shortcutPayloads = 0;
 
             payloads.forEach(payload => {
                 const viewingShortcut = _isShortcutExamCode(payload.code)
                     || payload.responses.some(r => Array.isArray(r.shortcutResults));
-                const includePending = examScope === 'current' && !viewingShortcut;
+                if (viewingShortcut) shortcutPayloads += 1;
+                const includePending = wantFullGroup && !viewingShortcut;
                 roster.push(..._buildRosterForExport(payload.responses, group, {
                     includePending,
+                    groupOptions: payload.groupOptions,
                     examTitle: payload.title,
                     examCode: payload.code
                 }));
             });
 
+            const shortcutOnly = shortcutPayloads > 0 && shortcutPayloads === payloads.length;
             if (!roster.length) {
-                showToast('No responses to export');
+                showToast(wantFullGroup && !shortcutOnly ? 'No students to export' : 'No responses to export');
                 return;
             }
 
@@ -3890,8 +3930,11 @@ const TestBuilder = (function () {
             const examSuffix = includeExamColumns
                 ? 'AllExams'
                 : _safeFilenamePart((payloads[0] && payloads[0].title) || testData.title || 'test', 'test');
-            _downloadCsv(csvContent, `${examSuffix}_Responses_${groupSuffix}.csv`);
-            showToast('CSV exported!');
+            const rosterSuffix = wantFullGroup && !shortcutOnly ? 'AllStudents' : 'Responded';
+            _downloadCsv(csvContent, `${examSuffix}_Responses_${groupSuffix}_${rosterSuffix}.csv`);
+            showToast(wantFullGroup && shortcutOnly
+                ? 'Shortcut exams have no class list, so this file includes only students who responded.'
+                : 'CSV exported!');
         } catch (err) {
             console.error('CSV export failed:', err);
             showToast('Error exporting CSV');
