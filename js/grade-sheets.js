@@ -1959,6 +1959,58 @@
   // ══════════════════════════════════════════════════════
   //              PHASE 8: IMPORT DATA
   // ══════════════════════════════════════════════════════
+  const IMPORT_ALL_ACTIVITIES = "__all__";
+
+  function newImportedActivityId() {
+    return (
+      "act_" +
+      Date.now().toString(36) +
+      "_" +
+      Math.random().toString(36).slice(2, 8)
+    );
+  }
+
+  function copyActivityIntoSheet(
+    srcSheet,
+    currSheet,
+    srcAct,
+    category,
+    importMode,
+  ) {
+    const newActId = newImportedActivityId();
+    const newAct = {
+      id: newActId,
+      label: srcAct.label,
+      scaleId: srcAct.scaleId || null,
+      maxScore: srcAct.maxScore || null,
+      hidden: false,
+    };
+
+    if (!currSheet.categories) currSheet.categories = {};
+    if (!currSheet.categories[category]) currSheet.categories[category] = [];
+    currSheet.categories[category].push(newAct);
+
+    let importedCount = 0;
+    if (importMode === "full_column") {
+      const srcGrades = srcSheet.grades || {};
+      if (!currSheet.grades) currSheet.grades = {};
+      const currStudents = getStudentNames(currSheet.group);
+      currStudents.forEach((student) => {
+        if (
+          srcGrades[student] &&
+          srcGrades[student][srcAct.id] !== undefined &&
+          srcGrades[student][srcAct.id] !== null &&
+          srcGrades[student][srcAct.id] !== ""
+        ) {
+          if (!currSheet.grades[student]) currSheet.grades[student] = {};
+          currSheet.grades[student][newActId] = srcGrades[student][srcAct.id];
+          importedCount++;
+        }
+      });
+    }
+    return importedCount;
+  }
+
   function openImportModal() {
     if (!currentSheetId) return;
     $importSourceSelect.innerHTML =
@@ -2012,6 +2064,13 @@
 
     $importActivitySelect.innerHTML =
       '<option value="">-- Choose activity --</option>';
+    const allOpt = document.createElement("option");
+    allOpt.value = IMPORT_ALL_ACTIVITIES;
+    allOpt.textContent =
+      "All activities (" +
+      activities.length +
+      ")";
+    $importActivitySelect.appendChild(allOpt);
     activities.forEach((act) => {
       const opt = document.createElement("option");
       opt.value = act.id;
@@ -2037,68 +2096,58 @@
     const currSheet = getSheet();
     if (!srcSheet || !currSheet) return;
 
-    const opt =
-      $importActivitySelect.options[$importActivitySelect.selectedIndex];
-    const category = opt.dataset.cat;
-
-    // Find activity object in source
-    let srcAct = null;
-    if (srcSheet.categories && srcSheet.categories[category]) {
-      srcAct = srcSheet.categories[category].find((a) => a.id === srcActId);
-    }
-    if (!srcAct) return;
-
     let importMode = "desc_only";
     $importModeRadios.forEach((r) => {
       if (r.checked) importMode = r.value;
     });
 
-    // Import description & settings
-    const newActId =
-      "act_" +
-      Date.now().toString(36) +
-      "_" +
-      Math.random().toString(36).slice(2, 6);
-    const newAct = {
-      id: newActId,
-      label: srcAct.label,
-      scaleId: srcAct.scaleId || null,
-      maxScore: srcAct.maxScore || null,
-      hidden: false,
-    };
-
-    if (!currSheet.categories) currSheet.categories = {};
-    if (!currSheet.categories[category]) currSheet.categories[category] = [];
-    currSheet.categories[category].push(newAct);
-
-    // Import grades if requested
-    let importedCount = 0;
-    if (importMode === "full_column") {
-      const srcGrades = srcSheet.grades || {};
-      if (!currSheet.grades) currSheet.grades = {};
-
-      const currStudents = getStudentNames(currSheet.group);
-      currStudents.forEach((student) => {
-        if (
-          srcGrades[student] &&
-          srcGrades[student][srcActId] !== undefined &&
-          srcGrades[student][srcActId] !== null &&
-          srcGrades[student][srcActId] !== ""
-        ) {
-          if (!currSheet.grades[student]) currSheet.grades[student] = {};
-          currSheet.grades[student][newActId] = srcGrades[student][srcActId];
-          importedCount++;
-        }
-      });
+    let activitiesToImport;
+    if (srcActId === IMPORT_ALL_ACTIVITIES) {
+      activitiesToImport = getAllActivities(srcSheet);
+      if (!activitiesToImport.length) return;
+    } else {
+      const opt =
+        $importActivitySelect.options[$importActivitySelect.selectedIndex];
+      const category = opt.dataset.cat;
+      let srcAct = null;
+      if (srcSheet.categories && srcSheet.categories[category]) {
+        srcAct = srcSheet.categories[category].find((a) => a.id === srcActId);
+      }
+      if (!srcAct) return;
+      activitiesToImport = [{ ...srcAct, category }];
     }
 
+    let importedCount = 0;
+    activitiesToImport.forEach((srcAct) => {
+      importedCount += copyActivityIntoSheet(
+        srcSheet,
+        currSheet,
+        srcAct,
+        srcAct.category,
+        importMode,
+      );
+    });
+
+    const actCount = activitiesToImport.length;
     currSheet.updatedAt = Date.now();
     saveToStorage();
     closeImportModal();
     renderGrid();
     renderDescriptions();
 
-    if (importMode === "full_column") {
+    if (actCount > 1) {
+      if (importMode === "full_column") {
+        showToast(
+          `Imported ${actCount} activities and copied grades for ${importedCount} matching student cell${importedCount === 1 ? "" : "s"}.`,
+          "success",
+        );
+      } else {
+        showToast(
+          `Imported ${actCount} activities (descriptions & scale settings).`,
+          "success",
+        );
+      }
+    } else if (importMode === "full_column") {
       showToast(
         `Activity imported! Copied grades for ${importedCount} identical students.`,
         "success",
