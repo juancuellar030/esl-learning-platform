@@ -353,15 +353,28 @@
     return score;
   }
 
+  // Passing range is split into thirds of (max − pass):
+  // yellow near the minimum, lime through the middle, green near the top,
+  // and a separate color when the grade is the scale maximum.
+  function gradeBand(grade, napr, nmax) {
+    const g = Math.round(parseFloat(grade) * 10) / 10;
+    if (isNaN(g)) return "";
+    const pass = parseFloat(napr);
+    const max = parseFloat(nmax);
+    if (isNaN(pass) || isNaN(max)) return "";
+    if (g < pass) return "gs-fail";
+    if (g >= max) return "gs-max";
+    const span = max - pass;
+    if (!(span > 0)) return "gs-pass";
+    const third = span / 3;
+    if (g < pass + third) return "gs-border";
+    if (g < pass + third * 2) return "gs-mid";
+    return "gs-pass";
+  }
+
   function gradeColorFromGrade(grade, sheet) {
     if (grade == null || grade === "") return "";
-    const g = parseFloat(grade);
-    if (isNaN(g)) return "";
-    const pass = sheet.napr;
-    const margin = (sheet.nmax - sheet.nmin) * 0.05;
-    if (g < pass) return "gs-fail";
-    if (g < pass + margin) return "gs-border";
-    return "gs-pass";
+    return gradeBand(grade, sheet.napr, sheet.nmax);
   }
 
   function getSavedScales() {
@@ -402,11 +415,7 @@
       sc.nmax,
       sc.napr,
     );
-    // Margin based on activity's scale
-    const margin = (sc.nmax - sc.nmin) * 0.05;
-    if (grade < sc.napr) return "gs-fail";
-    if (grade < sc.napr + margin) return "gs-border";
-    return "gs-pass";
+    return gradeBand(grade, sc.napr, sc.nmax);
   }
 
   // ── Phase 6: Weighted Average Calculation (From Grades) ────────────

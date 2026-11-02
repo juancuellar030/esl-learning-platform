@@ -1380,6 +1380,16 @@ body {
     background: #fff8d6 !important;
 }
 
+.gs-grade-cell.gs-mid,
+.gs-avg-cell.gs-mid {
+    background: #e8f6c4 !important;
+}
+
+.gs-grade-cell.gs-max,
+.gs-avg-cell.gs-max {
+    background: #d9ecff !important;
+}
+
 .gs-grade-cell.gs-pass .gs-grade-input,
 .gs-grade-cell.gs-pass .gs-grade-display,
 .gs-avg-cell.gs-pass {
@@ -1396,6 +1406,18 @@ body {
 .gs-grade-cell.gs-border .gs-grade-display,
 .gs-avg-cell.gs-border {
     color: #e1b12c !important;
+}
+
+.gs-grade-cell.gs-mid .gs-grade-input,
+.gs-grade-cell.gs-mid .gs-grade-display,
+.gs-avg-cell.gs-mid {
+    color: #6d8c16 !important;
+}
+
+.gs-grade-cell.gs-max .gs-grade-input,
+.gs-grade-cell.gs-max .gs-grade-display,
+.gs-avg-cell.gs-max {
+    color: #1565c0 !important;
 }
 
 /* Cell pulse animation on input */
@@ -1455,6 +1477,16 @@ body {
 .gs-avg-cell.gs-border {
     background: #fff8d6;
     color: #c27b1a;
+}
+
+.gs-avg-cell.gs-mid {
+    background: #e8f6c4;
+    color: #6d8c16;
+}
+
+.gs-avg-cell.gs-max {
+    background: #d9ecff;
+    color: #1565c0;
 }
 
 /* Fail-risk badge */
@@ -2055,19 +2087,24 @@ body.dark-mode .gs-grade-table tbody tr:focus-within .gs-col-name-cell {
     color: #b0a8f0;
 }
 
-body.dark-mode .gs-grade-table tbody tr.gs-row-active td,
-body.dark-mode .gs-grade-table tbody tr:focus-within td {
-    box-shadow: inset 0 2px 0 #9b8cff, inset 0 -2px 0 #9b8cff;
+body.dark-mode .gs-grade-table tbody tr.gs-row-highlight > td,
+body.dark-mode .gs-grade-table tbody tr.gs-row-active > td,
+body.dark-mode .gs-grade-table tbody tr:focus-within > td {
+    border-top: 2px solid #b0a4ff !important;
+    border-bottom: 2px solid #b0a4ff !important;
+    box-shadow: none !important;
 }
 
-body.dark-mode .gs-grade-table tbody tr.gs-row-active .gs-grade-cell,
-body.dark-mode .gs-grade-table tbody tr.gs-row-active .gs-avg-cell,
-body.dark-mode .gs-grade-table tbody tr:focus-within .gs-grade-cell,
-body.dark-mode .gs-grade-table tbody tr:focus-within .gs-avg-cell {
-    background-image: linear-gradient(
-        rgba(155, 140, 255, 0.18),
-        rgba(155, 140, 255, 0.18)
-    );
+body.dark-mode .gs-grade-table tbody tr.gs-row-highlight .gs-grade-input,
+body.dark-mode .gs-grade-table tbody tr.gs-row-active .gs-grade-input,
+body.dark-mode .gs-grade-table tbody tr:focus-within .gs-grade-input {
+    box-shadow: none !important;
+}
+
+body.dark-mode .gs-grade-table tbody tr.gs-row-highlight > td.gs-avg-cell:not(.gs-pass):not(.gs-fail):not(.gs-border):not(.gs-mid):not(.gs-max),
+body.dark-mode .gs-grade-table tbody tr.gs-row-active > td.gs-avg-cell:not(.gs-pass):not(.gs-fail):not(.gs-border):not(.gs-mid):not(.gs-max),
+body.dark-mode .gs-grade-table tbody tr:focus-within > td.gs-avg-cell:not(.gs-pass):not(.gs-fail):not(.gs-border):not(.gs-mid):not(.gs-max) {
+    background: #2e2a50 !important;
 }
 
 body.dark-mode .gs-grade-cell {
@@ -2075,11 +2112,14 @@ body.dark-mode .gs-grade-cell {
 }
 
 body.dark-mode .gs-grade-input {
+    background-color: transparent !important;
+    border-color: transparent !important;
     color: #e0e0e0;
 }
 
 body.dark-mode .gs-grade-input:focus {
-    background: rgba(162, 155, 254, 0.06);
+    background-color: rgba(176, 164, 255, 0.22) !important;
+    border-color: transparent !important;
 }
 
 body.dark-mode .gs-grade-cell.gs-pass,
@@ -2100,6 +2140,18 @@ body.dark-mode .gs-avg-cell.gs-border {
     box-shadow: inset 0 0 0 1px rgba(255, 202, 87, 0.5);
 }
 
+body.dark-mode .gs-grade-cell.gs-mid,
+body.dark-mode .gs-avg-cell.gs-mid {
+    background: rgba(168, 196, 50, 0.28) !important;
+    box-shadow: inset 0 0 0 1px rgba(198, 220, 80, 0.55);
+}
+
+body.dark-mode .gs-grade-cell.gs-max,
+body.dark-mode .gs-avg-cell.gs-max {
+    background: rgba(66, 165, 245, 0.3) !important;
+    box-shadow: inset 0 0 0 1px rgba(100, 181, 246, 0.6);
+}
+
 body.dark-mode .gs-grade-cell.gs-pass .gs-grade-input,
 body.dark-mode .gs-grade-cell.gs-pass .gs-grade-display,
 body.dark-mode .gs-avg-cell.gs-pass {
@@ -2116,6 +2168,18 @@ body.dark-mode .gs-grade-cell.gs-border .gs-grade-input,
 body.dark-mode .gs-grade-cell.gs-border .gs-grade-display,
 body.dark-mode .gs-avg-cell.gs-border {
     color: #ffd166 !important;
+}
+
+body.dark-mode .gs-grade-cell.gs-mid .gs-grade-input,
+body.dark-mode .gs-grade-cell.gs-mid .gs-grade-display,
+body.dark-mode .gs-avg-cell.gs-mid {
+    color: #d4ec7a !important;
+}
+
+body.dark-mode .gs-grade-cell.gs-max .gs-grade-input,
+body.dark-mode .gs-grade-cell.gs-max .gs-grade-display,
+body.dark-mode .gs-avg-cell.gs-max {
+    color: #90caf9 !important;
 }
 
 body.dark-mode .gs-descriptions-panel {
