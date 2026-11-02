@@ -1143,6 +1143,11 @@ body {
     transform: scale(1.15);
 }
 
+.gs-act-th.gs-col-selected {
+    box-shadow: inset 0 0 0 2px #6c5ce7;
+    background: #efeaff;
+}
+
 /* Column overflow menu (copy / hide / clear) */
 .gs-act-th .gs-col-menu-btn {
     position: absolute;
@@ -2223,6 +2228,11 @@ body.dark-mode .gs-act-th:hover .gs-col-max {
 body.dark-mode .gs-act-th .gs-col-max.gs-has-custom-scale,
 body.dark-mode .gs-act-th:hover .gs-col-max.gs-has-custom-scale {
     color: #a29bfe;
+}
+
+body.dark-mode .gs-act-th.gs-col-selected {
+    box-shadow: inset 0 0 0 2px #b0a4ff;
+    background: #3a3368;
 }
 
 body.dark-mode .gs-act-th .gs-col-menu-btn:hover,

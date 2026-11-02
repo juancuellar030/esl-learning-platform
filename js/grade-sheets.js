@@ -160,6 +160,8 @@
   let pendingCsvImport = null;
   let pendingExportType = null; // 'current' or 'selected'
   let pendingGradeFocus = null;
+  let selectedCopyColIds = [];
+  let copyColAnchorId = null;
   let dashboardFilters = {
     search: "",
     subject: "",
@@ -976,7 +978,7 @@
             .replace(/"/g, "&quot;");
           th.innerHTML = `
                     <i class="fa-solid fa-grip-vertical gs-drag-handle"></i>
-                    <span class="gs-col-num">${colNum}</span>
+                    <span class="gs-col-num" title="Click to select this column. Shift-click selects a range. Ctrl-click adds or removes one. Then use Copy for Excel.">${colNum}</span>
                     <div class="gs-col-max gs-act-settings-trigger${hasCustomScale ? " gs-has-custom-scale" : ""}" data-id="${act.id}" title="${scaleTitle}">${scaleLabel} <i class="fa-solid fa-gear gs-act-settings-icon"></i></div>
                     <button class="gs-col-delete" data-id="${act.id}" title="Remove column"><i class="fa-solid fa-xmark"></i></button>
                     <button type="button" class="gs-col-menu-btn" data-id="${act.id}" title="Column actions" aria-haspopup="true" aria-expanded="false"><i class="fa-solid fa-ellipsis-vertical"></i></button>`;
@@ -984,6 +986,20 @@
             "click",
             (e) => openActivitySettings(e, act.id),
           );
+          th.addEventListener("click", (e) => {
+            if (
+              e.target.closest(
+                "button, .gs-act-settings-trigger, .gs-drag-handle",
+              )
+            )
+              return;
+            const mode = e.shiftKey
+              ? "range"
+              : e.ctrlKey || e.metaKey
+                ? "toggle"
+                : "single";
+            selectCopyColumns(act.id, mode);
+          });
           th.addEventListener("dragstart", onDragStart);
           th.addEventListener("dragover", onDragOver);
           th.addEventListener("dragleave", onDragLeave);
@@ -1106,6 +1122,7 @@
       });
     });
     restorePendingGradeFocus();
+    syncCopyColumnStyles();
   }
 
   function renderHiddenColsBar(hiddenActs) {
@@ -1145,7 +1162,7 @@
     });
 
     let valStr = input.value.trim().replace(",", ".");
-    if (valStr === "") {
+    if (valStr === "" || isExcelEmptyMark(valStr)) {
       if (!sheet.grades[name]) sheet.grades[name] = {};
       delete sheet.grades[name][actId];
     } else {
@@ -1222,7 +1239,7 @@
       valStr = valStr.replace(",", ".");
 
       if (!sheet.grades[name]) sheet.grades[name] = {};
-      if (valStr === "") {
+      if (valStr === "" || isExcelEmptyMark(valStr)) {
         delete sheet.grades[name][actId];
         count++;
         return;
@@ -1497,6 +1514,14 @@
     if (alreadyOpen) return;
 
     menu.dataset.actId = actId;
+    const copyBtn = menu.querySelector('[data-action="copy"]');
+    const copyIds = columnsToCopy(actId);
+    if (copyBtn) {
+      copyBtn.innerHTML =
+        copyIds.length > 1
+          ? `<i class="fa-solid fa-copy"></i> Copy ${copyIds.length} columns for Excel`
+          : `<i class="fa-solid fa-copy"></i> Copy for Excel`;
+    }
     menu.hidden = false;
     btn.setAttribute("aria-expanded", "true");
     btn.closest(".gs-act-th")?.classList.add("gs-col-menu-open");
@@ -1522,6 +1547,73 @@
       .map((inp) => String(inp.value ?? "").trim());
   }
 
+  function isExcelEmptyMark(valStr) {
+    const n = parseFloat(String(valStr).trim().replace(",", "."));
+    return n === -1;
+  }
+
+  function visibleActivityIds() {
+    const sheet = getSheet();
+    if (!sheet) return [];
+    return getAllActivities(sheet)
+      .filter((a) => !a.hidden)
+      .map((a) => a.id);
+  }
+
+  function orderedSelectedIds() {
+    const visible = visibleActivityIds();
+    selectedCopyColIds = selectedCopyColIds.filter((id) => visible.includes(id));
+    if (copyColAnchorId && !visible.includes(copyColAnchorId)) copyColAnchorId = null;
+    return visible.filter((id) => selectedCopyColIds.includes(id));
+  }
+
+  function syncCopyColumnStyles() {
+    if (!$thead) return;
+    const selected = new Set(orderedSelectedIds());
+    $thead.querySelectorAll(".gs-act-th").forEach((th) => {
+      th.classList.toggle("gs-col-selected", selected.has(th.dataset.id));
+    });
+  }
+
+  function selectCopyColumns(actId, mode) {
+    const ids = visibleActivityIds();
+    if (!ids.includes(actId)) return;
+    if (mode === "toggle") {
+      if (selectedCopyColIds.includes(actId)) {
+        selectedCopyColIds = selectedCopyColIds.filter((id) => id !== actId);
+      } else {
+        selectedCopyColIds.push(actId);
+        copyColAnchorId = actId;
+      }
+    } else if (mode === "range" && copyColAnchorId && ids.includes(copyColAnchorId)) {
+      const a = ids.indexOf(copyColAnchorId);
+      const b = ids.indexOf(actId);
+      const lo = Math.min(a, b);
+      const hi = Math.max(a, b);
+      selectedCopyColIds = ids.slice(lo, hi + 1);
+    } else {
+      selectedCopyColIds = [actId];
+      copyColAnchorId = actId;
+    }
+    syncCopyColumnStyles();
+  }
+
+  function columnsToCopy(actId) {
+    const ordered = orderedSelectedIds();
+    if (ordered.length > 1 && ordered.includes(actId)) return ordered;
+    return actId ? [actId] : ordered;
+  }
+
+  function buildExcelTsv(actIds) {
+    const columns = actIds.map((id) => getColumnDisplayValues(id));
+    const rowCount = columns.reduce((n, col) => Math.max(n, col.length), 0);
+    const lines = [];
+    for (let r = 0; r < rowCount; r++) {
+      lines.push(columns.map((col) => col[r] || "").join("\t"));
+    }
+    return lines.join("\r\n");
+  }
+
   async function copyTextToClipboard(text) {
     try {
       await navigator.clipboard.writeText(text);
@@ -1540,28 +1632,36 @@
     }
   }
 
-  async function copyColumnForExcel(actId) {
-    const values = getColumnDisplayValues(actId);
-    if (!values.length) {
-      showToast("No grades to copy in this column.", "error");
+  async function copyColumnsForExcel(actIds) {
+    const ids = (actIds || []).filter(Boolean);
+    if (!ids.length) {
+      showToast("No columns to copy.", "error");
       return;
     }
-    const text = values.join("\r\n");
+    const text = buildExcelTsv(ids);
+    if (!text) {
+      showToast("No grades to copy in these columns.", "error");
+      return;
+    }
     const ok = await copyTextToClipboard(text);
     if (ok) {
+      const n = ids.length;
       showToast(
-        `Copied ${values.length} value${values.length === 1 ? "" : "s"} for Excel.`,
+        n === 1
+          ? `Copied ${text.split(/\r\n/).length} value${text.split(/\r\n/).length === 1 ? "" : "s"} for Excel.`
+          : `Copied ${n} columns for Excel.`,
         "success",
       );
     } else {
-      showToast("Could not copy this column. Check clipboard permissions.", "error");
+      showToast("Could not copy these columns. Check clipboard permissions.", "error");
     }
   }
 
   function onColumnMenuAction(action, actId) {
+    const copyIds = action === "copy" ? columnsToCopy(actId) : null;
     closeColumnMenu();
     if (!actId) return;
-    if (action === "copy") copyColumnForExcel(actId);
+    if (action === "copy") copyColumnsForExcel(copyIds);
     if (action === "hide") toggleHideActivity(actId, true);
     if (action === "clear") clearColumnGrades(actId);
   }
@@ -2468,6 +2568,10 @@
           .trim()
           .replace(",", ".");
         if (raw === "") return;
+        if (isExcelEmptyMark(raw)) {
+          delete sheet.grades[student][act.id];
+          return;
+        }
         let num = parseFloat(raw);
         if (isNaN(num)) return;
         const sc = getScaleForActivity(
@@ -2811,6 +2915,14 @@
     document.addEventListener("click", (e) => {
       if (e.target.closest(".gs-col-menu, .gs-col-menu-btn")) return;
       closeColumnMenu();
+    });
+    document.addEventListener("keydown", (e) => {
+      if (!(e.ctrlKey || e.metaKey) || e.key.toLowerCase() !== "c") return;
+      if (e.target.closest("input, textarea, [contenteditable='true']")) return;
+      const ordered = orderedSelectedIds();
+      if (ordered.length < 2) return;
+      e.preventDefault();
+      copyColumnsForExcel(ordered);
     });
     window.addEventListener("resize", closeColumnMenu);
     window.addEventListener("scroll", closeColumnMenu, true);
