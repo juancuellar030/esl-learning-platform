@@ -3228,18 +3228,20 @@ const TestBuilder = (function () {
     }
 
     function canonicalGroupCode(value) {
-        const raw = String(value || '').trim();
+        const raw = String(value || '').replace(/\u00a0/g, ' ').trim();
+        if (!raw || /^no group$/i.test(raw)) return raw ? 'No Group' : '';
         const stripped = raw.replace(/^group\s+/i, '').trim();
-        return stripped || raw;
+        return (stripped || raw).toUpperCase();
     }
 
     function studentsForGroup(groupCode) {
         const code = canonicalGroupCode(groupCode);
-        if (!code) return [];
+        if (!code || code === 'No Group') return [];
         if (Array.isArray(STUDENT_DATA[code])) return STUDENT_DATA[code];
         const prefixed = 'Group ' + code;
         if (Array.isArray(STUDENT_DATA[prefixed])) return STUDENT_DATA[prefixed];
-        return [];
+        const key = Object.keys(STUDENT_DATA).find(k => canonicalGroupCode(k) === code);
+        return key ? STUDENT_DATA[key] : [];
     }
 
     function rosterNameKey(name) {
@@ -3251,20 +3253,18 @@ const TestBuilder = (function () {
             .toUpperCase();
     }
 
-    function classGroupsForRoster(groupOptions, responses) {
-        const configured = [];
-        (groupOptions || []).forEach(g => {
-            const code = canonicalGroupCode(g);
-            if (code && studentsForGroup(code).length && !configured.includes(code)) configured.push(code);
-        });
-        if (configured.length) return configured;
-
-        const fromResponses = [];
-        (responses || []).forEach(r => {
-            const code = canonicalGroupCode(r && (r.studentGroup || r.group));
-            if (code && studentsForGroup(code).length && !fromResponses.includes(code)) fromResponses.push(code);
-        });
-        return fromResponses;
+    function classGroupsForRoster(groupOptions, responses, filterGroup) {
+        const codes = [];
+        const add = (value) => {
+            const code = canonicalGroupCode(value);
+            if (!code || code === 'No Group' || code === 'ALL') return;
+            if (!studentsForGroup(code).length || codes.includes(code)) return;
+            codes.push(code);
+        };
+        (responses || []).forEach(r => add(r && (r.studentGroup || r.group)));
+        if (filterGroup && filterGroup !== 'all') add(filterGroup);
+        (groupOptions || []).forEach(add);
+        return codes;
     }
 
     async function loadHistoricalResponses(code) {
@@ -3332,7 +3332,7 @@ const TestBuilder = (function () {
     function renderResponsesTable() {
         const rawResponses = Object.values(responsesData).filter(Boolean);
         const allRoster = _buildRosterForExport(rawResponses, 'all', {
-            includePending: !isShortcutResponseSet(responsesCode, rawResponses)
+            includePending: true
         });
 
         // Filter responses by active tab
@@ -3663,7 +3663,9 @@ const TestBuilder = (function () {
         const configuredGroups = Array.isArray(options.groupOptions)
             ? options.groupOptions
             : ((testData.settings && testData.settings.groupOptions) || []);
-        const groupOptions = includePending ? classGroupsForRoster(configuredGroups, list) : [];
+        const groupOptions = includePending
+            ? classGroupsForRoster(configuredGroups, list, filterGroup)
+            : [];
 
         if (includePending) {
             groupOptions.forEach(groupCode => {
@@ -3801,20 +3803,11 @@ const TestBuilder = (function () {
             });
         }
 
-        const scopeNote = csvRosterScope === 'responded'
-            ? 'Leaves out students who did not submit.'
-            : 'Includes every student on the group roster, even with no submission.';
-
         dom.respExportMenu.innerHTML = `
-            <div class="resp-export-heading">Who to include</div>
-            <div class="resp-export-scope" role="radiogroup" aria-label="Who to include">
-                <button type="button" class="resp-export-scope-btn ${csvRosterScope === 'responded' ? 'active' : ''}" data-set-roster-scope="responded" role="radio" aria-checked="${csvRosterScope === 'responded'}">Who responded</button>
-                <button type="button" class="resp-export-scope-btn ${csvRosterScope === 'group' ? 'active' : ''}" data-set-roster-scope="group" role="radio" aria-checked="${csvRosterScope === 'group'}">Whole group</button>
-            </div>
-            <p class="resp-export-scope-note">${esc(scopeNote)}</p>
+            <p class="resp-export-scope-note">Includes every student in each group, including students who did not submit.</p>
             <div class="resp-export-heading">Download scores</div>
             ${items.map(item => `
-                <button type="button" class="resp-export-item" data-exam-scope="${esc(item.examScope)}" data-group="${esc(item.group)}" data-roster-scope="${esc(csvRosterScope)}">
+                <button type="button" class="resp-export-item" data-exam-scope="${esc(item.examScope)}" data-group="${esc(item.group)}">
                     <i class="fa-solid ${item.icon}"></i>
                     <span class="resp-export-item-copy">
                         <span>${esc(item.label)}</span>
@@ -3824,24 +3817,13 @@ const TestBuilder = (function () {
             `).join('')}
         `;
 
-        dom.respExportMenu.querySelectorAll('[data-set-roster-scope]').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const next = btn.getAttribute('data-set-roster-scope');
-                if (next !== 'responded' && next !== 'group') return;
-                if (next === csvRosterScope) return;
-                csvRosterScope = next;
-                _renderRespExportMenu();
-            });
-        });
-
         dom.respExportMenu.querySelectorAll('.resp-export-item').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 const examScope = btn.getAttribute('data-exam-scope');
                 const group = btn.getAttribute('data-group');
                 _closeRespExportMenu();
-                exportCsv({ examScope, group, rosterScope: csvRosterScope });
+                exportCsv({ examScope, group, rosterScope: 'group' });
             });
         });
     }
@@ -3918,9 +3900,8 @@ const TestBuilder = (function () {
             payloads.forEach(payload => {
                 const viewingShortcut = isShortcutResponseSet(payload.code, payload.responses);
                 if (viewingShortcut) shortcutPayloads += 1;
-                const includePending = wantFullGroup && !viewingShortcut;
                 roster.push(..._buildRosterForExport(payload.responses, group, {
-                    includePending,
+                    includePending: true,
                     groupOptions: payload.groupOptions,
                     examTitle: payload.title,
                     examCode: payload.code
@@ -3933,15 +3914,16 @@ const TestBuilder = (function () {
                 return;
             }
 
+            const includedClassList = roster.some(r => r.isExpected);
             const questions = (!includeExamColumns && payloads[0]) ? (payloads[0].questions || []) : [];
             const csvContent = generateCsvContent(roster, { includeExamColumns, questions });
             const groupSuffix = group === 'all' ? 'AllGroups' : _safeFilenamePart(group, 'Group');
             const examSuffix = includeExamColumns
                 ? 'AllExams'
                 : _safeFilenamePart((payloads[0] && payloads[0].title) || testData.title || 'test', 'test');
-            const rosterSuffix = wantFullGroup && !shortcutOnly ? 'AllStudents' : 'Responded';
+            const rosterSuffix = includedClassList ? 'AllStudents' : 'Responded';
             _downloadCsv(csvContent, `${examSuffix}_Responses_${groupSuffix}_${rosterSuffix}.csv`);
-            showToast(wantFullGroup && shortcutOnly
+            showToast(shortcutOnly && !includedClassList
                 ? 'Shortcut exams have no class list, so this file includes only students who responded.'
                 : 'CSV exported!');
         } catch (err) {
