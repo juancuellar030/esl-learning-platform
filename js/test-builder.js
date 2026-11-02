@@ -3220,6 +3220,53 @@ const TestBuilder = (function () {
         }
     }
 
+    function isShortcutResponseSet(code, responses) {
+        const list = (responses || []).filter(Boolean);
+        if (list.length && list.every(r => Array.isArray(r.shortcutResults))) return true;
+        if (_isShortcutExamCode(code) && !list.some(r => Array.isArray(r.answers))) return true;
+        return false;
+    }
+
+    function canonicalGroupCode(value) {
+        const raw = String(value || '').trim();
+        const stripped = raw.replace(/^group\s+/i, '').trim();
+        return stripped || raw;
+    }
+
+    function studentsForGroup(groupCode) {
+        const code = canonicalGroupCode(groupCode);
+        if (!code) return [];
+        if (Array.isArray(STUDENT_DATA[code])) return STUDENT_DATA[code];
+        const prefixed = 'Group ' + code;
+        if (Array.isArray(STUDENT_DATA[prefixed])) return STUDENT_DATA[prefixed];
+        return [];
+    }
+
+    function rosterNameKey(name) {
+        return String(name || '')
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/\s+/g, ' ')
+            .trim()
+            .toUpperCase();
+    }
+
+    function classGroupsForRoster(groupOptions, responses) {
+        const configured = [];
+        (groupOptions || []).forEach(g => {
+            const code = canonicalGroupCode(g);
+            if (code && studentsForGroup(code).length && !configured.includes(code)) configured.push(code);
+        });
+        if (configured.length) return configured;
+
+        const fromResponses = [];
+        (responses || []).forEach(r => {
+            const code = canonicalGroupCode(r && (r.studentGroup || r.group));
+            if (code && studentsForGroup(code).length && !fromResponses.includes(code)) fromResponses.push(code);
+        });
+        return fromResponses;
+    }
+
     async function loadHistoricalResponses(code) {
         try {
             await FirebaseService.init();
@@ -3284,57 +3331,14 @@ const TestBuilder = (function () {
 
     function renderResponsesTable() {
         const rawResponses = Object.values(responsesData).filter(Boolean);
-        const allRoster = [];
-        const viewingShortcutExam = _isShortcutExamCode(responsesCode)
-            || rawResponses.some(r => Array.isArray(r.shortcutResults));
-
-        // Prepopulate roster from the current Test Builder settings, but not when
-        // viewing a standalone Keyboard Shortcut Exam (different session, different roster).
-        if (!viewingShortcutExam && testData.settings && testData.settings.groupOptions) {
-            testData.settings.groupOptions.forEach(groupCode => {
-                const students = STUDENT_DATA[groupCode] || [];
-                students.forEach(name => {
-                    allRoster.push({
-                        isExpected: true,
-                        studentName: name,
-                        studentGroup: groupCode,
-                        status: 'pending',
-                        responseData: null,
-                        hasRetake: false
-                    });
-                });
-            });
-        }
-
-        // Apply actual responses to roster
-        // Sort oldest to newest so the newest overwrites the responseData and marks hasRetake
-        rawResponses.sort((a, b) => (a.submittedAt || 0) - (b.submittedAt || 0)).forEach(r => {
-            const students = (r.coStudents && r.coStudents.length > 0) ? r.coStudents : [r.studentName || 'Unknown'];
-            const group = r.studentGroup || r.group || 'No Group';
-
-            students.forEach(sName => {
-                const match = allRoster.find(x => x.studentName === sName && x.studentGroup === group);
-                if (match) {
-                    if (match.status === 'submitted') match.hasRetake = true;
-                    match.status = 'submitted';
-                    match.responseData = r; // latest
-                } else {
-                    allRoster.push({
-                        isExpected: false,
-                        studentName: sName,
-                        studentGroup: group,
-                        status: 'submitted',
-                        responseData: r,
-                        hasRetake: false
-                    });
-                }
-            });
+        const allRoster = _buildRosterForExport(rawResponses, 'all', {
+            includePending: !isShortcutResponseSet(responsesCode, rawResponses)
         });
 
         // Filter responses by active tab
         let displayRoster = activeGroupTab === 'all'
             ? allRoster
-            : allRoster.filter(r => r.studentGroup === activeGroupTab);
+            : allRoster.filter(r => canonicalGroupCode(r.studentGroup) === canonicalGroupCode(activeGroupTab));
 
         // Final display sort (alphabetical by group then name)
         displayRoster.sort((a, b) => {
@@ -3656,18 +3660,19 @@ const TestBuilder = (function () {
         const list = Array.isArray(rawResponses) ? [...rawResponses].filter(Boolean) : [];
         const allRoster = [];
 
-        const groupOptions = Array.isArray(options.groupOptions)
+        const configuredGroups = Array.isArray(options.groupOptions)
             ? options.groupOptions
             : ((testData.settings && testData.settings.groupOptions) || []);
+        const groupOptions = includePending ? classGroupsForRoster(configuredGroups, list) : [];
 
         if (includePending) {
             groupOptions.forEach(groupCode => {
-                const students = STUDENT_DATA[groupCode] || [];
+                const students = studentsForGroup(groupCode);
                 students.forEach(name => {
                     allRoster.push({
                         isExpected: true,
                         studentName: name,
-                        studentGroup: groupCode,
+                        studentGroup: canonicalGroupCode(groupCode),
                         status: 'pending',
                         responseData: null,
                         hasRetake: false,
@@ -3680,9 +3685,13 @@ const TestBuilder = (function () {
 
         list.sort((a, b) => (a.submittedAt || 0) - (b.submittedAt || 0)).forEach(r => {
             const students = (r.coStudents && r.coStudents.length > 0) ? r.coStudents : [r.studentName || 'Unknown'];
-            const group = r.studentGroup || r.group || 'No Group';
+            const group = canonicalGroupCode(r.studentGroup || r.group) || 'No Group';
             students.forEach(sName => {
-                const match = allRoster.find(x => x.studentName === sName && x.studentGroup === group);
+                const nameKey = rosterNameKey(sName);
+                const match = allRoster.find(x =>
+                    canonicalGroupCode(x.studentGroup) === group &&
+                    (x.studentName === sName || rosterNameKey(x.studentName) === nameKey)
+                );
                 if (match) {
                     if (match.status === 'submitted') match.hasRetake = true;
                     match.status = 'submitted';
@@ -3704,9 +3713,10 @@ const TestBuilder = (function () {
             });
         });
 
-        const displayRoster = filterGroup === 'all'
+        const wantedGroup = filterGroup === 'all' ? 'all' : (canonicalGroupCode(filterGroup) || filterGroup);
+        const displayRoster = wantedGroup === 'all'
             ? allRoster
-            : allRoster.filter(r => r.studentGroup === filterGroup);
+            : allRoster.filter(r => (canonicalGroupCode(r.studentGroup) || r.studentGroup) === wantedGroup);
 
         displayRoster.sort((a, b) => {
             if (a.examTitle !== b.examTitle) return (a.examTitle || '').localeCompare(b.examTitle || '');
@@ -3906,8 +3916,7 @@ const TestBuilder = (function () {
             let shortcutPayloads = 0;
 
             payloads.forEach(payload => {
-                const viewingShortcut = _isShortcutExamCode(payload.code)
-                    || payload.responses.some(r => Array.isArray(r.shortcutResults));
+                const viewingShortcut = isShortcutResponseSet(payload.code, payload.responses);
                 if (viewingShortcut) shortcutPayloads += 1;
                 const includePending = wantFullGroup && !viewingShortcut;
                 roster.push(..._buildRosterForExport(payload.responses, group, {
