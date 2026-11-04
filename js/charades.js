@@ -134,12 +134,9 @@
             'weather', 'places', 'transport', 'daily-routines',
             'arts', 'shapes', 'movement', 'classroom-language'
         ];
-        const funKeys = [
-            'movies-characters', 'countries', 'food-snacks',
-            'superheroes-villains', 'sports-activities', 'cartoons',
-            'video-game-characters', 'silly-actions', 'emojis-emotions',
-            'anime-characters', 'wild-animals', 'monuments-landmarks', 'fruits'
-        ];
+        // Show every category defined in charades-data.js, in file order,
+        // so new categories appear without editing this list.
+        const funKeys = Object.keys(window.funCategories || {});
 
         for (const key of vocabKeys) {
             const cat = categories[key];
