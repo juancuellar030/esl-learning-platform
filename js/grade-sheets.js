@@ -152,6 +152,10 @@
   const $exportIncScores = $("gs-export-inc-scores");
   const $exportIncGrades = $("gs-export-inc-grades");
   const $exportDecimals = $("gs-export-decimals");
+  const $exportFormat = $("gs-export-format");
+  const $exportFormatHint = $("gs-export-format-hint");
+  const $exportExecuteLabel = $("gs-export-execute-label");
+  const EXPORT_FORMAT_KEY = "gradeSheetsExportFormat";
 
   let editingActId = null;
   let editingActCat = null;
@@ -2777,6 +2781,343 @@
     URL.revokeObjectURL(link.href);
   }
 
+  // ══════════════════════════════════════════════════════
+  //        EXCEL (.xlsx) EXPORT – school template layout
+  // ══════════════════════════════════════════════════════
+  const EXCELJS_URL =
+    "https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js";
+  const XLSX_FONT = "Century Gothic";
+  const XLSX_CAT_HEADERS = {
+    cognitiva: "COGNITIVA",
+    laboral: "LABORAL",
+    ciudadana: "C. CIUDADANA",
+  };
+  const XLSX_CAT_TITLES = {
+    cognitiva: "COMPETENCIA COGNITIVA",
+    laboral: "COMPETENCIA LABORAL",
+    ciudadana: "COMPETENCIA CIUDADANA",
+  };
+  let excelJsPromise = null;
+
+  function loadExcelJs() {
+    if (window.ExcelJS) return Promise.resolve(window.ExcelJS);
+    if (excelJsPromise) return excelJsPromise;
+    excelJsPromise = new Promise((resolve, reject) => {
+      const s = document.createElement("script");
+      s.src = EXCELJS_URL;
+      s.onload = () =>
+        window.ExcelJS
+          ? resolve(window.ExcelJS)
+          : reject(new Error("ExcelJS not available"));
+      s.onerror = () => {
+        excelJsPromise = null;
+        s.remove();
+        reject(new Error("Could not load ExcelJS"));
+      };
+      document.head.appendChild(s);
+    });
+    return excelJsPromise;
+  }
+
+  // Returns { value, numFmt } for a grade in the chosen decimals format
+  function formatGradeForXlsx(g, decimals) {
+    if (decimals === "0") return { value: Math.round(g), numFmt: "0" };
+    if (decimals === "remove")
+      return { value: Math.round(g * 10), numFmt: "0" };
+    if (decimals === "2")
+      return { value: Math.round(g * 100) / 100, numFmt: "0.00" };
+    return { value: Math.round(g * 10) / 10, numFmt: "0.0" };
+  }
+
+  function xlsxSheetName(sheet, used) {
+    let base = (sheet.group + " " + (sheet.subject || ""))
+      .replace(/[\[\]:*?/\\]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toUpperCase()
+      .slice(0, 31) || "SHEET";
+    let name = base;
+    let n = 2;
+    while (used.has(name.toLowerCase())) {
+      const suffix = " (" + n++ + ")";
+      name = base.slice(0, 31 - suffix.length) + suffix;
+    }
+    used.add(name.toLowerCase());
+    return name;
+  }
+
+  function addXlsxWorksheet(workbook, sheet, options, usedNames) {
+    const incHeaders = options.includeHeaders !== false;
+    const decimals = options.decimals !== undefined ? options.decimals : "1";
+    // One value per activity, like the school template. Raw scores are used
+    // whenever they are selected; grades only when scores are unticked.
+    const useScores = options.includeScores !== false || !options.includeGrades;
+    const showAvg = options.includeGrades !== false;
+
+    const ws = workbook.addWorksheet(xlsxSheetName(sheet, usedNames), {
+      views: [{ showGridLines: false }],
+      pageSetup: {
+        orientation: "landscape",
+        fitToPage: true,
+        fitToWidth: 1,
+        fitToHeight: 0,
+        margins: {
+          left: 0.4,
+          right: 0.4,
+          top: 0.5,
+          bottom: 0.5,
+          header: 0.3,
+          footer: 0.3,
+        },
+      },
+    });
+
+    const students = getStudentNames(sheet.group);
+    const allActs = getAllActivities(sheet);
+    const catGroups = CATEGORIES.map((cat) => ({
+      cat,
+      acts: allActs.filter((a) => a.category === cat),
+    })).filter((g) => g.acts.length > 0);
+    const actCount = allActs.length;
+
+    // Column layout: A=COD, B=STUDENT, activities, [FINAL], gap, descriptions
+    const firstActCol = 3;
+    const avgCol = showAvg ? firstActCol + actCount : null;
+    const lastTableCol = firstActCol + actCount - 1 + (showAvg ? 1 : 0);
+    const tableEndCol = Math.max(lastTableCol, 2);
+    const gapCol = tableEndCol + 1;
+    const descCol = tableEndCol + 2;
+
+    ws.getColumn(1).width = 7;
+    ws.getColumn(2).width = 44;
+    catGroups.forEach((g) => {
+      const label = XLSX_CAT_HEADERS[g.cat];
+      let per = Math.max(8, Math.ceil((label.length * 1.25 + 2) / g.acts.length));
+      if (per === 9) per = 9.5; // ExcelJS omits width 9 (its default) on write
+      g.acts.forEach((act) => {
+        const idx = allActs.indexOf(act);
+        ws.getColumn(firstActCol + idx).width = per;
+      });
+    });
+    if (avgCol) ws.getColumn(avgCol).width = 10;
+    ws.getColumn(gapCol).width = 2;
+    ws.getColumn(descCol).width = 56;
+
+    const font = (extra = {}) => ({ name: XLSX_FONT, size: 11, ...extra });
+    const thin = { style: "thin", color: { argb: "FF000000" } };
+    const medium = { style: "medium", color: { argb: "FF000000" } };
+
+    let r = 1;
+
+    // ── Header info line ──
+    if (incHeaders) {
+      const termText = String(sheet.term || "").toUpperCase();
+      const bold = (t) => ({ text: t, font: font({ bold: true }) });
+      const norm = (t) => ({ text: t, font: font() });
+      const cell = ws.getCell(r, 1);
+      cell.value = {
+        richText: [
+          bold("TEACHER: "),
+          norm(String(sheet.teacherName || "").toUpperCase() + "        "),
+          bold("SUBJECT: "),
+          norm(String(sheet.subject || "").toUpperCase() + "        "),
+          bold("COURSE: "),
+          norm(String(sheet.group || "") + "        "),
+          bold("TERM: "),
+          norm(termText),
+        ],
+      };
+      cell.alignment = { vertical: "middle", horizontal: "left" };
+      ws.mergeCells(r, 1, r, descCol);
+      ws.getRow(r).height = 24;
+      r += 1;
+    }
+
+    // ── Table header (two rows) ──
+    const h1 = r;
+    const h2 = r + 1;
+    const headerFont = font({ bold: true });
+    const center = { vertical: "middle", horizontal: "center", wrapText: true };
+
+    const setHeader = (row, col, value) => {
+      const c = ws.getCell(row, col);
+      c.value = value;
+      c.font = headerFont;
+      c.alignment = center;
+      return c;
+    };
+
+    setHeader(h1, 1, "COD");
+    ws.mergeCells(h1, 1, h2, 1);
+    setHeader(h1, 2, "STUDENT");
+    ws.mergeCells(h1, 2, h2, 2);
+
+    let num = 1;
+    catGroups.forEach((g) => {
+      const start = firstActCol + allActs.indexOf(g.acts[0]);
+      const end = start + g.acts.length - 1;
+      setHeader(h1, start, XLSX_CAT_HEADERS[g.cat]);
+      if (end > start) ws.mergeCells(h1, start, h1, end);
+      g.acts.forEach((act, i) => setHeader(h2, start + i, num++));
+    });
+    if (avgCol) {
+      setHeader(h1, avgCol, "FINAL");
+      ws.mergeCells(h1, avgCol, h2, avgCol);
+    }
+    ws.getRow(h1).height = 22;
+    ws.getRow(h2).height = 18;
+
+    // ── Student rows ──
+    const firstDataRow = h2 + 1;
+    students.forEach((name, idx) => {
+      const row = firstDataRow + idx;
+      ws.getRow(row).height = 21;
+
+      const codCell = ws.getCell(row, 1);
+      codCell.value = idx + 1;
+      codCell.font = font({ bold: true });
+      codCell.alignment = { vertical: "middle", horizontal: "center" };
+
+      const nameCell = ws.getCell(row, 2);
+      nameCell.value = String(name).toLocaleUpperCase("es");
+      nameCell.font = font();
+      nameCell.alignment = { vertical: "middle", horizontal: "left" };
+
+      allActs.forEach((act, i) => {
+        const c = ws.getCell(row, firstActCol + i);
+        c.font = font({ bold: true });
+        c.alignment = { vertical: "middle", horizontal: "center" };
+        const raw = (sheet.grades[name] || {})[act.id];
+        if (raw == null || raw === "") return;
+        const v = parseFloat(raw);
+        if (isNaN(v)) {
+          c.value = String(raw);
+          return;
+        }
+        if (useScores) {
+          c.value = v;
+        } else {
+          const sc = getScaleForActivity(act, sheet);
+          const g = calculateGrade(v, sc.pmax, sc.exig, sc.nmin, sc.nmax, sc.napr);
+          const f = formatGradeForXlsx(g, decimals);
+          c.value = f.value;
+          c.numFmt = f.numFmt;
+        }
+      });
+
+      if (avgCol) {
+        const c = ws.getCell(row, avgCol);
+        c.font = font({ bold: true });
+        c.alignment = { vertical: "middle", horizontal: "center" };
+        const { avg } = calcWeightedAvg(name, sheet);
+        if (avg !== null) {
+          const f = formatGradeForXlsx(avg, decimals);
+          c.value = f.value;
+          c.numFmt = f.numFmt;
+        }
+      }
+    });
+
+    // ── Borders: thin grid, medium outline + medium line under header ──
+    const lastRow = Math.max(firstDataRow + students.length - 1, h2);
+    for (let row = h1; row <= lastRow; row++) {
+      for (let col = 1; col <= tableEndCol; col++) {
+        ws.getCell(row, col).border = {
+          top: row === h1 ? medium : row === firstDataRow ? medium : thin,
+          bottom: row === lastRow ? medium : row === h2 ? medium : thin,
+          left: col === 1 ? medium : thin,
+          right: col === tableEndCol ? medium : thin,
+        };
+      }
+    }
+
+    // ── Activity descriptions panel (right side) ──
+    let dRow = h1;
+    let dNum = 1;
+    const descWidthChars = 50;
+    catGroups.forEach((g, gi) => {
+      if (gi > 0) dRow += 1; // blank row between competencias
+      const t = ws.getCell(dRow, descCol);
+      t.value = XLSX_CAT_TITLES[g.cat];
+      t.font = font({ bold: true, size: 12 });
+      t.alignment = { vertical: "middle", horizontal: "center" };
+      dRow += 1;
+      g.acts.forEach((act) => {
+        const text = dNum++ + ". " + (act.label || "");
+        const lines = Math.max(1, Math.ceil(text.length / (descWidthChars * 1.05)));
+        const span = Math.max(1, Math.ceil((lines * 15) / 21));
+        const c = ws.getCell(dRow, descCol);
+        c.value = text;
+        c.font = font();
+        c.alignment = { vertical: "top", horizontal: "left", wrapText: true };
+        if (span > 1) ws.mergeCells(dRow, descCol, dRow + span - 1, descCol);
+        dRow += span;
+      });
+    });
+
+    ws.pageSetup.printArea =
+      "A1:" + ws.getColumn(descCol).letter + Math.max(lastRow, dRow);
+    return ws;
+  }
+
+  async function downloadXlsx(sheetList, filename, options) {
+    let ExcelJS;
+    try {
+      ExcelJS = await loadExcelJs();
+    } catch {
+      showToast(
+        "Could not load the Excel library (check your internet connection). Try CSV instead.",
+        "error",
+      );
+      return false;
+    }
+    const wb = new ExcelJS.Workbook();
+    wb.creator = "ESL Learning Platform";
+    wb.created = new Date();
+    const used = new Set();
+    sheetList.forEach((s) => addXlsxWorksheet(wb, s, options, used));
+    const buffer = await wb.xlsx.writeBuffer();
+    const blob = new Blob([buffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    link.style.display = "none";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+    return true;
+  }
+
+  function getExportFormat() {
+    return $exportFormat && $exportFormat.value === "csv" ? "csv" : "xlsx";
+  }
+
+  function syncExportFormatUi() {
+    const fmt = getExportFormat();
+    if ($exportExecuteLabel)
+      $exportExecuteLabel.textContent =
+        fmt === "csv" ? "Download CSV" : "Download Excel";
+    if ($exportFormatHint)
+      $exportFormatHint.textContent =
+        fmt === "csv"
+          ? "Plain data only. Use this format to upload grades back into a sheet."
+          : "Formatted like the school's planilla: one column per activity (raw scores, or grades if scores are unticked), a FINAL column when grades are included, and activity descriptions on the right. Multiple sheets become separate tabs.";
+  }
+
+  function exportFileBase(s, withTermSuffix) {
+    return (
+      s.subject +
+      "_" +
+      s.group +
+      "_" +
+      s.term +
+      (withTermSuffix ? "_Term" : "")
+    ).replace(/\s+/g, "_");
+  }
+
   function exportCurrentSheet() {
     openExportModal("current");
   }
@@ -2787,6 +3128,14 @@
 
   function openExportModal(type) {
     pendingExportType = type;
+    if ($exportFormat) {
+      let saved = null;
+      try {
+        saved = localStorage.getItem(EXPORT_FORMAT_KEY);
+      } catch {}
+      $exportFormat.value = saved === "csv" ? "csv" : "xlsx";
+    }
+    syncExportFormatUi();
     $exportOverlay.style.display = "flex";
   }
 
@@ -2795,13 +3144,47 @@
     pendingExportType = null;
   }
 
-  function executeExport() {
+  async function executeExport() {
     const options = {
       includeHeaders: $exportIncHeaders.checked,
       includeScores: $exportIncScores.checked,
       includeGrades: $exportIncGrades.checked,
       decimals: $exportDecimals.value,
     };
+    const format = getExportFormat();
+    try {
+      localStorage.setItem(EXPORT_FORMAT_KEY, format);
+    } catch {}
+
+    if (format === "xlsx") {
+      let list = [];
+      let filename = "";
+      if (pendingExportType === "current") {
+        const sheet = getSheet();
+        if (!sheet) return;
+        list = [sheet];
+        filename = exportFileBase(sheet, true) + ".xlsx";
+      } else if (pendingExportType === "selected") {
+        list = sheets.filter((s) => selectedIds.has(s.id));
+        if (!list.length) return;
+        filename =
+          list.length === 1
+            ? exportFileBase(list[0], false) + ".xlsx"
+            : "Grade_Sheets_Export.xlsx";
+      }
+      if (!list.length) return;
+      $exportExecuteBtn.disabled = true;
+      try {
+        const ok = await downloadXlsx(list, filename, options);
+        if (ok) closeExportModal();
+      } catch (err) {
+        console.error(err);
+        showToast("Excel export failed: " + err.message, "error");
+      } finally {
+        $exportExecuteBtn.disabled = false;
+      }
+      return;
+    }
 
     if (pendingExportType === "current") {
       const sheet = getSheet();
@@ -3038,6 +3421,8 @@
       $exportCancel.addEventListener("click", closeExportModal);
     if ($exportExecuteBtn)
       $exportExecuteBtn.addEventListener("click", executeExport);
+    if ($exportFormat)
+      $exportFormat.addEventListener("change", syncExportFormatUi);
     if ($exportOverlay)
       $exportOverlay.addEventListener("click", (e) => {
         if (e.target === $exportOverlay) closeExportModal();

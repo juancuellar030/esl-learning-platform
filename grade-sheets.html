@@ -1133,6 +1133,21 @@
                 </div>
                 <div class="gs-modal-body">
                     <div class="gs-field">
+                        <label for="gs-export-format">File Format</label>
+                        <select id="gs-export-format">
+                            <option value="xlsx">
+                                Excel (.xlsx) – school template layout
+                            </option>
+                            <option value="csv">
+                                CSV (plain data, can be re-uploaded)
+                            </option>
+                        </select>
+                        <small
+                            id="gs-export-format-hint"
+                            style="display: block; margin-top: 6px; opacity: 0.75"
+                        ></small>
+                    </div>
+                    <div class="gs-field">
                         <label>Header Information</label>
                         <label
                             style="
@@ -1213,7 +1228,8 @@
                         id="gs-export-execute-btn"
                         class="gs-btn gs-btn-primary"
                     >
-                        <i class="fa-solid fa-download"></i> Download CSV
+                        <i class="fa-solid fa-download"></i>
+                        <span id="gs-export-execute-label">Download Excel</span>
                     </button>
                 </div>
             </div>
@@ -1347,6 +1363,6 @@
         <script src="https://accounts.google.com/gsi/client" async defer></script>
         <script src="https://apis.google.com/js/api.js" async defer></script>
         <script src="js/google-drive-service.js"></script>
-        <script src="js/grade-sheets.js?v=excel-copy"></script>
+        <script src="js/grade-sheets.js?v=xlsx-export"></script>
     </body>
 </html>
