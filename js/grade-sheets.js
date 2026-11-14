@@ -151,8 +151,11 @@
   const $exportIncHeaders = $("gs-export-inc-headers");
   const $exportIncScores = $("gs-export-inc-scores");
   const $exportIncGrades = $("gs-export-inc-grades");
-  const $exportDecimals = $("gs-export-decimals");
-  const $exportFormat = $("gs-export-format");
+  const $exportIncFinal = $("gs-export-inc-final");
+  const $exportSubtitle = $("gs-export-subtitle");
+  const $exportDecimalsWrap = $("gs-export-decimals-wrap");
+  const $exportFormatRadios = document.getElementsByName("gs-export-format");
+  const $exportDecimalsRadios = document.getElementsByName("gs-export-decimals");
   const $exportFormatHint = $("gs-export-format-hint");
   const $exportExecuteLabel = $("gs-export-execute-label");
   const EXPORT_FORMAT_KEY = "gradeSheetsExportFormat";
@@ -2625,6 +2628,7 @@
     const incHeaders = options.includeHeaders !== false;
     const incScores = options.includeScores !== false;
     const incGrades = options.includeGrades !== false;
+    const incFinal = options.includeFinal !== false;
     const decimals = options.decimals !== undefined ? options.decimals : 1;
 
     // If both are false, default to including scores so we export something
@@ -2675,7 +2679,7 @@
         }
       });
     });
-    catHeaderCells.push("Weighted Avg");
+    if (incFinal) catHeaderCells.push("Weighted Avg");
     rows.push(catHeaderCells.map(csvEscape).join(","));
 
     // Activity labels row
@@ -2694,7 +2698,7 @@
           colNum++;
         });
     });
-    actLabelCells.push("");
+    if (incFinal) actLabelCells.push("");
     rows.push(actLabelCells.map(csvEscape).join(","));
 
     // Student rows
@@ -2742,8 +2746,10 @@
           });
       });
       // Weighted avg
-      const { avg } = calcWeightedAvg(name, sheet);
-      if (avg !== null) {
+      const { avg } = incFinal ? calcWeightedAvg(name, sheet) : { avg: null };
+      if (!incFinal) {
+        // final grade column excluded
+      } else if (avg !== null) {
         let avgStr = "";
         if (decimals === "0") {
           avgStr = Math.round(avg).toString();
@@ -2790,7 +2796,7 @@
   const XLSX_CAT_HEADERS = {
     cognitiva: "COGNITIVA",
     laboral: "LABORAL",
-    ciudadana: "C. CIUDADANA",
+    ciudadana: "CIUDADANA",
   };
   const XLSX_CAT_TITLES = {
     cognitiva: "COMPETENCIA COGNITIVA",
@@ -2852,7 +2858,7 @@
     // One value per activity, like the school template. Raw scores are used
     // whenever they are selected; grades only when scores are unticked.
     const useScores = options.includeScores !== false || !options.includeGrades;
-    const showAvg = options.includeGrades !== false;
+    const showAvg = options.includeFinal !== false;
 
     const ws = workbook.addWorksheet(xlsxSheetName(sheet, usedNames), {
       views: [{ showGridLines: false }],
@@ -3092,7 +3098,20 @@
   }
 
   function getExportFormat() {
-    return $exportFormat && $exportFormat.value === "csv" ? "csv" : "xlsx";
+    const r = [...$exportFormatRadios].find((x) => x.checked);
+    return r && r.value === "csv" ? "csv" : "xlsx";
+  }
+
+  function getExportDecimals() {
+    const r = [...$exportDecimalsRadios].find((x) => x.checked);
+    return r ? r.value : "1";
+  }
+
+  function syncExportOptionsUi() {
+    // Grade format only matters when grades or the final column are exported
+    const needsFormat = $exportIncGrades.checked || ($exportIncFinal && $exportIncFinal.checked);
+    if ($exportDecimalsWrap)
+      $exportDecimalsWrap.classList.toggle("is-disabled", !needsFormat);
   }
 
   function syncExportFormatUi() {
@@ -3104,7 +3123,8 @@
       $exportFormatHint.textContent =
         fmt === "csv"
           ? "Plain data only. Use this format to upload grades back into a sheet."
-          : "Formatted like the school's planilla: one column per activity (raw scores, or grades if scores are unticked), a FINAL column when grades are included, and activity descriptions on the right. Multiple sheets become separate tabs.";
+          : "One column per activity (raw scores, or grades when raw scores are off), activity descriptions on the right. Multiple sheets become separate tabs.";
+    syncExportOptionsUi();
   }
 
   function exportFileBase(s, withTermSuffix) {
@@ -3128,12 +3148,23 @@
 
   function openExportModal(type) {
     pendingExportType = type;
-    if ($exportFormat) {
-      let saved = null;
-      try {
-        saved = localStorage.getItem(EXPORT_FORMAT_KEY);
-      } catch {}
-      $exportFormat.value = saved === "csv" ? "csv" : "xlsx";
+    let saved = null;
+    try {
+      saved = localStorage.getItem(EXPORT_FORMAT_KEY);
+    } catch {}
+    const want = saved === "csv" ? "csv" : "xlsx";
+    [...$exportFormatRadios].forEach((r) => (r.checked = r.value === want));
+    if ($exportSubtitle) {
+      if (type === "current") {
+        const s = getSheet();
+        $exportSubtitle.textContent = s
+          ? s.subject + " · " + s.group + " · " + s.term + " Term"
+          : "";
+      } else {
+        const n = selectedIds.size;
+        $exportSubtitle.textContent =
+          n + " sheet" + (n === 1 ? "" : "s") + " selected";
+      }
     }
     syncExportFormatUi();
     $exportOverlay.style.display = "flex";
@@ -3149,7 +3180,8 @@
       includeHeaders: $exportIncHeaders.checked,
       includeScores: $exportIncScores.checked,
       includeGrades: $exportIncGrades.checked,
-      decimals: $exportDecimals.value,
+      includeFinal: $exportIncFinal ? $exportIncFinal.checked : true,
+      decimals: getExportDecimals(),
     };
     const format = getExportFormat();
     try {
@@ -3421,8 +3453,12 @@
       $exportCancel.addEventListener("click", closeExportModal);
     if ($exportExecuteBtn)
       $exportExecuteBtn.addEventListener("click", executeExport);
-    if ($exportFormat)
-      $exportFormat.addEventListener("change", syncExportFormatUi);
+    [...$exportFormatRadios].forEach((r) =>
+      r.addEventListener("change", syncExportFormatUi),
+    );
+    [$exportIncGrades, $exportIncFinal].forEach(
+      (el) => el && el.addEventListener("change", syncExportOptionsUi),
+    );
     if ($exportOverlay)
       $exportOverlay.addEventListener("click", (e) => {
         if (e.target === $exportOverlay) closeExportModal();

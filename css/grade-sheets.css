@@ -2420,3 +2420,417 @@ body.dark-mode .gs-toggle-label {
         min-width: auto;
     }
 }
+/* =====================================================
+   EXPORT MODAL (redesigned)
+   ===================================================== */
+.gs-export-modal {
+    --gsx-accent: #6c5ce7;
+    --gsx-accent-soft: rgba(108, 92, 231, 0.1);
+    --gsx-ink: #2d3436;
+    --gsx-muted: #7f8c8d;
+    --gsx-line: #e6e8ef;
+    --gsx-surface: #f7f7fb;
+    --gsx-card: #ffffff;
+    --gsx-excel: #1d7044;
+    --gsx-excel-soft: rgba(29, 112, 68, 0.1);
+    --gsx-csv: #0984e3;
+    --gsx-csv-soft: rgba(9, 132, 227, 0.1);
+    max-width: 480px;
+    border-radius: 22px;
+    max-height: calc(100vh - 32px);
+    display: flex;
+    flex-direction: column;
+}
+
+body.dark-mode .gs-export-modal {
+    --gsx-accent: #a29bfe;
+    --gsx-accent-soft: rgba(162, 155, 254, 0.14);
+    --gsx-ink: #ececf1;
+    --gsx-muted: #9a9aa6;
+    --gsx-line: #3d3d46;
+    --gsx-surface: #24242a;
+    --gsx-card: #2f2f36;
+    --gsx-excel: #3ecf83;
+    --gsx-excel-soft: rgba(62, 207, 131, 0.14);
+    --gsx-csv: #54a8f0;
+    --gsx-csv-soft: rgba(84, 168, 240, 0.14);
+}
+
+/* Hero header */
+.gs-export-hero {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 22px 24px 20px;
+    background: #2c1f56;
+    color: #fff;
+    flex-shrink: 0;
+}
+
+.gs-export-hero-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.16);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    display: grid;
+    place-items: center;
+    font-size: 22px;
+    flex-shrink: 0;
+}
+
+.gs-export-hero-text {
+    min-width: 0;
+    flex: 1;
+}
+
+.gs-export-hero-text h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: #fff;
+}
+
+.gs-export-hero-text p {
+    margin: 3px 0 0;
+    font-size: 0.85rem;
+    font-weight: 600;
+    opacity: 0.8;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.gs-export-modal .gs-export-close {
+    color: rgba(255, 255, 255, 0.75);
+    align-self: flex-start;
+}
+
+.gs-export-modal .gs-export-close:hover,
+body.dark-mode .gs-export-modal .gs-export-close:hover {
+    background: rgba(255, 255, 255, 0.16);
+    color: #fff;
+}
+
+/* Body */
+.gs-export-body {
+    padding: 20px 24px 6px;
+    overflow-y: auto;
+    background: var(--gsx-card);
+}
+
+.gs-export-section-title {
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--gsx-muted);
+    margin: 0 0 10px;
+}
+
+/* Format cards */
+.gs-export-formats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.gs-export-format-card {
+    --fmt: var(--gsx-excel);
+    --fmt-soft: var(--gsx-excel-soft);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 14px 14px 13px;
+    border: 2px solid var(--gsx-line);
+    border-radius: 14px;
+    background: var(--gsx-card);
+    cursor: pointer;
+    transition: border-color 0.18s, background 0.18s, transform 0.18s;
+}
+
+.gs-export-format-card.is-csv {
+    --fmt: var(--gsx-csv);
+    --fmt-soft: var(--gsx-csv-soft);
+}
+
+.gs-export-format-card:hover {
+    transform: translateY(-1px);
+    border-color: color-mix(in srgb, var(--fmt) 45%, var(--gsx-line));
+}
+
+.gs-export-format-card input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.gs-export-format-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    font-size: 18px;
+    color: var(--fmt);
+    background: var(--fmt-soft);
+    margin-bottom: 4px;
+}
+
+.gs-export-format-name {
+    font-weight: 800;
+    font-size: 0.98rem;
+    color: var(--gsx-ink);
+}
+
+.gs-export-format-desc {
+    font-size: 0.78rem;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--gsx-muted);
+}
+
+.gs-export-format-check {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 11px;
+    color: #fff;
+    background: var(--fmt);
+    transform: scale(0);
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.gs-export-format-card:has(input:checked) {
+    border-color: var(--fmt);
+    background: var(--fmt-soft);
+}
+
+.gs-export-format-card:has(input:checked) .gs-export-format-check {
+    transform: scale(1);
+}
+
+.gs-export-format-card:has(input:focus-visible) {
+    outline: 3px solid color-mix(in srgb, var(--fmt) 40%, transparent);
+    outline-offset: 2px;
+}
+
+.gs-export-format-hint {
+    margin: 10px 2px 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    line-height: 1.45;
+    color: var(--gsx-muted);
+}
+
+/* Toggle rows */
+.gs-export-toggles {
+    border: 1px solid var(--gsx-line);
+    border-radius: 14px;
+    background: var(--gsx-surface);
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.gs-export-toggle {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 11px 14px;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.gs-export-toggle + .gs-export-toggle {
+    border-top: 1px solid var(--gsx-line);
+}
+
+.gs-export-toggle:hover {
+    background: var(--gsx-accent-soft);
+}
+
+.gs-export-toggle-text {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.gs-export-toggle-text strong {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--gsx-ink);
+}
+
+.gs-export-toggle-text small {
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: var(--gsx-muted);
+}
+
+.gs-export-toggle input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.gs-switch {
+    position: relative;
+    width: 38px;
+    height: 22px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--gsx-muted) 45%, transparent);
+    flex-shrink: 0;
+    transition: background 0.2s;
+}
+
+.gs-switch::after {
+    content: "";
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.gs-export-toggle input:checked + .gs-switch {
+    background: var(--gsx-accent);
+}
+
+.gs-export-toggle input:checked + .gs-switch::after {
+    transform: translateX(16px);
+}
+
+.gs-export-toggle input:focus-visible + .gs-switch {
+    outline: 3px solid color-mix(in srgb, var(--gsx-accent) 40%, transparent);
+    outline-offset: 2px;
+}
+
+/* Grade format segmented control */
+.gs-export-decimals-wrap {
+    margin-bottom: 18px;
+    transition: opacity 0.2s;
+}
+
+.gs-export-decimals-wrap.is-disabled {
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+.gs-export-segmented {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+    padding: 4px;
+    border-radius: 12px;
+    background: var(--gsx-surface);
+    border: 1px solid var(--gsx-line);
+}
+
+.gs-export-segmented label {
+    position: relative;
+    cursor: pointer;
+}
+
+.gs-export-segmented input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.gs-export-segmented span {
+    display: block;
+    text-align: center;
+    padding: 8px 0;
+    border-radius: 9px;
+    font-weight: 800;
+    font-size: 0.92rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--gsx-muted);
+    transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+}
+
+.gs-export-segmented label:hover span {
+    color: var(--gsx-ink);
+}
+
+.gs-export-segmented input:checked + span {
+    background: var(--gsx-card);
+    color: var(--gsx-accent);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+}
+
+.gs-export-segmented input:focus-visible + span {
+    outline: 2px solid var(--gsx-accent);
+}
+
+/* Footer */
+.gs-export-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 14px 24px 20px;
+    background: var(--gsx-card);
+    border-top: 1px solid var(--gsx-line);
+    flex-shrink: 0;
+}
+
+.gs-export-download-btn {
+    background: var(--gsx-excel);
+    color: #fff;
+}
+
+.gs-export-modal:has(input[name="gs-export-format"][value="csv"]:checked) .gs-export-download-btn {
+    background: var(--gsx-csv);
+}
+
+.gs-export-download-btn:hover {
+    filter: brightness(1.08);
+    transform: translateY(-2px);
+}
+
+body.dark-mode .gs-export-download-btn {
+    color: #10131a;
+}
+
+.gs-export-download-btn:disabled {
+    opacity: 0.6;
+    cursor: progress;
+    transform: none;
+}
+
+@media (max-width: 480px) {
+    .gs-export-hero,
+    .gs-export-body,
+    .gs-export-footer {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+}
+
+.gs-export-footer .gs-btn-ghost {
+    color: var(--gsx-muted);
+    border-color: var(--gsx-line);
+}
+
+.gs-export-footer .gs-btn-ghost:hover {
+    color: var(--gsx-ink);
+    background: var(--gsx-surface);
+}
+
+body.dark-mode .gs-export-hero-text h3 {
+    color: #fff;
+}

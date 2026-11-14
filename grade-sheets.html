@@ -18,7 +18,7 @@
             href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
         />
         <link rel="stylesheet" href="css/styles.css" />
-        <link rel="stylesheet" href="css/grade-sheets.css?v=excel-copy" />
+        <link rel="stylesheet" href="css/grade-sheets.css?v=export-modal" />
     </head>
 
     <body>
@@ -1122,111 +1122,104 @@
             class="gs-modal-overlay"
             style="display: none"
         >
-            <div class="gs-modal gs-modal-sm">
-                <div class="gs-modal-header">
-                    <h3>
-                        <i class="fa-solid fa-file-export"></i> Export Settings
-                    </h3>
-                    <button class="gs-modal-close" id="gs-export-close">
+            <div class="gs-modal gs-export-modal" role="dialog" aria-labelledby="gs-export-title">
+                <div class="gs-export-hero">
+                    <div class="gs-export-hero-icon">
+                        <i class="fa-solid fa-file-arrow-down"></i>
+                    </div>
+                    <div class="gs-export-hero-text">
+                        <h3 id="gs-export-title">Export Grades</h3>
+                        <p id="gs-export-subtitle"></p>
+                    </div>
+                    <button class="gs-modal-close gs-export-close" id="gs-export-close" aria-label="Close">
                         <i class="fa-solid fa-xmark"></i>
                     </button>
                 </div>
-                <div class="gs-modal-body">
-                    <div class="gs-field">
-                        <label for="gs-export-format">File Format</label>
-                        <select id="gs-export-format">
-                            <option value="xlsx">
-                                Excel (.xlsx) – school template layout
-                            </option>
-                            <option value="csv">
-                                CSV (plain data, can be re-uploaded)
-                            </option>
-                        </select>
-                        <small
-                            id="gs-export-format-hint"
-                            style="display: block; margin-top: 6px; opacity: 0.75"
-                        ></small>
-                    </div>
-                    <div class="gs-field">
-                        <label>Header Information</label>
-                        <label
-                            style="
-                                display: flex;
-                                align-items: center;
-                                gap: 8px;
-                                cursor: pointer;
-                            "
-                        >
-                            <input
-                                type="checkbox"
-                                id="gs-export-inc-headers"
-                                checked
-                                style="width: auto"
-                            />
-                            Include Sheet Details (Teacher, Subject, etc.)
+                <div class="gs-export-body">
+                    <div class="gs-export-section-title">File format</div>
+                    <div class="gs-export-formats" role="radiogroup">
+                        <label class="gs-export-format-card is-xlsx">
+                            <input type="radio" name="gs-export-format" value="xlsx" checked />
+                            <span class="gs-export-format-icon"><i class="fa-solid fa-file-excel"></i></span>
+                            <span class="gs-export-format-name">Excel</span>
+                            <span class="gs-export-format-desc">School template layout, ready to hand in</span>
+                            <span class="gs-export-format-check"><i class="fa-solid fa-check"></i></span>
+                        </label>
+                        <label class="gs-export-format-card is-csv">
+                            <input type="radio" name="gs-export-format" value="csv" />
+                            <span class="gs-export-format-icon"><i class="fa-solid fa-file-csv"></i></span>
+                            <span class="gs-export-format-name">CSV</span>
+                            <span class="gs-export-format-desc">Plain data that can be uploaded back</span>
+                            <span class="gs-export-format-check"><i class="fa-solid fa-check"></i></span>
                         </label>
                     </div>
-                    <div class="gs-field">
-                        <label>Columns to Include</label>
-                        <label
-                            style="
-                                display: flex;
-                                align-items: center;
-                                gap: 8px;
-                                cursor: pointer;
-                            "
-                        >
-                            <input
-                                type="checkbox"
-                                id="gs-export-inc-scores"
-                                checked
-                                style="width: auto"
-                            />
-                            Include Raw Scores
+                    <p class="gs-export-format-hint" id="gs-export-format-hint"></p>
+
+                    <div class="gs-export-section-title">Include</div>
+                    <div class="gs-export-toggles">
+                        <label class="gs-export-toggle">
+                            <span class="gs-export-toggle-text">
+                                <strong>Sheet details</strong>
+                                <small>Teacher, subject, course and term</small>
+                            </span>
+                            <input type="checkbox" id="gs-export-inc-headers" checked />
+                            <span class="gs-switch" aria-hidden="true"></span>
                         </label>
-                        <label
-                            style="
-                                display: flex;
-                                align-items: center;
-                                gap: 8px;
-                                cursor: pointer;
-                                margin-top: 5px;
-                            "
-                        >
-                            <input
-                                type="checkbox"
-                                id="gs-export-inc-grades"
-                                checked
-                                style="width: auto"
-                            />
-                            Include Grades
+                        <label class="gs-export-toggle">
+                            <span class="gs-export-toggle-text">
+                                <strong>Raw scores</strong>
+                                <small>Points earned on each activity</small>
+                            </span>
+                            <input type="checkbox" id="gs-export-inc-scores" checked />
+                            <span class="gs-switch" aria-hidden="true"></span>
+                        </label>
+                        <label class="gs-export-toggle">
+                            <span class="gs-export-toggle-text">
+                                <strong>Grades</strong>
+                                <small>Each score converted to the grading scale</small>
+                            </span>
+                            <input type="checkbox" id="gs-export-inc-grades" checked />
+                            <span class="gs-switch" aria-hidden="true"></span>
+                        </label>
+                        <label class="gs-export-toggle">
+                            <span class="gs-export-toggle-text">
+                                <strong>Final grade column</strong>
+                                <small>Weighted average (35% · 35% · 30%)</small>
+                            </span>
+                            <input type="checkbox" id="gs-export-inc-final" checked />
+                            <span class="gs-switch" aria-hidden="true"></span>
                         </label>
                     </div>
-                    <div class="gs-field">
-                        <label for="gs-export-decimals">Grade Format</label>
-                        <select id="gs-export-decimals">
-                            <option value="1">
-                                1 Decimal Place (e.g., 4.7)
-                            </option>
-                            <option value="remove">
-                                Remove Decimal Point (e.g., 47)
-                            </option>
-                            <option value="0">
-                                Round to Whole Number (e.g., 5)
-                            </option>
-                            <option value="2">
-                                2 Decimal Places (e.g., 4.70)
-                            </option>
-                        </select>
+
+                    <div class="gs-export-decimals-wrap" id="gs-export-decimals-wrap">
+                        <div class="gs-export-section-title">Grade format</div>
+                        <div class="gs-export-segmented" role="radiogroup">
+                            <label title="1 decimal place">
+                                <input type="radio" name="gs-export-decimals" value="1" checked />
+                                <span>4.7</span>
+                            </label>
+                            <label title="Remove decimal point">
+                                <input type="radio" name="gs-export-decimals" value="remove" />
+                                <span>47</span>
+                            </label>
+                            <label title="Round to whole number">
+                                <input type="radio" name="gs-export-decimals" value="0" />
+                                <span>5</span>
+                            </label>
+                            <label title="2 decimal places">
+                                <input type="radio" name="gs-export-decimals" value="2" />
+                                <span>4.70</span>
+                            </label>
+                        </div>
                     </div>
                 </div>
-                <div class="gs-modal-footer">
+                <div class="gs-export-footer">
                     <button class="gs-btn gs-btn-ghost" id="gs-export-cancel">
                         Cancel
                     </button>
                     <button
                         id="gs-export-execute-btn"
-                        class="gs-btn gs-btn-primary"
+                        class="gs-btn gs-export-download-btn"
                     >
                         <i class="fa-solid fa-download"></i>
                         <span id="gs-export-execute-label">Download Excel</span>
@@ -1363,6 +1356,6 @@
         <script src="https://accounts.google.com/gsi/client" async defer></script>
         <script src="https://apis.google.com/js/api.js" async defer></script>
         <script src="js/google-drive-service.js"></script>
-        <script src="js/grade-sheets.js?v=xlsx-export"></script>
+        <script src="js/grade-sheets.js?v=export-modal"></script>
     </body>
 </html>
