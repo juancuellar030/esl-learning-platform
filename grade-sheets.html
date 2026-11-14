@@ -18,7 +18,7 @@
             href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
         />
         <link rel="stylesheet" href="css/styles.css" />
-        <link rel="stylesheet" href="css/grade-sheets.css?v=export-modal" />
+        <link rel="stylesheet" href="css/grade-sheets.css?v=export-layout" />
     </head>
 
     <body>
@@ -1155,6 +1155,39 @@
                     </div>
                     <p class="gs-export-format-hint" id="gs-export-format-hint"></p>
 
+                    <div class="gs-export-layout-wrap" id="gs-export-layout-wrap">
+                        <div class="gs-export-section-title">Workbook tabs</div>
+                        <div class="gs-export-choices" role="radiogroup">
+                            <label class="gs-export-choice">
+                                <input type="radio" name="gs-export-layout" value="group" checked />
+                                <span class="gs-export-choice-icon"><i class="fa-solid fa-table-cells-large"></i></span>
+                                <span class="gs-export-toggle-text">
+                                    <strong>One tab per group</strong>
+                                    <small>3A, 3B, 4A… each on its own tab</small>
+                                </span>
+                                <span class="gs-radio-dot" aria-hidden="true"></span>
+                            </label>
+                            <label class="gs-export-choice">
+                                <input type="radio" name="gs-export-layout" value="level" />
+                                <span class="gs-export-choice-icon"><i class="fa-solid fa-layer-group"></i></span>
+                                <span class="gs-export-toggle-text">
+                                    <strong>One tab per grade level</strong>
+                                    <small>Tercero, Cuarto, Quinto… with groups stacked</small>
+                                </span>
+                                <span class="gs-radio-dot" aria-hidden="true"></span>
+                            </label>
+                            <label class="gs-export-choice">
+                                <input type="radio" name="gs-export-layout" value="single" />
+                                <span class="gs-export-choice-icon"><i class="fa-solid fa-file-lines"></i></span>
+                                <span class="gs-export-toggle-text">
+                                    <strong>All in one tab</strong>
+                                    <small>Every table stacked on a single tab</small>
+                                </span>
+                                <span class="gs-radio-dot" aria-hidden="true"></span>
+                            </label>
+                        </div>
+                    </div>
+
                     <div class="gs-export-section-title">Include</div>
                     <div class="gs-export-toggles">
                         <label class="gs-export-toggle">
@@ -1356,6 +1389,6 @@
         <script src="https://accounts.google.com/gsi/client" async defer></script>
         <script src="https://apis.google.com/js/api.js" async defer></script>
         <script src="js/google-drive-service.js"></script>
-        <script src="js/grade-sheets.js?v=export-modal"></script>
+        <script src="js/grade-sheets.js?v=export-layout"></script>
     </body>
 </html>

@@ -159,6 +159,10 @@
   const $exportFormatHint = $("gs-export-format-hint");
   const $exportExecuteLabel = $("gs-export-execute-label");
   const EXPORT_FORMAT_KEY = "gradeSheetsExportFormat";
+  const EXPORT_LAYOUT_KEY = "gradeSheetsExportLayout";
+  const $exportLayoutWrap = $("gs-export-layout-wrap");
+  const $exportLayoutRadios = document.getElementsByName("gs-export-layout");
+  let pendingExportCount = 0;
 
   let editingActId = null;
   let editingActCat = null;
@@ -2835,13 +2839,43 @@
     return { value: Math.round(g * 10) / 10, numFmt: "0.0" };
   }
 
-  function xlsxSheetName(sheet, used) {
-    let base = (sheet.group + " " + (sheet.subject || ""))
-      .replace(/[\[\]:*?/\\]/g, " ")
-      .replace(/\s+/g, " ")
-      .trim()
-      .toUpperCase()
-      .slice(0, 31) || "SHEET";
+  const XLSX_LEVEL_NAMES = {
+    1: "PRIMERO",
+    2: "SEGUNDO",
+    3: "TERCERO",
+    4: "CUARTO",
+    5: "QUINTO",
+    6: "SEXTO",
+    7: "SÉPTIMO",
+    8: "OCTAVO",
+    9: "NOVENO",
+    10: "DÉCIMO",
+    11: "UNDÉCIMO",
+  };
+
+  function groupLevel(group) {
+    const m = String(group || "").match(/^\s*(\d+)/);
+    return m ? parseInt(m[1], 10) : null;
+  }
+
+  function compareSheetsForExport(a, b) {
+    const ga = String(a.group || "");
+    const gb = String(b.group || "");
+    const byGroup = ga.localeCompare(gb, undefined, { numeric: true });
+    if (byGroup) return byGroup;
+    const bySubject = String(a.subject || "").localeCompare(String(b.subject || ""));
+    if (bySubject) return bySubject;
+    return String(a.term || "").localeCompare(String(b.term || ""));
+  }
+
+  function uniqueXlsxTabName(raw, used) {
+    const base =
+      String(raw || "")
+        .replace(/[\[\]:*?/\\]/g, " ")
+        .replace(/\s+/g, " ")
+        .trim()
+        .toUpperCase()
+        .slice(0, 31) || "SHEET";
     let name = base;
     let n = 2;
     while (used.has(name.toLowerCase())) {
@@ -2852,72 +2886,92 @@
     return name;
   }
 
-  function addXlsxWorksheet(workbook, sheet, options, usedNames) {
-    const incHeaders = options.includeHeaders !== false;
-    const decimals = options.decimals !== undefined ? options.decimals : "1";
-    // One value per activity, like the school template. Raw scores are used
-    // whenever they are selected; grades only when scores are unticked.
-    const useScores = options.includeScores !== false || !options.includeGrades;
-    const showAvg = options.includeFinal !== false;
+  // Splits the sheets into workbook tabs according to the chosen layout:
+  //   "group"  – one tab per sheet (default)
+  //   "level"  – one tab per grade level (3°, 4°, 5°…), tables stacked
+  //   "single" – every table stacked in a single tab
+  function planXlsxTabs(sheetList, layout) {
+    const sorted = [...sheetList].sort(compareSheetsForExport);
+    const subjectsOf = (list) => [
+      ...new Set(list.map((s) => String(s.subject || "").trim()).filter(Boolean)),
+    ];
+    const withSubject = (label, list) => {
+      const subs = subjectsOf(list);
+      return subs.length === 1 ? label + " (" + subs[0] + ")" : label;
+    };
 
-    const ws = workbook.addWorksheet(xlsxSheetName(sheet, usedNames), {
-      views: [{ showGridLines: false }],
-      pageSetup: {
-        orientation: "landscape",
-        fitToPage: true,
-        fitToWidth: 1,
-        fitToHeight: 0,
-        margins: {
-          left: 0.4,
-          right: 0.4,
-          top: 0.5,
-          bottom: 0.5,
-          header: 0.3,
-          footer: 0.3,
-        },
-      },
-    });
+    if (layout === "single") {
+      const subs = subjectsOf(sorted);
+      return [{ name: subs.length === 1 ? subs[0] : "GRADES", sheets: sorted }];
+    }
+    if (layout === "level") {
+      const buckets = new Map();
+      sorted.forEach((s) => {
+        const lvl = groupLevel(s.group);
+        const key = lvl != null ? "L" + lvl : "G" + s.group;
+        if (!buckets.has(key)) buckets.set(key, { lvl, group: s.group, sheets: [] });
+        buckets.get(key).sheets.push(s);
+      });
+      return [...buckets.values()].map((b) => ({
+        name: withSubject(
+          b.lvl != null ? XLSX_LEVEL_NAMES[b.lvl] || "GRADE " + b.lvl : b.group,
+          b.sheets,
+        ),
+        sheets: b.sheets,
+      }));
+    }
+    return sorted.map((s) => ({
+      name: s.group + " " + (s.subject || ""),
+      sheets: [s],
+    }));
+  }
 
-    const students = getStudentNames(sheet.group);
+  function xlsxBlockLayout(sheet, options) {
     const allActs = getAllActivities(sheet);
     const catGroups = CATEGORIES.map((cat) => ({
       cat,
       acts: allActs.filter((a) => a.category === cat),
     })).filter((g) => g.acts.length > 0);
-    const actCount = allActs.length;
-
-    // Column layout: A=COD, B=STUDENT, activities, [FINAL], gap, descriptions
+    const showAvg = options.includeFinal !== false;
     const firstActCol = 3;
-    const avgCol = showAvg ? firstActCol + actCount : null;
-    const lastTableCol = firstActCol + actCount - 1 + (showAvg ? 1 : 0);
-    const tableEndCol = Math.max(lastTableCol, 2);
-    const gapCol = tableEndCol + 1;
-    const descCol = tableEndCol + 2;
+    const avgCol = showAvg ? firstActCol + allActs.length : null;
+    const tableEndCol = Math.max(
+      firstActCol + allActs.length - 1 + (showAvg ? 1 : 0),
+      2,
+    );
 
-    ws.getColumn(1).width = 7;
-    ws.getColumn(2).width = 44;
+    const widths = { 1: 7, 2: 44 };
     catGroups.forEach((g) => {
       const label = XLSX_CAT_HEADERS[g.cat];
-      let per = Math.max(8, Math.ceil((label.length * 1.25 + 2) / g.acts.length));
-      if (per === 9) per = 9.5; // ExcelJS omits width 9 (its default) on write
+      const per = Math.max(8, Math.ceil((label.length * 1.25 + 2) / g.acts.length));
       g.acts.forEach((act) => {
-        const idx = allActs.indexOf(act);
-        ws.getColumn(firstActCol + idx).width = per;
+        widths[firstActCol + allActs.indexOf(act)] = per;
       });
     });
-    if (avgCol) ws.getColumn(avgCol).width = 10;
-    ws.getColumn(gapCol).width = 2;
-    ws.getColumn(descCol).width = 56;
+    if (avgCol) widths[avgCol] = 10;
+
+    return { sheet, allActs, catGroups, firstActCol, avgCol, tableEndCol, widths };
+  }
+
+  // Writes one grade table (header line, table, descriptions) starting at
+  // startRow. Returns the last row used.
+  function renderXlsxBlock(ws, layout, startRow, descCol, options) {
+    const { sheet, allActs, catGroups, firstActCol, avgCol, tableEndCol } = layout;
+    const incHeaders = options.includeHeaders !== false;
+    const decimals = options.decimals !== undefined ? options.decimals : "1";
+    // One value per activity, like the school template. Raw scores are used
+    // whenever they are selected; grades only when scores are unticked.
+    const useScores = options.includeScores !== false || !options.includeGrades;
+    const students = getStudentNames(sheet.group);
 
     const font = (extra = {}) => ({ name: XLSX_FONT, size: 11, ...extra });
     const thin = { style: "thin", color: { argb: "FF000000" } };
     const medium = { style: "medium", color: { argb: "FF000000" } };
 
-    let r = 1;
+    let r = startRow;
 
     // ── Header info line ──
     if (incHeaders) {
-      const termText = String(sheet.term || "").toUpperCase();
       const bold = (t) => ({ text: t, font: font({ bold: true }) });
       const norm = (t) => ({ text: t, font: font() });
       const cell = ws.getCell(r, 1);
@@ -2930,7 +2984,7 @@
           bold("COURSE: "),
           norm(String(sheet.group || "") + "        "),
           bold("TERM: "),
-          norm(termText),
+          norm(String(sheet.term || "").toUpperCase()),
         ],
       };
       cell.alignment = { vertical: "middle", horizontal: "left" };
@@ -2944,7 +2998,6 @@
     const h2 = r + 1;
     const headerFont = font({ bold: true });
     const center = { vertical: "middle", horizontal: "center", wrapText: true };
-
     const setHeader = (row, col, value) => {
       const c = ws.getCell(row, col);
       c.value = value;
@@ -3061,8 +3114,60 @@
       });
     });
 
-    ws.pageSetup.printArea =
-      "A1:" + ws.getColumn(descCol).letter + Math.max(lastRow, dRow);
+    return Math.max(lastRow, dRow - 1);
+  }
+
+  function addXlsxTab(workbook, tab, options, usedNames) {
+    const ws = workbook.addWorksheet(uniqueXlsxTabName(tab.name, usedNames), {
+      views: [{ showGridLines: false }],
+      pageSetup: {
+        orientation: "landscape",
+        fitToPage: true,
+        fitToWidth: 1,
+        fitToHeight: 0,
+        margins: {
+          left: 0.4,
+          right: 0.4,
+          top: 0.5,
+          bottom: 0.5,
+          header: 0.3,
+          footer: 0.3,
+        },
+      },
+    });
+
+    // Shared columns so stacked tables line up: widest value wins, and the
+    // descriptions column sits to the right of the widest table.
+    const layouts = tab.sheets.map((s) => xlsxBlockLayout(s, options));
+    const maxTableEnd = Math.max(2, ...layouts.map((l) => l.tableEndCol));
+    const gapCol = maxTableEnd + 1;
+    const descCol = maxTableEnd + 2;
+    const widths = {};
+    layouts.forEach((l) =>
+      Object.entries(l.widths).forEach(([col, w]) => {
+        widths[col] = Math.max(widths[col] || 0, w);
+      }),
+    );
+    for (let col = 1; col <= maxTableEnd; col++) {
+      let w = widths[col] || 8;
+      if (w === 9) w = 9.5; // ExcelJS omits width 9 (its default) on write
+      ws.getColumn(col).width = w;
+    }
+    ws.getColumn(gapCol).width = 2;
+    ws.getColumn(descCol).width = 56;
+
+    let row = 1;
+    let lastRow = 1;
+    layouts.forEach((layout, i) => {
+      if (i > 0) {
+        // Each table starts on a new printed page
+        ws.getRow(lastRow).addPageBreak();
+        row = lastRow + 3;
+      }
+      lastRow = renderXlsxBlock(ws, layout, row, descCol, options);
+    });
+
+    ws.pageSetup.printArea = "A1:" + ws.getColumn(descCol).letter + lastRow;
     return ws;
   }
 
@@ -3081,7 +3186,9 @@
     wb.creator = "ESL Learning Platform";
     wb.created = new Date();
     const used = new Set();
-    sheetList.forEach((s) => addXlsxWorksheet(wb, s, options, used));
+    planXlsxTabs(sheetList, options.layout).forEach((tab) =>
+      addXlsxTab(wb, tab, options, used),
+    );
     const buffer = await wb.xlsx.writeBuffer();
     const blob = new Blob([buffer], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -3107,6 +3214,11 @@
     return r ? r.value : "1";
   }
 
+  function getExportLayout() {
+    const r = [...$exportLayoutRadios].find((x) => x.checked);
+    return r ? r.value : "group";
+  }
+
   function syncExportOptionsUi() {
     // Grade format only matters when grades or the final column are exported
     const needsFormat = $exportIncGrades.checked || ($exportIncFinal && $exportIncFinal.checked);
@@ -3123,7 +3235,9 @@
       $exportFormatHint.textContent =
         fmt === "csv"
           ? "Plain data only. Use this format to upload grades back into a sheet."
-          : "One column per activity (raw scores, or grades when raw scores are off), activity descriptions on the right. Multiple sheets become separate tabs.";
+          : "One column per activity (raw scores, or grades when raw scores are off), activity descriptions on the right.";
+    if ($exportLayoutWrap)
+      $exportLayoutWrap.hidden = fmt !== "xlsx" || pendingExportCount < 2;
     syncExportOptionsUi();
   }
 
@@ -3154,6 +3268,15 @@
     } catch {}
     const want = saved === "csv" ? "csv" : "xlsx";
     [...$exportFormatRadios].forEach((r) => (r.checked = r.value === want));
+    let savedLayout = null;
+    try {
+      savedLayout = localStorage.getItem(EXPORT_LAYOUT_KEY);
+    } catch {}
+    const wantLayout = ["group", "level", "single"].includes(savedLayout)
+      ? savedLayout
+      : "group";
+    [...$exportLayoutRadios].forEach((r) => (r.checked = r.value === wantLayout));
+    pendingExportCount = type === "current" ? 1 : selectedIds.size;
     if ($exportSubtitle) {
       if (type === "current") {
         const s = getSheet();
@@ -3181,11 +3304,13 @@
       includeScores: $exportIncScores.checked,
       includeGrades: $exportIncGrades.checked,
       includeFinal: $exportIncFinal ? $exportIncFinal.checked : true,
+      layout: pendingExportCount > 1 ? getExportLayout() : "group",
       decimals: getExportDecimals(),
     };
     const format = getExportFormat();
     try {
       localStorage.setItem(EXPORT_FORMAT_KEY, format);
+      localStorage.setItem(EXPORT_LAYOUT_KEY, getExportLayout());
     } catch {}
 
     if (format === "xlsx") {

@@ -2834,3 +2834,83 @@ body.dark-mode .gs-export-download-btn {
 body.dark-mode .gs-export-hero-text h3 {
     color: #fff;
 }
+
+/* Workbook tab layout choices */
+.gs-export-layout-wrap[hidden] {
+    display: none;
+}
+
+.gs-export-choices {
+    border: 1px solid var(--gsx-line);
+    border-radius: 14px;
+    background: var(--gsx-surface);
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.gs-export-choice {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.gs-export-choice + .gs-export-choice {
+    border-top: 1px solid var(--gsx-line);
+}
+
+.gs-export-choice:hover {
+    background: var(--gsx-accent-soft);
+}
+
+.gs-export-choice input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.gs-export-choice-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    font-size: 14px;
+    color: var(--gsx-muted);
+    background: var(--gsx-card);
+    border: 1px solid var(--gsx-line);
+    transition: color 0.15s, background 0.15s, border-color 0.15s;
+}
+
+.gs-radio-dot {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 2px solid color-mix(in srgb, var(--gsx-muted) 60%, transparent);
+    flex-shrink: 0;
+    box-sizing: border-box;
+    transition: border 0.15s;
+}
+
+.gs-export-choice:has(input:checked) {
+    background: var(--gsx-accent-soft);
+}
+
+.gs-export-choice:has(input:checked) .gs-export-choice-icon {
+    color: #fff;
+    background: var(--gsx-accent);
+    border-color: var(--gsx-accent);
+}
+
+.gs-export-choice input:checked ~ .gs-radio-dot {
+    border: 5px solid var(--gsx-accent);
+}
+
+.gs-export-choice input:focus-visible ~ .gs-radio-dot {
+    outline: 3px solid color-mix(in srgb, var(--gsx-accent) 40%, transparent);
+    outline-offset: 2px;
+}
