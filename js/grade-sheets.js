@@ -104,6 +104,7 @@
 
   // ── DOM refs – Phase 7 ─────────────────────────────────
   const $removeDecimalToggle = $("gs-remove-decimal-toggle");
+  const $removeDecimalWrap = $("gs-remove-decimal-wrap");
   const $clearGradesBtn = $("gs-clear-grades-btn");
   const $editSheetInfoBtn = $("gs-edit-sheet-info-btn");
 
@@ -1860,6 +1861,8 @@
       $modeGradesBtn.classList.toggle("gs-btn-primary", isGradesView);
       $modeGradesBtn.classList.toggle("gs-btn-secondary", !isGradesView);
     }
+    // "No Decimals" only changes how grades look, so show it in Grades mode
+    if ($removeDecimalWrap) $removeDecimalWrap.hidden = !isGradesView;
     renderGrid();
   }
 

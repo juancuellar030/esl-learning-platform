@@ -44,7 +44,6 @@ body {
     position: absolute;
     width: 350px;
     height: 350px;
-    background: radial-gradient(circle, rgba(123, 104, 238, 0.18) 0%, transparent 70%);
     top: -120px;
     right: -60px;
     pointer-events: none;
@@ -319,7 +318,6 @@ body {
     position: absolute;
     width: 150px;
     height: 150px;
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, transparent 70%);
     top: -60px;
     right: -30px;
     pointer-events: none;
@@ -3148,4 +3146,50 @@ body.dark-mode .gs-link-btn {
 
 body.dark-mode .gs-withdrawn-tag {
     background: #4a3326;
+}
+
+/* =====================================================
+   MODALS FIT THE SCREEN + WIDE "NEW SHEET" LAYOUT
+   ===================================================== */
+.gs-modal-overlay {
+    padding: 16px;
+    box-sizing: border-box;
+}
+
+/* Header and footer stay visible; the body scrolls when it is too tall */
+.gs-modal {
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 32px);
+}
+
+.gs-modal-header,
+.gs-modal-footer {
+    flex-shrink: 0;
+}
+
+.gs-modal-body {
+    overflow-y: auto;
+    min-height: 0;
+}
+
+.gs-modal-new-sheet {
+    max-width: 960px;
+}
+
+.gs-new-sheet-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 900px) {
+    .gs-new-sheet-grid {
+        grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+        gap: 0 28px;
+    }
+}
+
+/* "No Decimals" only applies in Grades mode */
+.gs-toggle-switch-wrapper[hidden] {
+    display: none;
 }
