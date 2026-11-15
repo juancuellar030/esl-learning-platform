@@ -18,7 +18,7 @@
             href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
         />
         <link rel="stylesheet" href="css/styles.css" />
-        <link rel="stylesheet" href="css/grade-sheets.css?v=export-layout" />
+        <link rel="stylesheet" href="css/grade-sheets.css?v=export-subject" />
     </head>
 
     <body>
@@ -1177,6 +1177,15 @@
                                 <span class="gs-radio-dot" aria-hidden="true"></span>
                             </label>
                             <label class="gs-export-choice">
+                                <input type="radio" name="gs-export-layout" value="subject" />
+                                <span class="gs-export-choice-icon"><i class="fa-solid fa-book-open"></i></span>
+                                <span class="gs-export-toggle-text">
+                                    <strong>One tab per subject</strong>
+                                    <small>Technology, Science… with groups stacked</small>
+                                </span>
+                                <span class="gs-radio-dot" aria-hidden="true"></span>
+                            </label>
+                            <label class="gs-export-choice">
                                 <input type="radio" name="gs-export-layout" value="single" />
                                 <span class="gs-export-choice-icon"><i class="fa-solid fa-file-lines"></i></span>
                                 <span class="gs-export-toggle-text">
@@ -1389,6 +1398,6 @@
         <script src="https://accounts.google.com/gsi/client" async defer></script>
         <script src="https://apis.google.com/js/api.js" async defer></script>
         <script src="js/google-drive-service.js"></script>
-        <script src="js/grade-sheets.js?v=export-layout"></script>
+        <script src="js/grade-sheets.js?v=export-subject"></script>
     </body>
 </html>

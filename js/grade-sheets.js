@@ -2904,6 +2904,18 @@
       const subs = subjectsOf(sorted);
       return [{ name: subs.length === 1 ? subs[0] : "GRADES", sheets: sorted }];
     }
+    if (layout === "subject") {
+      const buckets = new Map();
+      sorted.forEach((s) => {
+        const subject = String(s.subject || "").trim();
+        const key = subject.toLowerCase();
+        if (!buckets.has(key)) buckets.set(key, { subject, sheets: [] });
+        buckets.get(key).sheets.push(s);
+      });
+      return [...buckets.values()]
+        .sort((a, b) => a.subject.localeCompare(b.subject))
+        .map((b) => ({ name: b.subject || "NO SUBJECT", sheets: b.sheets }));
+    }
     if (layout === "level") {
       const buckets = new Map();
       sorted.forEach((s) => {
@@ -3272,7 +3284,7 @@
     try {
       savedLayout = localStorage.getItem(EXPORT_LAYOUT_KEY);
     } catch {}
-    const wantLayout = ["group", "level", "single"].includes(savedLayout)
+    const wantLayout = ["group", "level", "subject", "single"].includes(savedLayout)
       ? savedLayout
       : "group";
     [...$exportLayoutRadios].forEach((r) => (r.checked = r.value === wantLayout));
