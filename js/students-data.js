@@ -51,7 +51,7 @@ const studentNames = STUDENTS_DATA.map(s => s.name);
  * Pulls from STUDENT_GROUPS (student-groups-data.js) so names are
  * always in sync with the Grade Sheets tool.
  *
- * To add more groups: add entries here following the same pattern.
+ * Groups come from the active school year (School Setup).
  */
 function _buildClassGroups() {
     // STUDENT_GROUPS is defined in student-groups-data.js (loaded before this file)
@@ -59,18 +59,13 @@ function _buildClassGroups() {
         // Fallback: single group using legacy short names
         return [{ id: 'My Class', label: 'My Class', students: studentNames }];
     }
-    return [
-        { id: '3A', label: '3° A', students: STUDENT_GROUPS['3A'] || [] },
-        { id: '3B', label: '3° B', students: STUDENT_GROUPS['3B'] || [] },
-        { id: '3C', label: '3° C', students: STUDENT_GROUPS['3C'] || [] },
-        { id: '4A', label: '4° A', students: STUDENT_GROUPS['4A'] || [] },
-        { id: '4B', label: '4° B', students: STUDENT_GROUPS['4B'] || [] },
-        { id: '4C', label: '4° C', students: STUDENT_GROUPS['4C'] || [] },
-        { id: '5A', label: '5° A', students: STUDENT_GROUPS['5A'] || [] },
-        { id: '5B', label: '5° B', students: STUDENT_GROUPS['5B'] || [] },
-        { id: '5C', label: '5° C', students: STUDENT_GROUPS['5C'] || [] },
-        { id: '5D', label: '5° D', students: STUDENT_GROUPS['5D'] || [] },
-    ];
+    // One entry per group of the active school year (see School Setup)
+    return Object.keys(STUDENT_GROUPS)
+        .sort((x, y) => x.localeCompare(y, undefined, { numeric: true }))
+        .map(id => {
+            const m = id.match(/^(\d+)\s*(.*)$/);
+            return { id, label: m ? m[1] + '° ' + m[2] : id, students: STUDENT_GROUPS[id] || [] };
+        });
 }
 
 const CLASS_GROUPS = _buildClassGroups();

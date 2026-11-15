@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <link rel="icon" type="image/png" href="assets/graduation-cap-icon.png" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>School Setup - ESL Learning Platform</title>
+        <meta
+            name="description"
+            content="Set up school years, grade levels, groups, student rosters and subjects shared by every tool."
+        />
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        />
+        <link rel="stylesheet" href="css/styles.css" />
+        <link rel="stylesheet" href="css/school-setup.css?v=year1" />
+    </head>
+
+    <body>
+        <div class="ss-page">
+            <!-- Header -->
+            <header class="ss-header">
+                <div class="ss-header-text">
+                    <h1><i class="fa-solid fa-school"></i> School Setup</h1>
+                    <p>Years, groups, student lists and subjects shared by every tool</p>
+                </div>
+                <div class="ss-header-actions">
+                    <a href="tools.html" class="ss-btn ss-btn-ghost">
+                        <i class="fa-solid fa-arrow-left"></i> Tools
+                    </a>
+                    <div class="ss-year-picker" id="ss-year-picker">
+                        <button
+                            type="button"
+                            id="ss-year-btn"
+                            class="ss-year-btn"
+                            aria-haspopup="listbox"
+                            aria-expanded="false"
+                            title="School year shown on this page and used by every tool"
+                        >
+                            <i class="fa-regular fa-calendar"></i>
+                            <span id="ss-year-label"></span>
+                            <i class="fa-solid fa-chevron-down ss-year-caret"></i>
+                        </button>
+                        <div id="ss-year-menu" class="ss-year-menu" role="listbox" aria-label="School year" hidden></div>
+                    </div>
+                    <button id="ss-new-year-btn" class="ss-btn ss-btn-ghost">
+                        <i class="fa-solid fa-plus"></i> New year
+                    </button>
+                    <button id="ss-sync-chip" class="ss-sync-chip" data-state="off" title="Google Drive sync">
+                        <i class="fa-brands fa-google-drive"></i>
+                        <span id="ss-sync-chip-label">Not synced</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Tabs -->
+            <nav class="ss-tabs" role="tablist">
+                <button class="ss-tab is-active" data-tab="students" role="tab">
+                    <i class="fa-solid fa-users"></i> Groups &amp; Students
+                </button>
+                <button class="ss-tab" data-tab="subjects" role="tab">
+                    <i class="fa-solid fa-book-open"></i> Subjects
+                </button>
+                <button class="ss-tab" data-tab="sync" role="tab">
+                    <i class="fa-solid fa-cloud"></i> Sync &amp; Backup
+                </button>
+            </nav>
+
+            <!-- ── Groups & Students ── -->
+            <section class="ss-panel" data-panel="students">
+                <div class="ss-students-layout">
+                    <aside class="ss-card ss-groups-card">
+                        <div class="ss-card-head">
+                            <h2>Groups</h2>
+                            <span class="ss-muted" id="ss-groups-total"></span>
+                        </div>
+                        <div id="ss-group-list" class="ss-group-list"></div>
+                        <form id="ss-add-group-form" class="ss-inline-form">
+                            <input id="ss-add-group-input" type="text" placeholder="New group, e.g. 3D" maxlength="8" />
+                            <button class="ss-btn ss-btn-primary ss-btn-sm" type="submit">
+                                <i class="fa-solid fa-plus"></i> Add
+                            </button>
+                        </form>
+                        <button id="ss-import-multi-btn" class="ss-btn ss-btn-soft ss-btn-block">
+                            <i class="fa-solid fa-file-import"></i> Import lists for several groups
+                        </button>
+                    </aside>
+
+                    <div class="ss-card ss-roster-card">
+                        <div id="ss-roster-empty" class="ss-empty">
+                            <i class="fa-solid fa-users-rectangle"></i>
+                            <p>Add a group to start building its student list.</p>
+                        </div>
+                        <div id="ss-roster" hidden>
+                            <div class="ss-roster-head">
+                                <div>
+                                    <h2 id="ss-roster-title"></h2>
+                                    <p class="ss-muted" id="ss-roster-counts"></p>
+                                </div>
+                                <div class="ss-roster-actions">
+                                    <label class="ss-toggle">
+                                        <input type="checkbox" id="ss-show-withdrawn" checked />
+                                        <span class="ss-toggle-track"><span class="ss-toggle-thumb"></span></span>
+                                        Show withdrawn
+                                    </label>
+                                    <button id="ss-import-btn" class="ss-btn ss-btn-soft ss-btn-sm">
+                                        <i class="fa-solid fa-file-import"></i> Import list
+                                    </button>
+                                    <button id="ss-delete-group-btn" class="ss-btn ss-btn-danger-ghost ss-btn-sm" title="Delete group">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <form id="ss-add-student-form" class="ss-inline-form ss-add-student">
+                                <input
+                                    id="ss-add-student-input"
+                                    type="text"
+                                    placeholder="Add a student: LAST NAMES FIRST NAMES"
+                                    autocomplete="off"
+                                />
+                                <button class="ss-btn ss-btn-primary ss-btn-sm" type="submit">
+                                    <i class="fa-solid fa-user-plus"></i> Add student
+                                </button>
+                            </form>
+                            <div class="ss-table-wrap">
+                                <table class="ss-table">
+                                    <thead>
+                                        <tr>
+                                            <th class="ss-col-num">#</th>
+                                            <th>Student</th>
+                                            <th class="ss-col-status">Status</th>
+                                            <th class="ss-col-actions"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="ss-roster-body"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ── Subjects ── -->
+            <section class="ss-panel" data-panel="subjects" hidden>
+                <div class="ss-card">
+                    <div class="ss-card-head">
+                        <div>
+                            <h2>Subjects</h2>
+                            <p class="ss-muted">
+                                Choose which groups take each subject. Grade Sheets uses this to create a term's
+                                sheets in one go and to share activities across groups of the same level.
+                            </p>
+                        </div>
+                    </div>
+                    <div id="ss-subject-list" class="ss-subject-list"></div>
+                    <form id="ss-add-subject-form" class="ss-inline-form">
+                        <input id="ss-add-subject-input" type="text" placeholder="New subject, e.g. Science" maxlength="60" />
+                        <button class="ss-btn ss-btn-primary ss-btn-sm" type="submit">
+                            <i class="fa-solid fa-plus"></i> Add subject
+                        </button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- ── Sync & Backup ── -->
+            <section class="ss-panel" data-panel="sync" hidden>
+                <div class="ss-sync-grid">
+                    <div class="ss-card">
+                        <div class="ss-card-head">
+                            <h2><i class="fa-brands fa-google-drive"></i> Google Drive sync</h2>
+                        </div>
+                        <p class="ss-muted">
+                            Keeps one file, <strong>school-setup.json</strong>, in the
+                            <strong>ESL - School Setup</strong> folder of your Drive. Open this page on another
+                            computer and sync to get the same years, groups and lists there.
+                        </p>
+                        <dl class="ss-sync-status">
+                            <dt>Status</dt>
+                            <dd id="ss-sync-status">Not connected</dd>
+                            <dt>Last synced</dt>
+                            <dd id="ss-sync-last">Never</dd>
+                        </dl>
+                        <div class="ss-btn-row">
+                            <button id="ss-drive-connect" class="ss-btn ss-btn-primary">
+                                <i class="fa-brands fa-google"></i> Connect Google Drive
+                            </button>
+                            <button id="ss-drive-sync" class="ss-btn ss-btn-soft" hidden>
+                                <i class="fa-solid fa-rotate"></i> Sync now
+                            </button>
+                            <button id="ss-drive-disconnect" class="ss-btn ss-btn-ghost-dark" hidden>
+                                Disconnect
+                            </button>
+                        </div>
+                        <label class="ss-toggle ss-auto-sync">
+                            <input type="checkbox" id="ss-auto-sync" checked />
+                            <span class="ss-toggle-track"><span class="ss-toggle-thumb"></span></span>
+                            Sync automatically after each change while connected
+                        </label>
+                    </div>
+                    <div class="ss-card">
+                        <div class="ss-card-head">
+                            <h2><i class="fa-solid fa-box-archive"></i> Backup file</h2>
+                        </div>
+                        <p class="ss-muted">
+                            Download everything on this page as a file, or restore it from one. Restoring
+                            replaces the current setup on this computer.
+                        </p>
+                        <div class="ss-btn-row">
+                            <button id="ss-backup-download" class="ss-btn ss-btn-soft">
+                                <i class="fa-solid fa-download"></i> Download backup
+                            </button>
+                            <label class="ss-btn ss-btn-soft" for="ss-backup-file">
+                                <i class="fa-solid fa-upload"></i> Restore from file
+                            </label>
+                            <input id="ss-backup-file" type="file" accept=".json,application/json" hidden />
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- ── Modals ── -->
+        <div class="ss-overlay" id="ss-import-overlay" hidden>
+            <div class="ss-modal ss-modal-wide" role="dialog" aria-labelledby="ss-import-title">
+                <div class="ss-modal-head">
+                    <h3 id="ss-import-title">Import student list</h3>
+                    <button class="ss-icon-btn" data-close="ss-import-overlay" aria-label="Close">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+                <div class="ss-modal-body">
+                    <p class="ss-muted" id="ss-import-help"></p>
+                    <div class="ss-import-source">
+                        <textarea id="ss-import-text" rows="9" spellcheck="false"></textarea>
+                        <div class="ss-import-file-row">
+                            <label class="ss-btn ss-btn-soft ss-btn-sm" for="ss-import-file">
+                                <i class="fa-solid fa-file-excel"></i> Choose Excel / CSV file
+                            </label>
+                            <input id="ss-import-file" type="file" accept=".xlsx,.csv,.txt" hidden />
+                            <span class="ss-muted" id="ss-import-file-name"></span>
+                        </div>
+                    </div>
+                    <div class="ss-segment" role="radiogroup" aria-label="Import mode">
+                        <label><input type="radio" name="ss-import-mode" value="add" checked /><span>Add new names</span></label>
+                        <label><input type="radio" name="ss-import-mode" value="replace" /><span>Replace list</span></label>
+                    </div>
+                    <p class="ss-muted ss-small" id="ss-import-mode-hint"></p>
+                    <div id="ss-import-preview" class="ss-import-preview"></div>
+                </div>
+                <div class="ss-modal-foot">
+                    <button class="ss-btn ss-btn-ghost-dark" data-close="ss-import-overlay">Cancel</button>
+                    <button class="ss-btn ss-btn-primary" id="ss-import-confirm" disabled>
+                        <i class="fa-solid fa-check"></i> Import
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="ss-overlay" id="ss-student-overlay" hidden>
+            <div class="ss-modal" role="dialog" aria-labelledby="ss-student-title">
+                <div class="ss-modal-head">
+                    <h3 id="ss-student-title">Student</h3>
+                    <button class="ss-icon-btn" data-close="ss-student-overlay" aria-label="Close">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+                <div class="ss-modal-body" id="ss-student-body"></div>
+                <div class="ss-modal-foot" id="ss-student-foot"></div>
+            </div>
+        </div>
+
+        <div class="ss-overlay" id="ss-year-overlay" hidden>
+            <div class="ss-modal" role="dialog" aria-labelledby="ss-year-title">
+                <div class="ss-modal-head">
+                    <h3 id="ss-year-title">New school year</h3>
+                    <button class="ss-icon-btn" data-close="ss-year-overlay" aria-label="Close">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+                <div class="ss-modal-body">
+                    <label class="ss-field">
+                        <span>Year</span>
+                        <input id="ss-year-input" type="text" inputmode="numeric" maxlength="9" placeholder="2027" />
+                    </label>
+                    <label class="ss-field">
+                        <span>Start from</span>
+                        <select id="ss-year-copy"></select>
+                    </label>
+                    <p class="ss-muted ss-small">
+                        Copying keeps the grade levels, groups and subjects but starts every student list
+                        empty, ready for the new year's lists. Earlier years stay available in the year picker.
+                    </p>
+                </div>
+                <div class="ss-modal-foot">
+                    <button class="ss-btn ss-btn-ghost-dark" data-close="ss-year-overlay">Cancel</button>
+                    <button class="ss-btn ss-btn-primary" id="ss-year-create">
+                        <i class="fa-solid fa-check"></i> Create year
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="ss-toast" class="ss-toast" role="status" aria-live="polite"></div>
+
+        <script src="js/school-roster.js?v=1"></script>
+        <script src="js/student-groups-data.js?v=setup1"></script>
+        <script src="js/darkmode.js"></script>
+        <script src="https://accounts.google.com/gsi/client" async defer></script>
+        <script src="https://apis.google.com/js/api.js" async defer></script>
+        <script src="js/google-drive-service.js"></script>
+        <script src="js/school-setup.js?v=year1"></script>
+    </body>
+</html>

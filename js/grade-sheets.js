@@ -35,6 +35,7 @@
   const $filterSubject = $("gs-filter-subject");
   const $filterCourse = $("gs-filter-course");
   const $filterTerm = $("gs-filter-term");
+  const $filterYear = $("gs-filter-year");
   const $filterSort = $("gs-filter-sort");
   const $filterClearBtn = $("gs-filter-clear-btn");
   const $filterSummary = $("gs-filter-summary");
@@ -54,7 +55,11 @@
   const $fieldSubject = $("gs-field-subject");
   const $fieldIcon = $("gs-field-icon");
   const $fieldHeaderColor = $("gs-field-header-color");
-  const $fieldGroup = $("gs-field-group");
+  const $fieldGroups = $("gs-field-groups");
+  const $fieldGroupsHint = $("gs-field-groups-hint");
+  const $fieldShare = $("gs-field-share");
+  const $subjectOptions = $("gs-subject-options");
+  const $modalCreateLabel = $("gs-modal-create-label");
   const $fieldTerm = $("gs-field-term");
   const $deleteOverlay = $("gs-delete-overlay");
   const $deleteName = $("gs-delete-name");
@@ -209,15 +214,59 @@
   // ══════════════════════════════════════════════════════
   //                    HELPERS
   // ══════════════════════════════════════════════════════
-  function getStudentCount(g) {
-    return typeof STUDENT_GROUPS !== "undefined" && STUDENT_GROUPS[g]
-      ? STUDENT_GROUPS[g].length
-      : 0;
+  // ── Rosters come from School Setup (js/school-roster.js) ──
+  // Sheets belong to a school year; sheets made before school years existed
+  // count as 2026.
+  const LEGACY_SHEET_YEAR = "2026";
+  const Roster = window.SchoolRoster || null;
+
+  function currentSchoolYear() {
+    return Roster ? Roster.activeYear() : LEGACY_SHEET_YEAR;
   }
-  function getStudentNames(g) {
-    return typeof STUDENT_GROUPS !== "undefined" && STUDENT_GROUPS[g]
-      ? STUDENT_GROUPS[g]
+  function sheetYear(sheet) {
+    return (sheet && sheet.year) || LEGACY_SHEET_YEAR;
+  }
+  function yearGroupIds(year) {
+    if (Roster && Roster.year(year)) return Roster.groups(year).map((g) => g.id);
+    return typeof STUDENT_GROUPS !== "undefined"
+      ? Object.keys(STUDENT_GROUPS).sort((a, b) =>
+          a.localeCompare(b, undefined, { numeric: true }),
+        )
       : [];
+  }
+  // [{ name, status, withdrawnOn, note }] including withdrawn students
+  function rosterFor(group, year) {
+    if (Roster && Roster.group(group, year))
+      return Roster.students(group, { year, includeWithdrawn: true });
+    const list =
+      typeof STUDENT_GROUPS !== "undefined" && STUDENT_GROUPS[group]
+        ? STUDENT_GROUPS[group]
+        : [];
+    return list.map((name) => ({ name, status: "active" }));
+  }
+  function hasAnyGrade(sheet, name) {
+    const row = (sheet.grades || {})[name];
+    return !!row && Object.values(row).some((v) => v != null && v !== "");
+  }
+  // Active students, plus withdrawn students who already have grades here
+  function getSheetRoster(sheet) {
+    return rosterFor(sheet.group, sheetYear(sheet)).filter(
+      (st) => st.status !== "withdrawn" || hasAnyGrade(sheet, st.name),
+    );
+  }
+  function getSheetStudents(sheet) {
+    return getSheetRoster(sheet).map((st) => st.name);
+  }
+  function getWithdrawnStudent(sheet, name) {
+    return (
+      getSheetRoster(sheet).find(
+        (st) => st.name === name && st.status === "withdrawn",
+      ) || null
+    );
+  }
+  function getActiveCount(group, year) {
+    return rosterFor(group, year).filter((st) => st.status !== "withdrawn")
+      .length;
   }
 
   function getAllActivities(sheet) {
@@ -233,7 +282,7 @@
   }
 
   function getCompletionPercent(sheet) {
-    const students = getStudentNames(sheet.group);
+    const students = getSheetStudents(sheet);
     const aids = getAllActivityIds(sheet);
     if (!students.length || !aids.length) return 0;
     const total = students.length * aids.length;
@@ -431,10 +480,17 @@
     return gradeBand(grade, sc.napr, sc.nmax);
   }
 
-  // ── Phase 6: Weighted Average Calculation (From Grades) ────────────
+  // ── Phase 6: Weighted Average Calculation ────────────
+  // Mirrors the school platform's final grade (DEF): raw scores are averaged
+  // within each competencia, the competencias are weighted (35/35/30), and
+  // the result is read on the grade scale as a straight proportion
+  // (e.g. 42.5 / 50 → 4.25). Per-activity scales and exigency only affect
+  // the individual activity grades and colours, not the final grade.
   function calcWeightedAvg(studentName, sheet) {
     const grades = sheet.grades[studentName] || {};
     const cats = sheet.categories || {};
+    const sheetMax = parseFloat(sheet.pmax) || 50;
+    const nmax = parseFloat(sheet.nmax) || 5;
     let weightedSum = 0;
     let totalWeight = 0;
     let filledCats = 0;
@@ -442,34 +498,27 @@
     CATEGORIES.forEach((cat) => {
       const acts = cats[cat] || [];
       if (acts.length === 0) return;
-      let sumGrades = 0,
+      let sumRatio = 0,
         count = 0;
       acts.forEach((a) => {
         const v = parseFloat(grades[a.id]);
         if (!isNaN(v)) {
-          const sc = getScaleForActivity(a, sheet);
-          const grade = calculateGrade(
-            v,
-            sc.pmax,
-            sc.exig,
-            sc.nmin,
-            sc.nmax,
-            sc.napr,
-          );
-          sumGrades += grade;
+          const max = parseFloat(a.maxScore) || sheetMax;
+          sumRatio += Math.min(Math.max(v / max, 0), 1);
           count++;
         }
       });
       if (count > 0) {
-        const avgGrade = sumGrades / count;
-        weightedSum += avgGrade * CAT_WEIGHTS[cat];
+        weightedSum += (sumRatio / count) * CAT_WEIGHTS[cat];
         totalWeight += CAT_WEIGHTS[cat];
         filledCats++;
       }
     });
 
     if (totalWeight === 0) return { avg: null, filledCats };
-    return { avg: weightedSum / totalWeight, filledCats };
+    // Trim floating-point noise so values like 4.25 round up (not 4.2499999…)
+    const avg = Math.round((weightedSum / totalWeight) * nmax * 1e9) / 1e9;
+    return { avg, filledCats };
   }
 
   function isFailRisk(studentName, sheet) {
@@ -481,7 +530,7 @@
 
   // ── Phase 3: Missing Grades ──────────────────────────
   function getMissingGrades(sheet) {
-    const students = getStudentNames(sheet.group);
+    const students = getSheetStudents(sheet);
     const allActs = getAllActivities(sheet);
     if (!students.length || !allActs.length)
       return {
@@ -524,17 +573,291 @@
   // ══════════════════════════════════════════════════════
   //              POPULATE GROUP DROPDOWN
   // ══════════════════════════════════════════════════════
-  function populateGroupDropdown() {
-    $fieldGroup.innerHTML = "";
-    if (typeof STUDENT_GROUPS === "undefined") return;
-    Object.keys(STUDENT_GROUPS)
-      .sort()
-      .forEach((g) => {
-        const opt = document.createElement("option");
-        opt.value = g;
-        opt.textContent = g + " (" + STUDENT_GROUPS[g].length + " students)";
-        $fieldGroup.appendChild(opt);
+  // Groups of the current school year as chips, one row per grade level
+  function renderGroupPicker(checked) {
+    if (!$fieldGroups) return;
+    const year = currentSchoolYear();
+    const ids = yearGroupIds(year);
+    const byLevel = new Map();
+    ids.forEach((g) => {
+      const lvl = groupLevel(g);
+      const key = lvl == null ? "?" : lvl;
+      if (!byLevel.has(key)) byLevel.set(key, []);
+      byLevel.get(key).push(g);
+    });
+    $fieldGroups.innerHTML = ids.length
+      ? [...byLevel.entries()]
+          .map(([lvl, list]) => {
+            const label =
+              lvl === "?"
+                ? "Other"
+                : Roster
+                  ? Roster.levelName(lvl, year)
+                  : XLSX_LEVEL_NAMES[lvl] || lvl + "°";
+            const chips = list
+              .map(
+                (g) =>
+                  `<label class="gs-group-chip"><input type="checkbox" value="${escHtml(g)}"${checked && checked.has(g) ? " checked" : ""}><span>${escHtml(g)} <small>${getActiveCount(g, year)}</small></span></label>`,
+              )
+              .join("");
+            return `<div class="gs-group-picker-row"><span class="gs-group-picker-level">${escHtml(label)}</span><div class="gs-group-picker-chips">${chips}</div></div>`;
+          })
+          .join("")
+      : '<p class="gs-field-hint">No groups yet. Add them in School Setup.</p>';
+    updateCreateLabel();
+  }
+
+  function selectedPickerGroups() {
+    return $fieldGroups
+      ? [...$fieldGroups.querySelectorAll("input:checked")].map((i) => i.value)
+      : [];
+  }
+
+  function updateCreateLabel() {
+    const n = selectedPickerGroups().length;
+    if ($modalCreateLabel)
+      $modalCreateLabel.textContent = n > 1 ? `Create ${n} Sheets` : "Create Sheet";
+    if ($fieldGroupsHint) {
+      const sub = Roster && Roster.subjectByName($fieldSubject.value);
+      $fieldGroupsHint.textContent =
+        sub && sub.groups.length
+          ? `· ${sub.name} groups from School Setup`
+          : "· pick one or more";
+    }
+  }
+
+  function populateSubjectOptions() {
+    if (!$subjectOptions) return;
+    const names = new Set();
+    if (Roster) Roster.subjects(currentSchoolYear()).forEach((x) => names.add(x.name));
+    sheets.forEach((x) => x.subject && names.add(x.subject));
+    $subjectOptions.innerHTML = [...names]
+      .sort((a, b) => a.localeCompare(b))
+      .map((n) => `<option value="${escHtml(n)}"></option>`)
+      .join("");
+  }
+
+  // Typing a subject from School Setup ticks the groups that take it
+  function onSubjectInput() {
+    const sub = Roster && Roster.subjectByName($fieldSubject.value);
+    if (sub && sub.groups.length) renderGroupPicker(new Set(sub.groups));
+    else updateCreateLabel();
+  }
+
+  // ══════════════════════════════════════════════════════
+  //      SHARED ACTIVITIES (subject + level + term + year)
+  // ══════════════════════════════════════════════════════
+  // Sheets with linked: true and the same school year, subject, grade level
+  // and term share one activity list (same activity ids). Editing it in one
+  // sheet copies it to the others; each sheet keeps its own grades and its
+  // own hidden columns.
+  const LINK_MIGRATION_KEY = "gradeSheetsLinkMigration";
+
+  function linkKey(sheet) {
+    return [
+      sheetYear(sheet),
+      normalizeText(sheet.subject),
+      groupLevel(sheet.group),
+      normalizeText(sheet.term),
+    ].join("|");
+  }
+
+  // Other sheets that share activities with this one
+  function linkedSiblings(sheet) {
+    if (!sheet || !sheet.linked) return [];
+    const key = linkKey(sheet);
+    return sheets.filter((x) => x !== sheet && x.linked && linkKey(x) === key);
+  }
+
+  // Sheets of the same year/subject/level/term, shared or not
+  function levelPeers(sheet) {
+    const key = linkKey(sheet);
+    return sheets.filter((x) => x !== sheet && linkKey(x) === key);
+  }
+
+  function groupList(list) {
+    return list
+      .map((x) => x.group)
+      .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
+      .join(", ");
+  }
+
+  // Labels and max scores per category, in order
+  function activityShape(sheet) {
+    return CATEGORIES.map((cat) =>
+      (sheet.categories[cat] || [])
+        .map((a) => normalizeText(a.label) + "#" + (a.maxScore || sheet.pmax || 50))
+        .join("\u0001"),
+    ).join("\u0002");
+  }
+
+  function cloneActivities(categories, hiddenById) {
+    const out = {};
+    CATEGORIES.forEach((cat) => {
+      out[cat] = (categories[cat] || []).map((a) => ({
+        ...a,
+        hidden: hiddenById ? !!hiddenById[a.id] : false,
+      }));
+    });
+    return out;
+  }
+
+  // Gives target the same activity ids as source (same shape required),
+  // moving its grades to the new ids.
+  function adoptActivities(target, source) {
+    const hidden = {};
+    CATEGORIES.forEach((cat) => {
+      const from = target.categories[cat] || [];
+      const to = source.categories[cat] || [];
+      from.forEach((a, i) => {
+        const newId = to[i] && to[i].id;
+        if (!newId) return;
+        hidden[newId] = !!a.hidden;
+        if (newId === a.id) return;
+        Object.values(target.grades || {}).forEach((row) => {
+          if (row && Object.prototype.hasOwnProperty.call(row, a.id)) {
+            row[newId] = row[a.id];
+            delete row[a.id];
+          }
+        });
       });
+    });
+    target.categories = cloneActivities(source.categories, hidden);
+  }
+
+  // Copies this sheet's activity list to the sheets it shares with
+  function syncLinkedActivities(sheet) {
+    const sibs = linkedSiblings(sheet);
+    if (!sibs.length) return 0;
+    const ids = new Set(getAllActivityIds(sheet));
+    sibs.forEach((sib) => {
+      const hidden = {};
+      getAllActivities(sib).forEach((a) => (hidden[a.id] = !!a.hidden));
+      sib.categories = cloneActivities(sheet.categories, hidden);
+      Object.values(sib.grades || {}).forEach((row) => {
+        Object.keys(row || {}).forEach((aid) => {
+          if (!ids.has(aid)) delete row[aid];
+        });
+      });
+      sib.updatedAt = Date.now();
+    });
+    return sibs.length;
+  }
+
+  // Call after any change to a sheet's activities (add, remove, edit, reorder)
+  function activitiesChanged(sheet) {
+    sheet.updatedAt = Date.now();
+    const shared = syncLinkedActivities(sheet);
+    saveToStorage();
+    renderLinkInfo();
+    return shared;
+  }
+
+  // One-time: share activities between existing sheets whose activity
+  // lists already match (same descriptions, same order). Grades are kept.
+  function linkExistingSheets() {
+    if (localStorage.getItem(LINK_MIGRATION_KEY)) return;
+    const buckets = new Map();
+    sheets
+      .filter((x) => x.linked === undefined)
+      .forEach((x) => {
+        const k = linkKey(x);
+        if (!buckets.has(k)) buckets.set(k, []);
+        buckets.get(k).push(x);
+      });
+    let linked = 0;
+    buckets.forEach((list) => {
+      list.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+      const canon = list[0];
+      const shape = activityShape(canon);
+      canon.linked = true;
+      list.slice(1).forEach((x) => {
+        if (activityShape(x) === shape) {
+          adoptActivities(x, canon);
+          x.linked = true;
+          linked++;
+        } else {
+          x.linked = false;
+        }
+      });
+    });
+    localStorage.setItem(LINK_MIGRATION_KEY, String(Date.now()));
+    if (buckets.size) saveToStorage();
+    if (linked)
+      setTimeout(
+        () =>
+          showToast(
+            `Activities are now shared between groups of the same level (${linked} sheet${linked === 1 ? "" : "s"} linked).`,
+            "success",
+          ),
+        600,
+      );
+  }
+
+  // Start sharing with the other sheets of this subject/level/term,
+  // using this sheet's activities.
+  function shareWithLevel() {
+    const sheet = getSheet();
+    if (!sheet) return;
+    const peers = levelPeers(sheet);
+    const shape = activityShape(sheet);
+    const mismatched = peers.filter(
+      (p) => getAllActivityIds(p).length && activityShape(p) !== shape,
+    );
+    if (mismatched.length) {
+      showToast(
+        `${groupList(mismatched)} ${mismatched.length === 1 ? "has" : "have"} different activities. Make the lists match (same descriptions, same order) to share them.`,
+        "error",
+      );
+      return;
+    }
+    peers.forEach((p) => {
+      if (getAllActivityIds(p).length) adoptActivities(p, sheet);
+      else p.categories = cloneActivities(sheet.categories);
+      p.linked = true;
+      p.updatedAt = Date.now();
+    });
+    sheet.linked = true;
+    saveToStorage();
+    renderLinkInfo();
+    showToast(`Activities shared with ${groupList(peers)}.`, "success");
+  }
+
+  function unshareActivities() {
+    const sheet = getSheet();
+    if (!sheet) return;
+    const sibs = linkedSiblings(sheet);
+    sheet.linked = false;
+    sheet.updatedAt = Date.now();
+    saveToStorage();
+    renderLinkInfo();
+    showToast(
+      `${sheet.group} now keeps its own activities${sibs.length ? "; " + groupList(sibs) + " still share theirs" : ""}.`,
+      "info",
+    );
+  }
+
+  function renderLinkInfo() {
+    const el = $("gs-link-info");
+    if (!el) return;
+    const sheet = getSheet();
+    if (!sheet) {
+      el.hidden = true;
+      return;
+    }
+    const sibs = linkedSiblings(sheet);
+    const peers = levelPeers(sheet);
+    if (sheet.linked && sibs.length) {
+      el.hidden = false;
+      el.className = "gs-info-item gs-link-info is-linked";
+      el.innerHTML = `<i class="fa-solid fa-link"></i> <span>Activities shared with <strong>${escHtml(groupList(sibs))}</strong></span> <button type="button" class="gs-link-btn" data-link-action="unshare" title="Give this group its own activities">Unshare</button>`;
+    } else if (peers.length) {
+      el.hidden = false;
+      el.className = "gs-info-item gs-link-info";
+      el.innerHTML = `<i class="fa-solid fa-link-slash"></i> <span>Own activities</span> <button type="button" class="gs-link-btn" data-link-action="share" title="Use one set of activities for all of them">Share with ${escHtml(groupList(peers))}</button>`;
+    } else {
+      el.hidden = true;
+    }
   }
 
   // ══════════════════════════════════════════════════════
@@ -546,6 +869,7 @@
       if (saved && typeof saved === "object") {
         dashboardFilters = {
           search: saved.search || "",
+          year: saved.year != null ? saved.year : currentSchoolYear(),
           subject: saved.subject || "",
           course: saved.course || "",
           term: saved.term || "",
@@ -564,6 +888,7 @@
     if ($filterSubject) $filterSubject.value = dashboardFilters.subject;
     if ($filterCourse) $filterCourse.value = dashboardFilters.course;
     if ($filterTerm) $filterTerm.value = dashboardFilters.term;
+    if ($filterYear) $filterYear.value = dashboardFilters.year || "";
     if ($filterSort) $filterSort.value = dashboardFilters.sort;
     if ($filterClearBtn)
       $filterClearBtn.disabled = !hasActiveDashboardFilters();
@@ -575,6 +900,7 @@
       dashboardFilters.subject ||
       dashboardFilters.course ||
       dashboardFilters.term ||
+      (dashboardFilters.year || "") !== currentSchoolYear() ||
       dashboardFilters.sort !== "recent"
     );
   }
@@ -604,6 +930,12 @@
       else $el.value = "";
     };
 
+    const years = [...new Set(sheets.map((s) => sheetYear(s)))];
+    if (!years.includes(currentSchoolYear())) years.push(currentSchoolYear());
+    years.sort();
+    fillSelect($filterYear, years, "All years");
+    if ($filterYear && dashboardFilters.year && years.includes(dashboardFilters.year))
+      $filterYear.value = dashboardFilters.year;
     fillSelect($filterSubject, subjects, "All subjects");
     fillSelect($filterCourse, courses, "All courses");
     fillSelect($filterTerm, terms, "All terms");
@@ -622,6 +954,8 @@
   function getFilteredSortedSheets() {
     const query = normalizeText(dashboardFilters.search);
     let list = sheets.filter((sheet) => {
+      if (dashboardFilters.year && sheetYear(sheet) !== dashboardFilters.year)
+        return false;
       if (
         dashboardFilters.subject &&
         sheet.subject !== dashboardFilters.subject
@@ -683,6 +1017,7 @@
   function clearDashboardFilters() {
     dashboardFilters = {
       search: "",
+      year: currentSchoolYear(),
       subject: "",
       course: "",
       term: "",
@@ -698,6 +1033,7 @@
     dashboardFilters.subject = $filterSubject ? $filterSubject.value : "";
     dashboardFilters.course = $filterCourse ? $filterCourse.value : "";
     dashboardFilters.term = $filterTerm ? $filterTerm.value : "";
+    dashboardFilters.year = $filterYear ? $filterYear.value : "";
     dashboardFilters.sort = $filterSort ? $filterSort.value : "recent";
     saveDashboardFilters();
     syncDashboardFilterControls();
@@ -736,7 +1072,7 @@
     $dashboardGrid.style.display = "";
 
     filtered.forEach(({ sheet, pct }, idx) => {
-      const sc = getStudentCount(sheet.group);
+      const sc = getSheetStudents(sheet).length;
       const ac = getAllActivityIds(sheet).length;
       const sel = selectedIds.has(sheet.id);
       const headerColor = normalizeHeaderColor(sheet.headerColor);
@@ -767,7 +1103,7 @@
                 </div>
                 <div class="gs-card-body">
                     <div class="gs-card-detail"><i class="fa-solid fa-chalkboard-user"></i> ${escHtml(sheet.teacherName)}</div>
-                    <div class="gs-card-detail"><i class="fa-solid fa-list-check"></i> ${ac} ${ac === 1 ? "activity" : "activities"}</div>
+                    <div class="gs-card-detail"><i class="fa-solid fa-list-check"></i> ${ac} ${ac === 1 ? "activity" : "activities"}${linkedSiblings(sheet).length ? ` <span class="gs-card-linked" title="Activities shared with ${escHtml(groupList(linkedSiblings(sheet)))}"><i class="fa-solid fa-link"></i> shared</span>` : ""}</div>
                     <div class="gs-completion-label">${pct}% complete</div>
                     <div class="gs-completion-bar-wrap"><div class="gs-completion-bar" style="width:${pct}%"></div></div>
                 </div>`;
@@ -815,6 +1151,8 @@
       ? sheets[sheets.length - 1].teacherName || ""
       : "";
     $fieldSubject.value = "";
+    populateSubjectOptions();
+    renderGroupPicker(new Set());
     setIconPickerValue($fieldIcon, "fa-microchip");
     setColorPickerValue($fieldHeaderColor, "#2c1f56");
     $modalOverlay.style.display = "";
@@ -832,29 +1170,68 @@
       setTimeout(() => ($fieldSubject.style.borderColor = ""), 1500);
       return;
     }
-    sheets.push({
-      id: generateId(),
-      teacherName: $fieldTeacher.value.trim() || "Teacher",
-      subject,
-      group: $fieldGroup.value,
-      term: $fieldTerm.value,
-      icon: normalizeIcon($fieldIcon ? $fieldIcon.value : ""),
-      headerColor: normalizeHeaderColor(
-        $fieldHeaderColor ? $fieldHeaderColor.value : "",
+    const groups = selectedPickerGroups();
+    if (!groups.length) {
+      showToast("Pick at least one group.", "error");
+      return;
+    }
+    const year = currentSchoolYear();
+    const term = $fieldTerm.value;
+    const share = !$fieldShare || $fieldShare.checked;
+    const duplicates = groups.filter((g) =>
+      sheets.some(
+        (x) =>
+          x.group === g &&
+          x.term === term &&
+          sheetYear(x) === year &&
+          normalizeText(x.subject) === normalizeText(subject),
       ),
-      pmax: 50,
-      exig: 60,
-      nmin: 1.0,
-      nmax: 5.0,
-      napr: 3.0,
-      categories: { cognitiva: [], laboral: [], ciudadana: [] },
-      grades: {},
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
+    );
+    if (
+      duplicates.length &&
+      !confirm(
+        `${subject} ${term} term already has a sheet for ${duplicates.join(", ")}. Create another one anyway?`,
+      )
+    )
+      return;
+
+    const created = [];
+    groups.forEach((group) => {
+      const sheet = {
+        id: generateId(),
+        year,
+        teacherName: $fieldTeacher.value.trim() || "Teacher",
+        subject,
+        group,
+        term,
+        icon: normalizeIcon($fieldIcon ? $fieldIcon.value : ""),
+        headerColor: normalizeHeaderColor(
+          $fieldHeaderColor ? $fieldHeaderColor.value : "",
+        ),
+        pmax: 50,
+        exig: 60,
+        nmin: 1.0,
+        nmax: 5.0,
+        napr: 3.0,
+        linked: share,
+        categories: { cognitiva: [], laboral: [], ciudadana: [] },
+        grades: {},
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      };
+      // Start from the level's shared activities when they already exist
+      if (share) {
+        const source = linkedSiblings(sheet)[0];
+        if (source) sheet.categories = cloneActivities(source.categories);
+      }
+      sheets.push(sheet);
+      created.push(sheet);
     });
     saveToStorage();
     closeNewSheetModal();
     renderDashboard();
+    if (created.length > 1)
+      showToast(`Created ${created.length} sheets: ${groupList(created)}.`, "success");
   }
 
   // ══════════════════════════════════════════════════════
@@ -896,6 +1273,7 @@
     $infoSubject.textContent = sheet.subject;
     $infoGroup.textContent = "Course " + sheet.group;
     $infoTerm.textContent = sheet.term + " Term";
+    renderLinkInfo();
     renderGrid();
     renderDescriptions();
   }
@@ -914,7 +1292,7 @@
     closeColumnMenu();
     const sheet = getSheet();
     if (!sheet) return;
-    const students = getStudentNames(sheet.group);
+    const students = getSheetStudents(sheet);
     const allActs = getAllActivities(sheet);
     const visibleActs = allActs.filter((a) => !a.hidden);
     const hasActivities = allActs.length > 0;
@@ -1027,6 +1405,8 @@
     students.forEach((name, idx) => {
       const tr = document.createElement("tr");
       if (highlightedRow === name) tr.classList.add("gs-row-highlight");
+      const withdrawn = getWithdrawnStudent(sheet, name);
+      if (withdrawn) tr.classList.add("gs-row-withdrawn");
 
       const numTd = document.createElement("td");
       numTd.className = "gs-col-num-cell";
@@ -1036,6 +1416,17 @@
       const nameTd = document.createElement("td");
       nameTd.className = "gs-col-name-cell";
       nameTd.textContent = name;
+      if (withdrawn) {
+        const tag = document.createElement("span");
+        tag.className = "gs-withdrawn-tag";
+        tag.textContent = "Withdrawn";
+        tag.title =
+          "Withdrawn in School Setup" +
+          (withdrawn.withdrawnOn ? " on " + withdrawn.withdrawnOn : "") +
+          (withdrawn.note ? " — " + withdrawn.note : "") +
+          ". Kept here because they have grades on this sheet.";
+        nameTd.appendChild(tag);
+      }
       nameTd.addEventListener("click", () => {
         highlightedRow = highlightedRow === name ? null : name;
         renderGrid();
@@ -1399,8 +1790,7 @@
       hidden: false,
       maxScore: sheet.pmax || 50,
     });
-    sheet.updatedAt = Date.now();
-    saveToStorage();
+    activitiesChanged(sheet);
     inp.value = "";
     renderGrid();
     renderDescriptions();
@@ -1409,6 +1799,24 @@
   function removeActivity(actId) {
     const sheet = getSheet();
     if (!sheet) return;
+    const sibs = linkedSiblings(sheet);
+    if (sibs.length) {
+      const act = getAllActivities(sheet).find((a) => a.id === actId);
+      const withGrades = [sheet, ...sibs].filter((x) =>
+        Object.values(x.grades || {}).some(
+          (row) => row && row[actId] != null && row[actId] !== "",
+        ),
+      );
+      if (
+        !confirm(
+          `Remove "${act ? act.label : "this activity"}" from ${sheet.group} and ${groupList(sibs)}?` +
+            (withGrades.length
+              ? `\n\nGrades typed in this column will be deleted in ${groupList(withGrades)}.`
+              : ""),
+        )
+      )
+        return;
+    }
     CATEGORIES.forEach((cat) => {
       sheet.categories[cat] = (sheet.categories[cat] || []).filter(
         (a) => a.id !== actId,
@@ -1417,8 +1825,7 @@
     Object.keys(sheet.grades).forEach(
       (name) => delete sheet.grades[name][actId],
     );
-    sheet.updatedAt = Date.now();
-    saveToStorage();
+    activitiesChanged(sheet);
     renderGrid();
     renderDescriptions();
   }
@@ -1750,8 +2157,7 @@
         found.scaleId = $actScaleSelect.value;
       }
     });
-    sheet.updatedAt = Date.now();
-    saveToStorage();
+    activitiesChanged(sheet);
     closeActivitySettings();
     renderGrid();
   }
@@ -1763,17 +2169,12 @@
     const sheet = getSheet();
     if (!sheet) return;
 
-    if (
-      $editInfoGroup &&
-      $editInfoGroup.children.length === 0 &&
-      typeof STUDENT_GROUPS !== "undefined"
-    ) {
-      Object.keys(STUDENT_GROUPS).forEach((g) => {
-        const opt = document.createElement("option");
-        opt.value = g;
-        opt.textContent = g;
-        $editInfoGroup.appendChild(opt);
-      });
+    if ($editInfoGroup) {
+      const ids = yearGroupIds(sheetYear(sheet));
+      if (sheet.group && !ids.includes(sheet.group)) ids.push(sheet.group);
+      $editInfoGroup.innerHTML = ids
+        .map((g) => `<option value="${escHtml(g)}">${escHtml(g)}</option>`)
+        .join("");
     }
 
     if ($editInfoTeacher) $editInfoTeacher.value = sheet.teacherName || "";
@@ -1812,6 +2213,21 @@
     sheet.headerColor = normalizeHeaderColor(
       $editInfoHeaderColor ? $editInfoHeaderColor.value : "",
     );
+
+    if (sheet.linked) {
+      const sibs = linkedSiblings(sheet);
+      if (sibs.length) {
+        if (activityShape(sibs[0]) === activityShape(sheet)) {
+          adoptActivities(sheet, sibs[0]);
+        } else {
+          sheet.linked = false;
+          showToast(
+            `${sheet.group} keeps its own activities because they differ from ${groupList(sibs)}.`,
+            "info",
+          );
+        }
+      }
+    }
 
     sheet.updatedAt = Date.now();
     saveToStorage();
@@ -1861,8 +2277,7 @@
     if (si === -1 || ti === -1) return;
     const [moved] = acts.splice(si, 1);
     acts.splice(ti, 0, moved);
-    sheet.updatedAt = Date.now();
-    saveToStorage();
+    activitiesChanged(sheet);
     renderGrid();
     renderDescriptions();
   }
@@ -1947,8 +2362,7 @@
       if (!sheet.categories[newCat]) sheet.categories[newCat] = [];
       sheet.categories[newCat].push(act);
     }
-    sheet.updatedAt = Date.now();
-    saveToStorage();
+    activitiesChanged(sheet);
     closeEditDescription();
     renderGrid();
     renderDescriptions();
@@ -2030,7 +2444,7 @@
     const { missing, studentsWithGrades, totalCells, filledCells } =
       getMissingGrades(sheet);
     const allActs = getAllActivities(sheet);
-    const students = getStudentNames(sheet.group);
+    const students = getSheetStudents(sheet);
 
     $missingContent.innerHTML = "";
 
@@ -2114,7 +2528,7 @@
     if (importMode === "full_column") {
       const srcGrades = srcSheet.grades || {};
       if (!currSheet.grades) currSheet.grades = {};
-      const currStudents = getStudentNames(currSheet.group);
+      const currStudents = getSheetStudents(currSheet);
       currStudents.forEach((student) => {
         if (
           srcGrades[student] &&
@@ -2249,8 +2663,7 @@
     });
 
     const actCount = activitiesToImport.length;
-    currSheet.updatedAt = Date.now();
-    saveToStorage();
+    activitiesChanged(currSheet);
     closeImportModal();
     renderGrid();
     renderDescriptions();
@@ -2285,15 +2698,12 @@
   // ══════════════════════════════════════════════════════
   function downloadRosterTemplate() {
     const rows = [["Group", "Student"]];
-    if (typeof STUDENT_GROUPS !== "undefined") {
-      Object.keys(STUDENT_GROUPS)
-        .sort()
-        .forEach((group) => {
-          (STUDENT_GROUPS[group] || []).forEach((name) => {
-            rows.push([group, name]);
-          });
-        });
-    }
+    const year = currentSchoolYear();
+    yearGroupIds(year).forEach((group) => {
+      rosterFor(group, year)
+        .filter((st) => st.status !== "withdrawn")
+        .forEach((st) => rows.push([group, st.name]));
+    });
     const csv = rows.map((r) => r.map(csvEscape).join(",")).join("\r\n");
     downloadCsv("All_Groups_Roster.csv", csv);
   }
@@ -2304,7 +2714,7 @@
       showToast("Open a sheet first to download its template.", "error");
       return;
     }
-    const students = getStudentNames(sheet.group);
+    const students = getSheetStudents(sheet);
     const activities = getAllActivities(sheet);
     if (!activities.length) {
       showToast("This sheet has no activities yet — add some first.", "error");
@@ -2396,7 +2806,7 @@
   function previewUploadRows(rows) {
     const sheet = getSheet();
     if (!sheet) return null;
-    const students = getStudentNames(sheet.group);
+    const students = getSheetStudents(sheet);
     const studentLookup = new Map(
       students.map((name) => [normalizeText(name), name]),
     );
@@ -2566,7 +2976,10 @@
         : 0;
     const dataRows = pendingCsvImport.rows.slice(labelRowIndex + 1);
     const studentLookup = new Map(
-      getStudentNames(sheet.group).map((name) => [normalizeText(name), name]),
+      rosterFor(sheet.group, sheetYear(sheet)).map((st) => [
+        normalizeText(st.name),
+        st.name,
+      ]),
     );
     let imported = 0;
 
@@ -2639,7 +3052,7 @@
     const exportScores = incScores || (!incScores && !incGrades);
     const exportGrades = incGrades || (!incScores && !incGrades);
 
-    const students = getStudentNames(sheet.group);
+    const students = getSheetStudents(sheet);
     const allActs = getAllActivities(sheet);
     const rows = [];
 
@@ -2974,7 +3387,7 @@
     // One value per activity, like the school template. Raw scores are used
     // whenever they are selected; grades only when scores are unticked.
     const useScores = options.includeScores !== false || !options.includeGrades;
-    const students = getStudentNames(sheet.group);
+    const students = getSheetStudents(sheet);
 
     const font = (extra = {}) => ({ name: XLSX_FONT, size: 11, ...extra });
     const thin = { style: "thin", color: { argb: "FF000000" } };
@@ -3424,6 +3837,30 @@
       $filterCourse.addEventListener("change", onDashboardFilterChange);
     if ($filterTerm)
       $filterTerm.addEventListener("change", onDashboardFilterChange);
+    if ($filterYear)
+      $filterYear.addEventListener("change", onDashboardFilterChange);
+
+    // New sheet: group picker + subject suggestions
+    if ($fieldSubject) $fieldSubject.addEventListener("input", onSubjectInput);
+    if ($fieldGroups) $fieldGroups.addEventListener("change", updateCreateLabel);
+
+    // Shared activities chip in the editor
+    const $linkInfo = $("gs-link-info");
+    if ($linkInfo)
+      $linkInfo.addEventListener("click", (e) => {
+        const btn = e.target.closest("[data-link-action]");
+        if (!btn) return;
+        if (btn.dataset.linkAction === "share")
+          shareWithLevel();
+        else unshareActivities();
+      });
+
+    // Rosters edited in School Setup (another tab)
+    if (Roster)
+      Roster.onChange(() => {
+        if (currentSheetId) renderGrid();
+        else renderDashboard();
+      });
     if ($filterSort)
       $filterSort.addEventListener("change", onDashboardFilterChange);
     if ($filterClearBtn)
@@ -3651,9 +4088,10 @@
   //                      INIT
   // ══════════════════════════════════════════════════════
   function init() {
-    populateGroupDropdown();
-    loadDashboardFilters();
     loadFromStorage();
+    linkExistingSheets();
+    loadDashboardFilters();
+    if (dashboardFilters.year === undefined) dashboardFilters.year = currentSchoolYear();
     renderDashboard();
     bindEvents();
   }

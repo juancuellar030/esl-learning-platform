@@ -18,7 +18,7 @@
             href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
         />
         <link rel="stylesheet" href="css/styles.css" />
-        <link rel="stylesheet" href="css/grade-sheets.css?v=export-subject" />
+        <link rel="stylesheet" href="css/grade-sheets.css?v=dark2" />
     </head>
 
     <body>
@@ -78,6 +78,12 @@
                         />
                     </div>
                     <div class="gs-filter-controls">
+                        <div class="gs-filter-field">
+                            <label for="gs-filter-year">Year</label>
+                            <select id="gs-filter-year">
+                                <option value="">All years</option>
+                            </select>
+                        </div>
                         <div class="gs-filter-field">
                             <label for="gs-filter-subject">Subject</label>
                             <select id="gs-filter-subject">
@@ -274,6 +280,7 @@
                         <i class="fa-solid fa-calendar-alt"></i>
                         <span id="gs-info-term"></span>
                     </div>
+                    <div id="gs-link-info" class="gs-info-item gs-link-info" hidden></div>
                     <button
                         id="gs-edit-sheet-info-btn"
                         class="gs-btn gs-btn-sm gs-btn-secondary"
@@ -407,7 +414,10 @@
                             type="text"
                             id="gs-field-subject"
                             placeholder="e.g. Technology"
+                            list="gs-subject-options"
+                            autocomplete="off"
                         />
+                        <datalist id="gs-subject-options"></datalist>
                     </div>
                     <div class="gs-field">
                         <label>Subject Icon</label>
@@ -527,10 +537,17 @@
                         </div>
                     </div>
                     <div class="gs-field">
-                        <label for="gs-field-group">Group / Course</label>
-                        <select id="gs-field-group">
-                            <!-- Populated by JS from STUDENT_GROUPS -->
-                        </select>
+                        <label>
+                            Groups / Courses
+                            <span id="gs-field-groups-hint" class="gs-field-hint"></span>
+                        </label>
+                        <div id="gs-field-groups" class="gs-group-picker">
+                            <!-- Populated by JS from School Setup -->
+                        </div>
+                        <a href="school-setup.html" class="gs-setup-link">
+                            <i class="fa-solid fa-school"></i> Manage groups,
+                            students and subjects in School Setup
+                        </a>
                     </div>
                     <div class="gs-field">
                         <label for="gs-field-term">School Term</label>
@@ -541,13 +558,24 @@
                             <option value="Fourth">Fourth</option>
                         </select>
                     </div>
+                    <label class="gs-share-acts">
+                        <input type="checkbox" id="gs-field-share" checked />
+                        <span>
+                            <strong>Share activities within each grade level</strong>
+                            <small>Sheets of the same subject, term and level
+                                (e.g. 3A, 3B, 3C) use one set of activities:
+                                add or edit them once and every group
+                                updates.</small>
+                        </span>
+                    </label>
                 </div>
                 <div class="gs-modal-footer">
                     <button id="gs-modal-cancel" class="gs-btn gs-btn-ghost">
                         Cancel
                     </button>
                     <button id="gs-modal-create" class="gs-btn gs-btn-primary">
-                        <i class="fa-solid fa-check"></i> Create Sheet
+                        <i class="fa-solid fa-check"></i>
+                        <span id="gs-modal-create-label">Create Sheet</span>
                     </button>
                 </div>
             </div>
@@ -1393,11 +1421,12 @@
             </button>
         </div>
 
-        <script src="js/student-groups-data.js"></script>
+        <script src="js/school-roster.js?v=1"></script>
+        <script src="js/student-groups-data.js?v=setup1"></script>
         <script src="js/darkmode.js"></script>
         <script src="https://accounts.google.com/gsi/client" async defer></script>
         <script src="https://apis.google.com/js/api.js" async defer></script>
         <script src="js/google-drive-service.js"></script>
-        <script src="js/grade-sheets.js?v=export-subject"></script>
+        <script src="js/grade-sheets.js?v=setup1"></script>
     </body>
 </html>

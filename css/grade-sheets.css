@@ -2914,3 +2914,238 @@ body.dark-mode .gs-export-hero-text h3 {
     outline: 3px solid color-mix(in srgb, var(--gsx-accent) 40%, transparent);
     outline-offset: 2px;
 }
+
+/* =====================================================
+   SCHOOL SETUP INTEGRATION
+   (group picker, shared activities, withdrawn students)
+   ===================================================== */
+.gs-field-hint {
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 600;
+    color: #a29bfe;
+    font-size: 0.8rem;
+}
+
+.gs-group-picker {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px;
+    border: 2px solid #dfe6e9;
+    border-radius: 12px;
+}
+
+.gs-group-picker-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.gs-group-picker-level {
+    width: 82px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    color: #636e72;
+}
+
+.gs-group-picker-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.gs-field .gs-group-chip input {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+    pointer-events: none;
+}
+
+.gs-group-chip span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 2px solid #dfe6e9;
+    font-weight: 800;
+    font-size: 0.88rem;
+    color: #2d3436;
+    cursor: pointer;
+    user-select: none;
+}
+
+.gs-group-chip small {
+    font-weight: 700;
+    color: #95a5a6;
+    font-size: 0.75rem;
+}
+
+.gs-group-chip input:checked + span {
+    background: #6c5ce7;
+    border-color: #6c5ce7;
+    color: #fff;
+}
+
+.gs-group-chip input:checked + span small {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.gs-group-chip input:focus-visible + span {
+    outline: 3px solid rgba(108, 92, 231, 0.35);
+}
+
+.gs-setup-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #6c5ce7;
+    text-decoration: none;
+}
+
+.gs-setup-link:hover {
+    text-decoration: underline;
+}
+
+.gs-share-acts {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: #f5f3ff;
+    cursor: pointer;
+}
+
+.gs-share-acts input {
+    margin-top: 3px;
+    width: 18px;
+    height: 18px;
+    accent-color: #6c5ce7;
+    flex-shrink: 0;
+}
+
+.gs-share-acts strong {
+    display: block;
+    font-size: 0.9rem;
+    color: #2d3436;
+}
+
+.gs-share-acts small {
+    display: block;
+    margin-top: 2px;
+    font-size: 0.8rem;
+    color: #636e72;
+    line-height: 1.4;
+}
+
+.gs-link-info {
+    padding: 4px 6px 4px 12px;
+    border-radius: 999px;
+    background: #f1f2f6;
+}
+
+.gs-link-info.is-linked {
+    background: #ede9fe;
+    color: #4b3bc4;
+}
+
+.gs-link-info.is-linked i {
+    color: #6c5ce7;
+}
+
+.gs-link-btn {
+    border: none;
+    border-radius: 999px;
+    padding: 4px 10px;
+    font: inherit;
+    font-size: 0.78rem;
+    font-weight: 800;
+    cursor: pointer;
+    background: #fff;
+    color: #6c5ce7;
+}
+
+.gs-link-btn:hover {
+    background: #6c5ce7;
+    color: #fff;
+}
+
+.gs-card-linked {
+    margin-left: 6px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: #6c5ce7;
+}
+
+.gs-grade-table tr.gs-row-withdrawn .gs-col-name-cell {
+    color: #95a5a6;
+}
+
+.gs-withdrawn-tag {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 1px 7px;
+    border-radius: 999px;
+    background: #fff1e6;
+    color: #e17055;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    vertical-align: middle;
+    cursor: help;
+}
+
+body.dark-mode .gs-group-picker,
+body.dark-mode .gs-group-chip span {
+    border-color: #444;
+}
+
+body.dark-mode .gs-group-chip span,
+body.dark-mode .gs-share-acts strong {
+    color: #ecf0f1;
+}
+
+body.dark-mode .gs-share-acts {
+    background: #363636;
+}
+
+body.dark-mode .gs-share-acts small,
+body.dark-mode .gs-group-picker-level {
+    color: #b2bec3;
+}
+
+body.dark-mode .gs-link-info {
+    background: #333;
+}
+
+body.dark-mode .gs-link-info.is-linked {
+    background: #2e2a50;
+    color: #b0a8f0;
+}
+
+body.dark-mode .gs-group-chip input:checked + span {
+    background: #2e2a50;
+    border-color: #a29bfe;
+    color: #b0a8f0;
+}
+
+body.dark-mode .gs-group-chip input:checked + span small {
+    color: #b0a8f0;
+}
+
+body.dark-mode .gs-link-btn {
+    background: #2a2a2a;
+    color: #a29bfe;
+}
+
+body.dark-mode .gs-withdrawn-tag {
+    background: #4a3326;
+}
