@@ -437,7 +437,8 @@
 
   function gradeColorFromGrade(grade, sheet) {
     if (grade == null || grade === "") return "";
-    return gradeBand(grade, sheet.napr, sheet.nmax);
+    const ref = getReferenceScale(sheet);
+    return gradeBand(grade, ref.napr, ref.nmax);
   }
 
   function getSavedScales() {
@@ -448,20 +449,53 @@
     return [];
   }
 
-  function getScaleForActivity(act, sheet) {
-    if (act && act.scaleId && act.scaleId !== "global") {
-      const scales = getSavedScales();
-      const saved = scales.find((s) => s.id === act.scaleId);
-      if (saved) return saved;
-    }
+  // Columns without a scale of their own use the "General Scale" saved in
+  // the Grading Scale tool. If it isn't saved on this computer, the sheet's
+  // stored scale is the fallback.
+  const DEFAULT_SCALE_NAME = "General Scale";
+
+  function getGeneralScale() {
+    return (
+      getSavedScales().find(
+        (s) => normalizeText(s.name) === normalizeText(DEFAULT_SCALE_NAME),
+      ) || null
+    );
+  }
+
+  function sheetFallbackScale(sheet) {
     return {
-      name: "Default Sheet Scale",
-      pmax: act && act.maxScore ? act.maxScore : sheet.pmax || 50,
+      id: null,
+      name: "Sheet scale",
+      pmax: sheet.pmax || 50,
       exig: sheet.exig,
       nmin: sheet.nmin,
       nmax: sheet.nmax,
       napr: sheet.napr,
     };
+  }
+
+  // Scale used for the final grade's colour and the fail-risk warning
+  function getReferenceScale(sheet) {
+    return getGeneralScale() || sheetFallbackScale(sheet);
+  }
+
+  function isDefaultScale(act) {
+    if (!act || !act.scaleId || act.scaleId === "global") return true;
+    const general = getGeneralScale();
+    if (general && act.scaleId === general.id) return true;
+    return !getSavedScales().some((s) => s.id === act.scaleId);
+  }
+
+  function getScaleForActivity(act, sheet) {
+    if (act && act.scaleId && act.scaleId !== "global") {
+      const saved = getSavedScales().find((s) => s.id === act.scaleId);
+      if (saved) return saved;
+    }
+    const general = getGeneralScale();
+    if (general) return general;
+    const fallback = sheetFallbackScale(sheet);
+    if (act && act.maxScore) fallback.pmax = act.maxScore;
+    return fallback;
   }
 
   function gradeColor(value, sheet, act) {
@@ -482,16 +516,19 @@
   }
 
   // ── Phase 6: Weighted Average Calculation ────────────
-  // Mirrors the school platform's final grade (DEF): raw scores are averaged
-  // within each competencia, the competencias are weighted (35/35/30), and
-  // the result is read on the grade scale as a straight proportion
-  // (e.g. 42.5 / 50 → 4.25). Per-activity scales and exigency only affect
-  // the individual activity grades and colours, not the final grade.
+  // Mirrors the school platform's final grade (DEF). The platform receives
+  // each activity's grade with one decimal (typed without the point, e.g.
+  // 4.3 → 43), averages them within each competencia, weights the
+  // competencias 35/35/30 and rounds. So each activity's score is first
+  // converted with its scale and rounded to one decimal, exactly as it is
+  // shown in Grades view and typed into the platform.
+  function roundGrade1(g) {
+    return Math.round(g * 10 + 1e-9) / 10;
+  }
+
   function calcWeightedAvg(studentName, sheet) {
     const grades = sheet.grades[studentName] || {};
     const cats = sheet.categories || {};
-    const sheetMax = parseFloat(sheet.pmax) || 50;
-    const nmax = parseFloat(sheet.nmax) || 5;
     let weightedSum = 0;
     let totalWeight = 0;
     let filledCats = 0;
@@ -499,18 +536,20 @@
     CATEGORIES.forEach((cat) => {
       const acts = cats[cat] || [];
       if (acts.length === 0) return;
-      let sumRatio = 0,
+      let sumGrades = 0,
         count = 0;
       acts.forEach((a) => {
         const v = parseFloat(grades[a.id]);
         if (!isNaN(v)) {
-          const max = parseFloat(a.maxScore) || sheetMax;
-          sumRatio += Math.min(Math.max(v / max, 0), 1);
+          const sc = getScaleForActivity(a, sheet);
+          sumGrades += roundGrade1(
+            calculateGrade(v, sc.pmax, sc.exig, sc.nmin, sc.nmax, sc.napr),
+          );
           count++;
         }
       });
       if (count > 0) {
-        weightedSum += (sumRatio / count) * CAT_WEIGHTS[cat];
+        weightedSum += (sumGrades / count) * CAT_WEIGHTS[cat];
         totalWeight += CAT_WEIGHTS[cat];
         filledCats++;
       }
@@ -518,7 +557,7 @@
 
     if (totalWeight === 0) return { avg: null, filledCats };
     // Trim floating-point noise so values like 4.25 round up (not 4.2499999…)
-    const avg = Math.round((weightedSum / totalWeight) * nmax * 1e9) / 1e9;
+    const avg = Math.round((weightedSum / totalWeight) * 1e9) / 1e9;
     return { avg, filledCats };
   }
 
@@ -526,7 +565,7 @@
     const { avg, filledCats } = calcWeightedAvg(studentName, sheet);
     // Show fail-risk only when student has grades in at least 2 categories
     if (avg === null || filledCats < 2) return false;
-    return avg < sheet.napr;
+    return avg < getReferenceScale(sheet).napr;
   }
 
   // ── Phase 3: Missing Grades ──────────────────────────
@@ -1357,12 +1396,12 @@
           th.dataset.cat = cat;
           th.draggable = true;
           const sc = getScaleForActivity(act, sheet);
-          const hasCustomScale = act.scaleId && act.scaleId !== "global";
+          const hasCustomScale = !isDefaultScale(act);
           const scaleLabel = hasCustomScale ? escHtml(sc.name) : `/${sc.pmax}`;
           const scaleTitle = (
             hasCustomScale
               ? `Custom scale: ${sc.name} — click to change`
-              : "Using default sheet scale — click to set a custom scale for this activity"
+              : `Using ${sc.name || DEFAULT_SCALE_NAME} — click to choose another scale for this activity`
           )
             .replace(/&/g, "&amp;")
             .replace(/"/g, "&quot;");
@@ -1790,6 +1829,7 @@
       label,
       hidden: false,
       maxScore: sheet.pmax || 50,
+      scaleId: getGeneralScale() ? getGeneralScale().id : null,
     });
     activitiesChanged(sheet);
     inp.value = "";
@@ -2101,16 +2141,20 @@
 
     if ($actSettingsLabel) $actSettingsLabel.textContent = act.label;
     if ($actScaleSelect) {
-      $actScaleSelect.innerHTML =
-        '<option value="global">Default Sheet Scale</option>';
       const scales = getSavedScales();
+      const general = getGeneralScale();
+      $actScaleSelect.innerHTML = general
+        ? ""
+        : `<option value="global">Sheet scale (no "${DEFAULT_SCALE_NAME}" saved in Grading Scale)</option>`;
       scales.forEach((sc) => {
         const opt = document.createElement("option");
         opt.value = sc.id;
-        opt.textContent = sc.name || "Unnamed Scale";
+        opt.textContent =
+          (sc.name || "Unnamed Scale") + (general && sc.id === general.id ? " (default)" : "");
         $actScaleSelect.appendChild(opt);
       });
-      $actScaleSelect.value = act.scaleId || "global";
+      const current = isDefaultScale(act) ? (general ? general.id : "global") : act.scaleId;
+      $actScaleSelect.value = current;
     }
     updateActScalePreview();
     if ($actSettingsOverlay) $actSettingsOverlay.style.display = "";
@@ -2127,13 +2171,7 @@
     const val = $actScaleSelect.value;
     let sc;
     if (val === "global" && sheet) {
-      sc = {
-        pmax: sheet.pmax,
-        exig: sheet.exig,
-        nmin: sheet.nmin,
-        nmax: sheet.nmax,
-        napr: sheet.napr,
-      };
+      sc = sheetFallbackScale(sheet);
     } else {
       const scales = getSavedScales();
       sc = scales.find((s) => s.id === val);
@@ -3075,10 +3113,10 @@
       rows.push(
         [
           "Scale:",
-          "Max " + (sheet.pmax || 50),
-          "Pass " + (sheet.napr || 3.0),
-          "Min " + (sheet.nmin || 1.0),
-          "Max " + (sheet.nmax || 5.0),
+          "Max " + (getReferenceScale(sheet).pmax || 50),
+          "Pass " + (getReferenceScale(sheet).napr || 3.0),
+          "Min " + (getReferenceScale(sheet).nmin || 1.0),
+          "Max " + (getReferenceScale(sheet).nmax || 5.0),
         ]
           .map(csvEscape)
           .join(","),
@@ -4043,6 +4081,9 @@
 
     // Phase 3 – Scale config
     $scaleConfigBtn.addEventListener("click", openScaleConfig);
+    // The sheet's own scale is only a fallback now; columns use the
+    // General Scale (or another saved scale) from Activity Settings.
+    $scaleConfigBtn.hidden = true;
     document
       .querySelectorAll(".gs-scale-close")
       .forEach((b) => b.addEventListener("click", closeScaleConfig));

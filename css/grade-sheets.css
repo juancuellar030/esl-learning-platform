@@ -3193,3 +3193,19 @@ body.dark-mode .gs-withdrawn-tag {
 .gs-toggle-switch-wrapper[hidden] {
     display: none;
 }
+
+.gs-btn[hidden] {
+    display: none;
+}
+
+/* Ghost buttons inside light dialogs (e.g. Cancel) need dark text */
+body:not(.dark-mode) .gs-modal-footer .gs-btn-ghost {
+    color: #636e72;
+    border: 1px solid #dfe6e9;
+    background: transparent;
+}
+
+body:not(.dark-mode) .gs-modal-footer .gs-btn-ghost:hover {
+    color: #2d3436;
+    background: #f1f2f6;
+}
