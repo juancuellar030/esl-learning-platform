@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <link rel="icon" type="image/png" href="assets/graduation-cap-icon.png" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Class Redistribution - ESL Learning Platform</title>
+        <meta
+            name="description"
+            content="Build next school year's groups from this year's rosters, balanced by behavior, gender, peer influence and student links."
+        />
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        />
+        <link rel="stylesheet" href="css/styles.css" />
+        <link rel="stylesheet" href="css/class-redistribution.css?v=1" />
+    </head>
+
+    <body class="cr-body">
+        <div class="cr-page">
+            <!-- Header -->
+            <header class="cr-header">
+                <div class="cr-header-text">
+                    <h1>
+                        <i class="fa-solid fa-people-arrows"></i>
+                        <span data-i18n="app.title">Class Redistribution</span>
+                    </h1>
+                    <p data-i18n="app.subtitle">Build next school year's groups from this year's rosters</p>
+                </div>
+                <div class="cr-header-actions">
+                    <span class="cr-private" data-i18n-tip="privacy.tip">
+                        <i class="fa-solid fa-lock"></i>
+                        <span data-i18n="privacy.short">Private · this device only</span>
+                    </span>
+                    <span id="cr-saved" class="cr-saved" aria-live="polite"></span>
+                    <div class="cr-lang" role="group" aria-label="Language / Idioma">
+                        <button type="button" class="cr-lang-btn" data-lang="en">EN</button>
+                        <button type="button" class="cr-lang-btn" data-lang="es">ES</button>
+                    </div>
+                    <a href="tools.html" class="cr-btn cr-btn-on-brand">
+                        <i class="fa-solid fa-arrow-left"></i> <span data-i18n="nav.tools">Tools</span>
+                    </a>
+                </div>
+            </header>
+
+            <!-- Scope + plan + actions -->
+            <section class="cr-toolbar" id="cr-toolbar">
+                <div class="cr-tool-row">
+                    <div class="cr-field">
+                        <label for="cr-year" data-i18n="tb.year">School year</label>
+                        <select id="cr-year" class="cr-select"></select>
+                    </div>
+                    <div class="cr-field">
+                        <label for="cr-level" data-i18n="tb.grade">Current grade</label>
+                        <select id="cr-level" class="cr-select"></select>
+                    </div>
+                    <div class="cr-scope" id="cr-scope"></div>
+                    <div class="cr-tool-spacer"></div>
+                    <div class="cr-btn-group">
+                        <button type="button" id="cr-undo" class="cr-icon-btn" data-i18n-tip="tb.undo">
+                            <i class="fa-solid fa-rotate-left"></i>
+                        </button>
+                        <button type="button" id="cr-redo" class="cr-icon-btn" data-i18n-tip="tb.redo">
+                            <i class="fa-solid fa-rotate-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="cr-tool-row">
+                    <div class="cr-field">
+                        <label for="cr-plan" data-i18n="tb.plan">Plan</label>
+                        <div class="cr-inline">
+                            <select id="cr-plan" class="cr-select"></select>
+                            <button type="button" id="cr-plan-menu" class="cr-icon-btn" data-i18n-tip="tb.planActions">
+                                <i class="fa-solid fa-ellipsis"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="cr-field cr-field-num">
+                        <label for="cr-group-count" data-i18n="tb.groupCount">New groups</label>
+                        <input id="cr-group-count" class="cr-input" type="number" min="1" max="8" step="1" />
+                    </div>
+                    <div class="cr-field cr-field-num">
+                        <label for="cr-target" data-i18n="tb.target">Target size</label>
+                        <input id="cr-target" class="cr-input" type="number" min="1" max="60" step="1" data-i18n-placeholder="tb.targetNone" />
+                    </div>
+                    <div class="cr-tool-spacer"></div>
+                    <button type="button" id="cr-links-btn" class="cr-btn cr-btn-soft">
+                        <i class="fa-solid fa-link"></i> <span id="cr-links-label"></span>
+                    </button>
+                    <button type="button" id="cr-balance" class="cr-btn cr-btn-primary">
+                        <i class="fa-solid fa-scale-balanced"></i> <span data-i18n="tb.autoBalance">Auto-balance</span>
+                    </button>
+                    <button type="button" id="cr-export" class="cr-btn cr-btn-soft">
+                        <i class="fa-solid fa-file-export"></i> <span data-i18n="tb.export">Export</span>
+                        <i class="fa-solid fa-chevron-down cr-caret"></i>
+                    </button>
+                    <button type="button" id="cr-backup" class="cr-btn cr-btn-soft">
+                        <i class="fa-solid fa-box-archive"></i> <span data-i18n="tb.backup">Backup</span>
+                        <i class="fa-solid fa-chevron-down cr-caret"></i>
+                    </button>
+                    <button type="button" id="cr-finalize" class="cr-btn cr-btn-green">
+                        <i class="fa-solid fa-flag-checkered"></i> <span data-i18n="tb.finalize">Finalize</span>
+                    </button>
+                    <input type="file" id="cr-backup-file" accept=".json,application/json" hidden />
+                </div>
+            </section>
+
+            <!-- Views -->
+            <section class="cr-viewbar" id="cr-viewbar">
+                <div class="cr-views" id="cr-views" role="tablist"></div>
+                <div class="cr-viewbar-right">
+                    <div class="cr-field cr-field-inline">
+                        <label for="cr-filter" data-i18n="vb.highlight">Highlight</label>
+                        <select id="cr-filter" class="cr-select cr-select-sm"></select>
+                    </div>
+                    <button type="button" id="cr-select-mode" class="cr-btn cr-btn-soft cr-btn-sm" aria-pressed="false">
+                        <i class="fa-regular fa-square-check"></i> <span data-i18n="vb.selectMode">Select</span>
+                    </button>
+                </div>
+                <div class="cr-legend" id="cr-legend"></div>
+            </section>
+
+            <!-- Board -->
+            <main class="cr-board" id="cr-board">
+                <aside class="cr-left" id="cr-left"></aside>
+                <div class="cr-groups" id="cr-groups"></div>
+            </main>
+
+            <div class="cr-empty" id="cr-empty" hidden></div>
+        </div>
+
+        <!-- Selection bar -->
+        <div class="cr-selbar" id="cr-selbar" hidden></div>
+
+        <!-- Student profile drawer -->
+        <aside class="cr-drawer" id="cr-drawer" aria-hidden="true">
+            <div class="cr-drawer-inner" id="cr-drawer-inner"></div>
+        </aside>
+
+        <div id="cr-modal-root"></div>
+        <div class="cr-menu" id="cr-menu" role="menu" hidden></div>
+        <div class="cr-tip" id="cr-tip" role="tooltip" hidden></div>
+        <div class="cr-toast" id="cr-toast" role="status" hidden></div>
+
+        <script src="js/school-roster.js?v=1"></script>
+        <script src="js/student-groups-data.js?v=setup1"></script>
+        <script src="js/students-data.js?v=setup1"></script>
+        <script src="js/darkmode.js"></script>
+        <script src="js/class-redistribution.js?v=1"></script>
+    </body>
+</html>
