@@ -531,40 +531,82 @@
     border-radius: 10px;
 }
 
-/* Canvas Area */
+/* Viewer Area (PDF.js 4.x viewer components) */
 .viewer-canvas-area {
     flex: 1;
-    display: flex;
-    /* Remove centering to allow scrolling when zoomed */
-    /* align-items: center; */
-    /* justify-content: center; */
-    overflow: auto;
-    padding: 2rem;
-    margin-top: 0.1rem;
     position: relative;
+    min-height: 0;
 }
 
-.canvas-wrapper {
-    position: relative;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-    background: white;
-    margin: auto;
-    /* Centers content when smaller than container */
-}
-
-#pdfCanvas {
-    display: block;
-    background: white;
-}
-
-#annotationCanvas {
+/* PDF.js requires the scroll container to be absolutely positioned */
+.pdfjs-container {
     position: absolute;
-    top: 0;
-    left: 0;
-    cursor: crosshair;
-    z-index: 10;
-    /* Ensure annotations appear above PDF */
-    pointer-events: auto;
+    inset: 0;
+    overflow: auto;
+    background: #2a2a2a;
+}
+
+.pdfjs-container .pdfViewer {
+    padding: 1.5rem 0;
+}
+
+.pdfjs-container .pdfViewer .page {
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+/* Hand tool: grab cursor, no text selection */
+.pdfjs-container[data-tool="select"] {
+    cursor: grab;
+}
+
+.pdfjs-container[data-tool="select"].panning {
+    cursor: grabbing;
+}
+
+.pdfjs-container[data-tool="select"] .textLayer {
+    pointer-events: none;
+    user-select: none;
+}
+
+/* Pen: existing annotations shouldn't catch the pointer, so new strokes can
+   start on top of earlier ones */
+.pdfjs-container[data-tool="marker"] .annotationEditorLayer > * {
+    pointer-events: none !important;
+}
+
+/* Eraser */
+.pdfjs-container[data-tool="eraser"],
+.pdfjs-container[data-tool="eraser"] * {
+    cursor: cell !important;
+}
+
+.pdfjs-container[data-tool="eraser"] .textLayer {
+    user-select: none;
+}
+
+/* Saving indicator */
+.save-status {
+    color: #aaa;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    min-width: 70px;
+    text-align: right;
+}
+
+.header-btn.active {
+    background: var(--medium-slate-blue);
+}
+
+.stroke-width-label {
+    color: white;
+    font-size: 0.75rem;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+}
+
+.stroke-width-group.disabled {
+    opacity: 0.35;
+    pointer-events: none;
 }
 
 /* Notification System */
@@ -735,134 +777,6 @@ body.dark-mode .modal-card input:focus {
     .viewer-canvas-area {
         padding: 1rem;
     }
-}
-
-/* Text Layer */
-#textLayer {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    pointer-events: none;
-    z-index: 20;
-    overflow: hidden;
-}
-
-.text-annotation-box {
-    position: absolute;
-    pointer-events: auto;
-    cursor: move;
-    border: 1px solid transparent;
-    padding: 2px;
-    min-width: 40px;
-    min-height: 1.2em;
-    outline: none;
-    background: transparent;
-    transform-origin: top left;
-    box-sizing: border-box;
-}
-
-.text-annotation-editable {
-    width: 100%;
-    min-height: 1.2em;
-    outline: none;
-    cursor: text;
-    white-space: pre-wrap;
-    word-break: break-word;
-    writing-mode: horizontal-tb;
-    line-height: 1.3;
-    background: transparent;
-}
-
-.text-annotation-editable:empty:before {
-    content: attr(placeholder);
-    color: rgba(68, 68, 68, 0.4);
-}
-
-.text-annotation-box:hover {
-    border-color: rgba(99, 102, 241, 0.3);
-}
-
-.text-annotation-box.active {
-    border: 1px dashed var(--medium-slate-blue);
-    background: rgba(255, 255, 255, 0.5);
-    z-index: 30;
-}
-
-.text-annotation-box .resize-handle {
-    position: absolute;
-    width: 10px;
-    height: 10px;
-    background: var(--medium-slate-blue);
-    border: 1px solid white;
-    border-radius: 50%;
-    z-index: 40;
-    display: none;
-}
-
-.text-annotation-box.active .resize-handle {
-    display: block;
-}
-
-.resize-handle.se {
-    bottom: -5px;
-    right: -5px;
-    cursor: se-resize;
-}
-
-/* Hide other handles for now as requested user flow focuses on corner dragging */
-.resize-handle.nw,
-.resize-handle.ne,
-.resize-handle.sw {
-    display: none;
-}
-
-/* Text Alignment Mini-Toolbar */
-.text-align-toolbar {
-    position: absolute;
-    display: flex;
-    gap: 2px;
-    background: rgba(30, 30, 30, 0.95);
-    backdrop-filter: blur(8px);
-    border-radius: 6px;
-    padding: 3px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    z-index: 100;
-    pointer-events: auto;
-    transition: opacity 0.15s ease;
-}
-
-.text-align-toolbar.hidden {
-    opacity: 0;
-    pointer-events: none;
-}
-
-.text-align-btn {
-    background: transparent;
-    border: none;
-    color: rgba(255, 255, 255, 0.7);
-    width: 30px;
-    height: 28px;
-    border-radius: 4px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.8rem;
-    transition: all 0.15s ease;
-    padding: 0;
-}
-
-.text-align-btn:hover {
-    background: rgba(255, 255, 255, 0.12);
-    color: white;
-}
-
-.text-align-btn.active {
-    background: var(--medium-slate-blue, #6366f1);
-    color: white;
 }
 
 /* Thumbnail Grid Overlay */

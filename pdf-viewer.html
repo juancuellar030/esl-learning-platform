@@ -7,6 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PDF Viewer - ESL Learning Platform</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- PDF.js 4.x viewer component styles (pages, text layer, annotation editors) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/web/pdf_viewer.css">
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/pdf-library.css">
 </head>
@@ -39,7 +41,7 @@
                     <button class="header-btn" id="zoomOutBtn" title="Zoom Out">
                         <i class="fa-solid fa-search-minus"></i>
                     </button>
-                    <button class="header-btn" id="zoomResetBtn" title="Reset Zoom">
+                    <button class="header-btn" id="zoomResetBtn" title="Actual Size (100%)">
                         <span id="zoomLevel">100%</span>
                     </button>
                     <button class="header-btn" id="zoomInBtn" title="Zoom In">
@@ -57,6 +59,16 @@
                     </button>
                 </div>
 
+                <!-- Page View Mode -->
+                <div class="control-group view-mode-group">
+                    <button class="header-btn" id="singlePageModeBtn" title="Single Page View">
+                        <i class="fa-regular fa-file"></i>
+                    </button>
+                    <button class="header-btn" id="continuousModeBtn" title="Continuous Scroll View">
+                        <i class="fa-solid fa-scroll"></i>
+                    </button>
+                </div>
+
                 <!-- Page Thumbnails -->
                 <div class="control-group">
                     <button class="header-btn" id="thumbnailGridBtn" title="Page Thumbnails">
@@ -64,7 +76,7 @@
                     </button>
                 </div>
 
-                <!-- Undo/Redo Controls -->
+                <!-- Undo/Redo + Download -->
                 <div class="control-group">
                     <button class="header-btn" id="undoBtn" title="Undo (Ctrl+Z)">
                         <i class="fa-solid fa-undo"></i>
@@ -72,20 +84,23 @@
                     <button class="header-btn" id="redoBtn" title="Redo (Ctrl+Y)">
                         <i class="fa-solid fa-redo"></i>
                     </button>
+                    <button class="header-btn" id="downloadBtn" title="Download PDF with annotations">
+                        <i class="fa-solid fa-download"></i>
+                    </button>
                 </div>
             </div>
 
-            <button class="viewer-close" onclick="window.location.href='pdf-library.html'">
+            <span class="save-status" id="saveStatus"></span>
+
+            <button class="viewer-close" id="closeViewerBtn">
                 <i class="fa-solid fa-times"></i> Close
             </button>
         </div>
 
-        <!-- Canvas Area -->
+        <!-- PDF.js viewer area (container must be absolutely positioned) -->
         <div class="viewer-canvas-area">
-            <div class="canvas-wrapper" id="canvasWrapper">
-                <canvas id="pdfCanvas"></canvas>
-                <canvas id="annotationCanvas"></canvas>
-                <div id="textLayer"></div>
+            <div id="viewerContainer" class="pdfjs-container">
+                <div id="viewer" class="pdfViewer"></div>
             </div>
             <div class="loading-overlay" id="loadingOverlay">
                 <i class="fa-solid fa-spinner loading-spinner"></i>
@@ -111,14 +126,17 @@
                 <button class="tool-btn" id="selectToolBtn" title="Hand Tool (Pan)">
                     <i class="fa-solid fa-hand"></i>
                 </button>
-                <button class="tool-btn" id="markerToolBtn" title="Marker">
+                <button class="tool-btn" id="markerToolBtn" title="Draw">
                     <i class="fa-solid fa-pen"></i>
                 </button>
-                <button class="tool-btn" id="highlighterToolBtn" title="Highlighter">
+                <button class="tool-btn" id="highlighterToolBtn" title="Highlighter (drag over text or draw freely)">
                     <i class="fa-solid fa-highlighter"></i>
                 </button>
-                <button class="tool-btn" id="textToolBtn" title="Text Tool">
+                <button class="tool-btn" id="textToolBtn" title="Add Text">
                     <i class="fa-solid fa-font"></i>
+                </button>
+                <button class="tool-btn" id="imageToolBtn" title="Add Image">
+                    <i class="fa-regular fa-image"></i>
                 </button>
                 <button class="tool-btn" id="eraserToolBtn" title="Eraser">
                     <i class="fa-solid fa-eraser"></i>
@@ -136,10 +154,9 @@
 
             <div class="toolbar-divider"></div>
 
-            <!-- Stroke Width -->
+            <!-- Stroke Width / Font Size -->
             <div class="tool-group stroke-width-group">
-                <label
-                    style="color: white; font-size: 0.75rem; writing-mode: vertical-rl; transform: rotate(180deg);">Width</label>
+                <label class="stroke-width-label" id="strokeWidthLabel">Width</label>
                 <input type="range" class="stroke-width-slider" id="strokeWidthSlider" min="1" max="20" value="3"
                     orient="vertical">
                 <div class="stroke-preview">
@@ -179,6 +196,10 @@
                     title="Blue"></button>
                 <button class="palette-color-btn" data-color="#10b981" style="background: #10b981;"
                     title="Green"></button>
+                <button class="palette-color-btn" data-color="#fde047" style="background: #fde047;"
+                    title="Yellow"></button>
+                <button class="palette-color-btn" data-color="#a855f7" style="background: #a855f7;"
+                    title="Purple"></button>
                 <button class="palette-color-btn" data-color="#ffd6e7" style="background: #ffd6e7;"
                     title="Pastel Pink"></button>
                 <button class="palette-color-btn" data-color="#c7f0db" style="background: #c7f0db;"
@@ -195,24 +216,8 @@
         </div>
     </div>
 
-    <!-- PDF.js Library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-    <!-- Perfect Freehand for smooth strokes (local copy) -->
-    <script src="js/perfect-freehand.js"></script>
-    <script>
-        // Set PDF.js worker
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-
-        // Debug perfect-freehand structure
-        console.log('perfectFreehand object:', perfectFreehand);
-        console.log('perfectFreehand.getStroke:', perfectFreehand.getStroke);
-        console.log('perfectFreehand.default:', perfectFreehand.default);
-
-        // Create global alias for easier access
-        window.getStroke = perfectFreehand.getStroke || perfectFreehand.default;
-        console.log('Global getStroke function:', window.getStroke);
-    </script>
-    <script src="js/pdf-viewer.js"></script>
+    <!-- PDF.js 4.x is ES-module only; pdf-viewer.js loads the library and viewer components itself -->
+    <script type="module" src="js/pdf-viewer.js"></script>
 </body>
 
 </html>
