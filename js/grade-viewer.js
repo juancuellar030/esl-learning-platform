@@ -90,6 +90,7 @@
         elements.panelSnapshot = document.getElementById('gv-panel-snapshot');
         elements.panelCompare = document.getElementById('gv-panel-compare');
         elements.summary = document.getElementById('gv-summary');
+        elements.stats = document.getElementById('gv-stats');
         elements.subjectGrid = document.getElementById('gv-subject-grid');
         elements.compareHost = document.getElementById('gv-compare-host');
         elements.manageTerm = document.getElementById('gv-manage-term');
@@ -755,6 +756,8 @@
             </article>
         `;
 
+        renderStats(studentId, termKey);
+
         const visibleSubjects = SUBJECTS.filter((subject) => {
             const defTier = getTier(grades[subject.key]?.def);
             return subjectMatchesFilter(defTier, filter);
@@ -778,6 +781,150 @@
         }
 
         renderComparison(studentId);
+    }
+
+    /* ---------- Automatic term statistics (parent view) ---------- */
+
+    const TIER_ORDER = [
+        { key: 'superior', label: 'Superior' },
+        { key: 'alto', label: 'Alto' },
+        { key: 'basico', label: 'Básico' },
+        { key: 'bajo', label: 'Bajo' }
+    ];
+
+    /** Final (D) grades for one student in one term, keyed by subject. */
+    function termDefs(termKey, studentId) {
+        const grades = studentGradesForTerm(termKey, studentId);
+        return SUBJECTS
+            .map((subject) => ({ subject, value: toScaleGrade(grades[subject.key]?.def) }))
+            .filter((item) => item.value != null);
+    }
+
+    function averageOf(items) {
+        return items.length ? items.reduce((sum, item) => sum + item.value, 0) / items.length : null;
+    }
+
+    /** Every stored student in the group with at least one D grade in the term, with their average. */
+    function groupAverages(groupId, termKey) {
+        const group = CLASS_GROUP_LIST.find((item) => item.id === groupId);
+        const names = new Set((group?.students || ROSTER[groupId] || []).map((name) => normalizeLookup(name)));
+        return data.students
+            .filter((student) => names.has(normalizeLookup(student.name)))
+            .map((student) => ({ id: student.id, avg: averageOf(termDefs(termKey, student.id)) }))
+            .filter((item) => item.avg != null);
+    }
+
+    function previousTermKey(termKey) {
+        const keys = termKeysSorted();
+        const index = keys.indexOf(termKey);
+        return index > 0 ? keys[index - 1] : '';
+    }
+
+    function subjectList(items) {
+        return items.map((item) => `<span class="gv-stat-subject" title="${escapeHtml(item.subject.name)}">${escapeHtml(item.subject.key)}</span>`).join('');
+    }
+
+    function signed(value, digits = 1) {
+        const rounded = Number(value.toFixed(digits));
+        if (rounded === 0) return (0).toFixed(digits);
+        return `${rounded > 0 ? '+' : '−'}${Math.abs(rounded).toFixed(digits)}`;
+    }
+
+    function deltaClass(value) {
+        if (Math.abs(value) < 0.05) return 'gv-delta-same';
+        return value > 0 ? 'gv-delta-up' : 'gv-delta-down';
+    }
+
+    function renderStats(studentId, termKey) {
+        const defs = termKey && studentId ? termDefs(termKey, studentId) : [];
+        if (!defs.length) {
+            elements.stats.innerHTML = '';
+            elements.stats.hidden = true;
+            return;
+        }
+        elements.stats.hidden = false;
+        const cards = [];
+        const myAvg = averageOf(defs);
+
+        // Highest / lowest subjects (ties listed together)
+        const max = Math.max(...defs.map((item) => item.value));
+        const min = Math.min(...defs.map((item) => item.value));
+        cards.push(`
+            <article class="gv-stat-card">
+                <div class="gv-summary-label"><i class="fa-solid fa-arrow-trend-up" aria-hidden="true"></i> Highest grade</div>
+                <div class="gv-stat-headline"><span class="gv-stat-grade gv-tier-${getTier(max)}">${formatGrade(max)}</span></div>
+                <div class="gv-stat-subjects">${subjectList(defs.filter((item) => item.value === max))}</div>
+            </article>
+            <article class="gv-stat-card">
+                <div class="gv-summary-label"><i class="fa-solid fa-arrow-trend-down" aria-hidden="true"></i> Lowest grade</div>
+                <div class="gv-stat-headline"><span class="gv-stat-grade gv-tier-${getTier(min)}">${formatGrade(min)}</span></div>
+                <div class="gv-stat-subjects">${subjectList(defs.filter((item) => item.value === min))}</div>
+            </article>
+        `);
+
+        // Subjects per tier
+        const counts = Object.fromEntries(TIER_ORDER.map((tier) => [tier.key, 0]));
+        defs.forEach((item) => { counts[getTier(item.value)] += 1; });
+        const bar = TIER_ORDER
+            .filter((tier) => counts[tier.key])
+            .map((tier) => `<span class="gv-tier-bar-seg gv-tier-${tier.key}" style="flex-grow:${counts[tier.key]}" title="${tier.label}: ${counts[tier.key]}"></span>`)
+            .join('');
+        const rows = TIER_ORDER.map((tier) => `
+            <li><span class="gv-chip gv-tier-${tier.key}">${tier.label}</span><strong>${counts[tier.key]}</strong></li>
+        `).join('');
+        cards.push(`
+            <article class="gv-stat-card gv-stat-wide">
+                <div class="gv-summary-label"><i class="fa-solid fa-layer-group" aria-hidden="true"></i> Subjects by level <span class="gv-stat-note">${defs.length} graded</span></div>
+                <div class="gv-tier-bar" aria-hidden="true">${bar}</div>
+                <ul class="gv-tier-counts">${rows}</ul>
+            </article>
+        `);
+
+        // Position in the class group
+        if (selectedStudentGroup) {
+            const peers = groupAverages(selectedStudentGroup, termKey);
+            if (peers.length > 1 && peers.some((item) => item.id === studentId)) {
+                const position = 1 + peers.filter((item) => item.avg > myAvg + 1e-9).length;
+                const tied = peers.filter((item) => Math.abs(item.avg - myAvg) <= 1e-9).length > 1;
+                const groupAvg = peers.reduce((sum, item) => sum + item.avg, 0) / peers.length;
+                const diff = myAvg - groupAvg;
+                cards.push(`
+                    <article class="gv-stat-card">
+                        <div class="gv-summary-label"><i class="fa-solid fa-ranking-star" aria-hidden="true"></i> Position in ${escapeHtml(groupLabel(selectedStudentGroup))}</div>
+                        <div class="gv-stat-headline">${position}<span class="gv-stat-of">/ ${peers.length}</span></div>
+                        <div class="gv-stat-detail">${tied ? 'Tied · ' : ''}Group average ${groupAvg.toFixed(2)} · <span class="${deltaClass(diff)}">${signed(diff, 2)}</span></div>
+                    </article>
+                `);
+            }
+        }
+
+        // Change since the previous term
+        const prevKey = previousTermKey(termKey);
+        const prevDefs = prevKey ? termDefs(prevKey, studentId) : [];
+        if (prevDefs.length) {
+            const prevAvg = averageOf(prevDefs);
+            const diff = myAvg - prevAvg;
+            const prevMap = Object.fromEntries(prevDefs.map((item) => [item.subject.key, item.value]));
+            let up = 0;
+            let down = 0;
+            let same = 0;
+            defs.forEach((item) => {
+                const before = prevMap[item.subject.key];
+                if (before == null) return;
+                if (item.value > before) up += 1;
+                else if (item.value < before) down += 1;
+                else same += 1;
+            });
+            cards.push(`
+                <article class="gv-stat-card">
+                    <div class="gv-summary-label"><i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i> Since ${escapeHtml(data.terms[prevKey].label)}</div>
+                    <div class="gv-stat-headline"><span class="${deltaClass(diff)}">${signed(diff, 2)}</span></div>
+                    <div class="gv-stat-detail"><span class="gv-delta-up">▲ ${up}</span> · <span class="gv-delta-down">▼ ${down}</span> · <span class="gv-delta-same">■ ${same}</span> subjects</div>
+                </article>
+            `);
+        }
+
+        elements.stats.innerHTML = cards.join('');
     }
 
     function subjectMatchesFilter(tier, filter) {
