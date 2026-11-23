@@ -993,8 +993,52 @@ body.dark-mode .cr-more:hover {
 }
 
 .cr-from {
-    color: var(--cr-muted);
-    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 1px 7px 1px 6px;
+    border-radius: 999px;
+    background: var(--og, var(--cr-muted));
+    color: #fff;
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+}
+
+.cr-from i {
+    font-size: 9px;
+}
+
+/* Where a new group's students come from */
+.cr-sum-origin {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.cr-obar {
+    display: flex;
+    gap: 2px;
+    min-height: 20px;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.cr-obar-seg {
+    flex-basis: 0;
+    min-width: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+    background: var(--og);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 800;
+    white-space: nowrap;
+    overflow: hidden;
+    cursor: default;
 }
 
 .cr-badge {

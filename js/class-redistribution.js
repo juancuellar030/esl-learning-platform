@@ -91,6 +91,7 @@
       levels: [
         { v: "supportive", color: "#0f766e", icon: "fa-handshake" },
         { v: "neutral", color: "#78716c", icon: "fa-minus" },
+        { v: "absent", color: "#b45309", icon: "fa-house-circle-xmark" },
         { v: "questions", color: "#7e22ce", icon: "fa-comment-dots" },
       ],
     },
@@ -115,10 +116,14 @@
     "influence:offtask": 4,
     "family:supportive": 1,
     "family:neutral": 0.5,
+    "family:absent": 2.5,
     "family:questions": 2,
     prev: 0.8, // per previous group, only when "mix previous groups" is on
     link: 40, // per broken keep-apart / keep-together pair
   };
+  // One color per current group, so you can see where each student comes from
+  const ORIGIN_COLORS = ["#364fc7", "#c2255c", "#b35c00", "#087f5b", "#6741d9", "#0b7285", "#5c940d", "#862e9c"];
+  const ORIGIN_OTHER = "#868e96"; // new students and repeaters
   const IMPORTANT_LEVELS = new Set(["behavior:lot", "influence:leader", "influence:offtask"]);
 
   // ═══════════════════════════ TRANSLATIONS ═══════════════════════════
@@ -179,6 +184,7 @@
       "lv.influence.offtask": "Draws peers off-task",
       "lv.family.supportive": "Supportive",
       "lv.family.neutral": "Neutral",
+      "lv.family.absent": "Little support at home",
       "lv.family.questions": "Often questions the school",
       "lvs.behavior.lot": "Much support",
       "lvs.behavior.some": "Some support",
@@ -194,6 +200,7 @@
       "lvs.influence.offtask": "Draws off-task",
       "lvs.family.supportive": "Supportive",
       "lvs.family.neutral": "Neutral",
+      "lvs.family.absent": "Little home support",
       "lvs.family.questions": "Questions school",
       notRated: "Not rated",
       notRatedShort: "Not rated",
@@ -258,6 +265,10 @@
       "sum.repeaters": "Repeating: {n}",
       "sum.broken": "Broken links: {n}",
       "sum.newLabel": "New students",
+      "sum.from": "From",
+      "sum.fromOther": "New or repeating",
+      "sum.fromTip": "{n} from {g} ({p}%)",
+      "xl.fromGroup": "From {g}",
       "sum.brokenLabel": "Broken links",
 
       "flag.bigger": "{n} more students than the other groups",
@@ -486,6 +497,7 @@
       "lv.influence.offtask": "Distrae a sus compañeros",
       "lv.family.supportive": "Colaboradora",
       "lv.family.neutral": "Neutral",
+      "lv.family.absent": "Poco acompañamiento en casa",
       "lv.family.questions": "Cuestiona con frecuencia",
       "lvs.behavior.lot": "Mucho apoyo",
       "lvs.behavior.some": "Algo de apoyo",
@@ -501,6 +513,7 @@
       "lvs.influence.offtask": "Distrae",
       "lvs.family.supportive": "Colaboradora",
       "lvs.family.neutral": "Neutral",
+      "lvs.family.absent": "Poco apoyo en casa",
       "lvs.family.questions": "Cuestiona",
       notRated: "Sin calificar",
       notRatedShort: "Sin calificar",
@@ -565,6 +578,10 @@
       "sum.repeaters": "Repiten: {n}",
       "sum.broken": "Vínculos sin cumplir: {n}",
       "sum.newLabel": "Estudiantes nuevos",
+      "sum.from": "Vienen de",
+      "sum.fromOther": "Nuevos o repitentes",
+      "sum.fromTip": "{n} vienen de {g} ({p}%)",
+      "xl.fromGroup": "Vienen de {g}",
       "sum.brokenLabel": "Vínculos sin cumplir",
 
       "flag.bigger": "{n} estudiantes más que los otros grupos",
@@ -1556,6 +1573,22 @@
     return '<span class="cr-dots" data-tip="' + esc(lines.join("\n")) + '">' + dots + "</span>";
   }
 
+  function originColor(gid) {
+    const i = ctx ? ctx.originIds.indexOf(gid) : -1;
+    return i < 0 ? ORIGIN_OTHER : ORIGIN_COLORS[i % ORIGIN_COLORS.length];
+  }
+
+  function fromTagHtml(st) {
+    if (!st.from) return "";
+    return (
+      '<span class="cr-from" style="--og:' +
+      originColor(st.from) +
+      '"><i class="fa-solid fa-right-to-bracket"></i>' +
+      esc(t("card.from", { g: st.from })) +
+      "</span>"
+    );
+  }
+
   function cardHtml(st) {
     const view = ui.view;
     const v = ratingOf(st, view);
@@ -1574,7 +1607,7 @@
     if (warns.length) cls.push("has-warning");
 
     let meta = "";
-    if (st.from) meta += '<span class="cr-from">' + esc(t("card.from", { g: st.from })) + "</span>";
+    meta += fromTagHtml(st);
     if (st.source === "new") meta += '<span class="cr-badge cr-badge-new">' + esc(t("badge.new")) + "</span>";
     if (st.source === "repeater") meta += '<span class="cr-badge cr-badge-rep">' + esc(t("badge.repeater")) + "</span>";
     if (st.status === "repeating")
@@ -1654,7 +1687,7 @@
       '" aria-expanded="' +
       (!collapsed) +
       '"><i class="fa-solid fa-chevron-down cr-zone-caret"></i>' +
-      (o.icon ? '<i class="fa-solid ' + o.icon + ' cr-zone-ico"></i>' : "") +
+      (o.icon ? '<i class="fa-solid ' + o.icon + ' cr-zone-ico"' + (o.color ? ' style="color:' + o.color + '"' : "") + "></i>" : "") +
       '<span class="cr-zone-title">' +
       esc(o.title) +
       '</span><span class="cr-count">' +
@@ -1679,6 +1712,7 @@
         cid: gid,
         title: gid,
         icon: "fa-users",
+        color: originColor(gid),
         count: t("left.toPlace", { n: list.length, total: ctx.originTotals[gid] || 0 }),
         body: cardsHtml(list, t("left.allPlaced")),
       });
@@ -1746,6 +1780,42 @@
     );
   }
 
+  // Where a new group's students come from: { total, parts: [{ id, label, n, color }] }
+  function originBreakdown(gid) {
+    const list = ctx.members[gid] || [];
+    const counts = {};
+    let other = 0;
+    list.forEach((st) => {
+      if (st.source === "roster" && ctx.originIds.includes(st.from)) counts[st.from] = (counts[st.from] || 0) + 1;
+      else other++;
+    });
+    const parts = ctx.originIds.map((id) => ({ id, label: id, n: counts[id] || 0, color: originColor(id) }));
+    if (other) parts.push({ id: "", label: t("sum.fromOther"), n: other, color: ORIGIN_OTHER });
+    return { total: list.length, parts };
+  }
+
+  function originBarHtml(gid) {
+    const o = originBreakdown(gid);
+    if (!o.total) return "";
+    const pct = (n) => Math.round((n / o.total) * 100);
+    const tip = (p) => (p.id ? t("sum.fromTip", { n: p.n, g: p.label, p: pct(p.n) }) : p.label + ": " + p.n);
+    return (
+      '<div class="cr-sum-origin"><span class="cr-sum-cat"><i class="fa-solid fa-right-to-bracket"></i> ' +
+      esc(t("sum.from")) +
+      '</span><div class="cr-obar">' +
+      o.parts
+        .filter((p) => p.n)
+        .map(
+          (p) =>
+            '<span class="cr-obar-seg" style="--og:' + p.color + ";flex-grow:" + p.n + '" data-tip="' + esc(tip(p)) + '">' +
+            esc(p.id ? p.label + " · " + p.n : "+" + p.n) +
+            "</span>",
+        )
+        .join("") +
+      "</div></div>"
+    );
+  }
+
   function summaryHtml(gid) {
     const s = ctx.stats[gid];
     const flags = ctx.flags[gid];
@@ -1771,6 +1841,7 @@
         : "") +
       "</span></div>";
     if (s.guessed) html += '<p class="cr-sum-note">' + esc(tn("sum.guessed", s.guessed)) + "</p>";
+    html += originBarHtml(gid);
     CATEGORIES.filter((c) => c.id !== "gender").forEach((c) => {
       html +=
         '<div class="cr-sum-row"><span class="cr-sum-cat"><i class="fa-solid ' +
@@ -2517,7 +2588,7 @@
         ? "<h3>" + esc(st.name) + "</h3>"
         : '<input class="cr-input cr-name-input" id="cr-extra-name" value="' + esc(st.name) + '" aria-label="' + esc(t("add.name")) + '"/>') +
       '<div class="cr-drawer-sub">' +
-      (st.from ? '<span class="cr-from">' + esc(t("card.from", { g: st.from })) + "</span>" : "") +
+      fromTagHtml(st) +
       (st.source === "new" ? '<span class="cr-badge cr-badge-new">' + esc(t("badge.new")) + "</span>" : "") +
       (st.source === "repeater" ? '<span class="cr-badge cr-badge-rep">' + esc(t("badge.repeater")) + "</span>" : "") +
       '<span class="cr-loc"><i class="fa-solid fa-location-dot"></i> ' +
@@ -3830,6 +3901,7 @@
       CATEGORIES.filter((c) => c.id !== "gender").forEach((c) =>
         c.levels.forEach((l) => sumRows.push([catLabel(c.id) + ": " + lvLabel(c.id, l.v), s.cats[c.id][l.v]])),
       );
+      originBreakdown(g.id).parts.forEach((p) => sumRows.push([p.id ? t("xl.fromGroup", { g: p.label }) : p.label, p.n]));
       sumRows.push([t("sum.newLabel"), s.newCount], [t("sum.brokenLabel"), ctx.links.perGroup[g.id] || 0]);
       ctx.flags[g.id].forEach((f) => sumRows.push(["⚠ " + flagText(f)]));
       sumRows.forEach((r, i) => {
@@ -4078,6 +4150,21 @@
         "   ·   " + t("sum.brokenLabel") + ": " + (ctx.links.perGroup[g.id] || 0);
       doc.text(fitText(doc, line1, W - 2 * M - 6), M + 3, y);
       y += 5.5;
+      {
+        doc.setFont("helvetica", "bold");
+        doc.text(fitText(doc, t("sum.from") + ":", 42), M + 3, y);
+        doc.setFont("helvetica", "normal");
+        let x = M + 48;
+        originBreakdown(g.id).parts.forEach((p) => {
+          const [rr, gg, bb] = hexRgb(p.color);
+          doc.setFillColor(rr, gg, bb);
+          doc.rect(x, y - 2.6, 3, 3, "F");
+          const txt = pdfText(p.label + ": " + p.n);
+          doc.text(txt, x + 4, y);
+          x += doc.getTextWidth(txt) + 9;
+        });
+        y += 5;
+      }
       CATEGORIES.filter((c) => c.id !== "gender").forEach((c) => {
         doc.setFont("helvetica", "bold");
         doc.text(fitText(doc, t("catShort." + c.id) + ":", 42), M + 3, y);
@@ -4121,7 +4208,7 @@
       return y + 8;
     };
 
-    const summaryHeight = (g) => 6 + 6 + 5.5 + 4 * 5 + ctx.flags[g.id].length * 4.5 +
+    const summaryHeight = (g) => 6 + 6 + 5.5 + 5 * 5 + ctx.flags[g.id].length * 4.5 +
       ctx.links.broken.filter((b) => b.groups.includes(g.id)).length * 4.5 + 10;
 
     pl.groups.forEach((g, gi) => {
