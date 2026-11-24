@@ -550,6 +550,75 @@ body.dark-mode .gv-tier-bar-seg.gv-tier-bajo { background: #d93025; }
     background: #eef0fb;
 }
 
+/* One grade per term */
+.gv-score-row.is-single {
+    grid-template-columns: 1fr;
+}
+
+.gv-score-row.is-single .gv-score-block {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 0;
+    padding: 8px 14px;
+}
+
+.gv-score-row.is-single .gv-score-label {
+    margin-bottom: 0;
+}
+
+.gv-score-row.is-single .gv-score-value {
+    font-size: 1.3rem;
+}
+
+.gv-score-row.is-single .gv-rec-value {
+    margin: 0 0 0 auto;
+    padding-right: 10px;
+}
+
+.gv-compare-table .gv-compare-year {
+    border-left: 3px solid var(--indigo-velvet);
+}
+
+.gv-compare-table thead .gv-compare-year {
+    background: #2f2870;
+}
+
+.gv-compare-table td.gv-compare-year strong {
+    font-size: 0.95rem;
+}
+
+.gv-compare-prom th,
+.gv-compare-prom td {
+    border-top: 3px solid var(--indigo-velvet);
+}
+
+.gv-compare-prom td strong {
+    font-size: 0.95rem;
+}
+
+.gv-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+    color: var(--indigo-velvet);
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.gv-toggle span {
+    color: #666;
+    font-weight: 500;
+}
+
+.gv-toggle input {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--indigo-velvet);
+}
+
 .gv-trend {
     margin-left: 4px;
     font-weight: 800;
@@ -653,14 +722,8 @@ body.dark-mode .gv-tier-bar-seg.gv-tier-bajo { background: #d93025; }
     text-align: center;
 }
 
-.gv-grid tbody tr:nth-child(8n + 1) .gv-student-cell,
-.gv-grid tbody tr:nth-child(8n + 2) .gv-student-cell,
-.gv-grid tbody tr:nth-child(8n + 3) .gv-student-cell,
-.gv-grid tbody tr:nth-child(8n + 4) .gv-student-cell,
-.gv-grid tbody tr:nth-child(8n + 1) .gv-score-head,
-.gv-grid tbody tr:nth-child(8n + 2) .gv-score-head,
-.gv-grid tbody tr:nth-child(8n + 3) .gv-score-head,
-.gv-grid tbody tr:nth-child(8n + 4) .gv-score-head {
+.gv-grid tbody tr.gv-band .gv-student-cell,
+.gv-grid tbody tr.gv-band .gv-score-head {
     background: #eceef8;
 }
 
@@ -731,11 +794,25 @@ body.dark-mode .gv-suggestions {
 
 body.dark-mode .gv-search-panel input[type="search"],
 body.dark-mode .gv-field input,
-body.dark-mode .gv-field select,
-body.dark-mode .gv-cell {
+body.dark-mode .gv-field select {
     background: #363636;
     color: #f5f5f5;
     border-color: #555;
+}
+
+/* Grid inputs stay transparent so the cell's tier color fills the whole row height
+   (!important to beat the site-wide dark-mode input rule in styles.css) */
+body.dark-mode .gv-grid .gv-cell {
+    background-color: transparent !important;
+}
+
+body.dark-mode .gv-grid .gv-cell[class*="gv-tier-"] {
+    color: inherit !important;
+}
+
+body.dark-mode .gv-grid .gv-cell.gv-invalid {
+    background-color: #7f1d1d !important;
+    color: #fecaca !important;
 }
 
 body.dark-mode .gv-selected-bar h3,
@@ -767,14 +844,8 @@ body.dark-mode .gv-compare-table .gv-compare-subject {
 
 /* Dark mode: banded rows, empty cells and grid lines */
 body.dark-mode .gv-compare-table tbody tr:nth-child(even) .gv-compare-subject,
-body.dark-mode .gv-grid tbody tr:nth-child(8n + 1) .gv-student-cell,
-body.dark-mode .gv-grid tbody tr:nth-child(8n + 2) .gv-student-cell,
-body.dark-mode .gv-grid tbody tr:nth-child(8n + 3) .gv-student-cell,
-body.dark-mode .gv-grid tbody tr:nth-child(8n + 4) .gv-student-cell,
-body.dark-mode .gv-grid tbody tr:nth-child(8n + 1) .gv-score-head,
-body.dark-mode .gv-grid tbody tr:nth-child(8n + 2) .gv-score-head,
-body.dark-mode .gv-grid tbody tr:nth-child(8n + 3) .gv-score-head,
-body.dark-mode .gv-grid tbody tr:nth-child(8n + 4) .gv-score-head {
+body.dark-mode .gv-grid tbody tr.gv-band .gv-student-cell,
+body.dark-mode .gv-grid tbody tr.gv-band .gv-score-head {
     background: #3d3d48;
     color: #f5f5f5;
 }
@@ -857,6 +928,23 @@ body.dark-mode .gv-delta-up {
 
 body.dark-mode .gv-delta-down {
     color: #fca5a5;
+}
+
+body.dark-mode .gv-toggle {
+    color: var(--amber-flame);
+}
+
+body.dark-mode .gv-toggle span {
+    color: #b8b8c8;
+}
+
+body.dark-mode .gv-compare-table .gv-compare-year {
+    border-left-color: var(--medium-slate-blue);
+}
+
+body.dark-mode .gv-compare-table .gv-compare-prom th,
+body.dark-mode .gv-compare-table .gv-compare-prom td {
+    border-top-color: var(--medium-slate-blue);
 }
 
 body.dark-mode .gv-trend-up {

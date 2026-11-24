@@ -52,6 +52,7 @@
     let addSuggestionIndex = -1;
     let statusTimer = null;
     let gridDirty = false;
+    let showSubRows = null; // null = automatic (shown only when the term has S1–S3 grades)
 
     const elements = {};
 
@@ -102,6 +103,7 @@
         elements.addStudentSearch = document.getElementById('gv-add-student-search');
         elements.addStudentSuggestions = document.getElementById('gv-add-student-suggestions');
         elements.gridHost = document.getElementById('gv-grid-host');
+        elements.showSubRows = document.getElementById('gv-show-sub-rows');
         elements.termModal = document.getElementById('gv-term-modal');
         elements.closeTermModal = document.getElementById('gv-close-term-modal');
         elements.cancelTerm = document.getElementById('gv-cancel-term');
@@ -138,7 +140,12 @@
         elements.tabSnapshot.addEventListener('click', () => setParentPanel('snapshot'));
         elements.tabCompare.addEventListener('click', () => setParentPanel('compare'));
 
+        elements.showSubRows.addEventListener('change', () => {
+            showSubRows = elements.showSubRows.checked;
+            renderGrid();
+        });
         elements.manageTerm.addEventListener('change', () => {
+            showSubRows = null;
             manageTermKey = elements.manageTerm.value;
             renderGrid();
         });
@@ -768,13 +775,16 @@
         } else if (!visibleSubjects.length) {
             elements.subjectGrid.innerHTML = '<div class="gv-empty-card"><h3>No subjects match this filter</h3><p>Choose “All subjects” or another tier.</p></div>';
         } else {
+            // Show S1–S3 only when this student has them this term; otherwise just the term grade
+            const hasSub = termHasSubScores(termKey, studentId);
+            const cardRows = hasSub ? SCORE_ROWS : [{ ...DEF_ROW, label: 'Term grade' }];
             elements.subjectGrid.innerHTML = visibleSubjects.map((subject) => {
                 const entry = grades[subject.key] || emptySubjectGrades();
-                const blocks = SCORE_ROWS.map((row) => scoreBlock(row.label, entry[row.key], entry[row.recKey])).join('');
+                const blocks = cardRows.map((row) => scoreBlock(row.label, entry[row.key], entry[row.recKey])).join('');
                 return `
                     <article class="gv-subject-card">
                         <h4>${escapeHtml(subject.key)} <span>${escapeHtml(subject.name)}</span></h4>
-                        <div class="gv-score-row">${blocks}</div>
+                        <div class="gv-score-row${hasSub ? '' : ' is-single'}">${blocks}</div>
                     </article>
                 `;
             }).join('');
@@ -950,6 +960,23 @@
         `;
     }
 
+    const SUB_ROWS = SCORE_ROWS.filter((row) => row.key !== 'def');
+    const DEF_ROW = SCORE_ROWS.find((row) => row.key === 'def');
+
+    /** True when any S1–S3 grade (or its Rec) is filled in for this student in this term. */
+    function termHasSubScores(termKey, studentId) {
+        const subjects = studentGradesForTerm(termKey, studentId);
+        return Object.values(subjects).some((entry) =>
+            SUB_ROWS.some((row) => toScaleGrade(entry?.[row.key]) != null || toScaleGrade(entry?.[row.recKey]) != null)
+        );
+    }
+
+    function compareCell(value, rec, extra = '', className = '') {
+        const tier = getTier(value) || 'empty';
+        const recHtml = rec == null ? '' : `<div class="gv-rec-value ${getTier(rec) ? `gv-tier-${getTier(rec)}` : ''}">Rec ${displayGrade(rec)}</div>`;
+        return `<td class="gv-tier-${tier} ${className}"><strong>${displayGrade(value)}</strong>${recHtml}${extra}</td>`;
+    }
+
     function renderComparison(studentId) {
         const termsWithData = termKeysSorted().filter((key) => {
             const subjects = data.terms[key]?.grades?.[studentId];
@@ -961,35 +988,74 @@
             return;
         }
 
-        const termHeaders = termsWithData.map((key) =>
-            `<th colspan="4">${escapeHtml(data.terms[key].label)}</th>`
-        ).join('');
-        const subHeaders = termsWithData.map(() => '<th>S1</th><th>S2</th><th>S3</th><th>D</th>').join('');
+        // Columns: one per term (plus S1–S3 only for terms that have them), then a Year column after each year's terms
+        const columns = [];
+        termsWithData.forEach((key, index) => {
+            const year = parseTermKey(key).year;
+            columns.push({ type: 'term', key, sub: termHasSubScores(key, studentId) });
+            const nextYear = index + 1 < termsWithData.length ? parseTermKey(termsWithData[index + 1]).year : null;
+            if (year && nextYear !== year) {
+                columns.push({ type: 'year', year, keys: termsWithData.filter((k) => parseTermKey(k).year === year) });
+            }
+        });
+        const anySub = columns.some((col) => col.sub);
+
+        const headTop = columns.map((col) => {
+            if (col.type === 'year') {
+                return `<th class="gv-compare-year" ${anySub ? 'rowspan="2"' : ''} title="Average of the ${col.keys.length} term(s) entered for ${col.year}">Year ${col.year}</th>`;
+            }
+            const label = escapeHtml(data.terms[col.key].label);
+            return col.sub ? `<th colspan="4">${label}</th>` : `<th ${anySub ? 'rowspan="2"' : ''}>${label}</th>`;
+        }).join('');
+        const headSub = anySub
+            ? columns.filter((col) => col.sub).map(() => SCORE_ROWS.map((row) => `<th>${row.label}</th>`).join('')).join('')
+            : '';
+
+        const termDef = (key, subjectKey) => toScaleGrade(studentGradesForTerm(key, studentId)[subjectKey]?.def);
+        const yearAverage = (keys, subjectKey) => {
+            const values = keys.map((key) => termDef(key, subjectKey)).filter((value) => value != null);
+            return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : null;
+        };
 
         const rows = SUBJECTS.map((subject) => {
-            const defs = termsWithData.map((key) => toScaleGrade(studentGradesForTerm(key, studentId)[subject.key]?.def));
-            const cells = termsWithData.map((key, termIndex) => {
-                const entry = studentGradesForTerm(key, studentId)[subject.key] || emptySubjectGrades();
-                const trend = termIndex === 0 ? '' : trendMarkup(defs[termIndex], defs[termIndex - 1]);
-                return SCORE_ROWS.map((row, rowIndex) => {
-                    const grade = entry[row.key];
-                    const rec = entry[row.recKey];
-                    const tier = getTier(grade) || 'empty';
-                    const recHtml = rec == null ? '' : `<div class="gv-rec-value ${getTier(rec) ? `gv-tier-${getTier(rec)}` : ''}">Rec ${displayGrade(rec)}</div>`;
-                    const extra = rowIndex === 3 ? trend : '';
-                    return `<td class="gv-tier-${tier}"><strong>${displayGrade(grade)}</strong>${recHtml}${extra}</td>`;
-                }).join('');
+            const cells = columns.map((col) => {
+                if (col.type === 'year') {
+                    return compareCell(toScaleGrade(yearAverage(col.keys, subject.key)), null, '', 'gv-compare-year');
+                }
+                const entry = studentGradesForTerm(col.key, studentId)[subject.key] || emptySubjectGrades();
+                const termIndex = termsWithData.indexOf(col.key);
+                const trend = termIndex === 0 ? '' : trendMarkup(entry.def, termDef(termsWithData[termIndex - 1], subject.key));
+                const subCells = col.sub ? SUB_ROWS.map((row) => compareCell(entry[row.key], entry[row.recKey])).join('') : '';
+                return subCells + compareCell(entry.def, entry.recDef, trend);
             }).join('');
             return `<tr><th class="gv-compare-subject">${escapeHtml(subject.key)}</th>${cells}</tr>`;
+        }).join('');
+
+        // PROM row: average of the D grades in each term, and of the yearly averages
+        const average = (values) => {
+            const list = values.filter((value) => value != null);
+            return list.length ? list.reduce((sum, value) => sum + value, 0) / list.length : null;
+        };
+        const promCell = (value, className = '') => {
+            const rounded = value == null ? null : Math.round(value * 10) / 10;
+            return `<td class="gv-tier-${getTier(rounded) || 'empty'} ${className}"><strong>${value == null ? '—' : value.toFixed(2)}</strong></td>`;
+        };
+        const promCells = columns.map((col) => {
+            if (col.type === 'year') {
+                return promCell(average(SUBJECTS.map((subject) => yearAverage(col.keys, subject.key))), 'gv-compare-year');
+            }
+            const blanks = col.sub ? SUB_ROWS.map(() => '<td class="gv-tier-empty"></td>').join('') : '';
+            return blanks + promCell(average(SUBJECTS.map((subject) => termDef(col.key, subject.key))));
         }).join('');
 
         elements.compareHost.innerHTML = `
             <table class="gv-compare-table">
                 <thead>
-                    <tr><th rowspan="2" class="gv-compare-subject">Subject</th>${termHeaders}</tr>
-                    <tr>${subHeaders}</tr>
+                    <tr><th ${anySub ? 'rowspan="2"' : ''} class="gv-compare-subject">Subject</th>${headTop}</tr>
+                    ${anySub ? `<tr>${headSub}</tr>` : ''}
                 </thead>
                 <tbody>${rows}</tbody>
+                <tfoot><tr class="gv-compare-prom"><th class="gv-compare-subject">PROM</th>${promCells}</tr></tfoot>
             </table>
         `;
     }
@@ -1091,18 +1157,23 @@
             `<th colspan="2" title="${escapeHtml(subject.name)}">${escapeHtml(subject.key)}</th>`
         ).join('');
         const subHeads = SUBJECTS.map(() => '<th>Nota</th><th>Rec</th>').join('');
+        const autoSub = students.some((student) => termHasSubScores(manageTermKey, student.id));
+        const withSub = showSubRows == null ? autoSub : showSubRows;
+        elements.showSubRows.checked = withSub;
+        const gridRows = withSub ? SCORE_ROWS : [DEF_ROW];
 
         const body = students.map((student, studentIndex) => {
             const nameCell = `
-                <th class="gv-student-cell" rowspan="4">
+                <th class="gv-student-cell" rowspan="${gridRows.length}">
                     ${escapeHtml(student.name)}
                     <button type="button" class="gv-remove-student" data-remove-student="${escapeHtml(student.id)}" title="Remove student" aria-label="Remove ${escapeHtml(student.name)}">
                         <i class="fa-solid fa-xmark"></i>
                     </button>
                 </th>
             `;
-            return SCORE_ROWS.map((row, rowIndex) => {
-                const r = studentIndex * SCORE_ROWS.length + rowIndex;
+            const band = studentIndex % 2 === 0 ? ' class="gv-band"' : '';
+            return gridRows.map((row, rowIndex) => {
+                const r = studentIndex * gridRows.length + rowIndex;
                 const cells = SUBJECTS.flatMap((subject, subjectIndex) => {
                     const entry = term.grades[student.id]?.[subject.key] || emptySubjectGrades();
                     return [
@@ -1111,7 +1182,7 @@
                     ];
                 }).join('');
                 return `
-                    <tr>
+                    <tr${band}>
                         ${rowIndex === 0 ? nameCell : ''}
                         <th class="gv-score-head">${escapeHtml(row.label)}</th>
                         ${cells}
