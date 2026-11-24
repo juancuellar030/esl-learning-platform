@@ -81,6 +81,7 @@
         elements.studentSuggestions = document.getElementById('gv-student-suggestions');
         elements.parentEmpty = document.getElementById('gv-parent-empty');
         elements.parentDetail = document.getElementById('gv-parent-detail');
+        elements.selectedInline = document.getElementById('gv-selected-inline');
         elements.selectedName = document.getElementById('gv-selected-name');
         elements.selectedMeta = document.getElementById('gv-selected-meta');
         elements.clearStudent = document.getElementById('gv-clear-student');
@@ -383,6 +384,23 @@
         if (grade >= 4.0) return 'alto';
         if (grade >= 3.5) return 'basico';
         return 'bajo';
+    }
+
+    /**
+     * Tier for an average (PROM). Uses the same precision the school report
+     * prints (39,56 → 3.956 is Básico) instead of rounding to 1 decimal first.
+     */
+    function getAverageTier(average) {
+        if (average == null || !Number.isFinite(average)) return null;
+        const value = Math.round(average * 1000) / 1000;
+        if (value >= 4.7) return 'superior';
+        if (value >= 4.0) return 'alto';
+        if (value >= 3.5) return 'basico';
+        return 'bajo';
+    }
+
+    function formatAverage(average) {
+        return average == null ? '—' : average.toFixed(2);
     }
 
     function formatGrade(value) {
@@ -718,6 +736,7 @@
         const hasStudent = Boolean(selectedStudentName);
         elements.parentEmpty.hidden = hasStudent;
         elements.parentDetail.hidden = !hasStudent;
+        elements.selectedInline.hidden = !hasStudent;
         if (!hasStudent) return;
         elements.selectedName.textContent = selectedStudentName;
         elements.selectedMeta.textContent = selectedStudentGroup
@@ -746,12 +765,12 @@
             .filter((value) => value != null);
         const prom = defs.length ? defs.reduce((sum, value) => sum + value, 0) / defs.length : null;
         const perd = defs.filter((value) => value < 3.5).length;
-        const promTier = getTier(prom == null ? null : Math.round(prom * 10) / 10);
+        const promTier = getAverageTier(prom);
 
         elements.summary.innerHTML = `
             <article class="gv-summary-card">
                 <div class="gv-summary-label">PROM</div>
-                <div class="gv-summary-value ${promTier ? `gv-tier-${promTier}` : ''}">${prom == null ? '—' : (Math.round(prom * 10) / 10).toFixed(1)}</div>
+                <div class="gv-summary-value ${promTier ? `gv-tier-${promTier}` : ''}">${formatAverage(prom)}</div>
             </article>
             <article class="gv-summary-card ${perd > 0 ? 'is-alert' : ''}">
                 <div class="gv-summary-label">Perd</div>
@@ -1036,10 +1055,8 @@
             const list = values.filter((value) => value != null);
             return list.length ? list.reduce((sum, value) => sum + value, 0) / list.length : null;
         };
-        const promCell = (value, className = '') => {
-            const rounded = value == null ? null : Math.round(value * 10) / 10;
-            return `<td class="gv-tier-${getTier(rounded) || 'empty'} ${className}"><strong>${value == null ? '—' : value.toFixed(2)}</strong></td>`;
-        };
+        const promCell = (value, className = '') =>
+            `<td class="gv-tier-${getAverageTier(value) || 'empty'} ${className}"><strong>${formatAverage(value)}</strong></td>`;
         const promCells = columns.map((col) => {
             if (col.type === 'year') {
                 return promCell(average(SUBJECTS.map((subject) => yearAverage(col.keys, subject.key))), 'gv-compare-year');

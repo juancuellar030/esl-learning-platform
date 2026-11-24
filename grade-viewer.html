@@ -55,15 +55,27 @@
                 <!-- ==================== PARENT VIEW ==================== -->
                 <div id="gv-parent-view">
                     <div class="gv-search-panel">
-                        <label for="gv-student-search">Student</label>
-                        <div class="gv-autocomplete-wrap">
-                            <input type="search" id="gv-student-search" placeholder="Type a student name…"
-                                autocomplete="off" aria-autocomplete="list" aria-controls="gv-student-suggestions"
-                                aria-expanded="false">
-                            <ul id="gv-student-suggestions" class="gv-suggestions" role="listbox" hidden></ul>
+                        <div class="gv-search-field">
+                            <label for="gv-student-search">Student</label>
+                            <div class="gv-autocomplete-wrap">
+                                <input type="search" id="gv-student-search" placeholder="Type a student name…"
+                                    autocomplete="off" aria-autocomplete="list" aria-controls="gv-student-suggestions"
+                                    aria-expanded="false">
+                                <ul id="gv-student-suggestions" class="gv-suggestions" role="listbox" hidden></ul>
+                            </div>
+                            <p class="gv-hint">Search the school roster. Names match in any order (given name or
+                                surnames).</p>
                         </div>
-                        <p class="gv-hint">Search the school roster. Names match in any order (given name or surnames).
-                        </p>
+                        <div class="gv-selected-inline" id="gv-selected-inline" hidden>
+                            <div>
+                                <p class="cc-eyebrow">Selected student</p>
+                                <h3 id="gv-selected-name"></h3>
+                                <p id="gv-selected-meta" class="gv-selected-meta"></p>
+                            </div>
+                            <button type="button" class="btn-secondary" id="gv-clear-student">
+                                <i class="fa-solid fa-xmark"></i> Clear
+                            </button>
+                        </div>
                     </div>
 
                     <div id="gv-parent-empty" class="gv-empty-card">
@@ -74,17 +86,6 @@
                     </div>
 
                     <div id="gv-parent-detail" hidden>
-                        <div class="gv-selected-bar">
-                            <div>
-                                <p class="cc-eyebrow">Selected student</p>
-                                <h3 id="gv-selected-name"></h3>
-                                <p id="gv-selected-meta" class="gv-selected-meta"></p>
-                            </div>
-                            <button type="button" class="btn-secondary" id="gv-clear-student">
-                                <i class="fa-solid fa-xmark"></i> Clear
-                            </button>
-                        </div>
-
                         <div class="gv-parent-toolbar">
                             <div class="gv-field">
                                 <label for="gv-parent-term">Term</label>
