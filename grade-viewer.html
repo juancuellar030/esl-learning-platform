@@ -45,6 +45,9 @@
                         <button type="button" class="btn-secondary" id="gv-import-btn">
                             <i class="fa-solid fa-file-import"></i> Import Grades
                         </button>
+                        <button type="button" class="btn-secondary" id="gv-drive-btn">
+                            <i class="fa-brands fa-google-drive"></i> Google Drive
+                        </button>
                         <input type="file" id="gv-import-input" class="cc-visually-hidden" accept=".json,application/json"
                             aria-label="Choose a grade viewer backup file">
                     </div>
@@ -242,6 +245,9 @@
     <script src="js/school-roster.js?v=1"></script>
     <script src="js/student-groups-data.js?v=setup1"></script>
     <script src="js/students-data.js?v=setup1"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://apis.google.com/js/api.js" async defer></script>
+    <script src="js/google-drive-service.js"></script>
     <script src="js/grade-viewer.js"></script>
     <script src="js/darkmode.js"></script>
 </body>

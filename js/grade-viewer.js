@@ -75,6 +75,7 @@
         elements.exportBtn = document.getElementById('gv-export-btn');
         elements.importBtn = document.getElementById('gv-import-btn');
         elements.importInput = document.getElementById('gv-import-input');
+        elements.driveBtn = document.getElementById('gv-drive-btn');
         elements.parentView = document.getElementById('gv-parent-view');
         elements.manageView = document.getElementById('gv-manage-view');
         elements.studentSearch = document.getElementById('gv-student-search');
@@ -121,6 +122,7 @@
         elements.exportBtn.addEventListener('click', exportGrades);
         elements.importBtn.addEventListener('click', () => elements.importInput.click());
         elements.importInput.addEventListener('change', importGrades);
+        elements.driveBtn.addEventListener('click', openDrive);
 
         elements.studentSearch.addEventListener('input', () => renderStudentSuggestions(elements.studentSearch.value));
         elements.studentSearch.addEventListener('focus', () => renderStudentSuggestions(elements.studentSearch.value));
@@ -1435,31 +1437,76 @@
         const [file] = elements.importInput.files;
         elements.importInput.value = '';
         if (!file) return;
+        let parsed;
         try {
-            const parsed = JSON.parse(await file.text());
-            const validation = validateData(parsed);
-            if (!validation.valid) {
-                showStatus(`Import failed: ${validation.message}`, 'error', false);
-                return;
-            }
-            if (!window.confirm('Importing will replace all current grade viewer data. This cannot be undone. Continue?')) {
-                return;
-            }
-            data = normalizeData(parsed);
-            selectedStudentId = null;
-            selectedStudentName = '';
-            selectedStudentGroup = '';
-            elements.studentSearch.value = '';
-            hideSuggestions(elements.studentSuggestions, elements.studentSearch);
-            parentTermKey = latestTermKey();
-            manageTermKey = latestTermKey();
-            persist('Grades imported successfully.');
-            populateTermSelects();
-            if (currentView === 'manage') renderGrid();
-            else renderParent();
+            parsed = JSON.parse(await file.text());
         } catch (error) {
             showStatus('Import failed: the selected file is not valid JSON.', 'error', false);
+            return;
         }
+        applyImportedData(parsed, 'Grades imported successfully.');
+    }
+
+    /**
+     * Validate a backup (from a file or Google Drive), ask before replacing,
+     * then load it. Returns true when the data was applied.
+     */
+    function applyImportedData(parsed, successMessage) {
+        const validation = validateData(parsed);
+        if (!validation.valid) {
+            showStatus(`Import failed: ${validation.message}`, 'error', false);
+            return false;
+        }
+        if (!window.confirm('Loading this file will replace all current grade viewer data on this device. Continue?')) {
+            return false;
+        }
+        data = normalizeData(parsed);
+        selectedStudentId = null;
+        selectedStudentName = '';
+        selectedStudentGroup = '';
+        elements.studentSearch.value = '';
+        hideSuggestions(elements.studentSuggestions, elements.studentSearch);
+        parentTermKey = latestTermKey();
+        manageTermKey = latestTermKey();
+        persist(successMessage);
+        populateTermSelects();
+        if (currentView === 'manage') renderGrid();
+        else renderParent();
+        return true;
+    }
+
+    /* ---------- Google Drive (shared GoogleDriveService) ---------- */
+
+    let driveService = null;
+
+    function getDriveService() {
+        if (driveService || !window.GoogleDriveService) return driveService;
+        driveService = new window.GoogleDriveService({
+            folderName: 'ESL Platform Grade Viewer',
+            fileExtension: '.json',
+            onSave: () => {
+                // Keep any cell still being typed in before uploading
+                const active = document.activeElement;
+                if (active?.classList?.contains('gv-cell')) commitGridCell(active);
+                return data;
+            },
+            onLoad: (loaded) => {
+                applyImportedData(loaded, 'Grades loaded from Google Drive.');
+            },
+            onNotify: (message, type) => showStatus(message, type === 'error' ? 'error' : 'success')
+        });
+        return driveService;
+    }
+
+    async function openDrive() {
+        const service = getDriveService();
+        if (!service) {
+            showStatus('Google Drive could not be loaded. Check your connection and reload the page.', 'error', false);
+            return;
+        }
+        await service.openModal();
+        const nameInput = document.getElementById('gds-filename');
+        if (nameInput && !nameInput.value) nameInput.value = `grade-viewer-${formatDateKey(new Date())}`;
     }
 
     function formatDateKey(date) {
